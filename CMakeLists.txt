@@ -13,7 +13,7 @@ include(CPack)
 add_subdirectory(luau)
 
 target_compile_features(luau-lsp PUBLIC cxx_std_17)
-target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" luau/Analysis/include luau/Ast/include)
+target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include)
 target_link_libraries(luau-lsp PRIVATE Luau.Ast Luau.Analysis)
 
 if(MSVC)
