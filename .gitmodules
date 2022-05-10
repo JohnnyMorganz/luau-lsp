@@ -1,0 +1,3 @@
+[submodule "luau"]
+	path = luau
+	url = https://github.com/Roblox/luau.git
