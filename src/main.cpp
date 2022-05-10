@@ -1,10 +1,14 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <variant>
+#include <exception>
+#include "Protocol.hpp"
 #include "Luau/StringUtils.h"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
+using id_type = std::variant<int, std::string>;
 
 /** Reads stdin for a JSON-RPC message into output */
 bool readRawMessage(std::string& output)
@@ -60,12 +64,35 @@ void sendRawMessage(const json& message)
     std::cout << s << "\r\n";
 }
 
-// void sendRequest(int id, /* TODO: can be a string too? */ const std::string& method, std::optional<const json&> params) {}
-// void sendNotification(const std::string& method, std::optional<const json&> params) {}
+void sendRequest(const id_type& id, const std::string& method, const json& params) {}
+void sendResponse(const id_type& id, const json& result) {}
+void sendResponse(const id_type& id, const JsonRpcException& error) {}
+void sendNotification(const std::string& method, const json& params) {}
 
 // void onRequest(int id, /* TODO: can be a string too? maybe just take a JSON? */ const std::string& method /*, optional json value params*/) {}
 // // void onResponse(); // id = integer/string/null, result?: string | number | boolean | object | null, error?: ResponseError
 // void onNotification(const std::string& method, std::optional<const json&> params) {}
+
+class JsonRpcException : public std::exception
+{
+public:
+    JsonRpcException(lsp::ErrorCode code, const std::string& message) noexcept
+        : code(code)
+        , message(message)
+        , data(nullptr)
+    {
+    }
+    JsonRpcException(lsp::ErrorCode code, const std::string& message, const json& data) noexcept
+        : code(code)
+        , message(message)
+        , data(data)
+    {
+    }
+
+    lsp::ErrorCode code;
+    std::string message;
+    json data;
+};
 
 int main()
 {
@@ -75,17 +102,30 @@ int main()
     {
         if (readRawMessage(jsonString))
         {
-            // Parse the input
-            // TODO: handle invalid json
-            auto j = json::parse(jsonString);
-
-            if (!j.contains("jsonrpc"))
+            try
             {
-                std::cerr << "Not a JSON-RPC v2 message";
-                continue;
-            }
+                // Parse the input
+                // TODO: handle invalid json
+                auto j = json::parse(jsonString);
 
-            // TODO: dispatch to relevant handler
+                if (!j.contains("jsonrpc")) // TODO: check == 2.0
+                {
+                    throw JsonRpcException(lsp::ErrorCode::ParseError, "not a json-rpc 2.0 message");
+                }
+
+                // TODO: dispatch to relevant handler and receive response
+                // TODO: send response to client
+            }
+            catch (const JsonRpcException& e)
+            {
+                sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
+                    {"error", {{"code", e.code}, {"message", e.message}, {"data", e.data}}}});
+            }
+            catch (const std::exception& e)
+            {
+                sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
+                    {"error", {"code", lsp::ErrorCode::InternalError}, {"message", e.what()}}});
+            }
         }
     }
     return 0;

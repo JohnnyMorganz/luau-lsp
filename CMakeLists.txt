@@ -17,7 +17,7 @@ target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" luau/Analysi
 target_link_libraries(luau-lsp PRIVATE Luau.Ast Luau.Analysis)
 
 if(MSVC)
-  target_compile_options(luau-lsp PRIVATE /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
+  target_compile_options(luau-lsp PRIVATE /W4 /WX /D_CRT_SECURE_NO_WARNINGS)
 else()
   target_compile_options(luau-lsp PRIVATE -Wall -Werror)
 endif()
