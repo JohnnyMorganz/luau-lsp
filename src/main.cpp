@@ -8,8 +8,10 @@
 #include "Protocol.hpp"
 #include "JsonRpc.hpp"
 #include "Luau/Frontend.h"
+#include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/StringUtils.h"
+#include "Luau/ToString.h"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
@@ -19,6 +21,11 @@ using Response = json;
 
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
+
+static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
+{
+    return std::nullopt;
+}
 
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
@@ -236,7 +243,8 @@ public:
     lsp::ServerCapabilities getServerCapabilities()
     {
         lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Full;
-        lsp::CompletionOptions completionProvider{};
+        std::vector<std::string> triggerCharacters{".", ":", "'", "\""};
+        lsp::CompletionOptions completionProvider{triggerCharacters};
         return lsp::ServerCapabilities{textDocumentSync, completionProvider};
     }
 
@@ -257,6 +265,10 @@ public:
         else if (method == "shutdown")
         {
             return onShutdown(id);
+        }
+        else if (method == "textDocument/completion")
+        {
+            return completion(REQUIRED_PARAMS(params, "textDocument/completion"));
         }
         else
         {
@@ -434,8 +446,6 @@ public:
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
     {
-        sendLogMessage(lsp::MessageType::Info, "got an opened file");
-
         // Manage the file in-memory
         fileResolver.managedFiles.insert_or_assign(params.textDocument.uri, params.textDocument.text);
 
@@ -447,8 +457,6 @@ public:
 
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
     {
-        sendLogMessage(lsp::MessageType::Info, "got a changed file");
-
         // Update in-memory file with new contents
         for (auto& change : params.contentChanges)
         {
@@ -467,9 +475,53 @@ public:
 
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
     {
-        sendLogMessage(lsp::MessageType::Info, "got a closed file");
         // Release managed in-memory file
         fileResolver.managedFiles.erase(params.textDocument.uri);
+    }
+
+    std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
+    {
+        auto result =
+            Luau::autocomplete(frontend, params.textDocument.uri, Luau::Position(params.position.line, params.position.character), nullCallback);
+        std::vector<lsp::CompletionItem> items;
+
+        for (auto& [name, entry] : result.entryMap)
+        {
+            lsp::CompletionItem item;
+            item.label = name;
+            item.deprecated = entry.deprecated;
+            switch (entry.kind)
+            {
+            case Luau::AutocompleteEntryKind::Property:
+                item.kind = lsp::CompletionItemKind::Property;
+                break;
+            case Luau::AutocompleteEntryKind::Binding:
+                item.kind = lsp::CompletionItemKind::Variable;
+                break;
+            case Luau::AutocompleteEntryKind::Keyword:
+                item.kind = lsp::CompletionItemKind::Keyword;
+                break;
+            case Luau::AutocompleteEntryKind::String:
+                item.kind = lsp::CompletionItemKind::Text;
+                break;
+            case Luau::AutocompleteEntryKind::Type:
+                item.kind = lsp::CompletionItemKind::TypeParameter;
+                break;
+            case Luau::AutocompleteEntryKind::Module:
+                item.kind = lsp::CompletionItemKind::Module;
+                break;
+            }
+
+            // TODO: it seems that entry.type is no longer safe to use here (deallocated somewhere else?)
+            // if (entry.type)
+            // {
+            //     item.detail = Luau::toString(entry.type.value());
+            // }
+
+            items.emplace_back(item);
+        }
+
+        return items;
     }
 
     Response onShutdown(const id_type& id)
