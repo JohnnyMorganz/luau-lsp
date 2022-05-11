@@ -6,38 +6,19 @@
 #include <exception>
 #include <filesystem>
 #include "Protocol.hpp"
+#include "JsonRpc.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/StringUtils.h"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
+using namespace json_rpc;
 using id_type = std::variant<int, std::string>;
 using Response = json;
 
-class JsonRpcException : public std::exception
-{
-public:
-    JsonRpcException(lsp::ErrorCode code, const std::string& message) noexcept
-        : code(code)
-        , message(message)
-        , data(nullptr)
-    {
-    }
-    JsonRpcException(lsp::ErrorCode code, const std::string& message, const json& data) noexcept
-        : code(code)
-        , message(message)
-        , data(data)
-    {
-    }
-
-    lsp::ErrorCode code;
-    std::string message;
-    json data;
-};
-
 #define REQUIRED_PARAMS(params, method) \
-    !params ? throw JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
+    !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
 
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
@@ -203,13 +184,6 @@ public:
 
         sendRawMessage(msg);
     }
-    // void sendResponse(std::optional<id_type> id, const JsonRpcException& error)
-    // {
-    //     // TODO
-    //     json msg{
-    //         {"jsonrpc", "2.0"}
-    //     }
-    // }
     void sendNotification(const std::string& method, std::optional<json> params)
     {
         json msg{
@@ -322,55 +296,26 @@ public:
                 try
                 {
                     // Parse the input
-                    auto j = json::parse(jsonString);
-                    std::string jsonrpc_version = j.at("jsonrpc").get<std::string>();
+                    auto msg = json_rpc::parse(jsonString);
 
-                    if (jsonrpc_version != "2.0")
-                        throw JsonRpcException(lsp::ErrorCode::ParseError, "not a json-rpc 2.0 message");
-
-                    // Parse id - if no id, then this is a notification
-                    std::optional<id_type> id;
-                    if (j.contains("id"))
+                    if (msg.is_request())
                     {
-                        if (j.at("id").is_string())
-                        {
-                            id = j.at("id").get<std::string>();
-                        }
-                        else if (j.at("id").is_number())
-                        {
-                            id = j.at("id").get<int>();
-                        }
+                        auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
+                        sendTrace(response.dump(), std::nullopt);
+                        sendResponse(msg.id.value(), response);
                     }
-
-                    // Parse method - if no method then this is a response
-                    std::optional<std::string> method;
-                    if (j.contains("method"))
-                        j.at("method").get_to(method);
-
-                    // Handle response
-                    if (!method.has_value())
+                    else if (msg.is_response())
                     {
-                        if (!id.has_value())
-                            throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "no id or method");
-
                         // TODO: check error or result
                         continue;
                     }
-
-                    // Parse params (if present)
-                    std::optional<json> params;
-                    if (j.contains("params"))
-                        params = j.at("params");
-
-                    if (id.has_value())
+                    else if (msg.is_notification())
                     {
-                        auto response = onRequest(id.value(), method.value(), params);
-                        sendTrace(response.dump(), std::nullopt);
-                        sendResponse(id.value(), response);
+                        onNotification(msg.method.value(), msg.params);
                     }
                     else
                     {
-                        onNotification(method.value(), params);
+                        throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
                     }
                 }
                 catch (const JsonRpcException& e)
@@ -410,7 +355,7 @@ public:
             errorDiagnostic.code = "000";
             errorDiagnostic.message = "Failed to resolve source module for this file";
             errorDiagnostic.severity = lsp::DiagnosticSeverity::Error;
-            errorDiagnostic.range = lsp::Range{{0, 0}, {0, 0}};
+            errorDiagnostic.range = {{0, 0}, {0, 0}};
             return {errorDiagnostic};
         }
 
@@ -422,9 +367,7 @@ public:
             diag.code = error.code();
             diag.message = "TypeError: " + Luau::toString(error);
             diag.severity = lsp::DiagnosticSeverity::Error;
-            lsp::Position start{error.location.begin.line, error.location.begin.column};
-            lsp::Position end{error.location.end.line, error.location.end.column};
-            diag.range = lsp::Range{start, end};
+            diag.range = {{error.location.begin.line, error.location.begin.column}, {error.location.end.line, error.location.end.column}};
             diagnostics.emplace_back(diag);
         }
 
@@ -438,7 +381,7 @@ public:
             diag.severity = lsp::DiagnosticSeverity::Error;
             lsp::Position start{error.location.begin.line, error.location.begin.column};
             lsp::Position end{error.location.end.line, error.location.end.column};
-            diag.range = lsp::Range{start, end};
+            diag.range = {start, end};
             diagnostics.emplace_back(diag);
         }
         for (auto& error : lr.warnings)
@@ -450,7 +393,7 @@ public:
             diag.severity = lsp::DiagnosticSeverity::Error;
             lsp::Position start{error.location.begin.line, error.location.begin.column};
             lsp::Position end{error.location.end.line, error.location.end.column};
-            diag.range = lsp::Range{start, end};
+            diag.range = {start, end};
             diagnostics.emplace_back(diag);
         }
 
@@ -504,67 +447,19 @@ public:
         return nullptr;
     }
 
-
-
 private:
     bool isInitialized = false;
     bool shutdownRequested = false;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
 
-    /** Reads stdin for a JSON-RPC message into output */
     bool readRawMessage(std::string& output)
     {
-        unsigned int contentLength = 0;
-        std::string line;
-
-        // Read the headers
-        while (true)
-        {
-            if (!std::cin)
-                return false;
-            std::getline(std::cin, line);
-
-            if (Luau::startsWith(line, "Content-Length: "))
-            {
-                if (contentLength != 0)
-                {
-                    std::cerr << "Duplicate content-length header found. Discarding old value";
-                }
-                std::string len = line.substr(16);
-                contentLength = std::stoi(len);
-                continue;
-            }
-
-            // Trim line and check if its empty (i.e., we have ended the header block)
-            line.erase(line.find_last_not_of(" \n\r\t") + 1);
-            if (line.empty())
-                break;
-        }
-
-        // Check if no Content-Length found
-        if (contentLength == 0)
-        {
-            std::cerr << "Failed to read content length\n";
-            return false;
-        }
-
-        // TODO: check if contentlength is too large?
-
-        // Read the JSON message into output
-        output.resize(contentLength);
-        std::cin.read(&output[0], contentLength);
-        return true;
+        return json_rpc::readRawMessage(std::cin, output);
     }
 
-    /** Sends a raw JSON-RPC message to stdout */
     void sendRawMessage(const json& message)
     {
-        std::string s = message.dump();
-        std::cout << "Content-Length: " << s.length() << '\n'; // TODO: these should be '\r\n' (SO MUCH DEBUGGING PAIN - APPARENTLY WINDOWS AUTO
-                                                               // CONVERTS \n TO \r\n, BUT THEN YOU ACTUALLY OUTPUT \r\r\n?????)
-        std::cout << '\n';
-        std::cout << s;
-        std::cout.flush();
+        json_rpc::sendRawMessage(std::cout, message);
     }
 };
 
