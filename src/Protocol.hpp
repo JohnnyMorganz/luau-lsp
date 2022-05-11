@@ -1,9 +1,12 @@
 #include <string>
 #include <optional>
+#include <variant>
 
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
+using URI = std::string;         // TODO: URI
+using DocumentUri = std::string; // TODO: URI
 
 namespace lsp
 {
@@ -24,18 +27,6 @@ enum ErrorCode
     ContentModified = -32801,
     RequestCancelled = -32800,
 };
-
-// struct Position
-// {
-//     unsigned int line;
-//     unsigned int character;
-// };
-
-// struct Range
-// {
-//     Position start;
-//     Position end;
-// };
 
 struct ClientCapabilities
 {
@@ -84,15 +75,24 @@ void to_json(json& j, const CompletionOptions& p)
         j["completionItem"] = {{"labelDetailsSupport", p.completionItem->labelDetailsSupport}};
 }
 
+enum TextDocumentSyncKind
+{
+    None = 0,
+    Full = 1,
+    Incremental = 2,
+};
 
 struct ServerCapabilities
 {
+    std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
 };
 
 void to_json(json& j, const ServerCapabilities& p)
 {
     j = json{};
+    if (p.textDocumentSync)
+        j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
         j["completionProvider"] = p.completionProvider.value();
 }
@@ -121,6 +121,160 @@ void to_json(json& j, const InitializeResult& p)
             j["serverInfo"] = {{"name", p.serverInfo->name}, {"version", p.serverInfo->version.value()}};
     }
 }
+
+struct Position
+{
+    unsigned int line;
+    unsigned int character;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
+
+struct Range
+{
+    Position start;
+    Position end;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Range, start, end);
+
+struct TextDocumentItem
+{
+    DocumentUri uri;
+    std::string languageId;
+    int version;
+    std::string text;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentItem, uri, languageId, version, text);
+
+struct TextDocumentIdentifier
+{
+    DocumentUri uri;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentIdentifier, uri);
+
+struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
+{
+    int version;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
+
+struct Location
+{
+    DocumentUri uri;
+    Range range;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Location, uri, range);
+
+struct DidOpenTextDocumentParams
+{
+    TextDocumentItem textDocument;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidOpenTextDocumentParams, textDocument);
+
+struct TextDocumentContentChangeEvent
+{
+    // If only text is provided, then its considered to be the whole document
+    std::optional<Range> range;
+    std::string text;
+};
+void from_json(const json& j, TextDocumentContentChangeEvent& p)
+{
+    j.at("text").get_to(p.text);
+    if (j.contains("range"))
+        p.range = j.at("range").get<Range>();
+}
+void to_json(json& j, const TextDocumentContentChangeEvent& p)
+{
+    j = json{
+        {"text", p.text},
+    };
+    if (p.range)
+        j["range"] = p.range.value();
+}
+
+struct DidChangeTextDocumentParams
+{
+    VersionedTextDocumentIdentifier textDocument;
+    std::vector<TextDocumentContentChangeEvent> contentChanges;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeTextDocumentParams, textDocument, contentChanges);
+
+struct DidCloseTextDocumentParams
+{
+    TextDocumentIdentifier textDocument;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidCloseTextDocumentParams, textDocument);
+
+enum DiagnosticSeverity
+{
+    Error = 1,
+    Warning = 2,
+    Information = 3,
+    Hint = 4,
+};
+
+enum DiagnosticTag
+{
+    Unnecessary = 1,
+    Deprecated = 2,
+};
+
+struct DiagnosticRelatedInformation
+{
+    Location location;
+    std::string message;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticRelatedInformation, location, message);
+
+struct CodeDescription
+{
+    URI href;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CodeDescription, href);
+
+struct Diagnostic
+{
+    Range range;
+    std::optional<DiagnosticSeverity> severity;
+    std::optional<std::variant<std::string, int>> code;
+    std::optional<CodeDescription> codeDescription;
+    std::optional<std::string> source;
+    std::string message;
+    std::optional<std::vector<DiagnosticTag>> tags;
+    std::optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
+    // data?
+};
+void to_json(json& j, const Diagnostic& p)
+{
+    j = json{{"range", p.range}, {"message", p.message}};
+    if (p.severity)
+        j["severity"] = p.severity.value();
+    if (p.code)
+    {
+        if (std::holds_alternative<int>(p.code.value()))
+        {
+            j["code"] = std::get<int>(p.code.value());
+        }
+        else
+        {
+            j["code"] = std::get<std::string>(p.code.value());
+        }
+    }
+    if (p.codeDescription)
+        j["codeDescription"] = p.codeDescription.value();
+    if (p.source)
+        j["source"] = p.source.value();
+    if (p.tags)
+        j["tags"] = p.tags.value();
+    if (p.relatedInformation)
+        j["relatedInformation"] = p.relatedInformation.value();
+}
+
+struct PublishDiagnosticsParams
+{
+    DocumentUri uri;
+    std::optional<int> version;
+    std::vector<Diagnostic> diagnostic;
+};
 
 enum TraceValue
 {
