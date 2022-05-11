@@ -54,6 +54,8 @@ struct WorkspaceFileResolver
 {
     Luau::Config defaultConfig;
 
+    // Currently opened files where content is managed by client
+    mutable std::unordered_map<lsp::DocumentUri, std::string> managedFiles;
     mutable std::unordered_map<std::string, Luau::Config> configCache;
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
 
@@ -62,10 +64,25 @@ struct WorkspaceFileResolver
         defaultConfig.mode = Luau::Mode::Nonstrict;
     }
 
+    /// The file is managed by the client, so FS will be out of date
+    bool isManagedFile(const Luau::ModuleName& name)
+    {
+        return managedFiles.find(name) != managedFiles.end();
+    }
+
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override
     {
         Luau::SourceCode::Type sourceType = Luau::SourceCode::Module;
-        std::optional<std::string> source = readFile(name); // TODO: URI
+        std::optional<std::string> source;
+
+        if (isManagedFile(name))
+        {
+            source = managedFiles.at(name);
+        }
+        else
+        {
+            source = readFile(name); // TODO: URI
+        }
 
         if (!source)
             return std::nullopt;
@@ -390,7 +407,7 @@ public:
             diag.source = "Luau";
             diag.code = error.code;
             diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
-            diag.severity = lsp::DiagnosticSeverity::Error;
+            diag.severity = lsp::DiagnosticSeverity::Warning;
             lsp::Position start{error.location.begin.line, error.location.begin.column};
             lsp::Position end{error.location.end.line, error.location.end.column};
             diag.range = {start, end};
@@ -418,7 +435,9 @@ public:
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
     {
         sendLogMessage(lsp::MessageType::Info, "got an opened file");
-        // TODO: manage file location
+
+        // Manage the file in-memory
+        fileResolver.managedFiles.insert_or_assign(params.textDocument.uri, params.textDocument.text);
 
         // Trigger diagnostics
         auto diagnostics = findDiagnostics(params.textDocument.uri);
@@ -430,15 +449,27 @@ public:
     {
         sendLogMessage(lsp::MessageType::Info, "got a changed file");
 
-        // TODO: update local version of file
+        // Update in-memory file with new contents
+        for (auto& change : params.contentChanges)
+        {
+            // TODO: if range is present - we should update incrementally, currently we ask for full sync
+            fileResolver.managedFiles.insert_or_assign(params.textDocument.uri, change.text);
+        }
+
         // Mark the module dirty for the typechecker
         frontend.markDirty(params.textDocument.uri);
+
+        // Trigger diagnostics
+        auto diagnostics = findDiagnostics(params.textDocument.uri);
+        lsp::PublishDiagnosticsParams publish{params.textDocument.uri, params.textDocument.version, diagnostics};
+        sendNotification("textDocument/publishDiagnostics", publish);
     }
 
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
     {
         sendLogMessage(lsp::MessageType::Info, "got a closed file");
-        // TODO: release local version of file
+        // Release managed in-memory file
+        fileResolver.managedFiles.erase(params.textDocument.uri);
     }
 
     Response onShutdown(const id_type& id)
