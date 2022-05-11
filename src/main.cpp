@@ -403,12 +403,24 @@ public:
         if (frontend.isDirty(fileName))
             cr = frontend.check(fileName);
 
+        if (!frontend.getSourceModule(fileName))
+        {
+            lsp::Diagnostic errorDiagnostic;
+            errorDiagnostic.source = "Luau";
+            errorDiagnostic.code = "000";
+            errorDiagnostic.message = "Failed to resolve source module for this file";
+            errorDiagnostic.severity = lsp::DiagnosticSeverity::Error;
+            errorDiagnostic.range = lsp::Range{{0, 0}, {0, 0}};
+            return {errorDiagnostic};
+        }
+
         std::vector<lsp::Diagnostic> diagnostics;
         for (auto& error : cr.errors)
         {
             lsp::Diagnostic diag;
+            diag.source = "Luau";
             diag.code = error.code();
-            diag.message = Luau::toString(error);
+            diag.message = "TypeError: " + Luau::toString(error);
             diag.severity = lsp::DiagnosticSeverity::Error;
             lsp::Position start{error.location.begin.line, error.location.begin.column};
             lsp::Position end{error.location.end.line, error.location.end.column};
@@ -417,7 +429,30 @@ public:
         }
 
         Luau::LintResult lr = frontend.lint(fileName);
-
+        for (auto& error : lr.errors)
+        {
+            lsp::Diagnostic diag;
+            diag.source = "Luau";
+            diag.code = error.code;
+            diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
+            diag.severity = lsp::DiagnosticSeverity::Error;
+            lsp::Position start{error.location.begin.line, error.location.begin.column};
+            lsp::Position end{error.location.end.line, error.location.end.column};
+            diag.range = lsp::Range{start, end};
+            diagnostics.emplace_back(diag);
+        }
+        for (auto& error : lr.warnings)
+        {
+            lsp::Diagnostic diag;
+            diag.source = "Luau";
+            diag.code = error.code;
+            diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
+            diag.severity = lsp::DiagnosticSeverity::Error;
+            lsp::Position start{error.location.begin.line, error.location.begin.column};
+            lsp::Position end{error.location.end.line, error.location.end.column};
+            diag.range = lsp::Range{start, end};
+            diagnostics.emplace_back(diag);
+        }
 
         return diagnostics;
     }
