@@ -170,6 +170,17 @@ int main()
 {
     bool isInitialized = false;
     bool shutdownRequested = false;
+    lsp::TraceValue traceMode = lsp::TraceValue::Off;
+
+    auto sendTrace = [&traceMode](std::string message, std::optional<std::string> verbose)
+    {
+        if (traceMode == lsp::TraceValue::Off)
+            return;
+        json params{{"message", message}};
+        if (verbose && traceMode == lsp::TraceValue::Verbose)
+            params["verbose"] = verbose.value();
+        sendNotification("$/logTrace", params);
+    };
 
     // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
     // auto d = 4;
@@ -268,6 +279,14 @@ int main()
                     {
                         // Client received result of initialize
                         sendLogMessage(lsp::MessageType::Info, "server initialized!");
+                    }
+                    else if (method.value() == "$/setTrace")
+                    {
+                        if (!params)
+                            throw JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for setTrace");
+                        lsp::SetTraceParams p;
+                        params->get_to(p);
+                        traceMode = p.value;
                     }
                 }
 

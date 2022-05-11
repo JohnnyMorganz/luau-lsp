@@ -122,6 +122,24 @@ void to_json(json& j, const InitializeResult& p)
     }
 }
 
+enum TraceValue
+{
+    Off,
+    Messages,
+    Verbose,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {
+                                             {Off, "off"},
+                                             {Messages, "messages"},
+                                             {Verbose, "verbose"},
+                                         });
+
+struct SetTraceParams
+{
+    TraceValue value;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SetTraceParams, value);
+
 enum MessageType
 {
     Error = 1,
