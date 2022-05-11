@@ -8,9 +8,17 @@ using json = nlohmann::json;
 using URI = std::string;         // TODO: URI
 using DocumentUri = std::string; // TODO: URI
 
+// #define OPTIONAL_GET(j, prop, name, type) \
+//     if (j.contains(name)) \
+//         prop = j.at(name).get<type>(prop);
+
+// #define OPTIONAL_SET(j, prop, name) \
+//     if (prop) \
+//         j[name] = prop.value();
+
 namespace lsp
 {
-enum ErrorCode
+enum struct ErrorCode
 {
     // JSON RPC errors
     ParseError = -32700,
@@ -31,6 +39,16 @@ enum ErrorCode
 struct ClientCapabilities
 {
     // TODO
+};
+void to_json(json& j, const ClientCapabilities& p)
+{
+    j;
+    p;
+};
+void from_json(const json& j, ClientCapabilities& p)
+{
+    j;
+    p;
 };
 
 struct InitializeParams
@@ -75,7 +93,7 @@ void to_json(json& j, const CompletionOptions& p)
         j["completionItem"] = {{"labelDetailsSupport", p.completionItem->labelDetailsSupport}};
 }
 
-enum TextDocumentSyncKind
+enum struct TextDocumentSyncKind
 {
     None = 0,
     Full = 1,
@@ -121,6 +139,20 @@ void to_json(json& j, const InitializeResult& p)
             j["serverInfo"] = {{"name", p.serverInfo->name}, {"version", p.serverInfo->version.value()}};
     }
 }
+
+struct InitializedParams
+{
+};
+void to_json(json& j, const InitializedParams& p)
+{
+    j;
+    p;
+};
+void from_json(const json& j, InitializedParams& p)
+{
+    j;
+    p;
+};
 
 struct Position
 {
@@ -204,7 +236,7 @@ struct DidCloseTextDocumentParams
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidCloseTextDocumentParams, textDocument);
 
-enum DiagnosticSeverity
+enum struct DiagnosticSeverity
 {
     Error = 1,
     Warning = 2,
@@ -212,7 +244,7 @@ enum DiagnosticSeverity
     Hint = 4,
 };
 
-enum DiagnosticTag
+enum struct DiagnosticTag
 {
     Unnecessary = 1,
     Deprecated = 2,
@@ -276,16 +308,16 @@ struct PublishDiagnosticsParams
     std::vector<Diagnostic> diagnostic;
 };
 
-enum TraceValue
+enum struct TraceValue
 {
     Off,
     Messages,
     Verbose,
 };
 NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {
-                                             {Off, "off"},
-                                             {Messages, "messages"},
-                                             {Verbose, "verbose"},
+                                             {TraceValue::Off, "off"},
+                                             {TraceValue::Messages, "messages"},
+                                             {TraceValue::Verbose, "verbose"},
                                          });
 
 struct SetTraceParams
@@ -294,7 +326,7 @@ struct SetTraceParams
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SetTraceParams, value);
 
-enum MessageType
+enum struct MessageType
 {
     Error = 1,
     Warning = 2,
