@@ -6,8 +6,6 @@
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
-using URI = std::string;         // TODO: URI
-using DocumentUri = std::string; // TODO: URI
 
 // #define OPTIONAL_GET(j, prop, name, type) \
 //     if (j.contains(name)) \
@@ -19,6 +17,9 @@ using DocumentUri = std::string; // TODO: URI
 
 namespace lsp
 {
+using URI = std::string;         // TODO: URI
+using DocumentUri = std::string; // TODO: URI
+
 enum struct ErrorCode
 {
     // JSON RPC errors
@@ -190,6 +191,20 @@ struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
 
+struct TextDocumentPositionParams
+{
+    TextDocumentIdentifier textDocument;
+    Position position;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentPositionParams, textDocument, position);
+
+struct TextEdit
+{
+    Range range;
+    std::string newText;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextEdit, range, newText);
+
 struct Location
 {
     DocumentUri uri;
@@ -313,6 +328,119 @@ void to_json(json& j, const PublishDiagnosticsParams& p)
     j = json{{"uri", p.uri}, {"diagnostics", p.diagnostics}};
     if (p.version)
         j["version"] = p.version.value();
+}
+
+enum struct CompletionTriggerKind
+{
+    Invoked = 1,
+    TriggerCharacter = 2,
+    TriggerForIncompleteCompletions = 3
+};
+
+struct CompletionContext
+{
+    CompletionTriggerKind triggerKind;
+    std::optional<std::string> triggerCharacter;
+};
+
+struct CompletionParams : TextDocumentPositionParams
+{
+    std::optional<CompletionContext> context;
+};
+
+enum struct InsertTextFormat
+{
+    PlainText = 1,
+    Snippet = 2,
+};
+
+enum struct CompletionItemTag
+{
+    Deprecated = 1,
+};
+
+enum struct InsertTextMode
+{
+    AsIs = 1,
+    AdjustIndentation = 2,
+};
+
+struct CompletionItemLabelDetails
+{
+    std::optional<std::string> detail;
+    std::optional<std::string> description;
+};
+void to_json(json& j, const CompletionItemLabelDetails& p)
+{
+    j = json{};
+    if (p.detail)
+        j["detail"] = p.detail.value();
+    if (p.description)
+        j["detail"] = p.description.value();
+}
+
+enum struct CompletionItemKind
+{
+    Text = 1,
+    Method = 2,
+    Function = 3,
+    Constructor = 4,
+    Field = 5,
+    Variable = 6,
+    Class = 7,
+    Interface = 8,
+    Module = 9,
+    Property = 10,
+    Unit = 11,
+    Value = 12,
+    Enum = 13,
+    Keyword = 14,
+    Snippet = 15,
+    Color = 16,
+    File = 17,
+    Reference = 18,
+    Folder = 19,
+    EnumMember = 20,
+    Constant = 21,
+    Struct = 22,
+    Event = 23,
+    Operator = 24,
+    TypeParameter = 25,
+};
+
+struct CompletionItem
+{
+    std::string label;
+    std::optional<CompletionItemLabelDetails> labelDetails;
+    std::optional<CompletionItemKind> kind;
+    // std::optional<std::vector<CompletionItemTag>> tags;
+    std::optional<std::string> detail;
+    // std::optional<std::string> documentation;
+    bool deprecated = false;
+    // bool preselect = false;
+    // std::optional<std::string> sortText;
+    // std::optional<std::string> filterText;
+    std::optional<std::string> insertText;
+    // std::optional<InsertTextFormat> insertTextFormat;
+    // std::optional<InsertTextMode> insertTextMode;
+    // std::optional<TextEdit> textEdit;
+    // std::optional<std::string> textEditString;
+    // std::optional<std::vector<TextEdit>> additionalTextEdits;
+    // std::optional<std::vector<std::string>> commitCharacters;
+    // std::optional<Command> command;
+    // data?
+};
+void to_json(json& j, const CompletionItem& p)
+{
+    j = json{{"label", p.label}, {"deprecated", p.deprecated}};
+    if (p.kind)
+        j["kind"] = p.kind.value();
+    if (p.insertText)
+        j["insertText"] = p.insertText.value();
+    if (p.detail)
+        j["detail"] = p.detail.value();
+    if (p.labelDetails)
+        j["labelDetails"] = p.labelDetails.value();
 }
 
 enum struct TraceValue
