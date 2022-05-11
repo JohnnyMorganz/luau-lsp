@@ -80,9 +80,11 @@ bool readRawMessage(std::string& output)
 void sendRawMessage(const json& message)
 {
     std::string s = message.dump();
-    std::cout << "Content-Length: " << s.length() << "\r\n";
-    std::cout << "\r\n";
-    std::cout << s << "\r\n";
+    std::cout << "Content-Length: " << s.length() << '\n'; // TODO: these should be '\r\n' (SO MUCH DEBUGGING PAIN - APPARENTLY WINDOWS AUTO CONVERTS
+                                                           // \n TO \r\n, BUT THEN YOU ACTUALLY OUTPUT \r\r\n?????)
+    std::cout << '\n';
+    std::cout << s;
+    std::cout.flush();
 }
 
 void sendRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -168,6 +170,13 @@ int main()
 {
     bool isInitialized = false;
     bool shutdownRequested = false;
+
+    // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
+    // auto d = 4;
+    // while (d == 4)
+    // {
+    //     d = 4;
+    // }
 
     // Begin input loop
     std::string jsonString;
