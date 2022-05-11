@@ -305,8 +305,14 @@ struct PublishDiagnosticsParams
 {
     DocumentUri uri;
     std::optional<int> version;
-    std::vector<Diagnostic> diagnostic;
+    std::vector<Diagnostic> diagnostics;
 };
+void to_json(json& j, const PublishDiagnosticsParams& p)
+{
+    j = json{{"uri", p.uri}, {"diagnostics", p.diagnostics}};
+    if (p.version)
+        j["version"] = p.version.value();
+}
 
 enum struct TraceValue
 {
