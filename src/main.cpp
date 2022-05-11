@@ -10,6 +10,27 @@
 using json = nlohmann::json;
 using id_type = std::variant<int, std::string>;
 
+class JsonRpcException : public std::exception
+{
+public:
+    JsonRpcException(lsp::ErrorCode code, const std::string& message) noexcept
+        : code(code)
+        , message(message)
+        , data(nullptr)
+    {
+    }
+    JsonRpcException(lsp::ErrorCode code, const std::string& message, const json& data) noexcept
+        : code(code)
+        , message(message)
+        , data(data)
+    {
+    }
+
+    lsp::ErrorCode code;
+    std::string message;
+    json data;
+};
+
 /** Reads stdin for a JSON-RPC message into output */
 bool readRawMessage(std::string& output)
 {
@@ -64,38 +85,90 @@ void sendRawMessage(const json& message)
     std::cout << s << "\r\n";
 }
 
-void sendRequest(const id_type& id, const std::string& method, const json& params) {}
-void sendResponse(const id_type& id, const json& result) {}
-void sendResponse(const id_type& id, const JsonRpcException& error) {}
-void sendNotification(const std::string& method, const json& params) {}
+void sendRequest(const id_type& id, const std::string& method, std::optional<json> params)
+{
+    json msg{
+        {"jsonrpc", "2.0"},
+        {"method", method},
+    };
+
+    if (std::holds_alternative<int>(id))
+    {
+        msg["id"] = std::get<int>(id);
+    }
+    else
+    {
+        msg["id"] = std::get<std::string>(id);
+    }
+
+    if (params.has_value())
+        msg["params"] = params.value();
+
+    sendRawMessage(msg);
+}
+
+void sendResponse(const id_type& id, const json& result)
+{
+    json msg{
+        {"jsonrpc", "2.0"},
+        {"result", result},
+    };
+
+    if (std::holds_alternative<int>(id))
+    {
+        msg["id"] = std::get<int>(id);
+    }
+    else
+    {
+        msg["id"] = std::get<std::string>(id);
+    }
+
+    sendRawMessage(msg);
+}
+// void sendResponse(std::optional<id_type> id, const JsonRpcException& error)
+// {
+//     // TODO
+//     json msg{
+//         {"jsonrpc", "2.0"}
+//     }
+// }
+void sendNotification(const std::string& method, std::optional<json> params)
+{
+    json msg{
+        {"jsonrpc", "2.0"},
+        {"method", method},
+    };
+
+    if (params.has_value())
+        msg["params"] = params.value();
+
+    sendRawMessage(msg);
+}
 
 // void onRequest(int id, /* TODO: can be a string too? maybe just take a JSON? */ const std::string& method /*, optional json value params*/) {}
 // // void onResponse(); // id = integer/string/null, result?: string | number | boolean | object | null, error?: ResponseError
 // void onNotification(const std::string& method, std::optional<const json&> params) {}
 
-class JsonRpcException : public std::exception
+void sendLogMessage(lsp::MessageType type, std::string message)
 {
-public:
-    JsonRpcException(lsp::ErrorCode code, const std::string& message) noexcept
-        : code(code)
-        , message(message)
-        , data(nullptr)
-    {
-    }
-    JsonRpcException(lsp::ErrorCode code, const std::string& message, const json& data) noexcept
-        : code(code)
-        , message(message)
-        , data(data)
-    {
-    }
+    json params{
+        {"type", type},
+        {"message", message},
+    };
+    sendNotification("window/logMessage", params);
+}
 
-    lsp::ErrorCode code;
-    std::string message;
-    json data;
-};
+lsp::ServerCapabilities getServerCapabilities()
+{
+    lsp::CompletionOptions completionProvider{};
+    return lsp::ServerCapabilities{completionProvider};
+}
 
 int main()
 {
+    bool isInitialized = false;
+    bool shutdownRequested = false;
+
     // Begin input loop
     std::string jsonString;
     while (std::cin)
@@ -107,10 +180,86 @@ int main()
                 // Parse the input
                 // TODO: handle invalid json
                 auto j = json::parse(jsonString);
+                std::string jsonrpc_version = j.at("jsonrpc").get<std::string>();
 
-                if (!j.contains("jsonrpc")) // TODO: check == 2.0
-                {
+                if (jsonrpc_version != "2.0")
                     throw JsonRpcException(lsp::ErrorCode::ParseError, "not a json-rpc 2.0 message");
+
+                // Parse id - if no id, then this is a notification
+                std::optional<id_type> id;
+                if (j.contains("id"))
+                {
+                    if (j.at("id").is_string())
+                    {
+                        id = j.at("id").get<std::string>();
+                    }
+                    else if (j.at("id").is_number())
+                    {
+                        id = j.at("id").get<int>();
+                    }
+                }
+
+                // Parse method - if no method then this is a response
+                std::optional<std::string> method;
+                if (j.contains("method"))
+                    j.at("method").get_to(method);
+
+
+                // Handle response
+                if (!method.has_value())
+                {
+                    if (!id.has_value())
+                        throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "no id or method");
+
+                    // TODO: check error or result
+                    continue;
+                }
+
+                // Parse params (if present)
+                std::optional<json> params;
+                if (j.contains("params"))
+                    params = j.at("params");
+
+                if (id.has_value())
+                {
+                    // Handle request
+                    // If a request has been sent before the server is initialized, we should error
+                    if (!isInitialized && method.value() != "initialize")
+                        throw JsonRpcException(lsp::ErrorCode::ServerNotInitialized, "server not initialized");
+                    // If we received a request after a shutdown, then we error with InvalidRequest
+                    if (shutdownRequested)
+                        throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down");
+
+                    if (method.value() == "initialize")
+                    {
+                        isInitialized = true;
+                        lsp::InitializeResult result;
+                        result.capabilities = getServerCapabilities();
+                        sendResponse(id.value(), result);
+                    }
+                    else if (method.value() == "shutdown")
+                    {
+                        shutdownRequested = true;
+                        sendResponse(id.value(), nullptr);
+                    }
+                }
+                else
+                {
+                    // Handle notification
+                    // If a notification is sent before the server is initilized or after a shutdown is requested (unless its exit), we should drop it
+                    if ((!isInitialized || shutdownRequested) && method.value() != "exit")
+                        continue;
+
+                    if (method.value() == "exit")
+                    {
+                        // Exit the process loop
+                        break;
+                    }
+                    else if (method.value() == "initialized")
+                    {
+                        // Client received result of initialize
+                        sendLogMessage(lsp::MessageType::Info, "server initialized!");
+                    }
                 }
 
                 // TODO: dispatch to relevant handler and receive response
@@ -121,6 +270,11 @@ int main()
                 sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
                     {"error", {{"code", e.code}, {"message", e.message}, {"data", e.data}}}});
             }
+            catch (const json::exception& e)
+            {
+                sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
+                    {"error", {"code", lsp::ErrorCode::ParseError}, {"message", e.what()}}});
+            }
             catch (const std::exception& e)
             {
                 sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
@@ -128,5 +282,7 @@ int main()
             }
         }
     }
-    return 0;
+
+    // If we received a shutdown request before exiting, exit normally. Otherwise, it is an abnormal exit
+    return shutdownRequested ? 0 : 1;
 }
