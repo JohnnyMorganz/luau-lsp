@@ -8,7 +8,6 @@
 using json = nlohmann::json;
 
 class Uri;
-const std::regex REGEX_EXPR("^(([^:/?#]+?):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?");
 
 std::string percentDecode(const std::string& str)
 {
@@ -198,11 +197,12 @@ public:
 
     static Uri parse(const std::string& value)
     {
+        const std::regex REGEX_EXPR("^(([^:\\/?#]+?):)?(\\/\\/([^\\/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
         std::smatch match;
         if (std::regex_match(value, match, REGEX_EXPR))
         {
             // match[0] is whole string
-            return Uri(match[1], percentDecode(match[2]), percentDecode(match[3]), percentDecode(match[4]), percentDecode(match[5]));
+            return Uri(match[2], percentDecode(match[4]), percentDecode(match[5]), percentDecode(match[7]), percentDecode(match[9]));
         }
         else
         {

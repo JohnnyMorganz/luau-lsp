@@ -149,7 +149,7 @@ struct WorkspaceFileResolver
         if (it != configCache.end())
             return it->second;
 
-        Luau::Config result = path.has_parent_path() ? readConfigRec(path.parent_path()) : defaultConfig;
+        Luau::Config result = (path.has_relative_path() && path.has_parent_path()) ? readConfigRec(path.parent_path()) : defaultConfig;
         auto configPath = path / Luau::kConfigName;
 
         if (std::optional<std::string> contents = readFile(configPath))
