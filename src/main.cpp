@@ -7,6 +7,7 @@
 #include <filesystem>
 #include "Protocol.hpp"
 #include "JsonRpc.hpp"
+#include "Uri.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"
@@ -25,6 +26,20 @@ using Response = json;
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
 {
     return std::nullopt;
+}
+
+// Get the corresponding Luau module name for a file
+Luau::ModuleName getModuleName(const std::string& name)
+{
+    return name;
+}
+Luau::ModuleName getModuleName(const std::filesystem::path& name)
+{
+    return name.generic_string();
+}
+Luau::ModuleName getModuleName(const Uri& name)
+{
+    return name.fsPath().generic_string();
 }
 
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
@@ -62,7 +77,7 @@ struct WorkspaceFileResolver
     Luau::Config defaultConfig;
 
     // Currently opened files where content is managed by client
-    mutable std::unordered_map<lsp::DocumentUri, std::string> managedFiles;
+    mutable std::unordered_map<Luau::ModuleName, std::string> managedFiles;
     mutable std::unordered_map<std::string, Luau::Config> configCache;
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
 
@@ -88,7 +103,7 @@ struct WorkspaceFileResolver
         }
         else
         {
-            source = readFile(name); // TODO: URI
+            source = readFile(name);
         }
 
         if (!source)
@@ -371,7 +386,7 @@ public:
         return shutdownRequested;
     }
 
-    std::vector<lsp::Diagnostic> findDiagnostics(const std::string& fileName)
+    std::vector<lsp::Diagnostic> findDiagnostics(const Luau::ModuleName& fileName)
     {
         Luau::CheckResult cr;
         if (frontend.isDirty(fileName))
@@ -446,29 +461,33 @@ public:
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
     {
+        auto moduleName = getModuleName(params.textDocument.uri);
+
         // Manage the file in-memory
-        fileResolver.managedFiles.insert_or_assign(params.textDocument.uri, params.textDocument.text);
+        fileResolver.managedFiles.insert_or_assign(moduleName, params.textDocument.text);
 
         // Trigger diagnostics
-        auto diagnostics = findDiagnostics(params.textDocument.uri);
+        auto diagnostics = findDiagnostics(moduleName);
         lsp::PublishDiagnosticsParams publish{params.textDocument.uri, params.textDocument.version, diagnostics};
         sendNotification("textDocument/publishDiagnostics", publish);
     }
 
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
     {
+        auto moduleName = getModuleName(params.textDocument.uri);
+
         // Update in-memory file with new contents
         for (auto& change : params.contentChanges)
         {
             // TODO: if range is present - we should update incrementally, currently we ask for full sync
-            fileResolver.managedFiles.insert_or_assign(params.textDocument.uri, change.text);
+            fileResolver.managedFiles.insert_or_assign(moduleName, change.text);
         }
 
         // Mark the module dirty for the typechecker
-        frontend.markDirty(params.textDocument.uri);
+        frontend.markDirty(moduleName);
 
         // Trigger diagnostics
-        auto diagnostics = findDiagnostics(params.textDocument.uri);
+        auto diagnostics = findDiagnostics(moduleName);
         lsp::PublishDiagnosticsParams publish{params.textDocument.uri, params.textDocument.version, diagnostics};
         sendNotification("textDocument/publishDiagnostics", publish);
     }
@@ -476,13 +495,14 @@ public:
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
     {
         // Release managed in-memory file
-        fileResolver.managedFiles.erase(params.textDocument.uri);
+        auto moduleName = getModuleName(params.textDocument.uri);
+        fileResolver.managedFiles.erase(moduleName);
     }
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
     {
-        auto result =
-            Luau::autocomplete(frontend, params.textDocument.uri, Luau::Position(params.position.line, params.position.character), nullCallback);
+        auto result = Luau::autocomplete(
+            frontend, getModuleName(params.textDocument.uri), Luau::Position(params.position.line, params.position.character), nullCallback);
         std::vector<lsp::CompletionItem> items;
 
         for (auto& [name, entry] : result.entryMap)

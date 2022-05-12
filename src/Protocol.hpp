@@ -3,6 +3,7 @@
 #include <optional>
 #include <variant>
 
+#include "Uri.hpp"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
@@ -17,8 +18,8 @@ using json = nlohmann::json;
 
 namespace lsp
 {
-using URI = std::string;         // TODO: URI
-using DocumentUri = std::string; // TODO: URI
+using URI = Uri;
+using DocumentUri = Uri;
 
 enum struct ErrorCode
 {
@@ -53,24 +54,71 @@ void from_json(const json& j, ClientCapabilities& p)
     p;
 };
 
+struct WorkspaceFolder
+{
+    DocumentUri uri;
+    std::string name;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFolder, uri, name);
+
+enum struct TraceValue
+{
+    Off,
+    Messages,
+    Verbose,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {
+                                             {TraceValue::Off, "off"},
+                                             {TraceValue::Messages, "messages"},
+                                             {TraceValue::Verbose, "verbose"},
+                                         });
+
 struct InitializeParams
 {
-    struct ClientInfo
-    {
-        std::string name;
-        std::optional<std::string> version;
-    };
+    // struct ClientInfo
+    // {
+    //     std::string name;
+    //     std::optional<std::string> version;
+    // };
 
-    std::optional<int> processId;
-    std::optional<ClientInfo> clientInfo;
-    std::optional<std::string> locale;
+    // std::optional<int> processId;
+    // std::optional<ClientInfo> clientInfo;
+    // std::optional<std::string> locale;
     // rootPath
-    // rootUri
-    std::optional<json> initializationOptions;
-    ClientCapabilities capabilities;
-    // traceValue
+    std::optional<DocumentUri> rootUri; // TODO: this is nullable!
+    // std::optional<json> initializationOptions;
+    // ClientCapabilities capabilities;
+    TraceValue trace = TraceValue::Off;
+    std::optional<std::vector<WorkspaceFolder>> workspaceFolders;
     // workspaceFolders
 };
+
+void from_json(const json& j, InitializeParams& p)
+{
+    if (j.at("rootUri").is_null())
+    {
+        p.rootUri = std::nullopt;
+    }
+    else
+    {
+        p.rootUri = j.at("rootUri").get<DocumentUri>();
+    }
+    if (j.contains("trace"))
+        p.trace = j.at("trace").get<TraceValue>();
+
+    if (j.contains("workspaceFolders"))
+    {
+        if (j.at("workspaceFolders").is_null())
+        {
+            p.workspaceFolders = std::nullopt;
+        }
+        else
+        {
+            p.workspaceFolders = j.at("workspaceFolders").get<std::vector<WorkspaceFolder>>();
+        }
+    }
+}
+
 
 struct CompletionOptions
 {
@@ -442,18 +490,6 @@ void to_json(json& j, const CompletionItem& p)
     if (p.labelDetails)
         j["labelDetails"] = p.labelDetails.value();
 }
-
-enum struct TraceValue
-{
-    Off,
-    Messages,
-    Verbose,
-};
-NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {
-                                             {TraceValue::Off, "off"},
-                                             {TraceValue::Messages, "messages"},
-                                             {TraceValue::Verbose, "verbose"},
-                                         });
 
 struct SetTraceParams
 {
