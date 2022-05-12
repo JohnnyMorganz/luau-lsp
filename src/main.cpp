@@ -532,6 +532,18 @@ public:
                 break;
             }
 
+            // Handle parentheses suggestions
+            if (entry.parens == Luau::ParenthesesRecommendation::CursorAfter)
+            {
+                item.insertText = name + "()$0";
+                item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+            }
+            else if (entry.parens == Luau::ParenthesesRecommendation::CursorInside)
+            {
+                item.insertText = name + "($1)$0";
+                item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+            }
+
             // TODO: it seems that entry.type is no longer safe to use here (deallocated somewhere else?)
             // if (entry.type)
             // {

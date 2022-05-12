@@ -469,7 +469,7 @@ struct CompletionItem
     // std::optional<std::string> sortText;
     // std::optional<std::string> filterText;
     std::optional<std::string> insertText;
-    // std::optional<InsertTextFormat> insertTextFormat;
+    InsertTextFormat insertTextFormat = InsertTextFormat::PlainText;
     // std::optional<InsertTextMode> insertTextMode;
     // std::optional<TextEdit> textEdit;
     // std::optional<std::string> textEditString;
@@ -480,7 +480,7 @@ struct CompletionItem
 };
 void to_json(json& j, const CompletionItem& p)
 {
-    j = json{{"label", p.label}, {"deprecated", p.deprecated}};
+    j = json{{"label", p.label}, {"deprecated", p.deprecated}, {"insertTextFormat", p.insertTextFormat}};
     if (p.kind)
         j["kind"] = p.kind.value();
     if (p.insertText)
