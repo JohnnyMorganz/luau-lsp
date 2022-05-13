@@ -8,14 +8,6 @@
 
 using json = nlohmann::json;
 
-// #define OPTIONAL_GET(j, prop, name, type) \
-//     if (j.contains(name)) \
-//         prop = j.at(name).get<type>(prop);
-
-// #define OPTIONAL_SET(j, prop, name) \
-//     if (prop) \
-//         j[name] = prop.value();
-
 namespace lsp
 {
 using URI = Uri;
@@ -43,16 +35,8 @@ struct ClientCapabilities
 {
     // TODO
 };
-void to_json(json& j, const ClientCapabilities& p)
-{
-    j;
-    p;
-};
-void from_json(const json& j, ClientCapabilities& p)
-{
-    j;
-    p;
-};
+void to_json(json&, const ClientCapabilities&){};
+void from_json(const json&, ClientCapabilities&){};
 
 struct WorkspaceFolder
 {
@@ -232,16 +216,8 @@ void to_json(json& j, const InitializeResult& p)
 struct InitializedParams
 {
 };
-void to_json(json& j, const InitializedParams& p)
-{
-    j;
-    p;
-};
-void from_json(const json& j, InitializedParams& p)
-{
-    j;
-    p;
-};
+void to_json(json&, const InitializedParams&){};
+void from_json(const json&, InitializedParams&){};
 
 struct Position
 {

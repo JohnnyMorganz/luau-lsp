@@ -23,22 +23,22 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         submodules: true
-      
+
     - name: Setup Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-      
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+
     - name: Dist
       run: |
         mkdir build && cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
         cmake --build . --config Release --target luau-lsp
-    
+
     - name: Move Build
       if: matrix.os == 'windows-latest'
       run: mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
-    
+
     - name: Move Build
       if: matrix.os != 'windows-latest'
       run: mv build/luau-lsp ./dist/luau-lsp
@@ -46,7 +46,7 @@ jobs:
     - name: Copy into Extension
       if: matrix.os == 'windows-latest'
       run: cp ./dist/luau-lsp.exe editors/code/bin/server.exe
-    
+
     - name: Copy into Extension
       if: matrix.os != 'windows-latest'
       run: |
@@ -55,17 +55,17 @@ jobs:
 
     - run: npm ci
       working-directory: editors/code
-    
+
     - name: Package Extension (release)
       run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
       working-directory: editors/code
-    
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
       with:
         name: dist-${{ matrix.code-target }}
         path: ./dist
-      
+
   publish:
     name: publish
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
           name: dist-win32-x64
           path: dist
       - run: ls -al ./dist
-        
+
       - name: Publish Release
         uses: ncipollo/release-action@v1
         env:
@@ -103,7 +103,7 @@ jobs:
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "dist/*"
-        
+
       - run: npm ci
         working-directory: editors/code
 

@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-18.04, windows-latest]
-    name: Build Extension (${{ matrix.os }})
+    name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
