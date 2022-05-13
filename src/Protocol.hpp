@@ -189,12 +189,13 @@ struct ServerCapabilities
 {
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
+    bool hoverProvider = false;
     std::optional<WorkspaceCapabilities> workspace;
 };
 
 void to_json(json& j, const ServerCapabilities& p)
 {
-    j = json{};
+    j = json{{"hoverProvider", p.hoverProvider}};
     if (p.textDocumentSync)
         j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
@@ -572,6 +573,36 @@ void to_json(json& j, const CompletionItem& p)
         j["labelDetails"] = p.labelDetails.value();
     if (p.documentation)
         j["documentation"] = p.documentation.value();
+}
+
+struct HoverParams : TextDocumentPositionParams
+{
+};
+
+enum struct MarkupKind
+{
+    PlainText,
+    Markdown,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(MarkupKind, {{MarkupKind::PlainText, "plaintext"}, {MarkupKind::Markdown, "markdown"}});
+
+struct MarkupContent
+{
+    MarkupKind kind;
+    std::string value;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MarkupContent, kind, value);
+
+struct Hover
+{
+    MarkupContent contents;
+    std::optional<Range> range;
+};
+void to_json(json& j, const Hover& p)
+{
+    j = {{"contents", p.contents}};
+    if (p.range)
+        j["range"] = p.range.value();
 }
 
 struct WorkspaceFoldersChangeEvent

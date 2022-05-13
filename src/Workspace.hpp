@@ -3,6 +3,7 @@
 #include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
+#include "Luau/AstQuery.h"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
 
@@ -25,6 +26,11 @@ static std::optional<std::string> getParentPath(const std::string& path)
         return path.substr(0, slash);
 
     return "";
+}
+
+std::string codeBlock(std::string language, std::string code)
+{
+    return "```" + language + "\n" + code + "\n" + "```";
 }
 
 // Get the corresponding Luau module name for a file
@@ -618,6 +624,50 @@ public:
         }
 
         return items;
+    }
+
+    std::optional<lsp::Hover> hover(const lsp::HoverParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+        auto position = Luau::Position{params.position.line, params.position.character};
+
+        // Run the type checker to ensure we are up to date
+        frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return std::nullopt;
+
+        auto module = frontend.moduleResolver.getModule(moduleName);
+        auto type = Luau::findTypeAtPosition(*module, *sourceModule, position);
+
+        if (!type)
+        {
+            auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
+            if (binding)
+                type = binding->typeId;
+        }
+
+        if (type)
+        {
+            Luau::ToStringOptions opts;
+            opts.useLineBreaks = true;
+            opts.functionTypeArguments = true;
+            opts.hideNamedFunctionTypeParameters = false;
+            opts.indent = true;
+
+            // if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+            // {
+            //     // Lets try to effectively resolve the function name
+            //     // auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
+
+            //     return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction("FUNC", *ftv, opts))}};
+            // }
+
+            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", Luau::toString(*type, opts))}};
+        }
+
+        return std::nullopt;
     }
 
     void updateSourceMap()

@@ -151,11 +151,13 @@ public:
         std::vector<std::string> triggerCharacters{".", ":", "'", "\""};
         lsp::CompletionOptions::CompletionItem completionItem{true};
         lsp::CompletionOptions completionProvider{triggerCharacters, std::nullopt, false, completionItem};
+        // Hover Provider
+        bool hoverProvider = true;
         // Workspaces
         lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
-        return lsp::ServerCapabilities{textDocumentSync, completionProvider, workspace};
+        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -179,6 +181,10 @@ public:
         else if (method == "textDocument/completion")
         {
             return completion(REQUIRED_PARAMS(params, "textDocument/completion"));
+        }
+        else if (method == "textDocument/hover")
+        {
+            return hover(REQUIRED_PARAMS(params, "textDocument/hover"));
         }
         else
         {
@@ -405,6 +411,16 @@ public:
     {
         auto workspace = findWorkspace(params.textDocument.uri);
         return workspace->completion(params);
+    }
+
+    // TODO: can't type this as lsp::hover as it can return null
+    Response hover(const lsp::HoverParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->hover(params);
+        if (result)
+            return *result;
+        return nullptr;
     }
 
     Response onShutdown(const id_type& id)
