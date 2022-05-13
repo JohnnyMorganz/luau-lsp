@@ -12,7 +12,7 @@ jobs:
         include:
           - os: windows-latest
             code-target: win32-x64
-          - os: ubuntu-18.04
+          - os: ubuntu-latest
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
