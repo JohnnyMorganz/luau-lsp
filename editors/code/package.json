@@ -15,6 +15,26 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "languages": [
+            {
+                "id": "lua",
+                "aliases": [
+                    "Luau"
+                ],
+                "extensions": [
+                    ".lua",
+                    ".luau"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "lua",
+                "scopeName": "source.lua",
+                "path": "./syntaxes/lua.tmLanguage.json"
+            }
+        ],
         "commands": [
             {
                 "command": "luau-lsp.helloWorld",

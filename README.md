@@ -20,7 +20,7 @@ We could also potentially take it a step forward, allowing the server to be used
 
 - [x] Diagnostics (incl. type errors)
 - [x] Autocompletion
-- [] Hover
+- [x] Hover
 - [] Signature Help
 - [] Go To Declaration
 - [] Go To Definition
@@ -42,3 +42,11 @@ We could also potentially take it a step forward, allowing the server to be used
 - [] Inline Value
 - [] Inlay Hints
 - [] Workspace Symbols
+
+## Build From Source
+
+```sh
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --target luau-lsp --config Release
+```
