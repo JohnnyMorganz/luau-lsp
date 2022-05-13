@@ -601,7 +601,7 @@ public:
             {
                 auto id = Luau::follow(entry.type.value());
                 // Try to infer more type info about the entry to provide better suggestion info
-                if (auto _ = Luau::get<Luau::FunctionTypeVar>(id))
+                if (Luau::get<Luau::FunctionTypeVar>(id))
                 {
                     item.kind = lsp::CompletionItemKind::Function;
                 }
@@ -613,7 +613,7 @@ public:
                         item.kind = lsp::CompletionItemKind::Event;
                     }
                 }
-                else if (auto _ = Luau::get<Luau::ClassTypeVar>(id))
+                else if (Luau::get<Luau::ClassTypeVar>(id))
                 {
                     item.kind = lsp::CompletionItemKind::Class;
                 }

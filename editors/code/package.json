@@ -2,13 +2,28 @@
     "name": "luau-lsp",
     "displayName": "Luau LSP",
     "description": "LSP Client for Luau",
+    "publisher": "JohnnyMorganz",
     "readme": "../README.md",
+    "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/JohnnyMorganz/luau-lsp"
+    },
+    "bugs": {
+        "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
+    },
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.67.0"
     },
     "categories": [
-        "Other"
+        "Programming Languages",
+        "Linters"
+    ],
+    "keywords": [
+        "lua",
+        "luau",
+        "roblox"
     ],
     "activationEvents": [
         "onLanguage:lua",
