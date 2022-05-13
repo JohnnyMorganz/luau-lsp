@@ -90,7 +90,7 @@ std::optional<std::string> encode(char c)
 std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false)
 {
     std::optional<std::string> res = std::nullopt;
-    size_t nativeEncodePos = -1;
+    size_t nativeEncodePos = std::string::npos;
 
     for (size_t pos = 0; pos < uriComponent.length(); pos++)
     {
@@ -100,10 +100,10 @@ std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false
         if (isalpha(code) || isdigit(code) || code == '-' || code == '.' || code == '_' || code == '~' || (allowSlash && code == '/'))
         {
             // check if we are delaying native encode
-            if (nativeEncodePos != -1)
+            if (nativeEncodePos != std::string::npos)
             {
                 *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos));
-                nativeEncodePos = -1;
+                nativeEncodePos = std::string::npos;
             }
             // check if we write into a new string (by default we try to return the param)
             if (res.has_value())
@@ -125,16 +125,16 @@ std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false
             {
 
                 // check if we are delaying native encode
-                if (nativeEncodePos != -1)
+                if (nativeEncodePos != std::string::npos)
                 {
                     *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos));
-                    nativeEncodePos = -1;
+                    nativeEncodePos = std::string::npos;
                 }
 
                 // append escaped variant to result
                 *res += *escaped;
             }
-            else if (nativeEncodePos == -1)
+            else if (nativeEncodePos == std::string::npos)
             {
                 // use native encode only when needed
                 nativeEncodePos = pos;
@@ -142,7 +142,7 @@ std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false
         }
     }
 
-    if (nativeEncodePos != -1)
+    if (nativeEncodePos != std::string::npos)
     {
         *res += encodeURIComponent(uriComponent.substr(nativeEncodePos), allowSlash);
     }
