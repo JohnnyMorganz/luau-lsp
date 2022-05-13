@@ -140,7 +140,10 @@ void to_json(json& j, const CompletionOptions& p)
     if (p.allCommitCharacters)
         j["allCommitCharacters"] = p.allCommitCharacters.value();
     if (p.completionItem)
-        j["completionItem"] = {{"labelDetailsSupport", p.completionItem->labelDetailsSupport}};
+    {
+        j["completionItem"] = {};
+        j["completionItem"]["labelDetailsSupport"] = p.completionItem->labelDetailsSupport;
+    }
 }
 
 enum struct TextDocumentSyncKind
@@ -150,10 +153,30 @@ enum struct TextDocumentSyncKind
     Incremental = 2,
 };
 
+struct WorkspaceFoldersServerCapabilities
+{
+    bool supported = false;
+    bool changeNotifications = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFoldersServerCapabilities, supported, changeNotifications);
+
+struct WorkspaceCapabilities
+{
+    std::optional<WorkspaceFoldersServerCapabilities> workspaceFolders;
+    // fileOperations
+};
+void to_json(json& j, const WorkspaceCapabilities& p)
+{
+    j = {};
+    if (p.workspaceFolders.has_value())
+        j["workspaceFolders"] = p.workspaceFolders.value();
+}
+
 struct ServerCapabilities
 {
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
+    std::optional<WorkspaceCapabilities> workspace;
 };
 
 void to_json(json& j, const ServerCapabilities& p)
@@ -163,6 +186,8 @@ void to_json(json& j, const ServerCapabilities& p)
         j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
         j["completionProvider"] = p.completionProvider.value();
+    if (p.workspace)
+        j["workspace"] = p.workspace.value();
 }
 
 struct InitializeResult
@@ -492,6 +517,19 @@ void to_json(json& j, const CompletionItem& p)
     if (p.documentation)
         j["documentation"] = p.documentation.value();
 }
+
+struct WorkspaceFoldersChangeEvent
+{
+    std::vector<WorkspaceFolder> added;
+    std::vector<WorkspaceFolder> removed;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFoldersChangeEvent, added, removed);
+
+struct DidChangeWorkspaceFoldersParams
+{
+    WorkspaceFoldersChangeEvent event;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWorkspaceFoldersParams, event);
 
 struct SetTraceParams
 {
