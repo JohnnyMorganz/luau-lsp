@@ -44,6 +44,7 @@ jobs:
           mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
           mkdir -p editors/code/bin
           cp ./dist/luau-lsp.exe editors/code/bin/server.exe
+          mv ./dist/luau-lsp.exe ./dist/luau-lsp-${{ matrix.code-target }}.exe
 
       - name: Move Build
         if: matrix.os != 'windows-latest'
@@ -53,6 +54,7 @@ jobs:
           mkdir -p editors/code/bin
           cp ./dist/luau-lsp editors/code/bin/server
           chmod 777 editors/code/bin/server
+          mv ./dist/luau-lsp ./dist/luau-lsp-${{ matrix.code-target }}
 
       - run: npm ci
         working-directory: editors/code
