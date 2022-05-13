@@ -90,7 +90,7 @@ std::optional<std::string> encode(char c)
 std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false)
 {
     std::optional<std::string> res = std::nullopt;
-    int nativeEncodePos = -1;
+    size_t nativeEncodePos = -1;
 
     for (size_t pos = 0; pos < uriComponent.length(); pos++)
     {
