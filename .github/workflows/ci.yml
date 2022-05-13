@@ -58,7 +58,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 14.x
       - run: npm install
         working-directory: editors/code
       - run: xvfb-run -a npm test
