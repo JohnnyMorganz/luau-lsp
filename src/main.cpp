@@ -104,6 +104,7 @@ public:
 
         sendRawMessage(msg);
     }
+
     void sendNotification(const std::string& method, std::optional<json> params)
     {
         json msg{
@@ -135,6 +136,13 @@ public:
             params["verbose"] = verbose.value();
         sendNotification("$/logTrace", params);
     };
+
+    void registerCapability(std::string id, std::string method, json registerOptions)
+    {
+        lsp::Registration registration{id, method, registerOptions};
+        // TODO: handle responses?
+        sendRequest(id, "client/registerCapability", lsp::RegistrationParams{{registration}}); // TODO: request id?
+    }
 
     lsp::ServerCapabilities getServerCapabilities()
     {
@@ -217,6 +225,14 @@ public:
         {
             onDidChangeWorkspaceFolders(REQUIRED_PARAMS(params, "workspace/didChangeWorkspaceFolders"));
         }
+        else if (method == "workspace/didChangeWatchedFiles")
+        {
+            onDidChangeWatchedFiles(REQUIRED_PARAMS(params, "workspace/didChangeWatchedFiles"));
+        }
+        else
+        {
+            sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
+        }
     }
 
     void processInputLoop()
@@ -227,6 +243,7 @@ public:
             if (readRawMessage(jsonString))
             {
                 sendTrace(jsonString, std::nullopt);
+                sendLogMessage(lsp::MessageType::Info, jsonString);
                 try
                 {
                     // Parse the input
@@ -305,6 +322,11 @@ public:
     {
         // Client received result of initialize
         sendLogMessage(lsp::MessageType::Info, "server initialized!");
+        sendLogMessage(lsp::MessageType::Info, "trace level: " + json(traceMode).dump());
+
+        // Dynamically register file watchers. Currently doing on client
+        // lsp::FileSystemWatcher watcher{"sourcemap.json"};
+        // registerCapability("WORKSPACE-FILE-WATCHERS", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{{watcher}});
     }
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
@@ -360,6 +382,22 @@ public:
         for (auto& folder : params.event.added)
         {
             workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(folder.name, folder.uri));
+        }
+    }
+
+    void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
+    {
+        sendLogMessage(lsp::MessageType::Info, "got watched file change");
+        for (const auto& change : params.changes)
+        {
+            auto workspace = findWorkspace(change.uri);
+            auto filePath = change.uri.fsPath();
+            // Flag sourcemap changes
+            if (filePath.filename() == "sourcemap.json")
+            {
+                sendLogMessage(lsp::MessageType::Info, "sourcemap changed");
+                workspace->updateSourceMap();
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import {
   ServerOptions,
   LanguageClient,
   LanguageClientOptions,
+  Trace,
 } from "vscode-languageclient/node";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -30,7 +31,10 @@ export function activate(context: vscode.ExtensionContext) {
       { scheme: "file", language: "luau" },
     ],
     synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher("**/.luaurc"),
+      fileEvents: [
+        vscode.workspace.createFileSystemWatcher("**/.luaurc"),
+        vscode.workspace.createFileSystemWatcher("**/sourcemap.json"),
+      ],
     },
     diagnosticCollectionName: "luau",
   };
@@ -41,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
     serverOptions,
     clientOptions
   );
+  client.trace = Trace.Messages;
 
   console.log("LSP Setup");
   context.subscriptions.push(client.start());

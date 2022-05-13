@@ -466,6 +466,18 @@ public:
         return items;
     }
 
+    void updateSourceMap()
+    {
+        // Read in the sourcemap
+        // TODO: We should invoke the rojo process dynamically if possible here, so that we can also refresh the sourcemap when we notice files are
+        // changed
+        // TODO: we assume a sourcemap.json file in the workspace root
+        if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
+        {
+            fileResolver.updateSourceMap(sourceMapContents.value());
+        }
+    }
+
 private:
     void setup()
     {
@@ -475,19 +487,6 @@ private:
         // TODO: register extended types
         Luau::registerBuiltinTypes(frontend.typeChecker);
         Luau::freeze(frontend.typeChecker.globalTypes);
-    }
-
-    void updateSourceMap()
-    {
-        // Read in the sourcemap
-        // TODO: We should invoke the rojo process dynamically if possible here, so that we can also refresh the sourcemap when we notice files are
-        // changed
-        // TODO: we assume a sourcemap.json file in the workspace root
-        // TODO: we need to refresh sourcemap on change
-        if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
-        {
-            fileResolver.updateSourceMap(sourceMapContents.value());
-        }
     }
 
     std::vector<lsp::Diagnostic> findDiagnostics(const Luau::ModuleName& fileName)

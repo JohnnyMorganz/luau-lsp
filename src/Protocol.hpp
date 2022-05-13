@@ -119,6 +119,19 @@ void from_json(const json& j, InitializeParams& p)
     }
 }
 
+struct Registration
+{
+    std::string id;
+    std::string method;
+    json registerOptions = nullptr;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Registration, id, method, registerOptions);
+
+struct RegistrationParams
+{
+    std::vector<Registration> registrations;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RegistrationParams, registrations);
 
 struct CompletionOptions
 {
@@ -324,6 +337,49 @@ struct DidCloseTextDocumentParams
     TextDocumentIdentifier textDocument;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidCloseTextDocumentParams, textDocument);
+
+using Pattern = std::string;
+using GlobPattern = Pattern; // | RelativePattern
+
+enum WatchKind
+{
+    Create = 1,
+    Change = 2,
+    Delete = 4,
+};
+
+struct FileSystemWatcher
+{
+    GlobPattern globPattern;
+    int kind = WatchKind::Create | WatchKind::Change | WatchKind::Delete;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FileSystemWatcher, globPattern, kind);
+
+struct DidChangeWatchedFilesRegistrationOptions
+{
+    std::vector<FileSystemWatcher> watchers;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWatchedFilesRegistrationOptions, watchers);
+
+enum struct FileChangeType
+{
+    Created = 1,
+    Changed = 2,
+    Deleted = 3,
+};
+
+struct FileEvent
+{
+    DocumentUri uri;
+    FileChangeType type;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FileEvent, uri, type);
+
+struct DidChangeWatchedFilesParams
+{
+    std::vector<FileEvent> changes;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWatchedFilesParams, changes);
 
 enum struct DiagnosticSeverity
 {
