@@ -103,9 +103,14 @@ struct WorkspaceFileResolver
 
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const
     {
-        if (realPathsToSourceNodes.find(name) == realPathsToSourceNodes.end())
+        std::error_code ec;
+        auto canonicalName = std::filesystem::canonical(name, ec);
+        if (ec.value() != 0)
+            canonicalName = name;
+        auto strName = canonicalName.generic_string();
+        if (realPathsToSourceNodes.find(strName) == realPathsToSourceNodes.end())
             return std::nullopt;
-        return realPathsToSourceNodes.at(name);
+        return realPathsToSourceNodes.at(strName);
     }
 
     Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode) const
@@ -301,7 +306,11 @@ struct WorkspaceFileResolver
 
         if (auto realPath = node->getScriptFilePath())
         {
-            realPathsToSourceNodes[realPath->generic_string()] = node; // TODO: canonicalize?
+            std::error_code ec;
+            auto canonicalName = std::filesystem::canonical(*realPath, ec);
+            if (ec.value() != 0)
+                canonicalName = *realPath;
+            realPathsToSourceNodes[canonicalName.generic_string()] = node;
         }
 
         for (auto& child : node->children)
@@ -332,13 +341,146 @@ struct WorkspaceFileResolver
     }
 };
 
+namespace types
+{
+std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
+{
+    std::optional<Luau::TypeFun> baseType;
+    if (className.has_value())
+    {
+        baseType = globalScope->lookupType(className.value());
+    }
+    if (!baseType.has_value())
+    {
+        baseType = globalScope->lookupType("Instance");
+    }
+
+    if (baseType.has_value())
+    {
+        return baseType->type;
+    }
+    else
+    {
+        // If we reach this stage, we couldn't find the class name nor the "Instance" type
+        // This most likely means a valid definitions file was not provided
+        return std::nullopt;
+    }
+}
+
+Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
+    std::optional<Luau::TypeId> parent, const WorkspaceFileResolver& fileResolver)
+{
+    Luau::LazyTypeVar ltv;
+    ltv.thunk = [&arena, globalScope, node, parent, fileResolver]()
+    {
+        // TODO: we should cache created instance types and reuse them where possible
+
+        // Look up the base class instance
+        auto baseTypeId = getTypeIdForClass(globalScope, node->className);
+        if (!baseTypeId)
+        {
+            return Luau::getSingletonTypes().anyType;
+        }
+
+        // Create the ClassTypeVar representing the instance
+        Luau::ClassTypeVar ctv{node->name, {}, baseTypeId, std::nullopt, {}, {}, "@roblox"};
+        auto typeId = arena.addType(std::move(ctv));
+
+        // Attach Parent and Children info
+        // Get the mutable version of the type var
+        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(typeId))
+        {
+
+            // Add the parent
+            if (parent.has_value())
+            {
+                ctv->props["Parent"] = Luau::makeProperty(parent.value());
+            }
+            else
+            {
+                // Search for the parent type
+                if (auto parentPath = getParentPath(node->virtualPath))
+                {
+                    if (auto parentNode = fileResolver.getSourceNodeFromVirtualPath(parentPath.value()))
+                    {
+                        ctv->props["Parent"] =
+                            Luau::makeProperty(makeLazyInstanceType(arena, globalScope, parentNode.value(), std::nullopt, fileResolver));
+                    }
+                }
+            }
+
+            // Add the children
+            for (const auto& child : node->children)
+            {
+                ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, child, typeId, fileResolver));
+            }
+        }
+        return typeId;
+    };
+
+    return arena.addType(std::move(ltv));
+}
+
+// Magic function for `Instance:IsA("ClassName")` predicate
+std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+{
+    if (expr.args.size != 1)
+        return std::nullopt;
+
+    auto index = expr.func->as<Luau::AstExprIndexName>();
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return std::nullopt;
+
+    std::optional<Luau::LValue> lvalue = tryGetLValue(*index->expr);
+    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
+    if (!lvalue || !tfun)
+        return std::nullopt;
+
+    Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
+    return Luau::ExprResult<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+}
+
+// Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
+static std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+{
+    auto index = expr.func->as<Luau::AstExprIndexName>();
+    if (!index)
+        return std::nullopt;
+
+    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeId instanceType = typeChecker.checkLValueBinding(scope, *index->expr);
+    return Luau::ExprResult<Luau::TypePackId>{arena.addTypePack({instanceType})};
+}
+
+// Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
+std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return std::nullopt;
+
+    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
+    if (!tfun)
+        return std::nullopt;
+
+    Luau::TypeId nillableClass = Luau::makeOption(typeChecker, typeChecker.globalTypes, tfun->type);
+    return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
+}
+
+} // namespace types
+
 class WorkspaceFolder
 {
 public:
     std::string name;
     lsp::DocumentUri rootUri;
-
-private:
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
 
@@ -457,6 +599,18 @@ public:
                 {
                     item.kind = lsp::CompletionItemKind::Function;
                 }
+                else if (auto ttv = Luau::get<Luau::TableTypeVar>(id))
+                {
+                    // Special case the RBXScriptSignal type as a connection
+                    if (ttv->name && ttv->name.value() == "RBXScriptSignal")
+                    {
+                        item.kind = lsp::CompletionItemKind::Event;
+                    }
+                }
+                else if (auto ctv = Luau::get<Luau::ClassTypeVar>(id))
+                {
+                    item.kind = lsp::CompletionItemKind::Class;
+                }
                 item.detail = Luau::toString(id);
             }
 
@@ -483,9 +637,74 @@ private:
     {
         updateSourceMap();
 
-        // Register types
-        // TODO: register extended types
+        // Register general builtin types
         Luau::registerBuiltinTypes(frontend.typeChecker);
+
+        // Register extended types
+        // TODO: we assume a globalTypes.d.lua in workspace root
+        if (auto definitions = readFile(rootUri.fsPath() / "globalTypes.d.lua"))
+        {
+            auto loadResult = Luau::loadDefinitionFile(frontend.typeChecker, frontend.typeChecker.globalScope, *definitions, "@roblox");
+            if (!loadResult.success)
+            {
+                // TODO: publish diagnostics for file
+            }
+
+            // Extend globally registered types with Instance information
+            if (fileResolver.rootSourceNode->className == "DataModel")
+            {
+                for (const auto& service : fileResolver.rootSourceNode->children)
+                {
+                    auto serviceName = service->className; // We know it must be a service of the same class name
+                    if (auto serviceType = frontend.typeChecker.globalScope->lookupType(serviceName))
+                    {
+                        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
+                        {
+                            // Extend the props to include the children
+                            for (const auto& child : service->children)
+                            {
+                                ctv->props[child->name] = Luau::makeProperty(types::makeLazyInstanceType(
+                                    frontend.typeChecker.globalTypes, frontend.typeChecker.globalScope, child, serviceType->type, fileResolver));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
+            frontend.typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+            {
+                if (auto node = fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name)
+                                                                 : fileResolver.getSourceNodeFromRealPath(name))
+                {
+                    // HACK: we need a way to get the typeArena for the module, but I don't know how
+                    // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it this
+                    // way...
+                    LUAU_ASSERT(scope->returnType);
+                    auto typeArena = scope->returnType->owningArena;
+                    LUAU_ASSERT(typeArena);
+
+                    scope->bindings[Luau::AstName("script")] =
+                        Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt, fileResolver), Luau::Location{}, {},
+                            {}, std::nullopt};
+                }
+            };
+        }
+
+        if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))
+        {
+            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
+            {
+                Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
+            }
+        }
+
+        // Freeze arena
         Luau::freeze(frontend.typeChecker.globalTypes);
     }
 

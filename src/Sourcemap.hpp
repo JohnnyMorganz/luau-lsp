@@ -10,7 +10,7 @@ using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 struct SourceNode
 {
     std::string name;
-    std::optional<std::string> className;
+    std::string className;
     std::vector<std::filesystem::path> filePaths;
     std::vector<SourceNodePtr> children;
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
