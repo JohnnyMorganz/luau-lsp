@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [windows, ubuntu, macos]
-    name: ${{matrix.os}}
+    name: Build Server (${{matrix.os}})
     runs-on: ${{matrix.os}}-latest
     steps:
       - uses: actions/checkout@v2
@@ -50,6 +50,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-18.04, windows-latest]
+    name: Build Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
