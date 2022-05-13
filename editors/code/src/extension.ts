@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as os from "os";
-import * as fs from "fs";
 import {
   Executable,
   ServerOptions,
@@ -9,39 +8,15 @@ import {
   Trace,
 } from "vscode-languageclient/node";
 
-export const fileExists = (path: vscode.Uri | string): Thenable<boolean> => {
-  const uri = path instanceof vscode.Uri ? path : vscode.Uri.file(path);
-  return vscode.workspace.fs.stat(uri).then(
-    () => true,
-    () => false
-  );
-};
-
-const findBuiltServer = (context: vscode.ExtensionContext) => {
-  const platform = os.platform();
-  const path = vscode.Uri.joinPath(
-    context.extensionUri,
-    "bin",
-    platform,
-    `luau-lsp${platform === "win32" ? ".exe" : ""}`
-  );
-
-  //   if (!fileExists(path)) {
-  //     vscode.window.showErrorMessage("Luau LSP is currently not supported on your platform");
-  //     return undefined
-  //   }
-
-  if (platform !== "win32") {
-    fs.chmodSync(path.fsPath, "777");
-  }
-  return path;
-};
-
 export function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
   const run: Executable = {
-    command: findBuiltServer(context).fsPath,
+    command: vscode.Uri.joinPath(
+      context.extensionUri,
+      "bin",
+      os.platform() === "win32" ? "server.exe" : "server"
+    ).fsPath,
   };
 
   // If debugging, run the locally build extension

@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    tags: ["*"]
+
+jobs:
+  dist:
+    strategy:
+    matrix:
+      include:
+        - os: windows-latest
+          code-target: win32-x64
+        - os: ubuntu-18.04
+          code-target: linux-x64
+        - os: macos-latest
+          code-target: darwin-x64
+
+  name: ${{matrix.os}}
+  runs-on: ${{matrix.os}}
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        submodules: true
+      
+    - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      
+    - name: Dist
+      run: |
+        mkdir build && cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        cmake --build . --config Release --target luau-lsp
+    
+    - name: Move Build
+      if: matrix.os == 'windows-latest'
+      run: mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
+    
+    - name: Move Build
+      if: matrix.os != 'windows-latest'
+      run: mv build/luau-lsp ./dist/luau-lsp
+
+    - name: Copy into Extension
+      if: matrix.os == 'windows-latest'
+      run: cp ./dist/luau-lsp.exe editors/code/bin/server.exe
+    
+    - name: Copy into Extension
+      if: matrix.os != 'windows-latest'
+      run: |
+        cp ./dist/luau-lsp editors/code/bin/server
+        chmod 777 editors/code/bin/server
+
+    - run: npm ci
+      working-directory: editors/code
+    
+    - name: Package Extension (release)
+      run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+      working-directory: editors/code
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist-${{ matrix.code-target }}
+        path: ./dist
+      
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: ["dist"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-darwin-x64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-linux-x64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-win32-x64
+          path: dist
+      - run: ls -al ./dist
+        
+      - name: Publish Release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.version }}
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "dist/*"
+        
+      - run: npm ci
+        working-directory: editors/code
+
+      - name: Publish Extension
+        working-directory: editors/code
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/luau-lsp-*.vsix
