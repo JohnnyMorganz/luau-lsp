@@ -42,7 +42,7 @@ jobs:
 
       - name: Move Build
         if: matrix.os != 'windows-latest'
-        run: mv build/luau-lsp ./dist/luau-lsp
+        run: mkdir -p ./dist && mv build/luau-lsp ./dist/luau-lsp
 
       - name: Copy into Extension
         if: matrix.os == 'windows-latest'
@@ -51,6 +51,7 @@ jobs:
       - name: Copy into Extension
         if: matrix.os != 'windows-latest'
         run: |
+          mkdir -p editors/code/bin
           cp ./dist/luau-lsp editors/code/bin/server
           chmod 777 editors/code/bin/server
 
