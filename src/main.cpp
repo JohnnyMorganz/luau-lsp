@@ -254,7 +254,6 @@ public:
             if (readRawMessage(jsonString))
             {
                 sendTrace(jsonString, std::nullopt);
-                sendLogMessage(lsp::MessageType::Info, jsonString);
                 try
                 {
                     // Parse the input
