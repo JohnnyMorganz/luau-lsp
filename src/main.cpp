@@ -172,7 +172,7 @@ class LanguageServer
 public:
     LanguageServer()
         : fileResolver(WorkspaceFileResolver())
-        , frontend(Luau::Frontend(&fileResolver, &fileResolver))
+        , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
     }
 
@@ -275,7 +275,7 @@ public:
 
         if (method == "initialize")
         {
-            return onInitialize(id);
+            return onInitialize(REQUIRED_PARAMS(params, "initialize"));
         }
         else if (method == "shutdown")
         {
@@ -333,10 +333,9 @@ public:
         std::string jsonString;
         while (std::cin)
         {
-            sendTrace(jsonString, std::nullopt);
-
             if (readRawMessage(jsonString))
             {
+                sendTrace(jsonString, std::nullopt);
                 try
                 {
                     // Parse the input
@@ -445,9 +444,10 @@ public:
     }
 
     // Dispatch handlers
-    lsp::InitializeResult onInitialize(const id_type& id) // const lsp::InitializeParams& params
+    lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
         isInitialized = true;
+        traceMode = params.trace;
         lsp::InitializeResult result;
         result.capabilities = getServerCapabilities();
         return result;
@@ -510,10 +510,12 @@ public:
             lsp::CompletionItem item;
             item.label = name;
             item.deprecated = entry.deprecated;
+            item.documentation = entry.documentationSymbol; // TODO: eval doc symbol
+
             switch (entry.kind)
             {
             case Luau::AutocompleteEntryKind::Property:
-                item.kind = lsp::CompletionItemKind::Property;
+                item.kind = lsp::CompletionItemKind::Field;
                 break;
             case Luau::AutocompleteEntryKind::Binding:
                 item.kind = lsp::CompletionItemKind::Variable;
@@ -522,10 +524,10 @@ public:
                 item.kind = lsp::CompletionItemKind::Keyword;
                 break;
             case Luau::AutocompleteEntryKind::String:
-                item.kind = lsp::CompletionItemKind::Text;
+                item.kind = lsp::CompletionItemKind::Constant; // TODO: is a string autocomplete always a singleton constant?
                 break;
             case Luau::AutocompleteEntryKind::Type:
-                item.kind = lsp::CompletionItemKind::TypeParameter;
+                item.kind = lsp::CompletionItemKind::Interface;
                 break;
             case Luau::AutocompleteEntryKind::Module:
                 item.kind = lsp::CompletionItemKind::Module;
@@ -544,11 +546,16 @@ public:
                 item.insertTextFormat = lsp::InsertTextFormat::Snippet;
             }
 
-            // TODO: it seems that entry.type is no longer safe to use here (deallocated somewhere else?)
-            // if (entry.type)
-            // {
-            //     item.detail = Luau::toString(entry.type.value());
-            // }
+            if (entry.type.has_value())
+            {
+                auto id = Luau::follow(entry.type.value());
+                // Try to infer more type info about the entry to provide better suggestion info
+                if (auto ftv = Luau::get<Luau::FunctionTypeVar>(id))
+                {
+                    item.kind = lsp::CompletionItemKind::Function;
+                }
+                item.detail = Luau::toString(id);
+            }
 
             items.emplace_back(item);
         }

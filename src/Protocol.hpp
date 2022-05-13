@@ -463,7 +463,7 @@ struct CompletionItem
     std::optional<CompletionItemKind> kind;
     // std::optional<std::vector<CompletionItemTag>> tags;
     std::optional<std::string> detail;
-    // std::optional<std::string> documentation;
+    std::optional<std::string> documentation;
     bool deprecated = false;
     // bool preselect = false;
     // std::optional<std::string> sortText;
@@ -489,6 +489,8 @@ void to_json(json& j, const CompletionItem& p)
         j["detail"] = p.detail.value();
     if (p.labelDetails)
         j["labelDetails"] = p.labelDetails.value();
+    if (p.documentation)
+        j["documentation"] = p.documentation.value();
 }
 
 struct SetTraceParams
