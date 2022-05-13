@@ -101,8 +101,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: ${{ github.event.inputs.version }}
-          name: ${{ github.event.inputs.version }}
+          # tag: ${{ github.event.inputs.version }}
+          # name: ${{ github.event.inputs.version }}
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "dist/*"
@@ -112,4 +112,4 @@ jobs:
 
       - name: Publish Extension
         working-directory: editors/code
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/luau-lsp-*.vsix
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath dist/luau-lsp-*.vsix
