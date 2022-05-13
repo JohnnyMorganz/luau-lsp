@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
   };
 
   const client = new LanguageClient(
-    "luau-lsp",
+    "luau",
     "Luau LSP",
     serverOptions,
     clientOptions
