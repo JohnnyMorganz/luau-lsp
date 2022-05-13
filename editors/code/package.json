@@ -2,8 +2,10 @@
     "name": "luau-lsp",
     "displayName": "Luau LSP",
     "description": "LSP Client for Luau",
+    "author": "JohnnyMorganz",
     "publisher": "JohnnyMorganz",
     "readme": "../README.md",
+    "license": "MIT",
     "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
     "repository": {
         "type": "git",
