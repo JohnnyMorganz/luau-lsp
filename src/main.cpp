@@ -110,6 +110,36 @@ public:
         sendRawMessage(msg);
     }
 
+    void sendError(const std::optional<id_type>& id, const JsonRpcException& e)
+    {
+        json msg{
+            {"jsonrpc", "2.0"},
+        };
+
+        if (id)
+        {
+            if (std::holds_alternative<int>(*id))
+            {
+                msg["id"] = std::get<int>(*id);
+            }
+            else
+            {
+                msg["id"] = std::get<std::string>(*id);
+            }
+        }
+        else
+        {
+            msg["id"] = nullptr;
+        }
+
+        msg["error"] = {};
+        msg["error"]["code"] = e.code;
+        msg["error"]["message"] = e.message;
+        msg["error"]["data"] = e.data;
+
+        sendRawMessage(msg);
+    }
+
     void sendNotification(const std::string& method, std::optional<json> params)
     {
         json msg{
@@ -254,10 +284,12 @@ public:
             if (readRawMessage(jsonString))
             {
                 sendTrace(jsonString, std::nullopt);
+                std::optional<id_type> id = std::nullopt;
                 try
                 {
                     // Parse the input
                     auto msg = json_rpc::parse(jsonString);
+                    id = msg.id;
 
                     if (msg.is_request())
                     {
@@ -281,18 +313,15 @@ public:
                 }
                 catch (const JsonRpcException& e)
                 {
-                    sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
-                        {"error", {{"code", e.code}, {"message", e.message}, {"data", e.data}}}});
+                    sendError(id, e);
                 }
                 catch (const json::exception& e)
                 {
-                    sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
-                        {"error", {"code", lsp::ErrorCode::ParseError}, {"message", e.what()}}});
+                    sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
                 }
                 catch (const std::exception& e)
                 {
-                    sendRawMessage({{"jsonrpc", "2.0"}, {"id", nullptr}, // TODO: id
-                        {"error", {"code", lsp::ErrorCode::InternalError}, {"message", e.what()}}});
+                    sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
                 }
             }
         }

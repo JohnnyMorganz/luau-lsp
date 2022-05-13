@@ -114,6 +114,11 @@ JsonRpcMessage parse(const std::string& jsonString)
     return JsonRpcMessage{id, method, params, result, error};
 }
 
+void trim_end(std::string& str)
+{
+    str.erase(str.find_last_not_of(" \n\r\t") + 1);
+}
+
 /// Reads a JSON-RPC message from input
 bool readRawMessage(std::istream& input, std::string& output)
 {
@@ -134,12 +139,13 @@ bool readRawMessage(std::istream& input, std::string& output)
                 std::cerr << "Duplicate content-length header found. Discarding old value";
             }
             std::string len = line.substr(16);
+            trim_end(len);
             contentLength = std::stoi(len);
             continue;
         }
 
         // Trim line and check if its empty (i.e., we have ended the header block)
-        line.erase(line.find_last_not_of(" \n\r\t") + 1);
+        trim_end(line);
         if (line.empty())
             break;
     }
@@ -147,7 +153,6 @@ bool readRawMessage(std::istream& input, std::string& output)
     // Check if no Content-Length found
     if (contentLength == 0)
     {
-        std::cerr << "Failed to read content length\n";
         return false;
     }
 
