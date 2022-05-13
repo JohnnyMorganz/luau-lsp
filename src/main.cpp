@@ -17,6 +17,11 @@
 #include "Luau/ToString.h"
 #include "nlohmann/json.hpp"
 
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 using json = nlohmann::json;
 using namespace json_rpc;
 using id_type = std::variant<int, std::string>;
@@ -453,6 +458,11 @@ int main()
     // {
     //     d = 4;
     // }
+
+#ifdef _WIN32
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
 
     LanguageServer server;
 

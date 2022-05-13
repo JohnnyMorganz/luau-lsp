@@ -163,9 +163,8 @@ bool readRawMessage(std::istream& input, std::string& output)
 void sendRawMessage(std::ostream& output, const json& message)
 {
     std::string s = message.dump();
-    output << "Content-Length: " << s.length() << '\n'; // TODO: these should be '\r\n' (SO MUCH DEBUGGING PAIN - APPARENTLY WINDOWS AUTO
-                                                        // CONVERTS \n TO \r\n, BUT THEN YOU ACTUALLY OUTPUT \r\r\n?????)
-    output << '\n';
+    output << "Content-Length: " << s.length() << "\r\n";
+    output << "\r\n";
     output << s;
     output.flush();
 }

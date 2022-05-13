@@ -79,7 +79,7 @@ struct InitializeParams
 
 void from_json(const json& j, InitializeParams& p)
 {
-    if (j.at("rootUri").is_null())
+    if (!j.contains("rootUri") || j.at("rootUri").is_null())
     {
         p.rootUri = std::nullopt;
     }
