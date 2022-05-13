@@ -17,8 +17,8 @@ jobs:
         - os: macos-latest
           code-target: darwin-x64
 
-  name: ${{matrix.os}}
-  runs-on: ${{matrix.os}}
+  name: ${{ matrix.os }}
+  runs-on: ${{ matrix.os }}
   steps:
     - uses: actions/checkout@v2
       with:
