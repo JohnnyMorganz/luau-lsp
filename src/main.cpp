@@ -393,14 +393,14 @@ private:
 
 int main()
 {
-    LanguageServer server;
-
     // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
     // auto d = 4;
     // while (d == 4)
     // {
     //     d = 4;
     // }
+
+    LanguageServer server;
 
     // Begin input loop
     server.processInputLoop();

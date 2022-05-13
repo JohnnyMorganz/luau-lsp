@@ -223,7 +223,7 @@ public:
 
     std::filesystem::path fsPath() const
     {
-        if (path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
+        if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
         {
             return path.substr(1);
         }
