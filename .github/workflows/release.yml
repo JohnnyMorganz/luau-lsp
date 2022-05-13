@@ -36,21 +36,20 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
           cmake --build . --config Release --target luau-lsp
 
-      - name: Move Build
+      - name: Move Build + Copy into Extension
         if: matrix.os == 'windows-latest'
-        run: mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
+        shell: bash
+        run: |
+          mkdir -p ./dist
+          mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
+          mkdir -p editors/code/bin
+          cp ./dist/luau-lsp.exe editors/code/bin/server.exe
 
       - name: Move Build
-        if: matrix.os != 'windows-latest'
-        run: mkdir -p ./dist && mv build/luau-lsp ./dist/luau-lsp
-
-      - name: Copy into Extension
-        if: matrix.os == 'windows-latest'
-        run: cp ./dist/luau-lsp.exe editors/code/bin/server.exe
-
-      - name: Copy into Extension
         if: matrix.os != 'windows-latest'
         run: |
+          mkdir -p ./dist
+          mv build/luau-lsp ./dist/luau-lsp
           mkdir -p editors/code/bin
           cp ./dist/luau-lsp editors/code/bin/server
           chmod 777 editors/code/bin/server
