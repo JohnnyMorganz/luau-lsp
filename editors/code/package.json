@@ -2,6 +2,7 @@
     "name": "luau-lsp",
     "displayName": "Luau LSP",
     "description": "LSP Client for Luau",
+    "readme": "../README.md",
     "version": "0.0.1",
     "engines": {
         "vscode": "^1.67.0"
