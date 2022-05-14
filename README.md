@@ -21,7 +21,7 @@ We could also potentially take it a step forward, allowing the server to be used
 - [x] Diagnostics (incl. type errors)
 - [x] Autocompletion
 - [x] Hover
-- [] Signature Help
+- [x] Signature Help
 - [] Go To Declaration
 - [] Go To Definition
 - [] Go To Type Definition

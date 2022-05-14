@@ -189,16 +189,19 @@ public:
     {
         lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Full;
         // Completion
-        std::vector<std::string> triggerCharacters{".", ":", "'", "\""};
+        std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
         lsp::CompletionOptions::CompletionItem completionItem{true};
-        lsp::CompletionOptions completionProvider{triggerCharacters, std::nullopt, false, completionItem};
+        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, false, completionItem};
         // Hover Provider
         bool hoverProvider = true;
+        // Signature Help
+        std::vector<std::string> signatureHelpTriggerCharacters{"(", ","};
+        lsp::SignatureHelpOptions signatureHelpProvider{signatureHelpTriggerCharacters};
         // Workspaces
         lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
-        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, workspace};
+        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -226,6 +229,10 @@ public:
         else if (method == "textDocument/hover")
         {
             return hover(REQUIRED_PARAMS(params, "textDocument/hover"));
+        }
+        else if (method == "textDocument/signatureHelp")
+        {
+            return signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
         }
         else
         {
@@ -289,7 +296,7 @@ public:
         {
             if (readRawMessage(jsonString))
             {
-                sendTrace(jsonString, std::nullopt);
+                // sendTrace(jsonString, std::nullopt);
                 std::optional<id_type> id = std::nullopt;
                 try
                 {
@@ -300,7 +307,7 @@ public:
                     if (msg.is_request())
                     {
                         auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
-                        sendTrace(response.dump(), std::nullopt);
+                        // sendTrace(response.dump(), std::nullopt);
                         sendResponse(msg.id.value(), response);
                     }
                     else if (msg.is_response())
@@ -462,6 +469,16 @@ public:
         return nullptr;
     }
 
+    // TODO: can't type this as lsp::SignatureHelp as it can return null
+    Response signatureHelp(const lsp::SignatureHelpParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->signatureHelp(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
+
     Response onShutdown(const id_type& id)
     {
         shutdownRequested = true;
@@ -497,6 +514,11 @@ int main()
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
+
+    // Enable all flags
+    for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
+        if (strncmp(flag->name, "Luau", 4) == 0)
+            flag->value = true;
 
     LanguageServer server;
 

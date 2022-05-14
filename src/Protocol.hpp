@@ -143,6 +143,20 @@ void to_json(json& j, const CompletionOptions& p)
     }
 }
 
+struct SignatureHelpOptions
+{
+    std::optional<std::vector<std::string>> triggerCharacters;
+    std::optional<std::vector<std::string>> retriggerCharacters;
+};
+void to_json(json& j, const SignatureHelpOptions& p)
+{
+    j = json{};
+    if (p.triggerCharacters)
+        j["triggerCharacters"] = p.triggerCharacters.value();
+    if (p.retriggerCharacters)
+        j["retriggerCharacters"] = p.retriggerCharacters.value();
+}
+
 enum struct TextDocumentSyncKind
 {
     None = 0,
@@ -174,6 +188,7 @@ struct ServerCapabilities
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
     bool hoverProvider = false;
+    std::optional<SignatureHelpOptions> signatureHelpProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
 
@@ -184,6 +199,8 @@ void to_json(json& j, const ServerCapabilities& p)
         j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
         j["completionProvider"] = p.completionProvider.value();
+    if (p.signatureHelpProvider)
+        j["signatureHelpProvider"] = p.signatureHelpProvider.value();
     if (p.workspace)
         j["workspace"] = p.workspace.value();
 }
@@ -274,6 +291,14 @@ struct Location
     Range range;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Location, uri, range);
+
+struct Command
+{
+    std::string title;
+    std::string command;
+    std::vector<json> arguments;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Command, title, command, arguments);
 
 struct DidOpenTextDocumentParams
 {
@@ -533,7 +558,7 @@ struct CompletionItem
     // std::optional<std::string> textEditString;
     // std::optional<std::vector<TextEdit>> additionalTextEdits;
     // std::optional<std::vector<std::string>> commitCharacters;
-    // std::optional<Command> command;
+    std::optional<Command> command;
     // data?
 };
 void to_json(json& j, const CompletionItem& p)
@@ -549,6 +574,8 @@ void to_json(json& j, const CompletionItem& p)
         j["labelDetails"] = p.labelDetails.value();
     if (p.documentation)
         j["documentation"] = p.documentation.value();
+    if (p.command)
+        j["command"] = p.command.value();
 }
 
 struct HoverParams : TextDocumentPositionParams
@@ -580,6 +607,89 @@ void to_json(json& j, const Hover& p)
     if (p.range)
         j["range"] = p.range.value();
 }
+
+struct ParameterInformation
+{
+    std::string label;
+    std::optional<MarkupContent> documentation;
+};
+void to_json(json& j, const ParameterInformation& p)
+{
+    j = {{"label", p.label}};
+    if (p.documentation)
+        j["documentation"] = p.documentation.value();
+}
+void from_json(const json& j, ParameterInformation& p)
+{
+    j.at("label").get_to(p.label);
+    if (j.contains("documentation"))
+        p.documentation = j.at("documentation").get<MarkupContent>();
+}
+
+struct SignatureInformation
+{
+    std::string label;
+    std::optional<MarkupContent> documentation;
+    std::optional<std::vector<ParameterInformation>> parameters;
+    std::optional<unsigned int> activeParameter;
+};
+void to_json(json& j, const SignatureInformation& p)
+{
+    j = {{"label", p.label}};
+    if (p.documentation)
+        j["documentation"] = p.documentation.value();
+    if (p.parameters)
+        j["parameters"] = p.parameters.value();
+    if (p.activeParameter)
+        j["activeParameter"] = p.activeParameter.value();
+}
+void from_json(const json& j, SignatureInformation& p)
+{
+    j.at("label").get_to(p.label);
+    if (j.contains("documentation"))
+        p.documentation = j.at("documentation").get<MarkupContent>();
+    if (j.contains("parameters"))
+        p.parameters = j.at("parameters").get<std::vector<ParameterInformation>>();
+    if (j.contains("activeParameter"))
+        p.activeParameter = j.at("activeParameter").get<unsigned int>();
+}
+
+struct SignatureHelp
+{
+    std::vector<SignatureInformation> signatures;
+    unsigned int activeSignature = 0;
+    unsigned int activeParameter = 0;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelp, signatures, activeSignature, activeParameter);
+
+enum struct SignatureHelpTriggerKind
+{
+    Invoked = 1,
+    TriggerCharacter = 2,
+    ContentChange = 3,
+};
+
+struct SignatureHelpContext
+{
+    SignatureHelpTriggerKind triggerKind;
+    std::optional<std::string> triggerCharacter;
+    bool isRetrigger;
+    std::optional<SignatureHelp> activeSignatureHelp;
+};
+void from_json(const json& j, SignatureHelpContext& p)
+{
+    j.at("triggerKind").get_to(p.triggerKind);
+    j.at("isRetrigger").get_to(p.isRetrigger);
+    if (j.contains("triggerCharacter"))
+        p.triggerCharacter = j.at("triggerCharacter").get<std::string>();
+    if (j.contains("activeSignatureHelp"))
+        p.activeSignatureHelp = j.at("activeSignatureHelp").get<SignatureHelp>();
+}
+
+struct SignatureHelpParams : TextDocumentPositionParams
+{
+    std::optional<SignatureHelpContext> context;
+};
 
 struct WorkspaceFoldersChangeEvent
 {
