@@ -187,7 +187,7 @@ public:
 
     lsp::ServerCapabilities getServerCapabilities()
     {
-        lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Full;
+        lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
         // Completion
         std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
         lsp::CompletionOptions::CompletionItem completionItem{true};
@@ -348,6 +348,8 @@ public:
     // Dispatch handlers
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
+        sendTrace("starting initialization process", std::nullopt);
+
         // Set provided settings
         traceMode = params.trace;
 

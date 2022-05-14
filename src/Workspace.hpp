@@ -551,6 +551,47 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
 
 } // namespace types
 
+size_t positionToOffset(const std::string& contents, const lsp::Position& position)
+{
+    // TODO: handle if position.line or position.character < 0
+    size_t startOfLine = 0;
+    for (int i = 0; i != position.line; ++i)
+    {
+        size_t nextNewLine = contents.find('\n', startOfLine);
+        if (nextNewLine == std::string::npos)
+        {
+            // TODO: out of range
+            return std::string::npos;
+        }
+        startOfLine = nextNewLine + 1;
+    }
+
+    // TODO: we should stop the line once we hit a '\n'
+    std::string line = contents.substr(startOfLine);
+
+    // TODO: we need to handle utf-16 codepoints
+    return startOfLine + position.character;
+}
+
+bool applyChange(std::string& contents, const lsp::TextDocumentContentChangeEvent& change)
+{
+    if (!change.range)
+    {
+        contents = change.text;
+        return true;
+    }
+
+    size_t startIndex = positionToOffset(contents, change.range->start);
+    size_t endIndex = positionToOffset(contents, change.range->end);
+    if (startIndex == std::string::npos || endIndex == std::string::npos || endIndex < startIndex)
+    {
+        return false;
+    }
+
+    contents.replace(startIndex, endIndex - startIndex, change.text);
+    return true;
+}
+
 class WorkspaceFolder
 {
 public:
@@ -597,11 +638,24 @@ public:
     void updateTextDocument(const lsp::DocumentUri& uri, const std::vector<lsp::TextDocumentContentChangeEvent>& changes)
     {
         auto moduleName = getModuleName(uri);
+
+        if (fileResolver.managedFiles.find(moduleName) == fileResolver.managedFiles.end())
+        {
+            std::cerr << "Text Document not loaded locally: " << uri.toString() << std::endl;
+            return;
+        }
+        std::string newContents(fileResolver.managedFiles.at(moduleName));
+
         for (auto& change : changes)
         {
-            // TODO: if range is present - we should update incrementally, currently we ask for full sync
-            fileResolver.managedFiles.insert_or_assign(moduleName, change.text);
+            if (!applyChange(newContents, change))
+            {
+                std::cerr << "Failed to update text document " << uri.toString() << std::endl;
+                return;
+            }
         }
+        fileResolver.managedFiles.insert_or_assign(moduleName, newContents);
+
         // Mark the module dirty for the typechecker
         frontend.markDirty(moduleName);
     }
