@@ -505,7 +505,7 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     }
 
     // See if the name belongs to a ClassTypeVar
-    bool implicitSelf = false;
+    // bool implicitSelf = false;
     Luau::TypeId* parentIt = nullptr;
     std::string methodName;
     std::string baseName;
@@ -514,7 +514,7 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     {
         parentIt = module->astTypes.find(indexName->expr);
         methodName = std::string(1, indexName->op) + indexName->index.value;
-        implicitSelf = indexName->op == ':';
+        // implicitSelf = indexName->op == ':';
     }
     else if (auto indexExpr = funcExpr->as<Luau::AstExprIndexExpr>())
     {
@@ -545,7 +545,7 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
         baseName = "_";
     }
 
-    // TODO: use implicitSelf to hide the name
+    // TODO: use implicitSelf to hide the self parameter
     return "function " + Luau::toStringNamedFunction(baseName + methodName, *ftv, opts);
 }
 
