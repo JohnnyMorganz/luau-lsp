@@ -555,7 +555,7 @@ size_t positionToOffset(const std::string& contents, const lsp::Position& positi
 {
     // TODO: handle if position.line or position.character < 0
     size_t startOfLine = 0;
-    for (int i = 0; i != position.line; ++i)
+    for (unsigned int i = 0; i != position.line; ++i)
     {
         size_t nextNewLine = contents.find('\n', startOfLine);
         if (nextNewLine == std::string::npos)
