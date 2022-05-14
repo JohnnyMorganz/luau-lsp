@@ -670,7 +670,7 @@ public:
         return std::nullopt;
     }
 
-    void updateSourceMap()
+    bool updateSourceMap()
     {
         // Read in the sourcemap
         // TODO: We should invoke the rojo process dynamically if possible here, so that we can also refresh the sourcemap when we notice files are
@@ -679,13 +679,22 @@ public:
         if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
         {
             fileResolver.updateSourceMap(sourceMapContents.value());
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
 private:
     void setup()
     {
-        updateSourceMap();
+        if (!updateSourceMap())
+        {
+            // TODO: log error properly
+            std::cerr << "Failed to load sourcemap.json for workspace. Instance information will not be available" << std::endl;
+        }
 
         // Register general builtin types
         Luau::registerBuiltinTypes(frontend.typeChecker);
@@ -701,44 +710,47 @@ private:
             }
 
             // Extend globally registered types with Instance information
-            if (fileResolver.rootSourceNode->className == "DataModel")
+            if (fileResolver.rootSourceNode)
             {
-                for (const auto& service : fileResolver.rootSourceNode->children)
+                if (fileResolver.rootSourceNode->className == "DataModel")
                 {
-                    auto serviceName = service->className; // We know it must be a service of the same class name
-                    if (auto serviceType = frontend.typeChecker.globalScope->lookupType(serviceName))
+                    for (const auto& service : fileResolver.rootSourceNode->children)
                     {
-                        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
+                        auto serviceName = service->className; // We know it must be a service of the same class name
+                        if (auto serviceType = frontend.typeChecker.globalScope->lookupType(serviceName))
                         {
-                            // Extend the props to include the children
-                            for (const auto& child : service->children)
+                            if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
                             {
-                                ctv->props[child->name] = Luau::makeProperty(types::makeLazyInstanceType(
-                                    frontend.typeChecker.globalTypes, frontend.typeChecker.globalScope, child, serviceType->type, fileResolver));
+                                // Extend the props to include the children
+                                for (const auto& child : service->children)
+                                {
+                                    ctv->props[child->name] = Luau::makeProperty(types::makeLazyInstanceType(
+                                        frontend.typeChecker.globalTypes, frontend.typeChecker.globalScope, child, serviceType->type, fileResolver));
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-            frontend.typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
-            {
-                if (auto node = fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name)
-                                                                 : fileResolver.getSourceNodeFromRealPath(name))
+                // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
+                frontend.typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
                 {
-                    // HACK: we need a way to get the typeArena for the module, but I don't know how
-                    // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it this
-                    // way...
-                    LUAU_ASSERT(scope->returnType);
-                    auto typeArena = scope->returnType->owningArena;
-                    LUAU_ASSERT(typeArena);
+                    if (auto node = fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name)
+                                                                     : fileResolver.getSourceNodeFromRealPath(name))
+                    {
+                        // HACK: we need a way to get the typeArena for the module, but I don't know how
+                        // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it
+                        // this way...
+                        LUAU_ASSERT(scope->returnType);
+                        auto typeArena = scope->returnType->owningArena;
+                        LUAU_ASSERT(typeArena);
 
-                    scope->bindings[Luau::AstName("script")] =
-                        Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt, fileResolver), Luau::Location{}, {},
-                            {}, std::nullopt};
-                }
-            };
+                        scope->bindings[Luau::AstName("script")] =
+                            Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt, fileResolver), Luau::Location{},
+                                {}, {}, std::nullopt};
+                    }
+                };
+            }
         }
 
         if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))

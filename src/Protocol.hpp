@@ -613,5 +613,13 @@ struct LogMessageParams
     MessageType type;
     std::string message;
 };
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LogMessageParams, type, message);
+
+struct ShowMessageParams
+{
+    MessageType type;
+    std::string message;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ShowMessageParams, type, message);
 
 } // namespace lsp

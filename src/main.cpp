@@ -172,6 +172,12 @@ public:
         sendNotification("$/logTrace", params);
     };
 
+    void sendWindowMessage(lsp::MessageType type, std::string message)
+    {
+        lsp::ShowMessageParams params{type, message};
+        sendNotification("window/showMessage", params);
+    }
+
     void registerCapability(std::string id, std::string method, json registerOptions)
     {
         lsp::Registration registration{id, method, registerOptions};
