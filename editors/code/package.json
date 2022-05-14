@@ -13,7 +13,7 @@
     "bugs": {
         "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
     },
-    "version": "0.1.2",
+    "version": "0.2.0",
     "engines": {
         "vscode": "^1.67.0"
     },
