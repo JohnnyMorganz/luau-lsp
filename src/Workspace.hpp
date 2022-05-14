@@ -847,7 +847,7 @@ public:
         if (!candidate)
             return std::nullopt;
 
-        unsigned int activeParameter = candidate->args.size == 0 ? 0 : candidate->args.size - 1;
+        unsigned int activeParameter = candidate->args.size == 0 ? 0 : static_cast<unsigned int>(candidate->args.size - 1);
 
         auto it = module->astTypes.find(candidate->func);
         if (!it)
