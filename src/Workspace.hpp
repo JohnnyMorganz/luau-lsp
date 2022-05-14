@@ -481,6 +481,74 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIs
     return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
 }
 
+// Converts a FTV and function call to a nice string
+// In the format "function NAME(args): ret"
+std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const Luau::AstExpr* funcExpr)
+{
+    Luau::ToStringOptions opts;
+    opts.functionTypeArguments = true;
+    opts.hideNamedFunctionTypeParameters = false;
+
+    // See if its just in the form `func(args)`
+    if (auto local = funcExpr->as<Luau::AstExprLocal>())
+    {
+        return "function " + Luau::toStringNamedFunction(local->local->name.value, *ftv, opts);
+    }
+    else if (auto global = funcExpr->as<Luau::AstExprGlobal>())
+    {
+        return "function " + Luau::toStringNamedFunction(global->name.value, *ftv, opts);
+    }
+    else if (funcExpr->as<Luau::AstExprGroup>())
+    {
+        // In the form (expr)(args), which implies thats its probably a IIFE
+        return "function" + Luau::toStringNamedFunction(global->name.value, *ftv, opts);
+    }
+
+    // See if the name belongs to a ClassTypeVar
+    bool implicitSelf = false;
+    Luau::TypeId* parentIt = nullptr;
+    std::string methodName;
+    std::string baseName;
+
+    if (auto indexName = funcExpr->as<Luau::AstExprIndexName>())
+    {
+        parentIt = module->astTypes.find(indexName->expr);
+        methodName = std::string(1, indexName->op) + indexName->index.value;
+        implicitSelf = indexName->op == ':';
+    }
+    else if (auto indexExpr = funcExpr->as<Luau::AstExprIndexExpr>())
+    {
+        parentIt = module->astTypes.find(indexExpr->expr);
+        // TODO: we need to toString the expr nicely... I can't be bothered right now
+        methodName = "_";
+    }
+
+    if (parentIt)
+    {
+        Luau::TypeId parentType = Luau::follow(*parentIt);
+        if (auto typeName = Luau::getName(parentType))
+        {
+            baseName = *typeName;
+        }
+        else if (auto parentClass = Luau::get<Luau::ClassTypeVar>(parentType))
+        {
+            baseName = parentClass->name;
+        }
+        // if (auto parentUnion = Luau::get<UnionTypeVar>(parentType))
+        // {
+        //     return returnFirstNonnullOptionOfType<ClassTypeVar>(parentUnion);
+        // }
+    }
+    else
+    {
+        // TODO: anymore we can do?
+        baseName = "_";
+    }
+
+    // TODO: use implicitSelf to hide the name
+    return "function " + Luau::toStringNamedFunction(baseName + methodName, *ftv, opts);
+}
+
 } // namespace types
 
 class WorkspaceFolder
@@ -642,35 +710,62 @@ public:
             return std::nullopt;
 
         auto module = frontend.moduleResolver.getModule(moduleName);
-        auto type = Luau::findTypeAtPosition(*module, *sourceModule, position);
+        auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
+
+        std::optional<Luau::TypeId> type = std::nullopt;
+
+        if (auto expr = exprOrLocal.getExpr())
+        {
+            if (auto it = module->astTypes.find(expr))
+                type = *it;
+        }
+        else if (auto local = exprOrLocal.getLocal())
+        {
+            auto scope = Luau::findScopeAtPosition(*module, position);
+            if (!scope)
+                return std::nullopt;
+            type = scope->lookup(local);
+        }
 
         if (!type)
+            return std::nullopt;
+        type = Luau::follow(*type);
+
+        Luau::ToStringOptions opts;
+        opts.useLineBreaks = true;
+        opts.functionTypeArguments = true;
+        opts.hideNamedFunctionTypeParameters = false;
+        opts.indent = true;
+        std::string typeString = Luau::toString(*type, opts);
+
+        if (exprOrLocal.getLocal())
         {
-            auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
-            if (binding)
-                type = binding->typeId;
+            std::string builder = "local ";
+            builder += exprOrLocal.getName()->value;
+            builder += ": " + typeString;
+            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
         }
-
-        if (type)
+        else
         {
-            Luau::ToStringOptions opts;
-            opts.useLineBreaks = true;
-            opts.functionTypeArguments = true;
-            opts.hideNamedFunctionTypeParameters = false;
-            opts.indent = true;
+            // If we have a function and its corresponding name
+            if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+            {
+                // See if the name is locally bound
+                if (auto localName = exprOrLocal.getName())
+                {
+                    std::string name = localName->value;
+                    return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts))}};
+                }
+                else if (auto funcExpr = exprOrLocal.getExpr())
+                {
+                    return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr))}};
+                }
+            }
 
-            // if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
-            // {
-            //     // Lets try to effectively resolve the function name
-            //     // auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
 
-            //     return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction("FUNC", *ftv, opts))}};
-            // }
 
-            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", Luau::toString(*type, opts))}};
+            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", typeString)}};
         }
-
-        return std::nullopt;
     }
 
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params)
@@ -714,7 +809,7 @@ public:
             opts.hideNamedFunctionTypeParameters = false;
 
             // Create the whole label
-            std::string label = Luau::toStringNamedFunction("", *ftv, opts); // TODO: maybe we should remove self from here?
+            std::string label = types::toStringFunctionCall(module, ftv, candidate->func);
             std::optional<lsp::MarkupContent> documentation;
 
             // Create each parameter label
