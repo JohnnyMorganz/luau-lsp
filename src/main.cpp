@@ -348,8 +348,6 @@ public:
     // Dispatch handlers
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
-        sendTrace("starting initialization process", std::nullopt);
-
         // Set provided settings
         traceMode = params.trace;
 

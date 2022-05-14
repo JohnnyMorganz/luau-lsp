@@ -938,22 +938,11 @@ public:
     }
 
 private:
-    void setup()
+    void registerExtendedTypes(Luau::TypeChecker& typeChecker)
     {
-        if (!updateSourceMap())
-        {
-            // TODO: log error properly
-            std::cerr << "Failed to load sourcemap.json for workspace. Instance information will not be available" << std::endl;
-        }
-
-        // Register general builtin types
-        Luau::registerBuiltinTypes(frontend.typeChecker);
-
-        // Register extended types
-        // TODO: we assume a globalTypes.d.lua in workspace root
         if (auto definitions = readFile(rootUri.fsPath() / "globalTypes.d.lua"))
         {
-            auto loadResult = Luau::loadDefinitionFile(frontend.typeChecker, frontend.typeChecker.globalScope, *definitions, "@roblox");
+            auto loadResult = Luau::loadDefinitionFile(typeChecker, typeChecker.globalScope, *definitions, "@roblox");
             if (!loadResult.success)
             {
                 // TODO: publish diagnostics for file
@@ -968,7 +957,7 @@ private:
                     for (const auto& service : fileResolver.rootSourceNode->children)
                     {
                         auto serviceName = service->className; // We know it must be a service of the same class name
-                        if (auto serviceType = frontend.typeChecker.globalScope->lookupType(serviceName))
+                        if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
                         {
                             if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
                             {
@@ -976,7 +965,7 @@ private:
                                 for (const auto& child : service->children)
                                 {
                                     ctv->props[child->name] = Luau::makeProperty(types::makeLazyInstanceType(
-                                        frontend.typeChecker.globalTypes, frontend.typeChecker.globalScope, child, serviceType->type, fileResolver));
+                                        typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type, fileResolver));
                                 }
                             }
                         }
@@ -984,7 +973,7 @@ private:
                 }
 
                 // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-                frontend.typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+                typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
                 {
                     if (auto node = fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name)
                                                                      : fileResolver.getSourceNodeFromRealPath(name))
@@ -1008,7 +997,7 @@ private:
             std::cerr << "Definitions file not found. Extended types will not be provided." << std::endl;
         }
 
-        if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))
+        if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
         {
             if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
             {
@@ -1020,9 +1009,22 @@ private:
                 Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
             }
         }
+    }
 
-        // Freeze arena
+    void setup()
+    {
+        if (!updateSourceMap())
+        {
+            // TODO: log error properly
+            std::cerr << "Failed to load sourcemap.json for workspace. Instance information will not be available" << std::endl;
+        }
+
+        Luau::registerBuiltinTypes(frontend.typeChecker);
+        Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
+        registerExtendedTypes(frontend.typeChecker);
+        registerExtendedTypes(frontend.typeCheckerForAutocomplete);
         Luau::freeze(frontend.typeChecker.globalTypes);
+        Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
     }
 
     std::vector<lsp::Diagnostic> findDiagnostics(const Luau::ModuleName& fileName)
