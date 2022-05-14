@@ -498,10 +498,10 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     {
         return "function " + Luau::toStringNamedFunction(global->name.value, *ftv, opts);
     }
-    else if (funcExpr->as<Luau::AstExprGroup>())
+    else if (funcExpr->as<Luau::AstExprGroup>() || funcExpr->as<Luau::AstExprFunction>())
     {
         // In the form (expr)(args), which implies thats its probably a IIFE
-        return "function" + Luau::toStringNamedFunction(global->name.value, *ftv, opts);
+        return "function" + Luau::toStringNamedFunction("", *ftv, opts);
     }
 
     // See if the name belongs to a ClassTypeVar
