@@ -57,10 +57,11 @@ jobs:
           mv ./dist/luau-lsp ./dist/luau-lsp-${{ matrix.code-target }}
 
       - name: Copy README and CHANGELOG
+        shell: bash
         run: |
-          rm editors/code/README.md
+          rm -f editors/code/README.md
           cp README.md editors/code/README.md
-          rm editors/code/CHANGELOG.md
+          rm -f editors/code/CHANGELOG.md
           cp CHANGELOG.md editors/code/CHANGELOG.md
 
       - run: npm ci
