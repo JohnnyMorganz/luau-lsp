@@ -247,8 +247,8 @@ void from_json(const json&, InitializedParams&){};
 
 struct Position
 {
-    unsigned int line;
-    unsigned int character;
+    size_t line;
+    size_t character;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
 
@@ -655,7 +655,7 @@ struct SignatureInformation
     std::string label;
     std::optional<MarkupContent> documentation;
     std::optional<std::vector<ParameterInformation>> parameters;
-    std::optional<unsigned int> activeParameter;
+    std::optional<size_t> activeParameter;
 };
 void to_json(json& j, const SignatureInformation& p)
 {
@@ -675,14 +675,14 @@ void from_json(const json& j, SignatureInformation& p)
     if (j.contains("parameters"))
         p.parameters = j.at("parameters").get<std::vector<ParameterInformation>>();
     if (j.contains("activeParameter"))
-        p.activeParameter = j.at("activeParameter").get<unsigned int>();
+        p.activeParameter = j.at("activeParameter").get<size_t>();
 }
 
 struct SignatureHelp
 {
     std::vector<SignatureInformation> signatures;
-    unsigned int activeSignature = 0;
-    unsigned int activeParameter = 0;
+    size_t activeSignature = 0;
+    size_t activeParameter = 0;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelp, signatures, activeSignature, activeParameter);
 
