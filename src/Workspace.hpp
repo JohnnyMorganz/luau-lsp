@@ -865,9 +865,10 @@ public:
         }
         else if (auto global = exprOrLocal.getExpr()->as<Luau::AstExprGlobal>())
         {
-            std::string builder = "global ";
+            // TODO: should we indicate this is a global somehow?
+            std::string builder = "type ";
             builder += global->name.value;
-            builder += ": " + typeString;
+            builder += " = " + typeString;
             return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
         }
         else
