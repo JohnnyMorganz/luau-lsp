@@ -841,32 +841,37 @@ public:
         opts.indent = true;
         std::string typeString = Luau::toString(*type, opts);
 
-        if (exprOrLocal.getLocal())
+        // If we have a function and its corresponding name
+        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+        {
+            // See if the name is locally bound
+            if (auto localName = exprOrLocal.getName())
+            {
+                std::string name = localName->value;
+                return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts))}};
+            }
+            else if (auto funcExpr = exprOrLocal.getExpr())
+            {
+                return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr))}};
+            }
+        }
+
+        if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
         {
             std::string builder = "local ";
             builder += exprOrLocal.getName()->value;
             builder += ": " + typeString;
             return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
         }
+        else if (auto global = exprOrLocal.getExpr()->as<Luau::AstExprGlobal>())
+        {
+            std::string builder = "global ";
+            builder += global->name.value;
+            builder += ": " + typeString;
+            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
+        }
         else
         {
-            // If we have a function and its corresponding name
-            if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
-            {
-                // See if the name is locally bound
-                if (auto localName = exprOrLocal.getName())
-                {
-                    std::string name = localName->value;
-                    return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts))}};
-                }
-                else if (auto funcExpr = exprOrLocal.getExpr())
-                {
-                    return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr))}};
-                }
-            }
-
-
-
             return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", typeString)}};
         }
     }
