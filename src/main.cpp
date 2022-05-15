@@ -192,6 +192,8 @@ public:
         std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
         lsp::CompletionOptions::CompletionItem completionItem{true};
         lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, false, completionItem};
+        // Document Link Provider
+        lsp::DocumentLinkOptions documentLinkProvider{false};
         // Hover Provider
         bool hoverProvider = true;
         // Signature Help
@@ -201,7 +203,7 @@ public:
         lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
-        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, workspace};
+        return lsp::ServerCapabilities{textDocumentSync, completionProvider, documentLinkProvider, hoverProvider, signatureHelpProvider, workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -225,6 +227,10 @@ public:
         else if (method == "textDocument/completion")
         {
             return completion(REQUIRED_PARAMS(params, "textDocument/completion"));
+        }
+        else if (method == "textDocument/documentLink")
+        {
+            return documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
         }
         else if (method == "textDocument/hover")
         {
@@ -399,6 +405,7 @@ public:
         workspace->updateTextDocument(params.textDocument.uri, params);
 
         // Trigger diagnostics
+        // TODO: this gets lagged behind, can we ignore it if we know the document is out of date? Maybe add a debounce delay?
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
         sendNotification("textDocument/publishDiagnostics", diagnostics);
     }
@@ -457,6 +464,12 @@ public:
     {
         auto workspace = findWorkspace(params.textDocument.uri);
         return workspace->completion(params);
+    }
+
+    std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        return workspace->documentLink(params);
     }
 
     // TODO: can't type this as lsp::hover as it can return null

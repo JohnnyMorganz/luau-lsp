@@ -5,6 +5,7 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
 #include "Luau/AstQuery.h"
+#include "Luau/TypeInfer.h"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
 #include "TextDocument.hpp"
@@ -550,6 +551,25 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     return "function " + Luau::toStringNamedFunction(baseName + methodName, *ftv, opts);
 }
 
+// Duplicated from Luau/TypeInfer.h, since its static
+std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
+{
+    const char* require = "require";
+
+    if (call.args.size != 1)
+        return std::nullopt;
+
+    const Luau::AstExprGlobal* funcAsGlobal = call.func->as<Luau::AstExprGlobal>();
+    if (!funcAsGlobal || funcAsGlobal->name != require)
+        return std::nullopt;
+
+    if (call.args.size != 1)
+        return std::nullopt;
+
+    return call.args.data[0];
+}
+
+
 } // namespace types
 
 class WorkspaceFolder
@@ -701,6 +721,59 @@ public:
         }
 
         return items;
+    }
+
+    std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+        std::vector<lsp::DocumentLink> result;
+
+        // We need to parse the code, which is currently only done in the type checker
+        frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule || !sourceModule->root)
+            return {};
+
+        // Only resolve document links on require(Foo.Bar.Baz) code
+        // TODO: Curerntly we only link at the top level block, not nested blocks
+        for (auto stat : sourceModule->root->body)
+        {
+            if (auto local = stat->as<Luau::AstStatLocal>())
+            {
+                if (local->values.size == 0)
+                    continue;
+
+                for (size_t i = 0; i < local->values.size; i++)
+                {
+                    const Luau::AstExprCall* call = local->values.data[i]->as<Luau::AstExprCall>();
+                    if (!call)
+                        continue;
+
+                    if (auto maybeRequire = types::matchRequire(*call))
+                    {
+                        if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, **maybeRequire))
+                        {
+                            // Resolve the module info to a URI
+                            std::optional<std::filesystem::path> realName = moduleInfo->name;
+                            if (fileResolver.isVirtualPath(moduleInfo->name))
+                                realName = fileResolver.resolveVirtualPathToRealPath(moduleInfo->name);
+
+                            if (realName)
+                            {
+                                lsp::DocumentLink link;
+                                link.target = Uri::file(rootUri.fsPath() / *realName); // TODO: Uri::joinPaths should be a function
+                                link.range = lsp::Range{{call->argLocation.begin.line, call->argLocation.begin.column},
+                                    {call->argLocation.end.line, call->argLocation.end.column - 1}};
+                                result.push_back(link);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params)

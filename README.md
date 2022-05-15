@@ -28,6 +28,7 @@ We could also potentially take it a step forward, allowing the server to be used
 - [] Go To Implementation
 - [] Find References
 - [] Document Highlight
+- [x] Document Link
 - [] Document Symbol
 - [] Code Actions
 - [] Code Lens

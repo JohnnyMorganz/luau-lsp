@@ -143,6 +143,12 @@ void to_json(json& j, const CompletionOptions& p)
     }
 }
 
+struct DocumentLinkOptions
+{
+    bool resolveProvider = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLinkOptions, resolveProvider);
+
 struct SignatureHelpOptions
 {
     std::optional<std::vector<std::string>> triggerCharacters;
@@ -187,6 +193,7 @@ struct ServerCapabilities
 {
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
+    std::optional<DocumentLinkOptions> documentLinkProvider;
     bool hoverProvider = false;
     std::optional<SignatureHelpOptions> signatureHelpProvider;
     std::optional<WorkspaceCapabilities> workspace;
@@ -199,6 +206,8 @@ void to_json(json& j, const ServerCapabilities& p)
         j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
         j["completionProvider"] = p.completionProvider.value();
+    if (p.documentLinkProvider)
+        j["documentLinkProvider"] = p.documentLinkProvider.value();
     if (p.signatureHelpProvider)
         j["signatureHelpProvider"] = p.signatureHelpProvider.value();
     if (p.workspace)
@@ -577,6 +586,21 @@ void to_json(json& j, const CompletionItem& p)
     if (p.command)
         j["command"] = p.command.value();
 }
+
+struct DocumentLinkParams
+{
+    TextDocumentIdentifier textDocument;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLinkParams, textDocument);
+
+struct DocumentLink
+{
+    Range range;
+    DocumentUri target; // TODO: potentially optional if we resolve later
+    // std::optional<std::string> tooltip;
+    // std::optional<json> data; // for resolver
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLink, range, target);
 
 struct HoverParams : TextDocumentPositionParams
 {
