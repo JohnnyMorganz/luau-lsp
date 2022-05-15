@@ -385,7 +385,7 @@ public:
     {
         // Start managing the file in-memory
         auto workspace = findWorkspace(params.textDocument.uri);
-        workspace->openTextDocument(params.textDocument.uri, params.textDocument.text);
+        workspace->openTextDocument(params.textDocument.uri, params);
 
         // Trigger diagnostics
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
@@ -396,7 +396,7 @@ public:
     {
         // Update in-memory file with new contents
         auto workspace = findWorkspace(params.textDocument.uri);
-        workspace->updateTextDocument(params.textDocument.uri, params.contentChanges);
+        workspace->updateTextDocument(params.textDocument.uri, params);
 
         // Trigger diagnostics
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);

@@ -4,7 +4,7 @@ project(luau-lsp LANGUAGES CXX)
 include(CTest)
 enable_testing()
 
-add_executable(luau-lsp src/main.cpp src/JsonRpc.hpp src/Protocol.hpp src/Uri.hpp src/Workspace.hpp src/Sourcemap.hpp)
+add_executable(luau-lsp src/main.cpp src/JsonRpc.hpp src/Protocol.hpp src/Uri.hpp src/Workspace.hpp src/Sourcemap.hpp src/TextDocument.hpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

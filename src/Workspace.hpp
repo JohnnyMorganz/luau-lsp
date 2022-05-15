@@ -7,6 +7,7 @@
 #include "Luau/AstQuery.h"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
+#include "TextDocument.hpp"
 
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
 {
@@ -80,7 +81,7 @@ struct WorkspaceFileResolver
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes;
 
     // Currently opened files where content is managed by client
-    mutable std::unordered_map<Luau::ModuleName, std::string> managedFiles;
+    mutable std::unordered_map<Luau::ModuleName, TextDocument> managedFiles;
     mutable std::unordered_map<std::string, Luau::Config> configCache;
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
 
@@ -173,7 +174,7 @@ struct WorkspaceFileResolver
 
         if (isManagedFile(name))
         {
-            source = managedFiles.at(name);
+            source = managedFiles.at(name).getText();
         }
         else
         {
@@ -551,47 +552,6 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
 
 } // namespace types
 
-size_t positionToOffset(const std::string& contents, const lsp::Position& position)
-{
-    // TODO: handle if position.line or position.character < 0
-    size_t startOfLine = 0;
-    for (unsigned int i = 0; i != position.line; ++i)
-    {
-        size_t nextNewLine = contents.find('\n', startOfLine);
-        if (nextNewLine == std::string::npos)
-        {
-            // TODO: out of range
-            return std::string::npos;
-        }
-        startOfLine = nextNewLine + 1;
-    }
-
-    // TODO: we should stop the line once we hit a '\n'
-    std::string line = contents.substr(startOfLine);
-
-    // TODO: we need to handle utf-16 codepoints
-    return startOfLine + position.character;
-}
-
-bool applyChange(std::string& contents, const lsp::TextDocumentContentChangeEvent& change)
-{
-    if (!change.range)
-    {
-        contents = change.text;
-        return true;
-    }
-
-    size_t startIndex = positionToOffset(contents, change.range->start);
-    size_t endIndex = positionToOffset(contents, change.range->end);
-    if (startIndex == std::string::npos || endIndex == std::string::npos || endIndex < startIndex)
-    {
-        return false;
-    }
-
-    contents.replace(startIndex, endIndex - startIndex, change.text);
-    return true;
-}
-
 class WorkspaceFolder
 {
 public:
@@ -629,13 +589,14 @@ public:
         return false;
     }
 
-    void openTextDocument(const lsp::DocumentUri& uri, const std::string& text)
+    void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
     {
         auto moduleName = getModuleName(uri);
-        fileResolver.managedFiles.insert_or_assign(moduleName, text);
+        fileResolver.managedFiles.emplace(
+            std::make_pair(moduleName, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
     }
 
-    void updateTextDocument(const lsp::DocumentUri& uri, const std::vector<lsp::TextDocumentContentChangeEvent>& changes)
+    void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
     {
         auto moduleName = getModuleName(uri);
 
@@ -644,17 +605,8 @@ public:
             std::cerr << "Text Document not loaded locally: " << uri.toString() << std::endl;
             return;
         }
-        std::string newContents(fileResolver.managedFiles.at(moduleName));
-
-        for (auto& change : changes)
-        {
-            if (!applyChange(newContents, change))
-            {
-                std::cerr << "Failed to update text document " << uri.toString() << std::endl;
-                return;
-            }
-        }
-        fileResolver.managedFiles.insert_or_assign(moduleName, newContents);
+        auto& textDocument = fileResolver.managedFiles.at(moduleName);
+        textDocument.update(params.contentChanges, params.textDocument.version);
 
         // Mark the module dirty for the typechecker
         frontend.markDirty(moduleName);
