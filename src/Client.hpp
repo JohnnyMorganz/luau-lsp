@@ -3,6 +3,7 @@
 #include <optional>
 #include "JsonRpc.hpp"
 #include "Protocol.hpp"
+#include "Luau/Documentation.h"
 
 using namespace json_rpc;
 
@@ -14,6 +15,8 @@ public:
     std::optional<std::filesystem::path> definitionsFile = std::nullopt;
     /// A registered documentation file passed by the client
     std::optional<std::filesystem::path> documentationFile = std::nullopt;
+    /// Parsed documentation database
+    Luau::DocumentationDatabase documentation{""};
 
     void sendRequest(const id_type& id, const std::string& method, std::optional<json> params)
     {

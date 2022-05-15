@@ -11,31 +11,12 @@
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
 #include "TextDocument.hpp"
+#include "DocumentationParser.hpp"
+#include "Utils.hpp"
 
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
 {
     return std::nullopt;
-}
-
-static std::optional<std::string> getParentPath(const std::string& path)
-{
-    if (path == "" || path == "." || path == "/")
-        return std::nullopt;
-
-    std::string::size_type slash = path.find_last_of("\\/", path.size() - 1);
-
-    if (slash == 0)
-        return "/";
-
-    if (slash != std::string::npos)
-        return path.substr(0, slash);
-
-    return "";
-}
-
-std::string codeBlock(std::string language, std::string code)
-{
-    return "```" + language + "\n" + code + "\n" + "```";
 }
 
 // Get the corresponding Luau module name for a file
@@ -62,26 +43,6 @@ Luau::Position convertPosition(const lsp::Position& position)
 lsp::Position convertPosition(const Luau::Position& position)
 {
     return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
-}
-
-std::optional<std::string> readFile(const std::filesystem::path& filePath)
-{
-    std::ifstream fileContents;
-    fileContents.open(filePath);
-
-    std::string output;
-    std::stringstream buffer;
-
-    if (fileContents)
-    {
-        buffer << fileContents.rdbuf();
-        output = buffer.str();
-        return output;
-    }
-    else
-    {
-        return std::nullopt;
-    }
 }
 
 struct WorkspaceFileResolver
@@ -677,7 +638,9 @@ public:
             lsp::CompletionItem item;
             item.label = name;
             item.deprecated = entry.deprecated;
-            item.documentation = entry.documentationSymbol; // TODO: eval doc symbol
+
+            if (entry.documentationSymbol)
+                item.documentation = printDocumentation(client->documentation, *entry.documentationSymbol);
 
             switch (entry.kind)
             {
@@ -845,20 +808,19 @@ public:
             if (auto localName = exprOrLocal.getName())
             {
                 std::string name = localName->value;
-                return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts))}};
+                typeString = codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts));
             }
             else if (auto funcExpr = exprOrLocal.getExpr())
             {
-                return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr))}};
+                typeString = codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr));
             }
         }
-
-        if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
+        else if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
         {
             std::string builder = "local ";
             builder += exprOrLocal.getName()->value;
             builder += ": " + typeString;
-            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
+            typeString = codeBlock("lua", builder);
         }
         else if (auto global = exprOrLocal.getExpr()->as<Luau::AstExprGlobal>())
         {
@@ -866,12 +828,20 @@ public:
             std::string builder = "type ";
             builder += global->name.value;
             builder += " = " + typeString;
-            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", builder)}};
+            typeString = codeBlock("lua", builder);
         }
         else
         {
-            return lsp::Hover{{lsp::MarkupKind::Markdown, codeBlock("lua", typeString)}};
+            typeString = codeBlock("lua", typeString);
         }
+
+        if (auto symbol = type.value()->documentationSymbol)
+        {
+            typeString += "\n----------\n";
+            typeString += printDocumentation(client->documentation, *symbol);
+        }
+
+        return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
     }
 
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params)
@@ -917,6 +887,9 @@ public:
             // Create the whole label
             std::string label = types::toStringFunctionCall(module, ftv, candidate->func);
             std::optional<lsp::MarkupContent> documentation;
+
+            if (followedId->documentationSymbol)
+                documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
 
             // Create each parameter label
             std::vector<lsp::ParameterInformation> parameters;

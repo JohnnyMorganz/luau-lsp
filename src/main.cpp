@@ -11,6 +11,7 @@
 #include "JsonRpc.hpp"
 #include "Uri.hpp"
 #include "Workspace.hpp"
+#include "DocumentationParser.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"
@@ -57,6 +58,7 @@ public:
     {
         client->definitionsFile = definitionsFile;
         client->documentationFile = documentationFile;
+        parseDocumentation(documentationFile, client->documentation, client);
         nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
     }
 
@@ -431,7 +433,7 @@ int main(int argc, char** argv)
         }
     }
 
-    LanguageServer server;
+    LanguageServer server(definitionsFile, documentationFile);
 
     // Begin input loop
     server.processInputLoop();
