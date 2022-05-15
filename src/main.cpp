@@ -523,6 +523,12 @@ int main()
     //     d = 4;
     // }
 
+    Luau::assertHandler() = [](const char* expr, const char* file, int line, const char*) -> int
+    {
+        printf("%s(%d): ASSERTION FAILED: %s\n", file, line, expr);
+        return 1;
+    };
+
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);

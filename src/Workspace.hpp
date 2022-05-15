@@ -52,7 +52,9 @@ Luau::ModuleName getModuleName(const Uri& name)
 
 Luau::Position convertPosition(const lsp::Position& position)
 {
-    return Luau::Position{static_cast<unsigned long>(position.line), static_cast<unsigned long>(position.character)};
+    LUAU_ASSERT(position.line <= UINT_MAX);
+    LUAU_ASSERT(position.character <= UINT_MAX);
+    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
 }
 
 lsp::Position convertPosition(const Luau::Position& position)
