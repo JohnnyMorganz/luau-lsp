@@ -562,11 +562,11 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 class WorkspaceFolder
 {
 public:
+    std::shared_ptr<Client> client;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
-    std::shared_ptr<Client> client;
 
 public:
     WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
