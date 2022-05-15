@@ -6,6 +6,7 @@
 #include <exception>
 #include <filesystem>
 #include <algorithm>
+#include "Client.hpp"
 #include "Protocol.hpp"
 #include "JsonRpc.hpp"
 #include "Uri.hpp"
@@ -47,10 +48,11 @@ class LanguageServer
     // This is common if the client has not yet opened a folder
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
+    Client client;
 
 public:
     LanguageServer()
-        : nullWorkspace(std::make_shared<WorkspaceFolder>())
+        : nullWorkspace(std::make_shared<WorkspaceFolder>(&client, "$NULL_WORKSPACE", Uri()))
     {
     }
 
@@ -65,124 +67,8 @@ public:
                 return workspace; // TODO: should we return early here? maybe a better match comes along?
             }
         }
-        sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+        client.sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
         return nullWorkspace;
-    }
-
-    void sendRequest(const id_type& id, const std::string& method, std::optional<json> params)
-    {
-        json msg{
-            {"jsonrpc", "2.0"},
-            {"method", method},
-        };
-
-        if (std::holds_alternative<int>(id))
-        {
-            msg["id"] = std::get<int>(id);
-        }
-        else
-        {
-            msg["id"] = std::get<std::string>(id);
-        }
-
-        if (params.has_value())
-            msg["params"] = params.value();
-
-        sendRawMessage(msg);
-    }
-
-    void sendResponse(const id_type& id, const json& result)
-    {
-        json msg{
-            {"jsonrpc", "2.0"},
-            {"result", result},
-        };
-
-        if (std::holds_alternative<int>(id))
-        {
-            msg["id"] = std::get<int>(id);
-        }
-        else
-        {
-            msg["id"] = std::get<std::string>(id);
-        }
-
-        sendRawMessage(msg);
-    }
-
-    void sendError(const std::optional<id_type>& id, const JsonRpcException& e)
-    {
-        json msg{
-            {"jsonrpc", "2.0"},
-        };
-
-        if (id)
-        {
-            if (std::holds_alternative<int>(*id))
-            {
-                msg["id"] = std::get<int>(*id);
-            }
-            else
-            {
-                msg["id"] = std::get<std::string>(*id);
-            }
-        }
-        else
-        {
-            msg["id"] = nullptr;
-        }
-
-        msg["error"] = {};
-        msg["error"]["code"] = e.code;
-        msg["error"]["message"] = e.message;
-        msg["error"]["data"] = e.data;
-
-        sendRawMessage(msg);
-    }
-
-    void sendNotification(const std::string& method, std::optional<json> params)
-    {
-        json msg{
-            {"jsonrpc", "2.0"},
-            {"method", method},
-        };
-
-        if (params.has_value())
-            msg["params"] = params.value();
-
-        sendRawMessage(msg);
-    }
-
-    void sendLogMessage(lsp::MessageType type, std::string message)
-    {
-        json params{
-            {"type", type},
-            {"message", message},
-        };
-        sendNotification("window/logMessage", params);
-    }
-
-    void sendTrace(std::string message, std::optional<std::string> verbose)
-    {
-        if (traceMode == lsp::TraceValue::Off)
-            return;
-        json params{{"message", message}};
-        if (verbose && traceMode == lsp::TraceValue::Verbose)
-            params["verbose"] = verbose.value();
-        sendNotification("$/logTrace", params);
-    };
-
-    void sendWindowMessage(lsp::MessageType type, std::string message)
-    {
-        lsp::ShowMessageParams params{type, message};
-        sendNotification("window/showMessage", params);
-    }
-
-    void registerCapability(std::string id, std::string method, json registerOptions)
-    {
-        lsp::Registration registration{id, method, registerOptions};
-        // TODO: handle responses?
-        sendRequest(id, "client/registerCapability", lsp::RegistrationParams{{registration}}); // TODO: request id?
     }
 
     lsp::ServerCapabilities getServerCapabilities()
@@ -266,8 +152,7 @@ public:
         }
         else if (method == "$/setTrace")
         {
-            lsp::SetTraceParams setTraceParams = REQUIRED_PARAMS(params, "$/setTrace");
-            traceMode = setTraceParams.value;
+            client.setTrace(REQUIRED_PARAMS(params, "$/setTrace"));
         }
         else if (method == "textDocument/didOpen")
         {
@@ -291,7 +176,7 @@ public:
         }
         else
         {
-            sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
+            client.sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
         }
     }
 
@@ -300,7 +185,7 @@ public:
         std::string jsonString;
         while (std::cin)
         {
-            if (readRawMessage(jsonString))
+            if (client.readRawMessage(jsonString))
             {
                 // sendTrace(jsonString, std::nullopt);
                 std::optional<id_type> id = std::nullopt;
@@ -314,7 +199,7 @@ public:
                     {
                         auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
                         // sendTrace(response.dump(), std::nullopt);
-                        sendResponse(msg.id.value(), response);
+                        client.sendResponse(msg.id.value(), response);
                     }
                     else if (msg.is_response())
                     {
@@ -332,15 +217,15 @@ public:
                 }
                 catch (const JsonRpcException& e)
                 {
-                    sendError(id, e);
+                    client.sendError(id, e);
                 }
                 catch (const json::exception& e)
                 {
-                    sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
+                    client.sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
                 }
                 catch (const std::exception& e)
                 {
-                    sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
+                    client.sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
                 }
             }
         }
@@ -355,19 +240,19 @@ public:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
         // Set provided settings
-        traceMode = params.trace;
+        client.traceMode = params.trace;
 
         // Configure workspaces
         if (params.workspaceFolders.has_value())
         {
             for (auto& folder : params.workspaceFolders.value())
             {
-                workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(folder.name, folder.uri));
+                workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(&client, folder.name, folder.uri));
             }
         }
         else if (params.rootUri.has_value())
         {
-            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>("$ROOT", params.rootUri.value()));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(&client, "$ROOT", params.rootUri.value()));
         }
 
         isInitialized = true;
@@ -379,8 +264,8 @@ public:
     void onInitialized(const lsp::InitializedParams& params)
     {
         // Client received result of initialize
-        sendLogMessage(lsp::MessageType::Info, "server initialized!");
-        sendLogMessage(lsp::MessageType::Info, "trace level: " + json(traceMode).dump());
+        client.sendLogMessage(lsp::MessageType::Info, "server initialized!");
+        client.sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client.traceMode).dump());
 
         // Dynamically register file watchers. Currently doing on client
         // lsp::FileSystemWatcher watcher{"sourcemap.json"};
@@ -395,7 +280,7 @@ public:
 
         // Trigger diagnostics
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        sendNotification("textDocument/publishDiagnostics", diagnostics);
+        client.sendNotification("textDocument/publishDiagnostics", diagnostics);
     }
 
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
@@ -407,7 +292,7 @@ public:
         // Trigger diagnostics
         // TODO: this gets lagged behind, can we ignore it if we know the document is out of date? Maybe add a debounce delay?
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        sendNotification("textDocument/publishDiagnostics", diagnostics);
+        client.sendNotification("textDocument/publishDiagnostics", diagnostics);
     }
 
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
@@ -440,13 +325,13 @@ public:
         // Add new folders
         for (auto& folder : params.event.added)
         {
-            workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(folder.name, folder.uri));
+            workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(&client, folder.name, folder.uri));
         }
     }
 
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
     {
-        sendLogMessage(lsp::MessageType::Info, "got watched file change");
+        client.sendLogMessage(lsp::MessageType::Info, "got watched file change");
         for (const auto& change : params.changes)
         {
             auto workspace = findWorkspace(change.uri);
@@ -454,7 +339,7 @@ public:
             // Flag sourcemap changes
             if (filePath.filename() == "sourcemap.json")
             {
-                sendLogMessage(lsp::MessageType::Info, "sourcemap changed");
+                client.sendLogMessage(lsp::MessageType::Info, "sourcemap changed");
                 workspace->updateSourceMap();
             }
         }
@@ -501,17 +386,6 @@ public:
 private:
     bool isInitialized = false;
     bool shutdownRequested = false;
-    lsp::TraceValue traceMode = lsp::TraceValue::Off;
-
-    bool readRawMessage(std::string& output)
-    {
-        return json_rpc::readRawMessage(std::cin, output);
-    }
-
-    void sendRawMessage(const json& message)
-    {
-        json_rpc::sendRawMessage(std::cout, message);
-    }
 };
 
 int main()

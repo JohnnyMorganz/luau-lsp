@@ -7,6 +7,7 @@
 #include "Luau/ToString.h"
 #include "Luau/AstQuery.h"
 #include "Luau/TypeInfer.h"
+#include "Client.hpp"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
 #include "TextDocument.hpp"
@@ -604,16 +605,12 @@ public:
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
+    Client* client;
 
 public:
-    WorkspaceFolder()
-        : fileResolver(WorkspaceFileResolver())
-        , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
-    {
-        setup();
-    }
-    WorkspaceFolder(const std::string& name, const lsp::DocumentUri& uri)
-        : name(name)
+    WorkspaceFolder(Client* client, const std::string& name, const lsp::DocumentUri& uri)
+        : client(client)
+        , name(name)
         , rootUri(uri)
         , fileResolver(WorkspaceFileResolver())
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
@@ -1066,9 +1063,14 @@ private:
         }
     }
 
+    bool isNullWorkspace() const
+    {
+        return name == "$NULL_WORKSPACE";
+    }
+
     void setup()
     {
-        if (!updateSourceMap())
+        if (!isNullWorkspace() && !updateSourceMap())
         {
             // TODO: log error properly
             std::cerr << "Failed to load sourcemap.json for workspace. Instance information will not be available" << std::endl;

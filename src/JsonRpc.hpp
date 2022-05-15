@@ -10,6 +10,7 @@ using json = nlohmann::json;
 namespace json_rpc
 {
 using id_type = std::variant<int, std::string>;
+using Response = json;
 
 class JsonRpcException : public std::exception
 {
