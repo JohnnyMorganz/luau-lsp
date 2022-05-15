@@ -2,6 +2,23 @@
 
 A proof of concept implementation of a language server for the [Luau](https://github.com/Roblox/luau) programming language.
 
+## Getting Started
+
+Install the extension from the marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
+
+In order to work effectively, you currently need to manually create a Rojo `sourcemap.json` in your workspace root.
+This allows the language server to easily resolve your instance tree and provide module resolution.
+
+Create a sourcemap:
+
+```sh
+rojo sourcemap --include-non-scripts default.project.json --output sourcemap.json
+```
+
+(Note: `rojo sourcemap` is currently not released, you must manually install latest Rojo directly using `cargo install rojo --git https://github.com/rojo-rbx/rojo.git`)
+
+The extension will automatically populate the latest API types and documentation.
+
 ## Design Goals
 
 The initial goal is to develop a language server supporting all common LSP functions.

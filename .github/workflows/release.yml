@@ -56,6 +56,13 @@ jobs:
           chmod 777 editors/code/bin/server
           mv ./dist/luau-lsp ./dist/luau-lsp-${{ matrix.code-target }}
 
+      - name: Copy README and CHANGELOG
+        run: |
+          rm editors/code/README.md
+          cp README.md editors/code/README.md
+          rm editors/code/CHANGELOG.md
+          cp CHANGELOG.md editors/code/CHANGELOG.md
+
       - run: npm ci
         working-directory: editors/code
 
