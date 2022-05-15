@@ -50,6 +50,16 @@ Luau::ModuleName getModuleName(const Uri& name)
     return name.fsPath().generic_string();
 }
 
+Luau::Position convertPosition(const lsp::Position& position)
+{
+    return Luau::Position{static_cast<unsigned long>(position.line), static_cast<unsigned long>(position.character)};
+}
+
+lsp::Position convertPosition(const Luau::Position& position)
+{
+    return lsp::Position{static_cast<size_t>(position.column), static_cast<size_t>(position.line)};
+}
+
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
     std::ifstream fileContents;
@@ -647,8 +657,7 @@ public:
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
     {
-        auto result = Luau::autocomplete(
-            frontend, getModuleName(params.textDocument.uri), Luau::Position(params.position.line, params.position.character), nullCallback);
+        auto result = Luau::autocomplete(frontend, getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
         std::vector<lsp::CompletionItem> items;
 
         for (auto& [name, entry] : result.entryMap)
@@ -779,7 +788,7 @@ public:
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params)
     {
         auto moduleName = getModuleName(params.textDocument.uri);
-        auto position = Luau::Position{params.position.line, params.position.character};
+        auto position = convertPosition(params.position);
 
         // Run the type checker to ensure we are up to date
         frontend.check(moduleName);
@@ -850,7 +859,7 @@ public:
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params)
     {
         auto moduleName = getModuleName(params.textDocument.uri);
-        auto position = Luau::Position{params.position.line, params.position.character};
+        auto position = convertPosition(params.position);
 
         // Run the type checker to ensure we are up to date
         frontend.check(moduleName);
@@ -1077,7 +1086,9 @@ private:
             diag.code = error.code();
             diag.message = "TypeError: " + Luau::toString(error);
             diag.severity = lsp::DiagnosticSeverity::Error;
-            diag.range = {{error.location.begin.line, error.location.begin.column}, {error.location.end.line, error.location.end.column}};
+            auto start = convertPosition(error.location.begin);
+            auto end = convertPosition(error.location.end);
+            diag.range = {start, end};
             diagnostics.emplace_back(diag);
         }
 
@@ -1089,8 +1100,8 @@ private:
             diag.code = error.code;
             diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
             diag.severity = lsp::DiagnosticSeverity::Error;
-            lsp::Position start{error.location.begin.line, error.location.begin.column};
-            lsp::Position end{error.location.end.line, error.location.end.column};
+            auto start = convertPosition(error.location.begin);
+            auto end = convertPosition(error.location.end);
             diag.range = {start, end};
             diagnostics.emplace_back(diag);
         }
@@ -1101,8 +1112,8 @@ private:
             diag.code = error.code;
             diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
             diag.severity = lsp::DiagnosticSeverity::Warning;
-            lsp::Position start{error.location.begin.line, error.location.begin.column};
-            lsp::Position end{error.location.end.line, error.location.end.column};
+            auto start = convertPosition(error.location.begin);
+            auto end = convertPosition(error.location.end);
             diag.range = {start, end};
             diagnostics.emplace_back(diag);
         }
