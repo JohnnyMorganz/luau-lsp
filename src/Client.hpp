@@ -10,6 +10,10 @@ class Client
 {
 public:
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
+    /// A registered definitions file passed by the client
+    std::optional<std::filesystem::path> definitionsFile = std::nullopt;
+    /// A registered documentation file passed by the client
+    std::optional<std::filesystem::path> documentationFile = std::nullopt;
 
     void sendRequest(const id_type& id, const std::string& method, std::optional<json> params)
     {

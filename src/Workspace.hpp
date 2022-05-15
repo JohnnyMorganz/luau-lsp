@@ -605,10 +605,10 @@ public:
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
-    Client* client;
+    std::shared_ptr<Client> client;
 
 public:
-    WorkspaceFolder(Client* client, const std::string& name, const lsp::DocumentUri& uri)
+    WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
         : client(client)
         , name(name)
         , rootUri(uri)
@@ -990,15 +990,15 @@ public:
     }
 
 private:
-    void registerExtendedTypes(Luau::TypeChecker& typeChecker)
+    void registerExtendedTypes(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)
     {
-        if (auto definitions = readFile(rootUri.fsPath() / "globalTypes.d.lua"))
+        if (auto definitions = readFile(definitionsFile))
         {
             auto loadResult = Luau::loadDefinitionFile(typeChecker, typeChecker.globalScope, *definitions, "@roblox");
             if (!loadResult.success)
             {
-                // TODO: publish diagnostics for file
-                std::cerr << "Failed to load definitions file" << std::endl;
+                client->sendWindowMessage(lsp::MessageType::Error, "Syntax error when reading definitions file. Extended types will not be provided");
+                return;
             }
 
             // Extend globally registered types with Instance information
@@ -1046,7 +1046,7 @@ private:
         }
         else
         {
-            std::cerr << "Definitions file not found. Extended types will not be provided." << std::endl;
+            client->sendWindowMessage(lsp::MessageType::Error, "Unable to read the definitions file. Extended types will not be provided");
         }
 
         if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
@@ -1072,14 +1072,25 @@ private:
     {
         if (!isNullWorkspace() && !updateSourceMap())
         {
-            // TODO: log error properly
-            std::cerr << "Failed to load sourcemap.json for workspace. Instance information will not be available" << std::endl;
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
         }
 
         Luau::registerBuiltinTypes(frontend.typeChecker);
         Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
-        registerExtendedTypes(frontend.typeChecker);
-        registerExtendedTypes(frontend.typeCheckerForAutocomplete);
+
+        if (client->definitionsFile)
+        {
+            client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + client->definitionsFile->generic_string());
+            registerExtendedTypes(frontend.typeChecker, *client->definitionsFile);
+            registerExtendedTypes(frontend.typeCheckerForAutocomplete, *client->definitionsFile);
+        }
+        else
+        {
+            client->sendLogMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
+        }
         Luau::freeze(frontend.typeChecker.globalTypes);
         Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
     }

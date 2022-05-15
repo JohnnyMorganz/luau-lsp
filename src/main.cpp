@@ -28,6 +28,7 @@ using namespace json_rpc;
 using id_type = std::variant<int, std::string>;
 using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
+using ClientPtr = std::shared_ptr<Client>;
 
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
@@ -43,17 +44,20 @@ bool replace(std::string& str, const std::string& from, const std::string& to)
 
 class LanguageServer
 {
+public:
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
-    Client client;
+    ClientPtr client;
 
-public:
-    LanguageServer()
-        : nullWorkspace(std::make_shared<WorkspaceFolder>(&client, "$NULL_WORKSPACE", Uri()))
+    LanguageServer(std::optional<std::filesystem::path> definitionsFile, std::optional<std::filesystem::path> documentationFile)
+        : client(std::make_shared<Client>())
     {
+        client->definitionsFile = definitionsFile;
+        client->documentationFile = documentationFile;
+        nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
     }
 
     /// Finds the workspace which the file belongs to.
@@ -67,7 +71,7 @@ public:
                 return workspace; // TODO: should we return early here? maybe a better match comes along?
             }
         }
-        client.sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+        client->sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
         return nullWorkspace;
     }
 
@@ -152,7 +156,7 @@ public:
         }
         else if (method == "$/setTrace")
         {
-            client.setTrace(REQUIRED_PARAMS(params, "$/setTrace"));
+            client->setTrace(REQUIRED_PARAMS(params, "$/setTrace"));
         }
         else if (method == "textDocument/didOpen")
         {
@@ -176,7 +180,7 @@ public:
         }
         else
         {
-            client.sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
+            client->sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
         }
     }
 
@@ -185,7 +189,7 @@ public:
         std::string jsonString;
         while (std::cin)
         {
-            if (client.readRawMessage(jsonString))
+            if (client->readRawMessage(jsonString))
             {
                 // sendTrace(jsonString, std::nullopt);
                 std::optional<id_type> id = std::nullopt;
@@ -199,7 +203,7 @@ public:
                     {
                         auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
                         // sendTrace(response.dump(), std::nullopt);
-                        client.sendResponse(msg.id.value(), response);
+                        client->sendResponse(msg.id.value(), response);
                     }
                     else if (msg.is_response())
                     {
@@ -217,15 +221,15 @@ public:
                 }
                 catch (const JsonRpcException& e)
                 {
-                    client.sendError(id, e);
+                    client->sendError(id, e);
                 }
                 catch (const json::exception& e)
                 {
-                    client.sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
+                    client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
                 }
                 catch (const std::exception& e)
                 {
-                    client.sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
+                    client->sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
                 }
             }
         }
@@ -240,19 +244,19 @@ public:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
         // Set provided settings
-        client.traceMode = params.trace;
+        client->traceMode = params.trace;
 
         // Configure workspaces
         if (params.workspaceFolders.has_value())
         {
             for (auto& folder : params.workspaceFolders.value())
             {
-                workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(&client, folder.name, folder.uri));
+                workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri));
             }
         }
         else if (params.rootUri.has_value())
         {
-            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(&client, "$ROOT", params.rootUri.value()));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value()));
         }
 
         isInitialized = true;
@@ -264,8 +268,8 @@ public:
     void onInitialized(const lsp::InitializedParams& params)
     {
         // Client received result of initialize
-        client.sendLogMessage(lsp::MessageType::Info, "server initialized!");
-        client.sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client.traceMode).dump());
+        client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
+        client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
 
         // Dynamically register file watchers. Currently doing on client
         // lsp::FileSystemWatcher watcher{"sourcemap.json"};
@@ -280,7 +284,7 @@ public:
 
         // Trigger diagnostics
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        client.sendNotification("textDocument/publishDiagnostics", diagnostics);
+        client->sendNotification("textDocument/publishDiagnostics", diagnostics);
     }
 
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
@@ -292,7 +296,7 @@ public:
         // Trigger diagnostics
         // TODO: this gets lagged behind, can we ignore it if we know the document is out of date? Maybe add a debounce delay?
         auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        client.sendNotification("textDocument/publishDiagnostics", diagnostics);
+        client->sendNotification("textDocument/publishDiagnostics", diagnostics);
     }
 
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
@@ -325,13 +329,12 @@ public:
         // Add new folders
         for (auto& folder : params.event.added)
         {
-            workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(&client, folder.name, folder.uri));
+            workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri));
         }
     }
 
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
     {
-        client.sendLogMessage(lsp::MessageType::Info, "got watched file change");
         for (const auto& change : params.changes)
         {
             auto workspace = findWorkspace(change.uri);
@@ -339,7 +342,7 @@ public:
             // Flag sourcemap changes
             if (filePath.filename() == "sourcemap.json")
             {
-                client.sendLogMessage(lsp::MessageType::Info, "sourcemap changed");
+                client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspace->name);
                 workspace->updateSourceMap();
             }
         }
@@ -388,7 +391,7 @@ private:
     bool shutdownRequested = false;
 };
 
-int main()
+int main(int argc, char** argv)
 {
     // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
     // auto d = 4;
@@ -412,6 +415,21 @@ int main()
     for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
         if (strncmp(flag->name, "Luau", 4) == 0)
             flag->value = true;
+
+    // Check passed arguments
+    std::optional<std::filesystem::path> definitionsFile;
+    std::optional<std::filesystem::path> documentationFile;
+    for (int i = 1; i < argc; i++)
+    {
+        if (strncmp(argv[i], "--definitions=", 14) == 0)
+        {
+            definitionsFile = std::filesystem::path(argv[i] + 14);
+        }
+        else if (strncmp(argv[i], "--docs=", 7) == 0)
+        {
+            documentationFile = std::filesystem::path(argv[i] + 7);
+        }
+    }
 
     LanguageServer server;
 
