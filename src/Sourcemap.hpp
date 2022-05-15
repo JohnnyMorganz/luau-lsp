@@ -93,3 +93,45 @@ Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& requi
 
     return Luau::SourceCode::Type::Module;
 }
+
+std::string jsonValueToLuau(const json& val)
+{
+    if (val.is_string() || val.is_number() || val.is_boolean())
+    {
+        return val.dump();
+    }
+    else if (val.is_null())
+    {
+        return "nil";
+    }
+    else if (val.is_array())
+    {
+        std::string out = "{";
+        for (auto& elem : val)
+        {
+            out += jsonValueToLuau(elem);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    else if (val.is_object())
+    {
+        std::string out = "{";
+
+        for (auto& [key, val] : val.items())
+        {
+            out += "[\"" + key + "\"] = ";
+            out += jsonValueToLuau(val);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    else
+    {
+        return ""; // TODO: should we error here?
+    }
+}

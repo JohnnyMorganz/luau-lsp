@@ -193,7 +193,19 @@ struct WorkspaceFileResolver
         else
         {
             source = readFile(realFileName);
-            // TODO: handle if json
+            if (source && realFileName.extension() == ".json")
+            {
+                try
+                {
+                    source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source));
+                }
+                catch (const std::exception& e)
+                {
+                    // TODO: display diagnostic?
+                    std::cerr << "Failed to load JSON module: " << realFileName.generic_string() << " - " << e.what() << std::endl;
+                    return std::nullopt;
+                }
+            }
         }
 
         if (!source)
