@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <limits.h>
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"

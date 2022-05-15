@@ -525,7 +525,7 @@ int main()
 
     Luau::assertHandler() = [](const char* expr, const char* file, int line, const char*) -> int
     {
-        printf("%s(%d): ASSERTION FAILED: %s\n", file, line, expr);
+        fprintf(stderr, "%s(%d): ASSERTION FAILED: %s\n", file, line, expr);
         return 1;
     };
 
