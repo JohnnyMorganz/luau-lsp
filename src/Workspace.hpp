@@ -60,7 +60,7 @@ Luau::Position convertPosition(const lsp::Position& position)
 
 lsp::Position convertPosition(const Luau::Position& position)
 {
-    return lsp::Position{static_cast<size_t>(position.column), static_cast<size_t>(position.line)};
+    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
 }
 
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
@@ -1096,14 +1096,27 @@ private:
         std::vector<lsp::Diagnostic> diagnostics;
         for (auto& error : cr.errors)
         {
+            // TODO: temporarily ignore diagnostics for modules which are irrelevant
+            // TODO: we should publish these as separate diagnostics for the other files
+            if (error.moduleName != fileName)
+                continue;
+
+            std::string message;
+            if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+            {
+                message = "SyntaxError: " + syntaxError->message;
+            }
+            else
+            {
+                message = "TypeError: " + Luau::toString(error);
+            }
+
             lsp::Diagnostic diag;
             diag.source = "Luau";
             diag.code = error.code();
-            diag.message = "TypeError: " + Luau::toString(error);
+            diag.message = message;
             diag.severity = lsp::DiagnosticSeverity::Error;
-            auto start = convertPosition(error.location.begin);
-            auto end = convertPosition(error.location.end);
-            diag.range = {start, end};
+            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
             diagnostics.emplace_back(diag);
         }
 
@@ -1115,9 +1128,7 @@ private:
             diag.code = error.code;
             diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
             diag.severity = lsp::DiagnosticSeverity::Error;
-            auto start = convertPosition(error.location.begin);
-            auto end = convertPosition(error.location.end);
-            diag.range = {start, end};
+            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
             diagnostics.emplace_back(diag);
         }
         for (auto& error : lr.warnings)
@@ -1127,9 +1138,7 @@ private:
             diag.code = error.code;
             diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
             diag.severity = lsp::DiagnosticSeverity::Warning;
-            auto start = convertPosition(error.location.begin);
-            auto end = convertPosition(error.location.end);
-            diag.range = {start, end};
+            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
             diagnostics.emplace_back(diag);
         }
 

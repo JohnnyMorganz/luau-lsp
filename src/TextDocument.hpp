@@ -60,7 +60,7 @@ public:
         if (range)
         {
             auto start = offsetAt(range->start);
-            auto end = offsetAt(range->end);
+            auto end = offsetAt(range->end) + 1; // End position is EXCLUSIVE
             return _content.substr(start, end - start);
         }
         return _content;
@@ -122,8 +122,8 @@ public:
             {
                 // TODO: check if range is valid
                 size_t startOffset = offsetAt(change.range->start);
-                size_t endOffset = offsetAt(change.range->end);
-                _content.replace(startOffset, endOffset - startOffset, change.text);
+                size_t endOffset = offsetAt(change.range->end); // End position is EXCLUSIVE
+                _content = _content.substr(0, startOffset) + change.text + _content.substr(endOffset, _content.size());
 
                 // Update offset
                 size_t startLine = std::max(static_cast<size_t>(change.range->start.line), (size_t)0);
