@@ -41,8 +41,6 @@ We could also potentially take it a step forward, allowing the server to be used
 - [ ] Document Highlight
 - [x] Document Link
 - [ ] Document Symbol
-- [ ] Code Actions
-- [ ] Code Lens
 - [ ] Color Provider
 - [ ] Formatting
 - [ ] Rename
@@ -51,9 +49,18 @@ We could also potentially take it a step forward, allowing the server to be used
 - [ ] Call Hierarchy
 - [ ] Type Hierarchy
 - [ ] Semantic Tokens
-- [ ] Inline Value
 - [ ] Inlay Hints
 - [ ] Workspace Symbols
+
+The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
+They can be investigated at a later time:
+
+- [ ] Go To Declaration (do not apply)
+- [ ] Go To Implementation (do not apply)
+- [ ] Code Actions (not necessary - could potentially add "fixers" for lints)
+- [ ] Code Lens (not necessary)
+- [ ] Inline Value (applies for debuggers only)
+- [ ] Moniker
 
 ## Build From Source
 
