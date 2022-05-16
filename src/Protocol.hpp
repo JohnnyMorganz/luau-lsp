@@ -8,6 +8,59 @@
 
 using json = nlohmann::json;
 
+// Define serializer/deserializer for std::optional and std::variant
+namespace nlohmann
+{
+template<typename T>
+struct adl_serializer<std::optional<T>>
+{
+    static void to_json(json& j, const std::optional<T>& opt)
+    {
+        if (opt == std::nullopt)
+            j = nullptr;
+        else
+            j = *opt;
+    }
+
+    static void from_json(const json& j, std::optional<T>& opt)
+    {
+        if (j.is_null())
+            opt = std::nullopt;
+        else
+            opt = j.get<T>();
+    }
+};
+
+// string | int is a common variant, so we will just special case it
+template<>
+struct adl_serializer<std::variant<std::string, int>>
+{
+    static void to_json(json& j, const std::variant<std::string, int>& data)
+    {
+        if (auto str = std::get_if<std::string>(&data))
+        {
+            j = *str;
+        }
+        else if (auto num = std::get_if<int>(&data))
+        {
+            j = *num;
+        }
+    }
+
+    static void from_json(const json& j, std::variant<std::string, int>& data)
+    {
+        // TODO: handle nicely?
+        assert(j.is_string() || j.is_number());
+
+        if (j.is_string())
+            data = j.get<std::string>();
+        else if (j.is_number())
+            data = j.get<int>();
+    }
+};
+} // namespace nlohmann
+
+
 namespace lsp
 {
 using URI = Uri;
@@ -31,12 +84,28 @@ enum struct ErrorCode
     RequestCancelled = -32800,
 };
 
+struct DiagnosticClientCapabilities
+{
+    bool dynamicRegistration = false;
+    bool relatedDocumentSupport = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
+
+struct TextDocumentClientCapabilities
+{
+    std::optional<DiagnosticClientCapabilities> diagnostic;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentClientCapabilities, diagnostic);
+
 struct ClientCapabilities
 {
+    std::optional<TextDocumentClientCapabilities> textDocument;
     // TODO
+    // notebook
+    // workspace
+    // window
 };
-void to_json(json&, const ClientCapabilities&){};
-void from_json(const json&, ClientCapabilities&){};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientCapabilities, textDocument);
 
 struct WorkspaceFolder
 {
@@ -51,57 +120,29 @@ enum struct TraceValue
     Messages,
     Verbose,
 };
-NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {
-                                             {TraceValue::Off, "off"},
-                                             {TraceValue::Messages, "messages"},
-                                             {TraceValue::Verbose, "verbose"},
-                                         });
+NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {{TraceValue::Off, "off"}, {TraceValue::Messages, "messages"}, {TraceValue::Verbose, "verbose"}});
 
 struct InitializeParams
 {
-    // struct ClientInfo
-    // {
-    //     std::string name;
-    //     std::optional<std::string> version;
-    // };
+    struct ClientInfo
+    {
+        std::string name;
+        std::optional<std::string> version;
+    };
 
-    // std::optional<int> processId;
-    // std::optional<ClientInfo> clientInfo;
-    // std::optional<std::string> locale;
-    // rootPath
-    std::optional<DocumentUri> rootUri; // TODO: this is nullable!
-    // std::optional<json> initializationOptions;
-    // ClientCapabilities capabilities;
+    std::optional<int> processId;
+    std::optional<ClientInfo> clientInfo;
+    std::optional<std::string> locale;
+    // TODO: rootPath (deprecated?)
+    std::optional<DocumentUri> rootUri;
+    std::optional<json> initializationOptions;
+    ClientCapabilities capabilities;
     TraceValue trace = TraceValue::Off;
     std::optional<std::vector<WorkspaceFolder>> workspaceFolders;
-    // workspaceFolders
 };
-
-void from_json(const json& j, InitializeParams& p)
-{
-    if (!j.contains("rootUri") || j.at("rootUri").is_null())
-    {
-        p.rootUri = std::nullopt;
-    }
-    else
-    {
-        p.rootUri = j.at("rootUri").get<DocumentUri>();
-    }
-    if (j.contains("trace"))
-        p.trace = j.at("trace").get<TraceValue>();
-
-    if (j.contains("workspaceFolders"))
-    {
-        if (j.at("workspaceFolders").is_null())
-        {
-            p.workspaceFolders = std::nullopt;
-        }
-        else
-        {
-            p.workspaceFolders = j.at("workspaceFolders").get<std::vector<WorkspaceFolder>>();
-        }
-    }
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeParams::ClientInfo, name, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+    InitializeParams, processId, clientInfo, locale, rootUri, initializationOptions, capabilities, trace, workspaceFolders);
 
 struct Registration
 {
@@ -129,19 +170,8 @@ struct CompletionOptions
     };
     std::optional<CompletionItem> completionItem;
 };
-void to_json(json& j, const CompletionOptions& p)
-{
-    j = json{{"resolveProvider", p.resolveProvider}};
-    if (p.triggerCharacters)
-        j["triggerCharacters"] = p.triggerCharacters.value();
-    if (p.allCommitCharacters)
-        j["allCommitCharacters"] = p.allCommitCharacters.value();
-    if (p.completionItem)
-    {
-        j["completionItem"] = {};
-        j["completionItem"]["labelDetailsSupport"] = p.completionItem->labelDetailsSupport;
-    }
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionOptions::CompletionItem, labelDetailsSupport);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionOptions, triggerCharacters, allCommitCharacters, resolveProvider, completionItem);
 
 struct DocumentLinkOptions
 {
@@ -154,14 +184,7 @@ struct SignatureHelpOptions
     std::optional<std::vector<std::string>> triggerCharacters;
     std::optional<std::vector<std::string>> retriggerCharacters;
 };
-void to_json(json& j, const SignatureHelpOptions& p)
-{
-    j = json{};
-    if (p.triggerCharacters)
-        j["triggerCharacters"] = p.triggerCharacters.value();
-    if (p.retriggerCharacters)
-        j["retriggerCharacters"] = p.retriggerCharacters.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelpOptions, triggerCharacters, retriggerCharacters);
 
 enum struct TextDocumentSyncKind
 {
@@ -169,6 +192,14 @@ enum struct TextDocumentSyncKind
     Full = 1,
     Incremental = 2,
 };
+
+struct DiagnosticOptions
+{
+    std::optional<std::string> identifier;
+    bool interFileDependencies = false;
+    bool workspaceDiagnostics = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticOptions, identifier, interFileDependencies, workspaceDiagnostics);
 
 struct WorkspaceFoldersServerCapabilities
 {
@@ -182,12 +213,7 @@ struct WorkspaceCapabilities
     std::optional<WorkspaceFoldersServerCapabilities> workspaceFolders;
     // fileOperations
 };
-void to_json(json& j, const WorkspaceCapabilities& p)
-{
-    j = {};
-    if (p.workspaceFolders.has_value())
-        j["workspaceFolders"] = p.workspaceFolders.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceCapabilities, workspaceFolders);
 
 struct ServerCapabilities
 {
@@ -202,31 +228,12 @@ struct ServerCapabilities
     bool referencesProvider = false;
     bool documentSymbolProvider = false;
     std::optional<DocumentLinkOptions> documentLinkProvider;
+    std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
-
-void to_json(json& j, const ServerCapabilities& p)
-{
-    j = json{
-        {"hoverProvider", p.hoverProvider},
-        {"declarationProvider", p.declarationProvider},
-        {"definitionProvider", p.definitionProvider},
-        {"typeDefinitionProvider", p.typeDefinitionProvider},
-        {"implementationProvider", p.implementationProvider},
-        {"referencesProvider", p.referencesProvider},
-        {"documentSymbolProvider", p.documentSymbolProvider},
-    };
-    if (p.textDocumentSync)
-        j["textDocumentSync"] = p.textDocumentSync.value();
-    if (p.completionProvider)
-        j["completionProvider"] = p.completionProvider.value();
-    if (p.documentLinkProvider)
-        j["documentLinkProvider"] = p.documentLinkProvider.value();
-    if (p.signatureHelpProvider)
-        j["signatureHelpProvider"] = p.signatureHelpProvider.value();
-    if (p.workspace)
-        j["workspace"] = p.workspace.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
+    declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
+    documentLinkProvider, diagnosticProvider, workspace);
 
 struct InitializeResult
 {
@@ -239,19 +246,8 @@ struct InitializeResult
     ServerCapabilities capabilities;
     std::optional<ServerInfo> serverInfo;
 };
-
-void to_json(json& j, const InitializeResult& p)
-{
-    j = json{
-        {"capabilities", p.capabilities},
-    };
-    if (p.serverInfo)
-    {
-        j["serverInfo"] = {{"name", p.serverInfo->name}};
-        if (p.serverInfo->version)
-            j["serverInfo"] = {{"name", p.serverInfo->name}, {"version", p.serverInfo->version.value()}};
-    }
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeResult::ServerInfo, name, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeResult, capabilities, serverInfo);
 
 struct InitializedParams
 {
@@ -335,20 +331,7 @@ struct TextDocumentContentChangeEvent
     std::optional<Range> range;
     std::string text;
 };
-void from_json(const json& j, TextDocumentContentChangeEvent& p)
-{
-    j.at("text").get_to(p.text);
-    if (j.contains("range"))
-        p.range = j.at("range").get<Range>();
-}
-void to_json(json& j, const TextDocumentContentChangeEvent& p)
-{
-    j = json{
-        {"text", p.text},
-    };
-    if (p.range)
-        j["range"] = p.range.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentContentChangeEvent, range, text);
 
 struct DidChangeTextDocumentParams
 {
@@ -445,31 +428,7 @@ struct Diagnostic
     std::optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
     // data?
 };
-void to_json(json& j, const Diagnostic& p)
-{
-    j = json{{"range", p.range}, {"message", p.message}};
-    if (p.severity)
-        j["severity"] = p.severity.value();
-    if (p.code)
-    {
-        if (std::holds_alternative<int>(p.code.value()))
-        {
-            j["code"] = std::get<int>(p.code.value());
-        }
-        else
-        {
-            j["code"] = std::get<std::string>(p.code.value());
-        }
-    }
-    if (p.codeDescription)
-        j["codeDescription"] = p.codeDescription.value();
-    if (p.source)
-        j["source"] = p.source.value();
-    if (p.tags)
-        j["tags"] = p.tags.value();
-    if (p.relatedInformation)
-        j["relatedInformation"] = p.relatedInformation.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);
 
 struct PublishDiagnosticsParams
 {
@@ -477,12 +436,63 @@ struct PublishDiagnosticsParams
     std::optional<int> version;
     std::vector<Diagnostic> diagnostics;
 };
-void to_json(json& j, const PublishDiagnosticsParams& p)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PublishDiagnosticsParams, uri, version, diagnostics);
+
+struct DocumentDiagnosticParams
 {
-    j = json{{"uri", p.uri}, {"diagnostics", p.diagnostics}};
-    if (p.version)
-        j["version"] = p.version.value();
-}
+    TextDocumentIdentifier textDocument;
+    std::optional<std::string> identifier;
+    std::optional<std::string> previousResultId;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentDiagnosticParams, textDocument, identifier, previousResultId);
+
+enum struct DocumentDiagnosticReportKind
+{
+    Full,
+    Unchanged,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    DocumentDiagnosticReportKind, {{DocumentDiagnosticReportKind::Full, "full"}, {DocumentDiagnosticReportKind::Unchanged, "unchanged"}});
+
+// TODO: we slightly stray away from the specification here for simplicity
+// The specification defines separated types FullDocumentDiagnosticReport and UnchangedDocumentDiagnosticReport, depending on the kind
+struct SingleDocumentDiagnosticReport
+{
+    DocumentDiagnosticReportKind kind;
+    std::optional<std::string> resultId; // NB: this MUST be present if kind == Unchanged
+    std::vector<Diagnostic> items;       // NB: this MUST NOT be present if kind == Unchanged
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SingleDocumentDiagnosticReport, kind, resultId, items);
+
+struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
+{
+    std::map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
+
+using DocumentDiagnosticReport = RelatedDocumentDiagnosticReport;
+
+// struct FullDocumentDiagnosticReport
+// {
+//     DocumentDiagnosticReportKind kind = DocumentDiagnosticReportKind::Full;
+//     std::optional<std::string> resultId;
+//     std::vector<Diagnostic> items;
+// };
+// struct UnchangedDocumentDiagnosticReport
+// {
+//     DocumentDiagnosticReportKind kind = DocumentDiagnosticReportKind::Unchanged;
+//     std::string resultId;
+// };
+// using SingleDocumentDiagnosticReport = std::variant<FullDocumentDiagnosticReport, UnchangedDocumentDiagnosticReport>;
+// struct RelatedFullDocumentDiagnosticReport : FullDocumentDiagnosticReport
+// {
+//     std::map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
+// };
+// struct RelatedUnchangedDocumentDiagnosticReport : UnchangedDocumentDiagnosticReport
+// {
+//     std::map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
+// };
+// using DocumentDiagnosticReport = std::variant<RelatedFullDocumentDiagnosticReport, RelatedUnchangedDocumentDiagnosticReport>;
 
 enum struct CompletionTriggerKind
 {
@@ -496,11 +506,13 @@ struct CompletionContext
     CompletionTriggerKind triggerKind;
     std::optional<std::string> triggerCharacter;
 };
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionContext, triggerKind, triggerCharacter);
 
 struct CompletionParams : TextDocumentPositionParams
 {
     std::optional<CompletionContext> context;
 };
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionParams, textDocument, position, context);
 
 enum struct InsertTextFormat
 {
@@ -524,14 +536,7 @@ struct CompletionItemLabelDetails
     std::optional<std::string> detail;
     std::optional<std::string> description;
 };
-void to_json(json& j, const CompletionItemLabelDetails& p)
-{
-    j = json{};
-    if (p.detail)
-        j["detail"] = p.detail.value();
-    if (p.description)
-        j["detail"] = p.description.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionItemLabelDetails, detail, description);
 
 enum struct CompletionItemKind
 {
@@ -567,39 +572,25 @@ struct CompletionItem
     std::string label;
     std::optional<CompletionItemLabelDetails> labelDetails;
     std::optional<CompletionItemKind> kind;
-    // std::optional<std::vector<CompletionItemTag>> tags;
+    std::optional<std::vector<CompletionItemTag>> tags;
     std::optional<std::string> detail;
     std::optional<std::string> documentation;
     bool deprecated = false;
-    // bool preselect = false;
-    // std::optional<std::string> sortText;
-    // std::optional<std::string> filterText;
+    bool preselect = false;
+    std::optional<std::string> sortText;
+    std::optional<std::string> filterText;
     std::optional<std::string> insertText;
     InsertTextFormat insertTextFormat = InsertTextFormat::PlainText;
-    // std::optional<InsertTextMode> insertTextMode;
-    // std::optional<TextEdit> textEdit;
-    // std::optional<std::string> textEditString;
-    // std::optional<std::vector<TextEdit>> additionalTextEdits;
-    // std::optional<std::vector<std::string>> commitCharacters;
+    std::optional<InsertTextMode> insertTextMode;
+    std::optional<TextEdit> textEdit;
+    std::optional<std::string> textEditString;
+    std::optional<std::vector<TextEdit>> additionalTextEdits;
+    std::optional<std::vector<std::string>> commitCharacters;
     std::optional<Command> command;
-    // data?
+    // TODO: data?
 };
-void to_json(json& j, const CompletionItem& p)
-{
-    j = json{{"label", p.label}, {"deprecated", p.deprecated}, {"insertTextFormat", p.insertTextFormat}};
-    if (p.kind)
-        j["kind"] = p.kind.value();
-    if (p.insertText)
-        j["insertText"] = p.insertText.value();
-    if (p.detail)
-        j["detail"] = p.detail.value();
-    if (p.labelDetails)
-        j["labelDetails"] = p.labelDetails.value();
-    if (p.documentation)
-        j["documentation"] = p.documentation.value();
-    if (p.command)
-        j["command"] = p.command.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionItem, label, labelDetails, kind, tags, detail, documentation, deprecated, preselect, sortText,
+    filterText, insertText, insertTextFormat, insertTextMode, textEdit, textEditString, additionalTextEdits, commitCharacters, command);
 
 struct DocumentLinkParams
 {
@@ -611,10 +602,10 @@ struct DocumentLink
 {
     Range range;
     DocumentUri target; // TODO: potentially optional if we resolve later
-    // std::optional<std::string> tooltip;
+    std::optional<std::string> tooltip;
     // std::optional<json> data; // for resolver
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLink, range, target);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLink, range, target, tooltip);
 
 struct HoverParams : TextDocumentPositionParams
 {
@@ -639,30 +630,14 @@ struct Hover
     MarkupContent contents;
     std::optional<Range> range;
 };
-void to_json(json& j, const Hover& p)
-{
-    j = {{"contents", p.contents}};
-    if (p.range)
-        j["range"] = p.range.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Hover, contents, range);
 
 struct ParameterInformation
 {
     std::string label;
     std::optional<MarkupContent> documentation;
 };
-void to_json(json& j, const ParameterInformation& p)
-{
-    j = {{"label", p.label}};
-    if (p.documentation)
-        j["documentation"] = p.documentation.value();
-}
-void from_json(const json& j, ParameterInformation& p)
-{
-    j.at("label").get_to(p.label);
-    if (j.contains("documentation"))
-        p.documentation = j.at("documentation").get<MarkupContent>();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ParameterInformation, label, documentation);
 
 struct SignatureInformation
 {
@@ -671,26 +646,7 @@ struct SignatureInformation
     std::optional<std::vector<ParameterInformation>> parameters;
     std::optional<size_t> activeParameter;
 };
-void to_json(json& j, const SignatureInformation& p)
-{
-    j = {{"label", p.label}};
-    if (p.documentation)
-        j["documentation"] = p.documentation.value();
-    if (p.parameters)
-        j["parameters"] = p.parameters.value();
-    if (p.activeParameter)
-        j["activeParameter"] = p.activeParameter.value();
-}
-void from_json(const json& j, SignatureInformation& p)
-{
-    j.at("label").get_to(p.label);
-    if (j.contains("documentation"))
-        p.documentation = j.at("documentation").get<MarkupContent>();
-    if (j.contains("parameters"))
-        p.parameters = j.at("parameters").get<std::vector<ParameterInformation>>();
-    if (j.contains("activeParameter"))
-        p.activeParameter = j.at("activeParameter").get<size_t>();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureInformation, label, documentation, parameters, activeParameter);
 
 struct SignatureHelp
 {
@@ -714,15 +670,7 @@ struct SignatureHelpContext
     bool isRetrigger;
     std::optional<SignatureHelp> activeSignatureHelp;
 };
-void from_json(const json& j, SignatureHelpContext& p)
-{
-    j.at("triggerKind").get_to(p.triggerKind);
-    j.at("isRetrigger").get_to(p.isRetrigger);
-    if (j.contains("triggerCharacter"))
-        p.triggerCharacter = j.at("triggerCharacter").get<std::string>();
-    if (j.contains("activeSignatureHelp"))
-        p.activeSignatureHelp = j.at("activeSignatureHelp").get<SignatureHelp>();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
 
 struct SignatureHelpParams : TextDocumentPositionParams
 {
@@ -788,20 +736,7 @@ struct DocumentSymbol
     Range selectionRange;
     std::vector<DocumentSymbol> children;
 };
-void to_json(json& j, const DocumentSymbol& p)
-{
-    j = {
-        {"name", p.name},
-        {"kind", p.kind},
-        {"tags", p.tags},
-        {"deprecated", p.deprecated},
-        {"range", p.range},
-        {"selectionRange", p.selectionRange},
-        {"children", p.children},
-    };
-    if (p.detail)
-        j["detail"] = p.detail.value();
-}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
 
 struct WorkspaceFoldersChangeEvent
 {

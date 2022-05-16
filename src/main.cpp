@@ -26,7 +26,6 @@
 
 using json = nlohmann::json;
 using namespace json_rpc;
-using id_type = std::variant<int, std::string>;
 using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 using ClientPtr = std::shared_ptr<Client>;
@@ -103,13 +102,15 @@ public:
         bool documentSymbolProvider = true;
         // Document Link Provider
         lsp::DocumentLinkOptions documentLinkProvider{false};
+        // Diagnostics Provider
+        lsp::DiagnosticOptions diagnosticsProvider{"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
         // Workspaces
         lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
         return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, declarationProvider,
             definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider, documentLinkProvider,
-            workspace};
+            diagnosticsProvider, workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -272,6 +273,8 @@ public:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params)
     {
         // Set provided settings
+        client->sendTrace("client capabilities: " + json(params.capabilities).dump(), std::nullopt);
+        client->capabilities = params.capabilities;
         client->traceMode = params.trace;
 
         // Configure workspaces
@@ -290,6 +293,7 @@ public:
         isInitialized = true;
         lsp::InitializeResult result;
         result.capabilities = getServerCapabilities();
+        client->sendTrace("server capabilities:" + json(result).dump(), std::nullopt);
         return result;
     }
 
@@ -389,23 +393,17 @@ public:
     }
 
     // TODO: can't type this as lsp::hover as it can return null
-    Response hover(const lsp::HoverParams& params)
+    std::optional<lsp::Hover> hover(const lsp::HoverParams& params)
     {
         auto workspace = findWorkspace(params.textDocument.uri);
-        auto result = workspace->hover(params);
-        if (result)
-            return *result;
-        return nullptr;
+        return workspace->hover(params);
     }
 
     // TODO: can't type this as lsp::SignatureHelp as it can return null
-    Response signatureHelp(const lsp::SignatureHelpParams& params)
+    std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params)
     {
         auto workspace = findWorkspace(params.textDocument.uri);
-        auto result = workspace->signatureHelp(params);
-        if (result)
-            return *result;
-        return nullptr;
+        return workspace->signatureHelp(params);
     }
 
     Response gotoDefinition(const lsp::DefinitionParams& params)

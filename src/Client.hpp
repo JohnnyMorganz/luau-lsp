@@ -10,6 +10,7 @@ using namespace json_rpc;
 class Client
 {
 public:
+    lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
     /// A registered definitions file passed by the client
     std::optional<std::filesystem::path> definitionsFile = std::nullopt;
@@ -23,19 +24,9 @@ public:
         json msg{
             {"jsonrpc", "2.0"},
             {"method", method},
+            {"id", id},
+            {"params", params},
         };
-
-        if (std::holds_alternative<int>(id))
-        {
-            msg["id"] = std::get<int>(id);
-        }
-        else
-        {
-            msg["id"] = std::get<std::string>(id);
-        }
-
-        if (params.has_value())
-            msg["params"] = params.value();
 
         sendRawMessage(msg);
     }
@@ -45,16 +36,8 @@ public:
         json msg{
             {"jsonrpc", "2.0"},
             {"result", result},
+            {"id", id},
         };
-
-        if (std::holds_alternative<int>(id))
-        {
-            msg["id"] = std::get<int>(id);
-        }
-        else
-        {
-            msg["id"] = std::get<std::string>(id);
-        }
 
         sendRawMessage(msg);
     }
@@ -63,28 +46,9 @@ public:
     {
         json msg{
             {"jsonrpc", "2.0"},
+            {"id", id},
+            {"error", {{"code", e.code}, {"message", e.message}, {"data", e.data}}},
         };
-
-        if (id)
-        {
-            if (std::holds_alternative<int>(*id))
-            {
-                msg["id"] = std::get<int>(*id);
-            }
-            else
-            {
-                msg["id"] = std::get<std::string>(*id);
-            }
-        }
-        else
-        {
-            msg["id"] = nullptr;
-        }
-
-        msg["error"] = {};
-        msg["error"]["code"] = e.code;
-        msg["error"]["message"] = e.message;
-        msg["error"]["data"] = e.data;
 
         sendRawMessage(msg);
     }
@@ -94,10 +58,8 @@ public:
         json msg{
             {"jsonrpc", "2.0"},
             {"method", method},
+            {"params", params},
         };
-
-        if (params.has_value())
-            msg["params"] = params.value();
 
         sendRawMessage(msg);
     }
@@ -111,7 +73,7 @@ public:
         sendNotification("window/logMessage", params);
     }
 
-    void sendTrace(std::string message, std::optional<std::string> verbose)
+    void sendTrace(std::string message, std::optional<std::string> verbose = std::nullopt)
     {
         if (traceMode == lsp::TraceValue::Off)
             return;
