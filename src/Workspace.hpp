@@ -781,6 +781,49 @@ public:
         {
             if (auto it = module->astTypes.find(expr))
                 type = *it;
+            else if (auto index = expr->as<Luau::AstExprIndexName>())
+            {
+                if (auto parentIt = module->astTypes.find(index->expr))
+                {
+                    auto parentType = Luau::follow(*parentIt);
+                    auto indexName = index->index.value;
+                    if (auto ctv = Luau::get<Luau::ClassTypeVar>(parentType))
+                    {
+                        if (auto prop = Luau::lookupClassProp(ctv, indexName))
+                        {
+                            type = prop->type;
+                        }
+                    }
+                    else if (auto tbl = Luau::get<Luau::TableTypeVar>(parentType))
+                    {
+                        if (tbl->props.find(indexName) != tbl->props.end())
+                        {
+                            type = tbl->props.at(indexName).type;
+                        }
+                    }
+                    else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
+                    {
+                        if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
+                        {
+                            if (tbl->props.find(indexName) != tbl->props.end())
+                            {
+                                type = tbl->props.at(indexName).type;
+                            }
+                        }
+                    }
+                    // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
+                    // {
+                    //     for (Luau::TypeId ty : i->parts)
+                    //     {
+                    //         // TODO: find the corresponding ty
+                    //     }
+                    // }
+                    // else if (auto u = get<Luau::UnionTypeVar>(parentType))
+                    // {
+                    //     // Find the corresponding ty
+                    // }
+                }
+            }
         }
         else if (auto local = exprOrLocal.getLocal())
         {
@@ -795,6 +838,7 @@ public:
         type = Luau::follow(*type);
 
         Luau::ToStringOptions opts;
+        opts.exhaustive = true;
         opts.useLineBreaks = true;
         opts.functionTypeArguments = true;
         opts.hideNamedFunctionTypeParameters = false;
