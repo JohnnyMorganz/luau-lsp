@@ -495,7 +495,6 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     }
 
     // See if the name belongs to a ClassTypeVar
-    // bool implicitSelf = false;
     Luau::TypeId* parentIt = nullptr;
     std::string methodName;
     std::string baseName;
@@ -504,7 +503,8 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
     {
         parentIt = module->astTypes.find(indexName->expr);
         methodName = std::string(1, indexName->op) + indexName->index.value;
-        // implicitSelf = indexName->op == ':';
+        // If we are calling this as a method ':', we should implicitly hide self
+        opts.hideFunctionSelfArgument = indexName->op == ':';
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
         baseName = Luau::toString(indexName->expr);
         trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)
@@ -1033,10 +1033,18 @@ public:
             Luau::ToStringOptions opts;
             opts.functionTypeArguments = true;
             opts.hideNamedFunctionTypeParameters = false;
+            opts.hideFunctionSelfArgument = candidate->self; // If self has been provided, then hide the self argument
 
             // Create the whole label
             std::string label = types::toStringFunctionCall(module, ftv, candidate->func);
             std::optional<lsp::MarkupContent> documentation;
+
+            // HACK: remove all instances of "_: " from the label
+            // They don't look great, maybe we should upstream this as an option?
+            while (auto index = label.find("_: ") != std::string::npos)
+            {
+                label.replace(index, 3, "");
+            }
 
             if (followedId->documentationSymbol)
                 documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
@@ -1060,10 +1068,6 @@ public:
                 if (idx < ftv->argNames.size() && ftv->argNames[idx])
                 {
                     label = ftv->argNames[idx]->name + ": ";
-                }
-                else
-                {
-                    label = "_: ";
                 }
                 label += Luau::toString(*it);
                 parameters.push_back(lsp::ParameterInformation{label});

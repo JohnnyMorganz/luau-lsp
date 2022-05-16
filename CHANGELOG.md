@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added basic go to definition and go to type definition support
+- Added support for pull-based diagnostics
+
 ### Changed
 
 - Hover over definitions will now try to give more expressive types
+- `self` will now no longer show up in hover/signature help if it has already been implicitly provided
 
 ### Fixed
 
