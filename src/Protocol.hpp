@@ -193,15 +193,27 @@ struct ServerCapabilities
 {
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
-    std::optional<DocumentLinkOptions> documentLinkProvider;
     bool hoverProvider = false;
     std::optional<SignatureHelpOptions> signatureHelpProvider;
+    bool declarationProvider = false;
+    bool definitionProvider = false;
+    bool typeDefinitionProvider = false;
+    bool implementationProvider = false;
+    bool referencesProvider = false;
+    std::optional<DocumentLinkOptions> documentLinkProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
 
 void to_json(json& j, const ServerCapabilities& p)
 {
-    j = json{{"hoverProvider", p.hoverProvider}};
+    j = json{
+        {"hoverProvider", p.hoverProvider},
+        {"declarationProvider", p.declarationProvider},
+        {"definitionProvider", p.definitionProvider},
+        {"typeDefinitionProvider", p.typeDefinitionProvider},
+        {"implementationProvider", p.implementationProvider},
+        {"referencesProvider", p.referencesProvider},
+    };
     if (p.textDocumentSync)
         j["textDocumentSync"] = p.textDocumentSync.value();
     if (p.completionProvider)
@@ -713,6 +725,13 @@ void from_json(const json& j, SignatureHelpContext& p)
 struct SignatureHelpParams : TextDocumentPositionParams
 {
     std::optional<SignatureHelpContext> context;
+};
+
+struct DefinitionParams : TextDocumentPositionParams
+{
+};
+struct TypeDefinitionParams : TextDocumentPositionParams
+{
 };
 
 struct WorkspaceFoldersChangeEvent

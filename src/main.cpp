@@ -84,18 +84,29 @@ public:
         std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
         lsp::CompletionOptions::CompletionItem completionItem{true};
         lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, false, completionItem};
-        // Document Link Provider
-        lsp::DocumentLinkOptions documentLinkProvider{false};
         // Hover Provider
         bool hoverProvider = true;
         // Signature Help
         std::vector<std::string> signatureHelpTriggerCharacters{"(", ","};
         lsp::SignatureHelpOptions signatureHelpProvider{signatureHelpTriggerCharacters};
+        // Go To Declaration Provider
+        bool declarationProvider = false; // TODO: does this apply to Luau?
+        // Go To Definition Provider
+        bool definitionProvider = true;
+        // Go To Type Definition Provider
+        bool typeDefinitionProvider = true;
+        // Go To Implementation Provider
+        bool implementationProvider = false; // TODO: does this apply to Luau?
+        // Find References Provider
+        bool referencesProvider = false;
+        // Document Link Provider
+        lsp::DocumentLinkOptions documentLinkProvider{false};
         // Workspaces
         lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
-        return lsp::ServerCapabilities{textDocumentSync, completionProvider, documentLinkProvider, hoverProvider, signatureHelpProvider, workspace};
+        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, declarationProvider,
+            definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentLinkProvider, workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -131,6 +142,14 @@ public:
         else if (method == "textDocument/signatureHelp")
         {
             return signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
+        }
+        else if (method == "textDocument/definition")
+        {
+            return gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
+        }
+        else if (method == "textDocument/typeDefinition")
+        {
+            return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
         }
         else
         {
@@ -377,6 +396,24 @@ public:
     {
         auto workspace = findWorkspace(params.textDocument.uri);
         auto result = workspace->signatureHelp(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
+
+    Response gotoDefinition(const lsp::DefinitionParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->gotoDefinition(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
+
+    Response gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->gotoTypeDefinition(params);
         if (result)
             return *result;
         return nullptr;

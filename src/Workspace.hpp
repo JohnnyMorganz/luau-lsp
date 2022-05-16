@@ -945,6 +945,92 @@ public:
         return lsp::SignatureHelp{signatures, 0, activeParameter};
     }
 
+    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+        auto position = convertPosition(params.position);
+
+        // Run the type checker to ensure we are up to date
+        if (frontend.isDirty(moduleName))
+            frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        auto module = frontend.moduleResolver.getModule(moduleName);
+        if (!sourceModule || !module)
+            return std::nullopt;
+
+        auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
+        if (!binding)
+            return std::nullopt;
+
+        // TODO: we should get further definitions from other modules (e.g., if the binding was from a `local X = require(...)`, we want more info
+        // about X from its required file)
+        // TODO: we should extend further if we don't find a binding (i.e., a index function call etc)
+
+        return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}};
+    }
+
+    std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
+    {
+        // If its a binding, we should find its assigned type if possible, and then find the definition of that type
+        // If its a type, then just find the definintion of that type (i.e. the type alias)
+
+        auto moduleName = getModuleName(params.textDocument.uri);
+        auto position = convertPosition(params.position);
+
+        // Run the type checker to ensure we are up to date
+        if (frontend.isDirty(moduleName))
+            frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        auto module = frontend.moduleResolver.getModule(moduleName);
+        if (!sourceModule || !module)
+            return std::nullopt;
+
+        auto node = Luau::findNodeAtPosition(*sourceModule, position);
+        if (!node)
+            return std::nullopt;
+
+        auto findTypeLocation = [&module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
+        {
+            // TODO: should we only handle references here? what if its an actual type
+            if (auto reference = type->as<Luau::AstTypeReference>())
+            {
+                // TODO: handle if imported from a module (i.e., reference.prefix)
+                auto scope = Luau::findScopeAtPosition(*module, position);
+                if (!scope)
+                    return std::nullopt;
+                if (scope->typeAliasLocations.find(reference->name.value) == scope->typeAliasLocations.end())
+                    return std::nullopt;
+                auto location = scope->typeAliasLocations.at(reference->name.value);
+                return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location.begin), convertPosition(location.end)}};
+            }
+            return std::nullopt;
+        };
+
+        if (auto type = node->asType())
+        {
+            return findTypeLocation(type);
+        }
+        else
+        {
+            // ExprOrLocal gives us better information
+            auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
+            if (auto local = exprOrLocal.getLocal())
+            {
+                if (auto annotation = local->annotation)
+                {
+                    return findTypeLocation(annotation);
+                }
+            }
+            // TODO: handle expressions
+            // AstExprTypeAssertion
+            // AstStatTypeAlias
+        }
+
+        return std::nullopt;
+    }
+
     bool updateSourceMap()
     {
         // Read in the sourcemap
