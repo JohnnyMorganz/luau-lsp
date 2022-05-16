@@ -46,20 +46,20 @@ std::optional<std::string> readFile(const std::filesystem::path& filePath)
     }
 }
 
-std::string& trim_start(std::string& str)
+std::string trim_start(std::string& str)
 {
     str.erase(0, str.find_first_not_of(" \n\r\t"));
     return str;
 }
 
 
-std::string& trim_end(std::string& str)
+std::string trim_end(std::string& str)
 {
     str.erase(str.find_last_not_of(" \n\r\t") + 1);
     return str;
 }
 
-std::string& trim(std::string& str)
+std::string trim(std::string& str)
 {
     trim_start(str);
     trim_end(str);
