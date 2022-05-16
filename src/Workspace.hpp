@@ -7,6 +7,7 @@
 #include "Luau/ToString.h"
 #include "Luau/AstQuery.h"
 #include "Luau/TypeInfer.h"
+#include "Luau/Transpiler.h"
 #include "Client.hpp"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
@@ -504,12 +505,15 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
         parentIt = module->astTypes.find(indexName->expr);
         methodName = std::string(1, indexName->op) + indexName->index.value;
         // implicitSelf = indexName->op == ':';
+        // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
+        baseName = trim(Luau::toString(indexName->expr));
     }
     else if (auto indexExpr = funcExpr->as<Luau::AstExprIndexExpr>())
     {
         parentIt = module->astTypes.find(indexExpr->expr);
-        // TODO: we need to toString the expr nicely... I can't be bothered right now
-        methodName = "_";
+        methodName = Luau::toString(indexExpr->index);
+        // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
+        baseName = trim(Luau::toString(indexName->expr));
     }
 
     if (parentIt)

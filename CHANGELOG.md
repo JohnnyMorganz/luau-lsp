@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed hover over method function definitions not working
+- Added a fallback to the prefix of a method name if we can't find the actual name
 
 ## [0.3.0] - 2022-05-15
 

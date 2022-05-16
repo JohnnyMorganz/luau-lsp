@@ -3,6 +3,7 @@
 #include <variant>
 #include "Protocol.hpp"
 #include "Luau/StringUtils.h"
+#include "Utils.hpp"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
@@ -113,11 +114,6 @@ JsonRpcMessage parse(const std::string& jsonString)
     }
 
     return JsonRpcMessage{id, method, params, result, error};
-}
-
-void trim_end(std::string& str)
-{
-    str.erase(str.find_last_not_of(" \n\r\t") + 1);
 }
 
 /// Reads a JSON-RPC message from input
