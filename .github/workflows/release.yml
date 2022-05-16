@@ -17,15 +17,12 @@ jobs:
           - os: macos-latest
             code-target: darwin-x64
           # Cross Compile
-          - os: windows-latest
-            code-target: win32-arm64
-            toolchain-file: ../toolchains/arm.cmake
-          - os: ubuntu-latest
-            code-target: linux-arm64
-            toolchain-file: ../toolchains/arm.cmake
+          # - os: ubuntu-latest
+          #   code-target: linux-arm64
+          #   toolchain-file: ../toolchains/linux-arm64.cmake
           - os: macos-latest
             code-target: darwin-arm64
-            toolchain-file: ../toolchains/arm.cmake
+            toolchain-file: ../toolchains/darwin-arm64.cmake
 
     name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
