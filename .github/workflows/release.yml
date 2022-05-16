@@ -16,13 +16,8 @@ jobs:
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
-          # Cross Compile
-          # - os: ubuntu-latest
-          #   code-target: linux-arm64
-          #   toolchain-file: ../toolchains/linux-arm64.cmake
           - os: macos-latest
             code-target: darwin-arm64
-            toolchain-file: ../toolchains/darwin-arm64.cmake
 
     name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
@@ -38,18 +33,13 @@ jobs:
           node-version: 14.x
 
       - name: Dist
-        if: ${{ !matrix.toolchain-file }}
         run: |
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
           cmake --build . --config Release --target luau-lsp
 
-      - name: Dist
-        if: ${{ matrix.toolchain-file }}
-        run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain-file }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-          cmake --build . --config Release --target luau-lsp
+      - name: (MacOS) Verify universal build
+        run: lipo -archs build/luau-lsp
 
       - name: Move Build + Copy into Extension
         if: matrix.os == 'windows-latest'
