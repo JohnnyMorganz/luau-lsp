@@ -89,13 +89,13 @@ struct DiagnosticClientCapabilities
     bool dynamicRegistration = false;
     bool relatedDocumentSupport = false;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
 
 struct TextDocumentClientCapabilities
 {
     std::optional<DiagnosticClientCapabilities> diagnostic;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentClientCapabilities, diagnostic);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentClientCapabilities, diagnostic);
 
 struct ClientCapabilities
 {
@@ -105,14 +105,14 @@ struct ClientCapabilities
     // workspace
     // window
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ClientCapabilities, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCapabilities, textDocument);
 
 struct WorkspaceFolder
 {
     DocumentUri uri;
     std::string name;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFolder, uri, name);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceFolder, uri, name);
 
 enum struct TraceValue
 {
@@ -140,8 +140,8 @@ struct InitializeParams
     TraceValue trace = TraceValue::Off;
     std::optional<std::vector<WorkspaceFolder>> workspaceFolders;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeParams::ClientInfo, name, version);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(InitializeParams::ClientInfo, name, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
     InitializeParams, processId, clientInfo, locale, rootUri, initializationOptions, capabilities, trace, workspaceFolders);
 
 struct Registration
@@ -150,13 +150,13 @@ struct Registration
     std::string method;
     json registerOptions = nullptr;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Registration, id, method, registerOptions);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Registration, id, method, registerOptions);
 
 struct RegistrationParams
 {
     std::vector<Registration> registrations;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RegistrationParams, registrations);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RegistrationParams, registrations);
 
 struct CompletionOptions
 {
@@ -170,21 +170,21 @@ struct CompletionOptions
     };
     std::optional<CompletionItem> completionItem;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionOptions::CompletionItem, labelDetailsSupport);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionOptions, triggerCharacters, allCommitCharacters, resolveProvider, completionItem);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionOptions::CompletionItem, labelDetailsSupport);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionOptions, triggerCharacters, allCommitCharacters, resolveProvider, completionItem);
 
 struct DocumentLinkOptions
 {
     bool resolveProvider = false;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLinkOptions, resolveProvider);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentLinkOptions, resolveProvider);
 
 struct SignatureHelpOptions
 {
     std::optional<std::vector<std::string>> triggerCharacters;
     std::optional<std::vector<std::string>> retriggerCharacters;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelpOptions, triggerCharacters, retriggerCharacters);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SignatureHelpOptions, triggerCharacters, retriggerCharacters);
 
 enum struct TextDocumentSyncKind
 {
@@ -199,21 +199,21 @@ struct DiagnosticOptions
     bool interFileDependencies = false;
     bool workspaceDiagnostics = false;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticOptions, identifier, interFileDependencies, workspaceDiagnostics);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DiagnosticOptions, identifier, interFileDependencies, workspaceDiagnostics);
 
 struct WorkspaceFoldersServerCapabilities
 {
     bool supported = false;
     bool changeNotifications = false;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFoldersServerCapabilities, supported, changeNotifications);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceFoldersServerCapabilities, supported, changeNotifications);
 
 struct WorkspaceCapabilities
 {
     std::optional<WorkspaceFoldersServerCapabilities> workspaceFolders;
     // fileOperations
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceCapabilities, workspaceFolders);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceCapabilities, workspaceFolders);
 
 struct ServerCapabilities
 {
@@ -231,7 +231,7 @@ struct ServerCapabilities
     std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
     documentLinkProvider, diagnosticProvider, workspace);
 
@@ -246,8 +246,8 @@ struct InitializeResult
     ServerCapabilities capabilities;
     std::optional<ServerInfo> serverInfo;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeResult::ServerInfo, name, version);
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(InitializeResult, capabilities, serverInfo);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(InitializeResult::ServerInfo, name, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(InitializeResult, capabilities, serverInfo);
 
 struct InitializedParams
 {
@@ -260,14 +260,14 @@ struct Position
     size_t line;
     size_t character;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Position, line, character);
 
 struct Range
 {
     Position start;
     Position end;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Range, start, end);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Range, start, end);
 
 struct TextDocumentItem
 {
@@ -276,40 +276,40 @@ struct TextDocumentItem
     int version;
     std::string text;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentItem, uri, languageId, version, text);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentItem, uri, languageId, version, text);
 
 struct TextDocumentIdentifier
 {
     DocumentUri uri;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentIdentifier, uri);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentIdentifier, uri);
 
 struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
     int version;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(VersionedTextDocumentIdentifier, uri, version);
 
 struct TextDocumentPositionParams
 {
     TextDocumentIdentifier textDocument;
     Position position;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentPositionParams, textDocument, position);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentPositionParams, textDocument, position);
 
 struct TextEdit
 {
     Range range;
     std::string newText;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextEdit, range, newText);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextEdit, range, newText);
 
 struct Location
 {
     DocumentUri uri;
     Range range;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Location, uri, range);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Location, uri, range);
 
 struct Command
 {
@@ -317,13 +317,13 @@ struct Command
     std::string command;
     std::vector<json> arguments;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Command, title, command, arguments);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Command, title, command, arguments);
 
 struct DidOpenTextDocumentParams
 {
     TextDocumentItem textDocument;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidOpenTextDocumentParams, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidOpenTextDocumentParams, textDocument);
 
 struct TextDocumentContentChangeEvent
 {
@@ -331,20 +331,20 @@ struct TextDocumentContentChangeEvent
     std::optional<Range> range;
     std::string text;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentContentChangeEvent, range, text);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentContentChangeEvent, range, text);
 
 struct DidChangeTextDocumentParams
 {
     VersionedTextDocumentIdentifier textDocument;
     std::vector<TextDocumentContentChangeEvent> contentChanges;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeTextDocumentParams, textDocument, contentChanges);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeTextDocumentParams, textDocument, contentChanges);
 
 struct DidCloseTextDocumentParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidCloseTextDocumentParams, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidCloseTextDocumentParams, textDocument);
 
 using Pattern = std::string;
 using GlobPattern = Pattern; // | RelativePattern
@@ -361,13 +361,13 @@ struct FileSystemWatcher
     GlobPattern globPattern;
     int kind = WatchKind::Create | WatchKind::Change | WatchKind::Delete;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FileSystemWatcher, globPattern, kind);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileSystemWatcher, globPattern, kind);
 
 struct DidChangeWatchedFilesRegistrationOptions
 {
     std::vector<FileSystemWatcher> watchers;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWatchedFilesRegistrationOptions, watchers);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWatchedFilesRegistrationOptions, watchers);
 
 enum struct FileChangeType
 {
@@ -381,13 +381,13 @@ struct FileEvent
     DocumentUri uri;
     FileChangeType type;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FileEvent, uri, type);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(FileEvent, uri, type);
 
 struct DidChangeWatchedFilesParams
 {
     std::vector<FileEvent> changes;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWatchedFilesParams, changes);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWatchedFilesParams, changes);
 
 enum struct DiagnosticSeverity
 {
@@ -408,13 +408,13 @@ struct DiagnosticRelatedInformation
     Location location;
     std::string message;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiagnosticRelatedInformation, location, message);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DiagnosticRelatedInformation, location, message);
 
 struct CodeDescription
 {
     URI href;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CodeDescription, href);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CodeDescription, href);
 
 struct Diagnostic
 {
@@ -428,7 +428,7 @@ struct Diagnostic
     std::optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
     // data?
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);
 
 struct PublishDiagnosticsParams
 {
@@ -436,7 +436,7 @@ struct PublishDiagnosticsParams
     std::optional<int> version;
     std::vector<Diagnostic> diagnostics;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PublishDiagnosticsParams, uri, version, diagnostics);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PublishDiagnosticsParams, uri, version, diagnostics);
 
 struct DocumentDiagnosticParams
 {
@@ -444,7 +444,7 @@ struct DocumentDiagnosticParams
     std::optional<std::string> identifier;
     std::optional<std::string> previousResultId;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentDiagnosticParams, textDocument, identifier, previousResultId);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentDiagnosticParams, textDocument, identifier, previousResultId);
 
 enum struct DocumentDiagnosticReportKind
 {
@@ -462,13 +462,13 @@ struct SingleDocumentDiagnosticReport
     std::optional<std::string> resultId; // NB: this MUST be present if kind == Unchanged
     std::vector<Diagnostic> items;       // NB: this MUST NOT be present if kind == Unchanged
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SingleDocumentDiagnosticReport, kind, resultId, items);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SingleDocumentDiagnosticReport, kind, resultId, items);
 
 struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
     std::map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
 
 using DocumentDiagnosticReport = RelatedDocumentDiagnosticReport;
 
@@ -506,13 +506,13 @@ struct CompletionContext
     CompletionTriggerKind triggerKind;
     std::optional<std::string> triggerCharacter;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionContext, triggerKind, triggerCharacter);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionContext, triggerKind, triggerCharacter);
 
 struct CompletionParams : TextDocumentPositionParams
 {
     std::optional<CompletionContext> context;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionParams, textDocument, position, context);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionParams, textDocument, position, context);
 
 enum struct InsertTextFormat
 {
@@ -536,7 +536,7 @@ struct CompletionItemLabelDetails
     std::optional<std::string> detail;
     std::optional<std::string> description;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionItemLabelDetails, detail, description);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionItemLabelDetails, detail, description);
 
 enum struct CompletionItemKind
 {
@@ -589,14 +589,14 @@ struct CompletionItem
     std::optional<Command> command;
     // TODO: data?
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CompletionItem, label, labelDetails, kind, tags, detail, documentation, deprecated, preselect, sortText,
-    filterText, insertText, insertTextFormat, insertTextMode, textEdit, textEditString, additionalTextEdits, commitCharacters, command);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CompletionItem, label, labelDetails, kind, tags, detail, documentation, deprecated, preselect,
+    sortText, filterText, insertText, insertTextFormat, insertTextMode, textEdit, textEditString, additionalTextEdits, commitCharacters, command);
 
 struct DocumentLinkParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLinkParams, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentLinkParams, textDocument);
 
 struct DocumentLink
 {
@@ -605,7 +605,7 @@ struct DocumentLink
     std::optional<std::string> tooltip;
     // std::optional<json> data; // for resolver
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentLink, range, target, tooltip);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentLink, range, target, tooltip);
 
 struct HoverParams : TextDocumentPositionParams
 {
@@ -623,21 +623,21 @@ struct MarkupContent
     MarkupKind kind;
     std::string value;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MarkupContent, kind, value);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MarkupContent, kind, value);
 
 struct Hover
 {
     MarkupContent contents;
     std::optional<Range> range;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Hover, contents, range);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Hover, contents, range);
 
 struct ParameterInformation
 {
     std::string label;
     std::optional<MarkupContent> documentation;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ParameterInformation, label, documentation);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ParameterInformation, label, documentation);
 
 struct SignatureInformation
 {
@@ -646,7 +646,7 @@ struct SignatureInformation
     std::optional<std::vector<ParameterInformation>> parameters;
     std::optional<size_t> activeParameter;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureInformation, label, documentation, parameters, activeParameter);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SignatureInformation, label, documentation, parameters, activeParameter);
 
 struct SignatureHelp
 {
@@ -654,7 +654,7 @@ struct SignatureHelp
     size_t activeSignature = 0;
     size_t activeParameter = 0;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelp, signatures, activeSignature, activeParameter);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SignatureHelp, signatures, activeSignature, activeParameter);
 
 enum struct SignatureHelpTriggerKind
 {
@@ -670,7 +670,7 @@ struct SignatureHelpContext
     bool isRetrigger;
     std::optional<SignatureHelp> activeSignatureHelp;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
 
 struct SignatureHelpParams : TextDocumentPositionParams
 {
@@ -688,7 +688,7 @@ struct DocumentSymbolParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentSymbolParams, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentSymbolParams, textDocument);
 
 enum struct SymbolKind
 {
@@ -736,26 +736,26 @@ struct DocumentSymbol
     Range selectionRange;
     std::vector<DocumentSymbol> children;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
 
 struct WorkspaceFoldersChangeEvent
 {
     std::vector<WorkspaceFolder> added;
     std::vector<WorkspaceFolder> removed;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WorkspaceFoldersChangeEvent, added, removed);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceFoldersChangeEvent, added, removed);
 
 struct DidChangeWorkspaceFoldersParams
 {
     WorkspaceFoldersChangeEvent event;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeWorkspaceFoldersParams, event);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWorkspaceFoldersParams, event);
 
 struct SetTraceParams
 {
     TraceValue value;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SetTraceParams, value);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SetTraceParams, value);
 
 enum struct MessageType
 {
@@ -770,13 +770,13 @@ struct LogMessageParams
     MessageType type;
     std::string message;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LogMessageParams, type, message);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(LogMessageParams, type, message);
 
 struct ShowMessageParams
 {
     MessageType type;
     std::string message;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ShowMessageParams, type, message);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ShowMessageParams, type, message);
 
 } // namespace lsp
