@@ -506,14 +506,16 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
         methodName = std::string(1, indexName->op) + indexName->index.value;
         // implicitSelf = indexName->op == ':';
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
-        baseName = trim(Luau::toString(indexName->expr));
+        baseName = Luau::toString(indexName->expr);
+        trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)
     }
     else if (auto indexExpr = funcExpr->as<Luau::AstExprIndexExpr>())
     {
         parentIt = module->astTypes.find(indexExpr->expr);
         methodName = Luau::toString(indexExpr->index);
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
-        baseName = trim(Luau::toString(indexName->expr));
+        baseName = Luau::toString(indexName->expr);
+        trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)
     }
 
     if (parentIt)
