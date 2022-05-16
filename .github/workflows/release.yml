@@ -16,8 +16,18 @@ jobs:
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
+          # Cross Compile
+          - os: windows-latest
+            code-target: win32-arm64
+            toolchain-file: ../toolchains/arm.cmake
+          - os: ubuntu-latest
+            code-target: linux-arm64
+            toolchain-file: ../toolchains/arm.cmake
+          - os: macos-latest
+            code-target: darwin-arm64
+            toolchain-file: ../toolchains/arm.cmake
 
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -31,9 +41,17 @@ jobs:
           node-version: 14.x
 
       - name: Dist
+        if: ${{ !matrix.toolchain-file }}
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -
+          cmake --build . --config Release --target luau-lsp
+
+      - name: Dist
+        if: ${{ matrix.toolchain-file }}
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain-file }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -
           cmake --build . --config Release --target luau-lsp
 
       - name: Move Build + Copy into Extension
@@ -101,6 +119,18 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: dist-win32-x64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-darwin-arm64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-linux-arm64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-win32-arm64
           path: dist
       - run: ls -al ./dist
 
