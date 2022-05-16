@@ -159,6 +159,11 @@ public:
         {
             return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
         }
+        else if (method == "textDocument/diagnostic")
+        {
+            return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
+        }
+        // TODO: workspace/diagnostic?
         else
         {
             throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
@@ -308,6 +313,26 @@ public:
         // registerCapability("WORKSPACE-FILE-WATCHERS", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{{watcher}});
     }
 
+    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version)
+    {
+        // Convert the diagnostics report into a series of diagnostics published for each relevant file
+        lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
+        auto diagnostics = workspace->documentDiagnostics(params);
+        client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
+
+        if (!diagnostics.relatedDocuments.empty())
+        {
+            for (const auto& [uri, diagnostics] : diagnostics.relatedDocuments)
+            {
+                if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->sendNotification(
+                        "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                }
+            }
+        }
+    }
+
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
     {
         // Start managing the file in-memory
@@ -315,8 +340,12 @@ public:
         workspace->openTextDocument(params.textDocument.uri, params);
 
         // Trigger diagnostics
-        auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        client->sendNotification("textDocument/publishDiagnostics", diagnostics);
+        // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
+        // however if a client doesn't yet support it, we push the diagnostics instead
+        if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
+        {
+            pushDiagnostics(workspace, params.textDocument.uri, params.textDocument.version);
+        }
     }
 
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
@@ -326,9 +355,27 @@ public:
         workspace->updateTextDocument(params.textDocument.uri, params);
 
         // Trigger diagnostics
-        // TODO: this gets lagged behind, can we ignore it if we know the document is out of date? Maybe add a debounce delay?
-        auto diagnostics = workspace->publishDiagnostics(params.textDocument.uri, params.textDocument.version);
-        client->sendNotification("textDocument/publishDiagnostics", diagnostics);
+        // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
+        // however if a client doesn't yet support it, we push the diagnostics instead
+        if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
+        {
+            // Convert the diagnostics report into a series of diagnostics published for each relevant file
+            auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{params.textDocument});
+            client->sendNotification("textDocument/publishDiagnostics",
+                lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
+
+            if (!diagnostics.relatedDocuments.empty())
+            {
+                for (const auto& [uri, diagnostics] : diagnostics.relatedDocuments)
+                {
+                    if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                    {
+                        client->sendNotification(
+                            "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                    }
+                }
+            }
+        }
     }
 
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
@@ -431,6 +478,12 @@ public:
         if (result)
             return *result;
         return nullptr;
+    }
+
+    lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        return workspace->documentDiagnostics(params);
     }
 
     Response onShutdown(const id_type& id)

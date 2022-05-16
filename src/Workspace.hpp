@@ -621,11 +621,111 @@ public:
         fileResolver.managedFiles.erase(moduleName);
     }
 
-    lsp::PublishDiagnosticsParams publishDiagnostics(const lsp::DocumentUri& uri, std::optional<int> version)
+    // lsp::PublishDiagnosticsParams publishDiagnostics(const lsp::DocumentUri& uri, std::optional<int> version)
+    // {
+    //     auto moduleName = getModuleName(uri);
+    //     auto diagnostics = findDiagnostics(moduleName);
+    //     return {uri, version, diagnostics};
+    // }
+
+private:
+    lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
     {
-        auto moduleName = getModuleName(uri);
-        auto diagnostics = findDiagnostics(moduleName);
-        return {uri, version, diagnostics};
+        std::string message;
+        if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+            message = "SyntaxError: " + syntaxError->message;
+        else
+            message = "TypeError: " + Luau::toString(error);
+
+        lsp::Diagnostic diagnostic;
+        diagnostic.source = "Luau";
+        diagnostic.code = error.code();
+        diagnostic.message = message;
+        diagnostic.severity = lsp::DiagnosticSeverity::Error;
+        diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
+        return diagnostic;
+    }
+
+    lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
+    {
+        lsp::Diagnostic diagnostic;
+        diagnostic.source = "Luau";
+        diagnostic.code = lint.code;
+        diagnostic.message = std::string(Luau::LintWarning::getName(lint.code)) + ": " + lint.text;
+        diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
+        diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
+        return diagnostic;
+    }
+
+public:
+    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
+    {
+        // TODO: should we apply a resultId and return an unchanged report if unchanged?
+        lsp::DocumentDiagnosticReport report;
+        std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
+
+        auto moduleName = getModuleName(params.textDocument.uri);
+        Luau::CheckResult cr;
+        if (frontend.isDirty(moduleName))
+            cr = frontend.check(moduleName);
+
+        // If there was an error retrieving the source module, bail early with this diagnostic
+        if (!frontend.getSourceModule(moduleName))
+        {
+            lsp::Diagnostic errorDiagnostic;
+            errorDiagnostic.source = "Luau";
+            errorDiagnostic.code = "000";
+            errorDiagnostic.message = "Failed to resolve source module for this file";
+            errorDiagnostic.severity = lsp::DiagnosticSeverity::Error;
+            errorDiagnostic.range = {{0, 0}, {0, 0}};
+            report.items.emplace_back(errorDiagnostic);
+            return report;
+        }
+
+        // Report Type Errors
+        // Note that type errors can extend to related modules in the require graph - so we report related information here
+        for (auto& error : cr.errors)
+        {
+            auto diagnostic = createTypeErrorDiagnostic(error);
+            if (error.moduleName == moduleName)
+            {
+                report.items.emplace_back(diagnostic);
+            }
+            else
+            {
+                auto fileName = fileResolver.resolveVirtualPathToRealPath(error.moduleName);
+                if (!fileName)
+                    continue;
+                auto uri = Uri::file(*fileName);
+                auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
+                currentDiagnostics.emplace_back(diagnostic);
+            }
+        }
+
+        // Convert the related diagnostics map into an equivalent report
+        if (!relatedDiagnostics.empty())
+        {
+            for (auto& [uri, diagnostics] : relatedDiagnostics)
+            {
+                // TODO: resultId?
+                lsp::SingleDocumentDiagnosticReport subReport{lsp::DocumentDiagnosticReportKind::Full, std::nullopt, diagnostics};
+                report.relatedDocuments.emplace(uri, subReport);
+            }
+        }
+
+        // Report Lint Warnings
+        // Lints only apply to the current file
+        Luau::LintResult lr = frontend.lint(moduleName);
+        for (auto& error : lr.errors)
+        {
+            auto diagnostic = createLintDiagnostic(error);
+            diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
+            report.items.emplace_back(diagnostic);
+        }
+        for (auto& error : lr.warnings)
+            report.items.emplace_back(createLintDiagnostic(error));
+
+        return report;
     }
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
@@ -1215,74 +1315,5 @@ private:
         }
         Luau::freeze(frontend.typeChecker.globalTypes);
         Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
-    }
-
-    std::vector<lsp::Diagnostic> findDiagnostics(const Luau::ModuleName& fileName)
-    {
-        Luau::CheckResult cr;
-        if (frontend.isDirty(fileName))
-            cr = frontend.check(fileName);
-
-        if (!frontend.getSourceModule(fileName))
-        {
-            lsp::Diagnostic errorDiagnostic;
-            errorDiagnostic.source = "Luau";
-            errorDiagnostic.code = "000";
-            errorDiagnostic.message = "Failed to resolve source module for this file";
-            errorDiagnostic.severity = lsp::DiagnosticSeverity::Error;
-            errorDiagnostic.range = {{0, 0}, {0, 0}};
-            return {errorDiagnostic};
-        }
-
-        std::vector<lsp::Diagnostic> diagnostics;
-        for (auto& error : cr.errors)
-        {
-            // TODO: temporarily ignore diagnostics for modules which are irrelevant
-            // TODO: we should publish these as separate diagnostics for the other files
-            if (error.moduleName != fileName)
-                continue;
-
-            std::string message;
-            if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
-            {
-                message = "SyntaxError: " + syntaxError->message;
-            }
-            else
-            {
-                message = "TypeError: " + Luau::toString(error);
-            }
-
-            lsp::Diagnostic diag;
-            diag.source = "Luau";
-            diag.code = error.code();
-            diag.message = message;
-            diag.severity = lsp::DiagnosticSeverity::Error;
-            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
-            diagnostics.emplace_back(diag);
-        }
-
-        Luau::LintResult lr = frontend.lint(fileName);
-        for (auto& error : lr.errors)
-        {
-            lsp::Diagnostic diag;
-            diag.source = "Luau";
-            diag.code = error.code;
-            diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
-            diag.severity = lsp::DiagnosticSeverity::Error;
-            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
-            diagnostics.emplace_back(diag);
-        }
-        for (auto& error : lr.warnings)
-        {
-            lsp::Diagnostic diag;
-            diag.source = "Luau";
-            diag.code = error.code;
-            diag.message = std::string(Luau::LintWarning::getName(error.code)) + ": " + error.text;
-            diag.severity = lsp::DiagnosticSeverity::Warning;
-            diag.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
-            diagnostics.emplace_back(diag);
-        }
-
-        return diagnostics;
     }
 };
