@@ -1031,6 +1031,25 @@ public:
         return std::nullopt;
     }
 
+    std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+
+        // Run the type checker to ensure we are up to date
+        if (frontend.isDirty(moduleName))
+            frontend.check(moduleName);
+
+        auto module = frontend.moduleResolver.getModule(moduleName);
+        if (!module)
+            return std::nullopt;
+
+        std::vector<lsp::DocumentSymbol> result;
+
+        // TODO
+
+        return result;
+    }
+
     bool updateSourceMap()
     {
         // Read in the sourcemap

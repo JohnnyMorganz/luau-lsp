@@ -99,6 +99,8 @@ public:
         bool implementationProvider = false; // TODO: does this apply to Luau?
         // Find References Provider
         bool referencesProvider = false;
+        // Document Symbol Provider
+        bool documentSymbolProvider = true;
         // Document Link Provider
         lsp::DocumentLinkOptions documentLinkProvider{false};
         // Workspaces
@@ -106,7 +108,8 @@ public:
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
         workspace.workspaceFolders = workspaceFolderCapabilities;
         return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, declarationProvider,
-            definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentLinkProvider, workspace};
+            definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider, documentLinkProvider,
+            workspace};
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
@@ -150,6 +153,10 @@ public:
         else if (method == "textDocument/typeDefinition")
         {
             return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
+        }
+        else if (method == "textDocument/documentSymbol")
+        {
+            return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
         }
         else
         {
@@ -414,6 +421,15 @@ public:
     {
         auto workspace = findWorkspace(params.textDocument.uri);
         auto result = workspace->gotoTypeDefinition(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
+
+    Response documentSymbol(const lsp::DocumentSymbolParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->documentSymbol(params);
         if (result)
             return *result;
         return nullptr;
