@@ -320,14 +320,14 @@ struct Position
     size_t line;
     size_t character;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Position, line, character);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
 
 struct Range
 {
     Position start;
     Position end;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Range, start, end);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Range, start, end);
 
 struct TextDocumentItem
 {
@@ -336,26 +336,26 @@ struct TextDocumentItem
     int version;
     std::string text;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentItem, uri, languageId, version, text);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentItem, uri, languageId, version, text);
 
 struct TextDocumentIdentifier
 {
     DocumentUri uri;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentIdentifier, uri);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentIdentifier, uri);
 
 struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
     int version;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(VersionedTextDocumentIdentifier, uri, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
 
 struct TextDocumentPositionParams
 {
     TextDocumentIdentifier textDocument;
     Position position;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentPositionParams, textDocument, position);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentPositionParams, textDocument, position);
 
 struct TextEdit
 {
@@ -398,7 +398,7 @@ struct DidChangeTextDocumentParams
     VersionedTextDocumentIdentifier textDocument;
     std::vector<TextDocumentContentChangeEvent> contentChanges;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeTextDocumentParams, textDocument, contentChanges);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeTextDocumentParams, textDocument, contentChanges);
 
 struct DidCloseTextDocumentParams
 {
