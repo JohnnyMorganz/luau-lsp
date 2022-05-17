@@ -500,17 +500,21 @@ public:
     }
 
     // TODO: can't type this as lsp::hover as it can return null
-    std::optional<lsp::Hover> hover(const lsp::HoverParams& params)
+    Response hover(const lsp::HoverParams& params)
     {
         auto workspace = findWorkspace(params.textDocument.uri);
-        return workspace->hover(params);
+        if (auto result = workspace->hover(params))
+            return *result;
+        return nullptr;
     }
 
     // TODO: can't type this as lsp::SignatureHelp as it can return null
-    std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params)
+    Response signatureHelp(const lsp::SignatureHelpParams& params)
     {
         auto workspace = findWorkspace(params.textDocument.uri);
-        return workspace->signatureHelp(params);
+        if (auto result = workspace->signatureHelp(params))
+            return *result;
+        return nullptr;
     }
 
     Response gotoDefinition(const lsp::DefinitionParams& params)

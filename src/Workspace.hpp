@@ -799,7 +799,7 @@ public:
             item.deprecated = entry.deprecated;
 
             if (entry.documentationSymbol)
-                item.documentation = printDocumentation(client->documentation, *entry.documentationSymbol);
+                item.documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *entry.documentationSymbol)};
 
             switch (entry.kind)
             {
@@ -1086,7 +1086,7 @@ public:
 
             // Create the whole label
             std::string label = types::toStringNamedFunction(module, ftv, candidate->func);
-            std::optional<lsp::MarkupContent> documentation;
+            lsp::MarkupContent documentation{lsp::MarkupKind::PlainText, ""};
 
             if (followedId->documentationSymbol)
                 documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
@@ -1107,17 +1107,19 @@ public:
                 }
 
                 std::string label;
+                lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::PlainText, ""};
                 if (idx < ftv->argNames.size() && ftv->argNames[idx])
                 {
                     label = ftv->argNames[idx]->name + ": ";
                 }
                 label += Luau::toString(*it);
-                parameters.push_back(lsp::ParameterInformation{label});
+
+                parameters.push_back(lsp::ParameterInformation{label, parameterDocumentation});
                 it++;
                 idx++;
             }
 
-            signatures.push_back(lsp::SignatureInformation{label, std::nullopt, parameters});
+            signatures.push_back(lsp::SignatureInformation{label, documentation, parameters});
         };
 
         if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedId))

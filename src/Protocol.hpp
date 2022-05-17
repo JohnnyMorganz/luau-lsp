@@ -648,6 +648,20 @@ enum struct CompletionItemKind
     TypeParameter = 25,
 };
 
+enum struct MarkupKind
+{
+    PlainText,
+    Markdown,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(MarkupKind, {{MarkupKind::PlainText, "plaintext"}, {MarkupKind::Markdown, "markdown"}});
+
+struct MarkupContent
+{
+    MarkupKind kind;
+    std::string value;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MarkupContent, kind, value);
+
 struct CompletionItem
 {
     std::string label;
@@ -655,7 +669,7 @@ struct CompletionItem
     std::optional<CompletionItemKind> kind;
     std::optional<std::vector<CompletionItemTag>> tags;
     std::optional<std::string> detail;
-    std::optional<std::string> documentation;
+    std::optional<MarkupContent> documentation;
     bool deprecated = false;
     bool preselect = false;
     std::optional<std::string> sortText;
@@ -691,20 +705,6 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentLink, range, target, too
 struct HoverParams : TextDocumentPositionParams
 {
 };
-
-enum struct MarkupKind
-{
-    PlainText,
-    Markdown,
-};
-NLOHMANN_JSON_SERIALIZE_ENUM(MarkupKind, {{MarkupKind::PlainText, "plaintext"}, {MarkupKind::Markdown, "markdown"}});
-
-struct MarkupContent
-{
-    MarkupKind kind;
-    std::string value;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MarkupContent, kind, value);
 
 struct Hover
 {
