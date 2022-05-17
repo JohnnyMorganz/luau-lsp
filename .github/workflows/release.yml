@@ -112,14 +112,6 @@ jobs:
         with:
           name: dist-darwin-arm64
           path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-linux-arm64
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-win32-arm64
-          path: dist
       - run: ls -al ./dist
 
       - name: Publish Release
