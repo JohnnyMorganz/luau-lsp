@@ -52,12 +52,26 @@
                 "path": "./syntaxes/lua.tmLanguage.json"
             }
         ],
-        "commands": [
-            {
-                "command": "luau-lsp.helloWorld",
-                "title": "Hello World"
+        "configuration": {
+            "title": "Luau",
+            "properties": {
+                "luau-lsp.autocompleteEnd": {
+                    "markdownDescription": "Automatically insert an `end` when opening a block",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.ignoreGlobs": {
+                    "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        "**/_Index/**"
+                    ]
+                }
             }
-        ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run package",

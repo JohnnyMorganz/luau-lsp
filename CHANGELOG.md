@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added basic go to definition and go to type definition support
 - Added support for pull-based diagnostics
+- Added the base support for user configuration through extension settings
 
 ### Changed
 
