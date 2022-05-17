@@ -16,8 +16,6 @@ jobs:
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
-          - os: macos-latest
-            code-target: darwin-arm64
 
     name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
@@ -39,6 +37,7 @@ jobs:
           cmake --build . --config Release --target luau-lsp
 
       - name: (MacOS) Verify universal build
+        if: matrix.os == 'macos-latest'
         run: lipo -archs build/luau-lsp
 
       - name: Move Build + Copy into Extension
