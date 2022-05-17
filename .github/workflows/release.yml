@@ -16,6 +16,8 @@ jobs:
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
+          - os: macos-latest
+            code-target: darwin-arm64 # TODO: we should try and merge this with above, because it runs the exact same steps
 
     name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
