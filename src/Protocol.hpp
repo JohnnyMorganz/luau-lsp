@@ -388,7 +388,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidOpenTextDocumentParams, textD
 struct TextDocumentContentChangeEvent
 {
     // If only text is provided, then its considered to be the whole document
-    std::optional<Range> range;
+    std::optional<Range> range = std::nullopt;
     std::string text;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentContentChangeEvent, range, text);
