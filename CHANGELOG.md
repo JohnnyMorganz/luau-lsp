@@ -6,14 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added basic go to definition and go to type definition support
+- Added support for pull-based diagnostics
+- Added the base support for user configuration through extension settings
+- Added support for marking specific globs as ignored (through extension settings). If a file is ignored, diagnostics will ONLY be displayed when the file is explicitly opened. If the file is closed, diagnostics will be discarded.
+
 ### Changed
 
 - Hover over definitions will now try to give more expressive types
+- `self` will now no longer show up in hover/signature help if it has already been implicitly provided
+- `_: ` will no longer show up in hover/signature help for unnamed function parameters
 
 ### Fixed
 
 - Fixed hover over method function definitions not working
 - Added a fallback to the prefix of a method name if we can't find the actual name
+- Fixed diagnostics lost on a reopened file because we did not mark it as dirty
+- Fixed invalid path computed for related diagnostics so they were not showing in the editor
 
 ## [0.3.0] - 2022-05-15
 

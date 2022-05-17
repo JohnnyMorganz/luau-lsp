@@ -58,6 +58,34 @@ struct adl_serializer<std::variant<std::string, int>>
             data = j.get<int>();
     }
 };
+
+// Same for int | bool
+template<>
+struct adl_serializer<std::variant<int, bool>>
+{
+    static void to_json(json& j, const std::variant<int, bool>& data)
+    {
+        if (auto str = std::get_if<bool>(&data))
+        {
+            j = *str;
+        }
+        else if (auto num = std::get_if<int>(&data))
+        {
+            j = *num;
+        }
+    }
+
+    static void from_json(const json& j, std::variant<int, bool>& data)
+    {
+        // TODO: handle nicely?
+        assert(j.is_boolean() || j.is_number());
+
+        if (j.is_boolean())
+            data = j.get<bool>();
+        else if (j.is_number())
+            data = j.get<int>();
+    }
+};
 } // namespace nlohmann
 
 
@@ -97,15 +125,47 @@ struct TextDocumentClientCapabilities
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TextDocumentClientCapabilities, diagnostic);
 
+struct DidChangeConfigurationClientCapabilities
+{
+    /**
+     * Did change configuration notification supports dynamic registration.
+     */
+    bool dynamicRegistration = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeConfigurationClientCapabilities, dynamicRegistration);
+
+struct ClientWorkspaceCapabilities
+{
+    /**
+     * Capabilities specific to the `workspace/didChangeConfiguration`
+     * notification.
+     */
+    std::optional<DidChangeConfigurationClientCapabilities> didChangeConfiguration;
+
+    /**
+     * The client supports `workspace/configuration` requests.
+     *
+     * @since 3.6.0
+     */
+    bool configuration = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, configuration);
+
 struct ClientCapabilities
 {
+    /**
+     * Text document specific client capabilities.
+     */
     std::optional<TextDocumentClientCapabilities> textDocument;
+    /**
+     * Workspace specific client capabilities.
+     */
+    std::optional<ClientWorkspaceCapabilities> workspace;
     // TODO
     // notebook
-    // workspace
     // window
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCapabilities, textDocument);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCapabilities, textDocument, workspace);
 
 struct WorkspaceFolder
 {
@@ -345,6 +405,27 @@ struct DidCloseTextDocumentParams
     TextDocumentIdentifier textDocument;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidCloseTextDocumentParams, textDocument);
+
+struct DidChangeConfigurationParams
+{
+    json settings;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeConfigurationParams, settings);
+
+struct ConfigurationItem
+{
+    std::optional<DocumentUri> scopeUri;
+    std::optional<std::string> section;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigurationItem, scopeUri, section);
+
+struct ConfigurationParams
+{
+    std::vector<ConfigurationItem> items;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigurationParams, items);
+
+using GetConfigurationResponse = std::vector<json>;
 
 using Pattern = std::string;
 using GlobPattern = Pattern; // | RelativePattern

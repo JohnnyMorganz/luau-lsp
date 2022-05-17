@@ -204,6 +204,10 @@ public:
         {
             onDidCloseTextDocument(REQUIRED_PARAMS(params, "textDocument/didClose"));
         }
+        else if (method == "workspace/didChangeConfiguration")
+        {
+            onDidChangeConfiguration(REQUIRED_PARAMS(params, "workspace/didChangeConfiguration"));
+        }
         else if (method == "workspace/didChangeWorkspaceFolders")
         {
             onDidChangeWorkspaceFolders(REQUIRED_PARAMS(params, "workspace/didChangeWorkspaceFolders"));
@@ -241,8 +245,7 @@ public:
                     }
                     else if (msg.is_response())
                     {
-                        // TODO: check error or result
-                        continue;
+                        client->handleResponse(msg);
                     }
                     else if (msg.is_notification())
                     {
@@ -307,6 +310,20 @@ public:
         // Client received result of initialize
         client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
         client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
+
+        // Dynamically register for configuration changed notifications
+        if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
+            client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
+        {
+            client->registerCapability("workspace/didChangeConfiguration", nullptr);
+            // Send off requests to get the configuration for each workspace
+            std::vector<lsp::DocumentUri> items;
+            for (auto& workspace : workspaceFolders)
+            {
+                items.emplace_back(workspace->rootUri);
+            }
+            client->requestConfiguration(items);
+        }
 
         // Dynamically register file watchers. Currently doing on client
         // lsp::FileSystemWatcher watcher{"sourcemap.json"};
@@ -383,6 +400,43 @@ public:
         // Release managed in-memory file
         auto workspace = findWorkspace(params.textDocument.uri);
         workspace->closeTextDocument(params.textDocument.uri);
+
+        // If this was an ignored file then lets clear the diagnostics for it
+        if (workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
+        {
+            client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
+        }
+    }
+
+    void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params)
+    {
+        // We can't tell what workspace this is for, so we will have to clear our config information and
+        // manually get it for all the workspaces again
+        if (client->capabilities.workspace && client->capabilities.workspace->configuration)
+        {
+            client->configStore.clear();
+
+            // Send off requests to get the configuration again for each workspace
+            std::vector<lsp::DocumentUri> items;
+            for (auto& workspace : workspaceFolders)
+            {
+                items.emplace_back(workspace->rootUri);
+            }
+            client->requestConfiguration(items);
+        }
+        else
+        {
+            // We just have to assume these are the new global settings
+            // We can't assume its formed correctly, so lets wrap it in a try-catch
+            try
+            {
+                client->globalConfig = params.settings;
+            }
+            catch (const std::exception& e)
+            {
+                client->sendLogMessage(lsp::MessageType::Error, std::string("failed to refresh global configuration: ") + e.what());
+            }
+        }
     }
 
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params)
@@ -398,6 +452,9 @@ public:
                     }) != std::end(params.event.removed))
             {
                 it = workspaceFolders.erase(it);
+
+                // Remove the configuration information for this folder
+                client->removeConfiguration((*it)->rootUri);
             }
             else
             {
@@ -406,10 +463,13 @@ public:
         }
 
         // Add new folders
+        std::vector<lsp::DocumentUri> configItems;
         for (auto& folder : params.event.added)
         {
             workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri));
+            configItems.emplace_back(folder.uri);
         }
+        client->requestConfiguration(configItems);
     }
 
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
