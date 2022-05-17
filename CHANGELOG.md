@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for pull-based diagnostics
 - Added the base support for user configuration through extension settings
 - Added support for marking specific globs as ignored (through extension settings). If a file is ignored, diagnostics will ONLY be displayed when the file is explicitly opened. If the file is closed, diagnostics will be discarded.
+- Cross compiled macOS binary to arm64
 
 ### Changed
 

@@ -16,8 +16,10 @@ jobs:
             code-target: linux-x64
           - os: macos-latest
             code-target: darwin-x64
+          - os: macos-latest
+            code-target: darwin-arm64 # TODO: we should try and merge this with above, because it runs the exact same steps
 
-    name: ${{ matrix.os }}
+    name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -35,6 +37,10 @@ jobs:
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
           cmake --build . --config Release --target luau-lsp
+
+      - name: (MacOS) Verify universal build
+        if: matrix.os == 'macos-latest'
+        run: lipo -archs build/luau-lsp
 
       - name: Move Build + Copy into Extension
         if: matrix.os == 'windows-latest'
@@ -101,6 +107,10 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: dist-win32-x64
+          path: dist
+      - uses: actions/download-artifact@v1
+        with:
+          name: dist-darwin-arm64
           path: dist
       - run: ls -al ./dist
 

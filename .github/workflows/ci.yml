@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [windows, ubuntu, macos]
     name: Build Server (${{matrix.os}})
