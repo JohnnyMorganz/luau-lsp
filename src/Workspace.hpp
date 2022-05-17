@@ -625,6 +625,8 @@ public:
         auto moduleName = getModuleName(uri);
         fileResolver.managedFiles.emplace(
             std::make_pair(moduleName, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
+        // Mark the file as dirty as we don't know what changes were made to it
+        frontend.markDirty(moduleName);
     }
 
     void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)

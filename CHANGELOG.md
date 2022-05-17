@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed hover over method function definitions not working
 - Added a fallback to the prefix of a method name if we can't find the actual name
+- Fixed diagnostics lost on a reopened file because we did not mark it as dirty
 
 ## [0.3.0] - 2022-05-15
 
