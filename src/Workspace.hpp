@@ -471,27 +471,50 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIs
     return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
 }
 
+using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
+
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const Luau::AstExpr* funcExpr)
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
+
+    // HACK: remove all instances of "_: " from the function string
+    // They don't look great, maybe we should upstream this as an option?
+    size_t index;
+    while ((index = functionString.find("_: ")) != std::string::npos)
+    {
+        functionString.replace(index, 3, "");
+    }
+
+    // If a name has already been provided, just use that
+    if (auto name = std::get_if<std::string>(&nameOrFuncExpr))
+    {
+        return "function " + *name + functionString;
+    }
+    auto funcExprPtr = std::get_if<Luau::AstExpr*>(&nameOrFuncExpr);
+
+    // TODO: error here?
+    if (!funcExprPtr)
+        return "function" + functionString;
+    auto funcExpr = *funcExprPtr;
 
     // See if its just in the form `func(args)`
     if (auto local = funcExpr->as<Luau::AstExprLocal>())
     {
-        return "function " + Luau::toStringNamedFunction(local->local->name.value, *ftv, opts);
+        return "function " + std::string(local->local->name.value) + functionString;
     }
     else if (auto global = funcExpr->as<Luau::AstExprGlobal>())
     {
-        return "function " + Luau::toStringNamedFunction(global->name.value, *ftv, opts);
+        return "function " + std::string(global->name.value) + functionString;
     }
     else if (funcExpr->as<Luau::AstExprGroup>() || funcExpr->as<Luau::AstExprFunction>())
     {
         // In the form (expr)(args), which implies thats its probably a IIFE
-        return "function" + Luau::toStringNamedFunction("", *ftv, opts);
+        return "function" + functionString;
     }
 
     // See if the name belongs to a ClassTypeVar
@@ -540,8 +563,7 @@ std::string toStringFunctionCall(Luau::ModulePtr module, const Luau::FunctionTyp
         baseName = "_";
     }
 
-    // TODO: use implicitSelf to hide the self parameter
-    return "function " + Luau::toStringNamedFunction(baseName + methodName, *ftv, opts);
+    return "function " + baseName + methodName + functionString;
 }
 
 // Duplicated from Luau/TypeInfer.h, since its static
@@ -954,16 +976,12 @@ public:
         // If we have a function and its corresponding name
         if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
         {
-            // See if the name is locally bound
+            types::NameOrExpr name = exprOrLocal.getExpr();
             if (auto localName = exprOrLocal.getName())
             {
-                std::string name = localName->value;
-                typeString = codeBlock("lua", "function " + Luau::toStringNamedFunction(name, *ftv, opts));
+                name = localName->value;
             }
-            else if (auto funcExpr = exprOrLocal.getExpr())
-            {
-                typeString = codeBlock("lua", types::toStringFunctionCall(module, ftv, funcExpr));
-            }
+            typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name));
         }
         else if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
         {
@@ -1036,15 +1054,8 @@ public:
             opts.hideFunctionSelfArgument = candidate->self; // If self has been provided, then hide the self argument
 
             // Create the whole label
-            std::string label = types::toStringFunctionCall(module, ftv, candidate->func);
+            std::string label = types::toStringNamedFunction(module, ftv, candidate->func);
             std::optional<lsp::MarkupContent> documentation;
-
-            // HACK: remove all instances of "_: " from the label
-            // They don't look great, maybe we should upstream this as an option?
-            while (auto index = label.find("_: ") != std::string::npos)
-            {
-                label.replace(index, 3, "");
-            }
 
             if (followedId->documentationSymbol)
                 documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
