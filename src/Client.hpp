@@ -16,7 +16,7 @@ struct ClientConfiguration
     std::vector<std::string> ignoreGlobs;
     // std::unordered_map<std::string, std::variant<int, bool>> fastFlags; // TODO: add ability to configure fast flags
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, fastFlags);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs);
 
 class Client
 {

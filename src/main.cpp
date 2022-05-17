@@ -400,6 +400,12 @@ public:
         // Release managed in-memory file
         auto workspace = findWorkspace(params.textDocument.uri);
         workspace->closeTextDocument(params.textDocument.uri);
+
+        // If this was an ignored file then lets clear the diagnostics for it
+        if (workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
+        {
+            client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
+        }
     }
 
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params)

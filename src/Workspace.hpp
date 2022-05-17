@@ -8,6 +8,7 @@
 #include "Luau/AstQuery.h"
 #include "Luau/TypeInfer.h"
 #include "Luau/Transpiler.h"
+#include "glob/glob.hpp"
 #include "Client.hpp"
 #include "Protocol.hpp"
 #include "Sourcemap.hpp"
@@ -688,6 +689,24 @@ private:
     }
 
 public:
+    /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
+    bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt)
+    {
+        // We want to test globs against a relative path to workspace, since thats what makes most sense
+        auto relativePath = path.lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+        auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+        std::vector<std::string> patterns = config.ignoreGlobs; // TODO: extend further?
+        for (auto& pattern : patterns)
+        {
+            if (glob::fnmatch_case(relativePath, pattern))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
     {
         // TODO: should we apply a resultId and return an unchanged report if unchanged?
@@ -712,6 +731,8 @@ public:
             return report;
         }
 
+        auto config = client->getConfiguration(rootUri);
+
         // Report Type Errors
         // Note that type errors can extend to related modules in the require graph - so we report related information here
         for (auto& error : cr.errors)
@@ -724,7 +745,7 @@ public:
             else
             {
                 auto fileName = fileResolver.resolveVirtualPathToRealPath(error.moduleName);
-                if (!fileName)
+                if (!fileName || isIgnoredFile(*fileName, config))
                     continue;
                 auto uri = Uri::file(*fileName);
                 auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
