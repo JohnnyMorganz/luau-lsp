@@ -217,4 +217,10 @@ public:
         }
         return *_lineOffsets;
     }
+
+    // TODO: this is a bit expensive
+    std::vector<std::string_view> getLines()
+    {
+        return Luau::split(_content, '\n');
+    }
 };

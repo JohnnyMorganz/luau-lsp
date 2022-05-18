@@ -787,8 +787,117 @@ public:
         return report;
     }
 
+    void endAutocompletion(const lsp::CompletionParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+        auto position = convertPosition(params.position);
+
+        if (frontend.isDirty(moduleName))
+            frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return;
+
+        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+        if (ancestry.size() < 2)
+            return;
+
+        Luau::AstNode* parent = ancestry.at(ancestry.size() - 2);
+        if (!parent)
+            return;
+
+        // We should only apply it if the line just above us is the start of the unclosed statement
+        // Otherwise, we insert ends in weird places if theirs an unclosed stat a while away
+        if (!parent->is<Luau::AstStatForIn>() && !parent->is<Luau::AstStatFor>() && !parent->is<Luau::AstStatIf>() &&
+            !parent->is<Luau::AstStatWhile>() && !parent->is<Luau::AstExprFunction>())
+            return;
+        if (params.position.line - parent->location.begin.line > 1)
+            return;
+
+        auto unclosedBlock = false;
+        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
+        {
+            if (Luau::AstStatForIn* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatFor* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatIf* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatWhile* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstExprFunction* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->hasEnd)
+                unclosedBlock = true;
+        }
+
+        // TODO: we could potentially extend this further that just `hasEnd`
+        // by inserting `then`, `until` `do` etc. It seems Studio does this
+
+        if (unclosedBlock)
+        {
+            if (!fileResolver.isManagedFile(moduleName))
+                return;
+            auto document = fileResolver.managedFiles.at(moduleName);
+            auto lines = document.getLines();
+
+            // If the position marker is at the very end of the file, if we insert one line further then vscode will
+            // not be happy and will insert at the position marker.
+            // If its in the middle of the file, vscode won't change the marker
+            if (params.position.line == lines.size() - 1)
+            {
+                // Insert an end at the current position, with a newline before it
+                // We replace all the current contents of the line since it will just be whitespace
+                lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line, params.position.character}}, "\nend\n"};
+                std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+                client->applyEdit({"insert end", changes},
+                    [this](auto) -> void
+                    {
+                        // Move the cursor up
+                        // $/command notification has been manually added by us in the extension
+                        client->sendNotification("$/command", std::make_optional<json>({
+                                                                  {"command", "cursorMove"},
+                                                                  {"data", {{"to", "prevBlankLine"}}},
+                                                              }));
+                    });
+            }
+            else
+            {
+                // Find the indentation level to stick the end on
+                std::string indent = "";
+                if (lines.size() > 1)
+                {
+                    // Use the indentation of the previous line, as thats where the stat begins
+                    auto prevLine = lines.at(params.position.line - 1);
+                    if (prevLine.size() > 0)
+                    {
+                        auto ch = prevLine.at(0);
+                        for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
+                        {
+                            if (*it != ch)
+                                break;
+                            indent += *it;
+                        }
+                    }
+                }
+
+                // Insert the end onto the next line
+                lsp::Position position{params.position.line + 1, 0};
+                lsp::TextEdit edit{{position, position}, indent + "end\n"};
+                std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+                client->applyEdit({"insert end", changes});
+            }
+        }
+    }
+
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
     {
+        if (params.context && params.context->triggerCharacter == "\n")
+        {
+            if (client->getConfiguration(rootUri).autocompleteEnd)
+                endAutocompletion(params);
+            return {};
+        }
+
         auto result = Luau::autocomplete(frontend, getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
         std::vector<lsp::CompletionItem> items;
 

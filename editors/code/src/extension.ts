@@ -6,7 +6,6 @@ import {
   ServerOptions,
   LanguageClient,
   LanguageClientOptions,
-  Trace,
 } from "vscode-languageclient/node";
 
 const CURRENT_VERSION_TXT =
@@ -132,7 +131,12 @@ export async function activate(context: vscode.ExtensionContext) {
     serverOptions,
     clientOptions
   );
-  client.trace = Trace.Messages;
+
+  client.onReady().then(() => {
+    client.onNotification("$/command", (params) => {
+      vscode.commands.executeCommand(params.command, params.data);
+    });
+  });
 
   console.log("LSP Setup");
   context.subscriptions.push(client.start());

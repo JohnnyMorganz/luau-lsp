@@ -80,9 +80,9 @@ public:
     {
         lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
         // Completion
-        std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
-        lsp::CompletionOptions::CompletionItem completionItem{true};
-        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, false, completionItem};
+        std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "\n"}; // \n is used to trigger end completion
+        lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
+        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, /* resolveProvider: */ false, completionItem};
         // Hover Provider
         bool hoverProvider = true;
         // Signature Help

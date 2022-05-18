@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added end autocompletion functionality, as done in Studio. Can be enabled through `luau-lsp.autocompleteEnd`
+
 ## [0.4.1] - 2022-05-17
 
 ### Fixed
