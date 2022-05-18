@@ -42,7 +42,6 @@ We could also potentially take it a step forward, allowing the server to be used
 - [x] Document Link
 - [ ] Document Symbol
 - [ ] Color Provider
-- [ ] Formatting
 - [ ] Rename
 - [ ] Folding Range
 - [ ] Selection Range
@@ -61,6 +60,7 @@ They can be investigated at a later time:
 - [ ] Code Lens (not necessary)
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker
+- [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
 
 ## Build From Source
 
