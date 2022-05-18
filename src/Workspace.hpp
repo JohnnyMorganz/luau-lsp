@@ -325,11 +325,14 @@ public:
                     if (prevLine.size() > 0)
                     {
                         auto ch = prevLine.at(0);
-                        for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
+                        if (ch == ' ' || ch == '\t')
                         {
-                            if (*it != ch)
-                                break;
-                            indent += *it;
+                            for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
+                            {
+                                if (*it != ch)
+                                    break;
+                                indent += *it;
+                            }
                         }
                     }
                 }
