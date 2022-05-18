@@ -423,17 +423,43 @@ public:
         }
         else if (auto expr = exprOrLocal.getExpr())
         {
-            if (auto it = module->astTypes.find(expr))
-                type = *it;
-            else if (auto index = expr->as<Luau::AstExprIndexName>())
+            // Special case, we want to check if there is a parent in the ancestry, and if it is an AstTable
+            // If so, and we are hovering over a prop, we want to give type info for the assigned expression to the prop
+            // rather than just "string"
+            auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+            if (ancestry.size() >= 2 && ancestry.at(ancestry.size() - 2)->is<Luau::AstExprTable>())
             {
-                if (auto parentIt = module->astTypes.find(index->expr))
+                auto parent = ancestry.at(ancestry.size() - 2)->as<Luau::AstExprTable>();
+                for (const auto& [kind, key, value] : parent->items)
                 {
-                    auto parentType = Luau::follow(*parentIt);
-                    auto indexName = index->index.value;
-                    auto prop = lookupProp(parentType, indexName);
-                    if (prop)
-                        type = prop->type;
+                    if (key && key->location.contains(position))
+                    {
+                        // Return type type of the value
+                        if (auto it = module->astTypes.find(value))
+                        {
+                            type = *it;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (!type)
+            {
+                if (auto it = module->astTypes.find(expr))
+                {
+                    type = *it;
+                }
+                else if (auto index = expr->as<Luau::AstExprIndexName>())
+                {
+                    if (auto parentIt = module->astTypes.find(index->expr))
+                    {
+                        auto parentType = Luau::follow(*parentIt);
+                        auto indexName = index->index.value;
+                        auto prop = lookupProp(parentType, indexName);
+                        if (prop)
+                            type = prop->type;
+                    }
                 }
             }
         }

@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Can now handle function definitions in tables
   - Can handle cross-file definitions
   - Can handle deeply nested tables - multiple properties (incl. cross file support)
+- Hovering over a property inside a table will now give you type information about the assigned expression, rather than just "string"
 
 ## [0.4.1] - 2022-05-17
 
