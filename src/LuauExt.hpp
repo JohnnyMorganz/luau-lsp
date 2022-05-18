@@ -250,3 +250,89 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
 
 } // namespace types
+
+// TODO: should upstream this
+struct FindNodeType : public Luau::AstVisitor
+{
+    const Luau::Position pos;
+    const Luau::Position documentEnd;
+    Luau::AstNode* best = nullptr;
+
+    explicit FindNodeType(Luau::Position pos, Luau::Position documentEnd)
+        : pos(pos)
+        , documentEnd(documentEnd)
+    {
+    }
+
+    bool visit(Luau::AstNode* node) override
+    {
+        if (node->location.contains(pos))
+        {
+            best = node;
+            return true;
+        }
+
+        // Edge case: If we ask for the node at the position that is the very end of the document
+        // return the innermost AST element that ends at that position.
+
+        if (node->location.end == documentEnd && pos >= documentEnd)
+        {
+            best = node;
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual bool visit(class Luau::AstType* node)
+    {
+        return visit(static_cast<Luau::AstNode*>(node));
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        visit(static_cast<Luau::AstNode*>(block));
+
+        for (Luau::AstStat* stat : block->body)
+        {
+            if (stat->location.end < pos)
+                continue;
+            if (stat->location.begin > pos)
+                break;
+
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
+Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos)
+{
+    const Luau::Position end = source.root->location.end;
+    if (pos < source.root->location.begin)
+        return source.root;
+
+    if (pos > end)
+        pos = end;
+
+    FindNodeType findNode{pos, end};
+    findNode.visit(source.root);
+    return findNode.best;
+}
+
+std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name)
+{
+    const Luau::Scope* scope = &deepScope;
+    while (true)
+    {
+        auto it = scope->typeAliasLocations.find(name);
+        if (it != scope->typeAliasLocations.end())
+            return it->second;
+
+        if (scope->parent)
+            scope = scope->parent.get();
+        else
+            return std::nullopt;
+    }
+}

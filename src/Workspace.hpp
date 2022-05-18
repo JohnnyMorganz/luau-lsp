@@ -639,7 +639,7 @@ public:
         if (!sourceModule || !module)
             return std::nullopt;
 
-        auto node = Luau::findNodeAtPosition(*sourceModule, position);
+        auto node = findNodeOrTypeAtPosition(*sourceModule, position);
         if (!node)
             return std::nullopt;
 
@@ -648,14 +648,19 @@ public:
             // TODO: should we only handle references here? what if its an actual type
             if (auto reference = type->as<Luau::AstTypeReference>())
             {
-                // TODO: handle if imported from a module (i.e., reference.prefix)
                 auto scope = Luau::findScopeAtPosition(*module, position);
                 if (!scope)
                     return std::nullopt;
-                if (scope->typeAliasLocations.find(reference->name.value) == scope->typeAliasLocations.end())
+
+                // TODO: we currently can't handle if its imported from a module
+                if (reference->prefix)
                     return std::nullopt;
-                auto location = scope->typeAliasLocations.at(reference->name.value);
-                return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location.begin), convertPosition(location.end)}};
+
+                auto location = lookupTypeLocation(*scope, reference->name.value);
+                if (!location)
+                    return std::nullopt;
+
+                return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
             }
             return std::nullopt;
         };
@@ -664,20 +669,19 @@ public:
         {
             return findTypeLocation(type);
         }
-        else
+        else if (auto typeAlias = node->as<Luau::AstStatTypeAlias>())
         {
-            // ExprOrLocal gives us better information
-            auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
-            if (auto local = exprOrLocal.getLocal())
+            return findTypeLocation(typeAlias->type);
+        }
+        else if (auto localExpr = node->as<Luau::AstExprLocal>())
+        {
+            if (auto local = localExpr->local)
             {
                 if (auto annotation = local->annotation)
                 {
                     return findTypeLocation(annotation);
                 }
             }
-            // TODO: handle expressions
-            // AstExprTypeAssertion
-            // AstStatTypeAlias
         }
 
         return std::nullopt;

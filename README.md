@@ -36,7 +36,7 @@ We could also potentially take it a step forward, allowing the server to be used
 - [x] Hover
 - [x] Signature Help
 - [x] Go To Definition
-- [ ] Go To Type Definition
+- [x] Go To Type Definition
 - [ ] Find References
 - [ ] Document Highlight
 - [x] Document Link
