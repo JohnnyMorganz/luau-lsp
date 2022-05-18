@@ -284,7 +284,7 @@ struct FindNodeType : public Luau::AstVisitor
         return false;
     }
 
-    virtual bool visit(class Luau::AstType* node)
+    virtual bool visit(class Luau::AstType* node) override
     {
         return visit(static_cast<Luau::AstNode*>(node));
     }
