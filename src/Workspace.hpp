@@ -849,8 +849,7 @@ public:
                 // We replace all the current contents of the line since it will just be whitespace
                 lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line, params.position.character}}, "\nend\n"};
                 std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
-                lsp::ApplyWorkspaceEditParams editParams{"insert end", changes};
-                client->applyEdit(editParams,
+                client->applyEdit({"insert end", {changes}},
                     [this](auto) -> void
                     {
                         // Move the cursor up
@@ -885,8 +884,7 @@ public:
                 lsp::Position position{params.position.line + 1, 0};
                 lsp::TextEdit edit{{position, position}, indent + "end\n"};
                 std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
-                lsp::ApplyWorkspaceEditParams editParams{"insert end", changes};
-                client->applyEdit(editParams);
+                client->applyEdit({"insert end", {changes}});
             }
         }
     }
