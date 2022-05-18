@@ -387,10 +387,41 @@ public:
 
         auto module = frontend.moduleResolver.getModule(moduleName);
         auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
+        auto node = findNodeOrTypeAtPosition(*sourceModule, position);
+        if (!node)
+            return std::nullopt;
 
+        std::string typeName;
         std::optional<Luau::TypeId> type = std::nullopt;
 
-        if (auto expr = exprOrLocal.getExpr())
+        if (auto ref = node->as<Luau::AstTypeReference>())
+        {
+            auto scope = Luau::findScopeAtPosition(*module, position);
+            if (!scope)
+                return std::nullopt;
+            std::optional<Luau::TypeFun> typeFun;
+            if (ref->prefix)
+            {
+                typeName = std::string(ref->prefix->value) + "." + ref->name.value;
+                typeFun = scope->lookupImportedType(ref->prefix->value, ref->name.value);
+            }
+            else
+            {
+                typeName = ref->name.value;
+                typeFun = scope->lookupType(ref->name.value);
+            }
+            if (!typeFun)
+                return std::nullopt;
+            type = typeFun->type;
+        }
+        else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
+        {
+            auto scope = Luau::findScopeAtPosition(*module, position);
+            if (!scope)
+                return std::nullopt;
+            type = scope->lookup(local);
+        }
+        else if (auto expr = exprOrLocal.getExpr())
         {
             if (auto it = module->astTypes.find(expr))
                 type = *it;
@@ -438,13 +469,6 @@ public:
                 }
             }
         }
-        else if (auto local = exprOrLocal.getLocal())
-        {
-            auto scope = Luau::findScopeAtPosition(*module, position);
-            if (!scope)
-                return std::nullopt;
-            type = scope->lookup(local);
-        }
 
         if (!type)
             return std::nullopt;
@@ -459,7 +483,11 @@ public:
         std::string typeString = Luau::toString(*type, opts);
 
         // If we have a function and its corresponding name
-        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+        if (!typeName.empty())
+        {
+            typeString = codeBlock("lua", "type " + typeName + " = " + typeString);
+        }
+        else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
         {
             types::NameOrExpr name = exprOrLocal.getExpr();
             if (auto localName = exprOrLocal.getName())
