@@ -336,3 +336,43 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
             return std::nullopt;
     }
 }
+
+std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+{
+    if (auto ctv = Luau::get<Luau::ClassTypeVar>(parentType))
+    {
+        if (auto prop = Luau::lookupClassProp(ctv, name))
+            return *prop;
+    }
+    else if (auto tbl = Luau::get<Luau::TableTypeVar>(parentType))
+    {
+        if (tbl->props.find(name) != tbl->props.end())
+        {
+            return tbl->props.at(name);
+        }
+    }
+    else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
+    {
+        if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
+        {
+            if (tbl->props.find(name) != tbl->props.end())
+            {
+                return tbl->props.at(name);
+            }
+        }
+
+        // TODO: we should respect metatable __index
+    }
+    // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
+    // {
+    //     for (Luau::TypeId ty : i->parts)
+    //     {
+    //         // TODO: find the corresponding ty
+    //     }
+    // }
+    // else if (auto u = get<Luau::UnionTypeVar>(parentType))
+    // {
+    //     // Find the corresponding ty
+    // }
+    return std::nullopt;
+}

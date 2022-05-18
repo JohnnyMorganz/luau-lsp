@@ -431,41 +431,9 @@ public:
                 {
                     auto parentType = Luau::follow(*parentIt);
                     auto indexName = index->index.value;
-                    if (auto ctv = Luau::get<Luau::ClassTypeVar>(parentType))
-                    {
-                        if (auto prop = Luau::lookupClassProp(ctv, indexName))
-                        {
-                            type = prop->type;
-                        }
-                    }
-                    else if (auto tbl = Luau::get<Luau::TableTypeVar>(parentType))
-                    {
-                        if (tbl->props.find(indexName) != tbl->props.end())
-                        {
-                            type = tbl->props.at(indexName).type;
-                        }
-                    }
-                    else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
-                    {
-                        if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
-                        {
-                            if (tbl->props.find(indexName) != tbl->props.end())
-                            {
-                                type = tbl->props.at(indexName).type;
-                            }
-                        }
-                    }
-                    // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
-                    // {
-                    //     for (Luau::TypeId ty : i->parts)
-                    //     {
-                    //         // TODO: find the corresponding ty
-                    //     }
-                    // }
-                    // else if (auto u = get<Luau::UnionTypeVar>(parentType))
-                    // {
-                    //     // Find the corresponding ty
-                    // }
+                    auto prop = lookupProp(parentType, indexName);
+                    if (prop)
+                        type = prop->type;
                 }
             }
         }
@@ -640,14 +608,113 @@ public:
             return std::nullopt;
 
         auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
-        if (!binding)
+        if (binding)
+            // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
+            return lsp::Location{
+                params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}};
+
+        auto node = findNodeOrTypeAtPosition(*sourceModule, position);
+        if (!node)
             return std::nullopt;
 
-        // TODO: we should get further definitions from other modules (e.g., if the binding was from a `local X = require(...)`, we want more info
-        // about X from its required file)
-        // TODO: we should extend further if we don't find a binding (i.e., a index function call etc)
+        if (auto expr = node->asExpr())
+        {
+            if (auto lvalue = Luau::tryGetLValue(*expr))
+            {
+                const Luau::LValue* current = &*lvalue;
+                std::vector<std::string> keys; // keys in reverse order
+                while (auto field = Luau::get<Luau::Field>(*current))
+                {
+                    keys.push_back(field->key);
+                    current = baseof(*current);
+                }
 
-        return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}};
+                const Luau::Symbol* symbol = Luau::get<Luau::Symbol>(*current);
+                auto scope = Luau::findScopeAtPosition(*module, position);
+                if (!scope)
+                    return std::nullopt;
+
+                auto baseType = scope->lookup(*symbol);
+                if (!baseType)
+                    return std::nullopt;
+                baseType = Luau::follow(*baseType);
+
+                std::vector<Luau::Property> properties;
+                for (auto it = keys.rbegin(); it != keys.rend(); ++it)
+                {
+                    auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type);
+                    auto prop = lookupProp(base, *it);
+                    if (!prop)
+                        return std::nullopt;
+                    properties.push_back(*prop);
+                }
+
+                if (properties.empty())
+                    return std::nullopt;
+
+                std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
+                std::optional<Luau::Location> location = std::nullopt;
+
+                for (auto it = properties.rbegin(); it != properties.rend(); ++it)
+                {
+                    if (!location && it->location)
+                        location = it->location;
+                    if (!definitionModuleName)
+                        definitionModuleName = Luau::getDefinitionModuleName(Luau::follow(it->type));
+                }
+
+                if (location)
+                {
+                    if (definitionModuleName)
+                    {
+                        if (auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName))
+                        {
+                            return lsp::Location{Uri::file(*file), lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
+                        }
+                    }
+                    return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
+                }
+
+                // auto ty = Luau::follow(prop->type);
+
+                // Try to see if we can infer a good location
+                // if (auto ftv = Luau::get<Luau::FunctionTypeVar>(ty))
+                // {
+                //     if (auto def = ftv->definition)
+                //     {
+                //         if (auto definitionModuleName = def->definitionModuleName)
+                //         {
+                //             auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName);
+                //             if (file)
+                //                 return lsp::Location{Uri::file(*file),
+                //                     lsp::Range{convertPosition(def->definitionLocation.begin), convertPosition(def->definitionLocation.end)}};
+                //         }
+                //         else
+                //         {
+                //             return lsp::Location{params.textDocument.uri,
+                //                 lsp::Range{convertPosition(def->definitionLocation.begin), convertPosition(def->definitionLocation.end)}};
+                //         }
+                //     }
+                // }
+
+                // Fallback to the prop location if available
+                // if (prop->location)
+                // {
+                //     if (auto definitionModuleName = Luau::getDefinitionModuleName(ty))
+                //     {
+                //         if (auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName))
+                //         {
+                //             return lsp::Location{
+                //                 Uri::file(*file), lsp::Range{convertPosition(prop->location->begin), convertPosition(prop->location->end)}};
+                //         }
+                //     }
+                //     return lsp::Location{
+                //         params.textDocument.uri, lsp::Range{convertPosition(prop->location->begin), convertPosition(prop->location->end)}};
+                // }
+            }
+        }
+
+        return std::nullopt;
     }
 
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params)

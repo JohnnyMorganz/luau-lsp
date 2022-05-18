@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Improved Go To Type Definition support
+- Improved overall Go To Definition support
+  - Can now handle function definitions in tables
+  - Can handle cross-file definitions
+  - Can handle deeply nested tables - multiple properties (incl. cross file support)
 
 ## [0.4.1] - 2022-05-17
 
