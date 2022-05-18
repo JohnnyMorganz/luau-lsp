@@ -23,32 +23,6 @@ static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, s
     return std::nullopt;
 }
 
-// Get the corresponding Luau module name for a file
-Luau::ModuleName getModuleName(const std::string& name)
-{
-    return name;
-}
-Luau::ModuleName getModuleName(const std::filesystem::path& name)
-{
-    return name.generic_string();
-}
-Luau::ModuleName getModuleName(const Uri& name)
-{
-    return name.fsPath().generic_string();
-}
-
-Luau::Position convertPosition(const lsp::Position& position)
-{
-    LUAU_ASSERT(position.line <= UINT_MAX);
-    LUAU_ASSERT(position.character <= UINT_MAX);
-    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
-}
-
-lsp::Position convertPosition(const Luau::Position& position)
-{
-    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
-}
-
 class WorkspaceFolder
 {
 public:
@@ -241,6 +215,7 @@ public:
         return report;
     }
 
+private:
     void endAutocompletion(const lsp::CompletionParams& params)
     {
         auto moduleName = getModuleName(params.textDocument.uri);
@@ -346,6 +321,7 @@ public:
         }
     }
 
+public:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
     {
         if (params.context && params.context->triggerCharacter == "\n")

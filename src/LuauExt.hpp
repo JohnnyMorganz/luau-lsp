@@ -376,3 +376,15 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     // }
     return std::nullopt;
 }
+
+Luau::Position convertPosition(const lsp::Position& position)
+{
+    LUAU_ASSERT(position.line <= UINT_MAX);
+    LUAU_ASSERT(position.character <= UINT_MAX);
+    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
+}
+
+lsp::Position convertPosition(const Luau::Position& position)
+{
+    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
+}

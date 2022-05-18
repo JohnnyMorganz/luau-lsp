@@ -2,6 +2,20 @@
 #include <optional>
 #include <unordered_map>
 
+// Get the corresponding Luau module name for a file
+Luau::ModuleName getModuleName(const std::string& name)
+{
+    return name;
+}
+Luau::ModuleName getModuleName(const std::filesystem::path& name)
+{
+    return name.generic_string();
+}
+Luau::ModuleName getModuleName(const Uri& name)
+{
+    return name.fsPath().generic_string();
+}
+
 struct WorkspaceFileResolver
     : Luau::FileResolver
     , Luau::ConfigResolver
