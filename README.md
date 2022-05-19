@@ -13,6 +13,8 @@ It does this by running the `rojo sourcemap` command, hence the Rojo executable 
 (Note: `rojo sourcemap` is currently not released, you must manually install latest Rojo directly using `cargo install rojo --git https://github.com/rojo-rbx/rojo.git` to have sourcemap generation support).
 It is recommend to `.gitignore` the `sourcemap.json` file. In future, the language server will generate the file internally.
 
+Note that currently the language server only supports generating a sourcemap from a `default.project.json`. If other project files are necessary, please open an issue.
+
 The extension will also automatically populate the latest API types and documentation.
 
 ## Design Goals
@@ -22,6 +24,8 @@ Module resolution and typing will initially revolve around [Rojo](https://github
 
 The idea is to ensure module resolution is customisable, allowing the server to later be easily extended to support other environments where Luau may be used.
 We could also potentially take it a step forward, allowing the server to be used on an Lua 5.1 codebase through a translation layer (such as type comments through EmmyLua), allowing the language server to support general purpose Lua development powered by the Luau type inference engine.
+
+If you use Luau in a different environment and are interested in using the language server, please get in touch!
 
 ## Supported Features
 
