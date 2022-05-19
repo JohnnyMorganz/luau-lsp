@@ -245,6 +245,7 @@ void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std
 
     for (auto& child : node->children)
     {
+        child->parent = node;
         writePathsToMap(child, base + "/" + child->name);
     }
 }
