@@ -15,7 +15,9 @@ add_executable(luau-lsp
     src/TextDocument.cpp
     src/Client.cpp
     src/DocumentationParser.cpp
-    src/LuauExt.cpp)
+    src/LuauExt.cpp
+    src/Utils.cpp
+)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
