@@ -88,43 +88,6 @@ public:
         fileResolver.managedFiles.erase(moduleName);
     }
 
-    // lsp::PublishDiagnosticsParams publishDiagnostics(const lsp::DocumentUri& uri, std::optional<int> version)
-    // {
-    //     auto moduleName = getModuleName(uri);
-    //     auto diagnostics = findDiagnostics(moduleName);
-    //     return {uri, version, diagnostics};
-    // }
-
-private:
-    lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
-    {
-        std::string message;
-        if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
-            message = "SyntaxError: " + syntaxError->message;
-        else
-            message = "TypeError: " + Luau::toString(error);
-
-        lsp::Diagnostic diagnostic;
-        diagnostic.source = "Luau";
-        diagnostic.code = error.code();
-        diagnostic.message = message;
-        diagnostic.severity = lsp::DiagnosticSeverity::Error;
-        diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
-        return diagnostic;
-    }
-
-    lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
-    {
-        lsp::Diagnostic diagnostic;
-        diagnostic.source = "Luau";
-        diagnostic.code = lint.code;
-        diagnostic.message = std::string(Luau::LintWarning::getName(lint.code)) + ": " + lint.text;
-        diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
-        diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
-        return diagnostic;
-    }
-
-public:
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt)
     {
