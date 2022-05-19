@@ -179,7 +179,7 @@ public:
     }
 
 private:
-    LUAU_NOINLINE void endAutocompletion(const lsp::CompletionParams& params)
+    void endAutocompletion(const lsp::CompletionParams& params)
     {
         auto moduleName = getModuleName(params.textDocument.uri);
         auto position = convertPosition(params.position);
@@ -859,24 +859,24 @@ public:
         return std::nullopt;
     }
 
-    std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params)
-    {
-        auto moduleName = getModuleName(params.textDocument.uri);
+    // std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params)
+    // {
+    //     auto moduleName = getModuleName(params.textDocument.uri);
 
-        // Run the type checker to ensure we are up to date
-        if (frontend.isDirty(moduleName))
-            frontend.check(moduleName);
+    //     // Run the type checker to ensure we are up to date
+    //     if (frontend.isDirty(moduleName))
+    //         frontend.check(moduleName);
 
-        auto module = frontend.moduleResolver.getModule(moduleName);
-        if (!module)
-            return std::nullopt;
+    //     auto module = frontend.moduleResolver.getModule(moduleName);
+    //     if (!module)
+    //         return std::nullopt;
 
-        std::vector<lsp::DocumentSymbol> result;
+    //     std::vector<lsp::DocumentSymbol> result;
 
-        // TODO
+    //     // TODO
 
-        return result;
-    }
+    //     return result;
+    // }
 
     bool updateSourceMap()
     {
