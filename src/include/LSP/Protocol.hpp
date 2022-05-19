@@ -312,8 +312,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(InitializeResult, capabilities, 
 struct InitializedParams
 {
 };
-static void to_json(json&, const InitializedParams&){};
-static void from_json(const json&, InitializedParams&){};
+inline void from_json(const json&, InitializedParams&){};
 
 struct Position
 {

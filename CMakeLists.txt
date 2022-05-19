@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 project(luau-lsp LANGUAGES CXX)
 
-include(CTest)
-enable_testing()
-
 add_executable(luau-lsp
     src/main.cpp
     src/JsonRpc.cpp
@@ -15,16 +12,14 @@ add_executable(luau-lsp
     src/TextDocument.cpp
     src/Client.cpp
     src/DocumentationParser.cpp
-    src/LuauExt.cpp)
-
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+    src/LuauExt.cpp
+    src/Utils.cpp
+)
 
 add_subdirectory(luau)
 
 target_compile_features(luau-lsp PUBLIC cxx_std_17)
-target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include)
+target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)
 target_link_libraries(luau-lsp PRIVATE Luau.Ast Luau.Analysis)
 
 if(MSVC)
@@ -32,3 +27,7 @@ if(MSVC)
 else()
   target_compile_options(luau-lsp PRIVATE -Wall -Werror)
 endif()
+
+add_executable(luau-lsp-tests tests/main.cpp)
+target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)
+target_include_directories(luau-lsp-tests PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)

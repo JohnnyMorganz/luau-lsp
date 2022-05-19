@@ -11,18 +11,9 @@
 #include "LSP/TextDocument.hpp"
 
 // Get the corresponding Luau module name for a file
-static Luau::ModuleName getModuleName(const std::string& name)
-{
-    return name;
-}
-static Luau::ModuleName getModuleName(const std::filesystem::path& name)
-{
-    return name.generic_string();
-}
-static Luau::ModuleName getModuleName(const Uri& name)
-{
-    return name.fsPath().generic_string();
-}
+Luau::ModuleName getModuleName(const std::string& name);
+Luau::ModuleName getModuleName(const std::filesystem::path& name);
+Luau::ModuleName getModuleName(const Uri& name);
 
 struct WorkspaceFileResolver
     : Luau::FileResolver
