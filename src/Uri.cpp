@@ -269,3 +269,13 @@ std::string Uri::toString() const
     }
     return res;
 }
+
+void from_json(const json& j, Uri& u)
+{
+    u = Uri::parse(j.get<std::string>());
+}
+
+void to_json(json& j, const Uri& u)
+{
+    j = u.toString();
+}
