@@ -1,10 +1,11 @@
 {
     "name": "luau-lsp",
-    "displayName": "Luau LSP",
-    "description": "LSP Client for Luau",
+    "displayName": "Luau Language Server",
+    "description": "A Language Server Client for Luau",
     "author": "JohnnyMorganz",
     "publisher": "JohnnyMorganz",
     "license": "MIT",
+    "icon": "assets/icon.png",
     "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
     "repository": {
         "type": "git",
