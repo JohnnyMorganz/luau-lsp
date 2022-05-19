@@ -65,3 +65,6 @@ public:
     // Encodes the Uri into a string representation
     std::string toString() const;
 };
+
+void from_json(const json& j, Uri& u);
+void to_json(json& j, const Uri& u);
