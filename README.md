@@ -6,18 +6,14 @@ A proof of concept implementation of a language server for the [Luau](https://gi
 
 Install the extension from the marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
 
-In order to work effectively, you currently need to manually create a Rojo `sourcemap.json` in your workspace root.
-This allows the language server to easily resolve your instance tree and provide module resolution.
+To resolve your instance tree and provide module resolution, the language server uses Rojo sourcemaps.
+The language server will automatically create a `sourcemap.json` in your workspace root on startup and whenever files are added/created/renamed.
 
-Create a sourcemap:
+It does this by running the `rojo sourcemap` command, hence the Rojo executable must be available to use in your workspace root.
+(Note: `rojo sourcemap` is currently not released, you must manually install latest Rojo directly using `cargo install rojo --git https://github.com/rojo-rbx/rojo.git` to have sourcemap generation support).
+It is recommend to `.gitignore` the `sourcemap.json` file. In future, the language server will generate the file internally.
 
-```sh
-rojo sourcemap --include-non-scripts default.project.json --output sourcemap.json
-```
-
-(Note: `rojo sourcemap` is currently not released, you must manually install latest Rojo directly using `cargo install rojo --git https://github.com/rojo-rbx/rojo.git`)
-
-The extension will automatically populate the latest API types and documentation.
+The extension will also automatically populate the latest API types and documentation.
 
 ## Design Goals
 
