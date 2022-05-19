@@ -1,4 +1,3 @@
-#pragma once
 #include "LSP/Utils.hpp"
 
 std::optional<std::string> getParentPath(const std::string& path)

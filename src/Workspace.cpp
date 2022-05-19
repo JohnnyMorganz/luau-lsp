@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <limits.h>
 #include "LSP/Workspace.hpp"

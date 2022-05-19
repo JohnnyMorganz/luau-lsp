@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <optional>
 #include "LSP/Client.hpp"
