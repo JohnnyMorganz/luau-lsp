@@ -7,6 +7,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
 } from "vscode-languageclient/node";
+import { spawn } from "child_process";
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
@@ -137,6 +138,74 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand(params.command, params.data);
     });
   });
+
+  // Register automatic sourcemap regenerate
+  // TODO: maybe we should move this to the server in future
+  const updateSourceMap = (workspaceFolder: vscode.WorkspaceFolder) => {
+    client.info(
+      `Regenerating sourcemap for ${
+        workspaceFolder.name
+      } (${workspaceFolder.uri.toString(true)})`
+    );
+    const args = [
+      "sourcemap",
+      "default.project.json",
+      "--output",
+      "sourcemap.json",
+    ];
+    const child = spawn("rojo", args, { cwd: workspaceFolder.uri.fsPath });
+
+    const onFailEvent = (err: any) => {
+      client.warn(
+        `Failed to update sourcemap for ${
+          workspaceFolder.name
+        } (${workspaceFolder.uri.toString(true)}): ` + err
+      );
+    };
+    child.stderr.on("data", onFailEvent);
+    child.on("err", onFailEvent);
+  };
+
+  const listener = (e: vscode.FileCreateEvent | vscode.FileDeleteEvent) => {
+    if (e.files.length === 0) {
+      return;
+    }
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(e.files[0]);
+    if (!workspaceFolder) {
+      return;
+    }
+    return updateSourceMap(workspaceFolder);
+  };
+
+  context.subscriptions.push(vscode.workspace.onDidCreateFiles(listener));
+  context.subscriptions.push(vscode.workspace.onDidDeleteFiles(listener));
+  context.subscriptions.push(
+    vscode.workspace.onDidRenameFiles((e) => {
+      if (e.files.length === 0) {
+        return;
+      }
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+        e.files[0].oldUri
+      );
+      if (!workspaceFolder) {
+        return;
+      }
+      return updateSourceMap(workspaceFolder);
+    })
+  );
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders((e) => {
+      for (const folder of e.added) {
+        updateSourceMap(folder);
+      }
+    })
+  );
+
+  if (vscode.workspace.workspaceFolders) {
+    for (const folder of vscode.workspace.workspaceFolders) {
+      updateSourceMap(folder);
+    }
+  }
 
   console.log("LSP Setup");
   context.subscriptions.push(client.start());
