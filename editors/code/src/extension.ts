@@ -142,6 +142,12 @@ export async function activate(context: vscode.ExtensionContext) {
   // Register automatic sourcemap regenerate
   // TODO: maybe we should move this to the server in future
   const updateSourceMap = (workspaceFolder: vscode.WorkspaceFolder) => {
+    const config = vscode.workspace.getConfiguration("luau-lsp");
+    if (!config.get<boolean>("autogenerateSourcemap")) {
+      // TODO: maybe we should disconnect the event instead of early returning? Bit more messy
+      return;
+    }
+
     client.info(
       `Regenerating sourcemap for ${
         workspaceFolder.name
@@ -149,11 +155,14 @@ export async function activate(context: vscode.ExtensionContext) {
     );
     const args = [
       "sourcemap",
-      "default.project.json",
+      config.get<string>("rojoProjectFile") ?? "default.project.json",
       "--output",
       "sourcemap.json",
-      "--include-non-scripts",
     ];
+    if (config.get<boolean>("includeNonScriptsInSourcemap")) {
+      args.push("--include-non-scripts");
+    }
+
     const child = spawn("rojo", args, { cwd: workspaceFolder.uri.fsPath });
 
     const onFailEvent = (err: any) => {
@@ -198,6 +207,21 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeWorkspaceFolders((e) => {
       for (const folder of e.added) {
         updateSourceMap(folder);
+      }
+    })
+  );
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (
+        e.affectsConfiguration("luau-lsp.autogenerateSourcemap") ||
+        e.affectsConfiguration("luau-lsp.includeNonScriptsInSourcemap") ||
+        e.affectsConfiguration("luau-lsp.rojoProjectFile")
+      ) {
+        if (vscode.workspace.workspaceFolders) {
+          for (const folder of vscode.workspace.workspaceFolders) {
+            updateSourceMap(folder);
+          }
+        }
       }
     })
   );

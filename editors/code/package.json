@@ -70,6 +70,21 @@
                     "default": [
                         "**/_Index/**"
                     ]
+                },
+                "luau-lsp.autogenerateSourcemap": {
+                    "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
+                    "type": "boolean",
+                    "default": true
+                },
+                "luau-lsp.rojoProjectFile": {
+                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if #luau-lsp.autogenerateSourcemap# is enabled",
+                    "type": "string",
+                    "default": "default.project.json"
+                },
+                "luau-lsp.includeNonScriptsInSourcemap": {
+                    "markdownDescription": "Include non-script instances in the generated sourcemap",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }

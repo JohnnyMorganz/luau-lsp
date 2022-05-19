@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- Can disable automatic sourcemap generation in extension settings.
+- Can change the project file used to generate sourcemap in extension settings (defaults to `default.project.json`).
+- Can toggle whether non-script instances are included in the generated sourcemap (included by default).
+
 ## [1.0.0] - 2022-05-19
 
 ### Added
