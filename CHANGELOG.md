@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added hover information for type references
 - Added end autocompletion functionality, as done in Studio. Can be enabled through `luau-lsp.autocompleteEnd`
+- Added automatic sourcemap regeneration when files change. This relies on `rojo` being available to execute in the workspace folder (i.e., on the PATH), with `rojo sourcemap` command support
 
 ### Changed
 
