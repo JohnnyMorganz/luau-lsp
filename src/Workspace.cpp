@@ -848,6 +848,7 @@ bool WorkspaceFolder::updateSourceMap()
     // TODO: we assume a sourcemap.json file in the workspace root
     if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
     {
+        frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
         return true;
     }
