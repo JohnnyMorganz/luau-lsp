@@ -72,7 +72,8 @@ public:
     bool updateSourceMap();
 
 private:
-    void registerExtendedTypes(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
+    void registerInstanceTypes(Luau::TypeChecker& typeChecker);
+    void registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
 
     bool isNullWorkspace() const
     {

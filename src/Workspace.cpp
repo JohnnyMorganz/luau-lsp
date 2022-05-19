@@ -843,13 +843,17 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
 bool WorkspaceFolder::updateSourceMap()
 {
     // Read in the sourcemap
-    // TODO: We should invoke the rojo process dynamically if possible here, so that we can also refresh the sourcemap when we notice files are
-    // changed
     // TODO: we assume a sourcemap.json file in the workspace root
     if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
     {
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
+
+        registerInstanceTypes(frontend.typeChecker);
+        registerInstanceTypes(frontend.typeCheckerForAutocomplete);
+
+        // TODO: we should signal a diagnostics refresh
+
         return true;
     }
     else
@@ -858,7 +862,71 @@ bool WorkspaceFolder::updateSourceMap()
     }
 }
 
-void WorkspaceFolder::registerExtendedTypes(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)
+void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
+{
+    // Extend the types from the sourcemap
+    // Extend globally registered types with Instance information
+    if (fileResolver.rootSourceNode)
+    {
+        if (fileResolver.rootSourceNode->className == "DataModel")
+        {
+            Luau::unfreeze(typeChecker.globalTypes);
+            for (const auto& service : fileResolver.rootSourceNode->children)
+            {
+                auto serviceName = service->className; // We know it must be a service of the same class name
+                if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
+                {
+                    if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
+                    {
+                        // Clear out all the old registered children
+                        for (auto it = ctv->props.begin(); it != ctv->props.end();)
+                        {
+                            if (hasTag(it->second, "@sourcemap-generated"))
+                                it = ctv->props.erase(it);
+                            else
+                                ++it;
+                        }
+
+
+                        // Extend the props to include the children
+                        for (const auto& child : service->children)
+                        {
+                            Luau::Property property{
+                                types::makeLazyInstanceType(typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type),
+                                /* deprecated */ false,
+                                /* deprecatedSuggestion */ {},
+                                /* location */ std::nullopt,
+                                /* tags */ {"@sourcemap-generated"},
+                                /* documentationSymbol*/ std::nullopt,
+                            };
+                            ctv->props[child->name] = property;
+                        }
+                    }
+                }
+            }
+            Luau::freeze(typeChecker.globalTypes);
+        }
+
+        // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
+        typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+        {
+            if (auto node =
+                    fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
+            {
+                // HACK: we need a way to get the typeArena for the module, but I don't know how
+                // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it
+                // this way...
+                LUAU_ASSERT(scope->returnType);
+                auto typeArena = scope->returnType->owningArena;
+                LUAU_ASSERT(typeArena);
+
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
+            }
+        };
+    }
+}
+
+void WorkspaceFolder::registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)
 {
     if (auto definitions = readFile(definitionsFile))
     {
@@ -869,84 +937,35 @@ void WorkspaceFolder::registerExtendedTypes(Luau::TypeChecker& typeChecker, cons
             return;
         }
 
-        // Extend globally registered types with Instance information
-        if (fileResolver.rootSourceNode)
+        if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
         {
-            if (fileResolver.rootSourceNode->className == "DataModel")
+            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
             {
-                for (const auto& service : fileResolver.rootSourceNode->children)
-                {
-                    auto serviceName = service->className; // We know it must be a service of the same class name
-                    if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
-                    {
-                        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
-                        {
-                            // Extend the props to include the children
-                            for (const auto& child : service->children)
-                            {
-                                ctv->props[child->name] = Luau::makeProperty(types::makeLazyInstanceType(
-                                    typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type, fileResolver));
-                            }
-                        }
-                    }
-                }
+                Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
             }
-
-            // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-            typeChecker.prepareModuleScope = [this](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
-            {
-                if (auto node = fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name)
-                                                                 : fileResolver.getSourceNodeFromRealPath(name))
-                {
-                    // HACK: we need a way to get the typeArena for the module, but I don't know how
-                    // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it
-                    // this way...
-                    LUAU_ASSERT(scope->returnType);
-                    auto typeArena = scope->returnType->owningArena;
-                    LUAU_ASSERT(typeArena);
-
-                    scope->bindings[Luau::AstName("script")] =
-                        Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt, fileResolver), Luau::Location{}, {},
-                            {}, std::nullopt};
-                }
-            };
         }
     }
     else
     {
         client->sendWindowMessage(lsp::MessageType::Error, "Unable to read the definitions file. Extended types will not be provided");
     }
-
-    if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
-    {
-        if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
-        {
-            Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
-        }
-    }
 }
 
 void WorkspaceFolder::setup()
 {
-    if (!isNullWorkspace() && !updateSourceMap())
-    {
-        client->sendWindowMessage(
-            lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
-    }
-
     Luau::registerBuiltinTypes(frontend.typeChecker);
     Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
 
     if (client->definitionsFile)
     {
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + client->definitionsFile->generic_string());
-        registerExtendedTypes(frontend.typeChecker, *client->definitionsFile);
-        registerExtendedTypes(frontend.typeCheckerForAutocomplete, *client->definitionsFile);
+        registerDefinitions(frontend.typeChecker, *client->definitionsFile);
+        registerDefinitions(frontend.typeCheckerForAutocomplete, *client->definitionsFile);
     }
     else
     {
@@ -955,4 +974,10 @@ void WorkspaceFolder::setup()
     }
     Luau::freeze(frontend.typeChecker.globalTypes);
     Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
+
+    if (!isNullWorkspace() && !updateSourceMap())
+    {
+        client->sendWindowMessage(
+            lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
+    }
 }

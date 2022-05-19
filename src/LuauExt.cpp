@@ -30,13 +30,17 @@ std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope,
     }
 }
 
-Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
-    std::optional<Luau::TypeId> parent, const WorkspaceFileResolver& fileResolver)
+Luau::TypeId makeLazyInstanceType(
+    Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node, std::optional<Luau::TypeId> parent)
 {
     Luau::LazyTypeVar ltv;
-    ltv.thunk = [&arena, globalScope, node, parent, fileResolver]()
+    ltv.thunk = [&arena, globalScope, node, parent]()
     {
         // TODO: we should cache created instance types and reuse them where possible
+
+        // Handle if the node is no longer valid
+        if (!node)
+            return Luau::getSingletonTypes().anyType;
 
         // Look up the base class instance
         auto baseTypeId = getTypeIdForClass(globalScope, node->className);
@@ -59,23 +63,15 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
             {
                 ctv->props["Parent"] = Luau::makeProperty(parent.value());
             }
-            else
+            else if (auto parentNode = node->parent.lock())
             {
-                // Search for the parent type
-                if (auto parentPath = getParentPath(node->virtualPath))
-                {
-                    if (auto parentNode = fileResolver.getSourceNodeFromVirtualPath(parentPath.value()))
-                    {
-                        ctv->props["Parent"] =
-                            Luau::makeProperty(makeLazyInstanceType(arena, globalScope, parentNode.value(), std::nullopt, fileResolver));
-                    }
-                }
+                ctv->props["Parent"] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, parentNode, std::nullopt));
             }
 
             // Add the children
-            for (const auto& child : node->children)
+            for (const auto child : node->children)
             {
-                ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, child, typeId, fileResolver));
+                ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, child, typeId));
             }
         }
         return typeId;
