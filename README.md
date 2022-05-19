@@ -1,6 +1,6 @@
 # Luau Language Server
 
-A proof of concept implementation of a language server for the [Luau](https://github.com/Roblox/luau) programming language.
+An implementation of a language server for the [Luau](https://github.com/Roblox/luau) programming language.
 
 ## Getting Started
 
