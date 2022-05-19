@@ -23,32 +23,6 @@ static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, s
     return std::nullopt;
 }
 
-// Get the corresponding Luau module name for a file
-Luau::ModuleName getModuleName(const std::string& name)
-{
-    return name;
-}
-Luau::ModuleName getModuleName(const std::filesystem::path& name)
-{
-    return name.generic_string();
-}
-Luau::ModuleName getModuleName(const Uri& name)
-{
-    return name.fsPath().generic_string();
-}
-
-Luau::Position convertPosition(const lsp::Position& position)
-{
-    LUAU_ASSERT(position.line <= UINT_MAX);
-    LUAU_ASSERT(position.character <= UINT_MAX);
-    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
-}
-
-lsp::Position convertPosition(const Luau::Position& position)
-{
-    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
-}
-
 class WorkspaceFolder
 {
 public:
@@ -114,43 +88,6 @@ public:
         fileResolver.managedFiles.erase(moduleName);
     }
 
-    // lsp::PublishDiagnosticsParams publishDiagnostics(const lsp::DocumentUri& uri, std::optional<int> version)
-    // {
-    //     auto moduleName = getModuleName(uri);
-    //     auto diagnostics = findDiagnostics(moduleName);
-    //     return {uri, version, diagnostics};
-    // }
-
-private:
-    lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
-    {
-        std::string message;
-        if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
-            message = "SyntaxError: " + syntaxError->message;
-        else
-            message = "TypeError: " + Luau::toString(error);
-
-        lsp::Diagnostic diagnostic;
-        diagnostic.source = "Luau";
-        diagnostic.code = error.code();
-        diagnostic.message = message;
-        diagnostic.severity = lsp::DiagnosticSeverity::Error;
-        diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
-        return diagnostic;
-    }
-
-    lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
-    {
-        lsp::Diagnostic diagnostic;
-        diagnostic.source = "Luau";
-        diagnostic.code = lint.code;
-        diagnostic.message = std::string(Luau::LintWarning::getName(lint.code)) + ": " + lint.text;
-        diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
-        diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
-        return diagnostic;
-    }
-
-public:
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt)
     {
@@ -241,8 +178,122 @@ public:
         return report;
     }
 
+private:
+    void endAutocompletion(const lsp::CompletionParams& params)
+    {
+        auto moduleName = getModuleName(params.textDocument.uri);
+        auto position = convertPosition(params.position);
+
+        if (frontend.isDirty(moduleName))
+            frontend.check(moduleName);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return;
+
+        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+        if (ancestry.size() < 2)
+            return;
+
+        Luau::AstNode* parent = ancestry.at(ancestry.size() - 2);
+        if (!parent)
+            return;
+
+        // We should only apply it if the line just above us is the start of the unclosed statement
+        // Otherwise, we insert ends in weird places if theirs an unclosed stat a while away
+        if (!parent->is<Luau::AstStatForIn>() && !parent->is<Luau::AstStatFor>() && !parent->is<Luau::AstStatIf>() &&
+            !parent->is<Luau::AstStatWhile>() && !parent->is<Luau::AstExprFunction>())
+            return;
+        if (params.position.line - parent->location.begin.line > 1)
+            return;
+
+        auto unclosedBlock = false;
+        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
+        {
+            if (Luau::AstStatForIn* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatFor* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatIf* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstStatWhile* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasEnd)
+                unclosedBlock = true;
+            if (Luau::AstExprFunction* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->hasEnd)
+                unclosedBlock = true;
+        }
+
+        // TODO: we could potentially extend this further that just `hasEnd`
+        // by inserting `then`, `until` `do` etc. It seems Studio does this
+
+        if (unclosedBlock)
+        {
+            if (!fileResolver.isManagedFile(moduleName))
+                return;
+            auto document = fileResolver.managedFiles.at(moduleName);
+            auto lines = document.getLines();
+
+            // If the position marker is at the very end of the file, if we insert one line further then vscode will
+            // not be happy and will insert at the position marker.
+            // If its in the middle of the file, vscode won't change the marker
+            if (params.position.line == lines.size() - 1)
+            {
+                // Insert an end at the current position, with a newline before it
+                // We replace all the current contents of the line since it will just be whitespace
+                lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line, params.position.character}}, "\nend\n"};
+                std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+                client->applyEdit({"insert end", {changes}},
+                    [this](auto) -> void
+                    {
+                        // Move the cursor up
+                        // $/command notification has been manually added by us in the extension
+                        client->sendNotification("$/command", std::make_optional<json>({
+                                                                  {"command", "cursorMove"},
+                                                                  {"data", {{"to", "prevBlankLine"}}},
+                                                              }));
+                    });
+            }
+            else
+            {
+                // Find the indentation level to stick the end on
+                std::string indent = "";
+                if (lines.size() > 1)
+                {
+                    // Use the indentation of the previous line, as thats where the stat begins
+                    auto prevLine = lines.at(params.position.line - 1);
+                    if (prevLine.size() > 0)
+                    {
+                        auto ch = prevLine.at(0);
+                        if (ch == ' ' || ch == '\t')
+                        {
+                            for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
+                            {
+                                if (*it != ch)
+                                    break;
+                                indent += *it;
+                            }
+                        }
+                    }
+                }
+
+                // Insert the end onto the next line
+                lsp::Position position{params.position.line + 1, 0};
+                lsp::TextEdit edit{{position, position}, indent + "end\n"};
+                std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+                client->applyEdit({"insert end", {changes}});
+            }
+        }
+    }
+
+public:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params)
     {
+        if (params.context && params.context->triggerCharacter == "\n")
+        {
+            if (client->getConfiguration(rootUri).autocompleteEnd)
+                endAutocompletion(params);
+            return {};
+        }
+
         auto result = Luau::autocomplete(frontend, getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
         std::vector<lsp::CompletionItem> items;
 
@@ -808,24 +859,24 @@ public:
         return std::nullopt;
     }
 
-    std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params)
-    {
-        auto moduleName = getModuleName(params.textDocument.uri);
+    // std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params)
+    // {
+    //     auto moduleName = getModuleName(params.textDocument.uri);
 
-        // Run the type checker to ensure we are up to date
-        if (frontend.isDirty(moduleName))
-            frontend.check(moduleName);
+    //     // Run the type checker to ensure we are up to date
+    //     if (frontend.isDirty(moduleName))
+    //         frontend.check(moduleName);
 
-        auto module = frontend.moduleResolver.getModule(moduleName);
-        if (!module)
-            return std::nullopt;
+    //     auto module = frontend.moduleResolver.getModule(moduleName);
+    //     if (!module)
+    //         return std::nullopt;
 
-        std::vector<lsp::DocumentSymbol> result;
+    //     std::vector<lsp::DocumentSymbol> result;
 
-        // TODO
+    //     // TODO
 
-        return result;
-    }
+    //     return result;
+    // }
 
     bool updateSourceMap()
     {

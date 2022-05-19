@@ -832,6 +832,28 @@ struct DidChangeWorkspaceFoldersParams
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWorkspaceFoldersParams, event);
 
+struct WorkspaceEdit
+{
+    // TODO: this is optional and there are other options provided
+    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceEdit, changes);
+
+struct ApplyWorkspaceEditParams
+{
+    std::optional<std::string> label;
+    WorkspaceEdit edit;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ApplyWorkspaceEditParams, label, edit);
+
+struct ApplyWorkspaceEditResult
+{
+    bool applied;
+    std::optional<std::string> failureReason;
+    std::optional<size_t> failedChange;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ApplyWorkspaceEditResult, applied, failureReason, failedChange);
+
 struct SetTraceParams
 {
     TraceValue value;

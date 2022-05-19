@@ -80,9 +80,9 @@ public:
     {
         lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
         // Completion
-        std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\""};
-        lsp::CompletionOptions::CompletionItem completionItem{true};
-        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, false, completionItem};
+        std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "\n"}; // \n is used to trigger end completion
+        lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
+        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, /* resolveProvider: */ false, completionItem};
         // Hover Provider
         bool hoverProvider = true;
         // Signature Help
@@ -99,7 +99,7 @@ public:
         // Find References Provider
         bool referencesProvider = false;
         // Document Symbol Provider
-        bool documentSymbolProvider = true;
+        bool documentSymbolProvider = false;
         // Document Link Provider
         lsp::DocumentLinkOptions documentLinkProvider{false};
         // Diagnostics Provider
@@ -155,10 +155,10 @@ public:
         {
             return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
         }
-        else if (method == "textDocument/documentSymbol")
-        {
-            return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
-        }
+        // else if (method == "textDocument/documentSymbol")
+        // {
+        //     return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+        // }
         else if (method == "textDocument/diagnostic")
         {
             return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
@@ -535,14 +535,14 @@ public:
         return nullptr;
     }
 
-    Response documentSymbol(const lsp::DocumentSymbolParams& params)
-    {
-        auto workspace = findWorkspace(params.textDocument.uri);
-        auto result = workspace->documentSymbol(params);
-        if (result)
-            return *result;
-        return nullptr;
-    }
+    // Response documentSymbol(const lsp::DocumentSymbolParams& params)
+    // {
+    //     auto workspace = findWorkspace(params.textDocument.uri);
+    //     auto result = workspace->documentSymbol(params);
+    //     if (result)
+    //         return *result;
+    //     return nullptr;
+    // }
 
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
     {

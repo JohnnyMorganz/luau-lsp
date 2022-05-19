@@ -181,6 +181,11 @@ public:
         sendRequest(nextRequestId++, "workspace/configuration", lsp::ConfigurationParams{items}, handler);
     }
 
+    void applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optional<ResponseHandler> handler = std::nullopt)
+    {
+        sendRequest(nextRequestId++, "workspace/applyEdit", params, handler);
+    }
+
     void setTrace(const lsp::SetTraceParams& params)
     {
         traceMode = params.value;

@@ -376,3 +376,43 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     // }
     return std::nullopt;
 }
+
+Luau::Position convertPosition(const lsp::Position& position)
+{
+    LUAU_ASSERT(position.line <= UINT_MAX);
+    LUAU_ASSERT(position.character <= UINT_MAX);
+    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
+}
+
+lsp::Position convertPosition(const Luau::Position& position)
+{
+    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
+}
+
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
+{
+    std::string message;
+    if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+        message = "SyntaxError: " + syntaxError->message;
+    else
+        message = "TypeError: " + Luau::toString(error);
+
+    lsp::Diagnostic diagnostic;
+    diagnostic.source = "Luau";
+    diagnostic.code = error.code();
+    diagnostic.message = message;
+    diagnostic.severity = lsp::DiagnosticSeverity::Error;
+    diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
+    return diagnostic;
+}
+
+lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
+{
+    lsp::Diagnostic diagnostic;
+    diagnostic.source = "Luau";
+    diagnostic.code = lint.code;
+    diagnostic.message = std::string(Luau::LintWarning::getName(lint.code)) + ": " + lint.text;
+    diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
+    diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
+    return diagnostic;
+}
