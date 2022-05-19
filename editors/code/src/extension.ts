@@ -152,6 +152,7 @@ export async function activate(context: vscode.ExtensionContext) {
       "default.project.json",
       "--output",
       "sourcemap.json",
+      "--include-non-scripts",
     ];
     const child = spawn("rojo", args, { cwd: workspaceFolder.uri.fsPath });
 
