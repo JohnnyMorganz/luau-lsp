@@ -9,6 +9,7 @@ using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 
 struct SourceNode
 {
+    std::weak_ptr<struct SourceNode> parent; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
     std::string name;
     std::string className;
     std::vector<std::filesystem::path> filePaths;
