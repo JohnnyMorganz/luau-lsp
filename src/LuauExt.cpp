@@ -1,6 +1,8 @@
-#pragma once
-#include <optional>
-#include "WorkspaceFileResolver.hpp"
+#include "Luau/BuiltinDefinitions.h"
+#include "Luau/ToString.h"
+#include "Luau/Transpiler.h"
+#include "LSP/LuauExt.hpp"
+#include "LSP/Utils.hpp"
 
 namespace types
 {
@@ -104,7 +106,7 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
 }
 
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
-static std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
+std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
     Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
 {
     auto index = expr.func->as<Luau::AstExprIndexName>();
@@ -247,65 +249,7 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
     return call.args.data[0];
 }
-
-
 } // namespace types
-
-// TODO: should upstream this
-struct FindNodeType : public Luau::AstVisitor
-{
-    const Luau::Position pos;
-    const Luau::Position documentEnd;
-    Luau::AstNode* best = nullptr;
-
-    explicit FindNodeType(Luau::Position pos, Luau::Position documentEnd)
-        : pos(pos)
-        , documentEnd(documentEnd)
-    {
-    }
-
-    bool visit(Luau::AstNode* node) override
-    {
-        if (node->location.contains(pos))
-        {
-            best = node;
-            return true;
-        }
-
-        // Edge case: If we ask for the node at the position that is the very end of the document
-        // return the innermost AST element that ends at that position.
-
-        if (node->location.end == documentEnd && pos >= documentEnd)
-        {
-            best = node;
-            return true;
-        }
-
-        return false;
-    }
-
-    virtual bool visit(class Luau::AstType* node) override
-    {
-        return visit(static_cast<Luau::AstNode*>(node));
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        visit(static_cast<Luau::AstNode*>(block));
-
-        for (Luau::AstStat* stat : block->body)
-        {
-            if (stat->location.end < pos)
-                continue;
-            if (stat->location.begin > pos)
-                break;
-
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
 
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos)
 {

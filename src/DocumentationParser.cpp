@@ -1,13 +1,4 @@
-#pragma once
-#include <optional>
-#include <filesystem>
-#include "Luau/Variant.h"
-#include "Luau/Documentation.h"
-#include "nlohmann/json.hpp"
-#include "Utils.hpp"
-#include "Client.hpp"
-
-using json = nlohmann::json;
+#include "LSP/DocumentationParser.hpp"
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
 {

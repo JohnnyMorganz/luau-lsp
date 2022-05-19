@@ -21,12 +21,12 @@ static std::optional<std::string> getParentPath(const std::string& path)
     return "";
 }
 
-std::string codeBlock(std::string language, std::string code)
+static std::string codeBlock(std::string language, std::string code)
 {
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
-std::optional<std::string> readFile(const std::filesystem::path& filePath)
+static std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
     std::ifstream fileContents;
     fileContents.open(filePath);
@@ -46,18 +46,18 @@ std::optional<std::string> readFile(const std::filesystem::path& filePath)
     }
 }
 
-void trim_start(std::string& str)
+static void trim_start(std::string& str)
 {
     str.erase(0, str.find_first_not_of(" \n\r\t"));
 }
 
 
-void trim_end(std::string& str)
+static void trim_end(std::string& str)
 {
     str.erase(str.find_last_not_of(" \n\r\t") + 1);
 }
 
-void trim(std::string& str)
+static void trim(std::string& str)
 {
     trim_start(str);
     trim_end(str);

@@ -7,17 +7,15 @@ enable_testing()
 
 add_executable(luau-lsp
     src/main.cpp
-    src/JsonRpc.hpp
-    src/Protocol.hpp
-    src/Uri.hpp
-    src/WorkspaceFileResolver.hpp
-    src/Workspace.hpp
-    src/Sourcemap.hpp
-    src/TextDocument.hpp
-    src/Client.hpp
-    src/DocumentationParser.hpp
-    src/LuauExt.hpp
-    src/Utils.hpp)
+    src/JsonRpc.cpp
+    src/Uri.cpp
+    src/WorkspaceFileResolver.cpp
+    src/Workspace.cpp
+    src/Sourcemap.cpp
+    src/TextDocument.cpp
+    src/Client.cpp
+    src/DocumentationParser.cpp
+    src/LuauExt.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -26,7 +24,7 @@ include(CPack)
 add_subdirectory(luau)
 
 target_compile_features(luau-lsp PUBLIC cxx_std_17)
-target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" src/ luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include)
+target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include)
 target_link_libraries(luau-lsp PRIVATE Luau.Ast Luau.Analysis)
 
 if(MSVC)

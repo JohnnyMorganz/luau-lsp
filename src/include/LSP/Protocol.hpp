@@ -3,8 +3,8 @@
 #include <optional>
 #include <variant>
 
-#include "Uri.hpp"
 #include "nlohmann/json.hpp"
+#include "LSP/Uri.hpp"
 
 using json = nlohmann::json;
 
@@ -312,8 +312,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(InitializeResult, capabilities, 
 struct InitializedParams
 {
 };
-void to_json(json&, const InitializedParams&){};
-void from_json(const json&, InitializedParams&){};
+static void to_json(json&, const InitializedParams&){};
+static void from_json(const json&, InitializedParams&){};
 
 struct Position
 {
