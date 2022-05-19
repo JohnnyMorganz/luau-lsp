@@ -70,7 +70,7 @@ Luau::TypeId makeLazyInstanceType(
             }
 
             // Add the children
-            for (const auto child : node->children)
+            for (const auto& child : node->children)
             {
                 ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, child, typeId));
             }
