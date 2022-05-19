@@ -179,7 +179,7 @@ public:
     }
 
 private:
-    void endAutocompletion(const lsp::CompletionParams& params)
+    LUAU_NOINLINE void endAutocompletion(const lsp::CompletionParams& params)
     {
         auto moduleName = getModuleName(params.textDocument.uri);
         auto position = convertPosition(params.position);
