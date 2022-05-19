@@ -14,8 +14,6 @@
 #include "Sourcemap.hpp"
 #include "TextDocument.hpp"
 #include "DocumentationParser.hpp"
-#include "WorkspaceFileResolver.hpp"
-#include "LuauExt.hpp"
 #include "Utils.hpp"
 
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
