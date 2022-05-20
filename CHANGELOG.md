@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2022-05-20
+
 ### Added
 
 - Can disable automatic sourcemap generation in extension settings.
