@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for "Rename"
   - Currently only works for local variables in the current document. Cross-file references will come in future.
 
+### Changed
+
+- Sync to upstream Luau 0.528
+
 ## [1.0.0] - 2022-05-19
 
 ### Added
