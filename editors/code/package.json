@@ -54,7 +54,7 @@
             }
         ],
         "configuration": {
-            "title": "Luau",
+            "title": "Luau Language Server",
             "properties": {
                 "luau-lsp.autocompleteEnd": {
                     "markdownDescription": "Automatically insert an `end` when opening a block",
@@ -71,17 +71,17 @@
                         "**/_Index/**"
                     ]
                 },
-                "luau-lsp.autogenerateSourcemap": {
+                "luau-lsp.sourcemap.autogenerate": {
                     "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
                     "type": "boolean",
                     "default": true
                 },
-                "luau-lsp.rojoProjectFile": {
-                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if #luau-lsp.autogenerateSourcemap# is enabled",
+                "luau-lsp.sourcemap.rojoProjectFile": {
+                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if #luau-lsp.sourcemap.autogenerate# is enabled",
                     "type": "string",
                     "default": "default.project.json"
                 },
-                "luau-lsp.includeNonScriptsInSourcemap": {
+                "luau-lsp.sourcemap.includeNonScripts": {
                     "markdownDescription": "Include non-script instances in the generated sourcemap",
                     "type": "boolean",
                     "default": true
