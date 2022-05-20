@@ -103,6 +103,8 @@ public:
         capabilities.documentSymbolProvider = false;
         // Document Link Provider
         capabilities.documentLinkProvider = {false};
+        // Rename Provider
+        capabilities.renameProvider = true;
         // Diagnostics Provider
         capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
         // Workspaces
@@ -156,6 +158,10 @@ public:
         else if (method == "textDocument/references")
         {
             return references(REQUIRED_PARAMS(params, "textDocument/references"));
+        }
+        else if (method == "textDocument/rename")
+        {
+            return rename(REQUIRED_PARAMS(params, "textDocument/rename"));
         }
         // else if (method == "textDocument/documentSymbol")
         // {
@@ -554,6 +560,15 @@ public:
     //         return *result;
     //     return nullptr;
     // }
+
+    Response rename(const lsp::RenameParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->rename(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
 
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
     {

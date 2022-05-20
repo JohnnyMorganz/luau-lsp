@@ -68,6 +68,7 @@ public:
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
 
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
+    lsp::RenameResult rename(const lsp::RenameParams& params);
 
     // std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
 

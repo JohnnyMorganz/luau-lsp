@@ -288,12 +288,13 @@ struct ServerCapabilities
     bool referencesProvider = false;
     bool documentSymbolProvider = false;
     std::optional<DocumentLinkOptions> documentLinkProvider;
+    bool renameProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, diagnosticProvider, workspace);
+    documentLinkProvider, renameProvider, diagnosticProvider, workspace);
 
 struct InitializeResult
 {
@@ -832,6 +833,21 @@ struct DocumentSymbol
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
 
+struct WorkspaceEdit
+{
+    // TODO: this is optional and there are other options provided
+    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceEdit, changes);
+
+struct RenameParams : TextDocumentPositionParams
+{
+    std::string newName;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RenameParams, textDocument, position, newName);
+
+using RenameResult = std::optional<WorkspaceEdit>;
+
 struct WorkspaceFoldersChangeEvent
 {
     std::vector<WorkspaceFolder> added;
@@ -844,13 +860,6 @@ struct DidChangeWorkspaceFoldersParams
     WorkspaceFoldersChangeEvent event;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWorkspaceFoldersParams, event);
-
-struct WorkspaceEdit
-{
-    // TODO: this is optional and there are other options provided
-    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceEdit, changes);
 
 struct ApplyWorkspaceEditParams
 {

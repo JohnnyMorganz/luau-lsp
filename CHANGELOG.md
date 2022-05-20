@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Can toggle whether non-script instances are included in the generated sourcemap (included by default).
 - Added support for "Find References"
   - Currently only works for finding all references of a local variable in the current document. Cross-file references will come in future.
+- Added support for "Rename"
+  - Currently only works for local variables in the current document. Cross-file references will come in future.
 
 ## [1.0.0] - 2022-05-19
 
