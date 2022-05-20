@@ -764,6 +764,20 @@ struct TypeDefinitionParams : TextDocumentPositionParams
 {
 };
 
+struct ReferenceContext
+{
+    bool includeDeclaration;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ReferenceContext, includeDeclaration);
+
+struct ReferenceParams : TextDocumentPositionParams
+{
+    ReferenceContext context;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ReferenceParams, textDocument, position, context);
+
+using ReferenceResult = std::optional<std::vector<Location>>;
+
 struct DocumentSymbolParams
 {
     TextDocumentIdentifier textDocument;

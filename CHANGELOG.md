@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Can disable automatic sourcemap generation in extension settings.
 - Can change the project file used to generate sourcemap in extension settings (defaults to `default.project.json`).
 - Can toggle whether non-script instances are included in the generated sourcemap (included by default).
+- Added support for "Find References"
+  - Currently only works for finding all references of a local variable in the current document. Cross-file references will come in future.
 
 ## [1.0.0] - 2022-05-19
 

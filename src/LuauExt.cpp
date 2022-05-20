@@ -357,3 +357,103 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
     diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
     return diagnostic;
 }
+
+struct FindSymbolReferences : public Luau::AstVisitor
+{
+    const Luau::Symbol symbol;
+    std::vector<Luau::Location> result;
+
+    explicit FindSymbolReferences(Luau::Symbol symbol)
+        : symbol(symbol)
+    {
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+
+    bool visitLocal(Luau::AstLocal* local)
+    {
+        if (Luau::Symbol(local) == symbol)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool visit(Luau::AstStatLocalFunction* function) override
+    {
+        if (visitLocal(function->name))
+        {
+            result.push_back(function->name->location);
+        }
+        return true;
+    }
+
+    bool visit(Luau::AstStatLocal* al) override
+    {
+        for (size_t i = 0; i < al->vars.size; ++i)
+        {
+            if (visitLocal(al->vars.data[i]))
+            {
+                result.push_back(al->vars.data[i]->location);
+            }
+        }
+        return true;
+    }
+
+    virtual bool visit(Luau::AstExprLocal* local) override
+    {
+        if (visitLocal(local->local))
+        {
+            result.push_back(local->location);
+        }
+        return true;
+    }
+
+    virtual bool visit(Luau::AstExprFunction* fn) override
+    {
+        for (size_t i = 0; i < fn->args.size; ++i)
+        {
+            if (visitLocal(fn->args.data[i]))
+            {
+                result.push_back(fn->args.data[i]->location);
+            }
+        }
+        return true;
+    }
+
+    virtual bool visit(Luau::AstStatFor* forStat) override
+    {
+        if (visitLocal(forStat->var))
+        {
+            result.push_back(forStat->var->location);
+        }
+        return true;
+    }
+
+    virtual bool visit(Luau::AstStatForIn* forIn) override
+    {
+        for (auto var : forIn->vars)
+        {
+            if (visitLocal(var))
+            {
+                result.push_back(var->location);
+            }
+        }
+        return true;
+    }
+};
+
+std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol)
+{
+    FindSymbolReferences finder(symbol);
+    source.root->visit(&finder);
+    return std::move(finder.result);
+}

@@ -67,6 +67,8 @@ public:
 
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
 
+    lsp::ReferenceResult references(const lsp::ReferenceParams& params);
+
     // std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
 
     bool updateSourceMap();

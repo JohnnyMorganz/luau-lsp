@@ -98,7 +98,7 @@ public:
         // Go To Implementation Provider
         capabilities.implementationProvider = false; // TODO: does this apply to Luau?
         // Find References Provider
-        capabilities.referencesProvider = false;
+        capabilities.referencesProvider = true;
         // Document Symbol Provider
         capabilities.documentSymbolProvider = false;
         // Document Link Provider
@@ -152,6 +152,10 @@ public:
         else if (method == "textDocument/typeDefinition")
         {
             return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
+        }
+        else if (method == "textDocument/references")
+        {
+            return references(REQUIRED_PARAMS(params, "textDocument/references"));
         }
         // else if (method == "textDocument/documentSymbol")
         // {
@@ -528,6 +532,15 @@ public:
     {
         auto workspace = findWorkspace(params.textDocument.uri);
         auto result = workspace->gotoTypeDefinition(params);
+        if (result)
+            return *result;
+        return nullptr;
+    }
+
+    Response references(const lsp::ReferenceParams& params)
+    {
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto result = workspace->references(params);
         if (result)
             return *result;
         return nullptr;
