@@ -78,39 +78,37 @@ public:
 
     lsp::ServerCapabilities getServerCapabilities()
     {
-        lsp::TextDocumentSyncKind textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
+        lsp::ServerCapabilities capabilities;
+        capabilities.textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
         // Completion
         std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "\n"}; // \n is used to trigger end completion
         lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
-        lsp::CompletionOptions completionProvider{completionTriggerCharacters, std::nullopt, /* resolveProvider: */ false, completionItem};
+        capabilities.completionProvider = {completionTriggerCharacters, std::nullopt, /* resolveProvider: */ false, completionItem};
         // Hover Provider
-        bool hoverProvider = true;
+        capabilities.hoverProvider = true;
         // Signature Help
         std::vector<std::string> signatureHelpTriggerCharacters{"(", ","};
-        lsp::SignatureHelpOptions signatureHelpProvider{signatureHelpTriggerCharacters};
+        capabilities.signatureHelpProvider = {signatureHelpTriggerCharacters};
         // Go To Declaration Provider
-        bool declarationProvider = false; // TODO: does this apply to Luau?
+        capabilities.declarationProvider = false; // TODO: does this apply to Luau?
         // Go To Definition Provider
-        bool definitionProvider = true;
+        capabilities.definitionProvider = true;
         // Go To Type Definition Provider
-        bool typeDefinitionProvider = true;
+        capabilities.typeDefinitionProvider = true;
         // Go To Implementation Provider
-        bool implementationProvider = false; // TODO: does this apply to Luau?
+        capabilities.implementationProvider = false; // TODO: does this apply to Luau?
         // Find References Provider
-        bool referencesProvider = false;
+        capabilities.referencesProvider = false;
         // Document Symbol Provider
-        bool documentSymbolProvider = false;
+        capabilities.documentSymbolProvider = false;
         // Document Link Provider
-        lsp::DocumentLinkOptions documentLinkProvider{false};
+        capabilities.documentLinkProvider = {false};
         // Diagnostics Provider
-        lsp::DiagnosticOptions diagnosticsProvider{"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
+        capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
         // Workspaces
-        lsp::WorkspaceCapabilities workspace;
         lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
-        workspace.workspaceFolders = workspaceFolderCapabilities;
-        return lsp::ServerCapabilities{textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider, declarationProvider,
-            definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider, documentLinkProvider,
-            diagnosticsProvider, workspace};
+        capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
+        return capabilities;
     }
 
     Response onRequest(const id_type& id, const std::string& method, std::optional<json> params)
