@@ -37,12 +37,12 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Signature Help
 - [x] Go To Definition
 - [x] Go To Type Definition
-- [ ] Find References
+- [x] Find References
 - [ ] Document Highlight
 - [x] Document Link
 - [ ] Document Symbol
 - [ ] Color Provider
-- [ ] Rename
+- [x] Rename
 - [ ] Folding Range
 - [ ] Selection Range
 - [ ] Call Hierarchy
