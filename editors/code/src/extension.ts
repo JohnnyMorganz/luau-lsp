@@ -44,6 +44,7 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       !(await exists(apiDocsUri(context)));
 
     if (!currentVersion || currentVersion !== latestVersion || mustUpdate) {
+      context.globalState.update("current-api-version", latestVersion);
       return vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
