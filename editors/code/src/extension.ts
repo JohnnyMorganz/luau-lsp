@@ -174,7 +174,7 @@ export async function activate(context: vscode.ExtensionContext) {
       );
     };
     child.stderr.on("data", onFailEvent);
-    child.on("err", onFailEvent);
+    child.on("error", onFailEvent);
   };
 
   const listener = (e: vscode.FileCreateEvent | vscode.FileDeleteEvent) => {
