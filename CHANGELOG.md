@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed extension repeatedly downloading latest API information when it is already up to date
 - Fixed `self: Type` showing up in hover information/autocomplete when it is unnecessary at it has been inferred by the `:` operator
 - Fixed extension not displaying error if calling out to `Rojo` command fails
+- Fixed reverse dependencies not updating when types of required modules change (causing the type system to be incorrect). i.e., if you required script B in script A, and change script B, now the change will propagate to script A
 
 ## [1.1.0] - 2022-05-20
 

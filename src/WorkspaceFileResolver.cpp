@@ -5,18 +5,15 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
-// Get the corresponding Luau module name for a file
-Luau::ModuleName getModuleName(const std::string& name)
+Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 {
-    return name;
-}
-Luau::ModuleName getModuleName(const std::filesystem::path& name)
-{
-    return name.generic_string();
-}
-Luau::ModuleName getModuleName(const Uri& name)
-{
-    return name.fsPath().generic_string();
+    auto fsPath = name.fsPath().generic_string();
+    if (auto virtualPath = resolveToVirtualPath(fsPath))
+    {
+        return *virtualPath;
+    }
+
+    return fsPath;
 }
 
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const

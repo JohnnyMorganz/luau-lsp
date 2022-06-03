@@ -23,7 +23,7 @@ bool WorkspaceFolder::isInWorkspace(const lsp::DocumentUri& file)
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
-    auto moduleName = getModuleName(uri);
+    auto moduleName = fileResolver.getModuleName(uri);
     fileResolver.managedFiles.emplace(
         std::make_pair(moduleName, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
     // Mark the file as dirty as we don't know what changes were made to it
@@ -32,7 +32,7 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
 
 void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
 {
-    auto moduleName = getModuleName(uri);
+    auto moduleName = fileResolver.getModuleName(uri);
 
     if (fileResolver.managedFiles.find(moduleName) == fileResolver.managedFiles.end())
     {
@@ -48,7 +48,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
-    auto moduleName = getModuleName(uri);
+    auto moduleName = fileResolver.getModuleName(uri);
     fileResolver.managedFiles.erase(moduleName);
 }
 
@@ -76,7 +76,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     lsp::DocumentDiagnosticReport report;
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
 
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     Luau::CheckResult cr;
     if (frontend.isDirty(moduleName))
         cr = frontend.check(moduleName);
@@ -144,7 +144,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     if (frontend.isDirty(moduleName))
@@ -256,7 +256,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         return {};
     }
 
-    auto result = Luau::autocomplete(frontend, getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
+    auto result = Luau::autocomplete(frontend, fileResolver.getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
     std::vector<lsp::CompletionItem> items;
 
     for (auto& [name, entry] : result.entryMap)
@@ -335,7 +335,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
 std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::DocumentLinkParams& params)
 {
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     std::vector<lsp::DocumentLink> result;
 
     // We need to parse the code, which is currently only done in the type checker
@@ -388,7 +388,7 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
 
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
@@ -534,7 +534,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
@@ -634,7 +634,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
 std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
@@ -760,7 +760,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     // If its a binding, we should find its assigned type if possible, and then find the definition of that type
     // If its a type, then just find the definintion of that type (i.e. the type alias)
 
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
@@ -823,7 +823,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
     // TODO: currently we only support searching for a binding at a current position
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
@@ -872,7 +872,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     }
 
     // TODO: currently we only support renaming local bindings in the current file
-    auto moduleName = getModuleName(params.textDocument.uri);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date

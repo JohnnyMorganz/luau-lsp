@@ -10,11 +10,6 @@
 #include "LSP/Sourcemap.hpp"
 #include "LSP/TextDocument.hpp"
 
-// Get the corresponding Luau module name for a file
-Luau::ModuleName getModuleName(const std::string& name);
-Luau::ModuleName getModuleName(const std::filesystem::path& name);
-Luau::ModuleName getModuleName(const Uri& name);
-
 struct WorkspaceFileResolver
     : Luau::FileResolver
     , Luau::ConfigResolver
@@ -48,6 +43,10 @@ struct WorkspaceFileResolver
     {
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot");
     }
+
+    // Return the corresponding module name from a file Uri
+    // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path
+    Luau::ModuleName getModuleName(const Uri& name);
 
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
 
