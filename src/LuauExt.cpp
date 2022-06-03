@@ -189,8 +189,9 @@ std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTy
     {
         parentIt = module->astTypes.find(indexName->expr);
         methodName = std::string(1, indexName->op) + indexName->index.value;
-        // If we are calling this as a method ':', we should implicitly hide self
+        // If we are calling this as a method ':', we should implicitly hide self, and recompute the functionString
         opts.hideFunctionSelfArgument = indexName->op == ':';
+        functionString = Luau::toStringNamedFunction("", *ftv, opts);
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
         baseName = Luau::toString(indexName->expr);
         trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)
