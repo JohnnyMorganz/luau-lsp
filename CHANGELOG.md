@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.529
+
 ### Fixed
 
 - Fixed extension repeatedly downloading latest API information when it is already up to date
