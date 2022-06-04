@@ -43,6 +43,18 @@ Luau::SourceCode::Type SourceNode::sourceCodeType() const
     }
 }
 
+std::optional<SourceNodePtr> SourceNode::findChild(const std::string& name)
+{
+    for (const auto& child : children)
+    {
+        if (child->name == name)
+        {
+            return child;
+        }
+    }
+    return std::nullopt;
+}
+
 static bool endsWith(std::string str, std::string suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);

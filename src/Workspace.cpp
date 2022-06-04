@@ -955,6 +955,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
         if (fileResolver.rootSourceNode->className == "DataModel")
         {
             Luau::unfreeze(typeChecker.globalTypes);
+            // Add instance information for the DataModel tree
             for (const auto& service : fileResolver.rootSourceNode->children)
             {
                 auto serviceName = service->className; // We know it must be a service of the same class name
@@ -988,6 +989,59 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                     }
                 }
             }
+
+            // Add containers to player and copy over instances
+            // Player.Character should contain StarterCharacter instances
+            if (auto playerType = typeChecker.globalScope->lookupType("Player"))
+            {
+                if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(playerType->type))
+                {
+                    // Player.PlayerGui should contain StarterGui instances
+                    if (auto playerGuiType = typeChecker.globalScope->lookupType("PlayerGui"))
+                    {
+                        ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
+                        if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
+                        {
+                            ctv->props["PlayerGui"] = Luau::makeProperty(types::makeLazyInstanceType(
+                                typeChecker.globalTypes, typeChecker.globalScope, starterGui.value(), std::nullopt, playerGuiType->type));
+                        }
+                    }
+
+                    // Player.StarterGear should contain StarterPack instances
+                    if (auto starterGearType = typeChecker.globalScope->lookupType("StarterGear"))
+                    {
+                        ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
+                        if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
+                        {
+                            ctv->props["StarterGear"] = Luau::makeProperty(types::makeLazyInstanceType(
+                                typeChecker.globalTypes, typeChecker.globalScope, starterPack.value(), std::nullopt, starterGearType->type));
+                        }
+                    }
+
+                    // Player.Backpack should be defined
+                    if (auto backpackType = typeChecker.globalScope->lookupType("Backpack"))
+                    {
+                        ctv->props["Backpack"] = Luau::makeProperty(backpackType->type);
+                        // TODO: should we duplicate StarterPack into here as well? Is that a reasonable assumption to make?
+                    }
+
+                    // Player.PlayerScripts should contain StarterPlayerScripts instances
+                    if (auto playerScriptsType = typeChecker.globalScope->lookupType("PlayerScripts"))
+                    {
+                        ctv->props["PlayerScripts"] = Luau::makeProperty(playerScriptsType->type);
+                        if (auto starterPlayer = fileResolver.rootSourceNode->findChild("StarterPlayer"))
+                        {
+                            if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
+                            {
+                                ctv->props["PlayerScripts"] = Luau::makeProperty(types::makeLazyInstanceType(typeChecker.globalTypes,
+                                    typeChecker.globalScope, starterPlayerScripts.value(), std::nullopt, playerScriptsType->type));
+                            }
+                        }
+                    }
+                }
+            }
+
+
             Luau::freeze(typeChecker.globalTypes);
         }
 

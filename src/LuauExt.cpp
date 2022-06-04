@@ -31,11 +31,11 @@ std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope,
     }
 }
 
-Luau::TypeId makeLazyInstanceType(
-    Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node, std::optional<Luau::TypeId> parent)
+Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
+    std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass)
 {
     Luau::LazyTypeVar ltv;
-    ltv.thunk = [&arena, globalScope, node, parent]()
+    ltv.thunk = [&arena, globalScope, node, parent, baseClass]()
     {
         // TODO: we should cache created instance types and reuse them where possible
 
@@ -44,10 +44,14 @@ Luau::TypeId makeLazyInstanceType(
             return Luau::getSingletonTypes().anyType;
 
         // Look up the base class instance
-        auto baseTypeId = getTypeIdForClass(globalScope, node->className);
+        auto baseTypeId = baseClass;
         if (!baseTypeId)
         {
-            return Luau::getSingletonTypes().anyType;
+            baseTypeId = getTypeIdForClass(globalScope, node->className);
+            if (!baseTypeId)
+            {
+                return Luau::getSingletonTypes().anyType;
+            }
         }
 
         // Create the ClassTypeVar representing the instance
