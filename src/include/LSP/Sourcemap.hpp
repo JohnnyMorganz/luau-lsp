@@ -20,6 +20,8 @@ struct SourceNode
     std::optional<std::filesystem::path> getScriptFilePath();
     Luau::SourceCode::Type sourceCodeType() const;
     std::optional<SourceNodePtr> findChild(const std::string& name);
+    // O(n) search for ancestor of name
+    std::optional<SourceNodePtr> findAncestor(const std::string& name);
 };
 
 static void from_json(const json& j, SourceNode& p)

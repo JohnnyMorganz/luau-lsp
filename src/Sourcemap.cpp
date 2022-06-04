@@ -55,6 +55,18 @@ std::optional<SourceNodePtr> SourceNode::findChild(const std::string& name)
     return std::nullopt;
 }
 
+std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& name)
+{
+    auto current = parent;
+    while (auto currentPtr = current.lock())
+    {
+        if (currentPtr->name == name)
+            return currentPtr;
+        current = currentPtr->parent;
+    }
+    return std::nullopt;
+}
+
 static bool endsWith(std::string str, std::string suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);

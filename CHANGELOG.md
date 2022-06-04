@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Player will now have `PlayerGui`, `Backpack`, `StarterGear` and `PlayerScripts` children, with the relevant Starter instances copied into it (StarterGui, StarterPack, PlayerScripts)
+- `Instance:FindFirstChild("name")` and `Instance:FindFirstAncestor("name")` will now correctly resolve to the relevant instance type if found. This allows the type checker to correctly resolve children/parents etc.
 
 ### Changed
 
