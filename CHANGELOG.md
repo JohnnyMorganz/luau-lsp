@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for configuring enabled Luau FFlags
 - Added support for pulling in the currently enabled FFlags in Studio, in order to replicate behaviour
 
+### Changed
+
+- The "Updating API" message will now only show on the status bar instead of a popup notification.
+
 ## [1.2.0] - 2022-06-04
 
 ### Added

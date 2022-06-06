@@ -52,8 +52,8 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       context.globalState.update("current-api-version", latestVersion);
       return vscode.window.withProgress(
         {
-          location: vscode.ProgressLocation.Notification,
-          title: "Updating API",
+          location: vscode.ProgressLocation.Window,
+          title: "Luau: Updating API Definitions",
           cancellable: false,
         },
         async () => {
@@ -90,7 +90,7 @@ const getFFlags = async () => {
     return vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Window,
-        title: "Fetching FFlags",
+        title: "Luau: Fetching FFlags",
         cancellable: false,
       },
       () =>
