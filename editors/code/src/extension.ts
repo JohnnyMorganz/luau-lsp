@@ -15,6 +15,11 @@ const GLOBAL_TYPES_DEFINITION =
   "https://raw.githubusercontent.com/JohnnyMorganz/luau-analyze-rojo/master/globalTypes.d.lua";
 const API_DOCS =
   "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json";
+const CURRENT_FFLAGS =
+  "https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCDesktopClient";
+
+type FFlags = Record<string, string>;
+type FFlagsEndpoint = { applicationSettings: FFlags };
 
 const globalTypesUri = (context: vscode.ExtensionContext) => {
   return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.lua");
@@ -80,6 +85,26 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
   }
 };
 
+const getFFlags = async () => {
+  try {
+    return vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Window,
+        title: "Fetching FFlags",
+        cancellable: false,
+      },
+      () =>
+        fetch(CURRENT_FFLAGS)
+          .then((r) => r.json() as Promise<FFlagsEndpoint>)
+          .then((r) => r.applicationSettings)
+    );
+  } catch (err) {
+    vscode.window.showErrorMessage(
+      "Failed to fetch current Luau FFlags: " + err
+    );
+  }
+};
+
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
@@ -88,6 +113,37 @@ export async function activate(context: vscode.ExtensionContext) {
     `--definitions=${globalTypesUri(context).fsPath}`,
     `--docs=${apiDocsUri(context).fsPath}`,
   ];
+
+  // Handle FFlags
+  const fflags: FFlags = {};
+  const fflagsConfig = vscode.workspace.getConfiguration("luau-lsp.fflags");
+
+  // Sync FFlags with upstream
+  if (fflagsConfig.get<boolean>("sync")) {
+    const currentFlags = await getFFlags();
+    if (currentFlags) {
+      for (const [name, value] of Object.entries(currentFlags)) {
+        if (name.startsWith("FFlagLuau")) {
+          fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+        }
+      }
+    }
+  }
+
+  // Handle overrides
+  const overridenFFlags = fflagsConfig.get<FFlags>("override");
+  if (overridenFFlags) {
+    for (const [name, value] of Object.entries(overridenFFlags)) {
+      fflags[name] = value;
+    }
+  }
+
+  console.log(fflags);
+
+  // Pass FFlags as arguments
+  for (const [name, value] of Object.entries(fflags)) {
+    args.push(`--flag:${name}=${value}`);
+  }
 
   const run: Executable = {
     command: vscode.Uri.joinPath(
@@ -223,6 +279,17 @@ export async function activate(context: vscode.ExtensionContext) {
             updateSourceMap(folder);
           }
         }
+      } else if (e.affectsConfiguration("luau-lsp.fflags")) {
+        vscode.window
+          .showInformationMessage(
+            "Luau FFlags have been changed, reload your workspace for this to take effect.",
+            "Reload Workspace"
+          )
+          .then((command) => {
+            if (command === "Reload Workspace") {
+              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            }
+          });
       }
     })
   );

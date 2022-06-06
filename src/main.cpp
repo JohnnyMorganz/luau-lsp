@@ -587,6 +587,56 @@ private:
     bool shutdownRequested = false;
 };
 
+void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags)
+{
+    for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
+    {
+        if (fastFlags.find(flag->name) != fastFlags.end())
+        {
+            std::string valueStr = fastFlags.at(flag->name);
+
+            if (valueStr == "true" || valueStr == "True")
+                flag->value = true;
+            else if (valueStr == "false" || valueStr == "False")
+                flag->value = false;
+            else
+            {
+                std::cerr << "Bad flag option, expected a boolean 'True' or 'False' for flag " << flag->name << "\n";
+                std::exit(1);
+            }
+
+            fastFlags.erase(flag->name);
+        }
+    }
+
+    for (Luau::FValue<int>* flag = Luau::FValue<int>::list; flag; flag = flag->next)
+    {
+        if (fastFlags.find(flag->name) != fastFlags.end())
+        {
+            std::string valueStr = fastFlags.at(flag->name);
+
+            int value = 0;
+            try
+            {
+                value = std::stoi(valueStr);
+            }
+            catch (...)
+            {
+                std::cerr << "Bad flag option, expected an int for flag " << flag->name << "\n";
+                std::exit(1);
+            }
+
+            flag->value = value;
+            fastFlags.erase(flag->name);
+        }
+    }
+
+    for (auto& [key, _] : fastFlags)
+    {
+        std::cerr << "Unknown FFlag: " << key << "\n";
+    }
+}
+
 int main(int argc, char** argv)
 {
     // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
@@ -615,6 +665,7 @@ int main(int argc, char** argv)
     // Check passed arguments
     std::optional<std::filesystem::path> definitionsFile;
     std::optional<std::filesystem::path> documentationFile;
+    std::unordered_map<std::string, std::string> fastFlags;
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "--definitions=", 14) == 0)
@@ -625,7 +676,23 @@ int main(int argc, char** argv)
         {
             documentationFile = std::filesystem::path(argv[i] + 7);
         }
+        else if (strncmp(argv[i], "--flag:", 7) == 0)
+        {
+            std::string flagSet = std::string(argv[i] + 7);
+
+            size_t eqIndex = flagSet.find("=");
+            if (eqIndex == std::string::npos)
+            {
+                std::cerr << "Bad flag option, missing =: " << flagSet << "\n";
+                return 1;
+            }
+
+            std::string flagName = flagSet.substr(0, eqIndex);
+            std::string flagValue = flagSet.substr(eqIndex + 1, flagSet.length());
+            fastFlags.emplace(flagName, flagValue);
+        }
     }
+    registerFastFlags(fastFlags);
 
     LanguageServer server(definitionsFile, documentationFile);
 

@@ -85,6 +85,19 @@
                     "markdownDescription": "Include non-script instances in the generated sourcemap",
                     "type": "boolean",
                     "default": true
+                },
+                "luau-lsp.fflags.sync": {
+                    "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
+                    "type": "boolean",
+                    "default": true
+                },
+                "luau-lsp.fflags.override": {
+                    "markdownDescription": "Override FFlags passed to Luau",
+                    "type": "object",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }

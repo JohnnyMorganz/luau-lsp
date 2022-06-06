@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for configuring enabled Luau FFlags
+- Added support for pulling in the currently enabled FFlags in Studio, in order to replicate behaviour
+
 ## [1.2.0] - 2022-06-04
 
 ### Added
