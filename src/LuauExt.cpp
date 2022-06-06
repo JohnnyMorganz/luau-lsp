@@ -31,6 +31,20 @@ std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope,
     }
 }
 
+std::optional<std::string> getTypeName(Luau::TypeId typeId)
+{
+    auto ty = Luau::follow(typeId);
+    if (auto typeName = Luau::getName(ty))
+    {
+        return *typeName;
+    }
+    else if (auto parentClass = Luau::get<Luau::ClassTypeVar>(ty))
+    {
+        return parentClass->name;
+    }
+    return std::nullopt;
+}
+
 Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
     std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass)
 {
@@ -44,18 +58,17 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
             return Luau::getSingletonTypes().anyType;
 
         // Look up the base class instance
-        auto baseTypeId = baseClass;
-        if (!baseTypeId)
-        {
-            baseTypeId = getTypeIdForClass(globalScope, node->className);
-            if (!baseTypeId)
-            {
-                return Luau::getSingletonTypes().anyType;
-            }
-        }
+        Luau::TypeId baseTypeId;
+        if (baseClass)
+            baseTypeId = *baseClass;
+        else if (auto foundId = getTypeIdForClass(globalScope, node->className))
+            baseTypeId = *foundId;
+        else
+            return Luau::getSingletonTypes().anyType;
 
         // Create the ClassTypeVar representing the instance
-        Luau::ClassTypeVar ctv{node->name, {}, baseTypeId, std::nullopt, {}, {}, "@roblox"};
+        std::string typeName = getTypeName(baseTypeId).value_or(node->name);
+        Luau::ClassTypeVar ctv{typeName, {}, baseTypeId, std::nullopt, {}, {}, "@roblox"};
         auto typeId = arena.addType(std::move(ctv));
 
         // Attach Parent and Children info
