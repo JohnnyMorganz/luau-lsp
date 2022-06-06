@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The "Updating API" message will now only show on the status bar instead of a popup notification.
 - Instance types will now be named by the Class Name rather than the Instance name
 
+### Fixed
+
+- Fixed requiring modules when using `:FindFirstAncestor("Ancestor")`
+
 ## [1.2.0] - 2022-06-04
 
 ### Added
