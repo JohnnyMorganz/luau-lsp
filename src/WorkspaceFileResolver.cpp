@@ -177,10 +177,23 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             Luau::AstName func = call->func->as<Luau::AstExprIndexName>()->index;
 
             if (func == "GetService" && context->name == "game")
+            {
                 return Luau::ModuleInfo{"game/" + std::string(index->value.data, index->value.size)};
-            if (func == "WaitForChild" || func == "FindFirstChild")
+            }
+            else if (func == "WaitForChild" || func == "FindFirstChild")
+            {
                 if (context)
                     return Luau::ModuleInfo{context->name + '/' + std::string(index->value.data, index->value.size), context->optional};
+            }
+            else if (func == "FindFirstAncestor")
+            {
+                if (context)
+                {
+                    auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
+                    if (ancestorName)
+                        return Luau::ModuleInfo{*ancestorName, context->optional};
+                }
+            }
         }
     }
 
