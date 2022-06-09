@@ -53,6 +53,12 @@
                 "path": "./syntaxes/lua.tmLanguage.json"
             }
         ],
+        "commands": [
+            {
+                "command": "luau-lsp.updateApi",
+                "title": "Luau: Redownload API Types"
+            }
+        ],
         "configuration": {
             "title": "Luau Language Server",
             "properties": {

@@ -36,6 +36,42 @@ const exists = (uri: vscode.Uri): Thenable<boolean> => {
   );
 };
 
+const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
+  try {
+    return vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Window,
+        title: "Luau: Updating API Definitions",
+        cancellable: false,
+      },
+      async () => {
+        return Promise.all([
+          fetch(GLOBAL_TYPES_DEFINITION)
+            .then((r) => r.arrayBuffer())
+            .then((data) =>
+              vscode.workspace.fs.writeFile(
+                globalTypesUri(context),
+                new Uint8Array(data)
+              )
+            ),
+          fetch(API_DOCS)
+            .then((r) => r.arrayBuffer())
+            .then((data) =>
+              vscode.workspace.fs.writeFile(
+                apiDocsUri(context),
+                new Uint8Array(data)
+              )
+            ),
+        ]);
+      }
+    );
+  } catch (err) {
+    vscode.window.showErrorMessage(
+      "Failed to retrieve API information: " + err
+    );
+  }
+};
+
 const updateApiInfo = async (context: vscode.ExtensionContext) => {
   try {
     const latestVersion = await fetch(CURRENT_VERSION_TXT).then((r) =>
@@ -50,33 +86,7 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
 
     if (!currentVersion || currentVersion !== latestVersion || mustUpdate) {
       context.globalState.update("current-api-version", latestVersion);
-      return vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Window,
-          title: "Luau: Updating API Definitions",
-          cancellable: false,
-        },
-        async () => {
-          return Promise.all([
-            fetch(GLOBAL_TYPES_DEFINITION)
-              .then((r) => r.arrayBuffer())
-              .then((data) =>
-                vscode.workspace.fs.writeFile(
-                  globalTypesUri(context),
-                  new Uint8Array(data)
-                )
-              ),
-            fetch(API_DOCS)
-              .then((r) => r.arrayBuffer())
-              .then((data) =>
-                vscode.workspace.fs.writeFile(
-                  apiDocsUri(context),
-                  new Uint8Array(data)
-                )
-              ),
-          ]);
-        }
-      );
+      return downloadApiDefinitions(context);
     }
   } catch (err) {
     vscode.window.showErrorMessage(
@@ -195,6 +205,23 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand(params.command, params.data);
     });
   });
+
+  // Register commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
+      await downloadApiDefinitions(context);
+      vscode.window
+        .showInformationMessage(
+          "API Types have been updated, reload workspace to take effect.",
+          "Reload Workspace"
+        )
+        .then((command) => {
+          if (command === "Reload Workspace") {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+          }
+        });
+    })
+  );
 
   // Register automatic sourcemap regenerate
   // TODO: maybe we should move this to the server in future
