@@ -28,6 +28,23 @@ jobs:
           mkdir build && cd build
           cmake ..
           cmake --build . --target luau-lsp
+        
+  run_tests:
+    name: Run Tests
+    runs-on: ubuntu-18.04
+    - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Build Tests
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build . --target luau-lsp-tests
+        
+      - name: Run Tests
+        run: ./build/luau-lsp-tests
 
   lint_extension:
     runs-on: ubuntu-18.04
