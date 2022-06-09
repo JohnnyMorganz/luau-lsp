@@ -1,0 +1,79 @@
+#include <optional>
+#include <filesystem>
+#include "LSP/Client.hpp"
+#include "LSP/Protocol.hpp"
+#include "LSP/JsonRpc.hpp"
+#include "LSP/Uri.hpp"
+#include "LSP/Workspace.hpp"
+#include "LSP/DocumentationParser.hpp"
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+using namespace json_rpc;
+using Response = json;
+using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
+using ClientPtr = std::shared_ptr<Client>;
+
+class LanguageServer
+{
+public:
+    // A "in memory" workspace folder which doesn't actually have a root.
+    // Any files which aren't part of a workspace but are opened will be handled here.
+    // This is common if the client has not yet opened a folder
+    WorkspaceFolderPtr nullWorkspace;
+    std::vector<WorkspaceFolderPtr> workspaceFolders;
+    ClientPtr client;
+
+    LanguageServer(std::optional<std::filesystem::path> definitionsFile, std::optional<std::filesystem::path> documentationFile)
+        : client(std::make_shared<Client>())
+    {
+        client->definitionsFile = definitionsFile;
+        client->documentationFile = documentationFile;
+        parseDocumentation(documentationFile, client->documentation, client);
+        nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
+    }
+
+    lsp::ServerCapabilities getServerCapabilities();
+
+    /// Finds the workspace which the file belongs to.
+    /// If no workspace is found, the file is attached to the null workspace
+    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri file);
+
+    Response onRequest(const id_type& id, const std::string& method, std::optional<json> params);
+    void onNotification(const std::string& method, std::optional<json> params);
+    void processInputLoop();
+    bool requestedShutdown();
+
+    // Dispatch handlers
+    lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
+
+    void onInitialized(const lsp::InitializedParams& params);
+
+    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version);
+
+    void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
+    void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);
+    void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params);
+    void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
+    void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
+    void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
+
+    std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
+    std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
+
+    // TODO: can't type this as lsp::hover as it can return null
+    Response hover(const lsp::HoverParams& params);
+    // TODO: can't type this as lsp::SignatureHelp as it can return null
+    Response signatureHelp(const lsp::SignatureHelpParams& params);
+    Response gotoDefinition(const lsp::DefinitionParams& params);
+    Response gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
+    Response references(const lsp::ReferenceParams& params);
+    // Response documentSymbol(const lsp::DocumentSymbolParams& params);
+    Response rename(const lsp::RenameParams& params);
+    lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
+    Response onShutdown(const id_type& id);
+
+private:
+    bool isInitialized = false;
+    bool shutdownRequested = false;
+};

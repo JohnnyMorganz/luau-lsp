@@ -4,6 +4,7 @@ project(luau-lsp LANGUAGES CXX)
 
 add_executable(luau-lsp
     src/main.cpp
+    src/LanguageServer.cpp
     src/JsonRpc.cpp
     src/Uri.cpp
     src/WorkspaceFileResolver.cpp
