@@ -129,7 +129,7 @@ void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> chang
                 // Append addedLineOffsets to offsets
                 offsets.insert(offsets.end(), addedLineOffsets.begin(), addedLineOffsets.end());
             }
-            long diff = change.text.size() - (endOffset - startOffset);
+            long diff = static_cast<long>(change.text.size() - (endOffset - startOffset));
             if (diff != 0)
             {
                 for (size_t i = startLine + 1 + addedLineOffsetsLen, len = offsets.size(); i < len; i++)
