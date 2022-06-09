@@ -319,8 +319,13 @@ struct Position
 {
     size_t line;
     size_t character;
+    friend bool operator==(const Position& lhs, const Position& rhs);
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
+inline bool operator==(const Position& lhs, const Position& rhs)
+{
+    return lhs.line == rhs.line && lhs.character == rhs.character;
+}
 
 struct Range
 {

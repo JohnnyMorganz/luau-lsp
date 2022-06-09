@@ -37,17 +37,15 @@ public:
 
     std::string getText(std::optional<lsp::Range> range = std::nullopt);
 
-    // lsp::Position positionAt(size_t offset);
-    // TODO: fix issues
-    // size_t offsetAt(lsp::Position position);
-
-    size_t offsetAt(const lsp::Position& position);
+    lsp::Position positionAt(size_t offset);
+    size_t offsetAt(lsp::Position position);
 
     bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
 
     void update(std::vector<lsp::TextDocumentContentChangeEvent> changes, int version);
 
     std::vector<size_t> getLineOffsets();
+    size_t lineCount();
 
     // TODO: this is a bit expensive
     std::vector<std::string_view> getLines();
