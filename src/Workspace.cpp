@@ -927,108 +927,6 @@ bool WorkspaceFolder::updateSourceMap()
     }
 }
 
-Luau::TypeId WorkspaceFolder::makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
-    std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass)
-{
-    Luau::LazyTypeVar ltv;
-    ltv.thunk = [this, &arena, globalScope, node, parent, baseClass]()
-    {
-        // TODO: we should cache created instance types and reuse them where possible
-
-        // Handle if the node is no longer valid
-        if (!node)
-            return Luau::getSingletonTypes().anyType;
-
-        // Look up the base class instance
-        Luau::TypeId baseTypeId;
-        if (baseClass)
-            baseTypeId = *baseClass;
-        else if (auto foundId = types::getTypeIdForClass(globalScope, node->className))
-            baseTypeId = *foundId;
-        else
-            return Luau::getSingletonTypes().anyType;
-
-        // Create the ClassTypeVar representing the instance
-        std::string typeName = types::getTypeName(baseTypeId).value_or(node->name);
-        Luau::ClassTypeVar ctv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox/globaltype/" + typeName};
-        auto typeId = arena.addType(std::move(ctv));
-
-        // Attach Parent and Children info
-        // Get the mutable version of the type var
-        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(typeId))
-        {
-
-            // Add the parent
-            if (parent.has_value())
-            {
-                ctv->props["Parent"] = Luau::makeProperty(parent.value());
-            }
-            else if (auto parentNode = node->parent.lock())
-            {
-                ctv->props["Parent"] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, parentNode, std::nullopt));
-            }
-
-            // Add the children
-            for (const auto& child : node->children)
-            {
-                ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(arena, globalScope, child, typeId));
-            }
-
-            // Add FindFirstAncestor and FindFirstChild
-            if (auto instanceType = types::getTypeIdForClass(globalScope, "Instance"))
-            {
-                auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {Luau::getSingletonTypes().stringType}, {"name"}, {*instanceType});
-                Luau::attachMagicFunction(findFirstAncestorFunction,
-                    [this, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::ExprResult<Luau::TypePackId> exprResult) -> std::optional<Luau::ExprResult<Luau::TypePackId>>
-                    {
-                        if (expr.args.size < 1)
-                            return std::nullopt;
-
-                        auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
-                        if (!str)
-                            return std::nullopt;
-
-                        // This is a O(n) search, not great!
-                        if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
-                        {
-                            return Luau::ExprResult<Luau::TypePackId>{
-                                typeChecker.globalTypes.addTypePack({makeLazyInstanceType(typeChecker.globalTypes, scope, *ancestor, std::nullopt)})};
-                        }
-
-                        return std::nullopt;
-                    });
-                ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
-
-                auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {Luau::getSingletonTypes().stringType}, {"name"}, {*instanceType});
-                Luau::attachMagicFunction(findFirstChildFunction,
-                    [this, node, typeId](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::ExprResult<Luau::TypePackId> exprResult) -> std::optional<Luau::ExprResult<Luau::TypePackId>>
-                    {
-                        if (expr.args.size < 1)
-                            return std::nullopt;
-
-                        auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
-                        if (!str)
-                            return std::nullopt;
-
-                        if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
-                        {
-                            return Luau::ExprResult<Luau::TypePackId>{
-                                typeChecker.globalTypes.addTypePack({makeLazyInstanceType(typeChecker.globalTypes, scope, *child, typeId)})};
-                        }
-
-                        return std::nullopt;
-                    });
-                ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
-            }
-        }
-        return typeId;
-    };
-
-    return arena.addType(std::move(ltv));
-}
-
 void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
 {
     // Extend the types from the sourcemap
@@ -1060,7 +958,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                         for (const auto& child : service->children)
                         {
                             Luau::Property property{
-                                makeLazyInstanceType(typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type),
+                                types::makeLazyInstanceType(typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type),
                                 /* deprecated */ false,
                                 /* deprecatedSuggestion */ {},
                                 /* location */ std::nullopt,
@@ -1085,7 +983,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                         ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
                         if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
                         {
-                            ctv->props["PlayerGui"] = Luau::makeProperty(makeLazyInstanceType(
+                            ctv->props["PlayerGui"] = Luau::makeProperty(types::makeLazyInstanceType(
                                 typeChecker.globalTypes, typeChecker.globalScope, starterGui.value(), std::nullopt, playerGuiType->type));
                         }
                     }
@@ -1096,7 +994,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                         ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
                         if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
                         {
-                            ctv->props["StarterGear"] = Luau::makeProperty(makeLazyInstanceType(
+                            ctv->props["StarterGear"] = Luau::makeProperty(types::makeLazyInstanceType(
                                 typeChecker.globalTypes, typeChecker.globalScope, starterPack.value(), std::nullopt, starterGearType->type));
                         }
                     }
@@ -1116,7 +1014,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                         {
                             if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
                             {
-                                ctv->props["PlayerScripts"] = Luau::makeProperty(makeLazyInstanceType(typeChecker.globalTypes,
+                                ctv->props["PlayerScripts"] = Luau::makeProperty(types::makeLazyInstanceType(typeChecker.globalTypes,
                                     typeChecker.globalScope, starterPlayerScripts.value(), std::nullopt, playerScriptsType->type));
                             }
                         }
@@ -1141,7 +1039,7 @@ void WorkspaceFolder::registerInstanceTypes(Luau::TypeChecker& typeChecker)
                 auto typeArena = scope->returnType->owningArena;
                 LUAU_ASSERT(typeArena);
 
-                scope->bindings[Luau::AstName("script")] = Luau::Binding{makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
             }
         };
     }
@@ -1170,12 +1068,9 @@ void WorkspaceFolder::registerDefinitions(Luau::TypeChecker& typeChecker, const 
                 Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
 
                 // Go through all the defined classes and if they are a subclass of Instance then give them the
-                // same metatable identity so that equality comparison works.
+                // same metatable identity as Instance so that equality comparison works.
                 // NOTE: This will OVERWRITE any metatables set on these classes!
                 // We assume that all subclasses of instance don't have any metamethaods
-                instanceMetaIdentity = typeChecker.globalTypes.addType(Luau::TableTypeVar{Luau::TableState::Sealed, typeChecker.globalScope->level});
-                ctv->metatable = instanceMetaIdentity;
-
                 for (auto& [_, ty] : typeChecker.globalScope->exportedTypeBindings)
                 {
                     if (auto* c = Luau::getMutable<Luau::ClassTypeVar>(ty.type))
@@ -1183,7 +1078,7 @@ void WorkspaceFolder::registerDefinitions(Luau::TypeChecker& typeChecker, const 
                         // Check if the ctv is a subclass of instance
                         if (Luau::isSubclass(c, ctv))
                         {
-                            c->metatable = instanceMetaIdentity;
+                            c->metatable = ctv->metatable;
                         }
                     }
                 }
