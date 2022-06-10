@@ -27,6 +27,9 @@ public:
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
 
+private:
+    std::optional<Luau::TypeId> instanceMetaIdentity; // An identity type used for all instance metatables
+
 public:
     WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
         : client(client)
@@ -75,6 +78,8 @@ public:
     bool updateSourceMap();
 
 private:
+    Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
+        std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass = std::nullopt);
     void registerInstanceTypes(Luau::TypeChecker& typeChecker);
     void registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
 

@@ -8,9 +8,7 @@
 namespace types
 {
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className);
-
-Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
-    std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass = std::nullopt);
+std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
 // Magic function for `Instance:IsA("ClassName")` predicate
 std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
