@@ -39,7 +39,7 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Find References
 - [ ] Document Highlight
 - [x] Document Link
-- [ ] Document Symbol
+- [x] Document Symbol
 - [ ] Color Provider
 - [x] Rename
 - [ ] Folding Range

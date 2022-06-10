@@ -65,7 +65,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Find References Provider
     capabilities.referencesProvider = true;
     // Document Symbol Provider
-    capabilities.documentSymbolProvider = false;
+    capabilities.documentSymbolProvider = true;
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Rename Provider
@@ -128,10 +128,10 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     {
         return rename(REQUIRED_PARAMS(params, "textDocument/rename"));
     }
-    // else if (method == "textDocument/documentSymbol")
-    // {
-    //     return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
-    // }
+    else if (method == "textDocument/documentSymbol")
+    {
+        return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+    }
     else if (method == "textDocument/diagnostic")
     {
         return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
@@ -538,15 +538,6 @@ Response LanguageServer::references(const lsp::ReferenceParams& params)
         return *result;
     return nullptr;
 }
-
-// Response documentSymbol(const lsp::DocumentSymbolParams& params)
-// {
-//     auto workspace = findWorkspace(params.textDocument.uri);
-//     auto result = workspace->documentSymbol(params);
-//     if (result)
-//         return *result;
-//     return nullptr;
-// }
 
 Response LanguageServer::rename(const lsp::RenameParams& params)
 {

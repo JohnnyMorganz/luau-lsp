@@ -70,7 +70,7 @@ public:
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
 
-    // std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
+    std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
 
     bool updateSourceMap();
 

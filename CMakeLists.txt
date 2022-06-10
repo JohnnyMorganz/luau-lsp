@@ -14,6 +14,7 @@ set(SOURCES
     src/DocumentationParser.cpp
     src/LuauExt.cpp
     src/Utils.cpp
+    src/operations/DocumentSymbol.cpp
 )
 add_executable(luau-lsp src/main.cpp ${SOURCES})
 

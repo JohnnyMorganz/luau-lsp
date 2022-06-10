@@ -68,7 +68,7 @@ public:
     Response gotoDefinition(const lsp::DefinitionParams& params);
     Response gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
     Response references(const lsp::ReferenceParams& params);
-    // Response documentSymbol(const lsp::DocumentSymbolParams& params);
+    Response documentSymbol(const lsp::DocumentSymbolParams& params);
     Response rename(const lsp::RenameParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     Response onShutdown(const id_type& id);

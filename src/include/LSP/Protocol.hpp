@@ -196,7 +196,8 @@ struct ClientWorkspaceCapabilities
      */
     std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, diagnostics);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, diagnostics);
 
 struct ClientCapabilities
 {
@@ -875,7 +876,8 @@ enum struct SymbolTag
 struct DocumentSymbol
 {
     std::string name;
-    std::optional<std::string> detail;
+    // TODO: this should be optional, but we can't represent undefined so it breaks
+    std::string detail;
     SymbolKind kind;
     std::vector<SymbolTag> tags;
     bool deprecated = false;
