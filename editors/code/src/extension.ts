@@ -148,8 +148,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  console.log(fflags);
-
   // Pass FFlags as arguments
   for (const [name, value] of Object.entries(fflags)) {
     args.push(`--flag:${name}=${value}`);
