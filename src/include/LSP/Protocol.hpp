@@ -119,6 +119,21 @@ struct DiagnosticClientCapabilities
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
 
+struct DiagnosticWorkspaceClientCapabilities
+{
+    /**
+     * Whether the client implementation supports a refresh request sent from
+     * the server to the client.
+     *
+     * Note that this event is global and will force the client to refresh all
+     * pulled diagnostics currently shown. It should be used with absolute care
+     * and is useful for situation where a server for example detects a project
+     * wide change that requires such a calculation.
+     */
+    bool refreshSupport = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DiagnosticWorkspaceClientCapabilities, refreshSupport);
+
 struct TextDocumentClientCapabilities
 {
     std::optional<DiagnosticClientCapabilities> diagnostic;
@@ -148,8 +163,15 @@ struct ClientWorkspaceCapabilities
      * @since 3.6.0
      */
     bool configuration = false;
+
+    /**
+     * Client workspace capabilities specific to diagnostics.
+     *
+     * @since 3.17.0.
+     */
+    std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, configuration);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, configuration, diagnostics);
 
 struct ClientCapabilities
 {

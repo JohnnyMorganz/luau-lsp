@@ -68,6 +68,8 @@ struct WorkspaceFileResolver
 
     const Luau::Config& readConfigRec(const std::filesystem::path& path) const;
 
+    void clearConfigCache();
+
     void writePathsToMap(const SourceNodePtr& node, const std::string& base);
 
     void updateSourceMap(const std::string& sourceMapContents);

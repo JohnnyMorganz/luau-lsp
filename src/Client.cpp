@@ -147,6 +147,14 @@ void Client::applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optiona
     sendRequest(nextRequestId++, "workspace/applyEdit", params, handler);
 }
 
+void Client::refreshWorkspaceDiagnostics()
+{
+    if (capabilities.workspace && capabilities.workspace->diagnostics && capabilities.workspace->diagnostics->refreshSupport)
+    {
+        sendRequest(nextRequestId++, "workspace/diagnostics/refresh", nullptr);
+    }
+}
+
 void Client::setTrace(const lsp::SetTraceParams& params)
 {
     traceMode = params.value;

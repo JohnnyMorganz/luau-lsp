@@ -456,6 +456,15 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspace->name);
             workspace->updateSourceMap();
         }
+        else if (filePath.filename() == ".luaurc")
+        {
+            client->sendLogMessage(
+                lsp::MessageType::Info, "Acknowledge config changed for workspace " + workspace->name + ", clearing configuration cache");
+            workspace->fileResolver.clearConfigCache();
+
+            // Send client request to refresh diagnostics
+            client->refreshWorkspaceDiagnostics();
+        }
     }
 }
 

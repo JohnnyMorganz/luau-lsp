@@ -267,6 +267,11 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
     return configCache[path.generic_string()] = result;
 }
 
+void WorkspaceFileResolver::clearConfigCache()
+{
+    configCache.clear();
+}
+
 void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std::string& base)
 {
     node->virtualPath = base;
