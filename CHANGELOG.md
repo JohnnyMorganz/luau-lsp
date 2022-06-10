@@ -15,11 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The "Updating API" message will now only show on the status bar instead of a popup notification.
 - Instance types will now be named by the Class Name rather than the Instance name
+- File system watchers for `.luaurc` and `sourcemap.json` are now registered on the server side
 
 ### Fixed
 
 - Fixed requiring modules when using `:FindFirstAncestor("Ancestor")`
 - Fixed requiring modules in `LocalPlayer.PlayerGui` / `LocalPlayer.PlayerScripts` / `LocalPlayer.StarterGear`
+- Changing `.luaurc` configuration will now refresh the config cache and update internally
 
 ## [1.2.0] - 2022-06-04
 

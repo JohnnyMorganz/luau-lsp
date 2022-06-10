@@ -149,6 +149,25 @@ struct DidChangeConfigurationClientCapabilities
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeConfigurationClientCapabilities, dynamicRegistration);
 
+struct DidChangeWatchedFilesClientCapabilities
+{
+    /**
+     * Did change watched files notification supports dynamic registration.
+     * Please note that the current protocol doesn't support static
+     * configuration for file changes from the server side.
+     */
+    bool dynamicRegistration = false;
+
+    /**
+     * Whether the client has support for relative patterns
+     * or not.
+     *
+     * @since 3.17.0
+     */
+    bool relativePatternSupport = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(DidChangeWatchedFilesClientCapabilities, dynamicRegistration, relativePatternSupport);
+
 struct ClientWorkspaceCapabilities
 {
     /**
@@ -156,6 +175,12 @@ struct ClientWorkspaceCapabilities
      * notification.
      */
     std::optional<DidChangeConfigurationClientCapabilities> didChangeConfiguration;
+
+    /**
+     * Capabilities specific to the `workspace/didChangeWatchedFiles`
+     * notification.
+     */
+    std::optional<DidChangeWatchedFilesClientCapabilities> didChangeWatchedFiles;
 
     /**
      * The client supports `workspace/configuration` requests.
@@ -171,7 +196,7 @@ struct ClientWorkspaceCapabilities
      */
     std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, configuration, diagnostics);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, diagnostics);
 
 struct ClientCapabilities
 {

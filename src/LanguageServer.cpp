@@ -287,7 +287,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
-        client->registerCapability("workspace/didChangeConfiguration", nullptr);
+        client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
         // Send off requests to get the configuration for each workspace
         std::vector<lsp::DocumentUri> items;
         for (auto& workspace : workspaceFolders)
@@ -297,9 +297,23 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         client->requestConfiguration(items);
     }
 
-    // Dynamically register file watchers. Currently doing on client
-    // lsp::FileSystemWatcher watcher{"sourcemap.json"};
-    // registerCapability("WORKSPACE-FILE-WATCHERS", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{{watcher}});
+    // Dynamically register file watchers
+    if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
+        client->capabilities.workspace->didChangeWatchedFiles->dynamicRegistration)
+    {
+        client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
+
+        std::vector<lsp::FileSystemWatcher> watchers;
+        watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
+        watchers.push_back(lsp::FileSystemWatcher{"**/sourcemap.json"});
+        client->registerCapability(
+            "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
+    }
+    else
+    {
+        client->sendLogMessage(lsp::MessageType::Warning,
+            "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap on config changes will not be provided");
+    }
 }
 
 void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version)

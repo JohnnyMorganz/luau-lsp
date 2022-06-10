@@ -76,9 +76,9 @@ void Client::sendWindowMessage(lsp::MessageType type, std::string message)
     sendNotification("window/showMessage", params);
 }
 
-void Client::registerCapability(std::string method, json registerOptions)
+void Client::registerCapability(std::string registrationId, std::string method, json registerOptions)
 {
-    lsp::Registration registration{"TODO-I-NEED-TO-FIX-THIS", method, registerOptions}; // TODO: registration ID
+    lsp::Registration registration{registrationId, method, registerOptions};
     // TODO: handle responses?
     sendRequest(nextRequestId++, "client/registerCapability", lsp::RegistrationParams{{registration}});
 }

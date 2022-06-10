@@ -40,7 +40,7 @@ public:
     void sendTrace(std::string message, std::optional<std::string> verbose = std::nullopt);
     void sendWindowMessage(lsp::MessageType type, std::string message);
 
-    void registerCapability(std::string method, json registerOptions);
+    void registerCapability(std::string registrationId, std::string method, json registerOptions);
 
     const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri);
     void removeConfiguration(const lsp::DocumentUri& uri);
