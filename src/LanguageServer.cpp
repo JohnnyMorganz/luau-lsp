@@ -312,7 +312,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     else
     {
         client->sendLogMessage(lsp::MessageType::Warning,
-            "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap on config changes will not be provided");
+            "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes will not be provided");
     }
 }
 
