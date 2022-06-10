@@ -33,6 +33,7 @@ add_executable(luau-lsp-tests
     tests/main.cpp
     tests/TextDocument.test.cpp
     tests/Utils.test.cpp
+    tests/WorkspaceFileResolver.test.cpp
     ${SOURCES}
 )
 target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)

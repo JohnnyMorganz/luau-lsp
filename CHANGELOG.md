@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed requiring modules when using `:FindFirstAncestor("Ancestor")`
+- Fixed requiring modules in `LocalPlayer.PlayerGui` / `LocalPlayer.PlayerScripts` / `LocalPlayer.StarterGear`
 
 ## [1.2.0] - 2022-06-04
 

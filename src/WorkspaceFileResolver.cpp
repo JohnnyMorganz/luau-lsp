@@ -159,7 +159,22 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
                     return Luau::ModuleInfo{parentPath.value(), context->optional};
             }
 
-            return Luau::ModuleInfo{context->name + '/' + i->index.value, context->optional};
+            // Map overrides for base name
+            auto baseName = context->name;
+            if (context->name == "game/Players/LocalPlayer/PlayerScripts")
+            {
+                baseName = "game/StarterPlayer/StarterPlayerScripts";
+            }
+            else if (context->name == "game/Players/LocalPlayer/PlayerGui")
+            {
+                baseName = "game/StarterGui";
+            }
+            else if (context->name == "game/Players/LocalPlayer/StarterGear")
+            {
+                baseName = "game/StarterPack";
+            }
+
+            return Luau::ModuleInfo{baseName + '/' + i->index.value, context->optional};
         }
     }
     else if (Luau::AstExprIndexExpr* i_expr = node->as<Luau::AstExprIndexExpr>())
