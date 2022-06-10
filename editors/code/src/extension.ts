@@ -182,12 +182,6 @@ export async function activate(context: vscode.ExtensionContext) {
       { scheme: "file", language: "lua" },
       { scheme: "file", language: "luau" },
     ],
-    // synchronize: {
-    //   fileEvents: [
-    //     vscode.workspace.createFileSystemWatcher("**/.luaurc"),
-    //     vscode.workspace.createFileSystemWatcher("**/sourcemap.json"),
-    //   ],
-    // },
     diagnosticCollectionName: "luau",
   };
 
