@@ -214,6 +214,7 @@ int startAnalyze(int argc, char** argv)
                     format, definitionsPath.relative_path().generic_string().c_str(), error.getLocation(), "SyntaxError", error.getMessage().c_str());
 
             if (loadResult.module)
+            {
                 for (const auto& error : loadResult.module->errors)
                     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
                         report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "SyntaxError",
@@ -221,6 +222,7 @@ int startAnalyze(int argc, char** argv)
                     else
                         report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "TypeError",
                             Luau::toString(error).c_str());
+            }
         }
     }
 
