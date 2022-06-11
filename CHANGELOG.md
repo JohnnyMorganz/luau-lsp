@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added Document Symbols support
 - Merged [luau-analyze-rojo](https://github.com/JohnnyMorganz/luau-analyze-rojo) into the project to simplify maintenance. To run a standalone analysis tool, run `luau-lsp analyze`
 
+### Changed
+
+- Sync to upstream Luau 0.531
+
 ### Fixed
 
 - Fixed the equality comparison between two Instance types causing a type error
