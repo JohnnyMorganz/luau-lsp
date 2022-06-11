@@ -558,8 +558,8 @@ struct Diagnostic
     std::optional<CodeDescription> codeDescription;
     std::optional<std::string> source;
     std::string message;
-    std::optional<std::vector<DiagnosticTag>> tags;
-    std::optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
+    std::vector<DiagnosticTag> tags;
+    std::vector<DiagnosticRelatedInformation> relatedInformation;
     // data?
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);

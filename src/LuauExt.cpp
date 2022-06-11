@@ -597,17 +597,32 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
     diagnostic.message = message;
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
+    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/typecheck")};
     return diagnostic;
 }
 
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
 {
+    std::string lintName = Luau::LintWarning::getName(lint.code);
+
     lsp::Diagnostic diagnostic;
     diagnostic.source = "Luau";
     diagnostic.code = lint.code;
-    diagnostic.message = std::string(Luau::LintWarning::getName(lint.code)) + ": " + lint.text;
+    diagnostic.message = lintName + ": " + lint.text;
     diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
     diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
+    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
+
+    if (lint.code == Luau::LintWarning::Code::Code_LocalUnused || lint.code == Luau::LintWarning::Code::Code_ImportUnused ||
+        lint.code == Luau::LintWarning::Code::Code_FunctionUnused)
+    {
+        diagnostic.tags.emplace_back(lsp::DiagnosticTag::Unnecessary);
+    }
+    else if (lint.code == Luau::LintWarning::Code::Code_DeprecatedApi || lint.code == Luau::LintWarning::Code::Code_DeprecatedGlobal)
+    {
+        diagnostic.tags.emplace_back(lsp::DiagnosticTag::Deprecated);
+    }
+
     return diagnostic;
 }
 

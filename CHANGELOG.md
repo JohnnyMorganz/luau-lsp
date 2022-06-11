@@ -10,10 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added Document Symbols support
 - Merged [luau-analyze-rojo](https://github.com/JohnnyMorganz/luau-analyze-rojo) into the project to simplify maintenance. To run a standalone analysis tool, run `luau-lsp analyze`
+- Added links to Luau Documentation for lint warnings
 
 ### Changed
 
 - Sync to upstream Luau 0.531
+- Unused lints will are now tagged appropriately so they render faded out
 
 ### Fixed
 

@@ -12,3 +12,4 @@ std::optional<std::string> readFile(const std::filesystem::path& filePath);
 void trim_start(std::string& str);
 void trim_end(std::string& str);
 void trim(std::string& str);
+std::string& toLower(std::string& str);

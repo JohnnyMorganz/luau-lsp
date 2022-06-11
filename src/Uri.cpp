@@ -4,6 +4,7 @@
 #include <optional>
 #include <ctype.h>
 #include "LSP/Uri.hpp"
+#include "LSP/Utils.hpp"
 
 static std::string percentDecode(const std::string& str)
 {
@@ -217,11 +218,7 @@ std::string Uri::toString() const
             }
             res += '@';
         }
-        std::for_each(mutAuthority.begin(), mutAuthority.end(),
-            [](unsigned char c)
-            {
-                return std::tolower(c);
-            });
+        toLower(mutAuthority);
         idx = mutAuthority.find(':');
         if (idx == std::string::npos)
         {

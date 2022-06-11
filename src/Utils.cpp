@@ -1,4 +1,5 @@
 #include "LSP/Utils.hpp"
+#include <algorithm>
 
 std::optional<std::string> getParentPath(const std::string& path)
 {
@@ -83,4 +84,14 @@ void trim(std::string& str)
 {
     trim_start(str);
     trim_end(str);
+}
+
+std::string& toLower(std::string& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c)
+        {
+            return std::tolower(c);
+        });
+    return str;
 }
