@@ -392,13 +392,16 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    frontend.check(moduleName);
+    // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
+    Luau::FrontendOptions frontendOpts{true, true};
+    frontend.check(moduleName, frontendOpts);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
         return std::nullopt;
 
-    auto module = frontend.moduleResolver.getModule(moduleName);
+    // TODO: fix forAutocomplete
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     if (!node)
@@ -538,13 +541,15 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     auto position = convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    frontend.check(moduleName);
+    // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
+    Luau::FrontendOptions frontendOpts{true, true};
+    frontend.check(moduleName, frontendOpts);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
         return std::nullopt;
 
-    auto module = frontend.moduleResolver.getModule(moduleName);
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
 
     if (ancestry.size() == 0)
@@ -639,10 +644,15 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
+    {
+        // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
+        Luau::FrontendOptions frontendOpts{true, true};
         frontend.check(moduleName);
+    }
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolver.getModule(moduleName);
+    // TODO: fix "forAutocomplete"
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
         return std::nullopt;
 
@@ -765,10 +775,16 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
+    {
+        // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
+        Luau::FrontendOptions frontendOpts{true, true};
         frontend.check(moduleName);
+    }
+
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolver.getModule(moduleName);
+    // TODO: fix "forAutocomplete"
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
         return std::nullopt;
 
@@ -832,8 +848,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         frontend.check(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolver.getModule(moduleName);
-    if (!sourceModule || !module)
+    if (!sourceModule)
         return std::nullopt;
 
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
@@ -881,8 +896,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
         frontend.check(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolver.getModule(moduleName);
-    if (!sourceModule || !module)
+    if (!sourceModule)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
 
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
@@ -914,7 +928,7 @@ bool WorkspaceFolder::updateSourceMap()
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
 
-        types::registerInstanceTypes(frontend.typeChecker, fileResolver);
+        types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ false);
         types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
 
         // TODO: we should signal a diagnostics refresh

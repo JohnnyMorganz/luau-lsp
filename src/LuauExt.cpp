@@ -209,7 +209,10 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIs
     return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
 }
 
-void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver)
+// TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
+// to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
+// Remove this once Luau has improved
+void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
 {
     // Extend the types from the sourcemap
     // Extend globally registered types with Instance information
@@ -309,7 +312,7 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
         }
 
         // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-        typeChecker.prepareModuleScope = [&](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+        typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
         {
             if (auto node =
                     fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
@@ -321,7 +324,16 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                 auto typeArena = scope->returnType->owningArena;
                 LUAU_ASSERT(typeArena);
 
-                scope->bindings[Luau::AstName("script")] = Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
+                if (expressiveTypes)
+                    scope->bindings[Luau::AstName("script")] =
+                        Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
+                else
+                {
+                    // TODO: we hope to remove these in future!
+                    scope->bindings[Luau::AstName("script")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                    scope->bindings[Luau::AstName("workspace")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                    scope->bindings[Luau::AstName("game")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                }
             }
         };
     }
