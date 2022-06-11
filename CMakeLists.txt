@@ -16,7 +16,7 @@ set(SOURCES
     src/Utils.cpp
     src/operations/DocumentSymbol.cpp
 )
-add_executable(luau-lsp src/main.cpp ${SOURCES})
+add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
 
 add_subdirectory(luau)
 

@@ -120,6 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   await updateApiInfo(context);
   const args = [
+    `lsp`,
     `--definitions=${globalTypesUri(context).fsPath}`,
     `--docs=${apiDocsUri(context).fsPath}`,
   ];
