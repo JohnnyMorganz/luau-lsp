@@ -1,0 +1,32 @@
+name: Pull Latest API Dump
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 0 * * *" # Runs at 00:10 UTC every day
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Update Types dump
+        run: |
+          cd scripts
+          python dumpRobloxTypes.py > globalTypes.d.lua
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3.12.1
+        with:
+          title: Update to latest types dump
+          body: |
+            Pulls in latest types dump
+            - This pull request is **auto-generated**
+          branch: auto/update-dump
+          commit-message: Update types Dump
+          base: master
