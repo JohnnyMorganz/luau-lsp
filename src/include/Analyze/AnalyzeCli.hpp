@@ -1,0 +1,1 @@
+int startAnalyze(int argc, char** argv);

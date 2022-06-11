@@ -61,6 +61,13 @@ They can be investigated at a later time:
 - [ ] Moniker
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
 
+## Standalone
+
+The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI.
+The entry point for the analysis tool is `luau-lsp analyze`.
+
+Install the binary and run `luau-lsp --help` for more information.
+
 ## Build From Source
 
 ```sh
