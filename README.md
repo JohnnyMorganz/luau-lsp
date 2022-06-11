@@ -45,7 +45,6 @@ If you use Luau in a different environment and are interested in using the langu
 - [ ] Folding Range
 - [ ] Selection Range
 - [ ] Call Hierarchy
-- [ ] Type Hierarchy
 - [ ] Semantic Tokens
 - [ ] Inlay Hints
 - [ ] Workspace Symbols
@@ -60,6 +59,7 @@ They can be investigated at a later time:
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
+- [ ] Type Hierarchy (Luau currently does not provide any [public] ways to define type hierarchies)
 
 ## Standalone
 
