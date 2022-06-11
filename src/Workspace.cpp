@@ -647,7 +647,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
     {
         // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
         Luau::FrontendOptions frontendOpts{true, true};
-        frontend.check(moduleName);
+        frontend.check(moduleName, frontendOpts);
     }
 
     auto sourceModule = frontend.getSourceModule(moduleName);
@@ -778,7 +778,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     {
         // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
         Luau::FrontendOptions frontendOpts{true, true};
-        frontend.check(moduleName);
+        frontend.check(moduleName, frontendOpts);
     }
 
 
