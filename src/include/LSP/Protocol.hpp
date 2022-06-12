@@ -386,7 +386,7 @@ struct TextDocumentItem
 {
     DocumentUri uri;
     std::string languageId;
-    int version;
+    size_t version;
     std::string text;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentItem, uri, languageId, version, text);
@@ -399,7 +399,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentIdentifier, uri);
 
 struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
-    int version;
+    size_t version;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
 
@@ -567,7 +567,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Diagnostic, range, severity, cod
 struct PublishDiagnosticsParams
 {
     DocumentUri uri;
-    std::optional<int> version;
+    std::optional<size_t> version;
     std::vector<Diagnostic> diagnostics;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PublishDiagnosticsParams, uri, version, diagnostics);

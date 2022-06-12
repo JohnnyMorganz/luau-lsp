@@ -92,7 +92,7 @@ size_t TextDocument::offsetAt(lsp::Position position)
     return std::max(std::min(lineOffset + position.character, nextLineOffset), lineOffset);
 }
 
-void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, int version)
+void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version)
 {
     _version = version;
     for (auto& change : changes)

@@ -7,12 +7,12 @@ class TextDocument
 private:
     lsp::DocumentUri _uri;
     std::string _languageId;
-    int _version;
+    size_t _version;
     std::string _content;
     std::optional<std::vector<size_t>> _lineOffsets = std::nullopt;
 
 public:
-    TextDocument(const lsp::DocumentUri& uri, const std::string& languageId, int version, const std::string& content)
+    TextDocument(const lsp::DocumentUri& uri, const std::string& languageId, size_t version, const std::string& content)
         : _uri(uri)
         , _languageId(languageId)
         , _version(version)
@@ -30,7 +30,7 @@ public:
         return _languageId;
     }
 
-    int version() const
+    size_t version() const
     {
         return _version;
     }
@@ -42,7 +42,7 @@ public:
 
     bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
 
-    void update(std::vector<lsp::TextDocumentContentChangeEvent> changes, int version);
+    void update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version);
 
     std::vector<size_t> getLineOffsets();
     size_t lineCount();
