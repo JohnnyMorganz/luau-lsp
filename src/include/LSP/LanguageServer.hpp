@@ -45,8 +45,8 @@ public:
     bool requestedShutdown();
 
     // Dispatch handlers
+private:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
-
     void onInitialized(const lsp::InitializedParams& params);
 
     void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version);

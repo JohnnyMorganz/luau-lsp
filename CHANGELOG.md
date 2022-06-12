@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed false positive type errors occuring when using DataModel instance types. Unfortunately, for this fix we had to temporarily type all DataModel instances as `any`. You should still get proper autocomplete and intellisense, however type errors will no longer throw for unknown children.
 - Fixed enum types to be under the "Enum" library, so the types are referenced using `Enum.Font` instead of `EnumFont`
 - HTML Tags have been stripped from documentation so they should render better in IntelliSense
+- Fixed "Text Document not loaded locally" error occuring when you start typing in a newly created file (as the sourcemap is not yet up-to-date)
 
 ## [1.3.0] - 2022-06-10
 
