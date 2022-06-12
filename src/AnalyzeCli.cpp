@@ -110,7 +110,7 @@ int startAnalyze(int argc, char** argv)
     std::vector<std::filesystem::path> definitionsPaths;
     std::vector<std::filesystem::path> files;
 
-    for (int i = 1; i < argc; ++i)
+    for (int i = 2; i < argc; ++i)
     {
         if (argv[i][0] == '-')
         {
@@ -174,6 +174,12 @@ int startAnalyze(int argc, char** argv)
     if (sourcemapPath.has_value() && !std::filesystem::exists(sourcemapPath.value()))
     {
         fprintf(stderr, "Cannot load sourcemap path %s: path does not exist\n", sourcemapPath->generic_string().c_str());
+        return 1;
+    }
+
+    if (files.empty())
+    {
+        fprintf(stderr, "error: no files provided\n");
         return 1;
     }
 
