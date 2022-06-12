@@ -407,7 +407,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
                     auto uri = Uri::file(*filePath);
                     if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()))
                     {
-                        auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{uri});
+                        auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
                         diagnostics.relatedDocuments.emplace(uri.toString(),
                             lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
                         diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
