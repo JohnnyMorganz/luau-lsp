@@ -338,7 +338,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     }
 }
 
-void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version)
+void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version)
 {
     // Convert the diagnostics report into a series of diagnostics published for each relevant file
     lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};

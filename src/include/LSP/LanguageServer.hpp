@@ -49,7 +49,7 @@ private:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized(const lsp::InitializedParams& params);
 
-    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const int version);
+    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version);
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);
