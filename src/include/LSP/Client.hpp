@@ -8,6 +8,7 @@
 
 using namespace json_rpc;
 using ResponseHandler = std::function<void(const JsonRpcMessage&)>;
+using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const ClientConfiguration&)>;
 
 class Client
 {
@@ -24,6 +25,8 @@ public:
     ClientConfiguration globalConfig;
     /// Configuration passed from the language client. Currently we only handle configuration at the workspace level
     std::unordered_map<std::string /* DocumentUri */, ClientConfiguration> configStore;
+
+    ConfigChangedCallback configChangedCallback;
 
 private:
     /// The request id for the next request

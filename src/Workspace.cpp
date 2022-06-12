@@ -11,6 +11,9 @@ static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, s
 /// Checks whether a provided file is part of the workspace
 bool WorkspaceFolder::isInWorkspace(const lsp::DocumentUri& file)
 {
+    if (file == rootUri)
+        return true;
+
     // Check if the root uri is a prefix of the file
     auto prefixStr = rootUri.toString();
     auto checkStr = file.toString();
@@ -158,6 +161,79 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
         report.items.emplace_back(createLintDiagnostic(error));
 
     return report;
+}
+
+lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
+{
+    lsp::WorkspaceDiagnosticReport workspaceReport;
+    auto config = client->getConfiguration(rootUri);
+
+    // TODO: we should handle non-sourcemap features
+    std::vector<SourceNodePtr> queue;
+    if (fileResolver.rootSourceNode)
+    {
+        queue.push_back(fileResolver.rootSourceNode);
+    };
+
+    while (!queue.empty())
+    {
+        auto node = queue.back();
+        queue.pop_back();
+        for (auto& child : node->children)
+        {
+            queue.push_back(child);
+        }
+
+        auto realPath = fileResolver.getRealPathFromSourceNode(node);
+        auto moduleName = fileResolver.getVirtualPathFromSourceNode(node);
+
+        if (!realPath || isIgnoredFile(*realPath, config))
+            continue;
+
+        // Compute new check result
+        Luau::CheckResult cr;
+        if (frontend.isDirty(moduleName))
+            cr = frontend.check(moduleName);
+
+        // If there was an error retrieving the source module, disregard this file
+        // TODO: should we file a diagnostic?
+        if (!frontend.getSourceModule(moduleName))
+            continue;
+
+        lsp::WorkspaceDocumentDiagnosticReport documentReport;
+        documentReport.uri = Uri::file(*realPath);
+        documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
+        if (fileResolver.isManagedFile(moduleName))
+        {
+            documentReport.version = fileResolver.managedFiles.at(moduleName).version();
+        }
+
+        // Report Type Errors
+        // Only report errors for the current file
+        for (auto& error : cr.errors)
+        {
+            auto diagnostic = createTypeErrorDiagnostic(error);
+            if (error.moduleName == moduleName)
+            {
+                documentReport.items.emplace_back(diagnostic);
+            }
+        }
+
+        // Report Lint Warnings
+        Luau::LintResult lr = frontend.lint(moduleName);
+        for (auto& error : lr.errors)
+        {
+            auto diagnostic = createLintDiagnostic(error);
+            diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
+            documentReport.items.emplace_back(diagnostic);
+        }
+        for (auto& error : lr.warnings)
+            documentReport.items.emplace_back(createLintDiagnostic(error));
+
+        workspaceReport.items.emplace_back(documentReport);
+    }
+
+    return workspaceReport;
 }
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)

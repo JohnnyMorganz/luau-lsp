@@ -628,6 +628,33 @@ using DocumentDiagnosticReport = RelatedDocumentDiagnosticReport;
 // };
 // using DocumentDiagnosticReport = std::variant<RelatedFullDocumentDiagnosticReport, RelatedUnchangedDocumentDiagnosticReport>;
 
+struct PreviousResultId
+{
+    DocumentUri uri;
+    std::string value;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(PreviousResultId, uri, value);
+
+struct WorkspaceDiagnosticParams
+{
+    std::optional<std::string> identifier;
+    std::vector<PreviousResultId> previousResultIds;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDiagnosticParams, identifier, previousResultIds);
+
+struct WorkspaceDocumentDiagnosticReport : SingleDocumentDiagnosticReport
+{
+    DocumentUri uri;
+    std::optional<size_t> version;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version);
+
+struct WorkspaceDiagnosticReport
+{
+    std::vector<WorkspaceDocumentDiagnosticReport> items;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDiagnosticReport, items);
+
 enum struct CompletionTriggerKind
 {
     Invoked = 1,

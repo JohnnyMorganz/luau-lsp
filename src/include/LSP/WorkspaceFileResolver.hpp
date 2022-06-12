@@ -52,6 +52,7 @@ struct WorkspaceFileResolver
 
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
 
+    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
     Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode) const;
 
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const;

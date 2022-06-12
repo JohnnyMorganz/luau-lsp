@@ -71,6 +71,7 @@ private:
     Response documentSymbol(const lsp::DocumentSymbolParams& params);
     Response rename(const lsp::RenameParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
+    lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown(const id_type& id);
 
 private:

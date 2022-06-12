@@ -71,7 +71,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Rename Provider
     capabilities.renameProvider = true;
     // Diagnostics Provider
-    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
+    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
@@ -136,7 +136,10 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     {
         return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
     }
-    // TODO: workspace/diagnostic?
+    else if (method == "workspace/diagnostic")
+    {
+        return workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic"));
+    }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
@@ -288,6 +291,25 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
+        client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config)
+        {
+            auto workspace = findWorkspace(workspaceUri);
+
+            // Recompute workspace diagnostics if requested
+            if (config.diagnostics.workspace)
+            {
+                auto diagnostics = workspace->workspaceDiagnostics({});
+                for (const auto& report : diagnostics.items)
+                {
+                    if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                    {
+                        client->sendNotification(
+                            "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                    }
+                }
+            }
+        };
+
         // Send off requests to get the configuration for each workspace
         std::vector<lsp::DocumentUri> items;
         for (auto& workspace : workspaceFolders)
@@ -373,7 +395,8 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
         // Compute diagnostics for reverse dependencies
         // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
         // TODO: maybe this should only be done onSave
-        if (client->getConfiguration(workspace->rootUri).diagnostics.includeDependents)
+        auto config = client->getConfiguration(workspace->rootUri);
+        if (config.diagnostics.includeDependents || config.diagnostics.workspace)
         {
             std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics;
             for (auto& module : markedDirty)
@@ -578,6 +601,19 @@ lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::Docu
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->documentDiagnostics(params);
+}
+
+lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
+{
+    lsp::WorkspaceDiagnosticReport fullReport;
+
+    for (auto& workspace : workspaceFolders)
+    {
+        auto report = workspace->workspaceDiagnostics(params);
+        fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
+    }
+
+    return fullReport;
 }
 
 Response LanguageServer::onShutdown(const id_type& id)

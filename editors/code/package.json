@@ -106,9 +106,14 @@
                     }
                 },
                 "luau-lsp.diagnostics.includeDependents": {
-                    "markdownDescription": "Recompute diagnostics for dependents when a file changes",
+                    "markdownDescription": "Recompute diagnostics for dependents when a file changes. If #luau-lsp.diagnostics.workspace# is enabled, this is ignored",
                     "type": "boolean",
                     "default": true
+                },
+                "luau-lsp.diagnostics.workspace": {
+                    "markdownDescription": "Compute diagnostics for the whole workspace",
+                    "type": "boolean",
+                    "default": false
                 }
             }
         }
