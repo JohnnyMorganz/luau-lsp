@@ -13,3 +13,4 @@ void trim_start(std::string& str);
 void trim_end(std::string& str);
 void trim(std::string& str);
 std::string& toLower(std::string& str);
+bool endsWith(const std::string_view& str, const std::string_view& suffix);

@@ -95,3 +95,8 @@ std::string& toLower(std::string& str)
         });
     return str;
 }
+
+bool endsWith(const std::string_view& str, const std::string_view& suffix)
+{
+    return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
+}

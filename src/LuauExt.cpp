@@ -349,6 +349,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             return loadResult;
         }
 
+        // Extend Instance types
         if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
         {
             if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
@@ -377,6 +378,50 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                 }
             }
         }
+
+        // Move Enums over as imported type bindings
+        std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes;
+        for (auto it = typeChecker.globalScope->exportedTypeBindings.begin(); it != typeChecker.globalScope->exportedTypeBindings.end();)
+        {
+            auto erase = false;
+            auto ty = it->second.type;
+            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
+            {
+                if (Luau::startsWith(ctv->name, "Enum") && ctv->name != "Enum" && ctv->name != "EnumItem")
+                {
+                    // Erase the "Enum" at the start
+                    ctv->name = ctv->name.substr(4);
+
+                    // Move the enum over to the imported types if it is not internal, otherwise rename the type
+                    if (endsWith(ctv->name, "_INTERNAL"))
+                    {
+                        ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
+                    }
+                    else
+                    {
+                        enumTypes.emplace(ctv->name, it->second);
+                    }
+
+                    // Update the documentation symbol
+                    Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
+                    for (auto& [name, prop] : ctv->props)
+                    {
+                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                    }
+
+                    // Prefix the name (after its been placed into enumTypes) with "Enum."
+                    ctv->name = "Enum." + ctv->name;
+
+                    erase = true;
+                }
+            };
+
+            if (erase)
+                it = typeChecker.globalScope->exportedTypeBindings.erase(it);
+            else
+                ++it;
+        }
+        typeChecker.globalScope->importedTypeBindings.emplace("Enum", enumTypes);
 
         return loadResult;
     }

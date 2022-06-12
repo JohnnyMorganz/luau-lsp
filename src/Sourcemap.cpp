@@ -1,6 +1,7 @@
 #include <optional>
 #include <filesystem>
 #include "LSP/Sourcemap.hpp"
+#include "LSP/Utils.hpp"
 
 bool SourceNode::isScript()
 {
@@ -65,11 +66,6 @@ std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& name)
         current = currentPtr->parent;
     }
     return std::nullopt;
-}
-
-static bool endsWith(std::string str, std::string suffix)
-{
-    return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
 
 Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& requirePath)
