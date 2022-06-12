@@ -592,7 +592,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 // The specification defines separated types FullDocumentDiagnosticReport and UnchangedDocumentDiagnosticReport, depending on the kind
 struct SingleDocumentDiagnosticReport
 {
-    DocumentDiagnosticReportKind kind;
+    DocumentDiagnosticReportKind kind = DocumentDiagnosticReportKind::Full;
     std::optional<std::string> resultId; // NB: this MUST be present if kind == Unchanged
     std::vector<Diagnostic> items;       // NB: this MUST NOT be present if kind == Unchanged
 };
@@ -600,7 +600,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SingleDocumentDiagnosticReport, 
 
 struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
-    std::map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
+    std::unordered_map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
 

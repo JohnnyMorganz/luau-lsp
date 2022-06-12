@@ -56,7 +56,7 @@ struct WorkspaceFileResolver
 
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const;
 
-    std::optional<std::filesystem::path> resolveVirtualPathToRealPath(const Luau::ModuleName& name) const;
+    std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const;
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
 

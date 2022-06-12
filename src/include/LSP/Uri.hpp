@@ -52,6 +52,16 @@ public:
         // TODO: validate?
     }
 
+    bool operator==(const Uri& other) const
+    {
+        return scheme == other.scheme && authority == other.authority && path == other.path && query == other.query && fragment == other.fragment;
+    }
+
+    bool operator!=(const Uri& other) const
+    {
+        return !operator==(other);
+    }
+
     static Uri parse(const std::string& value);
     static Uri file(const std::filesystem::path& fsPath);
 

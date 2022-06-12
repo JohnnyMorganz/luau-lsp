@@ -353,9 +353,12 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
 
 void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
 {
+    // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
+    std::vector<Luau::ModuleName> markedDirty;
+
     // Update in-memory file with new contents
     auto workspace = findWorkspace(params.textDocument.uri);
-    workspace->updateTextDocument(params.textDocument.uri, params);
+    workspace->updateTextDocument(params.textDocument.uri, params, &markedDirty);
 
     // Trigger diagnostics
     // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
@@ -366,6 +369,29 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
         auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{params.textDocument});
         client->sendNotification("textDocument/publishDiagnostics",
             lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
+
+        // Compute diagnostics for reverse dependencies
+        // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
+        // TODO: maybe this should only be done onSave
+        if (client->getConfiguration(workspace->rootUri).diagnostics.includeDependents)
+        {
+            std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics;
+            for (auto& module : markedDirty)
+            {
+                auto filePath = workspace->fileResolver.resolveToRealPath(module);
+                if (filePath)
+                {
+                    auto uri = Uri::file(*filePath);
+                    if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()))
+                    {
+                        auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{uri});
+                        diagnostics.relatedDocuments.emplace(uri.toString(),
+                            lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
+                        diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
+                    }
+                }
+            }
+        }
 
         if (!diagnostics.relatedDocuments.empty())
         {

@@ -43,7 +43,8 @@ public:
     bool isInWorkspace(const lsp::DocumentUri& file);
 
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
-    void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
+    void updateTextDocument(
+        const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration

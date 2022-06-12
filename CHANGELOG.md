@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Merged [luau-analyze-rojo](https://github.com/JohnnyMorganz/luau-analyze-rojo) into the project to simplify maintenance. To run a standalone analysis tool, run `luau-lsp analyze`
 - Added links to Luau Documentation for lint warnings
 - Added documentation to Enum types
+- Diagnostics of dependents (i.e., files which require a changed file) will now refresh to display type errors when the file changes
 
 ### Changed
 

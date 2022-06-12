@@ -104,6 +104,11 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "luau-lsp.diagnostics.includeDependents": {
+                    "markdownDescription": "Recompute diagnostics for dependents when a file changes",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }

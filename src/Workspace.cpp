@@ -30,7 +30,8 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
     frontend.markDirty(moduleName);
 }
 
-void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
+void WorkspaceFolder::updateTextDocument(
+    const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty)
 {
     auto moduleName = fileResolver.getModuleName(uri);
 
@@ -56,7 +57,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     textDocument.update(params.contentChanges, params.textDocument.version);
 
     // Mark the module dirty for the typechecker
-    frontend.markDirty(moduleName);
+    frontend.markDirty(moduleName, markedDirty);
 }
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
@@ -124,7 +125,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
         }
         else
         {
-            auto fileName = fileResolver.resolveVirtualPathToRealPath(error.moduleName);
+            auto fileName = fileResolver.resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
                 continue;
             auto uri = Uri::file(*fileName);
@@ -382,10 +383,7 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
                     if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, **maybeRequire))
                     {
                         // Resolve the module info to a URI
-                        std::optional<std::filesystem::path> realName = moduleInfo->name;
-                        if (fileResolver.isVirtualPath(moduleInfo->name))
-                            realName = fileResolver.resolveVirtualPathToRealPath(moduleInfo->name);
-
+                        auto realName = fileResolver.resolveToRealPath(moduleInfo->name);
                         if (realName)
                         {
                             lsp::DocumentLink link;
@@ -732,7 +730,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
             {
                 if (definitionModuleName)
                 {
-                    if (auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName))
+                    if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
                     {
                         return lsp::Location{Uri::file(*file), lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
                     }
