@@ -26,6 +26,13 @@ We could also potentially take it a step forward, allowing the server to be used
 
 If you use Luau in a different environment and are interested in using the language server, please get in touch!
 
+## Standalone
+
+The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI, with full Rojo resolution and API types support.
+The entry point for the analysis tool is `luau-lsp analyze`.
+
+Install the binary and run `luau-lsp --help` for more information.
+
 ## Supported Features
 
 - [x] Rojo Files Resolution
@@ -60,13 +67,6 @@ They can be investigated at a later time:
 - [ ] Moniker
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
 - [ ] Type Hierarchy (Luau currently does not provide any [public] ways to define type hierarchies)
-
-## Standalone
-
-The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI.
-The entry point for the analysis tool is `luau-lsp analyze`.
-
-Install the binary and run `luau-lsp --help` for more information.
 
 ## Build From Source
 
