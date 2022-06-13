@@ -4104,7 +4104,6 @@ declare class Instance
 	Archivable: boolean
 	ClassName: string
 	Name: string
-	Parent: Instance
 	RobloxLocked: boolean
 	SourceAssetId: number
 	function ClearAllChildren(self): nil
@@ -4139,7 +4138,7 @@ declare class Instance
 	DescendantAdded: RBXScriptSignal<Instance>
 	DescendantRemoving: RBXScriptSignal<Instance>
 	Destroying: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
+	Parent: Instance?
 end
 
 declare class ABTestService extends Instance
@@ -4153,7 +4152,6 @@ declare class ABTestService extends Instance
 	function WaitUntilUserABTestsInitialized(self): nil
 	OnBrowserTrackerABTestLoadingStatusChanged: RBXScriptSignal<EnumABTestLoadingStatus>
 	OnUserABTestLoadingStatusChanged: RBXScriptSignal<EnumABTestLoadingStatus, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Accoutrement extends Instance
@@ -4162,22 +4160,18 @@ declare class Accoutrement extends Instance
 	AttachmentPos: Vector3
 	AttachmentRight: Vector3
 	AttachmentUp: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Accessory extends Accoutrement
 	AccessoryType: EnumAccessoryType
-	function __eq(self, other: Instance): boolean
 end
 
 
 
 declare class AdService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AdvancedDragger extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnalyticsService extends Instance
@@ -4185,22 +4179,18 @@ declare class AnalyticsService extends Instance
 	function FireInGameEconomyEvent(self, player: Instance, itemName: string, economyAction: EnumAnalyticsEconomyAction, itemCategory: string, amount: number, currency: string, location: any, customData: any): nil
 	function FireLogEvent(self, player: Instance, logLevel: EnumAnalyticsLogLevel, message: string, debugInfo: any, customData: any): nil
 	function FirePlayerProgressionEvent(self, player: Instance, category: string, progressionStatus: EnumAnalyticsProgressionStatus, location: any, statistics: any, customData: any): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Animation extends Instance
 	AnimationId: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationClip extends Instance
 	Loop: boolean
 	Priority: EnumAnimationPriority
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CurveAnimation extends AnimationClip
-	function __eq(self, other: Instance): boolean
 end
 
 declare class KeyframeSequence extends AnimationClip
@@ -4208,7 +4198,6 @@ declare class KeyframeSequence extends AnimationClip
 	function AddKeyframe(self, keyframe: Keyframe): nil
 	function GetKeyframes(self): { Instance }
 	function RemoveKeyframe(self, keyframe: Keyframe): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationClipProvider extends Instance
@@ -4217,11 +4206,9 @@ declare class AnimationClipProvider extends Instance
 	function RegisterAnimationClip(self, animationClip: AnimationClip): Content
 	function GetAnimationClipAsync(self, assetId: Content): AnimationClip
 	function GetAnimations(self, userId: number): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationController extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationFromVideoCreatorService extends Instance
@@ -4229,18 +4216,15 @@ declare class AnimationFromVideoCreatorService extends Instance
 	function DownloadJobResult(self, jobId: string, outputFilePath: string): string
 	function FullProcess(self, videoFilePath: string, progressCallback: <A..., R...>(A...) -> R...): string
 	function GetJobStatus(self, jobId: string): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
 	function CreateAnimationByUploadingVideo(self, progressCallback: <A..., R...>(A...) -> R...): string
 	function ImportVideoWithPrompt(self): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationRigData extends Instance
 	function LoadFromHumanoid(self, humanoid: Instance): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationStreamTrack extends Instance
@@ -4252,7 +4236,6 @@ declare class AnimationStreamTrack extends Instance
 	function Play(self, fadeTime: number?, weight: number?): nil
 	function Stop(self, fadeTime: number?): nil
 	Stopped: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnimationTrack extends Instance
@@ -4274,7 +4257,6 @@ declare class AnimationTrack extends Instance
 	DidLoop: RBXScriptSignal<>
 	KeyframeReached: RBXScriptSignal<string>
 	Stopped: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Animator extends Instance
@@ -4284,7 +4266,6 @@ declare class Animator extends Instance
 	function LoadStreamAnimation(self, animation: TrackerStreamAnimation): AnimationStreamTrack
 	function StepAnimations(self, deltaTime: number): nil
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AppUpdateService extends Instance
@@ -4292,15 +4273,12 @@ declare class AppUpdateService extends Instance
 	function DisableDUAR(self): nil
 	function DisableDUARAndOpenSurvey(self, surveyUrl: string): nil
 	function PerformManagedUpdate(self): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AssetCounterService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AssetDeliveryProxy extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AssetImportService extends Instance
@@ -4312,7 +4290,6 @@ declare class AssetImportService extends Instance
 	function ImportMeshWithPrompt(self): any
 	ProgressUpdate: RBXScriptSignal<number>
 	UploadFinished: RBXScriptSignal<boolean, { [any]: any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AssetManagerService extends Instance
@@ -4350,7 +4327,6 @@ declare class AssetManagerService extends Instance
 	ImportSessionFinished: RBXScriptSignal<>
 	ImportSessionStarted: RBXScriptSignal<>
 	MayBeLinkedSourceModified: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AssetService extends Instance
@@ -4362,7 +4338,6 @@ declare class AssetService extends Instance
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
 	function SavePlaceAsync(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Atmosphere extends Instance
@@ -4372,7 +4347,6 @@ declare class Atmosphere extends Instance
 	Glare: number
 	Haze: number
 	Offset: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Attachment extends Instance
@@ -4387,7 +4361,6 @@ declare class Attachment extends Instance
 	WorldOrientation: Vector3
 	WorldPosition: Vector3
 	WorldSecondaryAxis: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Bone extends Attachment
@@ -4395,7 +4368,6 @@ declare class Bone extends Attachment
 	Transform: CFrame
 	TransformedCFrame: CFrame
 	TransformedWorldCFrame: CFrame
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AvatarEditorService extends Instance
@@ -4456,7 +4428,6 @@ declare class AvatarEditorService extends Instance
 	PromptSaveAvatarCompleted: RBXScriptSignal<EnumAvatarPromptResult, HumanoidDescription>
 	PromptSetFavoriteCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptUpdateOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AvatarImportService extends Instance
@@ -4465,16 +4436,13 @@ declare class AvatarImportService extends Instance
 	function ImportFbxRigWithoutSceneLoad(self, isR15: boolean?): Instance
 	function ImportLoadedFBXAnimation(self, useFBXModel: boolean): Instance
 	function LoadRigAndDetectType(self, promptR15Callback: <A..., R...>(A...) -> R...): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Backpack extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BackpackItem extends Instance
 	TextureId: Content
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -4496,7 +4464,6 @@ declare class Tool extends BackpackItem
 	Deactivated: RBXScriptSignal<>
 	Equipped: RBXScriptSignal<Mouse>
 	Unequipped: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -4507,13 +4474,11 @@ declare class BadgeService extends Instance
 	function UserHasBadgeAsync(self, userId: number, badgeId: number): boolean
 	BadgeAwarded: RBXScriptSignal<string, number, number>
 	OnBadgeAwarded: RBXScriptSignal<number, number, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BasePlayerGui extends Instance
 	function GetGuiObjectsAtPosition(self, x: number, y: number): { Instance }
 	function GetGuiObjectsInCircle(self, position: Vector2, radius: number): { Instance }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CoreGui extends BasePlayerGui
@@ -4522,14 +4487,12 @@ declare class CoreGui extends BasePlayerGui
 	function SetUserGuiRendering(self, enabled: boolean, guiAdornee: Instance, faceId: EnumNormalId): nil
 	function TakeScreenshot(self): nil
 	function ToggleRecording(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PlayerGui extends BasePlayerGui
 	CurrentScreenOrientation: EnumScreenOrientation
 	ScreenOrientation: EnumScreenOrientation
 	SelectionImageObject: GuiObject
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterGui extends BasePlayerGui
@@ -4544,7 +4507,6 @@ declare class StarterGui extends BasePlayerGui
 	function SetCoreGuiEnabled(self, coreGuiType: EnumCoreGuiType, enabled: boolean): nil
 	function GetCore(self, parameterName: string): any
 	CoreGuiChangedSignal: RBXScriptSignal<EnumCoreGuiType, boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BaseWrap extends Instance
@@ -4558,7 +4520,6 @@ declare class BaseWrap extends Instance
 	function GetVertices(self, cageType: EnumCageType): { any }
 	function IsHSRReady(self): boolean
 	function ModifyVertices(self, cageType: EnumCageType, vertices: { any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class WrapLayer extends BaseWrap
@@ -4573,14 +4534,12 @@ declare class WrapLayer extends BaseWrap
 	ReferenceOrigin: CFrame
 	ReferenceOriginWorld: CFrame
 	ShrinkFactor: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class WrapTarget extends BaseWrap
 	Color: Color3
 	DebugMode: EnumWrapTargetDebugMode
 	Stiffness: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Beam extends Instance
@@ -4604,35 +4563,29 @@ declare class Beam extends Instance
 	Width1: number
 	ZOffset: number
 	function SetTextureOffset(self, offset: number?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BindableEvent extends Instance
 	function Fire(self, ...: any): ()
 	Event: RBXScriptSignal<...any>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BindableFunction extends Instance
 	function Invoke(self, ...: any): ...any
 	OnInvoke: <A..., R...>(A...) -> R...
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyMover extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyAngularVelocity extends BodyMover
 	AngularVelocity: Vector3
 	MaxTorque: Vector3
 	P: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyForce extends BodyMover
 	Force: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyGyro extends BodyMover
@@ -4640,7 +4593,6 @@ declare class BodyGyro extends BodyMover
 	D: number
 	MaxTorque: Vector3
 	P: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyPosition extends BodyMover
@@ -4650,13 +4602,11 @@ declare class BodyPosition extends BodyMover
 	Position: Vector3
 	function GetLastForce(self): Vector3
 	ReachedTarget: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyThrust extends BodyMover
 	Force: Vector3
 	Location: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyVelocity extends BodyMover
@@ -4665,7 +4615,6 @@ declare class BodyVelocity extends BodyMover
 	Velocity: Vector3
 	function GetLastForce(self): Vector3
 	function lastForce(self): Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -4680,7 +4629,6 @@ declare class Breakpoint extends Instance
 	MetaBreakpointId: number
 	Script: string
 	Verified: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BreakpointManager extends Instance
@@ -4690,7 +4638,6 @@ declare class BreakpointManager extends Instance
 	MetaBreakpointAdded: RBXScriptSignal<MetaBreakpoint>
 	MetaBreakpointChanged: RBXScriptSignal<MetaBreakpoint>
 	MetaBreakpointRemoved: RBXScriptSignal<MetaBreakpoint>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BrowserService extends Instance
@@ -4707,7 +4654,6 @@ declare class BrowserService extends Instance
 	BrowserWindowClosed: RBXScriptSignal<>
 	BrowserWindowWillNavigate: RBXScriptSignal<string>
 	JavaScriptCallback: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BulkImportService extends Instance
@@ -4716,31 +4662,25 @@ declare class BulkImportService extends Instance
 	AssetImported: RBXScriptSignal<EnumAssetType, string, number>
 	BulkImportFinished: RBXScriptSignal<number>
 	BulkImportStarted: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CacheableContentProvider extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HSRDataContentProvider extends CacheableContentProvider
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MeshContentProvider extends CacheableContentProvider
 	function GetContentMemoryData(self): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SolidModelContentProvider extends CacheableContentProvider
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CalloutService extends Instance
 	function AttachCallout(self, definitionId: string, locationId: string, target: Instance): nil
 	function DefineCallout(self, definitionId: string, title: string, description: string, learnMoreURL: string): nil
 	function DetachCalloutsByDefinitionId(self, definitionId: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Camera extends Instance
@@ -4771,7 +4711,6 @@ declare class Camera extends Instance
 	function Zoom(self, distance: number): boolean
 	FirstPersonTransition: RBXScriptSignal<boolean>
 	InterpolationFinished: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ChangeHistoryService extends Instance
@@ -4784,11 +4723,9 @@ declare class ChangeHistoryService extends Instance
 	function Undo(self): nil
 	OnRedo: RBXScriptSignal<string>
 	OnUndo: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CharacterAppearance extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BodyColors extends CharacterAppearance
@@ -4804,7 +4741,6 @@ declare class BodyColors extends CharacterAppearance
 	RightLegColor3: Color3
 	TorsoColor: BrickColor
 	TorsoColor3: Color3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CharacterMesh extends CharacterAppearance
@@ -4812,28 +4748,23 @@ declare class CharacterMesh extends CharacterAppearance
 	BodyPart: EnumBodyPart
 	MeshId: number
 	OverlayTextureId: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Clothing extends CharacterAppearance
 	Color3: Color3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Pants extends Clothing
 	PantsTemplate: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Shirt extends Clothing
 	ShirtTemplate: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ShirtGraphic extends CharacterAppearance
 	Color3: Color3
 	Graphic: Content
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -4853,7 +4784,6 @@ declare class Chat extends Instance
 	function FilterStringForBroadcast(self, stringToFilter: string, playerFrom: Player): string
 	BubbleChatSettingsChanged: RBXScriptSignal<any>
 	Chatted: RBXScriptSignal<BasePart, string, EnumChatColor>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ClickDetector extends Instance
@@ -4863,7 +4793,6 @@ declare class ClickDetector extends Instance
 	MouseHoverEnter: RBXScriptSignal<Player>
 	MouseHoverLeave: RBXScriptSignal<Player>
 	RightMouseClick: RBXScriptSignal<Player>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Clouds extends Instance
@@ -4871,11 +4800,9 @@ declare class Clouds extends Instance
 	Cover: number
 	Density: number
 	Enabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ClusterPacketCache extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CollectionService extends Instance
@@ -4889,7 +4816,6 @@ declare class CollectionService extends Instance
 	function RemoveTag(self, instance: Instance, tag: string): nil
 	TagAdded: RBXScriptSignal<string>
 	TagRemoved: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CommandInstance extends Instance
@@ -4904,22 +4830,18 @@ declare class CommandInstance extends Instance
 	StatusTip: string
 	function EnableGuiAccess(self, displayName: string, statusTip: string, defaultShortcut: string): nil
 	function RegisterExecutionCallback(self, callbackFunction: <A..., R...>(A...) -> R...): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CommandService extends Instance
 	function Execute(self, name: string, params: any): any
 	function RegisterCommand(self, plugin: Plugin, name: string, context: string, permission: EnumCommandPermission?): CommandInstance
 	CommandExecuting: RBXScriptSignal<string, any>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Configuration extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ConfigureServerService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Constraint extends Instance
@@ -4929,7 +4851,6 @@ declare class Constraint extends Instance
 	Color: BrickColor
 	Enabled: boolean
 	Visible: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AlignOrientation extends Constraint
@@ -4944,7 +4865,6 @@ declare class AlignOrientation extends Constraint
 	Responsiveness: number
 	RigidityEnabled: boolean
 	SecondaryAxis: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AlignPosition extends Constraint
@@ -4956,7 +4876,6 @@ declare class AlignPosition extends Constraint
 	ReactionForceEnabled: boolean
 	Responsiveness: number
 	RigidityEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AngularVelocity extends Constraint
@@ -4964,7 +4883,6 @@ declare class AngularVelocity extends Constraint
 	MaxTorque: number
 	ReactionTorqueEnabled: boolean
 	RelativeTo: EnumActuatorRelativeTo
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BallSocketConstraint extends Constraint
@@ -4976,7 +4894,6 @@ declare class BallSocketConstraint extends Constraint
 	TwistLowerAngle: number
 	TwistUpperAngle: number
 	UpperAngle: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HingeConstraint extends Constraint
@@ -4994,7 +4911,6 @@ declare class HingeConstraint extends Constraint
 	ServoMaxTorque: number
 	TargetAngle: number
 	UpperAngle: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LineForce extends Constraint
@@ -5003,7 +4919,6 @@ declare class LineForce extends Constraint
 	Magnitude: number
 	MaxForce: number
 	ReactionForceEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LinearVelocity extends Constraint
@@ -5016,11 +4931,9 @@ declare class LinearVelocity extends Constraint
 	SecondaryTangentAxis: Vector3
 	VectorVelocity: Vector3
 	VelocityConstraintMode: EnumVelocityConstraintMode
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PlaneConstraint extends Constraint
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -5030,7 +4943,6 @@ declare class RigidConstraint extends Constraint
 	DestructionEnabled: boolean
 	DestructionForce: number
 	DestructionTorque: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RodConstraint extends Constraint
@@ -5040,7 +4952,6 @@ declare class RodConstraint extends Constraint
 	LimitAngle1: number
 	LimitsEnabled: boolean
 	Thickness: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RopeConstraint extends Constraint
@@ -5053,7 +4964,6 @@ declare class RopeConstraint extends Constraint
 	WinchResponsiveness: number
 	WinchSpeed: number
 	WinchTarget: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SlidingBallConstraint extends Constraint
@@ -5071,7 +4981,6 @@ declare class SlidingBallConstraint extends Constraint
 	TargetPosition: number
 	UpperLimit: number
 	Velocity: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CylindricalConstraint extends SlidingBallConstraint
@@ -5091,11 +5000,9 @@ declare class CylindricalConstraint extends SlidingBallConstraint
 	TargetAngle: number
 	UpperAngle: number
 	WorldRotationAxis: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PrismaticConstraint extends SlidingBallConstraint
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SpringConstraint extends Constraint
@@ -5110,13 +5017,11 @@ declare class SpringConstraint extends Constraint
 	Radius: number
 	Stiffness: number
 	Thickness: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Torque extends Constraint
 	RelativeTo: EnumActuatorRelativeTo
 	Torque: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TorsionSpringConstraint extends Constraint
@@ -5129,7 +5034,6 @@ declare class TorsionSpringConstraint extends Constraint
 	Radius: number
 	Restitution: number
 	Stiffness: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UniversalConstraint extends Constraint
@@ -5137,14 +5041,12 @@ declare class UniversalConstraint extends Constraint
 	MaxAngle: number
 	Radius: number
 	Restitution: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VectorForce extends Constraint
 	ApplyAtCenterOfMass: boolean
 	Force: Vector3
 	RelativeTo: EnumActuatorRelativeTo
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ContentProvider extends Instance
@@ -5164,7 +5066,6 @@ declare class ContentProvider extends Instance
 	function CalculateNumTrianglesInMesh(self, meshId: string): number
 	function PreloadAsync(self, contentIdList: { any }, callbackFunction: <A..., R...>(A...) -> R...?): nil
 	AssetFetchFailed: RBXScriptSignal<Content>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ContextActionService extends Instance
@@ -5195,7 +5096,6 @@ declare class ContextActionService extends Instance
 	LocalToolUnequipped: RBXScriptSignal<Tool>
 	function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()
 	function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Controller extends Instance
@@ -5203,39 +5103,31 @@ declare class Controller extends Instance
 	function GetButton(self, button: EnumButton): boolean
 	function UnbindButton(self, button: EnumButton): nil
 	ButtonChanged: RBXScriptSignal<EnumButton>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HumanoidController extends Controller
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SkateboardController extends Controller
 	Steer: number
 	Throttle: number
 	AxisChanged: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VehicleController extends Controller
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ControllerService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CookiesService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CorePackages extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CoreScriptSyncService extends Instance
 	function GetScriptFilePath(self, script: Instance): any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CrossDMScriptChangeListener extends Instance
@@ -5243,7 +5135,6 @@ declare class CrossDMScriptChangeListener extends Instance
 	function StartWatchingScriptLine(self, scriptRef: string, debuggerConnectionId: number, lineNumber: number): nil
 	GuidLineContentsChanged: RBXScriptSignal<string, number, string>
 	GuidNameChanged: RBXScriptSignal<string, string>
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -5254,7 +5145,6 @@ declare class DataModelMesh extends Instance
 	Offset: Vector3
 	Scale: Vector3
 	VertexColor: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -5264,19 +5154,16 @@ end
 declare class FileMesh extends DataModelMesh
 	MeshId: Content
 	TextureId: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SpecialMesh extends FileMesh
 	MeshType: EnumMeshType
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataModelPatchService extends Instance
 	function GetPatch(self, patchName: string): Instance
 	function RegisterPatch(self, patchName: string, behaviorName: string, localConfigPath: string, userId: number): nil
 	function UpdatePatch(self, userId: number, patchName: string, callbackFunction: <A..., R...>(A...) -> R...): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataModelSession extends Instance
@@ -5286,25 +5173,21 @@ declare class DataModelSession extends Instance
 	CurrentDataModelTypeChanged: RBXScriptSignal<>
 	DataModelCreated: RBXScriptSignal<EnumStudioDataModelType>
 	DataModelWillBeDestroyed: RBXScriptSignal<EnumStudioDataModelType>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreIncrementOptions extends Instance
 	function GetMetadata(self): { [any]: any }
 	function SetMetadata(self, attributes: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreInfo extends Instance
 	CreatedTime: number
 	DataStoreName: string
 	UpdatedTime: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreKey extends Instance
 	KeyName: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreKeyInfo extends Instance
@@ -5313,20 +5196,17 @@ declare class DataStoreKeyInfo extends Instance
 	Version: string
 	function GetMetadata(self): { [any]: any }
 	function GetUserIds(self): { any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreObjectVersionInfo extends Instance
 	CreatedTime: number
 	IsDeleted: boolean
 	Version: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreOptions extends Instance
 	AllScopes: boolean
 	function SetExperimentalFeatures(self, experimentalFeatures: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreService extends Instance
@@ -5336,19 +5216,16 @@ declare class DataStoreService extends Instance
 	function GetOrderedDataStore(self, name: string, scope: string?): OrderedDataStore
 	function GetRequestBudgetForRequestType(self, requestType: EnumDataStoreRequestType): number
 	function ListDataStoresAsync(self, prefix: string?, pageSize: number?): DataStoreListingPages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreSetOptions extends Instance
 	function GetMetadata(self): { [any]: any }
 	function SetMetadata(self, attributes: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Debris extends Instance
 	function AddItem(self, item: Instance, lifetime: number?): nil
 	function SetLegacyMaxItems(self, enabled: boolean): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebugSettings extends Instance
@@ -5360,11 +5237,9 @@ declare class DebugSettings extends Instance
 	ReportSoundWarnings: boolean
 	RobloxVersion: string
 	TickCountPreciseOverride: EnumTickCountSampleMethod
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggablePluginWatcher extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerBreakpoint extends Instance
@@ -5374,7 +5249,6 @@ declare class DebuggerBreakpoint extends Instance
 	Line: number
 	LogExpression: string
 	isContextDependentBreakpoint: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerConnection extends Instance
@@ -5404,11 +5278,9 @@ declare class DebuggerConnection extends Instance
 	BreakpointRemoved: RBXScriptSignal<Breakpoint, EnumBreakpointRemoveReason>
 	Paused: RBXScriptSignal<PausedState, EnumDebuggerPauseReason>
 	Resumed: RBXScriptSignal<PausedState>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LocalDebuggerConnection extends DebuggerConnection
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerConnectionManager extends Instance
@@ -5420,7 +5292,6 @@ declare class DebuggerConnectionManager extends Instance
 	ConnectionEnded: RBXScriptSignal<DebuggerConnection, EnumDebuggerEndReason>
 	ConnectionStarted: RBXScriptSignal<DebuggerConnection>
 	FocusChanged: RBXScriptSignal<DebuggerConnection>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerLuaResponse extends Instance
@@ -5430,7 +5301,6 @@ declare class DebuggerLuaResponse extends Instance
 	RequestId: number
 	Status: EnumDebuggerStatus
 	function GetArg(self): any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerManager extends Instance
@@ -5444,7 +5314,6 @@ declare class DebuggerManager extends Instance
 	function StepOver(self): nil
 	DebuggerAdded: RBXScriptSignal<Instance>
 	DebuggerRemoved: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerUIService extends Instance
@@ -5457,7 +5326,6 @@ declare class DebuggerUIService extends Instance
 	function Resume(self): nil
 	function SetCurrentThreadId(self, debuggerThreadId: number): nil
 	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerVariable extends Instance
@@ -5469,12 +5337,10 @@ declare class DebuggerVariable extends Instance
 	VariablesCount: number
 	function GetVariableByIndex(self, index: number): DebuggerVariable
 	function GetVariableByName(self, name: string): DebuggerVariable
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DebuggerWatch extends Instance
 	Expression: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Dialog extends Instance
@@ -5492,7 +5358,6 @@ declare class Dialog extends Instance
 	function SetPlayerIsUsing(self, player: Instance, isUsing: boolean): nil
 	function SignalDialogChoiceSelected(self, player: Instance, dialogChoice: Instance): nil
 	DialogChoiceSelected: RBXScriptSignal<Player, DialogChoice>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DialogChoice extends Instance
@@ -5500,7 +5365,6 @@ declare class DialogChoice extends Instance
 	GoodbyeDialog: string
 	ResponseDialog: string
 	UserDialog: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DraftsService extends Instance
@@ -5519,7 +5383,6 @@ declare class DraftsService extends Instance
 	DraftStatusChanged: RBXScriptSignal<Instance>
 	EditorsListChanged: RBXScriptSignal<Instance>
 	UpdateStatusChanged: RBXScriptSignal<Instance, EnumDraftStatusCode>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Dragger extends Instance
@@ -5527,7 +5390,6 @@ declare class Dragger extends Instance
 	function MouseDown(self, mousePart: Instance, pointOnMousePart: Vector3, parts: { Instance }): nil
 	function MouseMove(self, mouseRay: Ray): nil
 	function MouseUp(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DraggerService extends Instance
@@ -5547,7 +5409,6 @@ declare class DraggerService extends Instance
 	PivotSnapToGeometry: boolean
 	ShowHover: boolean
 	ShowPivotIndicator: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class EulerRotationCurve extends Instance
@@ -5557,7 +5418,6 @@ declare class EulerRotationCurve extends Instance
 	function X(self): FloatCurve
 	function Y(self): FloatCurve
 	function Z(self): FloatCurve
-	function __eq(self, other: Instance): boolean
 end
 
 declare class EventIngestService extends Instance
@@ -5565,7 +5425,6 @@ declare class EventIngestService extends Instance
 	function SendEventImmediately(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEvent(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEventStream(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Explosion extends Instance
@@ -5577,14 +5436,12 @@ declare class Explosion extends Instance
 	TimeScale: number
 	Visible: boolean
 	Hit: RBXScriptSignal<BasePart, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FaceAnimatorService extends Instance
 	AudioAnimationEnabled: boolean
 	FlipHeadOrientation: boolean
 	VideoAnimationEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FaceControls extends Instance
@@ -5638,12 +5495,10 @@ declare class FaceControls extends Instance
 	TongueOut: number
 	TongueUp: number
 	UpperLipSuck: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FaceInstance extends Instance
 	Face: EnumNormalId
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Decal extends FaceInstance
@@ -5652,7 +5507,6 @@ declare class Decal extends FaceInstance
 	Texture: Content
 	Transparency: number
 	ZIndex: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Texture extends Decal
@@ -5660,12 +5514,10 @@ declare class Texture extends Decal
 	OffsetStudsV: number
 	StudsPerTileU: number
 	StudsPerTileV: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FacialAnimationStreamingService extends Instance
 	Enabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Feature extends Instance
@@ -5673,7 +5525,6 @@ declare class Feature extends Instance
 	InOut: EnumInOut
 	LeftRight: EnumLeftRight
 	TopBottom: EnumTopBottom
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -5684,7 +5535,6 @@ declare class File extends Instance
 	Size: number
 	function GetBinaryContents(self): string
 	function GetTemporaryId(self): Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Fire extends Instance
@@ -5694,11 +5544,9 @@ declare class Fire extends Instance
 	SecondaryColor: Color3
 	Size: number
 	TimeScale: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FlagStandService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FloatCurve extends Instance
@@ -5710,47 +5558,38 @@ declare class FloatCurve extends Instance
 	function InsertKey(self, key: FloatCurveKey): { any }
 	function RemoveKeyAtIndex(self, startingIndex: number, count: number?): number
 	function SetKeys(self, keys: { any }): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FlyweightService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CSGDictionaryService extends FlyweightService
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NonReplicatedCSGDictionaryService extends FlyweightService
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Folder extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ForceField extends Instance
 	Visible: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FriendService extends Instance
 	function GetPlatformFriends(self): { any }
 	FriendsUpdated: RBXScriptSignal<{ any }>
-	function __eq(self, other: Instance): boolean
 end
 
 
 
 declare class GamePassService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GameSettings extends Instance
 	VideoCaptureEnabled: boolean
 	VideoRecording: boolean
 	VideoRecordingChangeRequest: RBXScriptSignal<boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GamepadService extends Instance
@@ -5760,11 +5599,9 @@ declare class GamepadService extends Instance
 	function GetGamepadCursorPosition(self): Vector2
 	function SetGamepadCursorPosition(self, position: Vector2): nil
 	GamepadThumbstick1Changed: RBXScriptSignal<Vector2>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Geometry extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GetTextBoundsParams extends Instance
@@ -5772,7 +5609,6 @@ declare class GetTextBoundsParams extends Instance
 	Size: number
 	Text: string
 	Width: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GlobalDataStore extends Instance
@@ -5781,7 +5617,6 @@ declare class GlobalDataStore extends Instance
 	function RemoveAsync(self, key: string): any
 	function SetAsync(self, key: string, value: any, userIds: { any }?, options: DataStoreSetOptions?): any
 	function UpdateAsync(self, key: string, transformFunction: <A..., R...>(A...) -> R...): any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStore extends GlobalDataStore
@@ -5789,16 +5624,13 @@ declare class DataStore extends GlobalDataStore
 	function ListKeysAsync(self, prefix: string?, pageSize: number?): DataStoreKeyPages
 	function ListVersionsAsync(self, key: string, sortDirection: EnumSortDirection?, minDate: number?, maxDate: number?, pageSize: number?): DataStoreVersionPages
 	function RemoveVersionAsync(self, key: string, version: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class OrderedDataStore extends GlobalDataStore
 	function GetSortedAsync(self, ascending: boolean, pagesize: number, minValue: any, maxValue: any): DataStorePages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GoogleAnalyticsConfiguration extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GroupService extends Instance
@@ -5806,11 +5638,9 @@ declare class GroupService extends Instance
 	function GetEnemiesAsync(self, groupId: number): StandardPages
 	function GetGroupInfoAsync(self, groupId: number): any
 	function GetGroupsAsync(self, userId: number): { any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiBase extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiBase2d extends GuiBase
@@ -5829,7 +5659,6 @@ declare class GuiBase2d extends GuiBase
 	SelectionGroup: boolean
 	TotalGroupScale: number
 	SelectionChanged: RBXScriptSignal<boolean, GuiObject, GuiObject>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiObject extends GuiBase2d
@@ -5876,18 +5705,15 @@ declare class GuiObject extends GuiBase2d
 	TouchRotate: RBXScriptSignal<{ any }, number, number, EnumUserInputState>
 	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number>
 	TouchTap: RBXScriptSignal<{ any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CanvasGroup extends GuiObject
 	GroupColor3: Color3
 	GroupTransparency: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Frame extends GuiObject
 	Style: EnumFrameStyle
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiButton extends GuiObject
@@ -5902,7 +5728,6 @@ declare class GuiButton extends GuiObject
 	MouseButton2Click: RBXScriptSignal<>
 	MouseButton2Down: RBXScriptSignal<number, number>
 	MouseButton2Up: RBXScriptSignal<number, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImageButton extends GuiButton
@@ -5921,7 +5746,6 @@ declare class ImageButton extends GuiButton
 	SliceScale: number
 	TileSize: UDim2
 	function SetEnableContentImageSizeChangedEvents(self, enabled: boolean): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextButton extends GuiButton
@@ -5946,11 +5770,9 @@ declare class TextButton extends GuiButton
 	TextXAlignment: EnumTextXAlignment
 	TextYAlignment: EnumTextYAlignment
 	function SetTextFromInput(self, text: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiLabel extends GuiObject
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImageLabel extends GuiLabel
@@ -5967,7 +5789,6 @@ declare class ImageLabel extends GuiLabel
 	SliceScale: number
 	TileSize: UDim2
 	function SetEnableContentImageSizeChangedEvents(self, enabled: boolean): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextLabel extends GuiLabel
@@ -5992,7 +5813,6 @@ declare class TextLabel extends GuiLabel
 	TextXAlignment: EnumTextXAlignment
 	TextYAlignment: EnumTextYAlignment
 	function SetTextFromInput(self, text: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScrollingFrame extends GuiObject
@@ -6020,7 +5840,6 @@ declare class ScrollingFrame extends GuiObject
 	function ClearInertialScrolling(self): nil
 	function GetSampledInertialVelocity(self): Vector2
 	function ScrollToTop(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextBox extends GuiObject
@@ -6064,7 +5883,6 @@ declare class TextBox extends GuiObject
 	FocusLost: RBXScriptSignal<boolean, InputObject>
 	Focused: RBXScriptSignal<>
 	ReturnPressedFromOnScreenKeyboard: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VideoFrame extends GuiObject
@@ -6083,7 +5901,6 @@ declare class VideoFrame extends GuiObject
 	Loaded: RBXScriptSignal<string>
 	Paused: RBXScriptSignal<string>
 	Played: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ViewportFrame extends GuiObject
@@ -6093,14 +5910,12 @@ declare class ViewportFrame extends GuiObject
 	ImageTransparency: number
 	LightColor: Color3
 	LightDirection: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LayerCollector extends GuiBase2d
 	Enabled: boolean
 	ResetOnSpawn: boolean
 	ZIndexBehavior: EnumZIndexBehavior
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BillboardGui extends LayerCollector
@@ -6123,7 +5938,6 @@ declare class BillboardGui extends LayerCollector
 	StudsOffset: Vector3
 	StudsOffsetWorldSpace: Vector3
 	function GetScreenSpaceBounds(self): any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginGui extends LayerCollector
@@ -6136,24 +5950,20 @@ declare class PluginGui extends LayerCollector
 	PluginDragMoved: RBXScriptSignal<{ [any]: any }>
 	WindowFocusReleased: RBXScriptSignal<>
 	WindowFocused: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DockWidgetPluginGui extends PluginGui
 	HostWidgetWasRestored: boolean
 	function RequestRaise(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class QWidgetPluginGui extends PluginGui
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScreenGui extends LayerCollector
 	DisplayOrder: number
 	IgnoreGuiInset: boolean
 	OnTopOfCoreBlur: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -6171,33 +5981,28 @@ declare class SurfaceGui extends LayerCollector
 	SizingMode: EnumSurfaceGuiSizingMode
 	ToolPunchThroughDistance: number
 	ZOffset: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuiBase3d extends GuiBase
 	Color3: Color3
 	Transparency: number
 	Visible: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 
 
 declare class InstanceAdornment extends GuiBase3d
 	Adornee: Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SelectionBox extends InstanceAdornment
 	LineThickness: number
 	SurfaceColor3: Color3
 	SurfaceTransparency: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PVAdornment extends GuiBase3d
 	Adornee: PVInstance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HandleAdornment extends PVAdornment
@@ -6210,18 +6015,15 @@ declare class HandleAdornment extends PVAdornment
 	MouseButton1Up: RBXScriptSignal<>
 	MouseEnter: RBXScriptSignal<>
 	MouseLeave: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BoxHandleAdornment extends HandleAdornment
 	Size: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ConeHandleAdornment extends HandleAdornment
 	Height: number
 	Radius: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CylinderHandleAdornment extends HandleAdornment
@@ -6229,24 +6031,20 @@ declare class CylinderHandleAdornment extends HandleAdornment
 	Height: number
 	InnerRadius: number
 	Radius: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImageHandleAdornment extends HandleAdornment
 	Image: Content
 	Size: Vector2
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LineHandleAdornment extends HandleAdornment
 	Length: number
 	Thickness: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SphereHandleAdornment extends HandleAdornment
 	Radius: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ParabolaAdornment extends PVAdornment
@@ -6256,22 +6054,18 @@ declare class ParabolaAdornment extends PVAdornment
 	Range: number
 	Thickness: number
 	function FindPartOnParabola(self, ignoreDescendentsTable: { Instance }): any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SelectionSphere extends PVAdornment
 	SurfaceColor3: Color3
 	SurfaceTransparency: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PartAdornment extends GuiBase3d
 	Adornee: BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HandlesBase extends PartAdornment
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ArcHandles extends HandlesBase
@@ -6281,7 +6075,6 @@ declare class ArcHandles extends HandlesBase
 	MouseDrag: RBXScriptSignal<EnumAxis, number, number>
 	MouseEnter: RBXScriptSignal<EnumAxis>
 	MouseLeave: RBXScriptSignal<EnumAxis>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Handles extends HandlesBase
@@ -6292,17 +6085,14 @@ declare class Handles extends HandlesBase
 	MouseDrag: RBXScriptSignal<EnumNormalId, number>
 	MouseEnter: RBXScriptSignal<EnumNormalId>
 	MouseLeave: RBXScriptSignal<EnumNormalId>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SurfaceSelection extends PartAdornment
 	TargetSurface: EnumNormalId
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SelectionLasso extends GuiBase3d
 	Humanoid: Humanoid
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -6378,11 +6168,9 @@ declare class GuiService extends Instance
 	SpecialKeyPressed: RBXScriptSignal<EnumSpecialKey, string>
 	UiMessageChanged: RBXScriptSignal<EnumUiMessageType, string>
 	SendCoreUiNotification: (title: string, text: string) -> nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GuidRegistryService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HapticService extends Instance
@@ -6390,7 +6178,6 @@ declare class HapticService extends Instance
 	function IsMotorSupported(self, inputType: EnumUserInputType, vibrationMotor: EnumVibrationMotor): boolean
 	function IsVibrationSupported(self, inputType: EnumUserInputType): boolean
 	function SetMotor(self, inputType: EnumUserInputType, vibrationMotor: EnumVibrationMotor, vibrationValues: any): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HeightmapImporterService extends Instance
@@ -6402,11 +6189,9 @@ declare class HeightmapImporterService extends Instance
 	function ImportHeightmap(self, region: Region3, heightmapAssetId: Content, colormapAssetId: Content, defaultMaterial: EnumMaterial): nil
 	ColormapHasUnknownPixels: RBXScriptSignal<>
 	ProgressUpdate: RBXScriptSignal<number, string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HiddenSurfaceRemovalAsset extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Highlight extends Instance
@@ -6417,7 +6202,6 @@ declare class Highlight extends Instance
 	FillTransparency: number
 	OutlineColor: Color3
 	OutlineTransparency: number
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -6430,13 +6214,11 @@ declare class HttpRbxApiService extends Instance
 	function PostAsyncFullUrl(self, apiUrl: string, data: string, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
 	function RequestAsync(self, requestOptions: { [any]: any }, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
 	function RequestLimitedAsync(self, requestOptions: { [any]: any }, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HttpRequest extends Instance
 	function Cancel(self): nil
 	function Start(self, callback: <A..., R...>(A...) -> R...): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HttpService extends Instance
@@ -6452,7 +6234,6 @@ declare class HttpService extends Instance
 	function GetAsync(self, url: string, nocache: boolean?, headers: any): string
 	function PostAsync(self, url: string, data: string, content_type: EnumHttpContentType?, compress: boolean?, headers: any): string
 	function RequestAsync(self, requestOptions: { [any]: any }): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Humanoid extends Instance
@@ -6531,7 +6312,6 @@ declare class Humanoid extends Instance
 	Strafing: RBXScriptSignal<boolean>
 	Swimming: RBXScriptSignal<number>
 	Touched: RBXScriptSignal<BasePart, BasePart>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class HumanoidDescription extends Instance
@@ -6584,15 +6364,12 @@ declare class HumanoidDescription extends Instance
 	function SetEquippedEmotes(self, equippedEmotes: { any }): nil
 	EmotesChanged: RBXScriptSignal<{ [any]: any }>
 	EquippedEmotesChanged: RBXScriptSignal<{ any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ILegacyStudioBridge extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LegacyStudioBridge extends ILegacyStudioBridge
-	function __eq(self, other: Instance): boolean
 end
 
 declare class IXPService extends Instance
@@ -6609,7 +6386,6 @@ declare class IXPService extends Instance
 	function RegisterUserLayers(self, userLayers: any): nil
 	OnBrowserTrackerLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
 	OnUserLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterBaseSettings extends Instance
@@ -6617,22 +6393,18 @@ declare class ImporterBaseSettings extends Instance
 	ImportName: string
 	ShouldImport: boolean
 	function GetStatuses(self): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterAnimationSettings extends ImporterBaseSettings
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterGroupSettings extends ImporterBaseSettings
 	Anchored: boolean
 	ImportAsModelAsset: boolean
 	InsertInWorkspace: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterJointSettings extends ImporterBaseSettings
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterMaterialSettings extends ImporterBaseSettings
@@ -6641,7 +6413,6 @@ declare class ImporterMaterialSettings extends ImporterBaseSettings
 	MetalnessFilePath: string
 	NormalFilePath: string
 	RoughnessFilePath: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterMeshSettings extends ImporterBaseSettings
@@ -6654,7 +6425,6 @@ declare class ImporterMeshSettings extends ImporterBaseSettings
 	DoubleSided: boolean
 	IgnoreVertexColors: boolean
 	PolygonCount: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ImporterRootSettings extends ImporterBaseSettings
@@ -6671,11 +6441,9 @@ declare class ImporterRootSettings extends ImporterBaseSettings
 	UseSceneOriginAsPivot: boolean
 	WorldForward: EnumNormalId
 	WorldUp: EnumNormalId
-	function __eq(self, other: Instance): boolean
 end
 
 declare class IncrementalPatchBuilder extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class InputObject extends Instance
@@ -6685,7 +6453,6 @@ declare class InputObject extends Instance
 	UserInputState: EnumUserInputState
 	UserInputType: EnumUserInputType
 	function IsModifierKeyDown(self, modifierKey: EnumModifierKey): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class InsertService extends Instance
@@ -6702,7 +6469,6 @@ declare class InsertService extends Instance
 	function LoadAsset(self, assetId: number): Instance
 	function LoadAssetVersion(self, assetVersionId: number): Instance
 	function LoadPackageAssetAsync(self, url: Content): { Instance }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class JointInstance extends Instance
@@ -6712,12 +6478,10 @@ declare class JointInstance extends Instance
 	Enabled: boolean
 	Part0: BasePart
 	Part1: BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DynamicRotate extends JointInstance
 	BaseAngle: number
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -6737,14 +6501,12 @@ declare class Motor extends JointInstance
 	DesiredAngle: number
 	MaxVelocity: number
 	function SetDesiredAngle(self, value: number): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Motor6D extends Motor
 	ChildName: string
 	ParentName: string
 	Transform: CFrame
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -6756,17 +6518,14 @@ declare class VelocityMotor extends JointInstance
 	DesiredAngle: number
 	Hole: Hole
 	MaxVelocity: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Weld extends JointInstance
-	function __eq(self, other: Instance): boolean
 end
 
 
 
 declare class KeyboardService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Keyframe extends Instance
@@ -6777,12 +6536,10 @@ declare class Keyframe extends Instance
 	function GetPoses(self): { Instance }
 	function RemoveMarker(self, marker: Instance): nil
 	function RemovePose(self, pose: Pose): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class KeyframeMarker extends Instance
 	Value: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class KeyframeSequenceProvider extends Instance
@@ -6791,15 +6548,12 @@ declare class KeyframeSequenceProvider extends Instance
 	function RegisterKeyframeSequence(self, keyframeSequence: Instance): Content
 	function GetAnimations(self, userId: number): Instance
 	function GetKeyframeSequenceAsync(self, assetId: Content): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LSPFileSyncService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LanguageService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Light extends Instance
@@ -6807,26 +6561,22 @@ declare class Light extends Instance
 	Color: Color3
 	Enabled: boolean
 	Shadows: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PointLight extends Light
 	Range: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SpotLight extends Light
 	Angle: number
 	Face: EnumNormalId
 	Range: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SurfaceLight extends Light
 	Angle: number
 	Face: EnumNormalId
 	Range: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Lighting extends Instance
@@ -6854,7 +6604,6 @@ declare class Lighting extends Instance
 	function GetSunDirection(self): Vector3
 	function SetMinutesAfterMidnight(self, minutes: number): nil
 	LightingChanged: RBXScriptSignal<boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LocalStorageService extends Instance
@@ -6864,15 +6613,12 @@ declare class LocalStorageService extends Instance
 	function WhenLoaded(self, callback: <A..., R...>(A...) -> R...): nil
 	ItemWasSet: RBXScriptSignal<string, string>
 	StoreWasCleared: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AppStorageService extends LocalStorageService
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UserStorageService extends LocalStorageService
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LocalizationService extends Instance
@@ -6897,7 +6643,6 @@ declare class LocalizationService extends Instance
 	function PromptImportFromCSVs(self): nil
 	function PromptUploadCSVToGameTable(self): Instance
 	AutoTranslateWillRun: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LocalizationTable extends Instance
@@ -6914,16 +6659,13 @@ declare class LocalizationTable extends Instance
 	function SetEntrySource(self, key: string, source: string, context: string, newSource: string): nil
 	function SetEntryValue(self, key: string, source: string, context: string, localeId: string, text: string): nil
 	function SetIsExemptFromUGCAnalytics(self, value: boolean): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LodDataEntity extends Instance
 	EntityLodEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LodDataService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LogService extends Instance
@@ -6938,7 +6680,6 @@ declare class LogService extends Instance
 	OnHttpResultApproved: RBXScriptSignal<boolean>
 	ServerHttpResultOut: RBXScriptSignal<{ [any]: any }>
 	ServerMessageOut: RBXScriptSignal<string, EnumMessageType, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LoginService extends Instance
@@ -6946,50 +6687,40 @@ declare class LoginService extends Instance
 	function PromptLogin(self): nil
 	LoginFailed: RBXScriptSignal<string>
 	LoginSucceeded: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LuaSettings extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LuaSourceContainer extends Instance
 	CurrentEditor: Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BaseScript extends LuaSourceContainer
 	Disabled: boolean
 	LinkedSource: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CoreScript extends BaseScript
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Script extends BaseScript
 	Source: ProtectedString
 	function GetHash(self): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LocalScript extends Script
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ModuleScript extends LuaSourceContainer
 	LinkedSource: Content
 	Source: ProtectedString
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LuaWebService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class LuauScriptAnalyzerService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MarkerCurve extends Instance
@@ -6998,7 +6729,6 @@ declare class MarkerCurve extends Instance
 	function GetMarkers(self): { any }
 	function InsertMarkerAtTime(self, time: number, marker: string): { any }
 	function RemoveMarkerAtIndex(self, startingIndex: number, count: number?): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MarketplaceService extends Instance
@@ -7054,7 +6784,6 @@ declare class MarketplaceService extends Instance
 	ServerPurchaseVerification: RBXScriptSignal<{ [any]: any }>
 	ThirdPartyPurchaseFinished: RBXScriptSignal<Instance, string, string, boolean>
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MaterialService extends Instance
@@ -7098,7 +6827,6 @@ declare class MaterialService extends Instance
 	function GetOverrideStatus(self, material: EnumMaterial): EnumPropertyStatus
 	function SetBaseMaterialOverride(self, material: EnumMaterial, name: string): nil
 	OverrideStatusChanged: RBXScriptSignal<EnumMaterial>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MaterialVariant extends Instance
@@ -7109,12 +6837,10 @@ declare class MaterialVariant extends Instance
 	NormalMap: Content
 	RoughnessMap: Content
 	StudsPerTile: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MemStorageConnection extends Instance
 	function Disconnect(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MemStorageService extends Instance
@@ -7126,20 +6852,17 @@ declare class MemStorageService extends Instance
 	function HasItem(self, key: string): boolean
 	function RemoveItem(self, key: string): boolean
 	function SetItem(self, key: string, value: string?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MemoryStoreQueue extends Instance
 	function AddAsync(self, value: any, expiration: number, priority: number?): nil
 	function ReadAsync(self, count: number, allOrNothing: boolean?, waitTimeout: number?): any
 	function RemoveAsync(self, id: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MemoryStoreService extends Instance
 	function GetQueue(self, name: string, invisibilityTimeout: number?): MemoryStoreQueue
 	function GetSortedMap(self, name: string): MemoryStoreSortedMap
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MemoryStoreSortedMap extends Instance
@@ -7148,7 +6871,6 @@ declare class MemoryStoreSortedMap extends Instance
 	function RemoveAsync(self, key: string): nil
 	function SetAsync(self, key: string, value: any, expiration: number): boolean
 	function UpdateAsync(self, key: string, transformFunction: <A..., R...>(A...) -> R..., expiration: number): any
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -7157,7 +6879,6 @@ end
 
 declare class MessageBusConnection extends Instance
 	function Disconnect(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MessageBusService extends Instance
@@ -7172,13 +6893,11 @@ declare class MessageBusService extends Instance
 	function Subscribe(self, mid: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
 	function SubscribeToProtocolMethodRequest(self, protocolName: string, methodName: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
 	function SubscribeToProtocolMethodResponse(self, protocolName: string, methodName: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MessagingService extends Instance
 	function PublishAsync(self, topic: string, message: any): nil
 	function SubscribeAsync(self, topic: string, callback: <A..., R...>(A...) -> R...): RBXScriptConnection
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MetaBreakpoint extends Instance
@@ -7197,11 +6916,9 @@ declare class MetaBreakpoint extends Instance
 	function SetContinueExecution(self, enabled: boolean): nil
 	function SetEnabled(self, enabled: boolean): nil
 	function SetLine(self, line: number, status: <A..., R...>(A...) -> R...): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MetaBreakpointContext extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Mouse extends Instance
@@ -7224,53 +6941,43 @@ declare class Mouse extends Instance
 	Move: RBXScriptSignal<>
 	WheelBackward: RBXScriptSignal<>
 	WheelForward: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PlayerMouse extends Mouse
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginMouse extends Mouse
 	DragEnter: RBXScriptSignal<{ Instance }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MouseService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MultipleDocumentInterfaceInstance extends Instance
 	FocusedDataModelSession: Instance
 	DataModelSessionEnded: RBXScriptSignal<Instance>
 	DataModelSessionStarted: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkMarker extends Instance
 	Received: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkPeer extends Instance
 	function SetOutgoingKBPSLimit(self, limit: number): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkClient extends NetworkPeer
 	ConnectionAccepted: RBXScriptSignal<string, Instance>
 	ConnectionFailed: RBXScriptSignal<string, number, string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkServer extends NetworkPeer
 	function EncryptStringForPlayerId(self, toEncrypt: string, playerId: number): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkReplicator extends Instance
 	function GetPlayer(self): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ClientReplicator extends NetworkReplicator
@@ -7278,11 +6985,9 @@ declare class ClientReplicator extends NetworkReplicator
 	function RequestServerStats(self, request: boolean): nil
 	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
 	StatsReceived: RBXScriptSignal<{ [any]: any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ServerReplicator extends NetworkReplicator
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NetworkSettings extends Instance
@@ -7297,14 +7002,12 @@ declare class NetworkSettings extends Instance
 	RandomizeJoinInstanceOrder: boolean
 	RenderStreamedRegions: boolean
 	ShowActiveAnimationAsset: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NoCollisionConstraint extends Instance
 	Enabled: boolean
 	Part0: BasePart
 	Part1: BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NotificationService extends Instance
@@ -7322,7 +7025,6 @@ declare class NotificationService extends Instance
 	Roblox17sEventReceived: RBXScriptSignal<{ [any]: any }>
 	RobloxConnectionChanged: RBXScriptSignal<string, EnumConnectionState, string, string>
 	RobloxEventReceived: RBXScriptSignal<{ [any]: any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PVInstance extends Instance
@@ -7332,7 +7034,6 @@ declare class PVInstance extends Instance
 	Pivot_Offset_Position: Vector3
 	function GetPivot(self): CFrame
 	function PivotTo(self, targetCFrame: CFrame): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BasePart extends PVInstance
@@ -7398,33 +7099,27 @@ declare class BasePart extends PVInstance
 	function UnionAsync(self, parts: { Instance }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation
 	TouchEnded: RBXScriptSignal<BasePart>
 	Touched: RBXScriptSignal<BasePart>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CornerWedgePart extends BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FormFactorPart extends BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Part extends FormFactorPart
 	Shape: EnumPartType
-	function __eq(self, other: Instance): boolean
 end
 
 
 
 declare class Platform extends Part
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Seat extends Part
 	Disabled: boolean
 	Occupant: Humanoid
 	function Sit(self, humanoid: Humanoid): nil
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -7435,11 +7130,9 @@ declare class SpawnLocation extends Part
 	Enabled: boolean
 	Neutral: boolean
 	TeamColor: BrickColor
-	function __eq(self, other: Instance): boolean
 end
 
 declare class WedgePart extends FormFactorPart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Terrain extends BasePart
@@ -7471,12 +7164,10 @@ declare class Terrain extends BasePart
 	function WorldToCellPreferEmpty(self, position: Vector3): Vector3
 	function WorldToCellPreferSolid(self, position: Vector3): Vector3
 	function WriteVoxels(self, region: Region3, resolution: number, materials: { any }, occupancy: { any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TriangleMeshPart extends BasePart
 	CollisionFidelity: EnumCollisionFidelity
-	function __eq(self, other: Instance): boolean
 end
 
 declare class MeshPart extends TriangleMeshPart
@@ -7489,7 +7180,6 @@ declare class MeshPart extends TriangleMeshPart
 	RenderFidelity: EnumRenderFidelity
 	TextureID: Content
 	function ApplyMesh(self, meshPart: MeshPart): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PartOperation extends TriangleMeshPart
@@ -7497,20 +7187,16 @@ declare class PartOperation extends TriangleMeshPart
 	SmoothingAngle: number
 	TriangleCount: number
 	UsePartColor: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NegateOperation extends PartOperation
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UnionOperation extends PartOperation
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TrussPart extends BasePart
 	Style: EnumStyle
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VehicleSeat extends BasePart
@@ -7526,7 +7212,6 @@ declare class VehicleSeat extends BasePart
 	Torque: number
 	TurnSpeed: number
 	function Sit(self, humanoid: Humanoid): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Model extends PVInstance
@@ -7543,11 +7228,9 @@ declare class Model extends PVInstance
 	function SetPrimaryPartCFrame(self, cframe: CFrame): nil
 	function TranslateBy(self, delta: Vector3): nil
 	PrimaryPart: BasePart?
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Actor extends Model
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -7561,7 +7244,6 @@ declare class WorldRoot extends Model
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult
 	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Workspace extends WorldRoot
@@ -7605,11 +7287,9 @@ declare class Workspace extends WorldRoot
 	function SetPhysicsThrottleEnabled(self, value: boolean): nil
 	function UnjoinFromOutsiders(self, objects: { Instance }): nil
 	function ZoomToExtents(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class WorldModel extends WorldRoot
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PackageLink extends Instance
@@ -7620,69 +7300,54 @@ declare class PackageLink extends Instance
 	PermissionLevel: EnumPackagePermission
 	Status: string
 	VersionNumber: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PackageService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PackageUIService extends Instance
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
 	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Pages extends Instance
 	IsFinished: boolean
 	function GetCurrentPage(self): { any }
 	function AdvanceToNextPageAsync(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CatalogPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreKeyPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreListingPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStorePages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataStoreVersionPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FriendPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class InventoryPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class EmotesPages extends InventoryPages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class OutfitPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StandardPages extends Pages
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PartOperationAsset extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ParticleEmitter extends Instance
@@ -7720,7 +7385,6 @@ declare class ParticleEmitter extends Instance
 	ZOffset: number
 	function Clear(self): nil
 	function Emit(self, particleCount: number?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Path extends Instance
@@ -7730,7 +7394,6 @@ declare class Path extends Instance
 	function ComputeAsync(self, start: Vector3, finish: Vector3): nil
 	Blocked: RBXScriptSignal<number>
 	Unblocked: RBXScriptSignal<number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PathfindingLink extends Instance
@@ -7738,36 +7401,30 @@ declare class PathfindingLink extends Instance
 	Attachment1: Attachment
 	IsBidirectional: boolean
 	Label: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PathfindingModifier extends Instance
 	Label: string
 	PassThrough: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PathfindingService extends Instance
 	function CreatePath(self, agentParameters: { [any]: any }?): Path
 	function FindPathAsync(self, start: Vector3, finish: Vector3): Path
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PausedState extends Instance
 	AllThreadsPaused: boolean
 	Reason: EnumDebuggerPauseReason
 	ThreadId: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PausedStateBreakpoint extends PausedState
 	Breakpoint: Breakpoint
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PausedStateException extends PausedState
 	ExceptionText: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PermissionsService extends Instance
@@ -7776,7 +7433,6 @@ declare class PermissionsService extends Instance
 	function GetIsThirdPartyTeleportAllowed(self): boolean
 	function GetPermissions(self, assetId: string): { any }
 	function SetPermissions(self, assetId: string, permissions: { any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PhysicsService extends Instance
@@ -7793,7 +7449,6 @@ declare class PhysicsService extends Instance
 	function RemoveCollisionGroup(self, name: string): nil
 	function RenameCollisionGroup(self, from: string, to: string): nil
 	function SetPartCollisionGroup(self, part: BasePart, name: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PhysicsSettings extends Instance
@@ -7823,7 +7478,6 @@ declare class PhysicsSettings extends Instance
 	ShowDecompositionGeometry: boolean
 	ThrottleAdjustTime: number
 	UseCSGv2: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Player extends Instance
@@ -7900,7 +7554,6 @@ declare class Player extends Instance
 	Idled: RBXScriptSignal<number>
 	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
 	SimulationRadiusChanged: RBXScriptSignal<number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PlayerEmulatorService extends Instance
@@ -7912,7 +7565,6 @@ declare class PlayerEmulatorService extends Instance
 	function GetEmulatedPolicyInfo(self): { [any]: any }
 	function RegionCodeWillHaveAutomaticNonCustomPolicies(self, regionCode: string): boolean
 	function SetEmulatedPolicyInfo(self, emulatedPolicyInfo: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PlayerScripts extends Instance
@@ -7932,7 +7584,6 @@ declare class PlayerScripts extends Instance
 	ComputerMovementModeRegistered: RBXScriptSignal<>
 	TouchCameraMovementModeRegistered: RBXScriptSignal<>
 	TouchMovementModeRegistered: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Players extends Instance
@@ -7973,7 +7624,6 @@ declare class Players extends Instance
 	PlayerRejoining: RBXScriptSignal<Player>
 	PlayerRemoving: RBXScriptSignal<Player>
 	function GetPlayers(self): { Player }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Plugin extends Instance
@@ -8023,7 +7673,6 @@ declare class Plugin extends Instance
 	Deactivation: RBXScriptSignal<>
 	Ready: RBXScriptSignal<>
 	Unloading: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginAction extends Instance
@@ -8035,11 +7684,9 @@ declare class PluginAction extends Instance
 	StatusTip: string
 	Text: string
 	Triggered: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginDebugService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginDragEvent extends Instance
@@ -8047,23 +7694,19 @@ declare class PluginDragEvent extends Instance
 	MimeType: string
 	Position: Vector2
 	Sender: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginGuiService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginManager extends Instance
 	function ExportPlace(self, filePath: string?): nil
 	function ExportSelection(self, filePath: string?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginManagerInterface extends Instance
 	function ExportPlace(self, filePath: string?): nil
 	function ExportSelection(self, filePath: string?): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginMenu extends Instance
@@ -8075,17 +7718,14 @@ declare class PluginMenu extends Instance
 	function AddSeparator(self): nil
 	function Clear(self): nil
 	function ShowAsync(self): PluginAction
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginPolicyService extends Instance
 	function GetPluginPolicy(self, pluginName: string): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginToolbar extends Instance
 	function CreateButton(self, buttonId: string, tooltip: string, iconname: string, text: string?): PluginToolbarButton
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PluginToolbarButton extends Instance
@@ -8094,7 +7734,6 @@ declare class PluginToolbarButton extends Instance
 	Icon: Content
 	function SetActive(self, active: boolean): nil
 	Click: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -8104,19 +7743,16 @@ declare class PolicyService extends Instance
 	LuobuWhitelisted: EnumTriStateBoolean
 	function GetPolicyInfoForPlayerAsync(self, player: Player): { [any]: any }
 	function GetPolicyInfoForServerRobloxOnlyAsync(self): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PoseBase extends Instance
 	EasingDirection: EnumPoseEasingDirection
 	EasingStyle: EnumPoseEasingStyle
 	Weight: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NumberPose extends PoseBase
 	Value: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Pose extends PoseBase
@@ -8124,24 +7760,20 @@ declare class Pose extends PoseBase
 	function AddSubPose(self, pose: Pose): nil
 	function GetSubPoses(self): { Instance }
 	function RemoveSubPose(self, pose: Pose): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PostEffect extends Instance
 	Enabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BloomEffect extends PostEffect
 	Intensity: number
 	Size: number
 	Threshold: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BlurEffect extends PostEffect
 	Size: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ColorCorrectionEffect extends PostEffect
@@ -8149,7 +7781,6 @@ declare class ColorCorrectionEffect extends PostEffect
 	Contrast: number
 	Saturation: number
 	TintColor: Color3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DepthOfFieldEffect extends PostEffect
@@ -8157,17 +7788,14 @@ declare class DepthOfFieldEffect extends PostEffect
 	FocusDistance: number
 	InFocusRadius: number
 	NearIntensity: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SunRaysEffect extends PostEffect
 	Intensity: number
 	Spread: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ProcessInstancePhysicsService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ProximityPrompt extends Instance
@@ -8193,7 +7821,6 @@ declare class ProximityPrompt extends Instance
 	PromptShown: RBXScriptSignal<EnumProximityPromptInputType>
 	TriggerEnded: RBXScriptSignal<Player>
 	Triggered: RBXScriptSignal<Player>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ProximityPromptService extends Instance
@@ -8205,13 +7832,11 @@ declare class ProximityPromptService extends Instance
 	PromptShown: RBXScriptSignal<ProximityPrompt, EnumProximityPromptInputType>
 	PromptTriggerEnded: RBXScriptSignal<ProximityPrompt, Player>
 	PromptTriggered: RBXScriptSignal<ProximityPrompt, Player>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PublishService extends Instance
 	function PublishDescendantAssets(self, instance: Instance): boolean
 	function PublishCageMeshAsync(self, wrap: Instance, cageType: EnumCageType): Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RbxAnalyticsService extends Instance
@@ -8233,31 +7858,24 @@ declare class RbxAnalyticsService extends Instance
 	function TrackEvent(self, category: string, action: string, label: string, value: number?): nil
 	function TrackEventWithArgs(self, category: string, action: string, label: string, args: { [any]: any }, value: number?): nil
 	function UpdateHeartbeatObject(self, args: { [any]: any }): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadata extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataCallbacks extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataClasses extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataEnums extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataEvents extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataFunctions extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataItem extends Instance
@@ -8277,7 +7895,6 @@ declare class ReflectionMetadataItem extends Instance
 	UIMaximum: number
 	UIMinimum: number
 	UINumTicks: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataClass extends ReflectionMetadataItem
@@ -8285,31 +7902,24 @@ declare class ReflectionMetadataClass extends ReflectionMetadataItem
 	ExplorerOrder: number
 	Insertable: boolean
 	PreferredParent: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataEnum extends ReflectionMetadataItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataEnumItem extends ReflectionMetadataItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataMember extends ReflectionMetadataItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataProperties extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReflectionMetadataYieldFunctions extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RemoteDebuggerServer extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RemoteEvent extends Instance
@@ -8318,7 +7928,6 @@ declare class RemoteEvent extends Instance
 	function FireServer(self, ...: any): ()
 	OnClientEvent: RBXScriptSignal<...any>
 	OnServerEvent: RBXScriptSignal<(Player, ...any)>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RemoteFunction extends Instance
@@ -8326,7 +7935,6 @@ declare class RemoteFunction extends Instance
 	function InvokeServer(self, ...: any): ...any
 	OnClientInvoke: <A..., R...>(A...) -> R...
 	OnServerInvoke: <A..., R...>(player: Player, A...) -> R...
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RenderSettings extends Instance
@@ -8344,7 +7952,6 @@ declare class RenderSettings extends Instance
 	RenderCSGTrianglesDebug: boolean
 	ShowBoundingBoxes: boolean
 	function GetMaxQualityLevel(self): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RenderingTest extends Instance
@@ -8360,7 +7967,6 @@ declare class RenderingTest extends Instance
 	ShouldSkip: boolean
 	Ticket: string
 	function RenderdocTriggerCapture(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReplicatedFirst extends Instance
@@ -8371,19 +7977,15 @@ declare class ReplicatedFirst extends Instance
 	DefaultLoadingGuiRemoved: RBXScriptSignal<>
 	FinishedReplicating: RBXScriptSignal<>
 	RemoveDefaultLoadingGuiSignal: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReplicatedStorage extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RobloxPluginGuiService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RobloxReplicatedStorage extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RotationCurve extends Instance
@@ -8395,11 +7997,9 @@ declare class RotationCurve extends Instance
 	function InsertKey(self, key: RotationCurveKey): { any }
 	function RemoveKeyAtIndex(self, startingIndex: number, count: number?): number
 	function SetKeys(self, keys: { any }): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RtMessagingService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RunService extends Instance
@@ -8428,11 +8028,9 @@ declare class RunService extends Instance
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
 	Stepped: RBXScriptSignal<number, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RuntimeScriptService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptChangeService extends Instance
@@ -8442,15 +8040,12 @@ declare class ScriptChangeService extends Instance
 	ScriptFullNameChanged: RBXScriptSignal<LuaSourceContainer>
 	ScriptSourceChanged: RBXScriptSignal<LuaSourceContainer>
 	ScriptSourceEdited: RBXScriptSignal<LuaSourceContainer, { any }>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptCloneWatcher extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptCloneWatcherHelper extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptContext extends Instance
@@ -8460,7 +8055,6 @@ declare class ScriptContext extends Instance
 	function SetTimeout(self, seconds: number): nil
 	Error: RBXScriptSignal<string, string, Instance>
 	ErrorDetailed: RBXScriptSignal<string, string, Instance, string, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptDebugger extends Instance
@@ -8486,7 +8080,6 @@ declare class ScriptDebugger extends Instance
 	Resuming: RBXScriptSignal<>
 	WatchAdded: RBXScriptSignal<Instance>
 	WatchRemoved: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptDocument extends Instance
@@ -8494,7 +8087,6 @@ declare class ScriptDocument extends Instance
 	function GetScript(self): LuaSourceContainer
 	function GetText(self): string
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptEditorService extends Instance
@@ -8503,16 +8095,13 @@ declare class ScriptEditorService extends Instance
 	TextDocumentDidChange: RBXScriptSignal<ScriptDocument, any>
 	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
 	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptRegistrationService extends Instance
 	function GetSourceContainerByScriptGuid(self, guid: string): LuaSourceContainer
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ScriptService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Selection extends Instance
@@ -8525,16 +8114,13 @@ declare class Selection extends Instance
 	function Set(self, selection: { Instance }): nil
 	function SetTerrainSelectionHack(self, center: Vector3, size: Vector3): nil
 	SelectionChanged: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ServerScriptService extends Instance
 	LoadStringEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ServerStorage extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SessionService extends Instance
@@ -8548,7 +8134,6 @@ declare class SessionService extends Instance
 	function SessionExists(self, sid: string): boolean
 	function SetMetadata(self, sid: string, key: string, value: any): nil
 	function SetSession(self, parentSid: string, childSid: string, tag: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Sky extends Instance
@@ -8564,7 +8149,6 @@ declare class Sky extends Instance
 	StarCount: number
 	SunAngularSize: number
 	SunTextureId: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Smoke extends Instance
@@ -8574,11 +8158,9 @@ declare class Smoke extends Instance
 	RiseVelocity: number
 	Size: number
 	TimeScale: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SnippetService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SocialService extends Instance
@@ -8587,7 +8169,6 @@ declare class SocialService extends Instance
 	function CanSendGameInviteAsync(self, player: Player): boolean
 	GameInvitePromptClosed: RBXScriptSignal<Instance, { any }>
 	PromptInviteRequested: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Sound extends Instance
@@ -8620,20 +8201,17 @@ declare class Sound extends Instance
 	Played: RBXScriptSignal<string>
 	Resumed: RBXScriptSignal<string>
 	Stopped: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SoundEffect extends Instance
 	Enabled: boolean
 	Priority: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ChorusSoundEffect extends SoundEffect
 	Depth: number
 	Mix: number
 	Rate: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CompressorSoundEffect extends SoundEffect
@@ -8643,21 +8221,17 @@ declare class CompressorSoundEffect extends SoundEffect
 	Release: number
 	SideChain: Instance
 	Threshold: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CustomDspSoundEffect extends SoundEffect
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ChannelSelectorSoundEffect extends CustomDspSoundEffect
 	Channel: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DistortionSoundEffect extends SoundEffect
 	Level: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class EchoSoundEffect extends SoundEffect
@@ -8665,26 +8239,22 @@ declare class EchoSoundEffect extends SoundEffect
 	DryLevel: number
 	Feedback: number
 	WetLevel: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class EqualizerSoundEffect extends SoundEffect
 	HighGain: number
 	LowGain: number
 	MidGain: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class FlangeSoundEffect extends SoundEffect
 	Depth: number
 	Mix: number
 	Rate: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class PitchShiftSoundEffect extends SoundEffect
 	Octave: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ReverbSoundEffect extends SoundEffect
@@ -8693,19 +8263,16 @@ declare class ReverbSoundEffect extends SoundEffect
 	Diffusion: number
 	DryLevel: number
 	WetLevel: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TremoloSoundEffect extends SoundEffect
 	Depth: number
 	Duty: number
 	Frequency: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SoundGroup extends Instance
 	Volume: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SoundService extends Instance
@@ -8726,7 +8293,6 @@ declare class SoundService extends Instance
 	function EndRecording(self): { [any]: any }
 	function GetRecordingDevices(self): { [any]: any }
 	DeviceListChanged: RBXScriptSignal<any>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Sparkles extends Instance
@@ -8734,11 +8300,9 @@ declare class Sparkles extends Instance
 	Enabled: boolean
 	SparkleColor: Color3
 	TimeScale: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SpawnerService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -8753,19 +8317,15 @@ declare class StackFrame extends Instance
 	Populated: boolean
 	Script: string
 	Upvalues: DebuggerVariable
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StandalonePluginScripts extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterGear extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterPack extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterPlayer extends Instance
@@ -8808,15 +8368,12 @@ declare class StarterPlayer extends Instance
 	NameDisplayDistance: number
 	UserEmotesEnabled: boolean
 	function ClearDefaults(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterPlayerScripts extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StarterCharacterScripts extends StarterPlayerScripts
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Stats extends Instance
@@ -8834,37 +8391,30 @@ declare class Stats extends Instance
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
 	function GetTotalMemoryUsageMb(self): number
 	function GetPaginatedMemoryByTexture(self, queryType: EnumTextureQueryType, pageIndex: number, pageSize: number): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StatsItem extends Instance
 	DisplayName: string
 	function GetValue(self): number
 	function GetValueString(self): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RunningAverageItemDouble extends StatsItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RunningAverageItemInt extends StatsItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RunningAverageTimeIntervalItem extends StatsItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TotalCountTimeIntervalItem extends StatsItem
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StopWatchReporter extends Instance
 	function FinishTask(self, taskId: number): nil
 	function SendReport(self, reportName: string): nil
 	function StartTask(self, reportName: string, taskName: string): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Studio extends Instance
@@ -9002,19 +8552,16 @@ declare class Studio extends Instance
 	Whitespace_Color: Color3
 	function GetAvailableThemes(self): { any }
 	ThemeChanged: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioAssetService extends Instance
 	function SerializeInstances(self, instances: { Instance }): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioData extends Instance
 	EnableScriptCollabByDefaultOnLoad: boolean
 	SrcPlaceId: number
 	SrcUniverseId: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioDeviceEmulatorService extends Instance
@@ -9026,12 +8573,10 @@ declare class StudioDeviceEmulatorService extends Instance
 	function SetCurrentOrientation(self, orientation: EnumScreenOrientation): nil
 	CurrentDeviceIdChanged: RBXScriptSignal<>
 	OrientationChanged: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioHighDpiService extends Instance
 	function IsNotHighDPIAwareBuild(self): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioPublishService extends Instance
@@ -9044,11 +8589,9 @@ declare class StudioPublishService extends Instance
 	GameNameUpdated: RBXScriptSignal<string>
 	GamePublishFinished: RBXScriptSignal<boolean, number>
 	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioScriptDebugEventListener extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioService extends Instance
@@ -9108,12 +8651,10 @@ declare class StudioService extends Instance
 	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
 	PromptTransformPluginCheckEnable: RBXScriptSignal<>
 	SaveLocallyAsComplete: RBXScriptSignal<boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StudioTheme extends Instance
 	function GetColor(self, styleguideitem: EnumStudioStyleGuideColor, modifier: EnumStudioStyleGuideModifier?): Color3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class SurfaceAppearance extends Instance
@@ -9123,7 +8664,6 @@ declare class SurfaceAppearance extends Instance
 	NormalMap: Content
 	RoughnessMap: Content
 	TexturePack: Content
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TaskScheduler extends Instance
@@ -9131,7 +8671,6 @@ declare class TaskScheduler extends Instance
 	SchedulerRate: number
 	ThreadPoolConfig: EnumThreadPoolConfig
 	ThreadPoolSize: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Team extends Instance
@@ -9141,18 +8680,15 @@ declare class Team extends Instance
 	function GetPlayers(self): { Instance }
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Teams extends Instance
 	function GetTeams(self): { Instance }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TeleportAsyncResult extends Instance
 	PrivateServerId: string
 	ReservedServerAccessCode: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TeleportOptions extends Instance
@@ -9161,7 +8697,6 @@ declare class TeleportOptions extends Instance
 	ShouldReserveServer: boolean
 	function GetTeleportData(self): any
 	function SetTeleportData(self, teleportData: any): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TeleportService extends Instance
@@ -9181,15 +8716,12 @@ declare class TeleportService extends Instance
 	function TeleportPartyAsync(self, placeId: number, players: { Instance }, teleportData: any, customLoadingScreen: GuiObject?): string
 	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Instance, any>
 	TeleportInitFailed: RBXScriptSignal<Instance, EnumTeleportResult, string, number, Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TemporaryCageMeshProvider extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TemporaryScriptService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TerrainDetail extends Instance
@@ -9200,12 +8732,10 @@ declare class TerrainDetail extends Instance
 	NormalMap: Content
 	RoughnessMap: Content
 	StudsPerTile: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TerrainRegion extends Instance
 	SizeInCells: Vector3
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TestService extends Instance
@@ -9234,11 +8764,9 @@ declare class TestService extends Instance
 	function Run(self): nil
 	ServerCollectConditionalResult: RBXScriptSignal<boolean, string, Instance, number>
 	ServerCollectResult: RBXScriptSignal<string, Instance, number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextBoxService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChannel extends Instance
@@ -9247,7 +8775,6 @@ declare class TextChannel extends Instance
 	function SendAsync(self, message: string, metadata: string?): TextChatMessage
 	MessageReceived: RBXScriptSignal<TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChatCommand extends Instance
@@ -9255,22 +8782,18 @@ declare class TextChatCommand extends Instance
 	PrimaryAlias: string
 	SecondaryAlias: string
 	Triggered: RBXScriptSignal<TextSource, string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChatConfigurations extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ChatInputBarConfiguration extends TextChatConfigurations
 	Enabled: boolean
 	TargetTextChannel: TextChannel
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ChatWindowConfiguration extends TextChatConfigurations
 	Enabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChatMessage extends Instance
@@ -9282,13 +8805,11 @@ declare class TextChatMessage extends Instance
 	TextChannel: TextChannel
 	TextSource: TextSource
 	Timestamp: DateTime
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChatMessageProperties extends Instance
 	PrefixText: string
 	Text: string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextChatService extends Instance
@@ -9298,14 +8819,12 @@ declare class TextChatService extends Instance
 	MessageReceived: RBXScriptSignal<TextChatMessage>
 	SendingMessage: RBXScriptSignal<TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> any
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextFilterResult extends Instance
 	function GetChatForUserAsync(self, toUserId: number): string
 	function GetNonChatStringForBroadcastAsync(self): string
 	function GetNonChatStringForUserAsync(self, toUserId: number): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextService extends Instance
@@ -9314,13 +8833,11 @@ declare class TextService extends Instance
 	function FilterStringAsync(self, stringToFilter: string, fromUserId: number, textContext: EnumTextFilterContext?): Instance
 	function GetFamilyInfoAsync(self, assetId: Content): { [any]: any }
 	function GetTextBoundsAsync(self, params: GetTextBoundsParams): Vector2
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TextSource extends Instance
 	CanSend: boolean
 	UserId: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ThirdPartyUserService extends Instance
@@ -9333,7 +8850,6 @@ declare class ThirdPartyUserService extends Instance
 	ActiveGamepadAdded: RBXScriptSignal<>
 	ActiveGamepadRemoved: RBXScriptSignal<>
 	ActiveUserSignedOut: RBXScriptSignal<number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ThreadState extends Instance
@@ -9342,41 +8858,33 @@ declare class ThreadState extends Instance
 	ThreadId: number
 	ThreadName: string
 	function GetFrame(self, index: number): Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TimerService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ToastNotificationService extends Instance
 	function HideNotification(self, notificationId: string): nil
 	function ShowNotification(self, message: string, notificationId: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ToolboxService extends Instance
 	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
 	ProcessAssetInsertionDrop: () -> nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TouchInputService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TouchTransmitter extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TracerService extends Instance
 	function FinishSpan(self, spanId: string): nil
 	function StartSpan(self, name: string, parentId: string): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TrackerStreamAnimation extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Trail extends Instance
@@ -9397,7 +8905,6 @@ declare class Trail extends Instance
 	Transparency: NumberSequence
 	WidthScale: NumberSequence
 	function Clear(self): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Translator extends Instance
@@ -9405,7 +8912,6 @@ declare class Translator extends Instance
 	function FormatByKey(self, key: string, args: any): string
 	function RobloxOnlyTranslate(self, context: Instance, text: string): string
 	function Translate(self, context: Instance, text: string): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TweenBase extends Instance
@@ -9414,19 +8920,16 @@ declare class TweenBase extends Instance
 	function Pause(self): nil
 	function Play(self): nil
 	Completed: RBXScriptSignal<EnumPlaybackState>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Tween extends TweenBase
 	Instance: Instance
 	TweenInfo: TweenInfo
-	function __eq(self, other: Instance): boolean
 end
 
 declare class TweenService extends Instance
 	function Create(self, instance: Instance, tweenInfo: TweenInfo, propertyTable: { [any]: any }): Tween
 	function GetValue(self, alpha: number, easingStyle: EnumEasingStyle, easingDirection: EnumEasingDirection): number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UGCValidationService extends Instance
@@ -9439,43 +8942,35 @@ declare class UGCValidationService extends Instance
 	function GetMeshVertColors(self, meshId: string): { any }
 	function GetMeshVerts(self, meshId: string): { any }
 	function GetTextureSize(self, textureId: string): Vector2
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIBase extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIComponent extends UIBase
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIConstraint extends UIComponent
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIAspectRatioConstraint extends UIConstraint
 	AspectRatio: number
 	AspectType: EnumAspectType
 	DominantAxis: EnumDominantAxis
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UISizeConstraint extends UIConstraint
 	MaxSize: Vector2
 	MinSize: Vector2
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UITextSizeConstraint extends UIConstraint
 	MaxTextSize: number
 	MinTextSize: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UICorner extends UIComponent
 	CornerRadius: UDim
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIGradient extends UIComponent
@@ -9484,11 +8979,9 @@ declare class UIGradient extends UIComponent
 	Offset: Vector2
 	Rotation: number
 	Transparency: NumberSequence
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UILayout extends UIComponent
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIGridStyleLayout extends UILayout
@@ -9497,7 +8990,6 @@ declare class UIGridStyleLayout extends UILayout
 	HorizontalAlignment: EnumHorizontalAlignment
 	SortOrder: EnumSortOrder
 	VerticalAlignment: EnumVerticalAlignment
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIGridLayout extends UIGridStyleLayout
@@ -9507,12 +8999,10 @@ declare class UIGridLayout extends UIGridStyleLayout
 	CellSize: UDim2
 	FillDirectionMaxCells: number
 	StartCorner: EnumStartCorner
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIListLayout extends UIGridStyleLayout
 	Padding: UDim
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIPageLayout extends UIGridStyleLayout
@@ -9533,7 +9023,6 @@ declare class UIPageLayout extends UIGridStyleLayout
 	PageEnter: RBXScriptSignal<Instance>
 	PageLeave: RBXScriptSignal<Instance>
 	Stopped: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UITableLayout extends UIGridStyleLayout
@@ -9541,7 +9030,6 @@ declare class UITableLayout extends UIGridStyleLayout
 	FillEmptySpaceRows: boolean
 	MajorAxis: EnumTableMajorAxis
 	Padding: UDim2
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIPadding extends UIComponent
@@ -9549,12 +9037,10 @@ declare class UIPadding extends UIComponent
 	PaddingLeft: UDim
 	PaddingRight: UDim
 	PaddingTop: UDim
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIScale extends UIComponent
 	Scale: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UIStroke extends UIComponent
@@ -9564,14 +9050,12 @@ declare class UIStroke extends UIComponent
 	LineJoinMode: EnumLineJoinMode
 	Thickness: number
 	Transparency: number
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UnvalidatedAssetService extends Instance
 	function AppendTempAssetId(self, userId: number, id: number, lookAt: Vector3, camPos: Vector3, usage: string): nil
 	function AppendVantagePoint(self, userId: number, id: number, lookAt: Vector3, camPos: Vector3): boolean
 	function UpgradeTempAssetId(self, userId: number, tempId: number, assetId: number): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UserGameSettings extends Instance
@@ -9627,7 +9111,6 @@ declare class UserGameSettings extends Instance
 	FullscreenChanged: RBXScriptSignal<boolean>
 	PerformanceStatsVisibleChanged: RBXScriptSignal<boolean>
 	StudioModeChanged: RBXScriptSignal<boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UserInputService extends Instance
@@ -9705,12 +9188,10 @@ declare class UserInputService extends Instance
 	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
 	WindowFocusReleased: RBXScriptSignal<>
 	WindowFocused: RBXScriptSignal<>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UserService extends Instance
 	function GetUserInfosByUserIdsAsync(self, userIds: { any }): { any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VRService extends Instance
@@ -9730,40 +9211,33 @@ declare class VRService extends Instance
 	TouchpadModeChanged: RBXScriptSignal<EnumVRTouchpad, EnumVRTouchpadMode>
 	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
 	UserCFrameEnabled: RBXScriptSignal<EnumUserCFrame, boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ValueBase extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BinaryStringValue extends ValueBase
 	Changed: RBXScriptSignal<BinaryString>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BoolValue extends ValueBase
 	Value: boolean
 	Changed: RBXScriptSignal<boolean>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class BrickColorValue extends ValueBase
 	Value: BrickColor
 	Changed: RBXScriptSignal<BrickColor>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class CFrameValue extends ValueBase
 	Value: CFrame
 	Changed: RBXScriptSignal<CFrame>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Color3Value extends ValueBase
 	Value: Color3
 	Changed: RBXScriptSignal<Color3>
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -9773,37 +9247,31 @@ end
 declare class IntValue extends ValueBase
 	Value: number
 	Changed: RBXScriptSignal<number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class NumberValue extends ValueBase
 	Value: number
 	Changed: RBXScriptSignal<number>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ObjectValue extends ValueBase
 	Value: Instance
 	Changed: RBXScriptSignal<Instance>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class RayValue extends ValueBase
 	Value: Ray
 	Changed: RBXScriptSignal<Ray>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class StringValue extends ValueBase
 	Value: string
 	Changed: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Vector3Value extends ValueBase
 	Value: Vector3
 	Changed: RBXScriptSignal<Vector3>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Vector3Curve extends Instance
@@ -9811,19 +9279,16 @@ declare class Vector3Curve extends Instance
 	function X(self): FloatCurve
 	function Y(self): FloatCurve
 	function Z(self): FloatCurve
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VersionControlService extends Instance
 	ScriptCollabEnabled: boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VideoCaptureService extends Instance
 	Active: boolean
 	CameraID: string
 	function GetCameraDevices(self): { [any]: any }
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VirtualInputManager extends Instance
@@ -9853,7 +9318,6 @@ declare class VirtualInputManager extends Instance
 	function WaitForInputEventsProcessed(self): nil
 	PlaybackCompleted: RBXScriptSignal<string>
 	RecordingCompleted: RBXScriptSignal<string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VirtualUser extends Instance
@@ -9870,20 +9334,16 @@ declare class VirtualUser extends Instance
 	function StartRecording(self): nil
 	function StopRecording(self): string
 	function TypeKey(self, key: string): nil
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VisibilityService extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class Visit extends Instance
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VoiceChannel extends Instance
 	function AddUserAsync(self, userId: number?): VoiceSource
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VoiceChatInternal extends Instance
@@ -9893,7 +9353,6 @@ declare class VoiceChatInternal extends Instance
 	function SubscribeRetry(self, userId: number): boolean
 	function SubscribeUnblock(self, userId: number): boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 declare class VoiceChatService extends Instance
@@ -9901,7 +9360,6 @@ declare class VoiceChatService extends Instance
 	VoiceChatEnabledForPlaceOnRcc: boolean
 	VoiceChatEnabledForUniverseOnRcc: boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
-	function __eq(self, other: Instance): boolean
 end
 
 
@@ -9911,7 +9369,6 @@ declare class WeldConstraint extends Instance
 	Enabled: boolean
 	Part0: BasePart
 	Part1: BasePart
-	function __eq(self, other: Instance): boolean
 end
 
 declare class ServiceProvider extends Instance
@@ -10100,7 +9557,6 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "Visit"): Visit
 	function GetService(self, service: "VoiceChatInternal"): VoiceChatInternal
 	function GetService(self, service: "VoiceChatService"): VoiceChatService
-	function __eq(self, other: Instance): boolean
 end
 
 declare class DataModel extends ServiceProvider
@@ -10146,28 +9602,23 @@ declare class DataModel extends ServiceProvider
 	Loaded: RBXScriptSignal<>
 	ScreenshotReady: RBXScriptSignal<string>
 	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GenericSettings extends ServiceProvider
-	function __eq(self, other: Instance): boolean
 end
 
 declare class AnalysticsSettings extends GenericSettings
-	function __eq(self, other: Instance): boolean
 end
 
 declare class GlobalSettings extends GenericSettings
 	function GetFFlag(self, name: string): boolean
 	function GetFVariable(self, name: string): string
-	function __eq(self, other: Instance): boolean
 end
 
 declare class UserSettings extends GenericSettings
 	function IsUserFeatureEnabled(self, name: string): boolean
 	function Reset(self): nil
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
-	function __eq(self, other: Instance): boolean
 end
 
 declare Instance: {

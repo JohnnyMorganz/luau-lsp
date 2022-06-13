@@ -60,6 +60,7 @@ DEFERRED_CLASSES: List[str] = [
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
+    "Instance": ["Parent"],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
         "FireAllClients",
@@ -135,6 +136,7 @@ EXTRA_MEMBERS = {
     "UserSettings": [
         'function GetService(self, service: "UserGameSettings"): UserGameSettings'
     ],
+    "Instance": ["Parent: Instance?"],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
@@ -503,8 +505,6 @@ def declareClass(klass: ApiClass):
     if klass["Name"] in EXTRA_MEMBERS:
         for method in EXTRA_MEMBERS[klass["Name"]]:
             out += f"\t{method}\n"
-
-    out += "\tfunction __eq(self, other: Instance): boolean\n"
 
     out += "end"
 
