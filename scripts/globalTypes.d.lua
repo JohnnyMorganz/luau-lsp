@@ -588,6 +588,7 @@ end
 declare class EnumConnectionError extends EnumItem end
 declare class EnumConnectionError_INTERNAL extends Enum
 	OK: EnumConnectionError
+	Unknown: EnumConnectionError
 	DisconnectErrors: EnumConnectionError
 	DisconnectBadhash: EnumConnectionError
 	DisconnectSecurityKeyMismatch: EnumConnectionError
@@ -3976,7 +3977,7 @@ type Sound = any
 type SoundEffect = any
 type ChorusSoundEffect = any
 type CompressorSoundEffect = any
-type CustomDspSoundEffect = any
+type CustomSoundEffect = any
 type ChannelSelectorSoundEffect = any
 type DistortionSoundEffect = any
 type EchoSoundEffect = any
@@ -4628,6 +4629,7 @@ declare class Breakpoint extends Instance
 	LogMessage: string
 	MetaBreakpointId: number
 	Script: string
+	Valid: boolean
 	Verified: boolean
 end
 
@@ -5326,6 +5328,7 @@ declare class DebuggerUIService extends Instance
 	function Resume(self): nil
 	function SetCurrentThreadId(self, debuggerThreadId: number): nil
 	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
+	ExpressionAdded: RBXScriptSignal<string>
 end
 
 declare class DebuggerVariable extends Instance
@@ -6421,10 +6424,13 @@ declare class ImporterMeshSettings extends ImporterBaseSettings
 	CageManifoldPreview: boolean
 	CageNoOverlappingVertices: boolean
 	CageNoOverlappingVerticesPreview: boolean
+	CageUVMatched: boolean
+	CageUVMatchedPreview: boolean
 	Dimensions: Vector3
 	DoubleSided: boolean
 	IgnoreVertexColors: boolean
 	PolygonCount: number
+	UseImportedPivot: boolean
 end
 
 declare class ImporterRootSettings extends ImporterBaseSettings
@@ -6909,6 +6915,7 @@ declare class MetaBreakpoint extends Instance
 	Line: number
 	LogMessage: string
 	Script: string
+	Valid: boolean
 	function GetContextBreakpoints(self): { [any]: any }
 	function Remove(self, status: <A..., R...>(A...) -> R...): number
 	function SetChildBreakpointEnabledByScriptAndContext(self, script: string, contextGST: number, enabled: boolean): nil
@@ -8083,10 +8090,12 @@ declare class ScriptDebugger extends Instance
 end
 
 declare class ScriptDocument extends Instance
+	function GetInternalUri(self): string
 	function GetNumLines(self): number
 	function GetScript(self): LuaSourceContainer
 	function GetText(self): string
-	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): boolean
+	function IsCommandBar(self): boolean
+	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number?, endCharacter: number?): any
 end
 
 declare class ScriptEditorService extends Instance
@@ -8223,10 +8232,10 @@ declare class CompressorSoundEffect extends SoundEffect
 	Threshold: number
 end
 
-declare class CustomDspSoundEffect extends SoundEffect
+declare class CustomSoundEffect extends SoundEffect
 end
 
-declare class ChannelSelectorSoundEffect extends CustomDspSoundEffect
+declare class ChannelSelectorSoundEffect extends CustomSoundEffect
 	Channel: number
 end
 
