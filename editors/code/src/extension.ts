@@ -129,6 +129,10 @@ export async function activate(context: vscode.ExtensionContext) {
   const fflags: FFlags = {};
   const fflagsConfig = vscode.workspace.getConfiguration("luau-lsp.fflags");
 
+  if (!fflagsConfig.get<boolean>("enableByDefault")) {
+    args.push("--no-flags-enabled");
+  }
+
   // Sync FFlags with upstream
   if (fflagsConfig.get<boolean>("sync")) {
     const currentFlags = await getFFlags();
