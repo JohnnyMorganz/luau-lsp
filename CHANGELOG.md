@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.532
+- Updated to improve table type stringification, with an appropriate newline placed in between braces. This should result in better readable table types when hovering
 
 ### Fixed
 

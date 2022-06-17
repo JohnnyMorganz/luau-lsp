@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #endif
 
+LUAU_FASTFLAG(LuauToStringTableBracesNewlines)
+
 enum class CliMode
 {
     Lsp,
@@ -222,6 +224,9 @@ int main(int argc, char** argv)
                 flag->value = true;
     }
     registerFastFlags(fastFlags);
+
+    // Enable improved table newline stringification
+    FFlag::LuauToStringTableBracesNewlines.value = true;
 
     if (mode == CliMode::Lsp)
         startLanguageServer(argc, argv);
