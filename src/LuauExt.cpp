@@ -209,6 +209,27 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIs
     return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
 }
 
+// Magic function for `EnumItem:IsA("EnumType")` predicate
+std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionEnumItemIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+{
+    if (expr.args.size != 1)
+        return std::nullopt;
+
+    auto index = expr.func->as<Luau::AstExprIndexName>();
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return std::nullopt;
+
+    std::optional<Luau::LValue> lvalue = tryGetLValue(*index->expr);
+    std::optional<Luau::TypeFun> tfun = scope->lookupImportedType("Enum", std::string(str->value.data, str->value.size));
+    if (!lvalue || !tfun)
+        return std::nullopt;
+
+    Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
+    return Luau::ExprResult<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+}
+
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
 // to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
 // Remove this once Luau has improved
@@ -387,32 +408,43 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             auto ty = it->second.type;
             if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
             {
-                if (Luau::startsWith(ctv->name, "Enum") && ctv->name != "Enum" && ctv->name != "EnumItem")
+                if (Luau::startsWith(ctv->name, "Enum"))
                 {
-                    // Erase the "Enum" at the start
-                    ctv->name = ctv->name.substr(4);
-
-                    // Move the enum over to the imported types if it is not internal, otherwise rename the type
-                    if (endsWith(ctv->name, "_INTERNAL"))
+                    if (ctv->name == "EnumItem")
                     {
-                        ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
+                        Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
                     }
-                    else
+                    else if (ctv->name != "Enum" && ctv->name != "Enums")
                     {
-                        enumTypes.emplace(ctv->name, it->second);
+                        // Erase the "Enum" at the start
+                        ctv->name = ctv->name.substr(4);
+
+                        // Move the enum over to the imported types if it is not internal, otherwise rename the type
+                        if (endsWith(ctv->name, "_INTERNAL"))
+                        {
+                            ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
+                        }
+                        else
+                        {
+                            enumTypes.emplace(ctv->name, it->second);
+                            // Erase the metatable for the type so it can be used in comparison
+                        }
+
+                        // Update the documentation symbol
+                        Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
+                        for (auto& [name, prop] : ctv->props)
+                        {
+                            prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                        }
+
+                        // Prefix the name (after its been placed into enumTypes) with "Enum."
+                        ctv->name = "Enum." + ctv->name;
+
+                        erase = true;
                     }
 
-                    // Update the documentation symbol
-                    Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
-                    for (auto& [name, prop] : ctv->props)
-                    {
-                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
-                    }
-
-                    // Prefix the name (after its been placed into enumTypes) with "Enum."
-                    ctv->name = "Enum." + ctv->name;
-
-                    erase = true;
+                    // Erase the metatable from the type to allow comparison
+                    ctv->metatable = std::nullopt;
                 }
             };
 
