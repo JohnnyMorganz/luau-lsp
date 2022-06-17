@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added predicate logic to `EnumItem:IsA("Type")` so it will now narrow the type of an EnumItem when used as a predicate
 
+### Changed
+
+- Sync to upstream Luau 0.532
+
 ### Fixed
 
 - Fixed equality comparison between enum items raising a type error

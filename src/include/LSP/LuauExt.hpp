@@ -14,16 +14,16 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
     std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass = std::nullopt);
 
 // Magic function for `Instance:IsA("ClassName")` predicate
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult);
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> exprResult);
 
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult);
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> exprResult);
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult);
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> exprResult);
 
 void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver, bool expressiveTypes = true);
 Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);

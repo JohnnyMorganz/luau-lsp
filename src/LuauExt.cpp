@@ -107,7 +107,7 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
                 auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {Luau::getSingletonTypes().stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstAncestorFunction,
                     [node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::ExprResult<Luau::TypePackId> exprResult) -> std::optional<Luau::ExprResult<Luau::TypePackId>>
+                        Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
                             return std::nullopt;
@@ -119,7 +119,7 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
                         // This is a O(n) search, not great!
                         if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
                         {
-                            return Luau::ExprResult<Luau::TypePackId>{
+                            return Luau::WithPredicate<Luau::TypePackId>{
                                 typeChecker.globalTypes.addTypePack({makeLazyInstanceType(typeChecker.globalTypes, scope, *ancestor, std::nullopt)})};
                         }
 
@@ -130,7 +130,7 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
                 auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {Luau::getSingletonTypes().stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstChildFunction,
                     [node, typeId](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::ExprResult<Luau::TypePackId> exprResult) -> std::optional<Luau::ExprResult<Luau::TypePackId>>
+                        Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
                             return std::nullopt;
@@ -141,7 +141,7 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
 
                         if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
                         {
-                            return Luau::ExprResult<Luau::TypePackId>{
+                            return Luau::WithPredicate<Luau::TypePackId>{
                                 typeChecker.globalTypes.addTypePack({makeLazyInstanceType(typeChecker.globalTypes, scope, *child, typeId)})};
                         }
 
@@ -157,8 +157,8 @@ Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& 
 }
 
 // Magic function for `Instance:IsA("ClassName")` predicate
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
 {
     if (expr.args.size != 1)
         return std::nullopt;
@@ -174,12 +174,12 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceIsA(
         return std::nullopt;
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
-    return Luau::ExprResult<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
 }
 
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
 {
     auto index = expr.func->as<Luau::AstExprIndexName>();
     if (!index)
@@ -187,12 +187,12 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionInstanceClone(
 
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
     Luau::TypeId instanceType = typeChecker.checkLValueBinding(scope, *index->expr);
-    return Luau::ExprResult<Luau::TypePackId>{arena.addTypePack({instanceType})};
+    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType})};
 }
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
 {
     if (expr.args.size < 1)
         return std::nullopt;
@@ -206,12 +206,12 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionFindFirstXWhichIs
         return std::nullopt;
 
     Luau::TypeId nillableClass = Luau::makeOption(typeChecker, typeChecker.globalTypes, tfun->type);
-    return Luau::ExprResult<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
+    return Luau::WithPredicate<Luau::TypePackId>{typeChecker.globalTypes.addTypePack({nillableClass})};
 }
 
 // Magic function for `EnumItem:IsA("EnumType")` predicate
-std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionEnumItemIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::ExprResult<Luau::TypePackId> exprResult)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
 {
     if (expr.args.size != 1)
         return std::nullopt;
@@ -227,7 +227,7 @@ std::optional<Luau::ExprResult<Luau::TypePackId>> magicFunctionEnumItemIsA(
         return std::nullopt;
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
-    return Luau::ExprResult<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
