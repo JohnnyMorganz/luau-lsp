@@ -3230,7 +3230,7 @@ declare class Color3
 	B: number
 	G: number
 	function ToHSV(self): (number, number, number)
-	function ToHex(self): (number, number, number)
+	function ToHex(self): string
 	function Lerp(self, color: Color3, alpha: number): Color3
 	r: number
 	g: number
