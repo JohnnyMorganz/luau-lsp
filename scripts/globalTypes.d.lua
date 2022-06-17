@@ -15,6 +15,7 @@ declare class EnumItem
 	Name: string
 	Value: number
 	EnumType: Enum
+    function IsA(self, enumName: string): boolean
 end
 
 declare debug: {
@@ -3156,8 +3157,6 @@ type Region3 = any
 type UDim2 = any
 type CFrame = any
 type Faces = any
-type EnumItem = any
-type Enum = any
 type Enums = any
 type Rect = any
 type Vector3 = any
@@ -3340,17 +3339,6 @@ declare class Faces
 	Left: boolean
 	Right: boolean
 	Back: boolean
-end
-
-declare class EnumItem
-	function IsA(self, enumName: string): boolean
-	EnumType: Enum
-	Value: number
-	Name: string
-end
-
-declare class Enum
-	function GetEnumItems(self): { any }
 end
 
 declare class Enums

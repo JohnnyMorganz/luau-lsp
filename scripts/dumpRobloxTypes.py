@@ -45,6 +45,8 @@ TYPE_INDEX = {
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
+    "Enum", # redefined explicitly
+    "EnumItem", # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -185,6 +187,7 @@ declare class EnumItem
 	Name: string
 	Value: number
 	EnumType: Enum
+    function IsA(self, enumName: string): boolean
 end
 
 declare debug: {
