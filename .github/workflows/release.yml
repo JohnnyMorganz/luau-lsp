@@ -29,16 +29,13 @@ jobs:
         include:
           - os: windows-latest
             artifact-name: luau-lsp-win64
-            code-target: win32-x64
+            code-target: [win32-x64]
           - os: ubuntu-latest
             artifact-name: luau-lsp-linux
-            code-target: linux-x64
+            code-target: [linux-x64]
           - os: macos-latest
             artifact-name: luau-lsp-macos
-            code-target: darwin-x64
-          - os: macos-latest
-            artifact-name: luau-lsp-macos-aarch64
-            code-target: darwin-arm64 # TODO: we should try and merge this with above, because it runs the exact same steps
+            code-target: [darwin-x64, darwin-arm64]
 
     name: ${{ matrix.os }} - ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
