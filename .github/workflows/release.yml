@@ -108,7 +108,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: dist-${{ matrix.code-target }}
+          name: dist-${{ matrix.artifact-name }}
           path: ./dist
 
       - name: Upload Server to Release
