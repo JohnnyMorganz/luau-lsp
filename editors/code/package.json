@@ -83,7 +83,7 @@
                     "default": true
                 },
                 "luau-lsp.sourcemap.rojoProjectFile": {
-                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if #luau-lsp.sourcemap.autogenerate# is enabled",
+                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
                     "type": "string",
                     "default": "default.project.json"
                 },
@@ -111,7 +111,7 @@
                     }
                 },
                 "luau-lsp.diagnostics.includeDependents": {
-                    "markdownDescription": "Recompute diagnostics for dependents when a file changes. If #luau-lsp.diagnostics.workspace# is enabled, this is ignored",
+                    "markdownDescription": "Recompute diagnostics for dependents when a file changes. If `#luau-lsp.diagnostics.workspace#` is enabled, this is ignored",
                     "type": "boolean",
                     "default": true
                 },
