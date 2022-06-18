@@ -6,20 +6,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+
   dist:
+    needs: ["create-release"]
     strategy:
       matrix:
         include:
           - os: windows-latest
-            code-target: win32-x64
+            artifact-name: luau-lsp-win64
+            code-target: [win32-x64]
           - os: ubuntu-latest
-            code-target: linux-x64
+            artifact-name: luau-lsp-linux
+            code-target: [linux-x64]
           - os: macos-latest
-            code-target: darwin-x64
-          - os: macos-latest
-            code-target: darwin-arm64 # TODO: we should try and merge this with above, because it runs the exact same steps
+            artifact-name: luau-lsp-macos
+            code-target: [darwin-x64, darwin-arm64]
 
-    name: ${{ matrix.os }} - ${{ matrix.code-target }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -32,7 +50,7 @@ jobs:
         with:
           node-version: 14.x
 
-      - name: Dist
+      - name: Build Server
         run: |
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
@@ -42,92 +60,61 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: lipo -archs build/luau-lsp
 
-      - name: Move Build + Copy into Extension
-        if: matrix.os == 'windows-latest'
+      - name: Copy Build into Extension
         shell: bash
         run: |
           mkdir -p ./dist
-          mv build/Release/luau-lsp.exe ./dist/luau-lsp.exe
           mkdir -p editors/code/bin
-          cp ./dist/luau-lsp.exe editors/code/bin/server.exe
-          mv ./dist/luau-lsp.exe ./dist/luau-lsp-${{ matrix.code-target }}.exe
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp build/Release/luau-lsp.exe editors/code/bin/server.exe
+          else
+            cp build/luau-lsp editors/code/bin/server
+            chmod 777 editors/code/bin/server
+          fi
 
-      - name: Move Build
-        if: matrix.os != 'windows-latest'
+      - name: Create Release Archive
+        shell: bash
         run: |
-          mkdir -p ./dist
-          mv build/luau-lsp ./dist/luau-lsp
-          mkdir -p editors/code/bin
-          cp ./dist/luau-lsp editors/code/bin/server
-          chmod 777 editors/code/bin/server
-          mv ./dist/luau-lsp ./dist/luau-lsp-${{ matrix.code-target }}
+          mkdir staging
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp "build/Release/luau-lsp.exe" staging/
+            cd staging
+            7z a ../dist/server.zip *
+          else
+            cp "build/luau-lsp" staging/
+            cd staging
+            zip ../dist/server.zip *
+          fi
 
-      - name: Copy README and CHANGELOG
+      - name: Copy README, CHANGELOG, LICENSE
         shell: bash
         run: |
           rm -f editors/code/README.md
           cp README.md editors/code/README.md
           rm -f editors/code/CHANGELOG.md
           cp CHANGELOG.md editors/code/CHANGELOG.md
-
-      - run: npm ci
-        working-directory: editors/code
-
-      - name: Package Extension (release)
-        run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
-        working-directory: editors/code
+          rm -f editors/code/LICENSE.md
+          cp LICENSE.md editors/code/LICENSE
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: dist-${{ matrix.code-target }}
+          name: dist-${{ matrix.artifact-name }}
           path: ./dist
 
-  publish:
-    name: publish
-    runs-on: ubuntu-latest
-    needs: ["dist"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Nodejs
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-darwin-x64
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-linux-x64
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-win32-x64
-          path: dist
-      - uses: actions/download-artifact@v1
-        with:
-          name: dist-darwin-arm64
-          path: dist
-      - run: ls -al ./dist
-
-      - name: Publish Release
-        uses: ncipollo/release-action@v1
+      - name: Upload Server to Release
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # tag: ${{ github.event.inputs.version }}
-          # name: ${{ github.event.inputs.version }}
-          draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "dist/*"
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./dist/server.zip
+          asset_name: ${{ matrix.artifact-name }}.zip
+          asset_content_type: application/octet-stream
 
       - run: npm ci
         working-directory: editors/code
 
       - name: Publish Extension
         working-directory: editors/code
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/luau-lsp-*.vsix
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
