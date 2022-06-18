@@ -70,6 +70,7 @@ private:
     Response references(const lsp::ReferenceParams& params);
     Response documentSymbol(const lsp::DocumentSymbolParams& params);
     Response rename(const lsp::RenameParams& params);
+    Response semanticTokens(const lsp::SemanticTokensParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown(const id_type& id);

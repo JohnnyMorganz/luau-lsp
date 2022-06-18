@@ -132,6 +132,10 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     {
         return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
     }
+    else if (method == "textDocument/semanticTokens/full")
+    {
+        return semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
+    }
     else if (method == "textDocument/diagnostic")
     {
         return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));

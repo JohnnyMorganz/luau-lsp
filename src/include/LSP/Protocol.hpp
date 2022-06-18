@@ -323,6 +323,14 @@ struct WorkspaceCapabilities
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceCapabilities, workspaceFolders);
 
+struct SemanticTokensOptions
+{
+    SemanticTokensLegend legend;
+    bool range = false;
+    bool full = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SemanticTokensOptions, legend, range, full);
+
 struct ServerCapabilities
 {
     std::optional<TextDocumentSyncKind> textDocumentSync;
@@ -339,10 +347,11 @@ struct ServerCapabilities
     bool renameProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
+    std::optional<SemanticTokensOptions> semanticTokensProvider;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, renameProvider, diagnosticProvider, workspace);
+    documentLinkProvider, renameProvider, diagnosticProvider, workspace, semanticTokensProvider);
 
 struct InitializeResult
 {
@@ -984,5 +993,113 @@ struct ShowMessageParams
     std::string message;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ShowMessageParams, type, message);
+
+enum struct SemanticTokenTypes
+{
+    Namespace,
+    Type,
+    Class,
+    Enum,
+    Interface,
+    Struct,
+    TypeParameter,
+    Parameter,
+    Variable,
+    Property,
+    EnumMember,
+    Event,
+    Function,
+    Method,
+    Macro,
+    Keyword,
+    Modifier,
+    Comment,
+    String,
+    Number,
+    RegExp,
+    Operator,
+    Decorator,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenTypes, {
+                                                     {SemanticTokenTypes::Namespace, "namespace"},
+                                                     {SemanticTokenTypes::Type, "type"},
+                                                     {SemanticTokenTypes::Class, "class"},
+                                                     {SemanticTokenTypes::Enum, "enum"},
+                                                     {SemanticTokenTypes::Interface, "interface"},
+                                                     {SemanticTokenTypes::Struct, "struct"},
+                                                     {SemanticTokenTypes::TypeParameter, "typeParameter"},
+                                                     {SemanticTokenTypes::Parameter, "parameter"},
+                                                     {SemanticTokenTypes::Variable, "variable"},
+                                                     {SemanticTokenTypes::Property, "property"},
+                                                     {SemanticTokenTypes::EnumMember, "enumMember"},
+                                                     {SemanticTokenTypes::Event, "event"},
+                                                     {SemanticTokenTypes::Function, "function"},
+                                                     {SemanticTokenTypes::Method, "method"},
+                                                     {SemanticTokenTypes::Macro, "macro"},
+                                                     {SemanticTokenTypes::Keyword, "keyword"},
+                                                     {SemanticTokenTypes::Modifier, "modifier"},
+                                                     {SemanticTokenTypes::Comment, "comment"},
+                                                     {SemanticTokenTypes::String, "string"},
+                                                     {SemanticTokenTypes::Number, "number"},
+                                                     {SemanticTokenTypes::RegExp, "regexp"},
+                                                     {SemanticTokenTypes::Operator, "operator"},
+                                                     {SemanticTokenTypes::Decorator, "decorator"},
+                                                 });
+
+enum struct SemanticTokenModifiers
+{
+    Declaration,
+    Definition,
+    Readonly,
+    Static,
+    Deprecated,
+    Abstract,
+    Async,
+    Modification,
+    Documentation,
+    DefaultLibrary,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenModifiers, {
+                                                         {SemanticTokenModifiers::Declaration, "declaration"},
+                                                         {SemanticTokenModifiers::Definition, "definition"},
+                                                         {SemanticTokenModifiers::Readonly, "readonly"},
+                                                         {SemanticTokenModifiers::Static, "static"},
+                                                         {SemanticTokenModifiers::Deprecated, "deprecated"},
+                                                         {SemanticTokenModifiers::Abstract, "abstract"},
+                                                         {SemanticTokenModifiers::Async, "async"},
+                                                         {SemanticTokenModifiers::Modification, "modification"},
+                                                         {SemanticTokenModifiers::Documentation, "documentation"},
+                                                         {SemanticTokenModifiers::DefaultLibrary, "defaultLibrary"},
+                                                     });
+
+enum struct TokenFormat
+{
+    Relative,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(TokenFormat, {
+                                              {TokenFormat::Relative, "relative"},
+                                          });
+
+struct SemanticTokensLegend
+{
+    std::vector<std::string> tokenTypes;
+    std::vector<std::string> tokenModifiers;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SemanticTokensLegend, tokenTypes, tokenModifiers);
+
+struct SemanticTokensParams
+{
+    TextDocumentIdentifier textDocument;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SemanticTokensParams, textDocument);
+
+struct SemanticTokens
+{
+    std::optional<std::string> resultId;
+    std::vector<size_t> data;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SemanticTokens, resultId, data);
 
 } // namespace lsp
