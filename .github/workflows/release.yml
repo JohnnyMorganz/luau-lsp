@@ -94,17 +94,6 @@ jobs:
           rm -f editors/code/CHANGELOG.md
           cp CHANGELOG.md editors/code/CHANGELOG.md
 
-      - run: npm ci
-        working-directory: editors/code
-
-      - name: Package Extension
-        working-directory: editors/code
-        run: npx vsce package -o "../../dist/extension.vsix" --target ${{ join(matrix.code-target, ' ') }}
-
-      # - name: Publish Extension
-      #   working-directory: editors/code
-      #   run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/extension.vsix
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
@@ -121,12 +110,9 @@ jobs:
           asset_name: ${{ matrix.artifact-name }}.zip
           asset_content_type: application/octet-stream
 
-      - name: Upload Extension to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./dist/extension.vsix
-          asset_name: ${{ matrix.artifact-name }}.vsix
-          asset_content_type: application/octet-stream
+      - run: npm ci
+        working-directory: editors/code
+
+      - name: Publish Extension
+        working-directory: editors/code
+        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
