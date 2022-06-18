@@ -39,7 +39,7 @@ jobs:
           - os: ubuntu-latest
             test-path: ./build/luau-lsp-tests
 
-    name: Run Tests
+    name: Run Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
