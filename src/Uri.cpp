@@ -84,7 +84,35 @@ static std::optional<std::string> encode(char c)
     }
 }
 
-static std::string encodeURIComponent(std::string uriComponent, bool allowSlash = false)
+// https://web.archive.org/web/20130128185825/http://es5.github.com:80/#x15.1.3.4
+// https://stackoverflow.com/a/17708801
+static std::string encodeURIComponent(const std::string& value)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (auto i = value.begin(), n = value.end(); i != n; ++i)
+    {
+        auto c = (*i);
+
+        // Keep alphanumeric and other accepted characters intact
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << int((unsigned char)c);
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+
+static std::string encodeURIComponentFast(const std::string& uriComponent, bool allowSlash = false)
 {
     std::optional<std::string> res = std::nullopt;
     size_t nativeEncodePos = std::string::npos;
@@ -94,12 +122,12 @@ static std::string encodeURIComponent(std::string uriComponent, bool allowSlash 
         auto code = uriComponent.at(pos);
 
         // unreserved characters: https://tools.ietf.org/html/rfc3986#section-2.3
-        if (isalpha(code) || isdigit(code) || code == '-' || code == '.' || code == '_' || code == '~' || (allowSlash && code == '/'))
+        if (iswalpha(code) || iswdigit(code) || code == '-' || code == '.' || code == '_' || code == '~' || (allowSlash && code == '/'))
         {
             // check if we are delaying native encode
             if (nativeEncodePos != std::string::npos)
             {
-                *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos));
+                *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos - nativeEncodePos));
                 nativeEncodePos = std::string::npos;
             }
             // check if we write into a new string (by default we try to return the param)
@@ -124,7 +152,7 @@ static std::string encodeURIComponent(std::string uriComponent, bool allowSlash 
                 // check if we are delaying native encode
                 if (nativeEncodePos != std::string::npos)
                 {
-                    *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos));
+                    *res += encodeURIComponent(uriComponent.substr(nativeEncodePos, pos - nativeEncodePos));
                     nativeEncodePos = std::string::npos;
                 }
 
@@ -141,10 +169,35 @@ static std::string encodeURIComponent(std::string uriComponent, bool allowSlash 
 
     if (nativeEncodePos != std::string::npos)
     {
-        *res += encodeURIComponent(uriComponent.substr(nativeEncodePos), allowSlash);
+        *res += encodeURIComponent(uriComponent.substr(nativeEncodePos));
     }
 
     return res.has_value() ? res.value() : uriComponent;
+}
+
+static std::string encodeURIComponentMinimal(const std::string& path, bool = false)
+{
+    std::optional<std::string> res;
+    for (size_t pos = 0; pos < path.length(); pos++)
+    {
+        auto ch = path[pos];
+        if (ch == '#' || ch == '?')
+        {
+            if (!res.has_value())
+            {
+                res = path.substr(0, pos);
+            }
+            *res += *encode(ch);
+        }
+        else
+        {
+            if (res.has_value())
+            {
+                *res += path[pos];
+            }
+        }
+    }
+    return res.has_value() ? *res : path;
 }
 
 Uri Uri::parse(const std::string& value)
@@ -165,13 +218,44 @@ Uri Uri::parse(const std::string& value)
 
 Uri Uri::file(const std::filesystem::path& fsPath)
 {
-    return Uri("file", "", fsPath.generic_string(), "", "");
-}
+    std::string authority = "";
+    auto path = fsPath.string();
 
+// normalize to fwd-slashes on windows,
+// on other systems bwd-slashes are valid
+// filename character, eg /f\oo/ba\r.txt
+#ifdef _WIN32
+    std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+
+    // check for authority as used in UNC shares
+    // or use the path as given
+    if (path.length() >= 2 && path[0] == '/' && path[1] == '/')
+    {
+        auto idx = path.find('/', 2);
+        if (idx == std::string::npos)
+        {
+            authority = path.substr(2);
+            path = '/';
+        }
+        else
+        {
+            authority = path.substr(2, idx - 2);
+            auto s = path.substr(idx);
+            path = !s.empty() ? s : "/";
+        }
+    }
+
+    return Uri("file", authority, path, "", "");
+}
 
 std::filesystem::path Uri::fsPath() const
 {
-    if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
+    if (!authority.empty() && path.length() > 1 && scheme == "file")
+    {
+        return "//" + authority + path;
+    }
+    else if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
     {
         return path.substr(1);
     }
@@ -182,8 +266,9 @@ std::filesystem::path Uri::fsPath() const
 }
 
 // Encodes the Uri into a string representation
-std::string Uri::toString() const
+std::string Uri::toStringUncached(bool skipEncoding) const
 {
+    auto encoder = !skipEncoding ? encodeURIComponentFast : encodeURIComponentMinimal;
     std::string res;
     if (!scheme.empty())
     {
@@ -207,14 +292,14 @@ std::string Uri::toString() const
             idx = userinfo.find(':');
             if (idx == std::string::npos)
             {
-                res += encodeURIComponent(userinfo, false);
+                res += encoder(userinfo, false);
             }
             else
             {
                 // <user>:<pass>@<auth>
-                res += encodeURIComponent(userinfo.substr(0, idx), false);
+                res += encoder(userinfo.substr(0, idx), false);
                 res += ':';
-                res += encodeURIComponent(userinfo.substr(idx + 1), false);
+                res += encoder(userinfo.substr(idx + 1), false);
             }
             res += '@';
         }
@@ -222,12 +307,12 @@ std::string Uri::toString() const
         idx = mutAuthority.find(':');
         if (idx == std::string::npos)
         {
-            res += encodeURIComponent(mutAuthority, false);
+            res += encoder(mutAuthority, false);
         }
         else
         {
             // <auth>:<port>
-            res += encodeURIComponent(mutAuthority.substr(0, idx), false);
+            res += encoder(mutAuthority.substr(0, idx), false);
             res += mutAuthority.substr(idx);
         }
     }
@@ -252,19 +337,33 @@ std::string Uri::toString() const
             }
         }
         // encode the rest of the path
-        res += encodeURIComponent(mutPath, true);
+        res += encoder(mutPath, true);
     }
     if (!query.empty())
     {
         res += '?';
-        res += encodeURIComponent(query, false);
+        res += encoder(query, false);
     }
     if (!fragment.empty())
     {
         res += '#';
-        res += encodeURIComponent(fragment, false);
+        res += !skipEncoding ? encodeURIComponentFast(fragment, false) : fragment;
     }
     return res;
+}
+
+std::string Uri::toString(bool skipEncoding) const
+{
+    if (skipEncoding)
+    {
+        return toStringUncached(skipEncoding);
+    }
+    else
+    {
+        if (!cachedToString.empty())
+            return cachedToString;
+        return cachedToString = toStringUncached(skipEncoding);
+    }
 }
 
 void from_json(const json& j, Uri& u)
