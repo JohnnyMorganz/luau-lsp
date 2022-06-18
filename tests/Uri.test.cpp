@@ -50,7 +50,7 @@ TEST_CASE("file#fsPath (win-special)")
 #ifndef _WIN32
     CHECK_EQ(Uri::file("c:/win/path").fsPath(), "c:/win/path");
     CHECK_EQ(Uri::file("c:/win/path/").fsPath(), "c:/win/path/");
-    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "c:/win/path");
+    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "C:/win/path"); // DEVIATION: c:/win/path
     CHECK_EQ(Uri::file("/c:/win/path").fsPath(), "c:/win/path");
     CHECK_EQ(Uri::file("./c/win/path").fsPath(), "/./c/win/path");
 #endif
