@@ -104,9 +104,9 @@ jobs:
         working-directory: editors/code
         run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
 
-      - name: Publish Extension
-        working-directory: editors/code
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/luau-lsp-*.vsix
+      # - name: Publish Extension
+      #   working-directory: editors/code
+      #   run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ../../dist/luau-lsp-*.vsix
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
