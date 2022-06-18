@@ -99,7 +99,7 @@ jobs:
 
       - name: Package Extension
         working-directory: editors/code
-        run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+        run: npx vsce package -o "../../dist/luau-lsp-${{ matrix.code-target }}.vsix" --target ${{ join(matrix.code-target, ' ') }}
 
       # - name: Publish Extension
       #   working-directory: editors/code
