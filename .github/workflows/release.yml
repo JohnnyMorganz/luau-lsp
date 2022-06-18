@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir -p ./dist
           mkdir -p editors/code/bin
-          if [ "${{ matrix.host }}" = "windows" ]; then
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cp build/Release/luau-lsp.exe editors/code/bin/server.exe
           else
             cp build/luau-lsp editors/code/bin/server
@@ -76,7 +76,7 @@ jobs:
         shell: bash
         run: |
           mkdir staging
-          if [ "${{ matrix.host }}" = "windows" ]; then
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cp "build/Release/luau-lsp.exe" staging/
             cd staging
             7z a ../dist/server.zip *
