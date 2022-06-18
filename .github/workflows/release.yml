@@ -86,13 +86,15 @@ jobs:
             zip ../dist/server.zip *
           fi
 
-      - name: Copy README and CHANGELOG
+      - name: Copy README, CHANGELOG, LICENSE
         shell: bash
         run: |
           rm -f editors/code/README.md
           cp README.md editors/code/README.md
           rm -f editors/code/CHANGELOG.md
           cp CHANGELOG.md editors/code/CHANGELOG.md
+          rm -f editors/code/LICENSE.md
+          cp LICENSE.md editors/code/LICENSE
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
