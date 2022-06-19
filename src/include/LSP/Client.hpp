@@ -16,7 +16,7 @@ public:
     lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
     /// A registered definitions file passed by the client
-    std::optional<std::filesystem::path> definitionsFile = std::nullopt;
+    std::vector<std::filesystem::path> definitionsFiles;
     /// A registered documentation file passed by the client
     std::optional<std::filesystem::path> documentationFile = std::nullopt;
     /// Parsed documentation database

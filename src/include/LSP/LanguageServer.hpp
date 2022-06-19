@@ -24,10 +24,10 @@ public:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
 
-    LanguageServer(std::optional<std::filesystem::path> definitionsFile, std::optional<std::filesystem::path> documentationFile)
+    LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
         : client(std::make_shared<Client>())
     {
-        client->definitionsFile = definitionsFile;
+        client->definitionsFiles = definitionsFiles;
         client->documentationFile = documentationFile;
         parseDocumentation(documentationFile, client->documentation, client);
         nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
@@ -61,16 +61,14 @@ private:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
 
-    // TODO: can't type this as lsp::hover as it can return null
-    Response hover(const lsp::HoverParams& params);
-    // TODO: can't type this as lsp::SignatureHelp as it can return null
-    Response signatureHelp(const lsp::SignatureHelpParams& params);
-    Response gotoDefinition(const lsp::DefinitionParams& params);
-    Response gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
-    Response references(const lsp::ReferenceParams& params);
-    Response documentSymbol(const lsp::DocumentSymbolParams& params);
-    Response rename(const lsp::RenameParams& params);
-    Response semanticTokens(const lsp::SemanticTokensParams& params);
+    std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
+    std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
+    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params);
+    std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
+    lsp::ReferenceResult references(const lsp::ReferenceParams& params);
+    std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
+    lsp::RenameResult rename(const lsp::RenameParams& params);
+    std::optional<std::vector<size_t>> semanticTokens(const lsp::SemanticTokensParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown(const id_type& id);

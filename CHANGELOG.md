@@ -10,15 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added predicate logic to `EnumItem:IsA("Type")` so it will now narrow the type of an EnumItem when used as a predicate
 - Added setting to configure whether all Luau FFlags are enabled by default. This can be configured using `luau-lsp.fflags.enableByDefault` or `--no-flags-enabled` command line option. Currently, all FFlags are enabled by default, but you can manually sync/override them.
+- Added support for adding extra definition files to load using `luau-lsp.types.definitionFiles`
+- Roblox definitions can now be disabled using `luau-lsp.types.roblox`
+- Added label details to completion items
 
 ### Changed
 
 - Sync to upstream Luau 0.532
 - Updated to improve table type stringification, with an appropriate newline placed in between braces. This should result in better readable table types when hovering
+- Upgraded vscode language client to 8.0, with support for LSP Specification 3.17
+- VSCode Client now makes use of diagnostics pull model
 
 ### Fixed
 
 - Fixed equality comparison between enum items raising a type error
+- Fixed autocompletion of properties with spaces not correctly being converted into a `["property"]` index leading to a type error
+- Fixed function stringification when using an expression index call such as `data["property"]()`
 
 ## [1.4.0] - 2022-06-12
 

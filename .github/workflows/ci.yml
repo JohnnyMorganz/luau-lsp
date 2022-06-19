@@ -14,9 +14,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows, ubuntu, macos]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     name: Build Server (${{matrix.os}})
-    runs-on: ${{matrix.os}}-latest
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -30,8 +30,17 @@ jobs:
           cmake --build . --target luau-lsp
 
   run_tests:
-    name: Run Tests
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            test-path: ./build/Debug/luau-lsp-tests
+          - os: ubuntu-latest
+            test-path: ./build/luau-lsp-tests
+
+    name: Run Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -45,10 +54,11 @@ jobs:
           cmake --build . --target luau-lsp-tests
 
       - name: Run Tests
-        run: ./build/luau-lsp-tests
+        run: ${{ matrix.test-path }}
 
   lint_extension:
-    runs-on: ubuntu-18.04
+    name: Lint Extension
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Setup node
@@ -67,8 +77,9 @@ jobs:
 
   build_extension:
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-18.04, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:

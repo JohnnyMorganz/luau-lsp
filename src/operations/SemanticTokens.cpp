@@ -173,11 +173,8 @@ std::optional<std::vector<size_t>> WorkspaceFolder::semanticTokens(const lsp::Se
     return packTokens(visitor.tokens);
 }
 
-Response LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
+std::optional<std::vector<size_t>> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->semanticTokens(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->semanticTokens(params);
 }

@@ -40,9 +40,11 @@ public:
     std::string query;
     std::string fragment;
 
+public:
     Uri() {}
 
-    Uri(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query, const std::string& fragment)
+    Uri(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query = "",
+        const std::string& fragment = "")
         : scheme(scheme)
         , authority(authority)
         , path(_referenceResolution(scheme, path))
@@ -72,8 +74,13 @@ public:
 
     std::filesystem::path fsPath() const;
 
+private:
+    mutable std::string cachedToString;
+    std::string toStringUncached(bool skipEncoding = false) const;
+
+public:
     // Encodes the Uri into a string representation
-    std::string toString() const;
+    std::string toString(bool skipEncoding = false) const;
 };
 
 void from_json(const json& j, Uri& u);

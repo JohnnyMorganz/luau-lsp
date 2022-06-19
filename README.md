@@ -6,7 +6,19 @@ An implementation of a language server for the [Luau](https://github.com/Roblox/
 
 Install the extension from the marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
 
-The extension will automatically populate the latest API types and documentation.
+### For General Users
+
+The langauge server should be immediately usable for general Luau code after installation.
+String require support is provided for relative module paths, using `require("../module")`.
+
+Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`.
+
+If there are specific features you require in the language server for your use case, feel free to open an issue.
+
+### For Rojo Users
+
+Rojo instance tree and requiring support is provided by default, and the language server should be able to directly emulate Studio.
+The extension will automatically populate the latest API types and documentation (which can be disabled by configuring `luau-lsp.types.roblox`).
 
 To resolve your instance tree and provide module resolution, the language server uses Rojo sourcemaps.
 The language server will automatically create a `sourcemap.json` in your workspace root on startup and whenever files are added/created/renamed.
@@ -15,6 +27,13 @@ It does this by running the `rojo sourcemap` command, hence Rojo 7.1.0+ must be 
 It is recommend to `.gitignore` the `sourcemap.json` file. In future, the language server will generate the file internally.
 
 By default we generate a sourcemap for a `default.project.json` project file. The name can be changed in extension settings, as well as whether non-script instances are included in the sourcemap (included by default). Autogeneration of sourcemaps can also be toggled completely on/off in settings - the server will instead just listen to manual changes to `sourcemap.json` files.
+
+## Standalone
+
+The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI, with full Rojo resolution and API types support.
+The entry point for the analysis tool is `luau-lsp analyze`.
+
+Install the binary and run `luau-lsp --help` for more information.
 
 ## Design Goals
 
@@ -26,17 +45,8 @@ We could also potentially take it a step forward, allowing the server to be used
 
 If you use Luau in a different environment and are interested in using the language server, please get in touch!
 
-## Standalone
-
-The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI, with full Rojo resolution and API types support.
-The entry point for the analysis tool is `luau-lsp analyze`.
-
-Install the binary and run `luau-lsp --help` for more information.
-
 ## Supported Features
 
-- [x] Rojo Files Resolution
-- [x] API Type Definitions
 - [x] Diagnostics (incl. type errors)
 - [x] Autocompletion
 - [x] Hover

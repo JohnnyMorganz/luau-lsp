@@ -122,6 +122,19 @@
                     "markdownDescription": "Compute diagnostics for the whole workspace",
                     "type": "boolean",
                     "default": false
+                },
+                "luau-lsp.types.definitionFiles": {
+                    "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "luau-lsp.types.roblox": {
+                    "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }
@@ -145,7 +158,7 @@
         "@types/vscode": "^1.67.0",
         "@typescript-eslint/eslint-plugin": "^5.21.0",
         "@typescript-eslint/parser": "^5.21.0",
-        "@vscode/test-electron": "^2.1.3",
+        "@vscode/test-electron": "^2.1.4",
         "eslint": "^8.14.0",
         "glob": "^8.0.1",
         "mocha": "^9.2.2",
@@ -157,6 +170,7 @@
     },
     "dependencies": {
         "node-fetch": "^3.2.4",
-        "vscode-languageclient": "^7.0.0"
+        "vscode-languageclient": "^8.0.1",
+        "vscode-uri": "^3.0.3"
     }
 }

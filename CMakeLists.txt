@@ -14,6 +14,7 @@ set(SOURCES
     src/DocumentationParser.cpp
     src/LuauExt.cpp
     src/Utils.cpp
+    src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
     src/operations/SemanticTokens.cpp
 )
@@ -34,6 +35,7 @@ endif()
 add_executable(luau-lsp-tests
     tests/main.cpp
     tests/TextDocument.test.cpp
+    tests/Uri.test.cpp
     tests/Utils.test.cpp
     tests/WorkspaceFileResolver.test.cpp
     ${SOURCES}

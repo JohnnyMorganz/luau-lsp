@@ -8,6 +8,9 @@ import {
   LanguageClientOptions,
 } from "vscode-languageclient/node";
 import { spawn } from "child_process";
+import { Utils as UriUtils } from "vscode-uri";
+
+let client: LanguageClient;
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
@@ -89,41 +92,61 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       return downloadApiDefinitions(context);
     }
   } catch (err) {
-    vscode.window.showErrorMessage(
+    vscode.window.showWarningMessage(
       "Failed to retrieve API information: " + err
     );
   }
 };
 
 const getFFlags = async () => {
-  try {
-    return vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Window,
-        title: "Luau: Fetching FFlags",
-        cancellable: false,
-      },
-      () =>
-        fetch(CURRENT_FFLAGS)
-          .then((r) => r.json() as Promise<FFlagsEndpoint>)
-          .then((r) => r.applicationSettings)
-    );
-  } catch (err) {
-    vscode.window.showErrorMessage(
-      "Failed to fetch current Luau FFlags: " + err
-    );
-  }
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Window,
+      title: "Luau: Fetching FFlags",
+      cancellable: false,
+    },
+    () =>
+      fetch(CURRENT_FFLAGS)
+        .then((r) => r.json() as Promise<FFlagsEndpoint>)
+        .then((r) => r.applicationSettings)
+  );
 };
 
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
-  await updateApiInfo(context);
-  const args = [
-    `lsp`,
-    `--definitions=${globalTypesUri(context).fsPath}`,
-    `--docs=${apiDocsUri(context).fsPath}`,
-  ];
+  const args = ["lsp"];
+
+  // Load roblox type definitions
+  const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
+  if (typesConfig.get<boolean>("roblox")) {
+    await updateApiInfo(context);
+    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
+    args.push(`--docs=${apiDocsUri(context).fsPath}`);
+  }
+
+  // Load extra type definitions
+  const definitionFiles = typesConfig.get<string[]>("definitionFiles");
+  if (definitionFiles) {
+    for (const definitionPath of definitionFiles) {
+      let uri;
+      if (vscode.workspace.workspaceFolders) {
+        uri = UriUtils.resolvePath(
+          vscode.workspace.workspaceFolders[0].uri,
+          definitionPath
+        );
+      } else {
+        uri = vscode.Uri.file(definitionPath);
+      }
+      if (await exists(uri)) {
+        args.push(`--definitions=${uri.fsPath}`);
+      } else {
+        vscode.window.showWarningMessage(
+          `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`
+        );
+      }
+    }
+  }
 
   // Handle FFlags
   const fflags: FFlags = {};
@@ -135,13 +158,19 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Sync FFlags with upstream
   if (fflagsConfig.get<boolean>("sync")) {
-    const currentFlags = await getFFlags();
-    if (currentFlags) {
-      for (const [name, value] of Object.entries(currentFlags)) {
-        if (name.startsWith("FFlagLuau")) {
-          fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+    try {
+      const currentFlags = await getFFlags();
+      if (currentFlags) {
+        for (const [name, value] of Object.entries(currentFlags)) {
+          if (name.startsWith("FFlagLuau")) {
+            fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+          }
         }
       }
+    } catch (err) {
+      vscode.window.showWarningMessage(
+        "Failed to fetch current Luau FFlags: " + err
+      );
     }
   }
 
@@ -190,20 +219,13 @@ export async function activate(context: vscode.ExtensionContext) {
     diagnosticCollectionName: "luau",
   };
 
-  const client = new LanguageClient(
-    "luau",
-    "Luau LSP",
-    serverOptions,
-    clientOptions
-  );
-
-  client.onReady().then(() => {
-    client.onNotification("$/command", (params) => {
-      vscode.commands.executeCommand(params.command, params.data);
-    });
-  });
+  client = new LanguageClient("luau", "Luau LSP", serverOptions, clientOptions);
 
   // Register commands
+  client.onNotification("$/command", (params) => {
+    vscode.commands.executeCommand(params.command, params.data);
+  });
+
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
       await downloadApiDefinitions(context);
@@ -314,6 +336,17 @@ export async function activate(context: vscode.ExtensionContext) {
               vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
           });
+      } else if (e.affectsConfiguration("luau-lsp.types")) {
+        vscode.window
+          .showInformationMessage(
+            "Luau type definitions have been changed, reload your workspace for this to take effect.",
+            "Reload Workspace"
+          )
+          .then((command) => {
+            if (command === "Reload Workspace") {
+              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            }
+          });
       }
     })
   );
@@ -325,7 +358,11 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   console.log("LSP Setup");
-  context.subscriptions.push(client.start());
+  await client.start();
 }
 
-export function deactivate() {}
+export async function deactivate() {
+  if (client) {
+    await client.stop();
+  }
+}
