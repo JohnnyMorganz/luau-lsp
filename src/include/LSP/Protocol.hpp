@@ -112,6 +112,15 @@ enum struct ErrorCode
     RequestCancelled = -32800,
 };
 
+enum struct PositionEncodingKind
+{
+    UTF8,
+    UTF16,
+    UTF32
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    PositionEncodingKind, {{PositionEncodingKind::UTF8, "utf-8"}, {PositionEncodingKind::UTF16, "utf-16"}, {PositionEncodingKind::UTF32, "utf-32"}});
+
 struct DiagnosticClientCapabilities
 {
     bool dynamicRegistration = false;
@@ -199,21 +208,56 @@ struct ClientWorkspaceCapabilities
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
     ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, diagnostics);
 
+struct ClientGeneralCapabilities
+{
+    /**
+     * The position encodings supported by the client. Client and server
+     * have to agree on the same position encoding to ensure that offsets
+     * (e.g. character position in a line) are interpreted the same on both
+     * side.
+     *
+     * To keep the protocol backwards compatible the following applies: if
+     * the value 'utf-16' is missing from the array of position encodings
+     * servers can assume that the client supports UTF-16. UTF-16 is
+     * therefore a mandatory encoding.
+     *
+     * If omitted it defaults to ['utf-16'].
+     *
+     * Implementation considerations: since the conversion from one encoding
+     * into another requires the content of the file / line the conversion
+     * is best done where the file is read which is usually on the server
+     * side.
+     *
+     * @since 3.17.0
+     */
+    std::optional<std::vector<PositionEncodingKind>> positionEncodings;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientGeneralCapabilities, positionEncodings);
+
 struct ClientCapabilities
 {
     /**
      * Text document specific client capabilities.
      */
     std::optional<TextDocumentClientCapabilities> textDocument;
+
     /**
      * Workspace specific client capabilities.
      */
     std::optional<ClientWorkspaceCapabilities> workspace;
+
+    /**
+     * General client capabilities.
+     *
+     * @since 3.16.0
+     */
+    std::optional<ClientGeneralCapabilities> general;
+
     // TODO
     // notebook
     // window
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCapabilities, textDocument, workspace);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCapabilities, textDocument, workspace, general);
 
 struct WorkspaceFolder
 {
@@ -325,6 +369,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceCapabilities, workspace
 
 struct ServerCapabilities
 {
+    PositionEncodingKind positionEncoding = PositionEncodingKind::UTF16;
     std::optional<TextDocumentSyncKind> textDocumentSync;
     std::optional<CompletionOptions> completionProvider;
     bool hoverProvider = false;
@@ -340,9 +385,9 @@ struct ServerCapabilities
     std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ServerCapabilities, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
-    declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, renameProvider, diagnosticProvider, workspace);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider,
+    signatureHelpProvider, declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider,
+    documentSymbolProvider, documentLinkProvider, renameProvider, diagnosticProvider, workspace);
 
 struct InitializeResult
 {
