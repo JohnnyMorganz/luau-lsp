@@ -10,6 +10,8 @@ import {
 import { spawn } from "child_process";
 import { Utils as UriUtils } from "vscode-uri";
 
+let client: LanguageClient;
+
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
 const GLOBAL_TYPES_DEFINITION =
@@ -217,20 +219,13 @@ export async function activate(context: vscode.ExtensionContext) {
     diagnosticCollectionName: "luau",
   };
 
-  const client = new LanguageClient(
-    "luau",
-    "Luau LSP",
-    serverOptions,
-    clientOptions
-  );
-
-  client.onReady().then(() => {
-    client.onNotification("$/command", (params) => {
-      vscode.commands.executeCommand(params.command, params.data);
-    });
-  });
+  client = new LanguageClient("luau", "Luau LSP", serverOptions, clientOptions);
 
   // Register commands
+  client.onNotification("$/command", (params) => {
+    vscode.commands.executeCommand(params.command, params.data);
+  });
+
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
       await downloadApiDefinitions(context);
@@ -363,7 +358,11 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   console.log("LSP Setup");
-  context.subscriptions.push(client.start());
+  await client.start();
 }
 
-export function deactivate() {}
+export async function deactivate() {
+  if (client) {
+    await client.stop();
+  }
+}
