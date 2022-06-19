@@ -210,6 +210,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     if (comma)
                         detail += ", ";
                     detail += arg.has_value() ? arg->name : "_";
+                    comma = true;
                 }
                 detail += ")";
                 item.labelDetails = {detail};

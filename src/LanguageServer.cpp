@@ -552,7 +552,7 @@ std::vector<lsp::DocumentLink> LanguageServer::documentLink(const lsp::DocumentL
 std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params)
+    return workspace->hover(params);
 }
 
 std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
