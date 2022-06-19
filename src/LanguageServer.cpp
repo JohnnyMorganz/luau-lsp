@@ -531,12 +531,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     }
 }
 
-std::vector<lsp::CompletionItem> LanguageServer::completion(const lsp::CompletionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->completion(params);
-}
-
 std::vector<lsp::DocumentLink> LanguageServer::documentLink(const lsp::DocumentLinkParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
