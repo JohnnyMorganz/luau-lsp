@@ -90,30 +90,24 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       return downloadApiDefinitions(context);
     }
   } catch (err) {
-    vscode.window.showErrorMessage(
+    vscode.window.showWarningMessage(
       "Failed to retrieve API information: " + err
     );
   }
 };
 
 const getFFlags = async () => {
-  try {
-    return vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Window,
-        title: "Luau: Fetching FFlags",
-        cancellable: false,
-      },
-      () =>
-        fetch(CURRENT_FFLAGS)
-          .then((r) => r.json() as Promise<FFlagsEndpoint>)
-          .then((r) => r.applicationSettings)
-    );
-  } catch (err) {
-    vscode.window.showErrorMessage(
-      "Failed to fetch current Luau FFlags: " + err
-    );
-  }
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Window,
+      title: "Luau: Fetching FFlags",
+      cancellable: false,
+    },
+    () =>
+      fetch(CURRENT_FFLAGS)
+        .then((r) => r.json() as Promise<FFlagsEndpoint>)
+        .then((r) => r.applicationSettings)
+  );
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -162,13 +156,19 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Sync FFlags with upstream
   if (fflagsConfig.get<boolean>("sync")) {
-    const currentFlags = await getFFlags();
-    if (currentFlags) {
-      for (const [name, value] of Object.entries(currentFlags)) {
-        if (name.startsWith("FFlagLuau")) {
-          fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+    try {
+      const currentFlags = await getFFlags();
+      if (currentFlags) {
+        for (const [name, value] of Object.entries(currentFlags)) {
+          if (name.startsWith("FFlagLuau")) {
+            fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+          }
         }
       }
+    } catch (err) {
+      vscode.window.showWarningMessage(
+        "Failed to fetch current Luau FFlags: " + err
+      );
     }
   }
 
