@@ -24,10 +24,10 @@ public:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
 
-    LanguageServer(std::optional<std::filesystem::path> definitionsFile, std::optional<std::filesystem::path> documentationFile)
+    LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
         : client(std::make_shared<Client>())
     {
-        client->definitionsFile = definitionsFile;
+        client->definitionsFiles = definitionsFiles;
         client->documentationFile = documentationFile;
         parseDocumentation(documentationFile, client->documentation, client);
         nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());

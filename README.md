@@ -11,12 +11,14 @@ Install the extension from the marketplace: https://marketplace.visualstudio.com
 The langauge server should be immediately usable for general Luau code after installation.
 String require support is provided for relative module paths, using `require("../module")`.
 
+Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`.
+
 If there are specific features you require in the language server for your use case, feel free to open an issue.
 
 ### For Rojo Users
 
 Rojo instance tree and requiring support is provided by default, and the language server should be able to directly emulate Studio.
-The extension will automatically populate the latest API types and documentation.
+The extension will automatically populate the latest API types and documentation (which can be disabled by configuring `luau-lsp.types.roblox`).
 
 To resolve your instance tree and provide module resolution, the language server uses Rojo sourcemaps.
 The language server will automatically create a `sourcemap.json` in your workspace root on startup and whenever files are added/created/renamed.
