@@ -8,7 +8,9 @@
 
 using json = nlohmann::json;
 
-// We create our own macro with special to_json support for std::optional
+// We create our own macro with special to_json support for std::optional / nullptr
+// Note: instead of converting nullptr to a JSON null, this macro omits the field completely (similar to undefined)
+// WARNING: explicit nulls will be lost! If nulls are necessary (and no undefineds), then use the standard macro
 #define NLOHMANN_JSON_TO_OPTIONAL(v1) \
     { \
         json val = nlohmann_json_t.v1; \
