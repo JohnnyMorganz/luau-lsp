@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added setting to configure whether all Luau FFlags are enabled by default. This can be configured using `luau-lsp.fflags.enableByDefault` or `--no-flags-enabled` command line option. Currently, all FFlags are enabled by default, but you can manually sync/override them.
 - Added support for adding extra definition files to load using `luau-lsp.types.definitionFiles`
 - Roblox definitions can now be disabled using `luau-lsp.types.roblox`
+- Added label details to completion items
 
 ### Changed
 
@@ -21,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed equality comparison between enum items raising a type error
+- Fixed autocompletion of properties with spaces not correctly being converted into a `["property"]` index leading to a type error
 
 ## [1.4.0] - 2022-06-12
 

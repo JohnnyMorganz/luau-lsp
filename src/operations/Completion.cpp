@@ -1,6 +1,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/Protocol.hpp"
+#include "LSP/LuauExt.hpp"
 
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
 {
@@ -155,15 +156,39 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             break;
         }
 
+        // Handle if name is a property with spaces
+        if (entry.kind == Luau::AutocompleteEntryKind::Property && name.find(" ") != std::string::npos)
+        {
+            auto lastAst = result.ancestry.back();
+            if (auto indexName = lastAst->as<Luau::AstExprIndexName>())
+            {
+                lsp::TextEdit textEdit;
+                textEdit.newText = "[\"" + name + "\"]";
+                textEdit.range = {convertPosition(indexName->indexLocation.begin), convertPosition(indexName->indexLocation.end)};
+                item.textEdit = textEdit;
+
+                // For some reason, the above text edit can't handle replacing the index operator
+                // Hence we remove it using an additional text edit
+                item.additionalTextEdits.emplace_back(
+                    lsp::TextEdit{{convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
+            }
+        }
+
         // Handle parentheses suggestions
         if (entry.parens == Luau::ParenthesesRecommendation::CursorAfter)
         {
-            item.insertText = name + "()$0";
+            if (item.textEdit)
+                item.textEdit->newText += "()$0";
+            else
+                item.insertText = name + "()$0";
             item.insertTextFormat = lsp::InsertTextFormat::Snippet;
         }
         else if (entry.parens == Luau::ParenthesesRecommendation::CursorInside)
         {
-            item.insertText = name + "($1)$0";
+            if (item.textEdit)
+                item.textEdit->newText += "($1)$0";
+            else
+                item.insertText = name + "($1)$0";
             item.insertTextFormat = lsp::InsertTextFormat::Snippet;
             // Trigger Signature Help
             item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
@@ -176,6 +201,18 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             if (auto ftv = Luau::get<Luau::FunctionTypeVar>(id))
             {
                 item.kind = lsp::CompletionItemKind::Function;
+
+                // Add label details
+                std::string detail = "(";
+                bool comma = false;
+                for (auto arg : ftv->argNames)
+                {
+                    if (comma)
+                        detail += ", ";
+                    detail += arg.has_value() ? arg->name : "_";
+                }
+                detail += ")";
+                item.labelDetails = {detail};
             }
             else if (auto ttv = Luau::get<Luau::TableTypeVar>(id))
             {

@@ -759,7 +759,7 @@ struct CompletionItem
     std::optional<InsertTextMode> insertTextMode;
     std::optional<TextEdit> textEdit;
     std::optional<std::string> textEditString;
-    std::optional<std::vector<TextEdit>> additionalTextEdits;
+    std::vector<TextEdit> additionalTextEdits;
     std::optional<std::vector<std::string>> commitCharacters;
     std::optional<Command> command;
     // TODO: data?
