@@ -139,11 +139,8 @@ std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(
     return visitor.symbols;
 }
 
-Response LanguageServer::documentSymbol(const lsp::DocumentSymbolParams& params)
+std::optional<std::vector<lsp::DocumentSymbol>> LanguageServer::documentSymbol(const lsp::DocumentSymbolParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->documentSymbol(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->documentSymbol(params);
 }

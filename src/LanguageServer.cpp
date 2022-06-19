@@ -549,58 +549,40 @@ std::vector<lsp::DocumentLink> LanguageServer::documentLink(const lsp::DocumentL
     return workspace->documentLink(params);
 }
 
-// TODO: can't type this as lsp::hover as it can return null
-Response LanguageServer::hover(const lsp::HoverParams& params)
+std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    if (auto result = workspace->hover(params))
-        return *result;
-    return nullptr;
+    return workspace->hover(params)
 }
 
-// TODO: can't type this as lsp::SignatureHelp as it can return null
-Response LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
+std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    if (auto result = workspace->signatureHelp(params))
-        return *result;
-    return nullptr;
+    return workspace->signatureHelp(params);
 }
 
-Response LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
+std::optional<lsp::Location> LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->gotoDefinition(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->gotoDefinition(params);
 }
 
-Response LanguageServer::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
+std::optional<lsp::Location> LanguageServer::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->gotoTypeDefinition(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->gotoTypeDefinition(params);
 }
 
-Response LanguageServer::references(const lsp::ReferenceParams& params)
+lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->references(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->references(params);
 }
 
-Response LanguageServer::rename(const lsp::RenameParams& params)
+lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    auto result = workspace->rename(params);
-    if (result)
-        return *result;
-    return nullptr;
+    return workspace->rename(params);
 }
 
 lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
