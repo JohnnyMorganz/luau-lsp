@@ -1037,26 +1037,29 @@ void WorkspaceFolder::setup()
     Luau::registerBuiltinTypes(frontend.typeChecker);
     Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
 
-    if (client->definitionsFile)
+    if (client->definitionsFiles.empty())
     {
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + client->definitionsFile->generic_string());
-        auto result = types::registerDefinitions(frontend.typeChecker, *client->definitionsFile);
-        types::registerDefinitions(frontend.typeCheckerForAutocomplete, *client->definitionsFile);
+        // TODO: should we disable this warning - maybe its sometimes not necessary if its vanilla Luau?
+        client->sendLogMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
+        client->sendWindowMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
+    }
+
+    for (auto definitionsFile : client->definitionsFiles)
+    {
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
+        auto result = types::registerDefinitions(frontend.typeChecker, definitionsFile);
+        types::registerDefinitions(frontend.typeCheckerForAutocomplete, definitionsFile);
 
         if (!result.success)
         {
             client->sendWindowMessage(lsp::MessageType::Error, "Failed to read definitions file. Extended types will not be provided");
-            // TODO: Display diagnostics?
+            // TODO: Display diagnostics? We can't right now since this is currently called during initialisation, need to move
         }
-    }
-    else
-    {
-        client->sendLogMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
-        client->sendWindowMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
     }
     Luau::freeze(frontend.typeChecker.globalTypes);
     Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
 
+    // TODO: disable sourcemap lookup if not Roblox related
     if (!isNullWorkspace() && !updateSourceMap())
     {
         client->sendWindowMessage(

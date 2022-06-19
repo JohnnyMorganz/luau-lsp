@@ -8,6 +8,7 @@ import {
   LanguageClientOptions,
 } from "vscode-languageclient/node";
 import { spawn } from "child_process";
+import { Utils as UriUtils } from "vscode-uri";
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
@@ -118,12 +119,38 @@ const getFFlags = async () => {
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
-  await updateApiInfo(context);
-  const args = [
-    `lsp`,
-    `--definitions=${globalTypesUri(context).fsPath}`,
-    `--docs=${apiDocsUri(context).fsPath}`,
-  ];
+  const args = ["lsp"];
+
+  // Load roblox type definitions
+  const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
+  if (typesConfig.get<boolean>("roblox")) {
+    await updateApiInfo(context);
+    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
+    args.push(`--docs=${apiDocsUri(context).fsPath}`);
+  }
+
+  // Load extra type definitions
+  const definitionFiles = typesConfig.get<string[]>("definitionFiles");
+  if (definitionFiles) {
+    for (const definitionPath of definitionFiles) {
+      let uri;
+      if (vscode.workspace.workspaceFolders) {
+        uri = UriUtils.resolvePath(
+          vscode.workspace.workspaceFolders[0].uri,
+          definitionPath
+        );
+      } else {
+        uri = vscode.Uri.file(definitionPath);
+      }
+      if (await exists(uri)) {
+        args.push(`--definitions=${uri.fsPath}`);
+      } else {
+        vscode.window.showWarningMessage(
+          `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`
+        );
+      }
+    }
+  }
 
   // Handle FFlags
   const fflags: FFlags = {};
@@ -307,6 +334,17 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window
           .showInformationMessage(
             "Luau FFlags have been changed, reload your workspace for this to take effect.",
+            "Reload Workspace"
+          )
+          .then((command) => {
+            if (command === "Reload Workspace") {
+              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            }
+          });
+      } else if (e.affectsConfiguration("luau-lsp.types")) {
+        vscode.window
+          .showInformationMessage(
+            "Luau type definitions have been changed, reload your workspace for this to take effect.",
             "Reload Workspace"
           )
           .then((command) => {
