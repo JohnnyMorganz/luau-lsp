@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed equality comparison between enum items raising a type error
 - Fixed autocompletion of properties with spaces not correctly being converted into a `["property"]` index leading to a type error
+- Fixed function stringification when using an expression index call such as `data["property"]()`
 
 ## [1.4.0] - 2022-06-12
 
