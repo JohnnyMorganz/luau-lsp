@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.532
 - Updated to improve table type stringification, with an appropriate newline placed in between braces. This should result in better readable table types when hovering
 - Upgraded vscode language client to 8.0, with support for LSP Specification 3.17
+- VSCode Client now makes use of diagnostics pull model
 
 ### Fixed
 

@@ -162,6 +162,10 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     lsp::WorkspaceDiagnosticReport workspaceReport;
     auto config = client->getConfiguration(rootUri);
 
+    // If we don't have workspace diagnostics enabled, then just return an empty report
+    if (!config.diagnostics.workspace)
+        return workspaceReport;
+
     // TODO: we should handle non-sourcemap features
     std::vector<SourceNodePtr> queue;
     if (fileResolver.rootSourceNode)
