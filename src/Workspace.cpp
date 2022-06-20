@@ -92,9 +92,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    Luau::CheckResult cr;
-    if (frontend.isDirty(moduleName))
-        cr = frontend.check(moduleName);
+    Luau::CheckResult cr = frontend.check(moduleName);
 
     // If there was an error retrieving the source module, bail early with this diagnostic
     if (!frontend.getSourceModule(moduleName))
@@ -189,9 +187,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
             continue;
 
         // Compute new check result
-        Luau::CheckResult cr;
-        if (frontend.isDirty(moduleName))
-            cr = frontend.check(moduleName);
+        Luau::CheckResult cr = frontend.check(moduleName);
 
         // If there was an error retrieving the source module, disregard this file
         // TODO: should we file a diagnostic?
