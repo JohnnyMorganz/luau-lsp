@@ -298,7 +298,8 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
-    if (!node)
+    auto scope = Luau::findScopeAtPosition(*module, position);
+    if (!node || !scope)
         return std::nullopt;
 
     std::string typeName;
@@ -306,9 +307,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
-        auto scope = Luau::findScopeAtPosition(*module, position);
-        if (!scope)
-            return std::nullopt;
         std::optional<Luau::TypeFun> typeFun;
         if (ref->prefix)
         {
@@ -384,6 +382,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
     opts.indent = true;
+    opts.scope = scope;
     std::string typeString = Luau::toString(*type, opts);
 
     // If we have a function and its corresponding name
@@ -398,7 +397,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         {
             name = localName->value;
         }
-        typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name));
+        typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope));
     }
     else if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
     {
@@ -445,6 +444,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+    auto scope = Luau::findScopeAtPosition(*module, position);
 
     if (ancestry.size() == 0)
         return std::nullopt;
@@ -467,13 +467,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     auto addSignature = [&](const Luau::FunctionTypeVar* ftv)
     {
-        Luau::ToStringOptions opts;
-        opts.functionTypeArguments = true;
-        opts.hideNamedFunctionTypeParameters = false;
-        opts.hideFunctionSelfArgument = candidate->self; // If self has been provided, then hide the self argument
-
         // Create the whole label
-        std::string label = types::toStringNamedFunction(module, ftv, candidate->func);
+        std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope);
         lsp::MarkupContent documentation{lsp::MarkupKind::PlainText, ""};
 
         if (followedId->documentationSymbol)

@@ -471,11 +471,14 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr)
+std::string toStringNamedFunction(
+    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    if (scope)
+        opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
 
     // HACK: remove all instances of "_: " from the function string
