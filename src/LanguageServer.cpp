@@ -71,7 +71,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Rename Provider
     capabilities.renameProvider = true;
     // Diagnostics Provider
-    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
+    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
