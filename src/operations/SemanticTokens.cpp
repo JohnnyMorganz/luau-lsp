@@ -8,12 +8,24 @@ struct SemanticToken
     Luau::Position start;
     Luau::Position end;
     lsp::SemanticTokenTypes tokenType;
-    std::vector<lsp::SemanticTokenModifiers> tokenModifiers;
+    lsp::SemanticTokenModifiers tokenModifiers;
 };
 
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
     std::vector<SemanticToken> tokens;
+    std::unordered_map<Luau::AstLocal*, lsp::SemanticTokenTypes> localTypes;
+
+    bool visit(Luau::AstType* type) override
+    {
+        return true;
+    }
+
+    bool visit(Luau::AstTypeReference* ref) override
+    {
+        tokens.emplace_back(SemanticToken{ref->location.begin, ref->location.end, lsp::SemanticTokenTypes::Type, lsp::SemanticTokenModifiers::None});
+        return false;
+    }
 
     // bool visit(Luau::AstStatLocal* local) override
     // {
@@ -25,29 +37,39 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     //     return false;
     // }
 
-    // bool visit(Luau::AstStatFunction* function) override
-    // {
-    //     lsp::DocumentSymbol symbol;
-    //     symbol.name = Luau::toString(function->name);
-    //     symbol.kind = lsp::SymbolKind::Function;
-    //     symbol.range = {convertPosition(function->location.begin), convertPosition(function->location.end)};
-    //     symbol.selectionRange = {convertPosition(function->name->location.begin), convertPosition(function->name->location.end)};
-    //     visitFunction(function->func, symbol);
-    //     addSymbol(symbol);
-    //     return false;
-    // }
+    bool visit(Luau::AstStatFunction* func) override
+    {
+        tokens.emplace_back(SemanticToken{
+            func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
+        return true;
+    }
 
-    // bool visit(Luau::AstStatLocalFunction* func) override
-    // {
-    //     lsp::DocumentSymbol symbol;
-    //     symbol.name = Luau::toString(func->name);
-    //     symbol.kind = lsp::SymbolKind::Function;
-    //     symbol.range = {convertPosition(func->location.begin), convertPosition(func->location.end)};
-    //     symbol.selectionRange = {convertPosition(func->name->location.begin), convertPosition(func->name->location.end)};
-    //     visitFunction(func->func, symbol);
-    //     addSymbol(symbol);
-    //     return false;
-    // }
+    bool visit(Luau::AstStatLocalFunction* func) override
+    {
+        tokens.emplace_back(SemanticToken{
+            func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
+        return true;
+    }
+
+    bool visit(Luau::AstExprFunction* func) override
+    {
+        for (auto arg : func->args)
+        {
+            tokens.emplace_back(
+                SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::Declaration});
+            localTypes.emplace(arg, lsp::SemanticTokenTypes::Parameter);
+        }
+        return true;
+    }
+
+    bool visit(Luau::AstExprLocal* local) override
+    {
+        auto type = lsp::SemanticTokenTypes::Variable;
+        if (contains(localTypes, local->local))
+            type = localTypes.at(local->local);
+        tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
+        return false;
+    }
 
     // bool visit(Luau::AstStatTypeAlias* alias) override
     // {
@@ -100,15 +122,15 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     //     parent = oldParent;
     // }
 
-    // bool visit(Luau::AstStatBlock* block) override
-    // {
-    //     for (Luau::AstStat* stat : block->body)
-    //     {
-    //         stat->visit(this);
-    //     }
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
 
-    //     return false;
-    // }
+        return false;
+    }
 };
 
 size_t convertTokenType(const lsp::SemanticTokenTypes tokenType)
@@ -116,19 +138,14 @@ size_t convertTokenType(const lsp::SemanticTokenTypes tokenType)
     return static_cast<size_t>(tokenType);
 }
 
-size_t convertTokenModifiers(const std::vector<lsp::SemanticTokenModifiers>& tokenModifiers)
-{
-    // Bit pack the token modifiers
-}
-
 std::vector<size_t> packTokens(const std::vector<SemanticToken>& tokens)
 {
     // Sort the tokens into the correct ordering
-    std::sort(tokens.begin(), tokens.end(),
-        [](const SemanticToken& a, const SemanticToken& b)
-        {
-            return a.start < b.start;
-        });
+    // std::sort(tokens.begin(), tokens.end(),
+    //     [](const SemanticToken& a, const SemanticToken& b)
+    //     {
+    //         return a.start < b.start;
+    //     });
 
     // Pack the tokens
     std::vector<size_t> result;
@@ -147,7 +164,7 @@ std::vector<size_t> packTokens(const std::vector<SemanticToken>& tokens)
         auto length = token.end.column - token.start.column + 1;
 
         result.insert(
-            result.end(), {deltaLine, deltaStartChar, length, convertTokenType(token.tokenType), convertTokenModifiers(token.tokenModifiers)});
+            result.end(), {deltaLine, deltaStartChar, length, convertTokenType(token.tokenType), static_cast<size_t>(token.tokenModifiers)});
 
         lastLine = line;
         lastChar = startChar;
