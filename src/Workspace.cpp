@@ -65,6 +65,9 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
     // Clear out base uri fsPath as well, in case we managed it like that
     // TODO: can be potentially removed when server generates sourcemap
     fileResolver.managedFiles.erase(uri.fsPath().generic_string());
+
+    // Mark the module as dirty as we no longer track its changes
+    frontend.markDirty(moduleName);
 }
 
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
@@ -94,18 +97,10 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     Luau::CheckResult cr = frontend.check(moduleName);
 
-    // If there was an error retrieving the source module, bail early with this diagnostic
+    // If there was an error retrieving the source module
+    // Bail early with an empty report - it is likely that the file was closed
     if (!frontend.getSourceModule(moduleName))
-    {
-        lsp::Diagnostic errorDiagnostic;
-        errorDiagnostic.source = "Luau";
-        errorDiagnostic.code = "000";
-        errorDiagnostic.message = "Failed to resolve source module for this file";
-        errorDiagnostic.severity = lsp::DiagnosticSeverity::Error;
-        errorDiagnostic.range = {{0, 0}, {0, 0}};
-        report.items.emplace_back(errorDiagnostic);
         return report;
-    }
 
     auto config = client->getConfiguration(rootUri);
 
