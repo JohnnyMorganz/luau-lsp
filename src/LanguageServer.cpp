@@ -307,8 +307,8 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         {
             auto workspace = findWorkspace(workspaceUri);
 
-            // Recompute workspace diagnostics if requested
-            if (config.diagnostics.workspace)
+            // Recompute workspace diagnostics if requested, but only if the diagnostics pull model is not available
+            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) && config.diagnostics.workspace)
             {
                 auto diagnostics = workspace->workspaceDiagnostics({});
                 for (const auto& report : diagnostics.items)

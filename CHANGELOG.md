@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Module name will now be included in hover and signature displays for imported types
 - Fixed bug where in-memory contents of a document which was deleted were not cleared, causing spurious errors when recreating a new document of the same name.
+- Fixed duplicate diagnostics displayed and never clearing when `workspace` diagnostics configuration was enabled
 
 ## [1.5.0] - 2022-06-20
 
