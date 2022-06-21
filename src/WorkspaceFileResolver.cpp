@@ -26,7 +26,7 @@ std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromRealPath(const std::string& name) const
 {
     std::error_code ec;
-    auto canonicalName = std::filesystem::canonical(name, ec);
+    auto canonicalName = std::filesystem::weakly_canonical(name, ec);
     if (ec.value() != 0)
         canonicalName = name;
     auto strName = canonicalName.generic_string();
@@ -288,7 +288,7 @@ void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std
     if (auto realPath = node->getScriptFilePath())
     {
         std::error_code ec;
-        auto canonicalName = std::filesystem::canonical(*realPath, ec);
+        auto canonicalName = std::filesystem::weakly_canonical(*realPath, ec);
         if (ec.value() != 0)
             canonicalName = *realPath;
         realPathsToSourceNodes[canonicalName.generic_string()] = node;
