@@ -216,7 +216,10 @@ export async function activate(context: vscode.ExtensionContext) {
       { scheme: "file", language: "lua" },
       { scheme: "file", language: "luau" },
     ],
-    diagnosticCollectionName: "luau",
+    diagnosticPullOptions: {
+      onChange: true,
+      onSave: true,
+    },
   };
 
   client = new LanguageClient("luau", "Luau LSP", serverOptions, clientOptions);
