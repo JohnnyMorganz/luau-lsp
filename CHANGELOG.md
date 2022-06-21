@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.5.1] - 2022-06-21
+
 ### Fixed
 
 - Module name will now be included in hover and signature displays for imported types
