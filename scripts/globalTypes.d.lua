@@ -3647,6 +3647,7 @@ type DebuggerManager = any
 type DebuggerUIService = any
 type DebuggerVariable = any
 type DebuggerWatch = any
+type DeviceIdService = any
 type Dialog = any
 type DialogChoice = any
 type DraftsService = any
@@ -3938,6 +3939,7 @@ type RotationCurve = any
 type RtMessagingService = any
 type RunService = any
 type RuntimeScriptService = any
+type ScreenshotHud = any
 type ScriptChangeService = any
 type ScriptCloneWatcher = any
 type ScriptCloneWatcherHelper = any
@@ -5332,6 +5334,10 @@ end
 
 declare class DebuggerWatch extends Instance
 	Expression: string
+end
+
+declare class DeviceIdService extends Instance
+	function GetDeviceId(self): string
 end
 
 declare class Dialog extends Instance
@@ -7047,6 +7053,7 @@ declare class BasePart extends PVInstance
 	CanTouch: boolean
 	CastShadow: boolean
 	CenterOfMass: Vector3
+	CollisionGroup: string
 	CollisionGroupId: number
 	Color: Color3
 	CustomPhysicalProperties: PhysicalProperties
@@ -7290,10 +7297,12 @@ end
 declare class PackageLink extends Instance
 	AutoUpdate: boolean
 	Creator: string
+	Package_Id: Content
 	PackageAssetName: string
 	PackageId: Content
 	PermissionLevel: EnumPackagePermission
 	Status: string
+	Version_Number: number
 	VersionNumber: number
 end
 
@@ -7668,6 +7677,8 @@ declare class Plugin extends Instance
 	Deactivation: RBXScriptSignal<>
 	Ready: RBXScriptSignal<>
 	Unloading: RBXScriptSignal<>
+	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
+	ProcessAssetInsertionDrop: () -> nil
 end
 
 declare class PluginAction extends Instance
@@ -8028,6 +8039,17 @@ end
 declare class RuntimeScriptService extends Instance
 end
 
+declare class ScreenshotHud extends Instance
+	CameraButtonIcon: Content
+	CameraButtonPosition: UDim2
+	CloseButtonPosition: UDim2
+	CloseWhenScreenshotTaken: boolean
+	ExperienceNameOverlayEnabled: boolean
+	OverlayFont: EnumFont
+	UsernameOverlayEnabled: boolean
+	Visible: boolean
+end
+
 declare class ScriptChangeService extends Instance
 	ScriptAdded: RBXScriptSignal<LuaSourceContainer>
 	ScriptBeingRemoved: RBXScriptSignal<LuaSourceContainer>
@@ -8079,9 +8101,10 @@ end
 
 declare class ScriptDocument extends Instance
 	function GetInternalUri(self): string
-	function GetNumLines(self): number
+	function GetLine(self, lineIndex: number?): string
+	function GetLineCount(self): number
 	function GetScript(self): LuaSourceContainer
-	function GetText(self): string
+	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number?, endCharacter: number?): any
 end
@@ -8476,6 +8499,7 @@ declare class Studio extends Instance
 	Hover_Animate_Speed: EnumHoverAnimateSpeed
 	Hover_Box_Thickness: number
 	Hover_Over_Color: Color3
+	IconOverrideDir: QDir
 	Indent_Using_Spaces: boolean
 	Keyword_Color: Color3
 	Line_Thickness: number
@@ -9419,6 +9443,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "DebuggerConnectionManager"): DebuggerConnectionManager
 	function GetService(self, service: "DebuggerManager"): DebuggerManager
 	function GetService(self, service: "DebuggerUIService"): DebuggerUIService
+	function GetService(self, service: "DeviceIdService"): DeviceIdService
 	function GetService(self, service: "DraftsService"): DraftsService
 	function GetService(self, service: "DraggerService"): DraggerService
 	function GetService(self, service: "EventIngestService"): EventIngestService
