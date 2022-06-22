@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Downgraded missing types/documentation files to a warning in the logs instead of a window error. It is common for no file to be provided in a vanilla build.
 
+### Fixed
+
+- Fixed diagnostics not showing for any file after the first one you open
+
 ## [1.5.1] - 2022-06-21
 
 ### Fixed
