@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target luau-lsp
+          cmake --build . --target luau-lsp -j 3
 
   run_tests:
     strategy:
@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target luau-lsp-tests
+          cmake --build . --target luau-lsp-tests -j 3
 
       - name: Run Tests
         run: ${{ matrix.test-path }}
