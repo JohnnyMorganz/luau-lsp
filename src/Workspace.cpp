@@ -833,8 +833,7 @@ void WorkspaceFolder::setup()
     if (client->definitionsFiles.empty())
     {
         // TODO: should we disable this warning - maybe its sometimes not necessary if its vanilla Luau?
-        client->sendLogMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
-        client->sendWindowMessage(lsp::MessageType::Error, "Definitions file was not provided by the client. Extended types will not be provided");
+        client->sendLogMessage(lsp::MessageType::Warning, "Definitions file was not provided by the client. Extended types will not be provided");
     }
 
     for (auto definitionsFile : client->definitionsFiles)

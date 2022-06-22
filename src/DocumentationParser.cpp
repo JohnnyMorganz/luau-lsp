@@ -38,8 +38,7 @@ void parseDocumentation(std::optional<std::filesystem::path> documentationFile, 
 {
     if (!documentationFile)
     {
-        client->sendLogMessage(lsp::MessageType::Error, "No documentation file given. Documentation will not be provided");
-        client->sendWindowMessage(lsp::MessageType::Error, "No documentation file given. Documentation will not be provided");
+        client->sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
         return;
     };
 
