@@ -170,7 +170,7 @@
     },
     "dependencies": {
         "node-fetch": "^3.2.4",
-        "vscode-languageclient": "^8.0.1",
+        "vscode-languageclient": "^8.0.2-next.5",
         "vscode-uri": "^3.0.3"
     }
 }
