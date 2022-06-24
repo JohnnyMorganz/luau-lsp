@@ -28,8 +28,10 @@ struct ClientTypesConfiguration
 {
     /// Whether Roblox-related definitions should be supported
     bool roblox = true;
+    /// Any definition files to load globally
+    std::vector<std::filesystem::path> definitionFiles;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings

@@ -88,6 +88,22 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     return false;
 }
 
+bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+{
+    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    auto canonicalised = std::filesystem::weakly_canonical(path);
+
+    for (auto& file : config.types.definitionFiles)
+    {
+        if (std::filesystem::weakly_canonical(file) == canonicalised)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
     // TODO: should we apply a resultId and return an unchanged report if unchanged?
@@ -103,6 +119,10 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
         return report;
 
     auto config = client->getConfiguration(rootUri);
+
+    // If the file is a definitions file, then don't display any diagnostics
+    if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
+        return report;
 
     // Report Type Errors
     // Note that type errors can extend to related modules in the require graph - so we report related information here
