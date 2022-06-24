@@ -298,6 +298,13 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
     client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
 
+    // Initialise loaded workspaces
+    nullWorkspace->initialize();
+    for (auto& folder : workspaceFolders)
+    {
+        folder->initialize();
+    }
+
     // Dynamically register for configuration changed notifications
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
@@ -306,6 +313,9 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config)
         {
             auto workspace = findWorkspace(workspaceUri);
+
+            // Update the workspace setup with the new configuration
+            workspace->setupWithConfiguration(config);
 
             // Recompute workspace diagnostics if requested, but only if the diagnostics pull model is not available
             if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) && config.diagnostics.workspace)
@@ -329,6 +339,14 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             items.emplace_back(workspace->rootUri);
         }
         client->requestConfiguration(items);
+    }
+    else
+    {
+        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+        for (auto& folder : workspaceFolders)
+        {
+            folder->setupWithConfiguration(client->globalConfig);
+        }
     }
 
     // Dynamically register file watchers

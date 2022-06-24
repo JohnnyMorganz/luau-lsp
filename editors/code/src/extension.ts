@@ -249,7 +249,10 @@ export async function activate(context: vscode.ExtensionContext) {
   // TODO: maybe we should move this to the server in future
   const updateSourceMap = (workspaceFolder: vscode.WorkspaceFolder) => {
     const config = vscode.workspace.getConfiguration("luau-lsp.sourcemap");
-    if (!config.get<boolean>("autogenerate")) {
+    if (
+      !config.get<boolean>("enabled") ||
+      !config.get<boolean>("autogenerate")
+    ) {
       // TODO: maybe we should disconnect the event instead of early returning? Bit more messy
       return;
     }
@@ -318,11 +321,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (
-        e.affectsConfiguration("luau-lsp.autogenerateSourcemap") ||
-        e.affectsConfiguration("luau-lsp.includeNonScriptsInSourcemap") ||
-        e.affectsConfiguration("luau-lsp.rojoProjectFile")
-      ) {
+      if (e.affectsConfiguration("luau-lsp.sourcemap")) {
         if (vscode.workspace.workspaceFolders) {
           for (const folder of vscode.workspace.workspaceFolders) {
             updateSourceMap(folder);

@@ -80,6 +80,11 @@
                         "**/_Index/**"
                     ]
                 },
+                "luau-lsp.sourcemap.enabled": {
+                    "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
+                    "type": "boolean",
+                    "default": true
+                },
                 "luau-lsp.sourcemap.autogenerate": {
                     "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
                     "type": "boolean",

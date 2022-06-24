@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `luau-lsp.sourcemap.enabled` option which dictates whether sourcemap-related features are enabled
+
 ## [1.5.2] - 2022-06-22
 
 ### Changed

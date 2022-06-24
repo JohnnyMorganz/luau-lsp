@@ -36,8 +36,13 @@ public:
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
         fileResolver.rootUri = uri;
-        setup();
     }
+
+    // Initialises the workspace folder
+    void initialize();
+
+    // Sets up the workspace folder after receiving configuration information
+    void setupWithConfiguration(const ClientConfiguration& configuration);
 
     /// Checks whether a provided file is part of the workspace
     bool isInWorkspace(const lsp::DocumentUri& file);
@@ -79,7 +84,5 @@ public:
     bool isNullWorkspace() const
     {
         return name == "$NULL_WORKSPACE";
-    }
-
-    void setup();
+    };
 };

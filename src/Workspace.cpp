@@ -805,9 +805,12 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 
 bool WorkspaceFolder::updateSourceMap()
 {
+    auto sourcemapPath = rootUri.fsPath() / "sourcemap.json";
+    client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
+
     // Read in the sourcemap
     // TODO: we assume a sourcemap.json file in the workspace root
-    if (auto sourceMapContents = readFile(rootUri.fsPath() / "sourcemap.json"))
+    if (auto sourceMapContents = readFile(sourcemapPath))
     {
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
@@ -825,15 +828,14 @@ bool WorkspaceFolder::updateSourceMap()
     }
 }
 
-void WorkspaceFolder::setup()
+void WorkspaceFolder::initialize()
 {
     Luau::registerBuiltinTypes(frontend.typeChecker);
     Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
 
     if (client->definitionsFiles.empty())
     {
-        // TODO: should we disable this warning - maybe its sometimes not necessary if its vanilla Luau?
-        client->sendLogMessage(lsp::MessageType::Warning, "Definitions file was not provided by the client. Extended types will not be provided");
+        client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
     }
 
     for (auto definitionsFile : client->definitionsFiles)
@@ -850,11 +852,16 @@ void WorkspaceFolder::setup()
     }
     Luau::freeze(frontend.typeChecker.globalTypes);
     Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
+}
 
-    // TODO: disable sourcemap lookup if not Roblox related
-    if (!isNullWorkspace() && !updateSourceMap())
+void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
+{
+    if (configuration.sourcemap.enabled)
     {
-        client->sendWindowMessage(
-            lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
+        if (!isNullWorkspace() && !updateSourceMap())
+        {
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
+        }
     }
 }
