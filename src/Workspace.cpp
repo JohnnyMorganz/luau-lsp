@@ -844,10 +844,28 @@ void WorkspaceFolder::initialize()
         auto result = types::registerDefinitions(frontend.typeChecker, definitionsFile);
         types::registerDefinitions(frontend.typeCheckerForAutocomplete, definitionsFile);
 
-        if (!result.success)
+        auto uri = Uri::file(definitionsFile);
+
+        if (result.success)
         {
-            client->sendWindowMessage(lsp::MessageType::Error, "Failed to read definitions file. Extended types will not be provided");
-            // TODO: Display diagnostics? We can't right now since this is currently called during initialisation, need to move
+            // Clear any set diagnostics
+            client->publishDiagnostics({uri, std::nullopt, {}});
+        }
+        else
+        {
+            client->sendWindowMessage(lsp::MessageType::Error,
+                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+
+            // Display relevant diagnostics
+            std::vector<lsp::Diagnostic> diagnostics;
+            for (auto& error : result.parseResult.errors)
+                diagnostics.emplace_back(createParseErrorDiagnostic(error));
+
+            if (result.module)
+                for (auto& error : result.module->errors)
+                    diagnostics.emplace_back(createTypeErrorDiagnostic(error));
+
+            client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }
     }
     Luau::freeze(frontend.typeChecker.globalTypes);

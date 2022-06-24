@@ -107,3 +107,4 @@ lsp::Position convertPosition(const Luau::Position& position);
 
 lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error);
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint);
+lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error);

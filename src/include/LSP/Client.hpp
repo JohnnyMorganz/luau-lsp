@@ -50,6 +50,7 @@ public:
     // TODO: this function only supports getting requests for workspaces
     void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);
     void applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optional<ResponseHandler> handler = std::nullopt);
+    void publishDiagnostics(const lsp::PublishDiagnosticsParams& params);
     void refreshWorkspaceDiagnostics();
 
     void setTrace(const lsp::SetTraceParams& params);

@@ -149,6 +149,11 @@ void Client::applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optiona
     sendRequest(nextRequestId++, "workspace/applyEdit", params, handler);
 }
 
+void Client::publishDiagnostics(const lsp::PublishDiagnosticsParams& params)
+{
+    sendNotification("textDocument/publishDiagnostics", params);
+}
+
 void Client::refreshWorkspaceDiagnostics()
 {
     if (capabilities.workspace && capabilities.workspace->diagnostics && capabilities.workspace->diagnostics->refreshSupport)

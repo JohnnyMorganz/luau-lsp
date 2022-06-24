@@ -700,6 +700,18 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
     return diagnostic;
 }
 
+lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error)
+{
+    lsp::Diagnostic diagnostic;
+    diagnostic.source = "Luau";
+    diagnostic.code = "SyntaxError";
+    diagnostic.message = "SyntaxError: " + error.getMessage();
+    diagnostic.severity = lsp::DiagnosticSeverity::Error;
+    diagnostic.range = {convertPosition(error.getLocation().begin), convertPosition(error.getLocation().end)};
+    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
+    return diagnostic;
+}
+
 struct FindSymbolReferences : public Luau::AstVisitor
 {
     const Luau::Symbol symbol;

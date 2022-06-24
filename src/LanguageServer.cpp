@@ -325,8 +325,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
                 {
                     if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
                     {
-                        client->sendNotification(
-                            "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
                     }
                 }
             }
@@ -373,7 +372,7 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
     // Convert the diagnostics report into a series of diagnostics published for each relevant file
     lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
     auto diagnostics = workspace->documentDiagnostics(params);
-    client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
+    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
 
     if (!diagnostics.relatedDocuments.empty())
     {
@@ -381,8 +380,7 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
         {
             if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
             {
-                client->sendNotification(
-                    "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
             }
         }
     }
@@ -419,8 +417,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
         auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{params.textDocument});
-        client->sendNotification("textDocument/publishDiagnostics",
-            lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
 
         // Compute diagnostics for reverse dependencies
         // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
@@ -453,8 +450,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
             {
                 if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
                 {
-                    client->sendNotification(
-                        "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
                 }
             }
         }
@@ -470,7 +466,7 @@ void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParam
     // If this was an ignored file then lets clear the diagnostics for it
     if (workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
     {
-        client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
     }
 }
 
