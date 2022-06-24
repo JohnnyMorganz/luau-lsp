@@ -464,7 +464,8 @@ void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParam
     workspace->closeTextDocument(params.textDocument.uri);
 
     // If this was an ignored file then lets clear the diagnostics for it
-    if (workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
+    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) &&
+        workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
     {
         client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
     }

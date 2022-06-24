@@ -124,6 +124,10 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
         return report;
 
+    // If the file is ignored, and is *not* loaded in, then don't display any diagnostics
+    if (isIgnoredFile(params.textDocument.uri.fsPath()) && !fileResolver.isManagedFile(moduleName))
+        return report;
+
     // Report Type Errors
     // Note that type errors can extend to related modules in the require graph - so we report related information here
     for (auto& error : cr.errors)
