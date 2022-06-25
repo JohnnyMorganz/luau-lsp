@@ -341,6 +341,14 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
         // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
         typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
         {
+            // TODO: we hope to remove these in future!
+            if (!expressiveTypes)
+            {
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                scope->bindings[Luau::AstName("workspace")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                scope->bindings[Luau::AstName("game")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+            }
+
             if (auto node =
                     fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
             {
@@ -354,13 +362,6 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                 if (expressiveTypes)
                     scope->bindings[Luau::AstName("script")] =
                         Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
-                else
-                {
-                    // TODO: we hope to remove these in future!
-                    scope->bindings[Luau::AstName("script")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                    scope->bindings[Luau::AstName("workspace")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                    scope->bindings[Luau::AstName("game")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                }
             }
         };
     }

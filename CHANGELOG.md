@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed regression where diagnostics are not cleared when you close an ignored file
+- Fixed errors sometimes occuring when you index `script`/`workspace`/`game` for children
 
 ## [1.5.2] - 2022-06-22
 
