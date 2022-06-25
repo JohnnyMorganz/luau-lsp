@@ -272,7 +272,9 @@ export async function activate(context: vscode.ExtensionContext) {
       args.push("--include-non-scripts");
     }
 
-    const child = spawn("rojo", args, { cwd: workspaceFolder.uri.fsPath });
+    const child = spawn(config.get<string>("rojoPath") ?? "rojo", args, {
+      cwd: workspaceFolder.uri.fsPath,
+    });
 
     const onFailEvent = (err: any) => {
       client.warn(

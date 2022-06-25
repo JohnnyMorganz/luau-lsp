@@ -90,6 +90,10 @@
                     "type": "boolean",
                     "default": true
                 },
+                "luau-lsp.sourcemap.rojoPath": {
+                    "markdownDescription": "Path to the Rojo executable. If not provided, attempts to run `rojo` in the workspace directory, so it must be available on the PATH",
+                    "type": "string"
+                },
                 "luau-lsp.sourcemap.rojoProjectFile": {
                     "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
                     "type": "string",

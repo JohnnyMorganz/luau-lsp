@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added `luau-lsp.sourcemap.enabled` option which dictates whether sourcemap-related features are enabled
 - Diagnostics will now be provided for definitions files which errored
+- Added `luau-lsp.sourcemap.rojoPath` to explicitly specify the path to a Rojo executable instead of relying on it being available from the workspace directory
 
 ### Changed
 
