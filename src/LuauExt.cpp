@@ -5,6 +5,8 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
 
+LUAU_FASTFLAG(LuauTypeMismatchModuleNameResolution)
+
 namespace types
 {
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
@@ -657,11 +659,13 @@ lsp::Position convertPosition(const Luau::Position& position)
     return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
 }
 
-lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver)
 {
     std::string message;
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         message = "SyntaxError: " + syntaxError->message;
+    else if (FFlag::LuauTypeMismatchModuleNameResolution)
+        message = "TypeError: " + Luau::toString(error, Luau::TypeErrorToStringOptions{fileResolver});
     else
         message = "TypeError: " + Luau::toString(error);
 

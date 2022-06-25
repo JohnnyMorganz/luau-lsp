@@ -132,7 +132,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     // Note that type errors can extend to related modules in the require graph - so we report related information here
     for (auto& error : cr.errors)
     {
-        auto diagnostic = createTypeErrorDiagnostic(error);
+        auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
         if (error.moduleName == moduleName)
         {
             report.items.emplace_back(diagnostic);
@@ -225,7 +225,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Only report errors for the current file
         for (auto& error : cr.errors)
         {
-            auto diagnostic = createTypeErrorDiagnostic(error);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
             if (error.moduleName == moduleName)
             {
                 documentReport.items.emplace_back(diagnostic);
@@ -887,7 +887,7 @@ void WorkspaceFolder::initialize()
 
             if (result.module)
                 for (auto& error : result.module->errors)
-                    diagnostics.emplace_back(createTypeErrorDiagnostic(error));
+                    diagnostics.emplace_back(createTypeErrorDiagnostic(error, &fileResolver));
 
             client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }
