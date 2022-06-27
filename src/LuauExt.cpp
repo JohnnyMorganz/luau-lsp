@@ -486,11 +486,7 @@ std::string toStringNamedFunction(
 
     // HACK: remove all instances of "_: " from the function string
     // They don't look great, maybe we should upstream this as an option?
-    size_t index;
-    while ((index = functionString.find("_: ")) != std::string::npos)
-    {
-        functionString.replace(index, 3, "");
-    }
+    replaceAll(functionString, "_: ", "");
 
     // If a name has already been provided, just use that
     if (auto name = std::get_if<std::string>(&nameOrFuncExpr))
@@ -531,6 +527,7 @@ std::string toStringNamedFunction(
         // If we are calling this as a method ':', we should implicitly hide self, and recompute the functionString
         opts.hideFunctionSelfArgument = indexName->op == ':';
         functionString = Luau::toStringNamedFunction("", *ftv, opts);
+        replaceAll(functionString, "_: ", "");
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
         baseName = Luau::toString(indexName->expr);
         trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)

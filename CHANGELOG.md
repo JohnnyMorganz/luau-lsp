@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed regression where diagnostics are not cleared when you close an ignored file
 - Fixed errors sometimes occuring when you index `script`/`workspace`/`game` for children
 - Fixed internal error caused by `:Clone()` calls when called on an expression which isn't an Lvalue (e.g., `inst:FindFirstChild(name):Clone()`)
+- Fixed bug where `_: ` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
 
 ## [1.5.2] - 2022-06-22
 
