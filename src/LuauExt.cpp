@@ -192,8 +192,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
         return std::nullopt;
 
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
-    Luau::TypeId instanceType = typeChecker.checkLValueBinding(scope, *index->expr);
-    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType})};
+    auto instanceType = typeChecker.checkExpr(scope, *index->expr);
+    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
 }
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
