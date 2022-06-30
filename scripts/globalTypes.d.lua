@@ -4007,6 +4007,7 @@ type StudioTheme = any
 type SurfaceAppearance = any
 type TaskScheduler = any
 type Team = any
+type TeamCreateService = any
 type Teams = any
 type TeleportAsyncResult = any
 type TeleportOptions = any
@@ -4931,10 +4932,6 @@ end
 
 
 declare class RigidConstraint extends Constraint
-	Broken: boolean
-	DestructionEnabled: boolean
-	DestructionForce: number
-	DestructionTorque: number
 end
 
 declare class RodConstraint extends Constraint
@@ -8106,7 +8103,7 @@ declare class ScriptDocument extends Instance
 	function GetScript(self): LuaSourceContainer
 	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
 	function IsCommandBar(self): boolean
-	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number?, endCharacter: number?): any
+	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 end
 
 declare class ScriptEditorService extends Instance
@@ -8460,6 +8457,7 @@ declare class Studio extends Instance
 	Bracket_Color: Color3
 	Builtin_Function_Color: Color3
 	Camera_Mouse_Wheel_Speed: number
+	Camera_Pan_Speed: number
 	Camera_Shift_Speed: number
 	Camera_Speed: number
 	Camera_Zoom_to_Mouse_Position: boolean
@@ -8701,6 +8699,10 @@ declare class Team extends Instance
 	function GetPlayers(self): { Instance }
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
+end
+
+declare class TeamCreateService extends Instance
+	ToggleManageCollaborators: RBXScriptSignal<>
 end
 
 declare class Teams extends Instance
@@ -9551,6 +9553,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StudioScriptDebugEventListener"): StudioScriptDebugEventListener
 	function GetService(self, service: "StudioService"): StudioService
 	function GetService(self, service: "TaskScheduler"): TaskScheduler
+	function GetService(self, service: "TeamCreateService"): TeamCreateService
 	function GetService(self, service: "Teams"): Teams
 	function GetService(self, service: "TeleportService"): TeleportService
 	function GetService(self, service: "TemporaryCageMeshProvider"): TemporaryCageMeshProvider
