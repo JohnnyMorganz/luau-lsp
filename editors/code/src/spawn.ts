@@ -117,14 +117,13 @@ const wrappedSpawn = (
   args: string[],
   options?: SpawnOptionsWithoutStdio
 ): Promise<string> => {
-  return spawnNaive(command, args, options)
-    .catch((err) => {
-      if (canSpawnInteractive(process.platform)) {
-        return spawnInteractive(command, args, options);
-      } else {
-        return Promise.reject(err);
-      }
-    });
+  return spawnNaive(command, args, options).catch((err) => {
+    if (canSpawnInteractive(process.platform)) {
+      return spawnInteractive(command, args, options);
+    } else {
+      return Promise.reject(err);
+    }
+  });
 };
 
 export default wrappedSpawn;
