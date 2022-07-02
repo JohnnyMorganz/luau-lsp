@@ -224,7 +224,7 @@ int main(int argc, char** argv)
     registerFastFlags(fastFlags);
 
     if (mode == CliMode::Lsp)
-        startLanguageServer(argc, argv);
+        return startLanguageServer(argc, argv);
     else
-        startAnalyze(argc, argv);
+        return startAnalyze(argc, argv);
 }

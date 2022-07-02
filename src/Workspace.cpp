@@ -132,7 +132,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     // Note that type errors can extend to related modules in the require graph - so we report related information here
     for (auto& error : cr.errors)
     {
-        auto diagnostic = createTypeErrorDiagnostic(error);
+        auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
         if (error.moduleName == moduleName)
         {
             report.items.emplace_back(diagnostic);
@@ -225,7 +225,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Only report errors for the current file
         for (auto& error : cr.errors)
         {
-            auto diagnostic = createTypeErrorDiagnostic(error);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
             if (error.moduleName == moduleName)
             {
                 documentReport.items.emplace_back(diagnostic);
@@ -341,11 +341,23 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             return std::nullopt;
         type = typeFun->type;
     }
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>())
+    {
+        typeName = alias->name.value;
+        auto typeFun = scope->lookupType(typeName);
+        if (!typeFun)
+            return std::nullopt;
+        type = typeFun->type;
+    }
+    else if (auto astType = node->asType())
+    {
+        if (auto ty = module->astResolvedTypes.find(astType))
+        {
+            type = *ty;
+        }
+    }
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
-        auto scope = Luau::findScopeAtPosition(*module, position);
-        if (!scope)
-            return std::nullopt;
         type = scope->lookup(local);
     }
     else if (auto expr = exprOrLocal.getExpr())
@@ -376,6 +388,14 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             if (auto it = module->astTypes.find(expr))
             {
                 type = *it;
+            }
+            else if (auto global = expr->as<Luau::AstExprGlobal>())
+            {
+                type = scope->lookup(global->name);
+            }
+            else if (auto local = expr->as<Luau::AstExprLocal>())
+            {
+                type = scope->lookup(local->local);
             }
             else if (auto index = expr->as<Luau::AstExprIndexName>())
             {
@@ -887,7 +907,7 @@ void WorkspaceFolder::initialize()
 
             if (result.module)
                 for (auto& error : result.module->errors)
-                    diagnostics.emplace_back(createTypeErrorDiagnostic(error));
+                    diagnostics.emplace_back(createTypeErrorDiagnostic(error, &fileResolver));
 
             client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }

@@ -105,6 +105,6 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
 Luau::Position convertPosition(const lsp::Position& position);
 lsp::Position convertPosition(const Luau::Position& position);
 
-lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error);
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver);
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint);
 lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error);
