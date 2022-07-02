@@ -542,16 +542,11 @@ std::string toStringNamedFunction(
         trim(baseName);
     }
 
-    if (parentIt)
-    {
-        if (auto name = getTypeName(*parentIt))
-            baseName = *name;
-    }
-    else
-    {
-        // TODO: anymore we can do?
-        baseName = "_";
-    }
+    if (!parentIt)
+        return "function" + methodName + functionString;
+
+    if (auto name = getTypeName(*parentIt))
+        baseName = *name;
 
     return "function " + baseName + methodName + functionString;
 }
