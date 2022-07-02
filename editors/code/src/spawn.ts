@@ -25,7 +25,7 @@ const canSpawnInteractive = (platform: NodeJS.Platform): boolean => {
 		default:
 			return false;
 	}
-}
+};
 
 const handleChildProcessPromise = (
 	cp: ChildProcessWithoutNullStreams,
@@ -46,12 +46,12 @@ const handleChildProcessPromise = (
 			interactive,
 			code: -1,
 			reason: e.message,
-		})
+		});
 	});
 	// Resolve with stdout or reject with stderr
 	// depending on the exist code and/or data
 	cp.on('close', (code) => {
-		if (code == 0 && stderr.length == 0) {
+		if (code === 0 && stderr.length === 0) {
 			resolve(stdout);
 		} else {
 			reject({
@@ -61,7 +61,7 @@ const handleChildProcessPromise = (
 			});
 		}
 	});
-}
+};
 
 
 
@@ -74,12 +74,12 @@ const spawnNaive = (command: string, args: string[], options?: SpawnOptionsWitho
 			cwd: process.cwd(),
 			env: process.env,
 			...options
-		})
+		});
 		// Hand the child process over and
 		// resolve / reject when it closes
 		handleChildProcessPromise(cp, resolve, reject, false);
-	})
-}
+	});
+};
 
 const spawnInteractive = (command: string, args: string[], options?: SpawnOptionsWithoutStdio): Promise<string> => {
 	return new Promise((resolve, reject) => {
@@ -93,7 +93,9 @@ const spawnInteractive = (command: string, args: string[], options?: SpawnOption
 		const cp = spawn(vscode.env.shell, {
 			cwd: cwd,
 			env: {
+				// eslint-disable-next-line @typescript-eslint/naming-convention
 				PWD: cwd,
+				// eslint-disable-next-line @typescript-eslint/naming-convention
 				TERM: 'xterm',
 				...process.env
 			},
@@ -107,8 +109,8 @@ const spawnInteractive = (command: string, args: string[], options?: SpawnOption
 		cp.stdin.write(`${command} ${args.join(' ')}`);
 		cp.stdin.write('\n');
 		cp.stdin.end();
-	})
-}
+	});
+};
 
 
 
@@ -122,12 +124,12 @@ const wrappedSpawn = (command: string, args: string[], options?: SpawnOptionsWit
 				if (!err.ran && canSpawnInteractive(process.platform)) {
 					spawnInteractive(command, args, options)
 						.then(resolve)
-						.catch(reject)
+						.catch(reject);
 				} else {
-					reject(err)
+					reject(err);
 				}
-			})
-	})
-}
+			});
+	});
+};
 
 export default wrappedSpawn;
