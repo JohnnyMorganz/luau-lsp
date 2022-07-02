@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed internal error caused by `:Clone()` calls when called on an expression which isn't an Lvalue (e.g., `inst:FindFirstChild(name):Clone()`)
 - Fixed bug where `_: ` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
 - Fixed analyze mode not exiting with a non-zero exit code when there are errors
+- Fixed excessive whitespace in document symbols for expr-named function defintions
 
 ## [1.5.2] - 2022-06-22
 

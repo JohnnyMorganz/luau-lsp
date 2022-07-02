@@ -43,6 +43,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         symbol.kind = lsp::SymbolKind::Function;
         symbol.range = {convertPosition(function->location.begin), convertPosition(function->location.end)};
         symbol.selectionRange = {convertPosition(function->name->location.begin), convertPosition(function->name->location.end)};
+        trim(symbol.name);
         visitFunction(function->func, symbol);
         addSymbol(symbol);
         return false;
