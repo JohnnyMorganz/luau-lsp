@@ -349,6 +349,13 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             return std::nullopt;
         type = typeFun->type;
     }
+    else if (auto astType = node->asType())
+    {
+        if (auto ty = module->astResolvedTypes.find(astType))
+        {
+            type = *ty;
+        }
+    }
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
         type = scope->lookup(local);
