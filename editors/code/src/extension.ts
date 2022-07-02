@@ -276,7 +276,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     spawn(config.get<string>("rojoPath") ?? "rojo", args, {
       cwd: workspaceFolder.uri.fsPath,
-    }).catch(err => {
+    }).catch((err) => {
       client.warn(
         `Failed to update sourcemap for ${
           workspaceFolder.name
