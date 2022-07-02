@@ -341,6 +341,14 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             return std::nullopt;
         type = typeFun->type;
     }
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>())
+    {
+        typeName = alias->name.value;
+        auto typeFun = scope->lookupType(typeName);
+        if (!typeFun)
+            return std::nullopt;
+        type = typeFun->type;
+    }
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
         type = scope->lookup(local);
