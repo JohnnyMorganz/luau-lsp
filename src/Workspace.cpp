@@ -862,7 +862,8 @@ bool WorkspaceFolder::updateSourceMap()
         types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ false);
         types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
 
-        // TODO: we should signal a diagnostics refresh
+        // Signal diagnostics refresh
+        client->refreshWorkspaceDiagnostics();
 
         return true;
     }
