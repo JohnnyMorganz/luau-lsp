@@ -7,8 +7,10 @@ import {
   LanguageClient,
   LanguageClientOptions,
 } from "vscode-languageclient/node";
-import { spawn } from "child_process";
+
 import { Utils as UriUtils } from "vscode-uri";
+
+import spawn from "./spawn";
 
 let client: LanguageClient;
 
@@ -272,19 +274,15 @@ export async function activate(context: vscode.ExtensionContext) {
       args.push("--include-non-scripts");
     }
 
-    const child = spawn(config.get<string>("rojoPath") ?? "rojo", args, {
+    spawn(config.get<string>("rojoPath") ?? "rojo", args, {
       cwd: workspaceFolder.uri.fsPath,
-    });
-
-    const onFailEvent = (err: any) => {
+    }).catch((err) => {
       client.warn(
         `Failed to update sourcemap for ${
           workspaceFolder.name
-        } (${workspaceFolder.uri.toString(true)}): ` + err
+        } (${workspaceFolder.uri.toString(true)}): ` + err.reason
       );
-    };
-    child.stderr.on("data", onFailEvent);
-    child.on("error", onFailEvent);
+    });
   };
 
   const listener = (e: vscode.FileCreateEvent | vscode.FileDeleteEvent) => {
