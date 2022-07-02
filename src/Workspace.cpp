@@ -343,9 +343,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     }
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
-        auto scope = Luau::findScopeAtPosition(*module, position);
-        if (!scope)
-            return std::nullopt;
         type = scope->lookup(local);
     }
     else if (auto expr = exprOrLocal.getExpr())
@@ -380,6 +377,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             else if (auto global = expr->as<Luau::AstExprGlobal>())
             {
                 type = scope->lookup(global->name);
+            }
+            else if (auto local = expr->as<Luau::AstExprLocal>())
+            {
+                type = scope->lookup(local->local);
             }
             else if (auto index = expr->as<Luau::AstExprIndexName>())
             {
