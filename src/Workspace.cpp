@@ -377,6 +377,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             {
                 type = *it;
             }
+            else if (auto global = expr->as<Luau::AstExprGlobal>())
+            {
+                type = scope->lookup(global->name);
+            }
             else if (auto index = expr->as<Luau::AstExprIndexName>())
             {
                 if (auto parentIt = module->astTypes.find(index->expr))
