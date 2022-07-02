@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Moved definitions file loading to post-initialization
-- Sync to upstream Luau 0.533
+- Sync to upstream Luau 0.534
 - A `_` will no longer show when we can't determine a function name / a function isn't named.
 
 ### Fixed
