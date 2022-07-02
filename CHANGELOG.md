@@ -6,19 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2022-07-02
+
 ### Added
 
 - Added `luau-lsp.sourcemap.enabled` option which dictates whether sourcemap-related features are enabled
 - Diagnostics will now be provided for definitions files which errored
 - Added `luau-lsp.sourcemap.rojoPath` to explicitly specify the path to a Rojo executable instead of relying on it being available from the workspace directory
+- Added hover information when hovering over a type definition
 
 ### Changed
 
 - Moved definitions file loading to post-initialization
+- Sync to upstream Luau 0.534
+- A `_` will no longer show when we can't determine a function name / a function isn't named.
 
 ### Fixed
 
 - Fixed regression where diagnostics are not cleared when you close an ignored file
+- Fixed errors sometimes occuring when you index `script`/`workspace`/`game` for children
+- Fixed internal error caused by `:Clone()` calls when called on an expression which isn't an Lvalue (e.g., `inst:FindFirstChild(name):Clone()`)
+- Fixed bug where `_: ` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
+- Fixed analyze mode not exiting with a non-zero exit code when there are errors
+- Fixed excessive whitespace in document symbols for expr-named function defintions
+- Fixed hover for global functions and local variables
 
 ## [1.5.2] - 2022-06-22
 
