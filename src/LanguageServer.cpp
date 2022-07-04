@@ -79,62 +79,66 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     if (shutdownRequested)
         throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down");
 
+    Response response;
+
     if (method == "initialize")
     {
-        return onInitialize(REQUIRED_PARAMS(params, "initialize"));
+        response = onInitialize(REQUIRED_PARAMS(params, "initialize"));
     }
     else if (method == "shutdown")
     {
-        return onShutdown(id);
+        response = onShutdown(id);
     }
     else if (method == "textDocument/completion")
     {
-        return completion(REQUIRED_PARAMS(params, "textDocument/completion"));
+        response = completion(REQUIRED_PARAMS(params, "textDocument/completion"));
     }
     else if (method == "textDocument/documentLink")
     {
-        return documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
+        response = documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
     }
     else if (method == "textDocument/hover")
     {
-        return hover(REQUIRED_PARAMS(params, "textDocument/hover"));
+        response = hover(REQUIRED_PARAMS(params, "textDocument/hover"));
     }
     else if (method == "textDocument/signatureHelp")
     {
-        return signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
+        response = signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
     }
     else if (method == "textDocument/definition")
     {
-        return gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
+        response = gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
     }
     else if (method == "textDocument/typeDefinition")
     {
-        return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
+        response = gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
     }
     else if (method == "textDocument/references")
     {
-        return references(REQUIRED_PARAMS(params, "textDocument/references"));
+        response = references(REQUIRED_PARAMS(params, "textDocument/references"));
     }
     else if (method == "textDocument/rename")
     {
-        return rename(REQUIRED_PARAMS(params, "textDocument/rename"));
+        response = rename(REQUIRED_PARAMS(params, "textDocument/rename"));
     }
     else if (method == "textDocument/documentSymbol")
     {
-        return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+        response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
     }
     else if (method == "textDocument/diagnostic")
     {
-        return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
+        response = documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
     }
     else if (method == "workspace/diagnostic")
     {
-        return workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic"));
+        response = workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic"));
     }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
     }
+
+    client->sendResponse(id, response);
 }
 
 void LanguageServer::onNotification(const std::string& method, std::optional<json> params)
@@ -205,9 +209,7 @@ void LanguageServer::processInputLoop()
 
                 if (msg.is_request())
                 {
-                    auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
-                    // sendTrace(response.dump(), std::nullopt);
-                    client->sendResponse(msg.id.value(), response);
+                    onRequest(msg.id.value(), msg.method.value(), msg.params);
                 }
                 else if (msg.is_response())
                 {
