@@ -718,6 +718,7 @@ bool WorkspaceFolder::updateSourceMap()
         types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
 
         // Signal diagnostics refresh
+        client->terminateWorkspaceDiagnostics();
         client->refreshWorkspaceDiagnostics();
 
         return true;

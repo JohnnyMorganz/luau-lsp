@@ -62,14 +62,14 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Rename Provider
     capabilities.renameProvider = true;
     // Diagnostics Provider
-    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ false};
+    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
     return capabilities;
 }
 
-Response LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> params)
+void LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> params)
 {
     // Handle request
     // If a request has been sent before the server is initialized, we should error
@@ -131,7 +131,17 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     }
     else if (method == "workspace/diagnostic")
     {
-        response = workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic"));
+        // This request has partial request support.
+        // If workspaceDiagnostic returns nothing, then we don't signal a response (as data will be sent as progress notifications)
+        if (auto report = workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic")))
+        {
+            response = report;
+        }
+        else
+        {
+            client->workspaceDiagnosticsRequestId = id;
+            return;
+        }
     }
     else
     {

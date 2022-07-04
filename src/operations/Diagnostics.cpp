@@ -1,6 +1,7 @@
 #include "LSP/Protocol.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
+#include "LSP/Client.hpp"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
@@ -20,10 +21,6 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
     // If the file is a definitions file, then don't display any diagnostics
     if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
-        return report;
-
-    // If the file is ignored, and is *not* loaded in, then don't display any diagnostics
-    if (isIgnoredFile(params.textDocument.uri.fsPath()) && !fileResolver.isManagedFile(moduleName))
         return report;
 
     // Report Type Errors
@@ -77,31 +74,35 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     lsp::WorkspaceDiagnosticReport workspaceReport;
     auto config = client->getConfiguration(rootUri);
 
-    // If we don't have workspace diagnostics enabled, then just return an empty report
-    if (!config.diagnostics.workspace)
-        return workspaceReport;
-
-    // TODO: we should handle non-sourcemap features
-    std::vector<SourceNodePtr> queue;
-    if (fileResolver.rootSourceNode)
+    // Find a list of files to compute diagnostics for
+    std::vector<Uri> files;
+    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath()), end; next != end; ++next)
     {
-        queue.push_back(fileResolver.rootSourceNode);
-    };
-
-    while (!queue.empty())
-    {
-        auto node = queue.back();
-        queue.pop_back();
-        for (auto& child : node->children)
+        if (next->is_regular_file() && next->path().has_extension() && !isIgnoredFile(next->path(), config) &&
+            !isDefinitionFile(next->path(), config))
         {
-            queue.push_back(child);
+            auto ext = next->path().extension();
+            if (ext == ".lua" || ext == ".luau")
+                files.push_back(Uri::file(next->path()));
         }
+    }
 
-        auto realPath = fileResolver.getRealPathFromSourceNode(node);
-        auto moduleName = fileResolver.getVirtualPathFromSourceNode(node);
+    for (auto uri : files)
+    {
+        auto moduleName = fileResolver.getModuleName(uri);
+        lsp::WorkspaceDocumentDiagnosticReport documentReport;
+        documentReport.uri = uri;
+        documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
+        if (fileResolver.isManagedFile(moduleName))
+            documentReport.version = fileResolver.managedFiles.at(moduleName).version();
 
-        if (!realPath || isIgnoredFile(*realPath, config))
+        // If we don't have workspace diagnostics enabled, then just return an empty report
+        // which clears the diagnostics for all files
+        if (!config.diagnostics.workspace)
+        {
+            workspaceReport.items.emplace_back(documentReport);
             continue;
+        }
 
         // Compute new check result
         Luau::CheckResult cr = frontend.check(moduleName);
@@ -110,14 +111,6 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // TODO: should we file a diagnostic?
         if (!frontend.getSourceModule(moduleName))
             continue;
-
-        lsp::WorkspaceDocumentDiagnosticReport documentReport;
-        documentReport.uri = Uri::file(*realPath);
-        documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-        if (fileResolver.isManagedFile(moduleName))
-        {
-            documentReport.version = fileResolver.managedFiles.at(moduleName).version();
-        }
 
         // Report Type Errors
         // Only report errors for the current file
@@ -153,7 +146,7 @@ lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::Docu
     return workspace->documentDiagnostics(params);
 }
 
-lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
+lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
 {
     lsp::WorkspaceDiagnosticReport fullReport;
 
@@ -163,5 +156,29 @@ lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::Wo
         fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
     }
 
-    return fullReport;
+    client->workspaceDiagnosticsToken = params.partialResultToken;
+    if (params.partialResultToken)
+    {
+        // Send the initial report as a partial result, and allow streaming of further results
+        client->sendProgress({params.partialResultToken.value(), fullReport});
+        return std::nullopt;
+    }
+    else
+    {
+        return fullReport;
+    }
+}
+
+void Client::terminateWorkspaceDiagnostics(bool retriggerRequest)
+{
+    lsp::DiagnosticServerCancellationData cancellationData{retriggerRequest};
+
+    if (this->workspaceDiagnosticsRequestId)
+    {
+        this->sendError(this->workspaceDiagnosticsRequestId,
+            JsonRpcException(lsp::ErrorCode::ServerCancelled, "workspace diagnostics terminated", cancellationData));
+    }
+
+    this->workspaceDiagnosticsRequestId = std::nullopt;
+    this->workspaceDiagnosticsToken = std::nullopt;
 }

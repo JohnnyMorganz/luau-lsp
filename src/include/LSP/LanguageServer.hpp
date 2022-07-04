@@ -39,7 +39,7 @@ public:
     /// If no workspace is found, the file is attached to the null workspace
     WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri file);
 
-    Response onRequest(const id_type& id, const std::string& method, std::optional<json> params);
+    void onRequest(const id_type& id, const std::string& method, std::optional<json> params);
     void onNotification(const std::string& method, std::optional<json> params);
     void processInputLoop();
     bool requestedShutdown();
@@ -69,7 +69,7 @@ private:
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
-    lsp::WorkspaceDiagnosticReport workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
+    lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown(const id_type& id);
 
 private:
