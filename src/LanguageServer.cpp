@@ -592,25 +592,6 @@ lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
     return workspace->rename(params);
 }
 
-lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->documentDiagnostics(params);
-}
-
-lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
-{
-    lsp::WorkspaceDiagnosticReport fullReport;
-
-    for (auto& workspace : workspaceFolders)
-    {
-        auto report = workspace->workspaceDiagnostics(params);
-        fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
-    }
-
-    return fullReport;
-}
-
 Response LanguageServer::onShutdown(const id_type& id)
 {
     shutdownRequested = true;
