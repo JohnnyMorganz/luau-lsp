@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Reintroduced support for workspace diagnostics, with proper streaming support. Enable `luau-lsp.diagnostics.workspace` for project wide diagnostics.
+
 ### Fixed
 
 - A diagnostic refresh will now be requested once sourcemap contents change
+- With the introduction of workspace diagnostics, ignored files should now only show diagnostics when specifically opened
 
 ## [1.6.0] - 2022-07-02
 
