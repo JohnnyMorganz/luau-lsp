@@ -39,6 +39,12 @@ public:
     void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
     void sendNotification(const std::string& method, std::optional<json> params);
 
+    template<typename T>
+    void sendProgress(const lsp::ProgressParams<T> params)
+    {
+        sendNotification("$/progress", params);
+    }
+
     void sendLogMessage(lsp::MessageType type, std::string message);
     void sendTrace(std::string message, std::optional<std::string> verbose = std::nullopt);
     void sendWindowMessage(lsp::MessageType type, std::string message);

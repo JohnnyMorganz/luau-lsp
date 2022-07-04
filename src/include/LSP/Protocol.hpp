@@ -141,6 +141,22 @@ enum struct PositionEncodingKind
 NLOHMANN_JSON_SERIALIZE_ENUM(
     PositionEncodingKind, {{PositionEncodingKind::UTF8, "utf-8"}, {PositionEncodingKind::UTF16, "utf-16"}, {PositionEncodingKind::UTF32, "utf-32"}});
 
+
+using ProgressToken = std::variant<std::string, int>;
+
+struct PartialResultParams
+{
+    std::optional<ProgressToken> partialResultToken;
+};
+
+template<typename T>
+struct ProgressParams
+{
+    ProgressToken token;
+    T value;
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ProgressParams, token, value);
+};
+
 struct DiagnosticClientCapabilities
 {
     bool dynamicRegistration = false;
