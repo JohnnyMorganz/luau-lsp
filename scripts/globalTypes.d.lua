@@ -656,7 +656,6 @@ declare class EnumContextActionPriority extends EnumItem end
 declare class EnumContextActionPriority_INTERNAL extends Enum
 	Low: EnumContextActionPriority
 	Medium: EnumContextActionPriority
-	Default: EnumContextActionPriority
 	High: EnumContextActionPriority
 end
 declare class EnumContextActionResult extends EnumItem end
@@ -2135,6 +2134,13 @@ declare class EnumRotationType_INTERNAL extends Enum
 	MovementRelative: EnumRotationType
 	CameraRelative: EnumRotationType
 end
+declare class EnumRunContext extends EnumItem end
+declare class EnumRunContext_INTERNAL extends Enum
+	Legacy: EnumRunContext
+	Server: EnumRunContext
+	Client: EnumRunContext
+	Plugin: EnumRunContext
+end
 declare class EnumRuntimeUndoBehavior extends EnumItem end
 declare class EnumRuntimeUndoBehavior_INTERNAL extends Enum
 	Aggregate: EnumRuntimeUndoBehavior
@@ -2837,6 +2843,8 @@ declare class EnumWrapLayerDebugMode_INTERNAL extends Enum
 	HSROuter: EnumWrapLayerDebugMode
 	HSRInner: EnumWrapLayerDebugMode
 	HSRInnerReverse: EnumWrapLayerDebugMode
+	LayerCageFittedToBase: EnumWrapLayerDebugMode
+	LayerCageFittedToPrev: EnumWrapLayerDebugMode
 end
 declare class EnumWrapTargetDebugMode extends EnumItem end
 declare class EnumWrapTargetDebugMode_INTERNAL extends Enum
@@ -3067,6 +3075,7 @@ declare Enum: {
 	RollOffMode: EnumRollOffMode_INTERNAL,
 	RotationOrder: EnumRotationOrder_INTERNAL,
 	RotationType: EnumRotationType_INTERNAL,
+	RunContext: EnumRunContext_INTERNAL,
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior_INTERNAL,
 	SaveFilter: EnumSaveFilter_INTERNAL,
 	SavedQualitySetting: EnumSavedQualitySetting_INTERNAL,
@@ -3528,6 +3537,7 @@ type AppUpdateService = any
 type AssetCounterService = any
 type AssetDeliveryProxy = any
 type AssetImportService = any
+type AssetImportSession = any
 type AssetManagerService = any
 type AssetService = any
 type Atmosphere = any
@@ -4281,8 +4291,21 @@ declare class AssetImportService extends Instance
 	function IsAvatar(self): boolean
 	function Upload(self): nil
 	function ImportMeshWithPrompt(self): any
+	function StartSessionWithPrompt(self): AssetImportSession
 	ProgressUpdate: RBXScriptSignal<number>
 	UploadFinished: RBXScriptSignal<boolean, { [any]: any }>
+end
+
+declare class AssetImportSession extends Instance
+	function Cancel(self): nil
+	function GetCurrentImportMap(self): { [any]: any }
+	function GetCurrentStatusTable(self): { [any]: any }
+	function GetFilename(self): string
+	function GetSettingsRoot(self): Instance
+	function IsAvatar(self): boolean
+	function Upload(self): nil
+	UploadComplete: RBXScriptSignal<boolean, { [any]: any }>
+	UploadProgress: RBXScriptSignal<number>
 end
 
 declare class AssetManagerService extends Instance
@@ -6630,6 +6653,7 @@ declare class LocalizationService extends Instance
 	function GetCorescriptLocalizations(self): { Instance }
 	function GetTableEntries(self, instance: Instance?): { any }
 	function GetTranslatorForPlayer(self, player: Player): Translator
+	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetRobloxLocaleId(self, locale: string): nil
 	function StartTextScraper(self): nil
 	function StopTextScraper(self): nil
@@ -6697,6 +6721,7 @@ end
 declare class BaseScript extends LuaSourceContainer
 	Disabled: boolean
 	LinkedSource: Content
+	RunContext: EnumRunContext
 end
 
 declare class CoreScript extends BaseScript
@@ -8102,9 +8127,11 @@ declare class ScriptDocument extends Instance
 	function GetLine(self, lineIndex: number?): string
 	function GetLineCount(self): number
 	function GetScript(self): LuaSourceContainer
+	function GetSelection(self): any
 	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
+	SelectionChanged: RBXScriptSignal<number, number, number, number>
 end
 
 declare class ScriptEditorService extends Instance
@@ -8600,6 +8627,7 @@ declare class StudioHighDpiService extends Instance
 end
 
 declare class StudioPublishService extends Instance
+	function ClearUploadNames(self): nil
 	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
 	function RefreshDocumentDisplayName(self): nil
 	function SetTeamCreateOnPublishInfo(self, shouldTurnOnTcOnPublish: boolean, newPlaceName: string): nil
@@ -8607,6 +8635,7 @@ declare class StudioPublishService extends Instance
 	function SetUploadNames(self, placeName: string, universeName: string): nil
 	function ShowSaveOrPublishPlaceToRoblox(self, showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode): nil
 	GameNameUpdated: RBXScriptSignal<string>
+	GamePublishCancelled: RBXScriptSignal<>
 	GamePublishFinished: RBXScriptSignal<boolean, number>
 	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 end
