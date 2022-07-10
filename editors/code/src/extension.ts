@@ -277,11 +277,19 @@ export async function activate(context: vscode.ExtensionContext) {
     spawn(config.get<string>("rojoPath") ?? "rojo", args, {
       cwd: workspaceFolder.uri.fsPath,
     }).catch((err) => {
-      client.warn(
-        `Failed to update sourcemap for ${
-          workspaceFolder.name
-        } (${workspaceFolder.uri.toString(true)}): ` + err.reason
-      );
+      let output = `Failed to update sourcemap for ${
+        workspaceFolder.name
+      } (${workspaceFolder.uri.toString(true)}): `;
+
+      if (
+        err.reason.includes("Found argument 'sourcemap' which wasn't expected")
+      ) {
+        output += `Your Rojo version doesn't have sourcemap support. Upgrade to Rojo v7.1.0+`;
+      } else {
+        output += err.reason;
+      }
+
+      vscode.window.showWarningMessage(output);
     });
   };
 
