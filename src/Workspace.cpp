@@ -293,14 +293,14 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         }
         typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope));
     }
-    else if (exprOrLocal.getLocal() || exprOrLocal.getExpr()->as<Luau::AstExprLocal>())
+    else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
     {
         std::string builder = "local ";
         builder += exprOrLocal.getName()->value;
         builder += ": " + typeString;
         typeString = codeBlock("lua", builder);
     }
-    else if (auto global = exprOrLocal.getExpr()->as<Luau::AstExprGlobal>())
+    else if (auto global = node->as<Luau::AstExprGlobal>())
     {
         // TODO: should we indicate this is a global somehow?
         std::string builder = "type ";

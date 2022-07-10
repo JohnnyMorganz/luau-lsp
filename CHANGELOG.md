@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - A diagnostic refresh will now be requested once sourcemap contents change
 - With the introduction of workspace diagnostics, ignored files should now only show diagnostics when specifically opened
 - Document symbols for method definitions now correctly use a colon instead of a dot operator.
+- Fixed crash when hovering over a type node
 
 ## [1.6.0] - 2022-07-02
 
