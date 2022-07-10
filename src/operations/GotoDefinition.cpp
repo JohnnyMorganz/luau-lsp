@@ -22,8 +22,14 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
 
     auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
     if (binding)
+    {
+        // If it points to a global definition (i.e. at pos 0,0), return nothing
+        if (binding->location.begin == Luau::Position{0, 0} && binding->location.end == Luau::Position{0, 0})
+            return std::nullopt;
+
         // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
         return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}};
+    }
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     if (!node)
