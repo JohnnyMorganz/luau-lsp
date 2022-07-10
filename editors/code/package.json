@@ -60,6 +60,10 @@
             {
                 "command": "luau-lsp.updateApi",
                 "title": "Luau: Redownload API Types"
+            },
+            {
+                "command": "luau-lsp.regenerateSourcemap",
+                "title": "Luau: Regenerate Rojo Sourcemap"
             }
         ],
         "configuration": {
