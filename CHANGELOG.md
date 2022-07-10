@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Reintroduced support for workspace diagnostics, with proper streaming support. Enable `luau-lsp.diagnostics.workspace` for project wide diagnostics.
 - You can now hover over a type node to get type information. In particular, this works for properties inside type tables, and hovering over `typeof()`, allowing you to determine what typeof resolved to.
+- Added Go To Definition for type references
 
 ### Changed
 

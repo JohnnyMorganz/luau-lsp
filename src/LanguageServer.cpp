@@ -574,18 +574,6 @@ std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::Signa
     return workspace->signatureHelp(params);
 }
 
-std::optional<lsp::Location> LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoDefinition(params);
-}
-
-std::optional<lsp::Location> LanguageServer::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoTypeDefinition(params);
-}
-
 lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
