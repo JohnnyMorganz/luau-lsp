@@ -562,12 +562,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     }
 }
 
-std::vector<lsp::DocumentLink> LanguageServer::documentLink(const lsp::DocumentLinkParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->documentLink(params);
-}
-
 std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);

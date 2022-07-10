@@ -17,6 +17,7 @@ set(SOURCES
     src/operations/Diagnostics.cpp
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
+    src/operations/DocumentLink.cpp
 )
 add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
 
