@@ -6,18 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Changed
-
-- Sync to upstream Luau 0.535
-
 ### Added
 
 - Reintroduced support for workspace diagnostics, with proper streaming support. Enable `luau-lsp.diagnostics.workspace` for project wide diagnostics.
+
+### Changed
+
+- Sync to upstream Luau 0.535
 
 ### Fixed
 
 - A diagnostic refresh will now be requested once sourcemap contents change
 - With the introduction of workspace diagnostics, ignored files should now only show diagnostics when specifically opened
+- Document symbols for method definitions now correctly use a colon instead of a dot operator.
 
 ## [1.6.0] - 2022-07-02
 
