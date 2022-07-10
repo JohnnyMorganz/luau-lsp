@@ -1,6 +1,34 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+struct RequireInfo
+{
+    Luau::AstExpr* require;
+    Luau::Location location;
+};
+
+struct FindRequireVisitor : public Luau::AstVisitor
+{
+    std::vector<RequireInfo> requireInfos;
+
+    bool visit(Luau::AstExprCall* call) override
+    {
+        if (auto maybeRequire = types::matchRequire(*call))
+            requireInfos.emplace_back(RequireInfo{*maybeRequire, call->argLocation});
+        return true;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
 std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::DocumentLinkParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -13,37 +41,22 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
     if (!sourceModule || !sourceModule->root)
         return {};
 
-    // Only resolve document links on require(Foo.Bar.Baz) code
-    // TODO: Curerntly we only link at the top level block, not nested blocks
-    for (auto stat : sourceModule->root->body)
+    FindRequireVisitor visitor;
+    visitor.visit(sourceModule->root);
+
+    for (auto& require : visitor.requireInfos)
     {
-        if (auto local = stat->as<Luau::AstStatLocal>())
+        if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *require.require))
         {
-            if (local->values.size == 0)
-                continue;
-
-            for (size_t i = 0; i < local->values.size; i++)
+            // Resolve the module info to a URI
+            auto realName = fileResolver.resolveToRealPath(moduleInfo->name);
+            if (realName)
             {
-                const Luau::AstExprCall* call = local->values.data[i]->as<Luau::AstExprCall>();
-                if (!call)
-                    continue;
-
-                if (auto maybeRequire = types::matchRequire(*call))
-                {
-                    if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, **maybeRequire))
-                    {
-                        // Resolve the module info to a URI
-                        auto realName = fileResolver.resolveToRealPath(moduleInfo->name);
-                        if (realName)
-                        {
-                            lsp::DocumentLink link;
-                            link.target = Uri::file(*realName);
-                            link.range = lsp::Range{{call->argLocation.begin.line, call->argLocation.begin.column},
-                                {call->argLocation.end.line, call->argLocation.end.column - 1}};
-                            result.push_back(link);
-                        }
-                    }
-                }
+                lsp::DocumentLink link;
+                link.target = Uri::file(*realName);
+                link.range = lsp::Range{
+                    {require.location.begin.line, require.location.begin.column}, {require.location.end.line, require.location.end.column - 1}};
+                result.push_back(link);
             }
         }
     }
