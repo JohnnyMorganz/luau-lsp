@@ -2704,6 +2704,12 @@ declare class EnumUiMessageType_INTERNAL extends Enum
 	UiMessageError: EnumUiMessageType
 	UiMessageInfo: EnumUiMessageType
 end
+declare class EnumUnionsScaleNonuniformly extends EnumItem end
+declare class EnumUnionsScaleNonuniformly_INTERNAL extends Enum
+	Default: EnumUnionsScaleNonuniformly
+	Disabled: EnumUnionsScaleNonuniformly
+	Enabled: EnumUnionsScaleNonuniformly
+end
 declare class EnumUsageContext extends EnumItem end
 declare class EnumUsageContext_INTERNAL extends Enum
 	Default: EnumUsageContext
@@ -3133,6 +3139,7 @@ declare Enum: {
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
 	UiMessageType: EnumUiMessageType_INTERNAL,
+	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly_INTERNAL,
 	UsageContext: EnumUsageContext_INTERNAL,
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
@@ -7193,6 +7200,7 @@ end
 
 declare class TriangleMeshPart extends BasePart
 	CollisionFidelity: EnumCollisionFidelity
+	MeshSize: Vector3
 end
 
 declare class MeshPart extends TriangleMeshPart
@@ -7201,7 +7209,6 @@ declare class MeshPart extends TriangleMeshPart
 	HasSkinnedMesh: boolean
 	JointOffset: Vector3
 	MeshId: Content
-	MeshSize: Vector3
 	RenderFidelity: EnumRenderFidelity
 	TextureID: Content
 	function ApplyMesh(self, meshPart: MeshPart): nil
@@ -7296,6 +7303,7 @@ declare class Workspace extends WorldRoot
 	StreamingTargetRadius: number
 	Terrain: Terrain
 	TouchesUseCollisionGroups: boolean
+	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly
 	function BreakJoints(self, objects: { Instance }): nil
 	function CalculateJumpDistance(self, gravity: number, jumpPower: number, walkSpeed: number): number
 	function CalculateJumpHeight(self, gravity: number, jumpPower: number): number
@@ -8629,6 +8637,7 @@ end
 declare class StudioPublishService extends Instance
 	function ClearUploadNames(self): nil
 	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
+	function PublishThenTurnOnTeamCreate(self): nil
 	function RefreshDocumentDisplayName(self): nil
 	function SetTeamCreateOnPublishInfo(self, shouldTurnOnTcOnPublish: boolean, newPlaceName: string): nil
 	function SetUniverseDisplayName(self, newName: string): nil
@@ -8659,11 +8668,6 @@ declare class StudioService extends Instance
 	UseLocalSpace: boolean
 	function AnimationIdSelected(self, id: number): nil
 	function CopyToClipboard(self, stringToCopy: string): nil
-	function DEPRECATED_EmitPlacePublishedSignal(self): nil
-	function DEPRECATED_RefreshDocumentDisplayName(self): nil
-	function DEPRECATED_SetUniverseDisplayName(self, newName: string): nil
-	function DEPRECATED_ShowSaveOrPublishPlaceToRoblox(self, showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode): nil
-	function DEPRECATED_publishAs(self, universeId: number, placeId: number, groupId: number): nil
 	function GetBadgeConfigureUrl(self, badgeId: number): string
 	function GetBadgeUploadUrl(self): string
 	function GetClassIcon(self, className: string): { [any]: any }
@@ -8687,10 +8691,6 @@ declare class StudioService extends Instance
 	function PromptImportFile(self, fileTypeFilter: { any }?): Instance
 	function PromptImportFiles(self, fileTypeFilter: { any }?): { Instance }
 	function TryInstallPlugin(self, assetId: number, assetVersionId: number): nil
-	DEPRECATED_GameNameUpdated: RBXScriptSignal<string>
-	DEPRECATED_GamePublishFinished: RBXScriptSignal<boolean, number>
-	DEPRECATED_OnPublishPlaceToRoblox: RBXScriptSignal<boolean>
-	DEPRECATED_OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 	OnImportFromRoblox: RBXScriptSignal<>
 	OnOpenGameSettings: RBXScriptSignal<string>
 	OnOpenManagePackagePlugin: RBXScriptSignal<number, number>
@@ -8995,6 +8995,10 @@ declare class UGCValidationService extends Instance
 	function GetMeshVertColors(self, meshId: string): { any }
 	function GetMeshVerts(self, meshId: string): { any }
 	function GetTextureSize(self, textureId: string): Vector2
+	function ValidateMeshTriangles(self, meshId: string): boolean
+	function ValidateMeshVertColors(self, meshId: string): boolean
+	function ValidateTextureSize(self, textureId: string): boolean
+	function ValidateUVSpace(self, meshId: string): boolean
 end
 
 declare class UIBase extends Instance
