@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Document symbols for method definitions now correctly use a colon instead of a dot operator.
 - Fixed crash when hovering over a type node
 - Fixed go to definition on a global just going to the top of the file. It will now not accept go to definition requests
+- Fixed using absolute file paths to point to definition files not working on Windows
 
 ## [1.6.0] - 2022-07-02
 

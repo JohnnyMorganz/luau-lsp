@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as os from "os";
+import * as path from "path";
 import fetch from "node-fetch";
 import {
   Executable,
@@ -7,8 +8,6 @@ import {
   LanguageClient,
   LanguageClientOptions,
 } from "vscode-languageclient/node";
-
-import { Utils as UriUtils } from "vscode-uri";
 
 import spawn from "./spawn";
 
@@ -39,6 +38,14 @@ const exists = (uri: vscode.Uri): Thenable<boolean> => {
     () => true,
     () => false
   );
+};
+
+const basenameUri = (uri: vscode.Uri): string => {
+  return path.basename(uri.fsPath);
+};
+
+const resolveUri = (uri: vscode.Uri, ...paths: string[]): vscode.Uri => {
+  return vscode.Uri.file(path.resolve(uri.fsPath, ...paths));
 };
 
 const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
@@ -127,7 +134,7 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
   // Check if the project file exists
   let projectFile =
     config.get<string>("rojoProjectFile") ?? "default.project.json";
-  const projectFileUri = UriUtils.resolvePath(workspaceFolder.uri, projectFile);
+  const projectFileUri = resolveUri(workspaceFolder.uri, projectFile);
 
   if (!(await exists(projectFileUri))) {
     // Search if there is a *.project.json file present in this workspace.
@@ -141,7 +148,7 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
       );
       return;
     } else if (foundProjectFiles.length === 1) {
-      const fileName = UriUtils.basename(foundProjectFiles[0]);
+      const fileName = basenameUri(foundProjectFiles[0]);
       const option = await vscode.window.showWarningMessage(
         `Unable to find project file ${projectFile}. We found ${fileName} available`,
         `Set project file to ${fileName}`,
@@ -161,7 +168,7 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
         "Cancel"
       );
       if (option === "Select project file") {
-        const files = foundProjectFiles.map((file) => UriUtils.basename(file));
+        const files = foundProjectFiles.map((file) => basenameUri(file));
         const selectedFile = await vscode.window.showQuickPick(files);
         if (selectedFile) {
           config.update("rojoProjectFile", selectedFile);
@@ -223,7 +230,7 @@ export async function activate(context: vscode.ExtensionContext) {
     for (const definitionPath of definitionFiles) {
       let uri;
       if (vscode.workspace.workspaceFolders) {
-        uri = UriUtils.resolvePath(
+        uri = resolveUri(
           vscode.workspace.workspaceFolders[0].uri,
           definitionPath
         );
