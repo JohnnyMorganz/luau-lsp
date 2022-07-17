@@ -236,11 +236,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     }
     else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
     {
-        types::NameOrExpr name = exprOrLocal.getExpr();
+        types::NameOrExpr name = "";
         if (auto localName = exprOrLocal.getName())
-        {
             name = localName->value;
-        }
+        else if (auto expr = exprOrLocal.getExpr())
+            name = expr;
         typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope));
     }
     else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
