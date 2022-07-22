@@ -8156,11 +8156,11 @@ end
 
 declare class ScriptDocument extends Instance
 	function GetInternalUri(self): string
-	function GetLine(self, lineIndex: number??): string
+	function GetLine(self, lineIndex: number?): string
 	function GetLineCount(self): number
 	function GetScript(self): LuaSourceContainer
 	function GetSelection(self): any
-	function GetText(self, startLine: number??, startCharacter: number??, endLine: number??, endCharacter: number??): string
+	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 	SelectionChanged: RBXScriptSignal<number, number, number, number>
