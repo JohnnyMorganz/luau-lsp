@@ -1671,6 +1671,7 @@ end
 declare class EnumMeshPartDetailLevel extends EnumItem end
 declare class EnumMeshPartDetailLevel_INTERNAL extends Enum
 	DistanceBased: EnumMeshPartDetailLevel
+	Level00: EnumMeshPartDetailLevel
 	Level01: EnumMeshPartDetailLevel
 	Level02: EnumMeshPartDetailLevel
 	Level03: EnumMeshPartDetailLevel
@@ -2812,6 +2813,12 @@ declare class EnumVoiceChatState_INTERNAL extends Enum
 	Ended: EnumVoiceChatState
 	Failed: EnumVoiceChatState
 end
+declare class EnumVolumetricAudio extends EnumItem end
+declare class EnumVolumetricAudio_INTERNAL extends Enum
+	Disabled: EnumVolumetricAudio
+	Automatic: EnumVolumetricAudio
+	Enabled: EnumVolumetricAudio
+end
 declare class EnumWaterDirection extends EnumItem end
 declare class EnumWaterDirection_INTERNAL extends Enum
 	NegX: EnumWaterDirection
@@ -3153,6 +3160,7 @@ declare Enum: {
 	VirtualCursorMode: EnumVirtualCursorMode_INTERNAL,
 	VirtualInputMode: EnumVirtualInputMode_INTERNAL,
 	VoiceChatState: EnumVoiceChatState_INTERNAL,
+	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
 	WaterForce: EnumWaterForce_INTERNAL,
 	WrapLayerAutoSkin: EnumWrapLayerAutoSkin_INTERNAL,
@@ -3890,6 +3898,7 @@ type OutfitPages = any
 type StandardPages = any
 type PartOperationAsset = any
 type ParticleEmitter = any
+type PatchMapping = any
 type Path = any
 type PathfindingLink = any
 type PathfindingModifier = any
@@ -3993,6 +4002,7 @@ type EqualizerSoundEffect = any
 type FlangeSoundEffect = any
 type PitchShiftSoundEffect = any
 type ReverbSoundEffect = any
+type RomarkSoundEffect = any
 type TremoloSoundEffect = any
 type SoundGroup = any
 type SoundService = any
@@ -4229,6 +4239,7 @@ declare class AnimationFromVideoCreatorService extends Instance
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
+	function IsAgeRestricted(self): boolean
 	function CreateAnimationByUploadingVideo(self, progressCallback: <A..., R...>(A...) -> R...): string
 	function ImportVideoWithPrompt(self): string
 end
@@ -4308,6 +4319,7 @@ declare class AssetImportSession extends Instance
 	function GetCurrentImportMap(self): { [any]: any }
 	function GetCurrentStatusTable(self): { [any]: any }
 	function GetFilename(self): string
+	function GetInstance(self, nodeId: number): Instance
 	function GetSettingsRoot(self): Instance
 	function IsAvatar(self): boolean
 	function Upload(self): nil
@@ -6443,14 +6455,20 @@ end
 declare class ImporterMeshSettings extends ImporterBaseSettings
 	Anchored: boolean
 	CageManifold: boolean
-	CageManifoldPreview: boolean
+	CageMeshIntersectedPreview: boolean
+	CageMeshNotIntersected: boolean
 	CageNoOverlappingVertices: boolean
-	CageNoOverlappingVerticesPreview: boolean
+	CageNonManifoldPreview: boolean
+	CageOverlappingVerticesPreview: boolean
 	CageUVMatched: boolean
-	CageUVMatchedPreview: boolean
+	CageUVMisMatchedPreview: boolean
 	Dimensions: Vector3
 	DoubleSided: boolean
 	IgnoreVertexColors: boolean
+	IrrelevantCageModifiedPreview: boolean
+	MeshHoleDetectedPreview: boolean
+	MeshNoHoleDetected: boolean
+	NoIrrelevantCageModified: boolean
 	PolygonCount: number
 	UseImportedPivot: boolean
 end
@@ -7422,6 +7440,12 @@ declare class ParticleEmitter extends Instance
 	function Emit(self, particleCount: number?): nil
 end
 
+declare class PatchMapping extends Instance
+	FlattenTree: boolean
+	PatchId: string
+	TargetPath: string
+end
+
 declare class Path extends Instance
 	Status: EnumPathStatus
 	function GetWaypoints(self): { any }
@@ -8132,11 +8156,11 @@ end
 
 declare class ScriptDocument extends Instance
 	function GetInternalUri(self): string
-	function GetLine(self, lineIndex: number?): string
+	function GetLine(self, lineIndex: number??): string
 	function GetLineCount(self): number
 	function GetScript(self): LuaSourceContainer
 	function GetSelection(self): any
-	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
+	function GetText(self, startLine: number??, startCharacter: number??, endLine: number??, endCharacter: number??): string
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 	SelectionChanged: RBXScriptSignal<number, number, number, number>
@@ -8318,6 +8342,9 @@ declare class ReverbSoundEffect extends SoundEffect
 	WetLevel: number
 end
 
+declare class RomarkSoundEffect extends SoundEffect
+end
+
 declare class TremoloSoundEffect extends SoundEffect
 	Depth: number
 	Duty: number
@@ -8334,6 +8361,7 @@ declare class SoundService extends Instance
 	DopplerScale: number
 	RespectFilteringEnabled: boolean
 	RolloffScale: number
+	VolumetricAudio: EnumVolumetricAudio
 	function BeginRecording(self): boolean
 	function GetListener(self): (EnumListenerType, any)
 	function GetOutputDevice(self): any
