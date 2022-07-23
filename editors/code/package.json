@@ -149,6 +149,7 @@
                 },
                 "luau-lsp.types.definitionFiles": {
                     "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
+                    "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.types.builtinDefinitions#` and `#luau-lsp.types.environments#` instead.",
                     "type": "array",
                     "default": [],
                     "items": {
@@ -159,6 +160,24 @@
                     "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
                     "type": "boolean",
                     "default": true
+                },
+                "luau-lsp.types.environments": {
+                    "markdownDescription": "A map between environment names and a path to a definition file to register. See `#luau-lsp.types.environmentGlobs#` for applying an environment to a file",
+                    "type": "object",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "string",
+                        "description": "A path to a definitions file"
+                    }
+                },
+                "luau-lsp.types.environmentGlobs": {
+                    "markdownDescription": "A map between globs and the environment they are registered too. Only one environment can be applied per file: ensure globs are uniqued as the order applied is indeterminate",
+                    "type": "object",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "string",
+                        "description": "An environment name to link to"
+                    }
                 }
             }
         }

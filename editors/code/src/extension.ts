@@ -211,32 +211,26 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
   });
 };
 
+const parseConfigPath = (path: string) => {
+  if (vscode.workspace.workspaceFolders) {
+    return resolveUri(vscode.workspace.workspaceFolders[0].uri, path);
+  } else {
+    return vscode.Uri.file(path);
+  }
+};
+
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
   const args = ["lsp"];
 
-  // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
-  if (typesConfig.get<boolean>("roblox")) {
-    await updateApiInfo(context);
-    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
-    args.push(`--docs=${apiDocsUri(context).fsPath}`);
-  }
 
-  // Load extra type definitions
+  // DEPRECATED: Load global type definitions
   const definitionFiles = typesConfig.get<string[]>("definitionFiles");
   if (definitionFiles) {
     for (const definitionPath of definitionFiles) {
-      let uri;
-      if (vscode.workspace.workspaceFolders) {
-        uri = resolveUri(
-          vscode.workspace.workspaceFolders[0].uri,
-          definitionPath
-        );
-      } else {
-        uri = vscode.Uri.file(definitionPath);
-      }
+      const uri = parseConfigPath(definitionPath);
       if (await exists(uri)) {
         args.push(`--definitions=${uri.fsPath}`);
       } else {
@@ -245,6 +239,43 @@ export async function activate(context: vscode.ExtensionContext) {
         );
       }
     }
+  }
+
+  // Load environments
+  const environments: Record<string, string> = {};
+
+  const environmentsConfig =
+    typesConfig.get<Record<string, string>>("environments");
+  if (environmentsConfig) {
+    for (const [name, file] of Object.entries(environmentsConfig)) {
+      const uri = parseConfigPath(file);
+      if (await exists(uri)) {
+        environments[name] = uri.fsPath;
+      } else {
+        vscode.window.showWarningMessage(
+          `Definitions file at ${file} does not exist, types will not be provided for environment ${name}`
+        );
+      }
+    }
+  }
+
+  // Load roblox type definitions
+  if (typesConfig.get<boolean>("roblox")) {
+    await updateApiInfo(context);
+
+    // if (!builtinDefinitions["roblox"]) {
+    //   builtinDefinitions["roblox"] = globalTypesUri(context).fsPath;
+    //   environments["roblox"] = "roblox";
+    //   en["*"] =
+    //     (builtinDefinitions["*"] ? builtinDefinitions["*"] + "," : "") +
+    //     "roblox";
+    // }
+    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
+    args.push(`--docs=${apiDocsUri(context).fsPath}`);
+  }
+
+  for (const [name, builtins] of Object.entries(environments)) {
+    args.push(`--environment:${name}=${builtins}`);
   }
 
   // Handle FFlags
@@ -285,6 +316,8 @@ export async function activate(context: vscode.ExtensionContext) {
   for (const [name, value] of Object.entries(fflags)) {
     args.push(`--flag:${name}=${value}`);
   }
+
+  console.log("Starting server with: ", args);
 
   const run: Executable = {
     command: vscode.Uri.joinPath(

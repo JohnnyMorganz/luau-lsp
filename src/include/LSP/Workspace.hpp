@@ -21,7 +21,7 @@
 class WorkspaceFolder
 {
 public:
-    std::shared_ptr<Client> client;
+    ClientPtr client;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
@@ -32,10 +32,9 @@ public:
         : client(client)
         , name(name)
         , rootUri(uri)
-        , fileResolver(WorkspaceFileResolver())
+        , fileResolver(WorkspaceFileResolver(client, rootUri))
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
-        fileResolver.rootUri = uri;
     }
 
     // Initialises the workspace folder

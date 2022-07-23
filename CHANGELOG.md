@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- `luau-lsp.types.definitionFiles` has been deprecated in favour of environment support. Instead, create an environment in `luau-lsp.types.environments` and then assign a glob "\*" to your environment.
+
+### Added
+
+- Added support for environments. You can now configure environments with definition files attached to them, then assign a glob pattern an environment, using `luau-lsp.types.environments` and `luau-lsp.types.environmentGlobs`. For example, adding an environment "testez" pointing to a testez definitions file, then globbing "\*.spec.lua" to "testez". This deprecates global definitions configuration `luau-lsp.types.definitionFiles`
+
 ### Changed
 
 - Sync to upstream Luau 0.537

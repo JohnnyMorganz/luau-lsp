@@ -488,12 +488,12 @@ void WorkspaceFolder::initialize()
     Luau::registerBuiltinTypes(frontend.typeChecker);
     Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
 
-    if (client->definitionsFiles.empty())
+    if (client->definitionsFiles_DEPRECATED.empty())
     {
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
     }
 
-    for (auto definitionsFile : client->definitionsFiles)
+    for (auto definitionsFile : client->definitionsFiles_DEPRECATED)
     {
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
         auto result = types::registerDefinitions(frontend.typeChecker, definitionsFile);
@@ -523,6 +523,44 @@ void WorkspaceFolder::initialize()
             client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }
     }
+
+    // Load environments
+    for (auto& [environment, definitionsFile] : client->environments)
+    {
+        auto scope = frontend.addEnvironment(environment);
+        if (auto definitions = readFile(definitionsFile))
+        {
+            auto uri = Uri::file(definitionsFile);
+            auto loadResult = Luau::loadDefinitionFile(frontend.typeChecker, scope, *definitions, "@" + name);
+            if (loadResult.success)
+            {
+                // Clear any set diagnostics
+                client->publishDiagnostics({uri, std::nullopt, {}});
+            }
+            else
+            {
+                client->sendWindowMessage(lsp::MessageType::Error,
+                    "Failed to read definitions file for built-in definition " + name + ". Extended types will not be provided");
+
+                // Display relevant diagnostics
+                std::vector<lsp::Diagnostic> diagnostics;
+                for (auto& error : loadResult.parseResult.errors)
+                    diagnostics.emplace_back(createParseErrorDiagnostic(error));
+
+                if (loadResult.module)
+                    for (auto& error : loadResult.module->errors)
+                        diagnostics.emplace_back(createTypeErrorDiagnostic(error, &fileResolver));
+
+                client->publishDiagnostics({uri, std::nullopt, diagnostics});
+            }
+        }
+        else
+        {
+            client->sendWindowMessage(lsp::MessageType::Error, "Could not read definitions file for built-in definition " + name + " (" +
+                                                                   definitionsFile.generic_string() + "). Extended types will not be provided");
+        }
+    }
+
     Luau::freeze(frontend.typeChecker.globalTypes);
     Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
 }

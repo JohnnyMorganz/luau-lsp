@@ -12,7 +12,6 @@ using json = nlohmann::json;
 using namespace json_rpc;
 using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
-using ClientPtr = std::shared_ptr<Client>;
 
 class LanguageServer
 {
@@ -24,12 +23,9 @@ public:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
 
-    LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
-        : client(std::make_shared<Client>())
+    LanguageServer(ClientPtr client)
+        : client(client)
     {
-        client->definitionsFiles = definitionsFiles;
-        client->documentationFile = documentationFile;
-        parseDocumentation(documentationFile, client->documentation, client);
         nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
     }
 
