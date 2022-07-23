@@ -246,7 +246,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
     {
         std::string builder = "local ";
-        builder += exprOrLocal.getName()->value;
+        if (auto name = exprOrLocal.getName())
+            builder += name->value;
+        else
+            builder += Luau::getIdentifier(node->asExpr()).value;
         builder += ": " + typeString;
         typeString = codeBlock("lua", builder);
     }
