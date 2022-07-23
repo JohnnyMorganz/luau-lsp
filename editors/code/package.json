@@ -69,6 +69,16 @@
         "configuration": {
             "title": "Luau Language Server",
             "properties": {
+                "luau-lsp.trace.server": {
+                    "markdownDescription": "Traces the communication between VS Code and the Luau language server.",
+                    "type": "string",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "off"
+                },
                 "luau-lsp.autocompleteEnd": {
                     "markdownDescription": "Automatically insert an `end` when opening a block",
                     "type": "boolean",
