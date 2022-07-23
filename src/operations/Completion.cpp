@@ -205,13 +205,30 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 // Add label details
                 std::string detail = "(";
                 bool comma = false;
-                for (auto arg : ftv->argNames)
+                size_t argIndex = 0;
+
+                auto it = Luau::begin(ftv->argTypes);
+                for (; it != Luau::end(ftv->argTypes); ++it)
                 {
                     if (comma)
                         detail += ", ";
-                    detail += arg.has_value() ? arg->name : "_";
+
+                    if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
+                        detail += ftv->argNames.at(argIndex)->name;
+                    else
+                        detail += "_"; // TODO: can we produce a basic type name
+
                     comma = true;
+                    argIndex++;
                 }
+
+                if (auto tail = it.tail())
+                {
+                    if (comma)
+                        detail += ", ";
+                    detail += Luau::toString(*tail);
+                }
+
                 detail += ")";
                 item.labelDetails = {detail};
             }
