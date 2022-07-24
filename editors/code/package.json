@@ -161,6 +161,31 @@
                     "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
                     "type": "boolean",
                     "default": true
+                },
+                "luau-lsp.inlayHints.parameterNames": {
+                    "markdownDescription": "Show inlay hints for function parameter names",
+                    "type": "string",
+                    "default": "none",
+                    "enum": [
+                        "none",
+                        "literals",
+                        "all"
+                    ]
+                },
+                "luau-lsp.inlayHints.variableTypes": {
+                    "markdownDescription": "Show inlay hints for variable types",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.inlayHints.parameterTypes": {
+                    "markdownDescription": "Show inlay hints for parameter types",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.inlayHints.functionReturnTypes": {
+                    "markdownDescription": "Show inlay hints for function return types",
+                    "type": "boolean",
+                    "default": false
                 }
             }
         }

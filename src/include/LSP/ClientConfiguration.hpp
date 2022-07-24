@@ -33,6 +33,27 @@ struct ClientTypesConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
 
+enum struct InlayHintsParameterNamesConfig
+{
+    None,
+    Literals,
+    All
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(InlayHintsParameterNamesConfig, {
+                                                                 {InlayHintsParameterNamesConfig::None, "none"},
+                                                                 {InlayHintsParameterNamesConfig::Literals, "literals"},
+                                                                 {InlayHintsParameterNamesConfig::All, "all"},
+                                                             })
+
+struct ClientInlayHintsConfiguration
+{
+    InlayHintsParameterNamesConfig parameterNames;
+    bool variableTypes = false;
+    bool parameterTypes = false;
+    bool functionReturnTypes = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes);
+
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
 struct ClientConfiguration
@@ -43,5 +64,6 @@ struct ClientConfiguration
     ClientSourcemapConfiguration sourcemap;
     ClientDiagnosticsConfiguration diagnostics;
     ClientTypesConfiguration types;
+    ClientInlayHintsConfiguration inlayHints;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints);
