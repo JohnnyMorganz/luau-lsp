@@ -136,7 +136,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/semanticTokens/full")
     {
-        return semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
+        response = semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
     }
     else if (method == "textDocument/diagnostic")
     {
