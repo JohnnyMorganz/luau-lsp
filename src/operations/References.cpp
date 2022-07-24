@@ -1,4 +1,5 @@
 #include "LSP/Workspace.hpp"
+#include "LSP/LanguageServer.hpp"
 
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
@@ -34,4 +35,10 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     }
 
     return result;
+}
+
+lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    return workspace->references(params);
 }

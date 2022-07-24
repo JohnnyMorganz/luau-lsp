@@ -562,30 +562,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     }
 }
 
-std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
-}
-
-std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->signatureHelp(params);
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
-}
-
-lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->rename(params);
-}
-
 Response LanguageServer::onShutdown(const id_type& id)
 {
     shutdownRequested = true;

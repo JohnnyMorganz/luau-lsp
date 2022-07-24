@@ -1,4 +1,5 @@
 #include "LSP/Workspace.hpp"
+#include "LSP/LanguageServer.hpp"
 
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
@@ -96,4 +97,10 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     }
 
     return lsp::SignatureHelp{signatures, 0, activeParameter};
+}
+
+std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    return workspace->signatureHelp(params);
 }

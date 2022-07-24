@@ -1,4 +1,5 @@
 #include "LSP/Workspace.hpp"
+#include "LSP/LanguageServer.hpp"
 
 lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 {
@@ -45,4 +46,10 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     }
 
     return lsp::WorkspaceEdit{{{params.textDocument.uri.toString(), localChanges}}};
+}
+
+lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    return workspace->rename(params);
 }

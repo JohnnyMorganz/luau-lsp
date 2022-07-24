@@ -1,4 +1,5 @@
 #include "LSP/Workspace.hpp"
+#include "LSP/LanguageServer.hpp"
 
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
@@ -169,4 +170,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     }
 
     return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
+}
+
+std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    return workspace->hover(params);
 }
