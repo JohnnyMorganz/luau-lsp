@@ -32,7 +32,9 @@
     ],
     "activationEvents": [
         "onLanguage:lua",
-        "onLanguage:luau"
+        "onLanguage:luau",
+        "onCommand:luau-lsp.updateApi",
+        "onCommand:luau-lsp.regenerateSourcemap"
     ],
     "main": "./dist/extension.js",
     "contributes": {
