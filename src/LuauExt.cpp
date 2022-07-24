@@ -626,7 +626,7 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
                 {
                     return lookupProp(followed, name);
                 }
-                else if (auto indexFunction = Luau::get<Luau::FunctionTypeVar>(followed))
+                else if (Luau::get<Luau::FunctionTypeVar>(followed))
                 {
                     // TODO: can we handle an index function...?
                     return std::nullopt;
