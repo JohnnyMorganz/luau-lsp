@@ -152,7 +152,6 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     continue;
 
                 auto paramName = (*namesIt)->name;
-                auto literal = isLiteral(param);
                 if (!isLiteral(param))
                 {
                     if (config.inlayHints.parameterNames == InlayHintsParameterNamesConfig::Literals)
