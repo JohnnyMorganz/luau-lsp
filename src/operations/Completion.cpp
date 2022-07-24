@@ -113,16 +113,108 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     }
 }
 
+/// Attempts to retrieve a list of service names by inspecting the global type definitions
+static std::vector<std::string> getServiceNames(const Luau::ScopePtr scope)
+{
+    std::vector<std::string> services;
+
+    if (auto dataModelType = scope->lookupType("ServiceProvider"))
+    {
+        if (auto ctv = Luau::get<Luau::ClassTypeVar>(dataModelType->type))
+        {
+            if (auto getService = Luau::lookupClassProp(ctv, "GetService"))
+            {
+                if (auto itv = Luau::get<Luau::IntersectionTypeVar>(getService->type))
+                {
+                    for (auto part : itv->parts)
+                    {
+                        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(part))
+                        {
+                            auto it = Luau::begin(ftv->argTypes);
+                            auto end = Luau::end(ftv->argTypes);
+
+                            if (it != end && ++it != end)
+                            {
+                                if (auto stv = Luau::get<Luau::SingletonTypeVar>(*it))
+                                {
+                                    if (auto ss = Luau::get<Luau::StringSingleton>(stv))
+                                    {
+                                        services.emplace_back(ss->value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return services;
+}
+
+void WorkspaceFolder::suggestImports(
+    const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config, std::vector<lsp::CompletionItem>& result)
+{
+    auto sourceModule = frontend.getSourceModule(moduleName);
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    if (!sourceModule || !module)
+        return;
+
+    // If in roblox mode - suggest services
+    if (config.types.roblox)
+    {
+        auto scope = Luau::findScopeAtPosition(*module, position);
+        if (!scope)
+            return;
+
+        // Place after any hot comments and TODO: already imported services
+        size_t lineNumber = 0;
+        for (auto hotComment : sourceModule->hotcomments)
+        {
+            if (!hotComment.header)
+                continue;
+            if (hotComment.location.begin.line >= lineNumber)
+                lineNumber = hotComment.location.begin.line + 1;
+        }
+
+        auto services = getServiceNames(frontend.typeCheckerForAutocomplete.globalScope);
+        for (auto& service : services)
+        {
+            // ASSUMPTION: if the service was defined, it was defined with the exact same name
+            if (scope->linearSearchForBinding(service, true))
+                continue;
+
+            auto importText = "local " + service + " = game:GetService(\"" + service + "\")\n";
+
+            lsp::CompletionItem item;
+            item.label = service;
+            item.kind = lsp::CompletionItemKind::Class;
+            item.detail = "Auto-import";
+            item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", importText)};
+            item.insertText = service;
+
+            lsp::Position placement{lineNumber, 0};
+            item.additionalTextEdits.emplace_back(lsp::TextEdit{{placement, placement}, importText});
+
+            result.emplace_back(item);
+        }
+    }
+}
+
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
+    auto config = client->getConfiguration(rootUri);
     if (params.context && params.context->triggerCharacter == "\n")
     {
-        if (client->getConfiguration(rootUri).autocompleteEnd)
+        if (config.autocompleteEnd)
             endAutocompletion(params);
         return {};
     }
 
-    auto result = Luau::autocomplete(frontend, fileResolver.getModuleName(params.textDocument.uri), convertPosition(params.position), nullCallback);
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto position = convertPosition(params.position);
+    auto result = Luau::autocomplete(frontend, moduleName, position, nullCallback);
     std::vector<lsp::CompletionItem> items;
 
     for (auto& [name, entry] : result.entryMap)
@@ -248,6 +340,13 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         }
 
         items.emplace_back(item);
+    }
+
+    if (config.completion.suggestImports &&
+        (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
+    {
+        // TODO: only import in start of expression/statement context
+        suggestImports(moduleName, position, config, items);
     }
 
     return items;

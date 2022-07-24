@@ -62,6 +62,8 @@ public:
 
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
+    void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
+        std::vector<lsp::CompletionItem>& result);
 
 public:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);

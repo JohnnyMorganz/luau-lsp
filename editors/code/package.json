@@ -84,6 +84,11 @@
                     "type": "boolean",
                     "default": false
                 },
+                "luau-lsp.completion.suggestImports": {
+                    "markdownDescription": "Suggest automatic imports in completion items",
+                    "type": "boolean",
+                    "default": true
+                },
                 "luau-lsp.ignoreGlobs": {
                     "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
                     "type": "array",
