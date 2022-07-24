@@ -4,14 +4,18 @@
 
 TEST_SUITE_BEGIN("SemanticTokens");
 
-TEST_CASE_FIXTURE(Fixture, "test")
+TEST_CASE_FIXTURE(Fixture, "function_definition_name")
 {
     auto result = parse(R"(
-        local x = 1
+        function foo() end
     )");
 
     auto tokens = getSemanticTokens(result);
     REQUIRE(!tokens.empty());
+
+    auto token = *tokens.begin();
+    CHECK_EQ(token.tokenType, lsp::SemanticTokenTypes::Function);
+    CHECK_EQ(token.tokenModifiers, lsp::SemanticTokenModifiers::None);
 }
 
 TEST_SUITE_END();
