@@ -28,7 +28,7 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
             return workspace; // TODO: should we return early here? maybe a better match comes along?
         }
     }
-    client->sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+    client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
 

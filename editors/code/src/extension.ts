@@ -311,10 +311,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const serverOptions: ServerOptions = { run, debug };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      { scheme: "file", language: "lua" },
-      { scheme: "file", language: "luau" },
-    ],
+    documentSelector: [{ language: "lua" }, { language: "luau" }],
     diagnosticPullOptions: {
       onChange: true,
       onSave: true,

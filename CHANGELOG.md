@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash when hovering over local in incomplete syntax tree
+- Fixed language server not working for newly created files not yet stored on disk
 
 ## [1.7.1] - 2022-07-17
 
