@@ -4,6 +4,21 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
+static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTokenTypes default)
+{
+    if (!ty)
+        return default;
+
+    auto followedTy = Luau::follow(*ty);
+
+    if (Luau::get<Luau::FunctionTypeVar>(followedTy))
+    {
+        return lsp::SemanticTokenTypes::Function;
+    }
+
+    return default;
+}
+
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
@@ -63,9 +78,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprLocal* local) override
     {
-        auto type = lsp::SemanticTokenTypes::Variable;
+        auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Variable);
         if (contains(localTypes, local->local))
             type = localTypes.at(local->local);
+
         tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
         return false;
     }
@@ -167,7 +183,7 @@ std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
 
         auto deltaLine = line - lastLine;
         auto deltaStartChar = deltaLine == 0 ? startChar - lastChar : startChar;
-        auto length = token.end.column - token.start.column + 1;
+        auto length = token.end.column - token.start.column;
 
         result.insert(
             result.end(), {deltaLine, deltaStartChar, length, convertTokenType(token.tokenType), static_cast<size_t>(token.tokenModifiers)});
