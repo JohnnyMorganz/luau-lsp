@@ -937,6 +937,9 @@ struct SignatureHelpParams : TextDocumentPositionParams
 struct DefinitionParams : TextDocumentPositionParams
 {
 };
+
+using DefinitionResult = std::vector<lsp::Location>;
+
 struct TypeDefinitionParams : TextDocumentPositionParams
 {
 };

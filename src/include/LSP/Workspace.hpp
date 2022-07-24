@@ -72,7 +72,7 @@ public:
 
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
 
-    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params);
+    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params);
 
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
 

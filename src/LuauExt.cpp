@@ -616,6 +616,24 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     }
     else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
     {
+        if (auto mtable = Luau::get<Luau::TableTypeVar>(mt->metatable))
+        {
+            auto indexIt = mtable->props.find("__index");
+            if (indexIt != mtable->props.end())
+            {
+                Luau::TypeId followed = Luau::follow(indexIt->second.type);
+                if (Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed))
+                {
+                    return lookupProp(followed, name);
+                }
+                else if (auto indexFunction = Luau::get<Luau::FunctionTypeVar>(followed))
+                {
+                    // TODO: can we handle an index function...?
+                    return std::nullopt;
+                }
+            }
+        }
+
         if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
         {
             if (tbl->props.find(name) != tbl->props.end())
@@ -623,8 +641,6 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
                 return tbl->props.at(name);
             }
         }
-
-        // TODO: we should respect metatable __index
     }
     // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
     // {
@@ -807,4 +823,17 @@ std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& sourc
     FindSymbolReferences finder(symbol);
     source.root->visit(&finder);
     return std::move(finder.result);
+}
+
+std::optional<Luau::Location> getLocation(Luau::TypeId type)
+{
+    type = follow(type);
+
+    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(type))
+    {
+        if (ftv->definition)
+            return ftv->definition->originalNameLocation;
+    }
+
+    return std::nullopt;
 }

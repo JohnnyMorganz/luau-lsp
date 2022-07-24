@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for cross-file go to definition of functions
+- Added support for go-to definition of properties defined on a metatable with `__index`
+
 ### Changed
 
 - Sync to upstream Luau 0.537
