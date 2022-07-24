@@ -186,6 +186,12 @@
                     "markdownDescription": "Show inlay hints for function return types",
                     "type": "boolean",
                     "default": false
+                },
+                "luau-lsp.inlayHints.typeHintMaxLength": {
+                    "markdownDescription": "The maximum length a type hint should be before being truncated",
+                    "type": "number",
+                    "default": 50,
+                    "minimum": 10
                 }
             }
         }

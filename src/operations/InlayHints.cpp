@@ -9,17 +9,36 @@ bool isLiteral(const Luau::AstExpr* expr)
            expr->is<Luau::AstExprConstantNil>();
 }
 
+// Adds a text edit onto the hint so that it can be inserted.
+void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
+{
+    auto result = Luau::toStringDetailed(ty);
+    if (result.invalid || result.truncated)
+        return;
+    hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
+}
+
+void makeInsertable(lsp::InlayHint& hint, Luau::TypePackId ty)
+{
+    auto result = types::toStringReturnTypeDetailed(ty);
+    if (result.invalid || result.truncated)
+        return;
+    hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
+}
 struct InlayHintVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
     const ClientConfiguration& config;
     std::vector<lsp::InlayHint> hints;
+    Luau::ToStringOptions stringOptions;
 
     explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config)
         : module(module)
         , config(config)
 
     {
+        stringOptions.maxTableLength = 30;
+        stringOptions.maxTypeLength = config.inlayHints.typeHintMaxLength;
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -42,8 +61,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + Luau::toString(followedTy);
+                    hint.label = ": " + Luau::toString(followedTy, stringOptions);
                     hint.position = convertPosition(var->location.end);
+                    makeInsertable(hint, followedTy);
                     hints.emplace_back(hint);
                 }
             }
@@ -67,13 +87,17 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 size_t idx = 0;
                 for (auto argType : ftv->argTypes)
                 {
+                    if (func->args.size <= idx)
+                        break;
+
                     auto param = func->args.data[idx];
                     if (!param->annotation)
                     {
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + Luau::toString(argType);
+                        hint.label = ": " + Luau::toString(argType, stringOptions);
                         hint.position = convertPosition(param->location.end);
+                        makeInsertable(hint, argType);
                         hints.emplace_back(hint);
                     }
                     idx++;
@@ -87,8 +111,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes);
+                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
                     hint.position = convertPosition(func->argLocation->end);
+                    makeInsertable(hint, ftv->retTypes);
                     hints.emplace_back(hint);
                 }
             }
@@ -114,6 +139,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
             {
                 if (namesIt == ftv->argNames.end())
                     break;
+                if (!namesIt->has_value())
+                    continue;
 
                 auto paramName = (*namesIt)->name;
                 auto literal = isLiteral(param);
