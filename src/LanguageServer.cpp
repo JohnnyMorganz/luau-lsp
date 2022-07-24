@@ -61,6 +61,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentLinkProvider = {false};
     // Rename Provider
     capabilities.renameProvider = true;
+    // Inlay Hint Provider
+    capabilities.inlayHintProvider = true;
     // Diagnostics Provider
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspaces
@@ -124,6 +126,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/documentSymbol")
     {
         response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+    }
+    else if (method == "textDocument/inlayHint")
+    {
+        response = inlayHint(REQUIRED_PARAMS(params, "textDocument/inlayHint"));
     }
     else if (method == "textDocument/diagnostic")
     {

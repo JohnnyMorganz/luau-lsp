@@ -551,6 +551,23 @@ std::string toStringNamedFunction(
     return "function " + baseName + methodName + functionString;
 }
 
+std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    return toStringReturnTypeDetailed(retTypes, options).name;
+}
+
+Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    size_t retSize = Luau::size(retTypes);
+    bool hasTail = !Luau::finite(retTypes);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+
+    auto result = Luau::toStringDetailed(retTypes, options);
+    if (wrap)
+        result.name = "(" + result.name + ")";
+    return result;
+}
+
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 {

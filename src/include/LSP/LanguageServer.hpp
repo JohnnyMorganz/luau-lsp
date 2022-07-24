@@ -68,6 +68,7 @@ private:
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown(const id_type& id);

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added support for cross-file go to definition of functions
 - Added support for go-to definition of properties defined on a metatable with `__index`
+- Added support for inlay hints. It can be enabled by configuring `luau-lsp.inlayHints.parameterNames`, `luau-lsp.inlayHints.parameterTypes`, `luau-lsp.inlayHints.variableTypes`, `luau-lsp.inlayHints.functionReturnTypes`.
 
 ### Changed
 

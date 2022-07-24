@@ -65,7 +65,7 @@ If you use Luau in a different environment and are interested in using the langu
 - [ ] Selection Range
 - [ ] Call Hierarchy
 - [ ] Semantic Tokens
-- [ ] Inlay Hints
+- [x] Inlay Hints
 - [ ] Workspace Symbols
 
 The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
