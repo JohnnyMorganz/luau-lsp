@@ -190,8 +190,7 @@ int startAnalyze(int argc, char** argv)
     Luau::FrontendOptions frontendOptions;
     frontendOptions.retainFullTypeGraphs = annotate;
 
-    WorkspaceFileResolver fileResolver;
-    fileResolver.rootUri = Uri::file(std::filesystem::current_path());
+    WorkspaceFileResolver fileResolver(Uri::file(std::filesystem::current_path()));
     Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 
     if (sourcemapPath)

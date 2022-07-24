@@ -12,7 +12,6 @@ using json = nlohmann::json;
 using namespace json_rpc;
 using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
-using ClientPtr = std::shared_ptr<Client>;
 
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()

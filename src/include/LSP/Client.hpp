@@ -15,8 +15,10 @@ class Client
 public:
     lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
-    /// A registered definitions file passed by the client
-    std::vector<std::filesystem::path> definitionsFiles;
+    /// [DEPRECATED] A registered definitions file passed by the client
+    std::vector<std::filesystem::path> definitionsFiles_DEPRECATED;
+    std::unordered_map<std::string, std::filesystem::path> environments;
+
     /// A registered documentation file passed by the client
     std::optional<std::filesystem::path> documentationFile = std::nullopt;
     /// Parsed documentation database
@@ -73,3 +75,5 @@ public:
 private:
     void sendRawMessage(const json& message);
 };
+
+using ClientPtr = std::shared_ptr<Client>;

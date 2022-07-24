@@ -1,6 +1,7 @@
 #include <optional>
 #include <unordered_map>
 #include <iostream>
+#include "glob/glob.hpp"
 #include "Luau/Ast.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
@@ -245,6 +246,32 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     {
         return name;
     }
+}
+
+std::optional<std::string> WorkspaceFileResolver::getEnvironmentForModule(const Luau::ModuleName& name) const
+{
+    if (!client)
+        return std::nullopt;
+
+    auto path = resolveToRealPath(name);
+    if (!path)
+        return std::nullopt;
+
+    // We want to test globs against a relative path to workspace, since thats what makes most sense
+    auto relativePath = path->lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+    auto config = client->getConfiguration(rootUri);
+    for (auto& [glob, environment] : config.types.environmentGlobs)
+    {
+        if (glob::fnmatch_case(relativePath, glob))
+            return environment;
+    }
+
+    // In roblox mode, set the default environment to "roblox"
+    if (config.types.roblox)
+        return "roblox";
+
+    return std::nullopt;
 }
 
 const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const
