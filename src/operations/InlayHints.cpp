@@ -50,14 +50,23 @@ struct InlayHintVisitor : public Luau::AstVisitor
         if (!scope)
             return false;
 
-        for (auto var : local->vars)
+        for (size_t i = 0; i < local->vars.size; i++)
         {
+            auto var = local->vars.data[i];
             if (!var->annotation)
             {
                 auto ty = scope->lookup(var);
                 if (ty)
                 {
                     auto followedTy = Luau::follow(*ty);
+
+                    // If the variable is assigned a function, don't bother showing a hint
+                    // since we can already infer stuff from the assigned function
+                    if (local->values.size > i)
+                    {
+                        if (Luau::get<Luau::FunctionTypeVar>(followedTy) && local->values.data[i]->is<Luau::AstExprFunction>())
+                            continue;
+                    }
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
