@@ -6,11 +6,11 @@ TEST_SUITE_BEGIN("SemanticTokens");
 
 TEST_CASE_FIXTURE(Fixture, "function_definition_name")
 {
-    auto result = parse(R"(
+    check(R"(
         function foo() end
     )");
 
-    auto tokens = getSemanticTokens(result);
+    auto tokens = getSemanticTokens(getMainModule(), getMainSourceModule());
     REQUIRE(!tokens.empty());
 
     auto token = *tokens.begin();
