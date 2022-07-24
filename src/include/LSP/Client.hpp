@@ -28,6 +28,11 @@ public:
 
     ConfigChangedCallback configChangedCallback;
 
+    // A partial result token for workspace diagnostics
+    // If this is present, we can stream results
+    std::optional<id_type> workspaceDiagnosticsRequestId = std::nullopt;
+    std::optional<lsp::ProgressToken> workspaceDiagnosticsToken = std::nullopt;
+
 private:
     /// The request id for the next request
     int nextRequestId = 0;
@@ -38,6 +43,11 @@ public:
     void sendResponse(const id_type& id, const json& result);
     void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
     void sendNotification(const std::string& method, std::optional<json> params);
+
+    void sendProgress(const lsp::ProgressParams params)
+    {
+        sendNotification("$/progress", params);
+    }
 
     void sendLogMessage(lsp::MessageType type, std::string message);
     void sendTrace(std::string message, std::optional<std::string> verbose = std::nullopt);
@@ -50,7 +60,9 @@ public:
     // TODO: this function only supports getting requests for workspaces
     void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);
     void applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optional<ResponseHandler> handler = std::nullopt);
+    void publishDiagnostics(const lsp::PublishDiagnosticsParams& params);
     void refreshWorkspaceDiagnostics();
+    void terminateWorkspaceDiagnostics(bool retriggerRequest = true);
 
     void setTrace(const lsp::SetTraceParams& params);
 

@@ -26,6 +26,8 @@ The language server will automatically create a `sourcemap.json` in your workspa
 It does this by running the `rojo sourcemap` command, hence Rojo 7.1.0+ must be available to execute in your workspace root.
 It is recommend to `.gitignore` the `sourcemap.json` file. In future, the language server will generate the file internally.
 
+Note, if you are using the VSCode extension on macOS, you need to configure the location of the Rojo binary at `luau-lsp.sourcemap.rojoPath`.
+
 By default we generate a sourcemap for a `default.project.json` project file. The name can be changed in extension settings, as well as whether non-script instances are included in the sourcemap (included by default). Autogeneration of sourcemaps can also be toggled completely on/off in settings - the server will instead just listen to manual changes to `sourcemap.json` files.
 
 ## Standalone

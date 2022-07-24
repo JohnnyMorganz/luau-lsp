@@ -28,9 +28,10 @@ declare debug: {
 }
 
 declare task: {
-    defer: <A..., R...>(f: thread | ((A...) -> R...), A...) -> (),
-    spawn: <A..., R...>(f: thread | ((A...) -> R...), A...) -> (),
-    delay: <A..., R...>(sec: number?, f: thread | ((A...) -> R...), A...) -> (),
+    cancel: (thread: thread) -> (),
+    defer: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
+    spawn: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
+    delay: <A..., R...>(sec: number?, f: thread | ((A...) -> R...), A...) -> thread,
     wait: (sec: number?) -> number,
     synchronize: () -> (),
     desynchronize: () -> (),
@@ -655,7 +656,6 @@ declare class EnumContextActionPriority extends EnumItem end
 declare class EnumContextActionPriority_INTERNAL extends Enum
 	Low: EnumContextActionPriority
 	Medium: EnumContextActionPriority
-	Default: EnumContextActionPriority
 	High: EnumContextActionPriority
 end
 declare class EnumContextActionResult extends EnumItem end
@@ -1671,6 +1671,7 @@ end
 declare class EnumMeshPartDetailLevel extends EnumItem end
 declare class EnumMeshPartDetailLevel_INTERNAL extends Enum
 	DistanceBased: EnumMeshPartDetailLevel
+	Level00: EnumMeshPartDetailLevel
 	Level01: EnumMeshPartDetailLevel
 	Level02: EnumMeshPartDetailLevel
 	Level03: EnumMeshPartDetailLevel
@@ -2133,6 +2134,13 @@ declare class EnumRotationType extends EnumItem end
 declare class EnumRotationType_INTERNAL extends Enum
 	MovementRelative: EnumRotationType
 	CameraRelative: EnumRotationType
+end
+declare class EnumRunContext extends EnumItem end
+declare class EnumRunContext_INTERNAL extends Enum
+	Legacy: EnumRunContext
+	Server: EnumRunContext
+	Client: EnumRunContext
+	Plugin: EnumRunContext
 end
 declare class EnumRuntimeUndoBehavior extends EnumItem end
 declare class EnumRuntimeUndoBehavior_INTERNAL extends Enum
@@ -2697,6 +2705,12 @@ declare class EnumUiMessageType_INTERNAL extends Enum
 	UiMessageError: EnumUiMessageType
 	UiMessageInfo: EnumUiMessageType
 end
+declare class EnumUnionsScaleNonuniformly extends EnumItem end
+declare class EnumUnionsScaleNonuniformly_INTERNAL extends Enum
+	Default: EnumUnionsScaleNonuniformly
+	Disabled: EnumUnionsScaleNonuniformly
+	Enabled: EnumUnionsScaleNonuniformly
+end
 declare class EnumUsageContext extends EnumItem end
 declare class EnumUsageContext_INTERNAL extends Enum
 	Default: EnumUsageContext
@@ -2799,6 +2813,12 @@ declare class EnumVoiceChatState_INTERNAL extends Enum
 	Ended: EnumVoiceChatState
 	Failed: EnumVoiceChatState
 end
+declare class EnumVolumetricAudio extends EnumItem end
+declare class EnumVolumetricAudio_INTERNAL extends Enum
+	Disabled: EnumVolumetricAudio
+	Automatic: EnumVolumetricAudio
+	Enabled: EnumVolumetricAudio
+end
 declare class EnumWaterDirection extends EnumItem end
 declare class EnumWaterDirection_INTERNAL extends Enum
 	NegX: EnumWaterDirection
@@ -2836,6 +2856,8 @@ declare class EnumWrapLayerDebugMode_INTERNAL extends Enum
 	HSROuter: EnumWrapLayerDebugMode
 	HSRInner: EnumWrapLayerDebugMode
 	HSRInnerReverse: EnumWrapLayerDebugMode
+	LayerCageFittedToBase: EnumWrapLayerDebugMode
+	LayerCageFittedToPrev: EnumWrapLayerDebugMode
 end
 declare class EnumWrapTargetDebugMode extends EnumItem end
 declare class EnumWrapTargetDebugMode_INTERNAL extends Enum
@@ -3066,6 +3088,7 @@ declare Enum: {
 	RollOffMode: EnumRollOffMode_INTERNAL,
 	RotationOrder: EnumRotationOrder_INTERNAL,
 	RotationType: EnumRotationType_INTERNAL,
+	RunContext: EnumRunContext_INTERNAL,
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior_INTERNAL,
 	SaveFilter: EnumSaveFilter_INTERNAL,
 	SavedQualitySetting: EnumSavedQualitySetting_INTERNAL,
@@ -3123,6 +3146,7 @@ declare Enum: {
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
 	UiMessageType: EnumUiMessageType_INTERNAL,
+	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly_INTERNAL,
 	UsageContext: EnumUsageContext_INTERNAL,
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
@@ -3136,6 +3160,7 @@ declare Enum: {
 	VirtualCursorMode: EnumVirtualCursorMode_INTERNAL,
 	VirtualInputMode: EnumVirtualInputMode_INTERNAL,
 	VoiceChatState: EnumVoiceChatState_INTERNAL,
+	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
 	WaterForce: EnumWaterForce_INTERNAL,
 	WrapLayerAutoSkin: EnumWrapLayerAutoSkin_INTERNAL,
@@ -3527,6 +3552,7 @@ type AppUpdateService = any
 type AssetCounterService = any
 type AssetDeliveryProxy = any
 type AssetImportService = any
+type AssetImportSession = any
 type AssetManagerService = any
 type AssetService = any
 type Atmosphere = any
@@ -3647,6 +3673,7 @@ type DebuggerManager = any
 type DebuggerUIService = any
 type DebuggerVariable = any
 type DebuggerWatch = any
+type DeviceIdService = any
 type Dialog = any
 type DialogChoice = any
 type DraftsService = any
@@ -3871,6 +3898,7 @@ type OutfitPages = any
 type StandardPages = any
 type PartOperationAsset = any
 type ParticleEmitter = any
+type PatchMapping = any
 type Path = any
 type PathfindingLink = any
 type PathfindingModifier = any
@@ -3938,6 +3966,7 @@ type RotationCurve = any
 type RtMessagingService = any
 type RunService = any
 type RuntimeScriptService = any
+type ScreenshotHud = any
 type ScriptChangeService = any
 type ScriptCloneWatcher = any
 type ScriptCloneWatcherHelper = any
@@ -3973,6 +4002,7 @@ type EqualizerSoundEffect = any
 type FlangeSoundEffect = any
 type PitchShiftSoundEffect = any
 type ReverbSoundEffect = any
+type RomarkSoundEffect = any
 type TremoloSoundEffect = any
 type SoundGroup = any
 type SoundService = any
@@ -4005,6 +4035,7 @@ type StudioTheme = any
 type SurfaceAppearance = any
 type TaskScheduler = any
 type Team = any
+type TeamCreateService = any
 type Teams = any
 type TeleportAsyncResult = any
 type TeleportOptions = any
@@ -4208,6 +4239,7 @@ declare class AnimationFromVideoCreatorService extends Instance
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
+	function IsAgeRestricted(self): boolean
 	function CreateAnimationByUploadingVideo(self, progressCallback: <A..., R...>(A...) -> R...): string
 	function ImportVideoWithPrompt(self): string
 end
@@ -4277,8 +4309,22 @@ declare class AssetImportService extends Instance
 	function IsAvatar(self): boolean
 	function Upload(self): nil
 	function ImportMeshWithPrompt(self): any
+	function StartSessionWithPrompt(self): AssetImportSession
 	ProgressUpdate: RBXScriptSignal<number>
 	UploadFinished: RBXScriptSignal<boolean, { [any]: any }>
+end
+
+declare class AssetImportSession extends Instance
+	function Cancel(self): nil
+	function GetCurrentImportMap(self): { [any]: any }
+	function GetCurrentStatusTable(self): { [any]: any }
+	function GetFilename(self): string
+	function GetInstance(self, nodeId: number): Instance
+	function GetSettingsRoot(self): Instance
+	function IsAvatar(self): boolean
+	function Upload(self): nil
+	UploadComplete: RBXScriptSignal<boolean, { [any]: any }>
+	UploadProgress: RBXScriptSignal<number>
 end
 
 declare class AssetManagerService extends Instance
@@ -4929,10 +4975,6 @@ end
 
 
 declare class RigidConstraint extends Constraint
-	Broken: boolean
-	DestructionEnabled: boolean
-	DestructionForce: number
-	DestructionTorque: number
 end
 
 declare class RodConstraint extends Constraint
@@ -5332,6 +5374,10 @@ end
 
 declare class DebuggerWatch extends Instance
 	Expression: string
+end
+
+declare class DeviceIdService extends Instance
+	function GetDeviceId(self): string
 end
 
 declare class Dialog extends Instance
@@ -6409,14 +6455,20 @@ end
 declare class ImporterMeshSettings extends ImporterBaseSettings
 	Anchored: boolean
 	CageManifold: boolean
-	CageManifoldPreview: boolean
+	CageMeshIntersectedPreview: boolean
+	CageMeshNotIntersected: boolean
 	CageNoOverlappingVertices: boolean
-	CageNoOverlappingVerticesPreview: boolean
+	CageNonManifoldPreview: boolean
+	CageOverlappingVerticesPreview: boolean
 	CageUVMatched: boolean
-	CageUVMatchedPreview: boolean
+	CageUVMisMatchedPreview: boolean
 	Dimensions: Vector3
 	DoubleSided: boolean
 	IgnoreVertexColors: boolean
+	IrrelevantCageModifiedPreview: boolean
+	MeshHoleDetectedPreview: boolean
+	MeshNoHoleDetected: boolean
+	NoIrrelevantCageModified: boolean
 	PolygonCount: number
 	UseImportedPivot: boolean
 end
@@ -6626,6 +6678,7 @@ declare class LocalizationService extends Instance
 	function GetCorescriptLocalizations(self): { Instance }
 	function GetTableEntries(self, instance: Instance?): { any }
 	function GetTranslatorForPlayer(self, player: Player): Translator
+	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetRobloxLocaleId(self, locale: string): nil
 	function StartTextScraper(self): nil
 	function StopTextScraper(self): nil
@@ -6693,6 +6746,7 @@ end
 declare class BaseScript extends LuaSourceContainer
 	Disabled: boolean
 	LinkedSource: Content
+	RunContext: EnumRunContext
 end
 
 declare class CoreScript extends BaseScript
@@ -7047,6 +7101,7 @@ declare class BasePart extends PVInstance
 	CanTouch: boolean
 	CastShadow: boolean
 	CenterOfMass: Vector3
+	CollisionGroup: string
 	CollisionGroupId: number
 	Color: Color3
 	CustomPhysicalProperties: PhysicalProperties
@@ -7163,6 +7218,7 @@ end
 
 declare class TriangleMeshPart extends BasePart
 	CollisionFidelity: EnumCollisionFidelity
+	MeshSize: Vector3
 end
 
 declare class MeshPart extends TriangleMeshPart
@@ -7171,7 +7227,6 @@ declare class MeshPart extends TriangleMeshPart
 	HasSkinnedMesh: boolean
 	JointOffset: Vector3
 	MeshId: Content
-	MeshSize: Vector3
 	RenderFidelity: EnumRenderFidelity
 	TextureID: Content
 	function ApplyMesh(self, meshPart: MeshPart): nil
@@ -7266,6 +7321,7 @@ declare class Workspace extends WorldRoot
 	StreamingTargetRadius: number
 	Terrain: Terrain
 	TouchesUseCollisionGroups: boolean
+	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly
 	function BreakJoints(self, objects: { Instance }): nil
 	function CalculateJumpDistance(self, gravity: number, jumpPower: number, walkSpeed: number): number
 	function CalculateJumpHeight(self, gravity: number, jumpPower: number): number
@@ -7290,10 +7346,12 @@ end
 declare class PackageLink extends Instance
 	AutoUpdate: boolean
 	Creator: string
+	Package_Id: Content
 	PackageAssetName: string
 	PackageId: Content
 	PermissionLevel: EnumPackagePermission
 	Status: string
+	Version_Number: number
 	VersionNumber: number
 end
 
@@ -7380,6 +7438,12 @@ declare class ParticleEmitter extends Instance
 	ZOffset: number
 	function Clear(self): nil
 	function Emit(self, particleCount: number?): nil
+end
+
+declare class PatchMapping extends Instance
+	FlattenTree: boolean
+	PatchId: string
+	TargetPath: string
 end
 
 declare class Path extends Instance
@@ -7668,6 +7732,8 @@ declare class Plugin extends Instance
 	Deactivation: RBXScriptSignal<>
 	Ready: RBXScriptSignal<>
 	Unloading: RBXScriptSignal<>
+	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
+	ProcessAssetInsertionDrop: () -> nil
 end
 
 declare class PluginAction extends Instance
@@ -8028,6 +8094,17 @@ end
 declare class RuntimeScriptService extends Instance
 end
 
+declare class ScreenshotHud extends Instance
+	CameraButtonIcon: Content
+	CameraButtonPosition: UDim2
+	CloseButtonPosition: UDim2
+	CloseWhenScreenshotTaken: boolean
+	ExperienceNameOverlayEnabled: boolean
+	OverlayFont: EnumFont
+	UsernameOverlayEnabled: boolean
+	Visible: boolean
+end
+
 declare class ScriptChangeService extends Instance
 	ScriptAdded: RBXScriptSignal<LuaSourceContainer>
 	ScriptBeingRemoved: RBXScriptSignal<LuaSourceContainer>
@@ -8079,11 +8156,14 @@ end
 
 declare class ScriptDocument extends Instance
 	function GetInternalUri(self): string
-	function GetNumLines(self): number
+	function GetLine(self, lineIndex: number?): string
+	function GetLineCount(self): number
 	function GetScript(self): LuaSourceContainer
-	function GetText(self): string
+	function GetSelection(self): any
+	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
 	function IsCommandBar(self): boolean
-	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number?, endCharacter: number?): any
+	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
+	SelectionChanged: RBXScriptSignal<number, number, number, number>
 end
 
 declare class ScriptEditorService extends Instance
@@ -8262,6 +8342,9 @@ declare class ReverbSoundEffect extends SoundEffect
 	WetLevel: number
 end
 
+declare class RomarkSoundEffect extends SoundEffect
+end
+
 declare class TremoloSoundEffect extends SoundEffect
 	Depth: number
 	Duty: number
@@ -8278,6 +8361,7 @@ declare class SoundService extends Instance
 	DopplerScale: number
 	RespectFilteringEnabled: boolean
 	RolloffScale: number
+	VolumetricAudio: EnumVolumetricAudio
 	function BeginRecording(self): boolean
 	function GetListener(self): (EnumListenerType, any)
 	function GetOutputDevice(self): any
@@ -8437,6 +8521,7 @@ declare class Studio extends Instance
 	Bracket_Color: Color3
 	Builtin_Function_Color: Color3
 	Camera_Mouse_Wheel_Speed: number
+	Camera_Pan_Speed: number
 	Camera_Shift_Speed: number
 	Camera_Speed: number
 	Camera_Zoom_to_Mouse_Position: boolean
@@ -8476,6 +8561,7 @@ declare class Studio extends Instance
 	Hover_Animate_Speed: EnumHoverAnimateSpeed
 	Hover_Box_Thickness: number
 	Hover_Over_Color: Color3
+	IconOverrideDir: QDir
 	Indent_Using_Spaces: boolean
 	Keyword_Color: Color3
 	Line_Thickness: number
@@ -8577,13 +8663,16 @@ declare class StudioHighDpiService extends Instance
 end
 
 declare class StudioPublishService extends Instance
+	function ClearUploadNames(self): nil
 	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
+	function PublishThenTurnOnTeamCreate(self): nil
 	function RefreshDocumentDisplayName(self): nil
 	function SetTeamCreateOnPublishInfo(self, shouldTurnOnTcOnPublish: boolean, newPlaceName: string): nil
 	function SetUniverseDisplayName(self, newName: string): nil
 	function SetUploadNames(self, placeName: string, universeName: string): nil
 	function ShowSaveOrPublishPlaceToRoblox(self, showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode): nil
 	GameNameUpdated: RBXScriptSignal<string>
+	GamePublishCancelled: RBXScriptSignal<>
 	GamePublishFinished: RBXScriptSignal<boolean, number>
 	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 end
@@ -8607,11 +8696,6 @@ declare class StudioService extends Instance
 	UseLocalSpace: boolean
 	function AnimationIdSelected(self, id: number): nil
 	function CopyToClipboard(self, stringToCopy: string): nil
-	function DEPRECATED_EmitPlacePublishedSignal(self): nil
-	function DEPRECATED_RefreshDocumentDisplayName(self): nil
-	function DEPRECATED_SetUniverseDisplayName(self, newName: string): nil
-	function DEPRECATED_ShowSaveOrPublishPlaceToRoblox(self, showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode): nil
-	function DEPRECATED_publishAs(self, universeId: number, placeId: number, groupId: number): nil
 	function GetBadgeConfigureUrl(self, badgeId: number): string
 	function GetBadgeUploadUrl(self): string
 	function GetClassIcon(self, className: string): { [any]: any }
@@ -8635,10 +8719,6 @@ declare class StudioService extends Instance
 	function PromptImportFile(self, fileTypeFilter: { any }?): Instance
 	function PromptImportFiles(self, fileTypeFilter: { any }?): { Instance }
 	function TryInstallPlugin(self, assetId: number, assetVersionId: number): nil
-	DEPRECATED_GameNameUpdated: RBXScriptSignal<string>
-	DEPRECATED_GamePublishFinished: RBXScriptSignal<boolean, number>
-	DEPRECATED_OnPublishPlaceToRoblox: RBXScriptSignal<boolean>
-	DEPRECATED_OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 	OnImportFromRoblox: RBXScriptSignal<>
 	OnOpenGameSettings: RBXScriptSignal<string>
 	OnOpenManagePackagePlugin: RBXScriptSignal<number, number>
@@ -8677,6 +8757,10 @@ declare class Team extends Instance
 	function GetPlayers(self): { Instance }
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
+end
+
+declare class TeamCreateService extends Instance
+	ToggleManageCollaborators: RBXScriptSignal<>
 end
 
 declare class Teams extends Instance
@@ -8939,6 +9023,10 @@ declare class UGCValidationService extends Instance
 	function GetMeshVertColors(self, meshId: string): { any }
 	function GetMeshVerts(self, meshId: string): { any }
 	function GetTextureSize(self, textureId: string): Vector2
+	function ValidateMeshTriangles(self, meshId: string): boolean
+	function ValidateMeshVertColors(self, meshId: string): boolean
+	function ValidateTextureSize(self, textureId: string): boolean
+	function ValidateUVSpace(self, meshId: string): boolean
 end
 
 declare class UIBase extends Instance
@@ -9419,6 +9507,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "DebuggerConnectionManager"): DebuggerConnectionManager
 	function GetService(self, service: "DebuggerManager"): DebuggerManager
 	function GetService(self, service: "DebuggerUIService"): DebuggerUIService
+	function GetService(self, service: "DeviceIdService"): DeviceIdService
 	function GetService(self, service: "DraftsService"): DraftsService
 	function GetService(self, service: "DraggerService"): DraggerService
 	function GetService(self, service: "EventIngestService"): EventIngestService
@@ -9526,6 +9615,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StudioScriptDebugEventListener"): StudioScriptDebugEventListener
 	function GetService(self, service: "StudioService"): StudioService
 	function GetService(self, service: "TaskScheduler"): TaskScheduler
+	function GetService(self, service: "TeamCreateService"): TeamCreateService
 	function GetService(self, service: "Teams"): Teams
 	function GetService(self, service: "TeleportService"): TeleportService
 	function GetService(self, service: "TemporaryCageMeshProvider"): TemporaryCageMeshProvider

@@ -114,6 +114,11 @@ namespace lsp
 using URI = Uri;
 using DocumentUri = Uri;
 
+// Alias a std::optional to PartialResponse
+// If it contains std::nullopt, we shouldn't send a result.
+template<typename T>
+using PartialResponse = std::optional<T>;
+
 enum struct ErrorCode
 {
     // JSON RPC errors
@@ -140,6 +145,22 @@ enum struct PositionEncodingKind
 };
 NLOHMANN_JSON_SERIALIZE_ENUM(
     PositionEncodingKind, {{PositionEncodingKind::UTF8, "utf-8"}, {PositionEncodingKind::UTF16, "utf-16"}, {PositionEncodingKind::UTF32, "utf-32"}});
+
+
+using ProgressToken = std::variant<std::string, int>;
+
+struct PartialResultParams
+{
+    std::optional<ProgressToken> partialResultToken;
+};
+
+// TODO: make this generic over value
+struct ProgressParams
+{
+    ProgressToken token;
+    json value;
+};
+NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value);
 
 struct DiagnosticClientCapabilities
 {
@@ -864,12 +885,12 @@ struct PreviousResultId
 };
 NLOHMANN_DEFINE_OPTIONAL(PreviousResultId, uri, value);
 
-struct WorkspaceDiagnosticParams
+struct WorkspaceDiagnosticParams : PartialResultParams
 {
     std::optional<std::string> identifier;
     std::vector<PreviousResultId> previousResultIds;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticParams, identifier, previousResultIds);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticParams, partialResultToken, identifier, previousResultIds);
 
 struct WorkspaceDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
@@ -883,6 +904,18 @@ struct WorkspaceDiagnosticReport
     std::vector<WorkspaceDocumentDiagnosticReport> items;
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReport, items);
+
+struct WorkspaceDiagnosticReportPartialResult
+{
+    std::vector<WorkspaceDocumentDiagnosticReport> items;
+};
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReportPartialResult, items);
+
+struct DiagnosticServerCancellationData
+{
+    bool retriggerRequest = true;
+};
+NLOHMANN_DEFINE_OPTIONAL(DiagnosticServerCancellationData, retriggerRequest);
 
 enum struct CompletionTriggerKind
 {
@@ -1070,6 +1103,9 @@ struct SignatureHelpParams : TextDocumentPositionParams
 struct DefinitionParams : TextDocumentPositionParams
 {
 };
+
+using DefinitionResult = std::vector<lsp::Location>;
+
 struct TypeDefinitionParams : TextDocumentPositionParams
 {
 };

@@ -32,7 +32,8 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr);
+std::string toStringNamedFunction(
+    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope = std::nullopt);
 
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);
@@ -98,11 +99,14 @@ struct FindNodeType : public Luau::AstVisitor
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos);
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol);
 
+std::optional<Luau::Location> getLocation(Luau::TypeId type);
+
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
 std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
 
 Luau::Position convertPosition(const lsp::Position& position);
 lsp::Position convertPosition(const Luau::Position& position);
 
-lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error);
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver);
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint);
+lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error);

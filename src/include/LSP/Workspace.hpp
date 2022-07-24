@@ -36,8 +36,13 @@ public:
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
         fileResolver.rootUri = uri;
-        setup();
     }
+
+    // Initialises the workspace folder
+    void initialize();
+
+    // Sets up the workspace folder after receiving configuration information
+    void setupWithConfiguration(const ClientConfiguration& configuration);
 
     /// Checks whether a provided file is part of the workspace
     bool isInWorkspace(const lsp::DocumentUri& file);
@@ -49,6 +54,8 @@ public:
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
+    /// Whether the file has been specified in the configuration as a definitions file
+    bool isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
 
     lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
@@ -65,7 +72,7 @@ public:
 
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
 
-    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params);
+    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params);
 
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
 
@@ -80,7 +87,5 @@ public:
     bool isNullWorkspace() const
     {
         return name == "$NULL_WORKSPACE";
-    }
-
-    void setup();
+    };
 };

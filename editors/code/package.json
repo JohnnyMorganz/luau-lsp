@@ -17,7 +17,7 @@
     "sponsor": {
         "url": "https://github.com/sponsors/JohnnyMorganz"
     },
-    "version": "1.4.0",
+    "version": "1.7.1",
     "engines": {
         "vscode": "^1.67.0"
     },
@@ -32,7 +32,9 @@
     ],
     "activationEvents": [
         "onLanguage:lua",
-        "onLanguage:luau"
+        "onLanguage:luau",
+        "onCommand:luau-lsp.updateApi",
+        "onCommand:luau-lsp.regenerateSourcemap"
     ],
     "main": "./dist/extension.js",
     "contributes": {
@@ -60,11 +62,25 @@
             {
                 "command": "luau-lsp.updateApi",
                 "title": "Luau: Redownload API Types"
+            },
+            {
+                "command": "luau-lsp.regenerateSourcemap",
+                "title": "Luau: Regenerate Rojo Sourcemap"
             }
         ],
         "configuration": {
             "title": "Luau Language Server",
             "properties": {
+                "luau-lsp.trace.server": {
+                    "markdownDescription": "Traces the communication between VS Code and the Luau language server.",
+                    "type": "string",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "off"
+                },
                 "luau-lsp.autocompleteEnd": {
                     "markdownDescription": "Automatically insert an `end` when opening a block",
                     "type": "boolean",
@@ -80,10 +96,20 @@
                         "**/_Index/**"
                     ]
                 },
+                "luau-lsp.sourcemap.enabled": {
+                    "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
+                    "type": "boolean",
+                    "default": true
+                },
                 "luau-lsp.sourcemap.autogenerate": {
                     "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
                     "type": "boolean",
                     "default": true
+                },
+                "luau-lsp.sourcemap.rojoPath": {
+                    "markdownDescription": "Path to the Rojo executable. If not provided, attempts to run `rojo` in the workspace directory, so it must be available on the PATH",
+                    "type": "string",
+                    "default": null
                 },
                 "luau-lsp.sourcemap.rojoProjectFile": {
                     "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
@@ -170,7 +196,6 @@
     },
     "dependencies": {
         "node-fetch": "^3.2.4",
-        "vscode-languageclient": "^8.0.1",
-        "vscode-uri": "^3.0.3"
+        "vscode-languageclient": "^8.0.2"
     }
 }

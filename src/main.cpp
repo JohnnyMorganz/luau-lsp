@@ -1,5 +1,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "Analyze/AnalyzeCli.hpp"
+#include "Luau/ExperimentalFlags.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -218,13 +219,13 @@ int main(int argc, char** argv)
     if (enableAllFlags)
     {
         for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
-            if (strncmp(flag->name, "Luau", 4) == 0)
+            if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isFlagExperimental(flag->name))
                 flag->value = true;
     }
     registerFastFlags(fastFlags);
 
     if (mode == CliMode::Lsp)
-        startLanguageServer(argc, argv);
+        return startLanguageServer(argc, argv);
     else
-        startAnalyze(argc, argv);
+        return startAnalyze(argc, argv);
 }

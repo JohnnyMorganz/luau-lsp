@@ -8,6 +8,98 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added support for cross-file go to definition of functions
+- Added support for go-to definition of properties defined on a metatable with `__index`
+
+### Changed
+
+- Sync to upstream Luau 0.537
+- Improved completion detail function param information with better representative types, and include a trailing type pack if present
+
+### Fixed
+
+- Fixed crash when hovering over local in incomplete syntax tree
+- Fixed language server not working for newly created files not yet stored on disk
+- Luau LSP will now activate if you run an LSP command
+
+## [1.7.1] - 2022-07-17
+
+### Fixed
+
+- Fix crash when hovering over function type definitions
+
+## [1.7.0] - 2022-07-16
+
+### Added
+
+- Reintroduced support for workspace diagnostics, with proper streaming support. Enable `luau-lsp.diagnostics.workspace` for project wide diagnostics.
+- You can now hover over a type node to get type information. In particular, this works for properties inside type tables, and hovering over `typeof()`, allowing you to determine what typeof resolved to.
+- Added Go To Definition for type references
+- Added `Luau: Regenerate Rojo Sourcemap` command to force regeneration of a Rojo sourcemap
+- Improved case where project file `default.project.json` was not found. We search for other project files, and prompt a user to configure
+
+### Changed
+
+- Sync to upstream Luau 0.536
+- Improved extension error message when Rojo version present does not have sourcemap support
+- Document links will now resolve for requires in all locations of a file, not just the top level block
+
+### Fixed
+
+- A diagnostic refresh will now be requested once sourcemap contents change
+- With the introduction of workspace diagnostics, ignored files should now only show diagnostics when specifically opened
+- Document symbols for method definitions now correctly use a colon instead of a dot operator.
+- Fixed crash when hovering over a type node
+- Fixed go to definition on a global just going to the top of the file. It will now not accept go to definition requests
+- Fixed using absolute file paths to point to definition files not working on Windows
+
+## [1.6.0] - 2022-07-02
+
+### Added
+
+- Added `luau-lsp.sourcemap.enabled` option which dictates whether sourcemap-related features are enabled
+- Diagnostics will now be provided for definitions files which errored
+- Added `luau-lsp.sourcemap.rojoPath` to explicitly specify the path to a Rojo executable instead of relying on it being available from the workspace directory
+- Added hover information when hovering over a type definition
+
+### Changed
+
+- Moved definitions file loading to post-initialization
+- Sync to upstream Luau 0.534
+- A `_` will no longer show when we can't determine a function name / a function isn't named.
+
+### Fixed
+
+- Fixed regression where diagnostics are not cleared when you close an ignored file
+- Fixed errors sometimes occuring when you index `script`/`workspace`/`game` for children
+- Fixed internal error caused by `:Clone()` calls when called on an expression which isn't an Lvalue (e.g., `inst:FindFirstChild(name):Clone()`)
+- Fixed bug where `_: ` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
+- Fixed analyze mode not exiting with a non-zero exit code when there are errors
+- Fixed excessive whitespace in document symbols for expr-named function defintions
+- Fixed hover for global functions and local variables
+
+## [1.5.2] - 2022-06-22
+
+### Changed
+
+- Downgraded missing types/documentation files to a warning in the logs instead of a window error. It is common for no file to be provided in a vanilla build.
+
+### Fixed
+
+- Fixed diagnostics not showing for any file after the first one you open
+
+## [1.5.1] - 2022-06-21
+
+### Fixed
+
+- Module name will now be included in hover and signature displays for imported types
+- Fixed bug where in-memory contents of a document which was deleted were not cleared, causing spurious errors when recreating a new document of the same name.
+- Fixed duplicate diagnostics displayed and never clearing when `workspace` diagnostics configuration was enabled
+
+## [1.5.0] - 2022-06-20
+
+### Added
+
 - Added predicate logic to `EnumItem:IsA("Type")` so it will now narrow the type of an EnumItem when used as a predicate
 - Added setting to configure whether all Luau FFlags are enabled by default. This can be configured using `luau-lsp.fflags.enableByDefault` or `--no-flags-enabled` command line option. Currently, all FFlags are enabled by default, but you can manually sync/override them.
 - Added support for adding extra definition files to load using `luau-lsp.types.definitionFiles`
@@ -26,6 +118,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed equality comparison between enum items raising a type error
 - Fixed autocompletion of properties with spaces not correctly being converted into a `["property"]` index leading to a type error
 - Fixed function stringification when using an expression index call such as `data["property"]()`
+- Fixed workspace diagnostics not respecting ignore globs for dependent files
 
 ## [1.4.0] - 2022-06-12
 

@@ -200,9 +200,10 @@ declare debug: {
 }
 
 declare task: {
-    defer: <A..., R...>(f: thread | ((A...) -> R...), A...) -> (),
-    spawn: <A..., R...>(f: thread | ((A...) -> R...), A...) -> (),
-    delay: <A..., R...>(sec: number?, f: thread | ((A...) -> R...), A...) -> (),
+    cancel: (thread: thread) -> (),
+    defer: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
+    spawn: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
+    delay: <A..., R...>(sec: number?, f: thread | ((A...) -> R...), A...) -> thread,
     wait: (sec: number?) -> number,
     synchronize: () -> (),
     desynchronize: () -> (),
@@ -436,7 +437,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 
 
 def resolveParameter(param: ApiParameter):
-    return f"{escapeName(param['Name'])}: {resolveType(param['Type'])}{'?' if 'Default' in param else ''}"
+    paramType = resolveType(param['Type'])
+    isOptional = paramType[-1] == "?"
+    return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
 
 def resolveParameterList(params: List[ApiParameter]):

@@ -17,15 +17,6 @@ using ClientPtr = std::shared_ptr<Client>;
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
 
-bool replace(std::string& str, const std::string& from, const std::string& to)
-{
-    size_t start_pos = str.find(from);
-    if (start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
@@ -37,7 +28,7 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
             return workspace; // TODO: should we return early here? maybe a better match comes along?
         }
     }
-    client->sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+    client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
 
@@ -87,7 +78,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     return capabilities;
 }
 
-Response LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> params)
+void LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> params)
 {
     // Handle request
     // If a request has been sent before the server is initialized, we should error
@@ -97,49 +88,51 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     if (shutdownRequested)
         throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down");
 
+    Response response;
+
     if (method == "initialize")
     {
-        return onInitialize(REQUIRED_PARAMS(params, "initialize"));
+        response = onInitialize(REQUIRED_PARAMS(params, "initialize"));
     }
     else if (method == "shutdown")
     {
-        return onShutdown(id);
+        response = onShutdown(id);
     }
     else if (method == "textDocument/completion")
     {
-        return completion(REQUIRED_PARAMS(params, "textDocument/completion"));
+        response = completion(REQUIRED_PARAMS(params, "textDocument/completion"));
     }
     else if (method == "textDocument/documentLink")
     {
-        return documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
+        response = documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
     }
     else if (method == "textDocument/hover")
     {
-        return hover(REQUIRED_PARAMS(params, "textDocument/hover"));
+        response = hover(REQUIRED_PARAMS(params, "textDocument/hover"));
     }
     else if (method == "textDocument/signatureHelp")
     {
-        return signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
+        response = signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
     }
     else if (method == "textDocument/definition")
     {
-        return gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
+        response = gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
     }
     else if (method == "textDocument/typeDefinition")
     {
-        return gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
+        response = gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
     }
     else if (method == "textDocument/references")
     {
-        return references(REQUIRED_PARAMS(params, "textDocument/references"));
+        response = references(REQUIRED_PARAMS(params, "textDocument/references"));
     }
     else if (method == "textDocument/rename")
     {
-        return rename(REQUIRED_PARAMS(params, "textDocument/rename"));
+        response = rename(REQUIRED_PARAMS(params, "textDocument/rename"));
     }
     else if (method == "textDocument/documentSymbol")
     {
-        return documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+        response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
     }
     else if (method == "textDocument/semanticTokens/full")
     {
@@ -147,16 +140,28 @@ Response LanguageServer::onRequest(const id_type& id, const std::string& method,
     }
     else if (method == "textDocument/diagnostic")
     {
-        return documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
+        response = documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
     }
     else if (method == "workspace/diagnostic")
     {
-        return workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic"));
+        // This request has partial request support.
+        // If workspaceDiagnostic returns nothing, then we don't signal a response (as data will be sent as progress notifications)
+        if (auto report = workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic")))
+        {
+            response = report;
+        }
+        else
+        {
+            client->workspaceDiagnosticsRequestId = id;
+            return;
+        }
     }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
     }
+
+    client->sendResponse(id, response);
 }
 
 void LanguageServer::onNotification(const std::string& method, std::optional<json> params)
@@ -227,9 +232,7 @@ void LanguageServer::processInputLoop()
 
                 if (msg.is_request())
                 {
-                    auto response = onRequest(msg.id.value(), msg.method.value(), msg.params);
-                    // sendTrace(response.dump(), std::nullopt);
-                    client->sendResponse(msg.id.value(), response);
+                    onRequest(msg.id.value(), msg.method.value(), msg.params);
                 }
                 else if (msg.is_response())
                 {
@@ -311,6 +314,13 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
     client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
 
+    // Initialise loaded workspaces
+    nullWorkspace->initialize();
+    for (auto& folder : workspaceFolders)
+    {
+        folder->initialize();
+    }
+
     // Dynamically register for configuration changed notifications
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
@@ -320,16 +330,18 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         {
             auto workspace = findWorkspace(workspaceUri);
 
-            // Recompute workspace diagnostics if requested
-            if (config.diagnostics.workspace)
+            // Update the workspace setup with the new configuration
+            workspace->setupWithConfiguration(config);
+
+            // Recompute workspace diagnostics if requested, but only if the diagnostics pull model is not available
+            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) && config.diagnostics.workspace)
             {
                 auto diagnostics = workspace->workspaceDiagnostics({});
                 for (const auto& report : diagnostics.items)
                 {
                     if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
                     {
-                        client->sendNotification(
-                            "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
                     }
                 }
             }
@@ -342,6 +354,14 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             items.emplace_back(workspace->rootUri);
         }
         client->requestConfiguration(items);
+    }
+    else
+    {
+        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+        for (auto& folder : workspaceFolders)
+        {
+            folder->setupWithConfiguration(client->globalConfig);
+        }
     }
 
     // Dynamically register file watchers
@@ -368,7 +388,7 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
     // Convert the diagnostics report into a series of diagnostics published for each relevant file
     lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
     auto diagnostics = workspace->documentDiagnostics(params);
-    client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
+    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
 
     if (!diagnostics.relatedDocuments.empty())
     {
@@ -376,8 +396,7 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
         {
             if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
             {
-                client->sendNotification(
-                    "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
             }
         }
     }
@@ -414,8 +433,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
         auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{params.textDocument});
-        client->sendNotification("textDocument/publishDiagnostics",
-            lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
 
         // Compute diagnostics for reverse dependencies
         // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
@@ -430,7 +448,8 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
                 if (filePath)
                 {
                     auto uri = Uri::file(*filePath);
-                    if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()))
+                    if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()) &&
+                        !workspace->isIgnoredFile(*filePath, config))
                     {
                         auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
                         diagnostics.relatedDocuments.emplace(uri.toString(),
@@ -447,8 +466,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
             {
                 if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
                 {
-                    client->sendNotification(
-                        "textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
                 }
             }
         }
@@ -462,9 +480,10 @@ void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParam
     workspace->closeTextDocument(params.textDocument.uri);
 
     // If this was an ignored file then lets clear the diagnostics for it
-    if (workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
+    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) &&
+        workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
     {
-        client->sendNotification("textDocument/publishDiagnostics", lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
     }
 }
 
@@ -554,67 +573,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             client->refreshWorkspaceDiagnostics();
         }
     }
-}
-
-std::vector<lsp::DocumentLink> LanguageServer::documentLink(const lsp::DocumentLinkParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->documentLink(params);
-}
-
-std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
-}
-
-std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->signatureHelp(params);
-}
-
-std::optional<lsp::Location> LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoDefinition(params);
-}
-
-std::optional<lsp::Location> LanguageServer::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoTypeDefinition(params);
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
-}
-
-lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->rename(params);
-}
-
-lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->documentDiagnostics(params);
-}
-
-lsp::WorkspaceDiagnosticReport LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
-{
-    lsp::WorkspaceDiagnosticReport fullReport;
-
-    for (auto& workspace : workspaceFolders)
-    {
-        auto report = workspace->workspaceDiagnostics(params);
-        fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
-    }
-
-    return fullReport;
 }
 
 Response LanguageServer::onShutdown(const id_type& id)

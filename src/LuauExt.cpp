@@ -5,6 +5,8 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
 
+LUAU_FASTFLAG(LuauTypeMismatchModuleNameResolution)
+
 namespace types
 {
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
@@ -190,8 +192,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
         return std::nullopt;
 
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
-    Luau::TypeId instanceType = typeChecker.checkLValueBinding(scope, *index->expr);
-    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType})};
+    auto instanceType = typeChecker.checkExpr(scope, *index->expr);
+    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
 }
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
@@ -339,6 +341,14 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
         // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
         typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
         {
+            // TODO: we hope to remove these in future!
+            if (!expressiveTypes)
+            {
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                scope->bindings[Luau::AstName("workspace")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+                scope->bindings[Luau::AstName("game")] = Luau::Binding{Luau::getSingletonTypes().anyType};
+            }
+
             if (auto node =
                     fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
             {
@@ -352,13 +362,6 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                 if (expressiveTypes)
                     scope->bindings[Luau::AstName("script")] =
                         Luau::Binding{types::makeLazyInstanceType(*typeArena, scope, node.value(), std::nullopt)};
-                else
-                {
-                    // TODO: we hope to remove these in future!
-                    scope->bindings[Luau::AstName("script")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                    scope->bindings[Luau::AstName("workspace")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                    scope->bindings[Luau::AstName("game")] = Luau::Binding{Luau::getSingletonTypes().anyType};
-                }
             }
         };
     }
@@ -471,20 +474,19 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr)
+std::string toStringNamedFunction(
+    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    if (scope)
+        opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
 
     // HACK: remove all instances of "_: " from the function string
     // They don't look great, maybe we should upstream this as an option?
-    size_t index;
-    while ((index = functionString.find("_: ")) != std::string::npos)
-    {
-        functionString.replace(index, 3, "");
-    }
+    replaceAll(functionString, "_: ", "");
 
     // If a name has already been provided, just use that
     if (auto name = std::get_if<std::string>(&nameOrFuncExpr))
@@ -525,6 +527,7 @@ std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTy
         // If we are calling this as a method ':', we should implicitly hide self, and recompute the functionString
         opts.hideFunctionSelfArgument = indexName->op == ':';
         functionString = Luau::toStringNamedFunction("", *ftv, opts);
+        replaceAll(functionString, "_: ", "");
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
         baseName = Luau::toString(indexName->expr);
         trim(baseName); // Trim it, because toString is probably not meant to be used in this context (it has whitespace)
@@ -539,16 +542,11 @@ std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTy
         trim(baseName);
     }
 
-    if (parentIt)
-    {
-        if (auto name = getTypeName(*parentIt))
-            baseName = *name;
-    }
-    else
-    {
-        // TODO: anymore we can do?
-        baseName = "_";
-    }
+    if (!parentIt)
+        return "function" + methodName + functionString;
+
+    if (auto name = getTypeName(*parentIt))
+        baseName = *name;
 
     return "function " + baseName + methodName + functionString;
 }
@@ -618,6 +616,24 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     }
     else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
     {
+        if (auto mtable = Luau::get<Luau::TableTypeVar>(mt->metatable))
+        {
+            auto indexIt = mtable->props.find("__index");
+            if (indexIt != mtable->props.end())
+            {
+                Luau::TypeId followed = Luau::follow(indexIt->second.type);
+                if (Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed))
+                {
+                    return lookupProp(followed, name);
+                }
+                else if (Luau::get<Luau::FunctionTypeVar>(followed))
+                {
+                    // TODO: can we handle an index function...?
+                    return std::nullopt;
+                }
+            }
+        }
+
         if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
         {
             if (tbl->props.find(name) != tbl->props.end())
@@ -625,8 +641,6 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
                 return tbl->props.at(name);
             }
         }
-
-        // TODO: we should respect metatable __index
     }
     // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
     // {
@@ -654,11 +668,13 @@ lsp::Position convertPosition(const Luau::Position& position)
     return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
 }
 
-lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error)
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver)
 {
     std::string message;
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         message = "SyntaxError: " + syntaxError->message;
+    else if (FFlag::LuauTypeMismatchModuleNameResolution)
+        message = "TypeError: " + Luau::toString(error, Luau::TypeErrorToStringOptions{fileResolver});
     else
         message = "TypeError: " + Luau::toString(error);
 
@@ -694,6 +710,18 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
         diagnostic.tags.emplace_back(lsp::DiagnosticTag::Deprecated);
     }
 
+    return diagnostic;
+}
+
+lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error)
+{
+    lsp::Diagnostic diagnostic;
+    diagnostic.source = "Luau";
+    diagnostic.code = "SyntaxError";
+    diagnostic.message = "SyntaxError: " + error.getMessage();
+    diagnostic.severity = lsp::DiagnosticSeverity::Error;
+    diagnostic.range = {convertPosition(error.getLocation().begin), convertPosition(error.getLocation().end)};
+    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
     return diagnostic;
 }
 
@@ -795,4 +823,17 @@ std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& sourc
     FindSymbolReferences finder(symbol);
     source.root->visit(&finder);
     return std::move(finder.result);
+}
+
+std::optional<Luau::Location> getLocation(Luau::TypeId type)
+{
+    type = follow(type);
+
+    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(type))
+    {
+        if (ftv->definition)
+            return ftv->definition->originalNameLocation;
+    }
+
+    return std::nullopt;
 }
