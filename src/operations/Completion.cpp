@@ -113,6 +113,50 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     }
 }
 
+bool isGetService(const Luau::AstExpr* expr)
+{
+    if (auto call = expr->as<Luau::AstExprCall>())
+        if (auto index = call->func->as<Luau::AstExprIndexName>())
+            if (index->index == "GetService")
+                if (auto name = index->expr->as<Luau::AstExprGlobal>())
+                    if (name->name == "game")
+                        return true;
+
+    return false;
+}
+
+struct ImportLocationVisitor : public Luau::AstVisitor
+{
+    std::unordered_map<std::string, size_t> serviceLineMap;
+
+    bool visit(Luau::AstStatLocal* local) override
+    {
+        if (local->vars.size != 1)
+            return false;
+
+        auto localName = local->vars.data[0];
+        auto expr = local->values.data[0];
+
+        if (!localName || !expr)
+            return false;
+
+        if (isGetService(expr))
+            serviceLineMap.emplace(std::string(localName->name.value), localName->location.begin.line);
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
 /// Attempts to retrieve a list of service names by inspecting the global type definitions
 static std::vector<std::string> getServiceNames(const Luau::ScopePtr scope)
 {
@@ -169,20 +213,37 @@ void WorkspaceFolder::suggestImports(
             return;
 
         // Place after any hot comments and TODO: already imported services
-        size_t lineNumber = 0;
+        size_t minimumLineNumber = 0;
         for (auto hotComment : sourceModule->hotcomments)
         {
             if (!hotComment.header)
                 continue;
-            if (hotComment.location.begin.line >= lineNumber)
-                lineNumber = hotComment.location.begin.line + 1;
+            if (hotComment.location.begin.line >= minimumLineNumber)
+                minimumLineNumber = hotComment.location.begin.line + 1;
         }
+
+        ImportLocationVisitor visitor;
+        visitor.visit(sourceModule->root);
 
         auto services = getServiceNames(frontend.typeCheckerForAutocomplete.globalScope);
         for (auto& service : services)
         {
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
-            if (scope->linearSearchForBinding(service, true))
+            bool isAlreadyDefined = false;
+            size_t lineNumber = minimumLineNumber;
+            for (auto& [definedService, location] : visitor.serviceLineMap)
+            {
+                if (definedService == service)
+                {
+                    isAlreadyDefined = true;
+                    break;
+                }
+
+                if (definedService < service && location >= lineNumber)
+                    lineNumber = location + 1;
+            }
+
+            if (isAlreadyDefined)
                 continue;
 
             auto importText = "local " + service + " = game:GetService(\"" + service + "\")\n";
