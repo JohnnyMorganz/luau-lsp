@@ -6,8 +6,14 @@
 
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
+    Luau::ModulePtr module;
     std::vector<SemanticToken> tokens;
     std::unordered_map<Luau::AstLocal*, lsp::SemanticTokenTypes> localTypes;
+
+    explicit SemanticTokensVisitor(Luau::ModulePtr module)
+        : module(module)
+    {
+    }
 
     bool visit(Luau::AstType* type) override
     {
@@ -126,10 +132,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     }
 };
 
-std::vector<SemanticToken> getSemanticTokens(Luau::AstStatBlock* block)
+std::vector<SemanticToken> getSemanticTokens(Luau::ModulePtr module, Luau::SourceModule* sourceModule)
 {
-    SemanticTokensVisitor visitor;
-    visitor.visit(block);
+    SemanticTokensVisitor visitor{module};
+    visitor.visit(sourceModule->root);
     return visitor.tokens;
 }
 
@@ -138,14 +144,14 @@ size_t convertTokenType(const lsp::SemanticTokenTypes tokenType)
     return static_cast<size_t>(tokenType);
 }
 
-std::vector<size_t> packTokens(const std::vector<SemanticToken>& tokens)
+std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
 {
     // Sort the tokens into the correct ordering
-    // std::sort(tokens.begin(), tokens.end(),
-    //     [](const SemanticToken& a, const SemanticToken& b)
-    //     {
-    //         return a.start < b.start;
-    //     });
+    std::sort(tokens.begin(), tokens.end(),
+        [](const SemanticToken& a, const SemanticToken& b)
+        {
+            return a.start < b.start;
+        });
 
     // Pack the tokens
     std::vector<size_t> result;
@@ -182,12 +188,12 @@ std::optional<std::vector<size_t>> WorkspaceFolder::semanticTokens(const lsp::Se
         frontend.check(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    if (!sourceModule)
+    auto module = frontend.moduleResolver.getModule(moduleName);
+    if (!sourceModule || !module)
         return std::nullopt;
 
-    SemanticTokensVisitor visitor;
-    visitor.visit(sourceModule->root);
-    return packTokens(visitor.tokens);
+    auto tokens = getSemanticTokens(module, sourceModule);
+    return packTokens(tokens);
 }
 
 std::optional<std::vector<size_t>> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
