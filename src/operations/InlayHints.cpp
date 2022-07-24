@@ -159,7 +159,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         continue;
 
                     // If the name somewhat matches the arg name, we can skip the inlay hint
-                    if (toLower(Luau::toString(param)) == toLower(std::string(paramName)))
+                    if (Luau::equalsLower(Luau::toString(param), paramName))
                         continue;
                 }
 
