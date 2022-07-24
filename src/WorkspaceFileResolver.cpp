@@ -266,6 +266,11 @@ std::optional<std::string> WorkspaceFileResolver::getEnvironmentForModule(const 
         if (glob::fnmatch_case(relativePath, glob))
             return environment;
     }
+
+    // In roblox mode, set the default environment to "roblox"
+    if (config.types.roblox)
+        return "roblox";
+
     return std::nullopt;
 }
 

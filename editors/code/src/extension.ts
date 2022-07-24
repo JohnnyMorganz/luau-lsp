@@ -262,15 +262,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // Load roblox type definitions
   if (typesConfig.get<boolean>("roblox")) {
     await updateApiInfo(context);
-
-    // if (!builtinDefinitions["roblox"]) {
-    //   builtinDefinitions["roblox"] = globalTypesUri(context).fsPath;
-    //   environments["roblox"] = "roblox";
-    //   en["*"] =
-    //     (builtinDefinitions["*"] ? builtinDefinitions["*"] + "," : "") +
-    //     "roblox";
-    // }
-    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
+    if (!environments["roblox"]) {
+      environments["roblox"] = globalTypesUri(context).fsPath;
+    }
     args.push(`--docs=${apiDocsUri(context).fsPath}`);
   }
 
