@@ -28,7 +28,7 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
             return workspace; // TODO: should we return early here? maybe a better match comes along?
         }
     }
-    client->sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+    client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
 
@@ -560,30 +560,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             client->refreshWorkspaceDiagnostics();
         }
     }
-}
-
-std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
-}
-
-std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->signatureHelp(params);
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
-}
-
-lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->rename(params);
 }
 
 Response LanguageServer::onShutdown(const id_type& id)

@@ -63,7 +63,7 @@ private:
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
-    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params);
+    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params);
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);

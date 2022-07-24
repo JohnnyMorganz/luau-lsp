@@ -192,7 +192,7 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
     args.push("--include-non-scripts");
   }
 
-  spawn(config.get<string>("rojoPath") ?? "rojo", args, {
+  await spawn(config.get<string>("rojoPath") ?? "rojo", args, {
     cwd: workspaceFolder.uri.fsPath,
   }).catch((err) => {
     let output = `Failed to update sourcemap for ${
@@ -209,6 +209,12 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
 
     vscode.window.showWarningMessage(output);
   });
+
+  client.info(
+    `Sourcemap regenerated for ${
+      workspaceFolder.name
+    } (${workspaceFolder.uri.toString(true)})`
+  );
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -311,10 +317,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const serverOptions: ServerOptions = { run, debug };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      { scheme: "file", language: "lua" },
-      { scheme: "file", language: "luau" },
-    ],
+    documentSelector: [{ language: "lua" }, { language: "luau" }],
     diagnosticPullOptions: {
       onChange: true,
       onSave: true,

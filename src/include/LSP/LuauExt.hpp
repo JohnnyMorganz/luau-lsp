@@ -99,6 +99,8 @@ struct FindNodeType : public Luau::AstVisitor
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos);
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol);
 
+std::optional<Luau::Location> getLocation(Luau::TypeId type);
+
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
 std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
 

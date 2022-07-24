@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added support for cross-file go to definition of functions
+- Added support for go-to definition of properties defined on a metatable with `__index`
 - Added support for automatic service importing. When using a service which has not yet been defined, it will be added (alphabetically) to the top of the file. Config setting: `luau-lsp.completion.suggestImports`
 
 ### Changed
@@ -18,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash when hovering over local in incomplete syntax tree
+- Fixed language server not working for newly created files not yet stored on disk
+- Luau LSP will now activate if you run an LSP command
 
 ## [1.7.1] - 2022-07-17
 
