@@ -2,14 +2,7 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/Protocol.hpp"
 #include "LSP/LuauExt.hpp"
-
-struct SemanticToken
-{
-    Luau::Position start;
-    Luau::Position end;
-    lsp::SemanticTokenTypes tokenType;
-    lsp::SemanticTokenModifiers tokenModifiers;
-};
+#include "LSP/SemanticTokens.hpp"
 
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
@@ -132,6 +125,13 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         return false;
     }
 };
+
+std::vector<SemanticToken> getSemanticTokens(Luau::AstStatBlock* block)
+{
+    SemanticTokensVisitor visitor;
+    visitor.visit(block);
+    return visitor.tokens;
+}
 
 size_t convertTokenType(const lsp::SemanticTokenTypes tokenType)
 {

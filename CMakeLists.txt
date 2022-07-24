@@ -41,12 +41,14 @@ endif()
 
 add_executable(luau-lsp-tests
     tests/main.cpp
+    tests/Fixture.cpp
     tests/TextDocument.test.cpp
     tests/Uri.test.cpp
     tests/Utils.test.cpp
     tests/WorkspaceFileResolver.test.cpp
+    tests/SemanticTokens.test.cpp
     ${SOURCES}
 )
 target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)
-target_include_directories(luau-lsp-tests PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)
+target_include_directories(luau-lsp-tests PRIVATE "${PROJECT_BINARY_DIR}" src/include tests/ luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)
 target_link_libraries(luau-lsp-tests PRIVATE Luau.Ast Luau.Analysis)
