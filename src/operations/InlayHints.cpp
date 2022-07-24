@@ -3,19 +3,30 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
 
+bool isLiteral(const Luau::AstExpr* expr)
+{
+    return expr->is<Luau::AstExprConstantBool>() || expr->is<Luau::AstExprConstantString>() || expr->is<Luau::AstExprConstantNumber>() ||
+           expr->is<Luau::AstExprConstantNil>();
+}
 
 struct InlayHintVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
+    const ClientConfiguration& config;
     std::vector<lsp::InlayHint> hints;
 
-    explicit InlayHintVisitor(Luau::ModulePtr module)
+    explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config)
         : module(module)
+        , config(config)
+
     {
     }
 
     bool visit(Luau::AstStatLocal* local) override
     {
+        if (!config.inlayHints.variableTypes)
+            return true;
+
         auto scope = Luau::findScopeAtPosition(*module, local->location.begin);
         if (!scope)
             return false;
@@ -50,29 +61,36 @@ struct InlayHintVisitor : public Luau::AstVisitor
         auto followedTy = Luau::follow(*ty);
         if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
         {
-            size_t idx = 0;
-            for (auto argType : ftv->argTypes)
+            // Parameter types hint
+            if (config.inlayHints.parameterTypes)
             {
-                auto param = func->args.data[idx];
-                if (!param->annotation)
+                size_t idx = 0;
+                for (auto argType : ftv->argTypes)
                 {
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + Luau::toString(argType);
-                    hint.position = convertPosition(param->location.end);
-                    hints.emplace_back(hint);
+                    auto param = func->args.data[idx];
+                    if (!param->annotation)
+                    {
+                        lsp::InlayHint hint;
+                        hint.kind = lsp::InlayHintKind::Type;
+                        hint.label = ": " + Luau::toString(argType);
+                        hint.position = convertPosition(param->location.end);
+                        hints.emplace_back(hint);
+                    }
+                    idx++;
                 }
-                idx++;
             }
 
             // Add return type annotation
-            if (!func->returnAnnotation && func->argLocation)
+            if (config.inlayHints.functionReturnTypes)
             {
-                lsp::InlayHint hint;
-                hint.kind = lsp::InlayHintKind::Type;
-                hint.label = ": " + types::toStringReturnType(ftv->retTypes);
-                hint.position = convertPosition(func->argLocation->end);
-                hints.emplace_back(hint);
+                if (!func->returnAnnotation && func->argLocation)
+                {
+                    lsp::InlayHint hint;
+                    hint.kind = lsp::InlayHintKind::Type;
+                    hint.label = ": " + types::toStringReturnType(ftv->retTypes);
+                    hint.position = convertPosition(func->argLocation->end);
+                    hints.emplace_back(hint);
+                }
             }
         }
 
@@ -81,6 +99,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprCall* call) override
     {
+        if (config.inlayHints.parameterNames == InlayHintsParameterNamesConfig::None)
+            return true;
+
         auto ty = module->astTypes.find(call->func);
         if (!ty)
             return false;
@@ -94,10 +115,22 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 if (namesIt == ftv->argNames.end())
                     break;
 
+                auto paramName = (*namesIt)->name;
+                auto literal = isLiteral(param);
+                if (!isLiteral(param))
+                {
+                    if (config.inlayHints.parameterNames == InlayHintsParameterNamesConfig::Literals)
+                        continue;
+
+                    // If the name somewhat matches the arg name, we can skip the inlay hint
+                    if (toLower(Luau::toString(param)) == toLower(std::string(paramName)))
+                        continue;
+                }
+
                 // TODO: only apply in specific situations
                 lsp::InlayHint hint;
                 hint.kind = lsp::InlayHintKind::Parameter;
-                hint.label = (*namesIt)->name + ":";
+                hint.label = paramName + ":";
                 hint.position = convertPosition(param->location.begin);
                 hint.paddingRight = true;
                 hints.emplace_back(hint);
@@ -135,7 +168,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module};
+    InlayHintVisitor visitor{module, config};
     visitor.visit(sourceModule->root);
     return visitor.hints;
 }
