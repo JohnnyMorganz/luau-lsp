@@ -33,6 +33,13 @@ struct ClientTypesConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
 
+struct ClientCompletionConfiguration
+{
+    /// Whether we should suggest automatic imports in completions
+    bool suggestImports = true;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, suggestImports);
+
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
 struct ClientConfiguration
@@ -43,5 +50,6 @@ struct ClientConfiguration
     ClientSourcemapConfiguration sourcemap;
     ClientDiagnosticsConfiguration diagnostics;
     ClientTypesConfiguration types;
+    ClientCompletionConfiguration completion;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, completion);
