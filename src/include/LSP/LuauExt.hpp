@@ -2,6 +2,7 @@
 #include <optional>
 #include "Luau/Frontend.h"
 #include "Luau/Scope.h"
+#include "Luau/ToString.h"
 #include "LSP/Protocol.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
@@ -34,6 +35,9 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 // In the format "function NAME(args): ret"
 std::string toStringNamedFunction(
     Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope = std::nullopt);
+
+std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options = {});
+Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options = {});
 
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);
