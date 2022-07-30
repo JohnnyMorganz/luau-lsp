@@ -1,0 +1,6 @@
+{
+  "name": "plugin",
+  "tree": {
+    "$path": "src"
+  }
+}
