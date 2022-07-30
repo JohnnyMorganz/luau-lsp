@@ -144,8 +144,13 @@ struct InlayHintVisitor : public Luau::AstVisitor
         if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
         {
             auto namesIt = ftv->argNames.begin();
+            auto idx = 0;
             for (auto param : call->args)
             {
+                // Skip first item if it is self
+                if (idx == 0 && ftv->hasSelf && call->self)
+                    continue;
+
                 if (namesIt == ftv->argNames.end())
                     break;
                 if (!namesIt->has_value())
@@ -171,6 +176,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 hints.emplace_back(hint);
 
                 namesIt++;
+                idx++;
             }
         }
 
