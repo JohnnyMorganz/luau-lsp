@@ -56,13 +56,10 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Go To Definition
 - [x] Go To Type Definition
 - [x] Find References
-- [ ] Document Highlight
 - [x] Document Link
 - [x] Document Symbol
 - [ ] Color Provider
 - [x] Rename
-- [ ] Folding Range
-- [ ] Selection Range
 - [ ] Call Hierarchy
 - [ ] Semantic Tokens
 - [x] Inlay Hints
@@ -75,6 +72,9 @@ They can be investigated at a later time:
 - [ ] Go To Implementation (do not apply)
 - [ ] Code Actions (not necessary - could potentially add "fixers" for lints)
 - [ ] Code Lens (not necessary)
+- [ ] Document Highlight (not necessary - editor highlighting is sufficient)
+- [ ] Folding Range (not necessary - editor folding is sufficient)
+- [ ] Selection Range (not necessary - editor selection is sufficient)
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
