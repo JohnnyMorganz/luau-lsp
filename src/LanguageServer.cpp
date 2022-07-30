@@ -21,13 +21,32 @@ using ClientPtr = std::shared_ptr<Client>;
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
 {
+    WorkspaceFolderPtr bestWorkspace = nullptr;
+    size_t length = 0;
+    auto checkStr = file.toString();
+
+
     for (auto& workspace : workspaceFolders)
     {
-        if (workspace->isInWorkspace(file))
+        if (file == workspace->rootUri)
+            return workspace;
+
+        // Check if the root uri is a prefix of the file
+        auto prefixStr = workspace->rootUri.toString();
+        auto size = prefixStr.size();
+        if (size < length)
+            continue;
+
+        if (checkStr.compare(0, size, prefixStr) == 0)
         {
-            return workspace; // TODO: should we return early here? maybe a better match comes along?
+            bestWorkspace = workspace;
+            length = size;
         }
     }
+
+    if (bestWorkspace)
+        return bestWorkspace;
+
     client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
