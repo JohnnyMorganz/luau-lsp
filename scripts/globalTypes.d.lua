@@ -7685,57 +7685,6 @@ declare class Players extends Instance
 	function GetPlayers(self): { Player }
 end
 
-declare class Plugin extends Instance
-	CollisionEnabled: boolean
-	GridSize: number
-	HostDataModelType: EnumStudioDataModelType
-	HostDataModelTypeIsCurrent: boolean
-	MultipleDocumentInterfaceInstance: MultipleDocumentInterfaceInstance
-	UsesAssetInsertionDrag: boolean
-	function Activate(self, exclusiveMouse: boolean): nil
-	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
-	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
-	function CreateToolbar(self, name: string): PluginToolbar
-	function Deactivate(self): nil
-	function GetItem(self, key: string, defaultValue: any): any
-	function GetJoinMode(self): EnumJointCreationMode
-	function GetMouse(self): PluginMouse
-	function GetSelectedRibbonTool(self): EnumRibbonTool
-	function GetSetting(self, key: string): any
-	function Invoke(self, key: string, arguments: any): nil
-	function IsActivated(self): boolean
-	function IsActivatedWithExclusiveMouse(self): boolean
-	function Negate(self, objects: { Instance }): { Instance }
-	function OnInvoke(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
-	function OnSetItem(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
-	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
-	function OpenWikiPage(self, url: string): nil
-	function PauseSound(self, sound: Instance): nil
-	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
-	function ResumeSound(self, sound: Instance): nil
-	function SaveSelectedToRoblox(self): nil
-	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
-	function Separate(self, objects: { Instance }): { Instance }
-	function SetItem(self, key: string, value: any): nil
-	function SetReady(self): nil
-	function SetSetting(self, key: string, value: any): nil
-	function StartDecalDrag(self, decal: Instance): nil
-	function StartDrag(self, dragData: { [any]: any }): nil
-	function StopAllSounds(self): nil
-	function Union(self, objects: { Instance }): UnionOperation
-	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
-	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
-	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
-	function ImportFbxRig(self, isR15: boolean?): Instance
-	function PromptForExistingAssetId(self, assetType: string): number
-	function PromptSaveSelection(self, suggestedFileName: string?): boolean
-	Deactivation: RBXScriptSignal<>
-	Ready: RBXScriptSignal<>
-	Unloading: RBXScriptSignal<>
-	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
-	ProcessAssetInsertionDrop: () -> nil
-end
-
 declare class PluginAction extends Instance
 	ActionId: string
 	AllowBinding: boolean
@@ -7787,6 +7736,7 @@ end
 
 declare class PluginToolbar extends Instance
 	function CreateButton(self, buttonId: string, tooltip: string, iconname: string, text: string?): PluginToolbarButton
+	function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton
 end
 
 declare class PluginToolbarButton extends Instance
@@ -9706,6 +9656,58 @@ declare class UserSettings extends GenericSettings
 	function IsUserFeatureEnabled(self, name: string): boolean
 	function Reset(self): nil
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
+end
+
+declare class Plugin extends Instance
+	CollisionEnabled: boolean
+	GridSize: number
+	HostDataModelType: EnumStudioDataModelType
+	HostDataModelTypeIsCurrent: boolean
+	MultipleDocumentInterfaceInstance: MultipleDocumentInterfaceInstance
+	UsesAssetInsertionDrag: boolean
+	function Activate(self, exclusiveMouse: boolean): nil
+	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
+	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
+	function CreateToolbar(self, name: string): PluginToolbar
+	function Deactivate(self): nil
+	function GetItem(self, key: string, defaultValue: any): any
+	function GetJoinMode(self): EnumJointCreationMode
+	function GetMouse(self): PluginMouse
+	function GetSelectedRibbonTool(self): EnumRibbonTool
+	function GetSetting(self, key: string): any
+	function Invoke(self, key: string, arguments: any): nil
+	function IsActivated(self): boolean
+	function IsActivatedWithExclusiveMouse(self): boolean
+	function Negate(self, objects: { Instance }): { Instance }
+	function OnInvoke(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
+	function OnSetItem(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
+	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
+	function OpenWikiPage(self, url: string): nil
+	function PauseSound(self, sound: Instance): nil
+	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
+	function ResumeSound(self, sound: Instance): nil
+	function SaveSelectedToRoblox(self): nil
+	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
+	function Separate(self, objects: { Instance }): { Instance }
+	function SetItem(self, key: string, value: any): nil
+	function SetReady(self): nil
+	function SetSetting(self, key: string, value: any): nil
+	function StartDecalDrag(self, decal: Instance): nil
+	function StartDrag(self, dragData: { [any]: any }): nil
+	function StopAllSounds(self): nil
+	function Union(self, objects: { Instance }): UnionOperation
+	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
+	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
+	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
+	function ImportFbxRig(self, isR15: boolean?): Instance
+	function PromptForExistingAssetId(self, assetType: string): number
+	function PromptSaveSelection(self, suggestedFileName: string?): boolean
+	Deactivation: RBXScriptSignal<>
+	Ready: RBXScriptSignal<>
+	Unloading: RBXScriptSignal<>
+	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
+	ProcessAssetInsertionDrop: () -> nil
+	function CreateToolbar(self, name: string): PluginToolbar
 end
 
 declare Instance: {
