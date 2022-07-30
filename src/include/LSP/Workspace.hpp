@@ -44,9 +44,6 @@ public:
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
-    /// Checks whether a provided file is part of the workspace
-    bool isInWorkspace(const lsp::DocumentUri& file);
-
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);

@@ -2,22 +2,6 @@
 #include <limits.h>
 #include "LSP/Workspace.hpp"
 
-/// Checks whether a provided file is part of the workspace
-bool WorkspaceFolder::isInWorkspace(const lsp::DocumentUri& file)
-{
-    if (file == rootUri)
-        return true;
-
-    // Check if the root uri is a prefix of the file
-    auto prefixStr = rootUri.toString();
-    auto checkStr = file.toString();
-    if (checkStr.compare(0, prefixStr.size(), prefixStr) == 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
     auto moduleName = fileResolver.getModuleName(uri);
