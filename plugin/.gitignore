@@ -2,4 +2,7 @@
 /*.rbxlx.lock
 /*.rbxl.lock
 
+*.rbxl
+*.rbxm
+
 sourcemap.json
