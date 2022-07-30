@@ -37,6 +37,9 @@
           ]
         }
       ],
+      "options": {
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+      },
       "detail": "Build Language Server Binary"
     },
     {
