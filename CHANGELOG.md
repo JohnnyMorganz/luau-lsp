@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.537
+- Sync to upstream Luau 0.538
 - Improved completion detail function param information with better representative types, and include a trailing type pack if present
 
 ### Fixed
