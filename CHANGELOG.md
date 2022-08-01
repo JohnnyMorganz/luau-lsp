@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.8.1] - 2022-08-01
+
 ### Fixed
 
-- Fixed `self` being showed as the first inlay hint incorrectly
+- Fixed `self` being showed as the first inlay hint incorrectly in parameter names and types
 
 ## [1.8.0] - 2022-07-30
 
