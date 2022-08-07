@@ -36,12 +36,16 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         return std::nullopt;
     auto followedId = Luau::follow(*it);
 
+    auto config = client->getConfiguration(rootUri);
+    types::ToStringNamedFunctionOpts opts;
+    opts.hideTableKind = !config.hover.showTableKinds;
+
     std::vector<lsp::SignatureInformation> signatures;
 
     auto addSignature = [&](const Luau::FunctionTypeVar* ftv)
     {
         // Create the whole label
-        std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope);
+        std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope, opts);
         lsp::MarkupContent documentation{lsp::MarkupKind::PlainText, ""};
 
         if (followedId->documentationSymbol)

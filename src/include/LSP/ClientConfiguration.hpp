@@ -56,6 +56,13 @@ struct ClientInlayHintsConfiguration
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
     ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength);
 
+struct ClientHoverConfiguration
+{
+    bool showTableKinds = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientHoverConfiguration, showTableKinds);
+
+
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
 struct ClientConfiguration
@@ -67,5 +74,6 @@ struct ClientConfiguration
     ClientDiagnosticsConfiguration diagnostics;
     ClientTypesConfiguration types;
     ClientInlayHintsConfiguration inlayHints;
+    ClientHoverConfiguration hover;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover);

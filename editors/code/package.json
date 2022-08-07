@@ -192,6 +192,11 @@
                     "type": "number",
                     "default": 50,
                     "minimum": 10
+                },
+                "luau-lsp.hover.showTableKinds": {
+                    "markdownDescription": "Show table kinds",
+                    "type": "boolean",
+                    "default": false
                 }
             }
         }

@@ -23,6 +23,8 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (!node || !scope)
         return std::nullopt;
 
+    auto config = client->getConfiguration(rootUri);
+
     std::string typeName;
     std::optional<Luau::TypeId> type = std::nullopt;
 
@@ -123,6 +125,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
     opts.indent = true;
+    opts.hideTableKind = !config.hover.showTableKinds;
     opts.scope = scope;
     std::string typeString = Luau::toString(*type, opts);
 
@@ -138,7 +141,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             name = localName->value;
         else if (auto expr = exprOrLocal.getExpr())
             name = expr;
-        typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope));
+
+        types::ToStringNamedFunctionOpts funcOpts;
+        funcOpts.hideTableKind = !config.hover.showTableKinds;
+        typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope, funcOpts));
     }
     else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
     {
