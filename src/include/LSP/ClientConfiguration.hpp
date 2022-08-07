@@ -58,11 +58,27 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 
 struct ClientHoverConfiguration
 {
+    bool enabled = true;
     bool showTableKinds = false;
     bool multilineFunctionDefinitions = false;
     bool strictDatamodelTypes = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientHoverConfiguration, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
+
+struct ClientCompletionConfiguration
+{
+    bool enabled = true;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled);
+
+struct ClientSignatureHelpConfiguration
+{
+    bool enabled = true;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSignatureHelpConfiguration, enabled);
 
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
@@ -77,5 +93,8 @@ struct ClientConfiguration
     ClientTypesConfiguration types;
     ClientInlayHintsConfiguration inlayHints;
     ClientHoverConfiguration hover;
+    ClientCompletionConfiguration completion;
+    ClientSignatureHelpConfiguration signatureHelp;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp);

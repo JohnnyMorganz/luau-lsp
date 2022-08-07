@@ -3,6 +3,11 @@
 
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
+    auto config = client->getConfiguration(rootUri);
+
+    if (!config.signatureHelp.enabled)
+        return std::nullopt;
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
@@ -36,7 +41,6 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         return std::nullopt;
     auto followedId = Luau::follow(*it);
 
-    auto config = client->getConfiguration(rootUri);
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
 

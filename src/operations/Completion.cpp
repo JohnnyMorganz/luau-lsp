@@ -115,9 +115,14 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
+    auto config = client->getConfiguration(rootUri);
+
+    if (!config.completion.enabled)
+        return {};
+
     if (params.context && params.context->triggerCharacter == "\n")
     {
-        if (client->getConfiguration(rootUri).autocompleteEnd)
+        if (config.autocompleteEnd)
             endAutocompletion(params);
         return {};
     }

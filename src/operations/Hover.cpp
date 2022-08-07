@@ -3,10 +3,13 @@
 
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
+    auto config = client->getConfiguration(rootUri);
+
+    if (!config.hover.enabled)
+        return std::nullopt;
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
-
-    auto config = client->getConfiguration(rootUri);
 
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
