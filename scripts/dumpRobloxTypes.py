@@ -152,8 +152,8 @@ EXTRA_MEMBERS = {
     "RemoteFunction": [
         "function InvokeClient(self, player: Player, ...: any): ...any",
         "function InvokeServer(self, ...: any): ...any",
-        "OnClientInvoke: <A..., R...>(A...) -> R...",
-        "OnServerInvoke: <A..., R...>(player: Player, A...) -> R...",
+        "OnClientInvoke: (...any) -> ...any",
+        "OnServerInvoke: (player: Player, ...any) -> ...any",
     ],
     "BindableEvent": [
         "function Fire(self, ...: any): ()",
@@ -161,7 +161,7 @@ EXTRA_MEMBERS = {
     ],
     "BindableFunction": [
         "function Invoke(self, ...: any): ...any",
-        "OnInvoke: <A..., R...>(A...) -> R...",
+        "OnInvoke: (...any) -> ...any",
     ],
     "Players": ["function GetPlayers(self): { Player }"],
     "ContextActionService": [
