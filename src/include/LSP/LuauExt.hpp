@@ -36,6 +36,7 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 struct ToStringNamedFunctionOpts
 {
     bool hideTableKind = false;
+    bool multiline = false;
 };
 
 std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,

@@ -59,8 +59,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 struct ClientHoverConfiguration
 {
     bool showTableKinds = false;
+    bool multilineFunctionDefinitions = false;
+    bool strictDatamodelTypes = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientHoverConfiguration, showTableKinds);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientHoverConfiguration, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
 
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`

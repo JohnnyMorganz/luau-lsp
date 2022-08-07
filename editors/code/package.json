@@ -197,6 +197,16 @@
                     "markdownDescription": "Show table kinds",
                     "type": "boolean",
                     "default": false
+                },
+                "luau-lsp.hover.multilineFunctionDefinitions": {
+                    "markdownDescription": "Show function definitions on multiple lines",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.hover.strictDatamodelTypes": {
+                    "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }

@@ -6,24 +6,24 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
+    auto config = client->getConfiguration(rootUri);
+
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    Luau::FrontendOptions frontendOpts{true, true};
+    Luau::FrontendOptions frontendOpts{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ config.hover.strictDatamodelTypes};
     frontend.check(moduleName, frontendOpts);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
+    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
+                                                    : frontend.moduleResolver.getModule(moduleName);
     if (!sourceModule)
         return std::nullopt;
 
-    // TODO: fix forAutocomplete
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);
     if (!node || !scope)
         return std::nullopt;
-
-    auto config = client->getConfiguration(rootUri);
 
     std::string typeName;
     std::optional<Luau::TypeId> type = std::nullopt;
@@ -144,6 +144,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 
         types::ToStringNamedFunctionOpts funcOpts;
         funcOpts.hideTableKind = !config.hover.showTableKinds;
+        funcOpts.multiline = config.hover.multilineFunctionDefinitions;
         typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope, funcOpts));
     }
     else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
