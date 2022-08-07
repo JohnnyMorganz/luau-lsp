@@ -22,6 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.539
 
+### Fixed
+
+- The types of `:FindFirstChild`, `:FindFirstAncestor` and `:FindFirstDescendant` have been changed to return `Instance?`
+- `:GetActor` is fixed to return `Actor?`
+
 ## [1.8.1] - 2022-08-01
 
 ### Fixed

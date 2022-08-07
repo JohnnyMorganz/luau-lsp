@@ -64,7 +64,13 @@ DEFERRED_CLASSES: List[str] = [
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
-    "Instance": ["Parent"],
+    "Instance": [
+        "Parent",
+        "FindFirstChild",
+        "FindFirstAncestor",
+        "FindFirstDescendant",
+        "GetActor",
+    ],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
         "FireAllClients",
@@ -140,7 +146,13 @@ EXTRA_MEMBERS = {
     "UserSettings": [
         'function GetService(self, service: "UserGameSettings"): UserGameSettings'
     ],
-    "Instance": ["Parent: Instance?"],
+    "Instance": [
+        "Parent: Instance?",
+        "function FindFirstAncestor(self, name: string): Instance?",
+        "function FindFirstChild(self, name: string, recursive: boolean?): Instance?",
+        "function FindFirstDescendant(self, name: string): Instance?",
+        "function GetActor(self): Actor?",
+    ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
