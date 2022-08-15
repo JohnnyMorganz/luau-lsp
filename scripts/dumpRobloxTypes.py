@@ -26,8 +26,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "<A..., R...>(A...) -> R...",
-    "function": "<A..., R...>(A...) -> R...",
+    "Function": "(...any) -> ...any",
+    "function": "(...any) -> ...any",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
