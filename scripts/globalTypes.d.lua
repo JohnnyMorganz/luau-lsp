@@ -4242,13 +4242,13 @@ end
 declare class AnimationFromVideoCreatorService extends Instance
 	function CreateJob(self, filePath: string): string
 	function DownloadJobResult(self, jobId: string, outputFilePath: string): string
-	function FullProcess(self, videoFilePath: string, progressCallback: <A..., R...>(A...) -> R...): string
+	function FullProcess(self, videoFilePath: string, progressCallback: (...any) -> ...any): string
 	function GetJobStatus(self, jobId: string): string
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
 	function IsAgeRestricted(self): boolean
-	function CreateAnimationByUploadingVideo(self, progressCallback: <A..., R...>(A...) -> R...): string
+	function CreateAnimationByUploadingVideo(self, progressCallback: (...any) -> ...any): string
 	function ImportVideoWithPrompt(self): string
 end
 
@@ -4299,7 +4299,7 @@ declare class Animator extends Instance
 end
 
 declare class AppUpdateService extends Instance
-	function CheckForUpdate(self, handler: <A..., R...>(A...) -> R...?): nil
+	function CheckForUpdate(self, handler: (...any) -> ...any?): nil
 	function DisableDUAR(self): nil
 	function DisableDUARAndOpenSurvey(self, surveyUrl: string): nil
 	function PerformManagedUpdate(self): boolean
@@ -4476,11 +4476,11 @@ declare class AvatarEditorService extends Instance
 end
 
 declare class AvatarImportService extends Instance
-	function ImportFBXAnimationFromFilePathUserMayChooseModel(self, fbxFilePath: string, selectedRig: Instance, userChooseModelThenImportCB: <A..., R...>(A...) -> R...): Instance
-	function ImportFBXAnimationUserMayChooseModel(self, selectedRig: Instance, userChooseModelThenImportCB: <A..., R...>(A...) -> R...): Instance
+	function ImportFBXAnimationFromFilePathUserMayChooseModel(self, fbxFilePath: string, selectedRig: Instance, userChooseModelThenImportCB: (...any) -> ...any): Instance
+	function ImportFBXAnimationUserMayChooseModel(self, selectedRig: Instance, userChooseModelThenImportCB: (...any) -> ...any): Instance
 	function ImportFbxRigWithoutSceneLoad(self, isR15: boolean?): Instance
 	function ImportLoadedFBXAnimation(self, useFBXModel: boolean): Instance
-	function LoadRigAndDetectType(self, promptR15Callback: <A..., R...>(A...) -> R...): Instance
+	function LoadRigAndDetectType(self, promptR15Callback: (...any) -> ...any): Instance
 end
 
 declare class Backpack extends Instance
@@ -4546,8 +4546,8 @@ declare class StarterGui extends BasePlayerGui
 	ShowDevelopmentGui: boolean
 	VirtualCursorMode: EnumVirtualCursorMode
 	function GetCoreGuiEnabled(self, coreGuiType: EnumCoreGuiType): boolean
-	function RegisterGetCore(self, parameterName: string, getFunction: <A..., R...>(A...) -> R...): nil
-	function RegisterSetCore(self, parameterName: string, setFunction: <A..., R...>(A...) -> R...): nil
+	function RegisterGetCore(self, parameterName: string, getFunction: (...any) -> ...any): nil
+	function RegisterSetCore(self, parameterName: string, setFunction: (...any) -> ...any): nil
 	function SetCore(self, parameterName: string, value: any): nil
 	function SetCoreGuiEnabled(self, coreGuiType: EnumCoreGuiType, enabled: boolean): nil
 	function GetCore(self, parameterName: string): any
@@ -4823,7 +4823,7 @@ declare class Chat extends Instance
 	function ChatLocal(self, partOrCharacter: Instance, message: string, color: EnumChatColor?): nil
 	function GetShouldUseLuaChat(self): boolean
 	function InvokeChatCallback(self, callbackType: EnumChatCallbackType, callbackArguments: any): any
-	function RegisterChatCallback(self, callbackType: EnumChatCallbackType, callbackFunction: <A..., R...>(A...) -> R...): nil
+	function RegisterChatCallback(self, callbackType: EnumChatCallbackType, callbackFunction: (...any) -> ...any): nil
 	function SetBubbleChatSettings(self, settings: any): nil
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
@@ -4876,7 +4876,7 @@ declare class CommandInstance extends Instance
 	Permission: EnumCommandPermission
 	StatusTip: string
 	function EnableGuiAccess(self, displayName: string, statusTip: string, defaultShortcut: string): nil
-	function RegisterExecutionCallback(self, callbackFunction: <A..., R...>(A...) -> R...): nil
+	function RegisterExecutionCallback(self, callbackFunction: (...any) -> ...any): nil
 end
 
 declare class CommandService extends Instance
@@ -5107,14 +5107,14 @@ declare class ContentProvider extends Instance
 	function UnregisterDefaultEncryptionKey(self): nil
 	function UnregisterEncryptedAsset(self, assetId: Content): nil
 	function CalculateNumTrianglesInMesh(self, meshId: string): number
-	function PreloadAsync(self, contentIdList: { any }, callbackFunction: <A..., R...>(A...) -> R...?): nil
+	function PreloadAsync(self, contentIdList: { any }, callbackFunction: (...any) -> ...any?): nil
 	AssetFetchFailed: RBXScriptSignal<Content>
 end
 
 declare class ContextActionService extends Instance
 	function BindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodeForActivation: EnumKeyCode?): nil
-	function BindCoreAction(self, actionName: string, functionToBind: <A..., R...>(A...) -> R..., createTouchButton: boolean, inputTypes: any): nil
-	function BindCoreActionAtPriority(self, actionName: string, functionToBind: <A..., R...>(A...) -> R..., createTouchButton: boolean, priorityLevel: number, inputTypes: any): nil
+	function BindCoreAction(self, actionName: string, functionToBind: (...any) -> ...any, createTouchButton: boolean, inputTypes: any): nil
+	function BindCoreActionAtPriority(self, actionName: string, functionToBind: (...any) -> ...any, createTouchButton: boolean, priorityLevel: number, inputTypes: any): nil
 	function CallFunction(self, actionName: string, state: EnumUserInputState, inputObject: Instance): any
 	function FireActionButtonFoundSignal(self, actionName: string, actionButton: Instance): nil
 	function GetAllBoundActionInfo(self): { [any]: any }
@@ -5253,7 +5253,7 @@ end
 declare class DataModelPatchService extends Instance
 	function GetPatch(self, patchName: string): Instance
 	function RegisterPatch(self, patchName: string, behaviorName: string, localConfigPath: string, userId: number): nil
-	function UpdatePatch(self, userId: number, patchName: string, callbackFunction: <A..., R...>(A...) -> R...): nil
+	function UpdatePatch(self, userId: number, patchName: string, callbackFunction: (...any) -> ...any): nil
 end
 
 declare class DataModelSession extends Instance
@@ -5348,21 +5348,21 @@ declare class DebuggerConnection extends Instance
 	IsPaused: boolean
 	function AddBreakpoint(self, script: string, line: number, breakpoint: Breakpoint): nil
 	function Close(self): nil
-	function EvaluateWatch(self, expression: string, frame: StackFrame, callback: <A..., R...>(A...) -> R...): number
+	function EvaluateWatch(self, expression: string, frame: StackFrame, callback: (...any) -> ...any): number
 	function GetFrameById(self, id: number): StackFrame
-	function GetSource(self, scriptRef: string, status: <A..., R...>(A...) -> R...): number
+	function GetSource(self, scriptRef: string, status: (...any) -> ...any): number
 	function GetThreadById(self, id: number): ThreadState
-	function GetThreads(self, callback: <A..., R...>(A...) -> R...): number
+	function GetThreads(self, callback: (...any) -> ...any): number
 	function GetVariableById(self, id: number): DebuggerVariable
-	function Pause(self, thread: ThreadState, status: <A..., R...>(A...) -> R...): number
-	function Populate(self, instance: Instance, callback: <A..., R...>(A...) -> R...): number
+	function Pause(self, thread: ThreadState, status: (...any) -> ...any): number
+	function Populate(self, instance: Instance, callback: (...any) -> ...any): number
 	function RemoveBreakpoint(self, breakpoint: Breakpoint): nil
-	function Resume(self, thread: ThreadState, status: <A..., R...>(A...) -> R...): number
-	function SetExceptionBreakMode(self, breakMode: EnumDebuggerExceptionBreakMode, callback: <A..., R...>(A...) -> R...): number
-	function SetVariable(self, variable: DebuggerVariable, value: string, callback: <A..., R...>(A...) -> R...): number
-	function Step(self, thread: ThreadState, callback: <A..., R...>(A...) -> R...): number
-	function StepIn(self, thread: ThreadState, callback: <A..., R...>(A...) -> R...): number
-	function StepOut(self, thread: ThreadState, callback: <A..., R...>(A...) -> R...): number
+	function Resume(self, thread: ThreadState, status: (...any) -> ...any): number
+	function SetExceptionBreakMode(self, breakMode: EnumDebuggerExceptionBreakMode, callback: (...any) -> ...any): number
+	function SetVariable(self, variable: DebuggerVariable, value: string, callback: (...any) -> ...any): number
+	function Step(self, thread: ThreadState, callback: (...any) -> ...any): number
+	function StepIn(self, thread: ThreadState, callback: (...any) -> ...any): number
+	function StepOut(self, thread: ThreadState, callback: (...any) -> ...any): number
 	BreakpointAdded: RBXScriptSignal<Breakpoint>
 	BreakpointChanged: RBXScriptSignal<Breakpoint>
 	BreakpointRemoved: RBXScriptSignal<Breakpoint, EnumBreakpointRemoveReason>
@@ -5714,7 +5714,7 @@ declare class GlobalDataStore extends Instance
 	function IncrementAsync(self, key: string, delta: number?, userIds: { any }?, options: DataStoreIncrementOptions?): any
 	function RemoveAsync(self, key: string): any
 	function SetAsync(self, key: string, value: any, userIds: { any }?, options: DataStoreSetOptions?): any
-	function UpdateAsync(self, key: string, transformFunction: <A..., R...>(A...) -> R...): any
+	function UpdateAsync(self, key: string, transformFunction: (...any) -> ...any): any
 end
 
 declare class DataStore extends GlobalDataStore
@@ -5784,9 +5784,9 @@ declare class GuiObject extends GuiBase2d
 	Transparency: number
 	Visible: boolean
 	ZIndex: number
-	function TweenPosition(self, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: <A..., R...>(A...) -> R...?): boolean
-	function TweenSize(self, endSize: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: <A..., R...>(A...) -> R...?): boolean
-	function TweenSizeAndPosition(self, endSize: UDim2, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: <A..., R...>(A...) -> R...?): boolean
+	function TweenPosition(self, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> ...any?): boolean
+	function TweenSize(self, endSize: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> ...any?): boolean
+	function TweenSizeAndPosition(self, endSize: UDim2, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> ...any?): boolean
 	InputBegan: RBXScriptSignal<InputObject>
 	InputChanged: RBXScriptSignal<InputObject>
 	InputEnded: RBXScriptSignal<InputObject>
@@ -6039,7 +6039,7 @@ end
 
 declare class PluginGui extends LayerCollector
 	Title: string
-	function BindToClose(self, func: <A..., R...>(A...) -> R...?): nil
+	function BindToClose(self, func: (...any) -> ...any?): nil
 	function GetRelativeMousePosition(self): Vector2
 	PluginDragDropped: RBXScriptSignal<{ [any]: any }>
 	PluginDragEntered: RBXScriptSignal<{ [any]: any }>
@@ -6213,7 +6213,7 @@ declare class GuiService extends Instance
 	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject
 	TouchControlsEnabled: boolean
-	function AddCenterDialog(self, dialog: Instance, centerDialogType: EnumCenterDialogType, showFunction: <A..., R...>(A...) -> R..., hideFunction: <A..., R...>(A...) -> R...): nil
+	function AddCenterDialog(self, dialog: Instance, centerDialogType: EnumCenterDialogType, showFunction: (...any) -> ...any, hideFunction: (...any) -> ...any): nil
 	function AddKey(self, key: string): nil
 	function AddSelectionParent(self, selectionName: string, selectionParent: Instance): nil
 	function AddSelectionTuple(self, selectionName: string, selections: any): nil
@@ -6325,7 +6325,7 @@ end
 
 declare class HttpRequest extends Instance
 	function Cancel(self): nil
-	function Start(self, callback: <A..., R...>(A...) -> R...): nil
+	function Start(self, callback: (...any) -> ...any): nil
 end
 
 declare class HttpService extends Instance
@@ -6728,7 +6728,7 @@ declare class LocalStorageService extends Instance
 	function Flush(self): nil
 	function GetItem(self, key: string): string
 	function SetItem(self, key: string, value: string): nil
-	function WhenLoaded(self, callback: <A..., R...>(A...) -> R...): nil
+	function WhenLoaded(self, callback: (...any) -> ...any): nil
 	ItemWasSet: RBXScriptSignal<string, string>
 	StoreWasCleared: RBXScriptSignal<>
 end
@@ -6965,8 +6965,8 @@ declare class MemStorageConnection extends Instance
 end
 
 declare class MemStorageService extends Instance
-	function Bind(self, key: string, callback: <A..., R...>(A...) -> R...): MemStorageConnection
-	function BindAndFire(self, key: string, callback: <A..., R...>(A...) -> R...): MemStorageConnection
+	function Bind(self, key: string, callback: (...any) -> ...any): MemStorageConnection
+	function BindAndFire(self, key: string, callback: (...any) -> ...any): MemStorageConnection
 	function Call(self, key: string, input: any): any
 	function Fire(self, key: string, value: string?): nil
 	function GetItem(self, key: string, defaultValue: string?): string
@@ -6991,7 +6991,7 @@ declare class MemoryStoreSortedMap extends Instance
 	function GetRangeAsync(self, direction: EnumSortDirection, count: number, exclusiveLowerBound: string?, exclusiveUpperBound: string?): { any }
 	function RemoveAsync(self, key: string): nil
 	function SetAsync(self, key: string, value: any, expiration: number): boolean
-	function UpdateAsync(self, key: string, transformFunction: <A..., R...>(A...) -> R..., expiration: number): any
+	function UpdateAsync(self, key: string, transformFunction: (...any) -> ...any, expiration: number): any
 end
 
 
@@ -7011,14 +7011,14 @@ declare class MessageBusService extends Instance
 	function Publish(self, mid: string, params: any): nil
 	function PublishProtocolMethodRequest(self, protocolName: string, methodName: string, message: any, customTelemetryData: any): nil
 	function PublishProtocolMethodResponse(self, protocolName: string, methodName: string, message: any, responseCode: number, customTelemetryData: any): nil
-	function Subscribe(self, mid: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
-	function SubscribeToProtocolMethodRequest(self, protocolName: string, methodName: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
-	function SubscribeToProtocolMethodResponse(self, protocolName: string, methodName: string, callback: <A..., R...>(A...) -> R..., once: boolean, sticky: boolean): Instance
+	function Subscribe(self, mid: string, callback: (...any) -> ...any, once: boolean, sticky: boolean): Instance
+	function SubscribeToProtocolMethodRequest(self, protocolName: string, methodName: string, callback: (...any) -> ...any, once: boolean, sticky: boolean): Instance
+	function SubscribeToProtocolMethodResponse(self, protocolName: string, methodName: string, callback: (...any) -> ...any, once: boolean, sticky: boolean): Instance
 end
 
 declare class MessagingService extends Instance
 	function PublishAsync(self, topic: string, message: any): nil
-	function SubscribeAsync(self, topic: string, callback: <A..., R...>(A...) -> R...): RBXScriptConnection
+	function SubscribeAsync(self, topic: string, callback: (...any) -> ...any): RBXScriptConnection
 end
 
 declare class MetaBreakpoint extends Instance
@@ -7032,12 +7032,12 @@ declare class MetaBreakpoint extends Instance
 	Script: string
 	Valid: boolean
 	function GetContextBreakpoints(self): { [any]: any }
-	function Remove(self, status: <A..., R...>(A...) -> R...): number
+	function Remove(self, status: (...any) -> ...any): number
 	function SetChildBreakpointEnabledByScriptAndContext(self, script: string, contextGST: number, enabled: boolean): nil
 	function SetContextEnabled(self, context: number, enabled: boolean): nil
 	function SetContinueExecution(self, enabled: boolean): nil
 	function SetEnabled(self, enabled: boolean): nil
-	function SetLine(self, line: number, status: <A..., R...>(A...) -> R...): number
+	function SetLine(self, line: number, status: (...any) -> ...any): number
 end
 
 declare class MetaBreakpointContext extends Instance
@@ -8095,7 +8095,7 @@ end
 
 declare class RunService extends Instance
 	ClientGitHash: string
-	function BindToRenderStep(self, name: string, priority: number, func: <A..., R...>(A...) -> R...): nil
+	function BindToRenderStep(self, name: string, priority: number, func: (...any) -> ...any): nil
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
 	function GetRobloxVersion(self): string
@@ -8206,7 +8206,7 @@ end
 declare class ScriptEditorService extends Instance
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
 	function GetScriptDocuments(self): { Instance }
-	function RegisterLSPCallback(self, methodToOverride: EnumLSPMethodType, callbackFunction: <A..., R...>(A...) -> R...): nil
+	function RegisterLSPCallback(self, methodToOverride: EnumLSPMethodType, callbackFunction: (...any) -> ...any): nil
 	TextDocumentDidChange: RBXScriptSignal<ScriptDocument, any>
 	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
 	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
@@ -9698,7 +9698,7 @@ declare class DataModel extends ServiceProvider
 	PrivateServerId: string
 	PrivateServerOwnerId: number
 	Workspace: Workspace
-	function BindToClose(self, func: <A..., R...>(A...) -> R...): nil
+	function BindToClose(self, func: (...any) -> ...any): nil
 	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
 	function DefineFastInt(self, name: string, defaultValue: number): number
 	function DefineFastString(self, name: string, defaultValue: string): string
@@ -9769,8 +9769,8 @@ declare class Plugin extends Instance
 	function IsActivated(self): boolean
 	function IsActivatedWithExclusiveMouse(self): boolean
 	function Negate(self, objects: { Instance }): { Instance }
-	function OnInvoke(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
-	function OnSetItem(self, key: string, callback: <A..., R...>(A...) -> R...): Instance
+	function OnInvoke(self, key: string, callback: (...any) -> ...any): Instance
+	function OnSetItem(self, key: string, callback: (...any) -> ...any): Instance
 	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
 	function OpenWikiPage(self, url: string): nil
 	function PauseSound(self, sound: Instance): nil
