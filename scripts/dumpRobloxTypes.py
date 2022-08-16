@@ -144,7 +144,8 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: Vector3): Vector3",
     ],
     "UserSettings": [
-        'function GetService(self, service: "UserGameSettings"): UserGameSettings'
+        "GameSettings: UserGameSettings",
+        'function GetService(self, service: "UserGameSettings"): UserGameSettings',
     ],
     "Instance": [
         "Parent: Instance?",
@@ -252,6 +253,18 @@ export type RBXScriptSignal<T... = ...any> = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare class GlobalSettings extends GenericSettings
+    Lua: LuaSettings
+    Game: GameSettings
+    Studio: Studio
+    Network: NetworkSettings
+    Physics: PhysicsSettings
+    Rendering: RenderSettings
+    Diagnostics: DebugSettings
+	function GetFFlag(self, name: string): boolean
+	function GetFVariable(self, name: string): string
+end
+
 declare game: DataModel
 declare workspace: Workspace
 declare plugin: Plugin
