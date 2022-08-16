@@ -23,6 +23,7 @@ set(SOURCES
     src/operations/SignatureHelp.cpp
     src/operations/References.cpp
     src/operations/Rename.cpp
+    src/operations/InlayHints.cpp
 )
 add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
 

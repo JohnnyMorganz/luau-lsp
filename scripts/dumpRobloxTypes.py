@@ -26,8 +26,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "<A..., R...>(A...) -> R...",
-    "function": "<A..., R...>(A...) -> R...",
+    "Function": "(...any) -> ...any",
+    "function": "(...any) -> ...any",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
@@ -45,8 +45,8 @@ TYPE_INDEX = {
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
-    "Enum", # redefined explicitly
-    "EnumItem", # redefined explicitly
+    "Enum",  # redefined explicitly
+    "EnumItem",  # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -58,11 +58,19 @@ DEFERRED_CLASSES: List[str] = [
     "AnalysticsSettings",
     "GlobalSettings",
     "UserSettings",
+    # Plugin is deferred after its items are declared
+    "Plugin",
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
-    "Instance": ["Parent"],
+    "Instance": [
+        "Parent",
+        "FindFirstChild",
+        "FindFirstAncestor",
+        "FindFirstDescendant",
+        "GetActor",
+    ],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
         "FireAllClients",
@@ -138,7 +146,13 @@ EXTRA_MEMBERS = {
     "UserSettings": [
         'function GetService(self, service: "UserGameSettings"): UserGameSettings'
     ],
-    "Instance": ["Parent: Instance?"],
+    "Instance": [
+        "Parent: Instance?",
+        "function FindFirstAncestor(self, name: string): Instance?",
+        "function FindFirstChild(self, name: string, recursive: boolean?): Instance?",
+        "function FindFirstDescendant(self, name: string): Instance?",
+        "function GetActor(self): Actor?",
+    ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
@@ -150,8 +164,8 @@ EXTRA_MEMBERS = {
     "RemoteFunction": [
         "function InvokeClient(self, player: Player, ...: any): ...any",
         "function InvokeServer(self, ...: any): ...any",
-        "OnClientInvoke: <A..., R...>(A...) -> R...",
-        "OnServerInvoke: <A..., R...>(player: Player, A...) -> R...",
+        "OnClientInvoke: (...any) -> ...any",
+        "OnServerInvoke: (player: Player, ...any) -> ...any",
     ],
     "BindableEvent": [
         "function Fire(self, ...: any): ()",
@@ -159,12 +173,18 @@ EXTRA_MEMBERS = {
     ],
     "BindableFunction": [
         "function Invoke(self, ...: any): ...any",
-        "OnInvoke: <A..., R...>(A...) -> R...",
+        "OnInvoke: (...any) -> ...any",
     ],
     "Players": ["function GetPlayers(self): { Player }"],
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
+    ],
+    "Plugin": [
+        "function CreateToolbar(self, name: string): PluginToolbar",
+    ],
+    "PluginToolbar": [
+        "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
     ],
 }
 
@@ -437,7 +457,7 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 
 
 def resolveParameter(param: ApiParameter):
-    paramType = resolveType(param['Type'])
+    paramType = resolveType(param["Type"])
     isOptional = paramType[-1] == "?"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 

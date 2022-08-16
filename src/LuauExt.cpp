@@ -474,12 +474,15 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(
-    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope)
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+    std::optional<Luau::ScopePtr> scope, ToStringNamedFunctionOpts stringOpts)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    opts.hideTableKind = stringOpts.hideTableKind;
+    opts.useLineBreaks = stringOpts.multiline;
+    opts.indent = stringOpts.multiline;
     if (scope)
         opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
@@ -549,6 +552,23 @@ std::string toStringNamedFunction(
         baseName = *name;
 
     return "function " + baseName + methodName + functionString;
+}
+
+std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    return toStringReturnTypeDetailed(retTypes, options).name;
+}
+
+Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    size_t retSize = Luau::size(retTypes);
+    bool hasTail = !Luau::finite(retTypes);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+
+    auto result = Luau::toStringDetailed(retTypes, options);
+    if (wrap)
+        result.name = "(" + result.name + ")";
+    return result;
 }
 
 // Duplicated from Luau/TypeInfer.h, since its static
