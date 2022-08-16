@@ -47,6 +47,7 @@ IGNORED_INSTANCES: List[str] = [
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
+    "GlobalSettings",  # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -56,7 +57,6 @@ DEFERRED_CLASSES: List[str] = [
     "DataModel",
     "GenericSettings",
     "AnalysticsSettings",
-    "GlobalSettings",
     "UserSettings",
     # Plugin is deferred after its items are declared
     "Plugin",
@@ -95,6 +95,7 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "WorldRoot": ["Raycast"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -144,7 +145,8 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: Vector3): Vector3",
     ],
     "UserSettings": [
-        'function GetService(self, service: "UserGameSettings"): UserGameSettings'
+        "GameSettings: UserGameSettings",
+        'function GetService(self, service: "UserGameSettings"): UserGameSettings',
     ],
     "Instance": [
         "Parent: Instance?",
@@ -185,6 +187,9 @@ EXTRA_MEMBERS = {
     ],
     "PluginToolbar": [
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
+    ],
+    "WorldRoot": [
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
     ],
 }
 
@@ -252,6 +257,18 @@ export type RBXScriptSignal<T... = ...any> = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare class GlobalSettings extends GenericSettings
+    Lua: LuaSettings
+    Game: GameSettings
+    Studio: Studio
+    Network: NetworkSettings
+    Physics: PhysicsSettings
+    Rendering: RenderSettings
+    Diagnostics: DebugSettings
+	function GetFFlag(self, name: string): boolean
+	function GetFVariable(self, name: string): string
+end
+
 declare game: DataModel
 declare workspace: Workspace
 declare plugin: Plugin
