@@ -4005,7 +4005,6 @@ type ServiceProvider = any
 type DataModel = any
 type GenericSettings = any
 type AnalysticsSettings = any
-type GlobalSettings = any
 type UserSettings = any
 type SessionService = any
 type Sky = any
@@ -9735,11 +9734,6 @@ declare class GenericSettings extends ServiceProvider
 end
 
 declare class AnalysticsSettings extends GenericSettings
-end
-
-declare class GlobalSettings extends GenericSettings
-	function GetFFlag(self, name: string): boolean
-	function GetFVariable(self, name: string): string
 end
 
 declare class UserSettings extends GenericSettings

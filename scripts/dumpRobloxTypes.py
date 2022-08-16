@@ -47,6 +47,7 @@ IGNORED_INSTANCES: List[str] = [
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
+    "GlobalSettings",  # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -56,7 +57,6 @@ DEFERRED_CLASSES: List[str] = [
     "DataModel",
     "GenericSettings",
     "AnalysticsSettings",
-    "GlobalSettings",
     "UserSettings",
     # Plugin is deferred after its items are declared
     "Plugin",
