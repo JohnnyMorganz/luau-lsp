@@ -95,6 +95,7 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "WorldRoot": ["Raycast"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -186,6 +187,9 @@ EXTRA_MEMBERS = {
     ],
     "PluginToolbar": [
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
+    ],
+    "WorldRoot": [
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
     ],
 }
 
