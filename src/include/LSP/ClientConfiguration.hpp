@@ -70,7 +70,7 @@ struct ClientCompletionConfiguration
 {
     bool enabled = true;
     /// Whether we should suggest automatic imports in completions
-    bool suggestImports = true;
+    bool suggestImports = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports);

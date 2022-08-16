@@ -410,7 +410,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (config.completion.suggestImports &&
         (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
     {
-        // TODO: only import in start of expression/statement context
         suggestImports(moduleName, position, config, items);
     }
 
