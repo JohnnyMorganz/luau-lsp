@@ -56,6 +56,26 @@ jobs:
       - name: Run Tests
         run: ${{ matrix.test-path }}
 
+  types_smoketest:
+    name: Types Smoketest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Build Tool
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build . --target luau-lsp -j 3
+
+      - name: Test types
+        run: |
+          touch test.lua
+          build/luau-lsp analyze --defs=scripts/globalTypes.d.lua test.lua
+
   lint_extension:
     name: Lint Extension
     runs-on: ubuntu-latest
