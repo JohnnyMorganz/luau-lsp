@@ -69,9 +69,11 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 struct ClientCompletionConfiguration
 {
     bool enabled = true;
+    /// Whether we should suggest automatic imports in completions
+    bool suggestImports = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports);
 
 struct ClientSignatureHelpConfiguration
 {

@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added configuration option `luau-lsp.hover.showTableKinds` (default: off) to indicate whether kinds (`{+ ... +}`, `{| ... |}`) are shown in hover information
 - Added configuration option `luau-lsp.hover.multilineFunctionDefinitions` (default: off) to spread function definitions in hover panel across multiple lines
 - Added configuration option `luau-lsp.hover.strictDatamodelTypes` (default: on) to use strict DataModel type information in hover panel (equivalent to autocomplete). When disabled, the same type information that the diagnostic type checker uses is displayed
+- Added support for automatic service importing. When using a service which has not yet been defined, it will be added (alphabetically) to the top of the file. Config setting: `luau-lsp.completion.suggestImports`
 
 ### Changed
 
