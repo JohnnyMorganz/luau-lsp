@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The types of `:FindFirstChild`, `:FindFirstAncestor` and `:FindFirstDescendant` have been changed to return `Instance?`
 - `:GetActor` is fixed to return `Actor?`
+- Fixed bug when using `--definitions=` when calling `luau-lsp analyze`
 
 ## [1.8.1] - 2022-08-01
 
