@@ -8,7 +8,7 @@ Install the extension from the marketplace: https://marketplace.visualstudio.com
 
 ### For General Users
 
-The langauge server should be immediately usable for general Luau code after installation.
+The language server should be immediately usable for general Luau code after installation.
 String require support is provided for relative module paths, using `require("../module")`.
 
 Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`.
