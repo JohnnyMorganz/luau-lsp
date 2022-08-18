@@ -1627,6 +1627,12 @@ declare class EnumLoadCharacterLayeredClothing_INTERNAL extends Enum
 	Disabled: EnumLoadCharacterLayeredClothing
 	Enabled: EnumLoadCharacterLayeredClothing
 end
+declare class EnumLoadDynamicHeads extends EnumItem end
+declare class EnumLoadDynamicHeads_INTERNAL extends Enum
+	Default: EnumLoadDynamicHeads
+	Disabled: EnumLoadDynamicHeads
+	Enabled: EnumLoadDynamicHeads
+end
 declare class EnumMaterial extends EnumItem end
 declare class EnumMaterial_INTERNAL extends Enum
 	Plastic: EnumMaterial
@@ -2696,6 +2702,18 @@ declare class EnumTouchMovementMode_INTERNAL extends Enum
 	ClickToMove: EnumTouchMovementMode
 	DynamicThumbstick: EnumTouchMovementMode
 end
+declare class EnumTrackerError extends EnumItem end
+declare class EnumTrackerError_INTERNAL extends Enum
+	Ok: EnumTrackerError
+	NoService: EnumTrackerError
+	InitFailed: EnumTrackerError
+	NoVideo: EnumTrackerError
+	VideoError: EnumTrackerError
+	CameraPermission: EnumTrackerError
+	NoAudio: EnumTrackerError
+	AudioError: EnumTrackerError
+	MicPermission: EnumTrackerError
+end
 declare class EnumTriStateBoolean extends EnumItem end
 declare class EnumTriStateBoolean_INTERNAL extends Enum
 	Unknown: EnumTriStateBoolean
@@ -3039,6 +3057,7 @@ declare Enum: {
 	ListDisplayMode: EnumListDisplayMode_INTERNAL,
 	ListenerType: EnumListenerType_INTERNAL,
 	LoadCharacterLayeredClothing: EnumLoadCharacterLayeredClothing_INTERNAL,
+	LoadDynamicHeads: EnumLoadDynamicHeads_INTERNAL,
 	Material: EnumMaterial_INTERNAL,
 	MaterialPattern: EnumMaterialPattern_INTERNAL,
 	MembershipType: EnumMembershipType_INTERNAL,
@@ -3156,6 +3175,7 @@ declare Enum: {
 	TopBottom: EnumTopBottom_INTERNAL,
 	TouchCameraMovementMode: EnumTouchCameraMovementMode_INTERNAL,
 	TouchMovementMode: EnumTouchMovementMode_INTERNAL,
+	TrackerError: EnumTrackerError_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
@@ -3477,7 +3497,6 @@ end
 declare class OverlapParams
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
-	IgnoreWater: boolean
 	CollisionGroup: string
 	MaxParts: number
 end
@@ -3754,6 +3773,8 @@ type DockWidgetPluginGui = any
 type QWidgetPluginGui = any
 type ScreenGui = any
 type GuiMain = any
+type SurfaceGuiBase = any
+type AdGui = any
 type SurfaceGui = any
 type GuiBase3d = any
 type FloorWire = any
@@ -4165,7 +4186,6 @@ declare class Instance
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
 	function SetAttribute(self, attribute: string, value: any): nil
-	function WaitForChild(self, childName: string, timeOut: number?): Instance
 	AncestryChanged: RBXScriptSignal<Instance, Instance>
 	AttributeChanged: RBXScriptSignal<string>
 	Changed: RBXScriptSignal<string>
@@ -4179,6 +4199,8 @@ declare class Instance
 	function FindFirstChild(self, name: string, recursive: boolean?): Instance?
 	function FindFirstDescendant(self, name: string): Instance?
 	function GetActor(self): Actor?
+	function WaitForChild(self, name: string): Instance
+	function WaitForChild(self, name: string, timeout: number): Instance?
 end
 
 declare class Accoutrement extends Instance
@@ -4291,10 +4313,13 @@ end
 declare class Animator extends Instance
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { any }
+	function GetPlayingAnimationTracksCoreScript(self): { any }
 	function LoadAnimation(self, animation: Animation): AnimationTrack
+	function LoadAnimationCoreScript(self, animation: Animation): AnimationTrack
 	function LoadStreamAnimation(self, animation: TrackerStreamAnimation): AnimationStreamTrack
 	function StepAnimations(self, deltaTime: number): nil
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
+	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
 end
 
 declare class AppUpdateService extends Instance
@@ -4311,16 +4336,8 @@ declare class AssetDeliveryProxy extends Instance
 end
 
 declare class AssetImportService extends Instance
-	function Cancel(self): nil
-	function GetCurrentImportMap(self): { [any]: any }
-	function ImportMesh(self, fileName: string): any
-	function IsAvatar(self): boolean
-	function Upload(self): nil
-	function ImportMeshWithPrompt(self): any
 	function PickFileWithPrompt(self): string
 	function StartSessionWithPrompt(self): AssetImportSession
-	ProgressUpdate: RBXScriptSignal<number>
-	UploadFinished: RBXScriptSignal<boolean, { [any]: any }>
 end
 
 declare class AssetImportSession extends Instance
@@ -5533,6 +5550,7 @@ declare class FaceAnimatorService extends Instance
 	AudioAnimationEnabled: boolean
 	FlipHeadOrientation: boolean
 	VideoAnimationEnabled: boolean
+	TrackerError: RBXScriptSignal<EnumTrackerError>
 end
 
 declare class FaceControls extends Instance
@@ -6004,6 +6022,7 @@ declare class ViewportFrame extends GuiObject
 	CurrentCamera: Camera
 	ImageColor3: Color3
 	ImageTransparency: number
+	IsMirrored: boolean
 	LightColor: Color3
 	LightDirection: Vector3
 end
@@ -6064,14 +6083,21 @@ end
 
 
 
-declare class SurfaceGui extends LayerCollector
+declare class SurfaceGuiBase extends LayerCollector
 	Active: boolean
 	Adornee: Instance
+	Face: EnumNormalId
+end
+
+declare class AdGui extends SurfaceGuiBase
+	AdShape: EnumAdShape
+end
+
+declare class SurfaceGui extends SurfaceGuiBase
 	AlwaysOnTop: boolean
 	Brightness: number
 	CanvasSize: Vector2
 	ClipsDescendants: boolean
-	Face: EnumNormalId
 	LightInfluence: number
 	PixelsPerStud: number
 	SizingMode: EnumSurfaceGuiSizingMode
@@ -6540,6 +6566,8 @@ declare class ImporterMeshSettings extends ImporterBaseSettings
 	MeshHoleDetectedPreview: boolean
 	MeshNoHoleDetected: boolean
 	NoIrrelevantCageModified: boolean
+	NoOuterCageFarExtendedFromMesh: boolean
+	OuterCageFarExtendedFromMeshPreview: boolean
 	PolygonCount: number
 	UseImportedPivot: boolean
 end
@@ -7735,6 +7763,7 @@ declare class Players extends Instance
 	function GetPlayerByUserId(self, userId: number): Player
 	function GetPlayerFromCharacter(self, character: Model): Player
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
+	function ReportAbuseV3(self, player: Player, jsonTags: string): nil
 	function SetChatStyle(self, style: EnumChatStyle?): nil
 	function SetLocalPlayerInfo(self, userId: number, userName: string, displayName: string, membershipType: EnumMembershipType, isUnder13: boolean): nil
 	function TeamChat(self, message: string): nil
@@ -8199,6 +8228,8 @@ declare class ScriptDocument extends Instance
 	function HasSelectedText(self): boolean
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
+	function ForceSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
+	function RequestSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
 	SelectionChanged: RBXScriptSignal<number, number, number, number>
 end
 
@@ -8462,6 +8493,7 @@ declare class StarterPlayer extends Instance
 	DevComputerMovementMode: EnumDevComputerMovementMode
 	DevTouchCameraMovementMode: EnumDevTouchCameraMovementMode
 	DevTouchMovementMode: EnumDevTouchMovementMode
+	EnableDynamicHeads: EnumLoadDynamicHeads
 	EnableMouseLockOption: boolean
 	GameSettingsAssetIDFace: number
 	GameSettingsAssetIDHead: number
@@ -8675,7 +8707,9 @@ declare class Studio extends Instance
 end
 
 declare class StudioAssetService extends Instance
+	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function SerializeInstances(self, instances: { Instance }): string
+	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
 end
 
 declare class StudioData extends Instance
@@ -8690,6 +8724,7 @@ declare class StudioDeviceEmulatorService extends Instance
 	IsMultiTouchEnabled: boolean
 	PivotPosition: Vector2
 	function GetMaxNumTouches(self): number
+	function GetTouchInBounds(self, index: number): boolean
 	function GetTouchPosition(self, index: number): Vector2
 	function EmulatePCDeviceWithResolution(self, deviceId: string, resolution: Vector2): boolean
 	function GetCurrentDeviceId(self): string
@@ -8699,6 +8734,7 @@ declare class StudioDeviceEmulatorService extends Instance
 	function SetCurrentOrientation(self, orientation: EnumScreenOrientation): nil
 	CurrentDeviceIdChanged: RBXScriptSignal<>
 	OrientationChanged: RBXScriptSignal<>
+	TouchInBoundsChanged: RBXScriptSignal<>
 	TouchPositionsChanged: RBXScriptSignal<>
 end
 
@@ -8913,11 +8949,19 @@ declare class TextChatConfigurations extends Instance
 end
 
 declare class ChatInputBarConfiguration extends TextChatConfigurations
+	AbsolutePosition: Vector2
+	AbsolutePositionWrite: Vector2
+	AbsoluteSize: Vector2
+	AbsoluteSizeWrite: Vector2
 	Enabled: boolean
 	TargetTextChannel: TextChannel
 end
 
 declare class ChatWindowConfiguration extends TextChatConfigurations
+	AbsolutePosition: Vector2
+	AbsolutePositionWrite: Vector2
+	AbsoluteSize: Vector2
+	AbsoluteSizeWrite: Vector2
 	Enabled: boolean
 end
 
@@ -9413,6 +9457,10 @@ declare class VideoCaptureService extends Instance
 	Active: boolean
 	CameraID: string
 	function GetCameraDevices(self): { [any]: any }
+	DevicesChanged: RBXScriptSignal<>
+	Error: RBXScriptSignal<string, string>
+	Started: RBXScriptSignal<string>
+	Stopped: RBXScriptSignal<string>
 end
 
 declare class VirtualInputManager extends Instance
