@@ -155,7 +155,8 @@ EXTRA_MEMBERS = {
         "function FindFirstChild(self, name: string, recursive: boolean?): Instance?",
         "function FindFirstDescendant(self, name: string): Instance?",
         "function GetActor(self): Actor?",
-        "WaitForChild: ((self, name: string) -> Instance) & ((self, name: string, timeout: number) -> Instance?)",
+        "function WaitForChild(self, name: string): Instance",
+        "function WaitForChild(self, name: string, timeout: number): Instance?",
     ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
