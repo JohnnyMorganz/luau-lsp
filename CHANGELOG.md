@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- New service imports which come first alphabetically will group with existing imports rather than going at the beginning of the file
+
 ## [1.9.0] - 2022-08-16
 
 ### Added
