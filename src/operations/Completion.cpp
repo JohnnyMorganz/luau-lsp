@@ -127,7 +127,7 @@ bool isGetService(const Luau::AstExpr* expr)
 
 struct ImportLocationVisitor : public Luau::AstVisitor
 {
-    size_t firstServiceDefinitionLine = -1;
+    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
     std::unordered_map<std::string, size_t> serviceLineMap;
 
     bool visit(Luau::AstStatLocal* local) override
@@ -145,7 +145,8 @@ struct ImportLocationVisitor : public Luau::AstVisitor
 
         if (isGetService(expr))
         {
-            firstServiceDefinitionLine = firstServiceDefinitionLine == -1 || firstServiceDefinitionLine >= line ? line : firstServiceDefinitionLine;
+            firstServiceDefinitionLine =
+                !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
             serviceLineMap.emplace(std::string(localName->name.value), line);
         }
 
@@ -230,7 +231,9 @@ void WorkspaceFolder::suggestImports(
 
         ImportLocationVisitor visitor;
         visitor.visit(sourceModule->root);
-        minimumLineNumber = __max(minimumLineNumber, visitor.firstServiceDefinitionLine);
+
+        if (visitor.firstServiceDefinitionLine)
+            minimumLineNumber = *visitor.firstServiceDefinitionLine > minimumLineNumber ? *visitor.firstServiceDefinitionLine : minimumLineNumber;
 
         auto services = getServiceNames(frontend.typeCheckerForAutocomplete.globalScope);
         for (auto& service : services)
