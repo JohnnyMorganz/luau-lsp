@@ -129,7 +129,7 @@ int startAnalyze(int argc, char** argv)
             else if (strncmp(argv[i], "--sourcemap=", 12) == 0)
                 sourcemapPath = std::string(argv[i] + 12);
             else if (strncmp(argv[i], "--definitions=", 14) == 0)
-                definitionsPaths.push_back(std::string(argv[i] + 17));
+                definitionsPaths.push_back(std::string(argv[i] + 14));
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));

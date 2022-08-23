@@ -43,9 +43,6 @@ public:
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
-    /// Checks whether a provided file is part of the workspace
-    bool isInWorkspace(const lsp::DocumentUri& file);
-
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
@@ -61,6 +58,8 @@ public:
 
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
+    void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
+        std::vector<lsp::CompletionItem>& result);
 
 public:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
@@ -71,12 +70,13 @@ public:
 
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
 
-    std::optional<lsp::Location> gotoDefinition(const lsp::DefinitionParams& params);
+    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params);
 
     std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
 
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
 

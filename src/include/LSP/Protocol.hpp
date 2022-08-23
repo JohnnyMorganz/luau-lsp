@@ -421,12 +421,13 @@ struct ServerCapabilities
     bool documentSymbolProvider = false;
     std::optional<DocumentLinkOptions> documentLinkProvider;
     bool renameProvider = false;
+    bool inlayHintProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider;
     std::optional<WorkspaceCapabilities> workspace;
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, renameProvider, diagnosticProvider, workspace);
+    documentLinkProvider, renameProvider, inlayHintProvider, diagnosticProvider, workspace);
 
 struct InitializeResult
 {
@@ -937,6 +938,9 @@ struct SignatureHelpParams : TextDocumentPositionParams
 struct DefinitionParams : TextDocumentPositionParams
 {
 };
+
+using DefinitionResult = std::vector<lsp::Location>;
+
 struct TypeDefinitionParams : TextDocumentPositionParams
 {
 };
@@ -1079,5 +1083,33 @@ struct ShowMessageParams
     std::string message;
 };
 NLOHMANN_DEFINE_OPTIONAL(ShowMessageParams, type, message);
+
+struct InlayHintParams
+{
+    TextDocumentIdentifier textDocument;
+    Range range;
+};
+NLOHMANN_DEFINE_OPTIONAL(InlayHintParams, textDocument, range);
+
+enum struct InlayHintKind
+{
+    Type = 1,
+    Parameter = 2,
+};
+
+struct InlayHint
+{
+    Position position;
+    std::string label;
+    std::optional<InlayHintKind> kind;
+    std::vector<TextEdit> textEdits;
+    std::optional<std::string> tooltip;
+    bool paddingLeft = false;
+    bool paddingRight = false;
+};
+
+NLOHMANN_DEFINE_OPTIONAL(InlayHint, position, label, kind, textEdits, tooltip, paddingLeft, paddingRight);
+
+using InlayHintResult = std::vector<InlayHint>;
 
 } // namespace lsp

@@ -19,6 +19,11 @@ set(SOURCES
     src/operations/DocumentSymbol.cpp
     src/operations/DocumentLink.cpp
     src/operations/GotoDefinition.cpp
+    src/operations/Hover.cpp
+    src/operations/SignatureHelp.cpp
+    src/operations/References.cpp
+    src/operations/Rename.cpp
+    src/operations/InlayHints.cpp
 )
 add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
 

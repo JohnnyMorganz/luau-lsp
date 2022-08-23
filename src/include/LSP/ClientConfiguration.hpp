@@ -35,6 +35,56 @@ struct ClientTypesConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles, environmentGlobs);
 
+enum struct InlayHintsParameterNamesConfig
+{
+    None,
+    Literals,
+    All
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(InlayHintsParameterNamesConfig, {
+                                                                 {InlayHintsParameterNamesConfig::None, "none"},
+                                                                 {InlayHintsParameterNamesConfig::Literals, "literals"},
+                                                                 {InlayHintsParameterNamesConfig::All, "all"},
+                                                             })
+
+struct ClientInlayHintsConfiguration
+{
+    InlayHintsParameterNamesConfig parameterNames;
+    bool variableTypes = false;
+    bool parameterTypes = false;
+    bool functionReturnTypes = false;
+    size_t typeHintMaxLength = 50;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength);
+
+struct ClientHoverConfiguration
+{
+    bool enabled = true;
+    bool showTableKinds = false;
+    bool multilineFunctionDefinitions = false;
+    bool strictDatamodelTypes = true;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
+
+struct ClientCompletionConfiguration
+{
+    bool enabled = true;
+    /// Whether we should suggest automatic imports in completions
+    bool suggestImports = false;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports);
+
+struct ClientSignatureHelpConfiguration
+{
+    bool enabled = true;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSignatureHelpConfiguration, enabled);
+
+
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
 struct ClientConfiguration
@@ -45,5 +95,10 @@ struct ClientConfiguration
     ClientSourcemapConfiguration sourcemap;
     ClientDiagnosticsConfiguration diagnostics;
     ClientTypesConfiguration types;
+    ClientInlayHintsConfiguration inlayHints;
+    ClientHoverConfiguration hover;
+    ClientCompletionConfiguration completion;
+    ClientSignatureHelpConfiguration signatureHelp;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp);

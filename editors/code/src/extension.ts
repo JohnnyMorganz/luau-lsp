@@ -16,7 +16,7 @@ let client: LanguageClient;
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
 const GLOBAL_TYPES_DEFINITION =
-  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/master/scripts/globalTypes.d.lua";
+  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.lua";
 const API_DOCS =
   "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json";
 const CURRENT_FFLAGS =
@@ -192,7 +192,7 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
     args.push("--include-non-scripts");
   }
 
-  spawn(config.get<string>("rojoPath") ?? "rojo", args, {
+  await spawn(config.get<string>("rojoPath") ?? "rojo", args, {
     cwd: workspaceFolder.uri.fsPath,
   }).catch((err) => {
     let output = `Failed to update sourcemap for ${
@@ -209,6 +209,12 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
 
     vscode.window.showWarningMessage(output);
   });
+
+  client.info(
+    `Sourcemap regenerated for ${
+      workspaceFolder.name
+    } (${workspaceFolder.uri.toString(true)})`
+  );
 };
 
 const parseConfigPath = (path: string) => {
@@ -329,7 +335,7 @@ export async function activate(context: vscode.ExtensionContext) {
       "..",
       "..",
       "build",
-      "Debug",
+      "RelWithDebInfo",
       "luau-lsp.exe"
     ).fsPath,
     args,
@@ -338,10 +344,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const serverOptions: ServerOptions = { run, debug };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      { scheme: "file", language: "lua" },
-      { scheme: "file", language: "luau" },
-    ],
+    documentSelector: [{ language: "lua" }, { language: "luau" }],
     diagnosticPullOptions: {
       onChange: true,
       onSave: true,

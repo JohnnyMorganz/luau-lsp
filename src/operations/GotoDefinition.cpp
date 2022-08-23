@@ -1,8 +1,10 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
-std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
+lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
+    lsp::DefinitionResult result;
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto position = convertPosition(params.position);
 
@@ -18,25 +20,29 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
     // TODO: fix "forAutocomplete"
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
-        return std::nullopt;
+        return result;
 
     auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
     if (binding)
     {
         // If it points to a global definition (i.e. at pos 0,0), return nothing
         if (binding->location.begin == Luau::Position{0, 0} && binding->location.end == Luau::Position{0, 0})
-            return std::nullopt;
+            return result;
 
         // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
-        return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}};
+        result.emplace_back(
+            lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}});
     }
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     if (!node)
-        return std::nullopt;
+        return result;
 
     if (auto expr = node->asExpr())
     {
+        std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
+        std::optional<Luau::Location> location = std::nullopt;
+
         if (auto lvalue = Luau::tryGetLValue(*expr))
         {
             const Luau::LValue* current = &*lvalue;
@@ -44,17 +50,17 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
             while (auto field = Luau::get<Luau::Field>(*current))
             {
                 keys.push_back(field->key);
-                current = baseof(*current);
+                current = Luau::baseof(*current);
             }
 
             const Luau::Symbol* symbol = Luau::get<Luau::Symbol>(*current);
             auto scope = Luau::findScopeAtPosition(*module, position);
             if (!scope)
-                return std::nullopt;
+                return result;
 
             auto baseType = scope->lookup(*symbol);
             if (!baseType)
-                return std::nullopt;
+                return result;
             baseType = Luau::follow(*baseType);
 
             std::vector<Luau::Property> properties;
@@ -63,15 +69,9 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
                 auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type);
                 auto prop = lookupProp(base, *it);
                 if (!prop)
-                    return std::nullopt;
+                    return result;
                 properties.push_back(*prop);
             }
-
-            if (properties.empty())
-                return std::nullopt;
-
-            std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
-            std::optional<Luau::Location> location = std::nullopt;
 
             for (auto it = properties.rbegin(); it != properties.rend(); ++it)
             {
@@ -81,74 +81,48 @@ std::optional<lsp::Location> WorkspaceFolder::gotoDefinition(const lsp::Definiti
                     definitionModuleName = Luau::getDefinitionModuleName(Luau::follow(it->type));
             }
 
-            if (location)
+            if (!definitionModuleName)
+                definitionModuleName = Luau::getDefinitionModuleName(*baseType);
+
+            if (!location)
+                location = getLocation(*baseType);
+        }
+
+        if (location)
+        {
+            if (definitionModuleName)
             {
-                if (definitionModuleName)
+                if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
                 {
-                    if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
-                    {
-                        return lsp::Location{Uri::file(*file), lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
-                    }
+                    result.emplace_back(
+                        lsp::Location{Uri::file(*file), lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
                 }
-                return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
             }
-
-            // auto ty = Luau::follow(prop->type);
-
-            // Try to see if we can infer a good location
-            // if (auto ftv = Luau::get<Luau::FunctionTypeVar>(ty))
-            // {
-            //     if (auto def = ftv->definition)
-            //     {
-            //         if (auto definitionModuleName = def->definitionModuleName)
-            //         {
-            //             auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName);
-            //             if (file)
-            //                 return lsp::Location{Uri::file(*file),
-            //                     lsp::Range{convertPosition(def->definitionLocation.begin), convertPosition(def->definitionLocation.end)}};
-            //         }
-            //         else
-            //         {
-            //             return lsp::Location{params.textDocument.uri,
-            //                 lsp::Range{convertPosition(def->definitionLocation.begin), convertPosition(def->definitionLocation.end)}};
-            //         }
-            //     }
-            // }
-
-            // Fallback to the prop location if available
-            // if (prop->location)
-            // {
-            //     if (auto definitionModuleName = Luau::getDefinitionModuleName(ty))
-            //     {
-            //         if (auto file = fileResolver.resolveVirtualPathToRealPath(*definitionModuleName))
-            //         {
-            //             return lsp::Location{
-            //                 Uri::file(*file), lsp::Range{convertPosition(prop->location->begin), convertPosition(prop->location->end)}};
-            //         }
-            //     }
-            //     return lsp::Location{
-            //         params.textDocument.uri, lsp::Range{convertPosition(prop->location->begin), convertPosition(prop->location->end)}};
-            // }
+            else
+            {
+                result.emplace_back(
+                    lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
+            }
         }
     }
     else if (auto reference = node->as<Luau::AstTypeReference>())
     {
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)
-            return std::nullopt;
+            return result;
 
         // TODO: we currently can't handle if its imported from a module
         if (reference->prefix)
-            return std::nullopt;
+            return result;
 
         auto location = lookupTypeLocation(*scope, reference->name.value);
         if (!location)
-            return std::nullopt;
+            return result;
 
-        return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
+        result.emplace_back(lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
     }
 
-    return std::nullopt;
+    return result;
 }
 
 std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
@@ -221,7 +195,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     return std::nullopt;
 }
 
-std::optional<lsp::Location> LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
+lsp::DefinitionResult LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->gotoDefinition(params);

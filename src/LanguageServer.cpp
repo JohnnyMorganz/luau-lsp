@@ -20,14 +20,33 @@ using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
 {
+    WorkspaceFolderPtr bestWorkspace = nullptr;
+    size_t length = 0;
+    auto checkStr = file.toString();
+
+
     for (auto& workspace : workspaceFolders)
     {
-        if (workspace->isInWorkspace(file))
+        if (file == workspace->rootUri)
+            return workspace;
+
+        // Check if the root uri is a prefix of the file
+        auto prefixStr = workspace->rootUri.toString();
+        auto size = prefixStr.size();
+        if (size < length)
+            continue;
+
+        if (checkStr.compare(0, size, prefixStr) == 0)
         {
-            return workspace; // TODO: should we return early here? maybe a better match comes along?
+            bestWorkspace = workspace;
+            length = size;
         }
     }
-    client->sendLogMessage(lsp::MessageType::Info, "cannot find workspace for " + file.toString());
+
+    if (bestWorkspace)
+        return bestWorkspace;
+
+    client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
 
@@ -60,6 +79,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentLinkProvider = {false};
     // Rename Provider
     capabilities.renameProvider = true;
+    // Inlay Hint Provider
+    capabilities.inlayHintProvider = true;
     // Diagnostics Provider
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspaces
@@ -123,6 +144,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/documentSymbol")
     {
         response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+    }
+    else if (method == "textDocument/inlayHint")
+    {
+        response = inlayHint(REQUIRED_PARAMS(params, "textDocument/inlayHint"));
     }
     else if (method == "textDocument/diagnostic")
     {
@@ -559,30 +584,6 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             client->refreshWorkspaceDiagnostics();
         }
     }
-}
-
-std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
-}
-
-std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->signatureHelp(params);
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
-}
-
-lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->rename(params);
 }
 
 Response LanguageServer::onShutdown(const id_type& id)

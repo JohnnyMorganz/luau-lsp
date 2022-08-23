@@ -474,12 +474,15 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(
-    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope)
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+    std::optional<Luau::ScopePtr> scope, ToStringNamedFunctionOpts stringOpts)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    opts.hideTableKind = stringOpts.hideTableKind;
+    opts.useLineBreaks = stringOpts.multiline;
+    opts.indent = stringOpts.multiline;
     if (scope)
         opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
@@ -551,6 +554,23 @@ std::string toStringNamedFunction(
     return "function " + baseName + methodName + functionString;
 }
 
+std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    return toStringReturnTypeDetailed(retTypes, options).name;
+}
+
+Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options)
+{
+    size_t retSize = Luau::size(retTypes);
+    bool hasTail = !Luau::finite(retTypes);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+
+    auto result = Luau::toStringDetailed(retTypes, options);
+    if (wrap)
+        result.name = "(" + result.name + ")";
+    return result;
+}
+
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 {
@@ -616,6 +636,24 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     }
     else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
     {
+        if (auto mtable = Luau::get<Luau::TableTypeVar>(mt->metatable))
+        {
+            auto indexIt = mtable->props.find("__index");
+            if (indexIt != mtable->props.end())
+            {
+                Luau::TypeId followed = Luau::follow(indexIt->second.type);
+                if (Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed))
+                {
+                    return lookupProp(followed, name);
+                }
+                else if (Luau::get<Luau::FunctionTypeVar>(followed))
+                {
+                    // TODO: can we handle an index function...?
+                    return std::nullopt;
+                }
+            }
+        }
+
         if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
         {
             if (tbl->props.find(name) != tbl->props.end())
@@ -623,8 +661,6 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
                 return tbl->props.at(name);
             }
         }
-
-        // TODO: we should respect metatable __index
     }
     // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
     // {
@@ -807,4 +843,17 @@ std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& sourc
     FindSymbolReferences finder(symbol);
     source.root->visit(&finder);
     return std::move(finder.result);
+}
+
+std::optional<Luau::Location> getLocation(Luau::TypeId type)
+{
+    type = follow(type);
+
+    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(type))
+    {
+        if (ftv->definition)
+            return ftv->definition->originalNameLocation;
+    }
+
+    return std::nullopt;
 }

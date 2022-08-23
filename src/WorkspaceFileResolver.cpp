@@ -315,7 +315,7 @@ void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std
     if (auto realPath = node->getScriptFilePath())
     {
         std::error_code ec;
-        auto canonicalName = std::filesystem::weakly_canonical(*realPath, ec);
+        auto canonicalName = std::filesystem::weakly_canonical(rootUri.fsPath() / *realPath, ec);
         if (ec.value() != 0)
             canonicalName = *realPath;
         realPathsToSourceNodes[canonicalName.generic_string()] = node;

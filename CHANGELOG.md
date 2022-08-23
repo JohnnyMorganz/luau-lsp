@@ -16,12 +16,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.537
+- Sync to upstream Luau 0.541
+
+### Fixed
+
+- New service imports which come first alphabetically will group with existing imports rather than going at the beginning of the file
+
+## [1.9.0] - 2022-08-16
+
+### Added
+
+- Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
+  - `luau-lsp.completion.enabled`: Autocomplete
+  - `luau-lsp.hover.enabled`: Hover
+  - `luau-lsp.signatureHelp.enabled`: Signature Help
+
+- Added configuration option `luau-lsp.hover.showTableKinds` (default: off) to indicate whether kinds (`{+ ... +}`, `{| ... |}`) are shown in hover information
+- Added configuration option `luau-lsp.hover.multilineFunctionDefinitions` (default: off) to spread function definitions in hover panel across multiple lines
+- Added configuration option `luau-lsp.hover.strictDatamodelTypes` (default: on) to use strict DataModel type information in hover panel (equivalent to autocomplete). When disabled, the same type information that the diagnostic type checker uses is displayed
+- Added support for automatic service importing. When using a service which has not yet been defined, it will be added (alphabetically) to the top of the file. Config setting: `luau-lsp.completion.suggestImports`
+
+### Changed
+
+- Sync to upstream Luau 0.540
+
+### Fixed
+
+- The types of `:FindFirstChild`, `:FindFirstAncestor` and `:FindFirstDescendant` have been changed to return `Instance?`
+- `:GetActor` is fixed to return `Actor?`
+- Fixed bug when using `--definitions=` when calling `luau-lsp analyze`
+
+## [1.8.1] - 2022-08-01
+
+### Fixed
+
+- Fixed `self` being showed as the first inlay hint incorrectly in parameter names and types
+
+## [1.8.0] - 2022-07-30
+
+### Added
+
+- Added support for cross-file go to definition of functions
+- Added support for go-to definition of properties defined on a metatable with `__index`
+- Added support for inlay hints. It can be enabled by configuring `luau-lsp.inlayHints.parameterNames`, `luau-lsp.inlayHints.parameterTypes`, `luau-lsp.inlayHints.variableTypes`, `luau-lsp.inlayHints.functionReturnTypes`.
+
+### Changed
+
+- Sync to upstream Luau 0.538
 - Improved completion detail function param information with better representative types, and include a trailing type pack if present
 
 ### Fixed
 
 - Fixed crash when hovering over local in incomplete syntax tree
+- Fixed language server not working for newly created files not yet stored on disk
+- Luau LSP will now activate if you run an LSP command
+- Fixed finding the incorrect workspace folder to analyze with in a multi-workspace environment
 
 ## [1.7.1] - 2022-07-17
 
