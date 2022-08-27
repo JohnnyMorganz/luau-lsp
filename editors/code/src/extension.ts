@@ -308,7 +308,7 @@ export async function activate(context: vscode.ExtensionContext) {
       "..",
       "..",
       "build",
-      "RelWithDebInfo",
+      process.env["CMAKE_BUILD_TYPE"] ?? "Debug",
       "luau-lsp.exe"
     ).fsPath,
     args,

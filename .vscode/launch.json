@@ -13,6 +13,9 @@
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
       ],
+      "env": {
+        "CMAKE_BUILD_TYPE": "${command:cmake.buildType}"
+      },
       "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
       "preLaunchTask": "Build Server and Extension"
     },
