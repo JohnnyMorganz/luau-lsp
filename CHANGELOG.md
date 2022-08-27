@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - New service imports which come first alphabetically will group with existing imports rather than going at the beginning of the file
+- Fixed warning messages showing up as notifications when generating Rojo Sourcemap even if it works successfully
 
 ## [1.9.0] - 2022-08-16
 
