@@ -324,7 +324,12 @@ export async function activate(context: vscode.ExtensionContext) {
     },
   };
 
-  client = new LanguageClient("luau", "Luau LSP", serverOptions, clientOptions);
+  client = new LanguageClient(
+    "luau",
+    "Luau Language Server",
+    serverOptions,
+    clientOptions
+  );
 
   // Register commands
   client.onNotification("$/command", (params) => {
