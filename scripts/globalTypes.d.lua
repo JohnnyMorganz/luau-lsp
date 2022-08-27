@@ -99,10 +99,6 @@ declare class EnumActuatorType_INTERNAL extends Enum
 	Motor: EnumActuatorType
 	Servo: EnumActuatorType
 end
-declare class EnumAdFormat extends EnumItem end
-declare class EnumAdFormat_INTERNAL extends Enum
-	Image: EnumAdFormat
-end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
 	HorizontalRectangle: EnumAdShape
@@ -267,6 +263,7 @@ declare class EnumAssetType_INTERNAL extends Enum
 	DressSkirtAccessory: EnumAssetType
 	EyebrowAccessory: EnumAssetType
 	EyelashAccessory: EnumAssetType
+	DynamicHead: EnumAssetType
 end
 declare class EnumAssetTypeVerification extends EnumItem end
 declare class EnumAssetTypeVerification_INTERNAL extends Enum
@@ -328,6 +325,7 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	DressSkirtAccessory: EnumAvatarAssetType
 	EyebrowAccessory: EnumAvatarAssetType
 	EyelashAccessory: EnumAvatarAssetType
+	DynamicHead: EnumAvatarAssetType
 end
 declare class EnumAvatarContextMenuOption extends EnumItem end
 declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
@@ -2276,6 +2274,12 @@ declare class EnumStreamOutBehavior_INTERNAL extends Enum
 	LowMemory: EnumStreamOutBehavior
 	Opportunistic: EnumStreamOutBehavior
 end
+declare class EnumStreamingIntegrityMode extends EnumItem end
+declare class EnumStreamingIntegrityMode_INTERNAL extends Enum
+	Default: EnumStreamingIntegrityMode
+	Disabled: EnumStreamingIntegrityMode
+	MinimumRadiusPause: EnumStreamingIntegrityMode
+end
 declare class EnumStreamingPauseMode extends EnumItem end
 declare class EnumStreamingPauseMode_INTERNAL extends Enum
 	Default: EnumStreamingPauseMode
@@ -2709,10 +2713,10 @@ declare class EnumTrackerError_INTERNAL extends Enum
 	InitFailed: EnumTrackerError
 	NoVideo: EnumTrackerError
 	VideoError: EnumTrackerError
-	CameraPermission: EnumTrackerError
+	VideoNoPermission: EnumTrackerError
 	NoAudio: EnumTrackerError
 	AudioError: EnumTrackerError
-	MicPermission: EnumTrackerError
+	AudioNoPermission: EnumTrackerError
 end
 declare class EnumTriStateBoolean extends EnumItem end
 declare class EnumTriStateBoolean_INTERNAL extends Enum
@@ -2913,7 +2917,6 @@ declare Enum: {
 	ActionType: EnumActionType_INTERNAL,
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
-	AdFormat: EnumAdFormat_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdornCullingMode: EnumAdornCullingMode_INTERNAL,
 	AlignType: EnumAlignType_INTERNAL,
@@ -3139,6 +3142,7 @@ declare Enum: {
 	StartCorner: EnumStartCorner_INTERNAL,
 	Status: EnumStatus_INTERNAL,
 	StreamOutBehavior: EnumStreamOutBehavior_INTERNAL,
+	StreamingIntegrityMode: EnumStreamingIntegrityMode_INTERNAL,
 	StreamingPauseMode: EnumStreamingPauseMode_INTERNAL,
 	StudioCloseMode: EnumStudioCloseMode_INTERNAL,
 	StudioDataModelType: EnumStudioDataModelType_INTERNAL,
@@ -3617,7 +3621,6 @@ type BodyThrust = any
 type BodyVelocity = any
 type RocketPropulsion = any
 type Breakpoint = any
-type BreakpointManager = any
 type BrowserService = any
 type BulkImportService = any
 type CacheableContentProvider = any
@@ -3884,6 +3887,7 @@ type MessageBusService = any
 type MessagingService = any
 type MetaBreakpoint = any
 type MetaBreakpointContext = any
+type MetaBreakpointManager = any
 type Mouse = any
 type PlayerMouse = any
 type PluginMouse = any
@@ -3901,6 +3905,7 @@ type NoCollisionConstraint = any
 type NotificationService = any
 type PVInstance = any
 type BasePart = any
+type AdPortal = any
 type CornerWedgePart = any
 type FormFactorPart = any
 type Part = any
@@ -4691,16 +4696,6 @@ declare class Breakpoint extends Instance
 	Script: string
 	Valid: boolean
 	Verified: boolean
-end
-
-declare class BreakpointManager extends Instance
-	function AddBreakpoint(self, script: Instance, line: number, condition: Instance): Instance
-	function GetBreakpointById(self, metaBreakpointId: number): MetaBreakpoint
-	function RemoveBreakpointById(self, metaBreakpointId: number): nil
-	MetaBreakpointAdded: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointChanged: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointRemoved: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointSetChanged: RBXScriptSignal<MetaBreakpoint, { [any]: any }>
 end
 
 declare class BrowserService extends Instance
@@ -6429,7 +6424,7 @@ declare class Humanoid extends Instance
 	Climbing: RBXScriptSignal<number>
 	ClusterCompositionFinished: RBXScriptSignal<>
 	Died: RBXScriptSignal<>
-	EmoteTriggered: RBXScriptSignal<any>
+	EmoteTriggered: RBXScriptSignal<boolean, AnimationTrack>
 	FallingDown: RBXScriptSignal<boolean>
 	FreeFalling: RBXScriptSignal<boolean>
 	GettingUp: RBXScriptSignal<boolean>
@@ -6967,7 +6962,6 @@ declare class MaterialService extends Instance
 	Use2022Materials: boolean
 	WoodName: string
 	WoodPlanksName: string
-	hasPropertyWarningInStudio: boolean
 	function GetBaseMaterialOverride(self, material: EnumMaterial): string
 	function GetMaterialOverrideChanged(self, material: EnumMaterial): RBXScriptSignal
 	function GetMaterialVariant(self, material: EnumMaterial, name: string): MaterialVariant
@@ -7068,6 +7062,16 @@ declare class MetaBreakpoint extends Instance
 end
 
 declare class MetaBreakpointContext extends Instance
+end
+
+declare class MetaBreakpointManager extends Instance
+	function AddBreakpoint(self, script: Instance, line: number, condition: Instance): Instance
+	function GetBreakpointById(self, metaBreakpointId: number): MetaBreakpoint
+	function RemoveBreakpointById(self, metaBreakpointId: number): nil
+	MetaBreakpointAdded: RBXScriptSignal<MetaBreakpoint>
+	MetaBreakpointChanged: RBXScriptSignal<MetaBreakpoint>
+	MetaBreakpointRemoved: RBXScriptSignal<MetaBreakpoint>
+	MetaBreakpointSetChanged: RBXScriptSignal<MetaBreakpoint, { [any]: any }>
 end
 
 declare class Mouse extends Instance
@@ -7251,6 +7255,9 @@ declare class BasePart extends PVInstance
 	Touched: RBXScriptSignal<BasePart>
 end
 
+declare class AdPortal extends BasePart
+end
+
 declare class CornerWedgePart extends BasePart
 end
 
@@ -7412,6 +7419,7 @@ declare class Workspace extends WorldRoot
 	SignalBehavior: EnumSignalBehavior
 	StreamOutBehavior: EnumStreamOutBehavior
 	StreamingEnabled: boolean
+	StreamingIntegrityMode: EnumStreamingIntegrityMode
 	StreamingMinRadius: number
 	StreamingPauseMode: EnumStreamingPauseMode
 	StreamingTargetRadius: number
@@ -8225,12 +8233,14 @@ declare class ScriptDocument extends Instance
 	function GetSelectionEnd(self): any
 	function GetSelectionStart(self): any
 	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
+	function GetViewport(self): any
 	function HasSelectedText(self): boolean
 	function IsCommandBar(self): boolean
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 	function ForceSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
 	function RequestSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
 	SelectionChanged: RBXScriptSignal<number, number, number, number>
+	ViewportChanged: RBXScriptSignal<number, number>
 end
 
 declare class ScriptEditorService extends Instance
@@ -8710,6 +8720,7 @@ declare class StudioAssetService extends Instance
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function SerializeInstances(self, instances: { Instance }): string
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
+	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
 end
 
 declare class StudioData extends Instance
@@ -9519,6 +9530,7 @@ declare class VoiceChannel extends Instance
 end
 
 declare class VoiceChatInternal extends Instance
+	function GetChannelId(self): string
 	function GetGroupId(self): string
 	function IsContextVoiceEnabled(self): boolean
 	function SubscribeBlock(self, userId: number): boolean
@@ -9565,7 +9577,6 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "BadgeService"): BadgeService
 	function GetService(self, service: "CoreGui"): CoreGui
 	function GetService(self, service: "StarterGui"): StarterGui
-	function GetService(self, service: "BreakpointManager"): BreakpointManager
 	function GetService(self, service: "BrowserService"): BrowserService
 	function GetService(self, service: "BulkImportService"): BulkImportService
 	function GetService(self, service: "CacheableContentProvider"): CacheableContentProvider
@@ -9643,6 +9654,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "MemoryStoreService"): MemoryStoreService
 	function GetService(self, service: "MessageBusService"): MessageBusService
 	function GetService(self, service: "MessagingService"): MessagingService
+	function GetService(self, service: "MetaBreakpointManager"): MetaBreakpointManager
 	function GetService(self, service: "MouseService"): MouseService
 	function GetService(self, service: "NetworkClient"): NetworkClient
 	function GetService(self, service: "NetworkServer"): NetworkServer
