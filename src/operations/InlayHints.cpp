@@ -12,7 +12,7 @@ bool isLiteral(const Luau::AstExpr* expr)
 // Adds a text edit onto the hint so that it can be inserted.
 void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
 {
-    auto result = Luau::toStringDetailed(ty);
+    auto result = Luau::toStringDetailed(ty, Luau::ToStringOptions{});
     if (result.invalid || result.truncated)
         return;
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
