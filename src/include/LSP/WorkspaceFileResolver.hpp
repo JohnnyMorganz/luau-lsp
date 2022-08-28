@@ -5,6 +5,7 @@
 #include "Luau/FileResolver.h"
 #include "Luau/StringUtils.h"
 #include "Luau/Config.h"
+#include "LSP/Client.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/Protocol.hpp"
 #include "LSP/Sourcemap.hpp"
@@ -14,6 +15,8 @@ struct WorkspaceFileResolver
     : Luau::FileResolver
     , Luau::ConfigResolver
 {
+    /// WARNING: make sure to check that client exists - it won't exist in CLI mode
+    ClientPtr client;
     Luau::Config defaultConfig;
 
     // The root source node from a parsed Rojo source map
@@ -27,7 +30,14 @@ struct WorkspaceFileResolver
     mutable std::unordered_map<std::string, Luau::Config> configCache;
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
 
-    WorkspaceFileResolver()
+    WorkspaceFileResolver(lsp::DocumentUri rootUri)
+        : WorkspaceFileResolver(nullptr, rootUri)
+    {
+    }
+
+    WorkspaceFileResolver(ClientPtr client, lsp::DocumentUri rootUri)
+        : client(client)
+        , rootUri(rootUri)
     {
         defaultConfig.mode = Luau::Mode::Nonstrict;
     }
@@ -64,6 +74,8 @@ struct WorkspaceFileResolver
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
 
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;
+
+    std::optional<std::string> getEnvironmentForModule(const Luau::ModuleName& name) const override;
 
     const Luau::Config& getConfig(const Luau::ModuleName& name) const override;
 

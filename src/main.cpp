@@ -45,7 +45,7 @@ static void displayHelp(const char* argv0)
     printf("  --sourcemap=PATH: path to a Rojo-style sourcemap\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("LSP options:\n");
-    printf("  --definitions=PATH: path to definition file for global types\n");
+    printf("  --environment:NAME=PATH: register an environment with a definitions file path\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");
 }
 
@@ -121,21 +121,38 @@ int startLanguageServer(int argc, char** argv)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    std::vector<std::filesystem::path> definitionsFiles;
-    std::optional<std::filesystem::path> documentationFile;
+    auto client = std::make_shared<Client>();
+
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "--definitions=", 14) == 0)
         {
-            definitionsFiles.emplace_back(argv[i] + 14);
+            client->definitionsFiles_DEPRECATED.emplace_back(argv[i] + 14);
         }
         else if (strncmp(argv[i], "--docs=", 7) == 0)
         {
-            documentationFile = std::filesystem::path(argv[i] + 7);
+            client->documentationFile = std::filesystem::path(argv[i] + 7);
+        }
+        else if (strncmp(argv[i], "--environment:", 14) == 0)
+        {
+            std::string environmentSet = std::string(argv[i] + 14);
+
+            size_t eqIndex = environmentSet.find("=");
+            if (eqIndex == std::string::npos)
+            {
+                std::cerr << "Bad environment option, missing =: " << environmentSet << "\n";
+                return 1;
+            }
+
+            std::string name = environmentSet.substr(0, eqIndex);
+            std::filesystem::path path = environmentSet.substr(eqIndex + 1, environmentSet.length());
+            client->environments.emplace(name, path);
         }
     }
 
-    LanguageServer server(definitionsFiles, documentationFile);
+    parseDocumentation(client->documentationFile, client->documentation, client);
+
+    LanguageServer server(client);
 
     // Begin input loop
     server.processInputLoop();

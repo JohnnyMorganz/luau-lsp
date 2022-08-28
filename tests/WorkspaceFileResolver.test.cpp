@@ -7,7 +7,7 @@ TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 {
-    WorkspaceFileResolver fileResolver;
+    WorkspaceFileResolver fileResolver{Uri()};
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerScripts"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("PurchaseClient"), Luau::Location(), Luau::Position(0, 0), '.');
@@ -19,7 +19,7 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 {
-    WorkspaceFileResolver fileResolver;
+    WorkspaceFileResolver fileResolver{Uri()};
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerGui"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GuiScript"), Luau::Location(), Luau::Position(0, 0), '.');
@@ -31,7 +31,7 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 
 TEST_CASE("resolveModule handles LocalPlayer StarterGear")
 {
-    WorkspaceFileResolver fileResolver;
+    WorkspaceFileResolver fileResolver{Uri()};
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/StarterGear"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GearScript"), Luau::Location(), Luau::Position(0, 0), '.');

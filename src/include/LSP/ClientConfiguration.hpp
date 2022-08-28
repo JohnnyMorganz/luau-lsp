@@ -28,10 +28,12 @@ struct ClientTypesConfiguration
 {
     /// Whether Roblox-related definitions should be supported
     bool roblox = true;
-    /// Any definition files to load globally
+    /// [DEPRECATED] Any definition files to load globally
     std::vector<std::filesystem::path> definitionFiles;
+    /// A map between globs and the environment they are registered too
+    std::unordered_map<std::string, std::string> environmentGlobs;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles, environmentGlobs);
 
 enum struct InlayHintsParameterNamesConfig
 {
