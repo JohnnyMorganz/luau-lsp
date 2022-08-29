@@ -50,12 +50,6 @@ declare function spawn<T...>(callback: (T...) -> ())
 declare function version(): string
 declare function printidentity(prefix: string?)
 
-export type RBXScriptSignal<T... = ...any> = {
-    Wait: (self: RBXScriptSignal<T...>) -> T...,
-    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-}
-
 declare class EnumAccessoryType extends EnumItem end
 declare class EnumAccessoryType_INTERNAL extends Enum
 	Unknown: EnumAccessoryType
@@ -3207,64 +3201,9 @@ declare Enum: {
 	ZIndexBehavior: EnumZIndexBehavior_INTERNAL,
 }
 
-type Ray = any
-type NumberRange = any
-type PathWaypoint = any
-type BrickColor = any
-type Vector2 = any
-type Color3 = any
-type UDim = any
-type PhysicalProperties = any
-type Axes = any
-type Region3 = any
-type UDim2 = any
-type CFrame = any
-type Faces = any
-type Enums = any
-type Rect = any
-type Vector3 = any
-type Random = any
-type TweenInfo = any
-type RBXScriptConnection = any
-type DateTime = any
-type NumberSequence = any
-type ColorSequence = any
-type NumberSequenceKeypoint = any
-type ColorSequenceKeypoint = any
-type RaycastParams = any
-type OverlapParams = any
-type RaycastResult = any
-type DockWidgetPluginGuiInfo = any
-type Vector2int16 = any
-type Vector3int16 = any
-type Region3int16 = any
-type CatalogSearchParams = any
-type Font = any
-declare class Ray
-	function ClosestPoint(self, point: Vector3): Vector3
-	Origin: Vector3
-	Unit: Ray
-	function Distance(self, point: Vector3): number
-	Direction: Vector3
-end
-
 declare class NumberRange
 	Max: number
 	Min: number
-end
-
-declare class PathWaypoint
-	Position: Vector3
-	Action: EnumPathWaypointAction
-end
-
-declare class BrickColor
-	r: number
-	Name: string
-	Number: number
-	Color: Color3
-	b: number
-	g: number
 end
 
 declare class Vector2
@@ -3300,6 +3239,15 @@ declare class Color3
 	function lerp(self, color: Color3, alpha: number): Color3
 end
 
+declare class BrickColor
+	r: number
+	Name: string
+	Number: number
+	Color: Color3
+	b: number
+	g: number
+end
+
 declare class UDim
 	Scale: number
 	Offset: number
@@ -3328,12 +3276,6 @@ declare class Axes
 	Back: boolean
 end
 
-declare class Region3
-	CFrame: CFrame
-	function ExpandToGrid(self, Region: number): Region3
-	Size: Vector3
-end
-
 declare class UDim2
 	Y: UDim
 	function Lerp(self, goal: UDim2, alpha: number): UDim2
@@ -3343,6 +3285,62 @@ declare class UDim2
 	function __add(self, other: UDim2): UDim2
 	function __sub(self, other: UDim2): UDim2
 	function __unm(self): UDim2
+end
+
+declare class Faces
+	Bottom: boolean
+	Top: boolean
+	Front: boolean
+	Left: boolean
+	Right: boolean
+	Back: boolean
+end
+
+declare class Enums
+	function GetEnums(self): { any }
+end
+
+declare class Rect
+	Max: Vector2
+	Min: Vector2
+	Height: number
+	Width: number
+end
+
+declare class Vector3
+	Z: number
+	Y: number
+	X: number
+	Unit: Vector3
+	Magnitude: number
+	function Dot(self, other: Vector3): number
+	function Lerp(self, goal: Vector3, alpha: number): Vector3
+	function Cross(self, other: Vector3): Vector3
+	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
+	function lerp(self, goal: Vector3, alpha: number): Vector3
+	z: number
+	y: number
+	x: number
+	unit: Vector3
+	magnitude: number
+	function __add(self, other: Vector3): Vector3
+	function __sub(self, other: Vector3): Vector3
+	function __mul(self, other: Vector3 | number): Vector3
+	function __div(self, other: Vector3 | number): Vector3
+	function __unm(self): Vector3
+end
+
+declare class PathWaypoint
+	Position: Vector3
+	Action: EnumPathWaypointAction
+end
+
+declare class Ray
+	function ClosestPoint(self, point: Vector3): Vector3
+	Origin: Vector3
+	Unit: Ray
+	function Distance(self, point: Vector3): number
+	Direction: Vector3
 end
 
 declare class CFrame
@@ -3395,47 +3393,10 @@ declare class CFrame
 	function __mul(self, other: Vector3): Vector3
 end
 
-declare class Faces
-	Bottom: boolean
-	Top: boolean
-	Front: boolean
-	Left: boolean
-	Right: boolean
-	Back: boolean
-end
-
-declare class Enums
-	function GetEnums(self): { any }
-end
-
-declare class Rect
-	Max: Vector2
-	Min: Vector2
-	Height: number
-	Width: number
-end
-
-declare class Vector3
-	Z: number
-	Y: number
-	X: number
-	Unit: Vector3
-	Magnitude: number
-	function Dot(self, other: Vector3): number
-	function Lerp(self, goal: Vector3, alpha: number): Vector3
-	function Cross(self, other: Vector3): Vector3
-	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
-	function lerp(self, goal: Vector3, alpha: number): Vector3
-	z: number
-	y: number
-	x: number
-	unit: Vector3
-	magnitude: number
-	function __add(self, other: Vector3): Vector3
-	function __sub(self, other: Vector3): Vector3
-	function __mul(self, other: Vector3 | number): Vector3
-	function __div(self, other: Vector3 | number): Vector3
-	function __unm(self): Vector3
+declare class Region3
+	CFrame: CFrame
+	function ExpandToGrid(self, Region: number): Region3
+	Size: Vector3
 end
 
 declare class Random
@@ -3564,6 +3525,13 @@ declare class Font
 	Weight: EnumFontWeight
 	Style: EnumFontStyle
 end
+
+
+export type RBXScriptSignal<T... = ...any> = {
+    Wait: (self: RBXScriptSignal<T...>) -> T...,
+    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
 
 type Instance = any
 type Accoutrement = any

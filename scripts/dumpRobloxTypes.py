@@ -249,7 +249,10 @@ declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
 declare function spawn<T...>(callback: (T...) -> ())
 declare function version(): string
 declare function printidentity(prefix: string?)
+"""
 
+# Hardcoded types after data types have been defined
+POST_DATATYPES_BASE = """
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
@@ -603,14 +606,8 @@ def printClasses(dump: ApiDump):
         print()
 
 
-def printDataTypes(types: DataTypesDump):
-    # Forward declare all the types
-    for klass in types["DataTypes"]:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        print(f"type {klass['Name']} = any")
-
-    for klass in types["DataTypes"]:
+def printDataTypes(types: List[DataType]):
+    for klass in types:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
         name = klass["Name"]
@@ -770,6 +767,82 @@ def loadClassesIntoStructures(dump: ApiDump):
         CLASSES[klass["Name"]] = klass
 
 
+def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
+    # A child of node in graph indicates that the child references the node
+    graph: defaultdict[str, set[str]] = defaultdict(set)
+
+    dataTypeNames = {klass["Name"] for klass in dataTypes}
+
+    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]):
+        name = type["Name"][:-1] if type["Name"][-1] == "?" else type["Name"]
+        if name in dataTypeNames:
+            return name
+
+        return None
+
+    def createReference(klassName: str, referenced: str | None):
+        if referenced is not None:
+            if klassName == referenced:
+                return
+            graph[referenced].add(klassName)
+
+    for klass in dataTypes:
+        klassName = klass["Name"]
+
+        if klassName not in graph:
+            graph[klassName] = set()
+
+        for member in klass["Members"]:
+            if member["MemberType"] == "Property":
+                createReference(klassName, resolveClass(member["ValueType"]))
+            elif (
+                member["MemberType"] == "Function" or member["MemberType"] == "Callback"
+            ):
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+                if "TupleReturns" in member:
+                    for ret in member["TupleReturns"]:
+                        createReference(klassName, resolveClass(ret))
+                else:
+                    createReference(klassName, resolveClass(member["ReturnType"]))
+            elif member["MemberType"] == "Event":
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+
+    visited: set[str] = set()
+    tempMark: set[str] = set()
+    sort: List[DataType] = []
+
+    def visit(klass: DataType):
+        n = klass["Name"]
+
+        if n in visited:
+            return
+
+        if n in tempMark:
+            raise RuntimeError()
+
+        tempMark.add(n)
+
+        for child in graph[n]:
+            visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
+
+        tempMark.remove(n)
+        visited.add(n)
+        sort.append(klass)
+
+    stack: List[DataType] = []
+    for klass in dataTypes:
+        stack.append(klass)
+
+    while stack:
+        klass = stack.pop()
+        if klass["Name"] not in visited:
+            visit(klass)
+
+    return list(reversed(sort))
+
+
 # Print global types
 dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
@@ -783,7 +856,8 @@ applyCorrections(dump, corrections)
 
 print(START_BASE)
 printEnums(dump)
-printDataTypes(dataTypes)
+printDataTypes(topologicalSortDataTypes(dataTypes["DataTypes"]))
+print(POST_DATATYPES_BASE)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
 print(END_BASE)
