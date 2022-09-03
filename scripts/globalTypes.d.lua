@@ -3529,6 +3529,7 @@ end
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
+	Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
