@@ -223,7 +223,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     std::vector<lsp::DocumentLink> result;
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    frontend.check(moduleName, Luau::FrontendOptions{true, true});
+    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ config.hover.strictDatamodelTypes});
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
