@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed diagnostics for ignored files not clearing when workspace diagnostics is enabled ([#77](https://github.com/JohnnyMorganz/luau-lsp/issues/77))
+
 ## [1.9.1] - 2022-08-29
 
 ### Changed
