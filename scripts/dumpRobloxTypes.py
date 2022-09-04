@@ -97,6 +97,7 @@ IGNORED_MEMBERS = {
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
     "WorldRoot": ["Raycast"],
+    "HttpService": ["RequestAsync"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -194,6 +195,9 @@ EXTRA_MEMBERS = {
     "WorldRoot": [
         "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
     ],
+    "HttpService": [
+        "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
+    ],
 }
 
 # Hardcoded types
@@ -258,6 +262,21 @@ export type RBXScriptSignal<T... = ...any> = {
     Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
+
+type HttpRequestOptions = {
+    Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
+    Headers: { [string]: string }?,
+    Body: string?,
+}
+
+type HttpResponseData = {
+    Success: boolean,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string },
+    Body: string?,
 }
 """
 

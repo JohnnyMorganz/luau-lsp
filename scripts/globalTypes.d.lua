@@ -3544,6 +3544,21 @@ export type RBXScriptSignal<T... = ...any> = {
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
+type HttpRequestOptions = {
+    Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
+    Headers: { [string]: string }?,
+    Body: string?,
+}
+
+type HttpResponseData = {
+    Success: boolean,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string },
+    Body: string?,
+}
+
 type Instance = any
 type Accoutrement = any
 type Accessory = any
@@ -6341,7 +6356,7 @@ declare class HttpService extends Instance
 	function UrlEncode(self, input: string): string
 	function GetAsync(self, url: string, nocache: boolean?, headers: any): string
 	function PostAsync(self, url: string, data: string, content_type: EnumHttpContentType?, compress: boolean?, headers: any): string
-	function RequestAsync(self, requestOptions: { [any]: any }): { [any]: any }
+	function RequestAsync(self, options: HttpRequestOptions): HttpResponseData
 end
 
 declare class Humanoid extends Instance
