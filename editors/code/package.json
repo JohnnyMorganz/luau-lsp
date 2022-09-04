@@ -17,7 +17,7 @@
     "sponsor": {
         "url": "https://github.com/sponsors/JohnnyMorganz"
     },
-    "version": "1.8.0",
+    "version": "1.9.1",
     "engines": {
         "vscode": "^1.67.0"
     },
@@ -71,7 +71,7 @@
         "configuration": {
             "title": "Luau Language Server",
             "properties": {
-                "luau-lsp.trace.server": {
+                "luau.trace.server": {
                     "markdownDescription": "Traces the communication between VS Code and the Luau language server.",
                     "type": "string",
                     "enum": [
@@ -83,6 +83,11 @@
                 },
                 "luau-lsp.autocompleteEnd": {
                     "markdownDescription": "Automatically insert an `end` when opening a block",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.completion.suggestImports": {
+                    "markdownDescription": "Suggest automatic imports in completion items",
                     "type": "boolean",
                     "default": false
                 },
@@ -192,6 +197,36 @@
                     "type": "number",
                     "default": 50,
                     "minimum": 10
+                },
+                "luau-lsp.hover.enabled": {
+                    "markdownDescription": "Enable hover",
+                    "type": "boolean",
+                    "default": true
+                },
+                "luau-lsp.hover.showTableKinds": {
+                    "markdownDescription": "Show table kinds",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.hover.multilineFunctionDefinitions": {
+                    "markdownDescription": "Show function definitions on multiple lines",
+                    "type": "boolean",
+                    "default": false
+                },
+                "luau-lsp.hover.strictDatamodelTypes": {
+                    "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
+                    "type": "boolean",
+                    "default": true
+                },
+                "luau-lsp.completion.enabled": {
+                    "markdownDescription": "Enable autocomplete",
+                    "type": "boolean",
+                    "default": true
+                },
+                "luau-lsp.signatureHelp.enabled": {
+                    "markdownDescription": "Enable signature help",
+                    "type": "boolean",
+                    "default": true
                 }
             }
         }

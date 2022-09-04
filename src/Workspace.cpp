@@ -52,6 +52,23 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 
     // Mark the module as dirty as we no longer track its changes
     frontend.markDirty(moduleName);
+
+    // Refresh workspace diagnostics to clear diagnostics on ignored files
+    if (isIgnoredFile(uri.fsPath()))
+    {
+        if (client->workspaceDiagnosticsToken)
+        {
+            lsp::WorkspaceDocumentDiagnosticReport documentReport;
+            documentReport.uri = uri;
+            documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
+            lsp::WorkspaceDiagnosticReportPartialResult report{{documentReport}};
+            client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
+        }
+        else
+        {
+            client->refreshWorkspaceDiagnostics();
+        }
+    }
 }
 
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration

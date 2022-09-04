@@ -26,8 +26,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "<A..., R...>(A...) -> R...",
-    "function": "<A..., R...>(A...) -> R...",
+    "Function": "(...any) -> ...any",
+    "function": "(...any) -> ...any",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
@@ -45,8 +45,9 @@ TYPE_INDEX = {
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
-    "Enum", # redefined explicitly
-    "EnumItem", # redefined explicitly
+    "Enum",  # redefined explicitly
+    "EnumItem",  # redefined explicitly
+    "GlobalSettings",  # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -56,13 +57,21 @@ DEFERRED_CLASSES: List[str] = [
     "DataModel",
     "GenericSettings",
     "AnalysticsSettings",
-    "GlobalSettings",
     "UserSettings",
+    # Plugin is deferred after its items are declared
+    "Plugin",
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
-    "Instance": ["Parent"],
+    "Instance": [
+        "Parent",
+        "FindFirstChild",
+        "FindFirstAncestor",
+        "FindFirstDescendant",
+        "GetActor",
+        "WaitForChild",
+    ],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
         "FireAllClients",
@@ -87,6 +96,7 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "WorldRoot": ["Raycast"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -136,9 +146,18 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: Vector3): Vector3",
     ],
     "UserSettings": [
-        'function GetService(self, service: "UserGameSettings"): UserGameSettings'
+        "GameSettings: UserGameSettings",
+        'function GetService(self, service: "UserGameSettings"): UserGameSettings',
     ],
-    "Instance": ["Parent: Instance?"],
+    "Instance": [
+        "Parent: Instance?",
+        "function FindFirstAncestor(self, name: string): Instance?",
+        "function FindFirstChild(self, name: string, recursive: boolean?): Instance?",
+        "function FindFirstDescendant(self, name: string): Instance?",
+        "function GetActor(self): Actor?",
+        "function WaitForChild(self, name: string): Instance",
+        "function WaitForChild(self, name: string, timeout: number): Instance?",
+    ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
@@ -150,8 +169,8 @@ EXTRA_MEMBERS = {
     "RemoteFunction": [
         "function InvokeClient(self, player: Player, ...: any): ...any",
         "function InvokeServer(self, ...: any): ...any",
-        "OnClientInvoke: <A..., R...>(A...) -> R...",
-        "OnServerInvoke: <A..., R...>(player: Player, A...) -> R...",
+        "OnClientInvoke: (...any) -> ...any",
+        "OnServerInvoke: (player: Player, ...any) -> ...any",
     ],
     "BindableEvent": [
         "function Fire(self, ...: any): ()",
@@ -159,12 +178,21 @@ EXTRA_MEMBERS = {
     ],
     "BindableFunction": [
         "function Invoke(self, ...: any): ...any",
-        "OnInvoke: <A..., R...>(A...) -> R...",
+        "OnInvoke: (...any) -> ...any",
     ],
     "Players": ["function GetPlayers(self): { Player }"],
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
+    ],
+    "Plugin": [
+        "function CreateToolbar(self, name: string): PluginToolbar",
+    ],
+    "PluginToolbar": [
+        "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
+    ],
+    "WorldRoot": [
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
     ],
 }
 
@@ -221,9 +249,13 @@ declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
 declare function spawn<T...>(callback: (T...) -> ())
 declare function version(): string
 declare function printidentity(prefix: string?)
+"""
 
+# Hardcoded types after data types have been defined
+POST_DATATYPES_BASE = """
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
+    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
@@ -232,6 +264,18 @@ export type RBXScriptSignal<T... = ...any> = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare class GlobalSettings extends GenericSettings
+    Lua: LuaSettings
+    Game: GameSettings
+    Studio: Studio
+    Network: NetworkSettings
+    Physics: PhysicsSettings
+    Rendering: RenderSettings
+    Diagnostics: DebugSettings
+	function GetFFlag(self, name: string): boolean
+	function GetFVariable(self, name: string): string
+end
+
 declare game: DataModel
 declare workspace: Workspace
 declare plugin: Plugin
@@ -437,7 +481,7 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 
 
 def resolveParameter(param: ApiParameter):
-    paramType = resolveType(param['Type'])
+    paramType = resolveType(param["Type"])
     isOptional = paramType[-1] == "?"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
@@ -563,14 +607,8 @@ def printClasses(dump: ApiDump):
         print()
 
 
-def printDataTypes(types: DataTypesDump):
-    # Forward declare all the types
-    for klass in types["DataTypes"]:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        print(f"type {klass['Name']} = any")
-
-    for klass in types["DataTypes"]:
+def printDataTypes(types: List[DataType]):
+    for klass in types:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
         name = klass["Name"]
@@ -730,6 +768,82 @@ def loadClassesIntoStructures(dump: ApiDump):
         CLASSES[klass["Name"]] = klass
 
 
+def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
+    # A child of node in graph indicates that the child references the node
+    graph: defaultdict[str, set[str]] = defaultdict(set)
+
+    dataTypeNames = {klass["Name"] for klass in dataTypes}
+
+    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]):
+        name = type["Name"][:-1] if type["Name"][-1] == "?" else type["Name"]
+        if name in dataTypeNames:
+            return name
+
+        return None
+
+    def createReference(klassName: str, referenced: str | None):
+        if referenced is not None:
+            if klassName == referenced:
+                return
+            graph[referenced].add(klassName)
+
+    for klass in dataTypes:
+        klassName = klass["Name"]
+
+        if klassName not in graph:
+            graph[klassName] = set()
+
+        for member in klass["Members"]:
+            if member["MemberType"] == "Property":
+                createReference(klassName, resolveClass(member["ValueType"]))
+            elif (
+                member["MemberType"] == "Function" or member["MemberType"] == "Callback"
+            ):
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+                if "TupleReturns" in member:
+                    for ret in member["TupleReturns"]:
+                        createReference(klassName, resolveClass(ret))
+                else:
+                    createReference(klassName, resolveClass(member["ReturnType"]))
+            elif member["MemberType"] == "Event":
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+
+    visited: set[str] = set()
+    tempMark: set[str] = set()
+    sort: List[DataType] = []
+
+    def visit(klass: DataType):
+        n = klass["Name"]
+
+        if n in visited:
+            return
+
+        if n in tempMark:
+            raise RuntimeError()
+
+        tempMark.add(n)
+
+        for child in graph[n]:
+            visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
+
+        tempMark.remove(n)
+        visited.add(n)
+        sort.append(klass)
+
+    stack: List[DataType] = []
+    for klass in dataTypes:
+        stack.append(klass)
+
+    while stack:
+        klass = stack.pop()
+        if klass["Name"] not in visited:
+            visit(klass)
+
+    return list(reversed(sort))
+
+
 # Print global types
 dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
@@ -743,7 +857,8 @@ applyCorrections(dump, corrections)
 
 print(START_BASE)
 printEnums(dump)
-printDataTypes(dataTypes)
+printDataTypes(topologicalSortDataTypes(dataTypes["DataTypes"]))
+print(POST_DATATYPES_BASE)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
 print(END_BASE)

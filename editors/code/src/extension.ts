@@ -16,7 +16,7 @@ let client: LanguageClient;
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
 const GLOBAL_TYPES_DEFINITION =
-  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/master/scripts/globalTypes.d.lua";
+  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.lua";
 const API_DOCS =
   "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json";
 const CURRENT_FFLAGS =
@@ -308,7 +308,7 @@ export async function activate(context: vscode.ExtensionContext) {
       "..",
       "..",
       "build",
-      "Debug",
+      process.env["CMAKE_BUILD_TYPE"] ?? "Debug",
       "luau-lsp.exe"
     ).fsPath,
     args,
@@ -324,7 +324,12 @@ export async function activate(context: vscode.ExtensionContext) {
     },
   };
 
-  client = new LanguageClient("luau", "Luau LSP", serverOptions, clientOptions);
+  client = new LanguageClient(
+    "luau",
+    "Luau Language Server",
+    serverOptions,
+    clientOptions
+  );
 
   // Register commands
   client.onNotification("$/command", (params) => {

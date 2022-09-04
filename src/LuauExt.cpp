@@ -474,12 +474,15 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(
-    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope)
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+    std::optional<Luau::ScopePtr> scope, ToStringNamedFunctionOpts stringOpts)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
+    opts.hideTableKind = stringOpts.hideTableKind;
+    opts.useLineBreaks = stringOpts.multiline;
+    opts.indent = stringOpts.multiline;
     if (scope)
         opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);

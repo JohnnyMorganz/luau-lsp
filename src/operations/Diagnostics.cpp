@@ -78,8 +78,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     std::vector<Uri> files;
     for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath()), end; next != end; ++next)
     {
-        if (next->is_regular_file() && next->path().has_extension() && !isIgnoredFile(next->path(), config) &&
-            !isDefinitionFile(next->path(), config))
+        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
         {
             auto ext = next->path().extension();
             if (ext == ".lua" || ext == ".luau")
@@ -96,9 +95,9 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         if (fileResolver.isManagedFile(moduleName))
             documentReport.version = fileResolver.managedFiles.at(moduleName).version();
 
-        // If we don't have workspace diagnostics enabled, then just return an empty report
-        // which clears the diagnostics for all files
-        if (!config.diagnostics.workspace)
+        // If we don't have workspace diagnostics enabled, or we are are ignoring this file
+        // Then provide an empty report to clear the file diagnostics
+        if (!config.diagnostics.workspace || isIgnoredFile(uri, config))
         {
             workspaceReport.items.emplace_back(documentReport);
             continue;

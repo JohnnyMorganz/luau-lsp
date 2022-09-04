@@ -12,7 +12,8 @@ bool isLiteral(const Luau::AstExpr* expr)
 // Adds a text edit onto the hint so that it can be inserted.
 void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
 {
-    auto result = Luau::toStringDetailed(ty);
+    Luau::ToStringOptions opts;
+    auto result = Luau::toStringDetailed(ty, opts);
     if (result.invalid || result.truncated)
         return;
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
@@ -93,13 +94,20 @@ struct InlayHintVisitor : public Luau::AstVisitor
             // Parameter types hint
             if (config.inlayHints.parameterTypes)
             {
-                size_t idx = 0;
-                for (auto argType : ftv->argTypes)
+                auto it = Luau::begin(ftv->argTypes);
+                if (it == Luau::end(ftv->argTypes))
+                    return true;
+
+                // Skip first item if it is self
+                if (ftv->hasSelf)
+                    it++;
+
+                for (auto param : func->args)
                 {
-                    if (func->args.size <= idx)
+                    if (it == Luau::end(ftv->argTypes))
                         break;
 
-                    auto param = func->args.data[idx];
+                    auto argType = *it;
                     if (!param->annotation)
                     {
                         lsp::InlayHint hint;
@@ -109,7 +117,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         makeInsertable(hint, argType);
                         hints.emplace_back(hint);
                     }
-                    idx++;
+
+                    it++;
                 }
             }
 
@@ -143,34 +152,52 @@ struct InlayHintVisitor : public Luau::AstVisitor
         auto followedTy = Luau::follow(*ty);
         if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
         {
+            if (ftv->argNames.size() == 0)
+                return true;
+
             auto namesIt = ftv->argNames.begin();
+            auto idx = 0;
             for (auto param : call->args)
             {
+                // Skip first item if it is self
+                if (idx == 0 && ftv->hasSelf && call->self)
+                    namesIt++;
+
                 if (namesIt == ftv->argNames.end())
                     break;
-                if (!namesIt->has_value())
-                    continue;
 
+                if (!namesIt->has_value())
+                {
+                    namesIt++;
+                    idx++;
+                    continue;
+                }
+
+                auto createHint = true;
                 auto paramName = (*namesIt)->name;
                 if (!isLiteral(param))
                 {
                     if (config.inlayHints.parameterNames == InlayHintsParameterNamesConfig::Literals)
-                        continue;
+                        createHint = false;
 
                     // If the name somewhat matches the arg name, we can skip the inlay hint
                     if (Luau::equalsLower(Luau::toString(param), paramName))
-                        continue;
+                        createHint = false;
                 }
 
                 // TODO: only apply in specific situations
-                lsp::InlayHint hint;
-                hint.kind = lsp::InlayHintKind::Parameter;
-                hint.label = paramName + ":";
-                hint.position = convertPosition(param->location.begin);
-                hint.paddingRight = true;
-                hints.emplace_back(hint);
+                if (createHint)
+                {
+                    lsp::InlayHint hint;
+                    hint.kind = lsp::InlayHintKind::Parameter;
+                    hint.label = paramName + ":";
+                    hint.position = convertPosition(param->location.begin);
+                    hint.paddingRight = true;
+                    hints.emplace_back(hint);
+                }
 
                 namesIt++;
+                idx++;
             }
         }
 
@@ -196,7 +223,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     std::vector<lsp::DocumentLink> result;
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    frontend.check(moduleName, Luau::FrontendOptions{true, true});
+    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ config.hover.strictDatamodelTypes});
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
