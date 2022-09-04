@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed diagnostics for ignored files not clearing when workspace diagnostics is enabled ([#77](https://github.com/JohnnyMorganz/luau-lsp/issues/77))
 - Fixed `luau-lsp analyze` would not exit with non-zero error code when definitions failed to load
+- Fixed `luau-lsp analyze` would not exit with non-zero error code when file path provided was not found
 
 ## [1.9.1] - 2022-08-29
 
