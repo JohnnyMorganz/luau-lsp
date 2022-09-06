@@ -888,9 +888,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
         visited.add(n)
         sort.append(klass)
 
-    stack: List[DataType] = []
-    for klass in dataTypes:
-        stack.append(klass)
+    stack = list(sorted(dataTypes, key=lambda x: x["Name"]))
 
     while stack:
         klass = stack.pop()
