@@ -98,6 +98,21 @@ IGNORED_MEMBERS = {
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
     "WorldRoot": ["Raycast"],
     "HttpService": ["RequestAsync"],
+    "HumanoidDescription": [
+        "GetAccessories",
+        "SetAccessories",
+        "GetEmotes",
+        "SetEmotes",
+        "GetEquippedEmotes",
+        "SetEquippedEmotes",
+    ],
+    "TeleportService": [
+        "GetPlayerPlaceInstanceAsync",
+        "TeleportAsync",
+        "TeleportPartyAsync",
+        "TeleportToPrivateServer",
+        "ReserveServer",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -198,6 +213,21 @@ EXTRA_MEMBERS = {
     "HttpService": [
         "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
     ],
+    "HumanoidDescription": [
+        "function GetAccessories(self, includeRigidAccessories: boolean): { HumanoidDescriptionAccessory }",
+        "function SetAccessories(self, accessories: { HumanoidDescriptionAccessory }, includeRigidAccessories: boolean): ()",
+        "function GetEmotes(self): { [string]: { number } }",
+        "function SetEmotes(self, emotes: { [string]: { number } }): ()",
+        "function GetEquippedEmotes(self): { { Slot: number, Name: string } }",
+        "function SetEquippedEmotes(self, equippedEmotes: { string } | { Slot: number, Name: string }): ()",
+    ],
+    "TeleportService": [
+        "function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)",
+        "function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult",
+        "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
+        "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
+        "function ReserveServer(self, placeId: number): (string, string)",
+    ],
 }
 
 # Hardcoded types
@@ -276,6 +306,14 @@ type HttpResponseData = {
     StatusMessage: string,
     Headers: { [string]: string },
     Body: string?,
+}
+
+type HumanoidDescriptionAccessory = {
+    AssetId: number,
+    AccessoryType: EnumAccessoryType,
+    IsLayered: boolean,
+    Order: number?,
+    Puffiness: number?,
 }
 """
 
