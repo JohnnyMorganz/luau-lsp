@@ -112,6 +112,8 @@ IGNORED_MEMBERS = {
         "TeleportPartyAsync",
         "TeleportToPrivateServer",
         "ReserveServer",
+        "LocalPlayerArrivedFromTeleport",
+        "TeleportInitFailed",
     ],
 }
 
@@ -227,6 +229,8 @@ EXTRA_MEMBERS = {
         "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
         "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
         "function ReserveServer(self, placeId: number): (string, string)",
+        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
+        "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
     ],
 }
 

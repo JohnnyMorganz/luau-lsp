@@ -8900,13 +8900,13 @@ declare class TeleportService extends Instance
 	function TeleportCancel(self): nil
 	function TeleportToPlaceInstance(self, placeId: number, instanceId: string, player: Player?, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToSpawnByName(self, placeId: number, spawnName: string, player: Player?, teleportData: any, customLoadingScreen: GuiObject?): nil
-	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Instance, any>
-	TeleportInitFailed: RBXScriptSignal<Instance, EnumTeleportResult, string, number, Instance>
 	function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)
 	function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult
 	function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string
 	function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function ReserveServer(self, placeId: number): (string, string)
+	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
+	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
 end
 
 declare class TemporaryCageMeshProvider extends Instance
