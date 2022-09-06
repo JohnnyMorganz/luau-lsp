@@ -132,7 +132,7 @@ struct ImportLocationVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstStatLocal* local) override
     {
-        if (local->vars.size != 1)
+        if (local->vars.size != 1 && local->values.size != 1)
             return false;
 
         auto localName = local->vars.data[0];
