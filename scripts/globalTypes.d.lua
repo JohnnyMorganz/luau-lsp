@@ -6,6 +6,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Instance = any
 
 declare class Enum
 	function GetEnumItems(self): { any }
@@ -3211,29 +3212,26 @@ declare Enum: {
 	ZIndexBehavior: EnumZIndexBehavior_INTERNAL,
 }
 
-declare class NumberRange
-	Max: number
-	Min: number
+declare class Axes
+	Z: boolean
+	Y: boolean
+	Top: boolean
+	Left: boolean
+	X: boolean
+	Right: boolean
+	Bottom: boolean
+	Front: boolean
+	Back: boolean
 end
 
-declare class Vector2
-	Y: number
-	X: number
-	Unit: Vector2
-	Magnitude: number
-	function Lerp(self, v: Vector2, alpha: number): Vector2
-	function Cross(self, other: Vector2): number
-	function Dot(self, v: Vector2): number
-	y: number
-	x: number
-	unit: Vector2
-	magnitude: number
-	function lerp(self, v: Vector2, alpha: number): Vector2
-	function __add(self, other: Vector2): Vector2
-	function __sub(self, other: Vector2): Vector2
-	function __mul(self, other: Vector2 | number): Vector2
-	function __div(self, other: Vector2 | number): Vector2
-	function __unm(self): Vector2
+declare class CatalogSearchParams
+	SearchKeyword: string
+	MinPrice: number
+	MaxPrice: number
+	SortType: EnumCatalogSortType
+	CategoryFilter: EnumCatalogCategoryFilter
+	BundleType: { any }
+	AssetTypes: { any }
 end
 
 declare class Color3
@@ -3258,12 +3256,74 @@ declare class BrickColor
 	g: number
 end
 
-declare class UDim
-	Scale: number
-	Offset: number
-	function __add(self, other: UDim): UDim
-	function __sub(self, other: UDim): UDim
-	function __unm(self): UDim
+declare class ColorSequence
+	Keypoints: { any }
+end
+
+declare class ColorSequenceKeypoint
+	Time: number
+	Value: Color3
+end
+
+declare class DateTime
+	UnixTimestamp: number
+	UnixTimestampMillis: number
+	function ToUniversalTime(self): { any }
+	function ToLocalTime(self): { any }
+	function ToIsoDate(self): string
+	function FormatUniversalTime(self, format: string, locale: string): string
+	function FormatLocalTime(self, format: string, locale: string): string
+end
+
+declare class DockWidgetPluginGuiInfo
+	InitialEnabled: boolean
+	InitialEnabledShouldOverrideRestore: boolean
+	FloatingXSize: number
+	FloatingYSize: number
+	MinWidth: number
+	MinHeight: number
+end
+
+declare class Enums
+	function GetEnums(self): { any }
+end
+
+declare class Faces
+	Bottom: boolean
+	Top: boolean
+	Front: boolean
+	Left: boolean
+	Right: boolean
+	Back: boolean
+end
+
+declare class Font
+	Family: string
+	Bold: boolean
+	Weight: EnumFontWeight
+	Style: EnumFontStyle
+end
+
+declare class NumberRange
+	Max: number
+	Min: number
+end
+
+declare class NumberSequence
+	Keypoints: { any }
+end
+
+declare class NumberSequenceKeypoint
+	Envelope: number
+	Time: number
+	Value: number
+end
+
+declare class OverlapParams
+	FilterDescendantsInstances: { Instance }
+	FilterType: EnumRaycastFilterType
+	CollisionGroup: string
+	MaxParts: number
 end
 
 declare class PhysicalProperties
@@ -3274,16 +3334,35 @@ declare class PhysicalProperties
 	Friction: number
 end
 
-declare class Axes
-	Z: boolean
-	Y: boolean
-	Top: boolean
-	Left: boolean
-	X: boolean
-	Right: boolean
-	Bottom: boolean
-	Front: boolean
-	Back: boolean
+declare class RBXScriptConnection
+	function Disconnect(self): nil
+	Connected: boolean
+	function disconnect(self): nil
+	connected: boolean
+end
+
+declare class RaycastParams
+	FilterDescendantsInstances: { Instance }
+	FilterType: EnumRaycastFilterType
+	IgnoreWater: boolean
+	CollisionGroup: string
+end
+
+declare class TweenInfo
+	DelayTime: number
+	Time: number
+	EasingDirection: EnumEasingDirection
+	RepeatCount: number
+	EasingStyle: EnumEasingStyle
+	Reverses: boolean
+end
+
+declare class UDim
+	Scale: number
+	Offset: number
+	function __add(self, other: UDim): UDim
+	function __sub(self, other: UDim): UDim
+	function __unm(self): UDim
 end
 
 declare class UDim2
@@ -3297,17 +3376,24 @@ declare class UDim2
 	function __unm(self): UDim2
 end
 
-declare class Faces
-	Bottom: boolean
-	Top: boolean
-	Front: boolean
-	Left: boolean
-	Right: boolean
-	Back: boolean
-end
-
-declare class Enums
-	function GetEnums(self): { any }
+declare class Vector2
+	Y: number
+	X: number
+	Unit: Vector2
+	Magnitude: number
+	function Lerp(self, v: Vector2, alpha: number): Vector2
+	function Cross(self, other: Vector2): number
+	function Dot(self, v: Vector2): number
+	y: number
+	x: number
+	unit: Vector2
+	magnitude: number
+	function lerp(self, v: Vector2, alpha: number): Vector2
+	function __add(self, other: Vector2): Vector2
+	function __sub(self, other: Vector2): Vector2
+	function __mul(self, other: Vector2 | number): Vector2
+	function __div(self, other: Vector2 | number): Vector2
+	function __unm(self): Vector2
 end
 
 declare class Rect
@@ -3315,6 +3401,16 @@ declare class Rect
 	Min: Vector2
 	Height: number
 	Width: number
+end
+
+declare class Vector2int16
+	X: number
+	Y: number
+	function __add(self, other: Vector2int16): Vector2int16
+	function __sub(self, other: Vector2int16): Vector2int16
+	function __mul(self, other: Vector2int16 | number): Vector2int16
+	function __div(self, other: Vector2int16 | number): Vector2int16
+	function __unm(self): Vector2int16
 end
 
 declare class Vector3
@@ -3340,12 +3436,33 @@ declare class Vector3
 	function __unm(self): Vector3
 end
 
+declare class RaycastResult
+	Distance: number
+	Instance: Instance
+	Position: Vector3
+	Material: EnumMaterial
+	Normal: Vector3
+end
+
 declare class Ray
 	function ClosestPoint(self, point: Vector3): Vector3
 	Origin: Vector3
 	Unit: Ray
 	function Distance(self, point: Vector3): number
 	Direction: Vector3
+end
+
+declare class Random
+	function NextInteger(self, min: number, max: number): number
+	function NextNumber(self): number
+	function NextNumber(self, min: number, max: number): number
+	function NextUnitVector(self): Vector3
+	function Clone(self): Random
+end
+
+declare class PathWaypoint
+	Position: Vector3
+	Action: EnumPathWaypointAction
 end
 
 declare class CFrame
@@ -3404,105 +3521,6 @@ declare class Region3
 	Size: Vector3
 end
 
-declare class PathWaypoint
-	Position: Vector3
-	Action: EnumPathWaypointAction
-end
-
-declare class Random
-	function NextInteger(self, min: number, max: number): number
-	function NextNumber(self): number
-	function NextNumber(self, min: number, max: number): number
-	function NextUnitVector(self): Vector3
-	function Clone(self): Random
-end
-
-declare class TweenInfo
-	DelayTime: number
-	Time: number
-	EasingDirection: EnumEasingDirection
-	RepeatCount: number
-	EasingStyle: EnumEasingStyle
-	Reverses: boolean
-end
-
-declare class RBXScriptConnection
-	function Disconnect(self): nil
-	Connected: boolean
-	function disconnect(self): nil
-	connected: boolean
-end
-
-declare class DateTime
-	UnixTimestamp: number
-	UnixTimestampMillis: number
-	function ToUniversalTime(self): { any }
-	function ToLocalTime(self): { any }
-	function ToIsoDate(self): string
-	function FormatUniversalTime(self, format: string, locale: string): string
-	function FormatLocalTime(self, format: string, locale: string): string
-end
-
-declare class NumberSequence
-	Keypoints: { any }
-end
-
-declare class ColorSequence
-	Keypoints: { any }
-end
-
-declare class NumberSequenceKeypoint
-	Envelope: number
-	Time: number
-	Value: number
-end
-
-declare class ColorSequenceKeypoint
-	Time: number
-	Value: Color3
-end
-
-declare class RaycastParams
-	FilterDescendantsInstances: { Instance }
-	FilterType: EnumRaycastFilterType
-	IgnoreWater: boolean
-	CollisionGroup: string
-end
-
-declare class OverlapParams
-	FilterDescendantsInstances: { Instance }
-	FilterType: EnumRaycastFilterType
-	CollisionGroup: string
-	MaxParts: number
-end
-
-declare class RaycastResult
-	Distance: number
-	Instance: Instance
-	Position: Vector3
-	Material: EnumMaterial
-	Normal: Vector3
-end
-
-declare class DockWidgetPluginGuiInfo
-	InitialEnabled: boolean
-	InitialEnabledShouldOverrideRestore: boolean
-	FloatingXSize: number
-	FloatingYSize: number
-	MinWidth: number
-	MinHeight: number
-end
-
-declare class Vector2int16
-	X: number
-	Y: number
-	function __add(self, other: Vector2int16): Vector2int16
-	function __sub(self, other: Vector2int16): Vector2int16
-	function __mul(self, other: Vector2int16 | number): Vector2int16
-	function __div(self, other: Vector2int16 | number): Vector2int16
-	function __unm(self): Vector2int16
-end
-
 declare class Vector3int16
 	X: number
 	Y: number
@@ -3517,23 +3535,6 @@ end
 declare class Region3int16
 	Min: Vector3int16
 	Max: Vector3int16
-end
-
-declare class CatalogSearchParams
-	SearchKeyword: string
-	MinPrice: number
-	MaxPrice: number
-	SortType: EnumCatalogSortType
-	CategoryFilter: EnumCatalogCategoryFilter
-	BundleType: { any }
-	AssetTypes: { any }
-end
-
-declare class Font
-	Family: string
-	Bold: boolean
-	Weight: EnumFontWeight
-	Style: EnumFontStyle
 end
 
 
@@ -3566,7 +3567,6 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
-type Instance = any
 type Accoutrement = any
 type Accessory = any
 type Hat = any

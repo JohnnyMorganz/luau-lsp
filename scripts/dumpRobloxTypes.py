@@ -240,6 +240,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Instance = any
 
 declare class Enum
 	function GetEnumItems(self): { any }
@@ -649,7 +650,8 @@ def printClasses(dump: ApiDump):
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
-        print(f"type {klass['Name']} = any")
+        if klass["Name"] != "Instance":
+            print(f"type {klass['Name']} = any")
 
     for klass in dump["Classes"]:
         if klass["Name"] in DEFERRED_CLASSES or klass["Name"] in IGNORED_INSTANCES:
@@ -881,16 +883,14 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
         tempMark.add(n)
 
-        for child in graph[n]:
+        for child in sorted(graph[n]):
             visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
 
         tempMark.remove(n)
         visited.add(n)
         sort.append(klass)
 
-    stack: List[DataType] = []
-    for klass in dataTypes:
-        stack.append(klass)
+    stack = list(sorted(dataTypes, key=lambda x: x["Name"]))
 
     while stack:
         klass = stack.pop()
