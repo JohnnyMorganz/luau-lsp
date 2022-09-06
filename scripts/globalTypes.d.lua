@@ -6,6 +6,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Instance = any
 
 declare class Enum
 	function GetEnumItems(self): { any }
@@ -3435,9 +3436,12 @@ declare class Vector3
 	function __unm(self): Vector3
 end
 
-declare class PathWaypoint
+declare class RaycastResult
+	Distance: number
+	Instance: Instance
 	Position: Vector3
-	Action: EnumPathWaypointAction
+	Material: EnumMaterial
+	Normal: Vector3
 end
 
 declare class Ray
@@ -3456,12 +3460,9 @@ declare class Random
 	function Clone(self): Random
 end
 
-declare class RaycastResult
-	Distance: number
-	Instance: Instance
+declare class PathWaypoint
 	Position: Vector3
-	Material: EnumMaterial
-	Normal: Vector3
+	Action: EnumPathWaypointAction
 end
 
 declare class CFrame
@@ -3541,7 +3542,6 @@ export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
 type HttpRequestOptions = {
@@ -3567,7 +3567,6 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
-type Instance = any
 type Accoutrement = any
 type Accessory = any
 type Hat = any
