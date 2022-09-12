@@ -843,7 +843,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
         return None
 
-    def createReference(klassName: str, referenced: str | None):
+    def createReference(klassName: str, referenced: Optional[str]):
         if referenced is not None:
             if klassName == referenced:
                 return
