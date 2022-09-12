@@ -1235,7 +1235,6 @@ declare class EnumIXPLoadingStatus_INTERNAL extends Enum
 	None: EnumIXPLoadingStatus
 	Pending: EnumIXPLoadingStatus
 	Initialized: EnumIXPLoadingStatus
-	ShutOff: EnumIXPLoadingStatus
 	ErrorTimedOut: EnumIXPLoadingStatus
 	ErrorConnection: EnumIXPLoadingStatus
 	ErrorJsonParse: EnumIXPLoadingStatus
@@ -1950,6 +1949,11 @@ declare class EnumPlayerChatType_INTERNAL extends Enum
 	All: EnumPlayerChatType
 	Team: EnumPlayerChatType
 	Whisper: EnumPlayerChatType
+end
+declare class EnumPortalType extends EnumItem end
+declare class EnumPortalType_INTERNAL extends Enum
+	Forward: EnumPortalType
+	Return: EnumPortalType
 end
 declare class EnumPoseEasingDirection extends EnumItem end
 declare class EnumPoseEasingDirection_INTERNAL extends Enum
@@ -2722,6 +2726,13 @@ declare class EnumTrackerError_INTERNAL extends Enum
 	AudioError: EnumTrackerError
 	AudioNoPermission: EnumTrackerError
 end
+declare class EnumTrackerMode extends EnumItem end
+declare class EnumTrackerMode_INTERNAL extends Enum
+	None: EnumTrackerMode
+	Audio: EnumTrackerMode
+	Video: EnumTrackerMode
+	AudioVideo: EnumTrackerMode
+end
 declare class EnumTriStateBoolean extends EnumItem end
 declare class EnumTriStateBoolean_INTERNAL extends Enum
 	Unknown: EnumTriStateBoolean
@@ -3104,6 +3115,7 @@ declare Enum: {
 	PlaybackState: EnumPlaybackState_INTERNAL,
 	PlayerActions: EnumPlayerActions_INTERNAL,
 	PlayerChatType: EnumPlayerChatType_INTERNAL,
+	PortalType: EnumPortalType_INTERNAL,
 	PoseEasingDirection: EnumPoseEasingDirection_INTERNAL,
 	PoseEasingStyle: EnumPoseEasingStyle_INTERNAL,
 	PositionAlignmentMode: EnumPositionAlignmentMode_INTERNAL,
@@ -3185,6 +3197,7 @@ declare Enum: {
 	TouchCameraMovementMode: EnumTouchCameraMovementMode_INTERNAL,
 	TouchMovementMode: EnumTouchMovementMode_INTERNAL,
 	TrackerError: EnumTrackerError_INTERNAL,
+	TrackerMode: EnumTrackerMode_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
@@ -3571,6 +3584,7 @@ type HumanoidDescriptionAccessory = {
 type Accoutrement = any
 type Accessory = any
 type Hat = any
+type AdPortal = any
 type AdService = any
 type AdvancedDragger = any
 type AnalyticsService = any
@@ -3909,7 +3923,6 @@ type NoCollisionConstraint = any
 type NotificationService = any
 type PVInstance = any
 type BasePart = any
-type AdPortal = any
 type CornerWedgePart = any
 type FormFactorPart = any
 type Part = any
@@ -4100,6 +4113,7 @@ type TextBoxService = any
 type TextChannel = any
 type TextChatCommand = any
 type TextChatConfigurations = any
+type BubbleChatConfiguration = any
 type ChatInputBarConfiguration = any
 type ChatWindowConfiguration = any
 type TextChatMessage = any
@@ -4226,6 +4240,11 @@ end
 
 
 
+declare class AdPortal extends Instance
+	PortalInvalidReason: string
+	PortalType: EnumPortalType
+end
+
 declare class AdService extends Instance
 end
 
@@ -4287,6 +4306,7 @@ declare class AnimationRigData extends Instance
 end
 
 declare class AnimationStreamTrack extends Instance
+	Animation: TrackerStreamAnimation
 	IsPlaying: boolean
 	Priority: EnumAnimationPriority
 	WeightCurrent: number
@@ -5184,7 +5204,7 @@ declare class AirController extends ControllerBase
 	CancelAirMomentum: boolean
 	MoveMaxForce: number
 	OrientationMaxTorque: number
-	OrientationSpeed: number
+	OrientationSpeedFactor: number
 	VectorForce: Vector3
 end
 
@@ -5192,7 +5212,7 @@ declare class ClimbController extends ControllerBase
 	AccelerationTime: number
 	MoveMaxForce: number
 	OrientationMaxTorque: number
-	OrientationSpeed: number
+	OrientationSpeedFactor: number
 end
 
 declare class GroundController extends ControllerBase
@@ -5211,14 +5231,19 @@ end
 
 declare class SwimController extends ControllerBase
 	AccelerationTime: number
-	OrientationMaxTorque: number
-	OrientationSpeed: number
+	PitchMaxTorque: number
+	PitchSpeedFactor: number
+	RollMaxTorque: number
+	RollSpeedFactor: number
 end
 
 declare class ControllerManager extends Instance
 	ActiveController: ControllerBase
 	BaseMoveSpeed: number
+	BaseTurnSpeed: number
+	FacingDirection: Vector3
 	HipHeight: number
+	MovingDirection: Vector3
 	function GetControllers(self): { Instance }
 end
 
@@ -5548,7 +5573,11 @@ end
 declare class FaceAnimatorService extends Instance
 	AudioAnimationEnabled: boolean
 	FlipHeadOrientation: boolean
+	TrackerMode: EnumTrackerMode
 	VideoAnimationEnabled: boolean
+	function IsStarted(self): boolean
+	function Start(self): nil
+	function Stop(self): nil
 	TrackerError: RBXScriptSignal<EnumTrackerError>
 end
 
@@ -6503,6 +6532,7 @@ declare class IKControl extends Instance
 	ChainRoot: Instance
 	Enabled: boolean
 	EndEffector: Instance
+	Offset: CFrame
 	Pole: Instance
 	Priority: number
 	Target: Instance
@@ -7274,9 +7304,6 @@ declare class BasePart extends PVInstance
 	Touched: RBXScriptSignal<BasePart>
 end
 
-declare class AdPortal extends BasePart
-end
-
 declare class CornerWedgePart extends BasePart
 end
 
@@ -7564,6 +7591,7 @@ declare class ParticleEmitter extends Instance
 	ZOffset: number
 	function Clear(self): nil
 	function Emit(self, particleCount: number?): nil
+	function FastForward(self, numFrames: number): nil
 end
 
 declare class PatchMapping extends Instance
@@ -8255,6 +8283,7 @@ declare class ScriptDocument extends Instance
 	function GetViewport(self): any
 	function HasSelectedText(self): boolean
 	function IsCommandBar(self): boolean
+	function CloseAsync(self): any
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 	function ForceSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
 	function RequestSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
@@ -8901,13 +8930,13 @@ declare class TeleportService extends Instance
 	function TeleportCancel(self): nil
 	function TeleportToPlaceInstance(self, placeId: number, instanceId: string, player: Player?, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToSpawnByName(self, placeId: number, spawnName: string, player: Player?, teleportData: any, customLoadingScreen: GuiObject?): nil
-	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Instance, any>
-	TeleportInitFailed: RBXScriptSignal<Instance, EnumTeleportResult, string, number, Instance>
 	function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)
 	function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult
 	function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string
 	function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function ReserveServer(self, placeId: number): (string, string)
+	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
+	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
 end
 
 declare class TemporaryCageMeshProvider extends Instance
@@ -8977,6 +9006,21 @@ declare class TextChatCommand extends Instance
 end
 
 declare class TextChatConfigurations extends Instance
+end
+
+declare class BubbleChatConfiguration extends TextChatConfigurations
+	AdorneeName: string
+	BackgroundColor3: Color3
+	BubbleDuration: number
+	BubblesSpacing: number
+	Enabled: boolean
+	Font: EnumFont
+	LocalPlayerStudsOffset: Vector3
+	MaxDistance: number
+	MinimizeDistance: number
+	TextColor3: Color3
+	TextSize: number
+	VerticalStudsOffset: number
 end
 
 declare class ChatInputBarConfiguration extends TextChatConfigurations
@@ -9131,6 +9175,7 @@ declare class UGCValidationService extends Instance
 	function GetMeshTriCountSync(self, meshId: string): number
 	function GetMeshVertsSync(self, meshId: string): { any }
 	function GetTextureSizeSync(self, textureId: string): Vector2
+	function ResetCollisionFidelity(self, meshPart: Instance): nil
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
 	function FetchAssetWithFormat(self, url: Content, assetFormat: string): { Instance }
 	function GetMeshTriCount(self, meshId: string): number
@@ -9296,6 +9341,7 @@ declare class UserGameSettings extends Instance
 	UsedHideHudShortcut: boolean
 	VREnabled: boolean
 	VRRotationIntensity: number
+	VRSmoothRotationEnabled: boolean
 	VignetteEnabled: boolean
 	function GetCameraYInvertValue(self): number
 	function GetOnboardingCompleted(self, onboardingId: string): boolean
@@ -9390,12 +9436,13 @@ declare class UserInputService extends Instance
 end
 
 declare class UserService extends Instance
-	function GetUserInfosByUserIdsAsync(self, userIds: { any }): { any }
+	function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }
 end
 
 declare class VRService extends Instance
 	DidPointerHit: boolean
 	GuiInputUserCFrame: EnumUserCFrame
+	LaserDistance: number
 	PointerHitCFrame: CFrame
 	VRDeviceAvailable: boolean
 	VRDeviceName: string

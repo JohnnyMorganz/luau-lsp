@@ -112,7 +112,12 @@ IGNORED_MEMBERS = {
         "TeleportPartyAsync",
         "TeleportToPrivateServer",
         "ReserveServer",
+        "LocalPlayerArrivedFromTeleport",
+        "TeleportInitFailed",
     ],
+    "UserService": {
+        "GetUserInfosByUserIdsAsync"
+    }
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -227,7 +232,12 @@ EXTRA_MEMBERS = {
         "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
         "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
         "function ReserveServer(self, placeId: number): (string, string)",
+        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
+        "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
     ],
+    "UserService": [
+        "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
+    ]
 }
 
 # Hardcoded types
@@ -840,7 +850,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
         return None
 
-    def createReference(klassName: str, referenced: str | None):
+    def createReference(klassName: str, referenced: Optional[str]):
         if referenced is not None:
             if klassName == referenced:
                 return

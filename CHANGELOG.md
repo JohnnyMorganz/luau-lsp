@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.9.2] - 2022-09-06
+
+### Changed
+
+- Sync to upstream Luau 0.543
+
 ### Fixed
 
 - Fixed diagnostics for ignored files not clearing when workspace diagnostics is enabled ([#77](https://github.com/JohnnyMorganz/luau-lsp/issues/77))
