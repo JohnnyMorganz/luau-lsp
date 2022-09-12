@@ -115,6 +115,9 @@ IGNORED_MEMBERS = {
         "LocalPlayerArrivedFromTeleport",
         "TeleportInitFailed",
     ],
+    "UserService": {
+        "GetUserInfosByUserIdsAsync"
+    }
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -232,6 +235,9 @@ EXTRA_MEMBERS = {
         "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
         "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
     ],
+    "UserService": [
+        "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
+    ]
 }
 
 # Hardcoded types

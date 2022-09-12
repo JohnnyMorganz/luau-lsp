@@ -9435,7 +9435,7 @@ declare class UserInputService extends Instance
 end
 
 declare class UserService extends Instance
-	function GetUserInfosByUserIdsAsync(self, userIds: { any }): { any }
+	function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }
 end
 
 declare class VRService extends Instance
