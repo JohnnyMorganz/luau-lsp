@@ -1,3 +1,4 @@
+--!strict
 local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
@@ -25,11 +26,17 @@ local INCLUDED_SERVICES = {
 	game:GetService("TestService"),
 }
 
-local function filterServices(child: Instance)
-	return table.find(INCLUDED_SERVICES, child)
+type EncodedInstance = {
+	Name: string,
+	ClassName: string,
+	Children: { EncodedInstance },
+}
+
+local function filterServices(child: Instance): boolean
+	return not not table.find(INCLUDED_SERVICES, child)
 end
 
-local function encodeInstance(instance: Instance, childFilter: ((Instance) -> boolean)?)
+local function encodeInstance(instance: Instance, childFilter: ((Instance) -> boolean)?): EncodedInstance
 	local encoded = {}
 	encoded.Name = instance.Name
 	encoded.ClassName = instance.ClassName
@@ -42,7 +49,7 @@ local function encodeInstance(instance: Instance, childFilter: ((Instance) -> bo
 
 		local success, data = pcall(encodeInstance, child)
 		if success then
-			encoded.Children[child.Name] = data
+			table.insert(encoded.Children, data)
 		end
 	end
 
