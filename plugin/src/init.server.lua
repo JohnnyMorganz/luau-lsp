@@ -3,9 +3,29 @@ local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
 local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
-local button =
-	toolbar:CreateButton("Connect to Language Server", "Connect to Server", "Connect to Server") :: PluginToolbarButton
+local button = toolbar:CreateButton(
+	"Language Server Setup",
+	"Connect to Server",
+	"rbxassetid://10913079454",
+	"Connect to Server"
+) :: PluginToolbarButton
 
+local widgetInfo = DockWidgetPluginGuiInfo.new(
+	-- widget info
+	Enum.InitialDockState.Float,
+	false,
+	false,
+	300,
+	200,
+	120,
+	70
+)
+
+local widget = plugin:CreateDockWidgetPluginGui("Luau Language Server", widgetInfo)
+widget.Title = "Luau Language Server"
+button.ClickableWhenViewportHidden = true
+
+local port = plugin:GetSetting("Port") or 3667
 local connected = false
 local connections = {}
 
@@ -66,9 +86,9 @@ end
 local function sendFullDMInfo()
 	local tree = encodeInstance(game, filterServices)
 
-	local result = HttpService:RequestAsync({
+	local success, result = pcall(HttpService.RequestAsync, HttpService, {
 		Method = "POST",
-		Url = "http://localhost:3667/full",
+		Url = string.format("http://localhost:%s/full", port),
 		Headers = {
 			["Content-Type"] = "application/json",
 		},
@@ -77,7 +97,9 @@ local function sendFullDMInfo()
 		}),
 	})
 
-	if not result.Success then
+	if not success then
+		warn("[Luau Language Server] Connecting to server failed: " .. result)
+	elseif not result.Success then
 		warn("[Luau Language Server] Sending full DM info failed: " .. result.StatusCode .. ": " .. result.Body)
 	end
 end
@@ -105,7 +127,51 @@ local function watchChanges()
 	sendFullDMInfo()
 end
 
-local function handleClick()
+-- Interface
+local theme = settings().Studio.Theme :: StudioTheme
+local frame = Instance.new("Frame")
+frame.BackgroundColor3 = theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
+frame.Size = UDim2.fromScale(1, 1)
+frame.Parent = widget
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 5)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = frame
+
+local padding = Instance.new("UIPadding")
+padding.PaddingTop = UDim.new(0, 5)
+padding.PaddingBottom = UDim.new(0, 5)
+padding.PaddingLeft = UDim.new(0, 5)
+padding.PaddingRight = UDim.new(0, 5)
+padding.Parent = frame
+
+local portTextBox = Instance.new("TextBox")
+portTextBox.BackgroundColor3 = theme:GetColor(Enum.StudioStyleGuideColor.InputFieldBackground)
+portTextBox.BorderColor3 = theme:GetColor(Enum.StudioStyleGuideColor.InputFieldBorder)
+portTextBox.TextColor3 = theme:GetColor(Enum.StudioStyleGuideColor.MainText)
+portTextBox.PlaceholderColor3 = theme:GetColor(Enum.StudioStyleGuideColor.SubText)
+portTextBox.PlaceholderText = "Port"
+portTextBox.Text = port
+portTextBox.TextSize = 20
+portTextBox.Size = UDim2.new(1, 0, 0, 30)
+portTextBox.LayoutOrder = 0
+portTextBox.Parent = frame
+portTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+	port = tonumber(portTextBox.Text)
+	plugin:SetSetting("Port", port)
+end)
+
+local connectButton = Instance.new("TextButton")
+connectButton.BackgroundColor3 = theme:GetColor(Enum.StudioStyleGuideColor.MainButton)
+connectButton.BorderColor3 = theme:GetColor(Enum.StudioStyleGuideColor.ButtonBorder)
+connectButton.TextColor3 = theme:GetColor(Enum.StudioStyleGuideColor.ButtonText)
+connectButton.Text = if connected then "Disconnect" else "Connect"
+connectButton.TextSize = 16
+connectButton.Size = UDim2.new(1, 0, 0, 25)
+connectButton.LayoutOrder = 1
+connectButton.Parent = frame
+connectButton.Activated:Connect(function()
 	if connected then
 		print("[Luau Language Server] Disconnecting from DataModel changes")
 		cleanup()
@@ -113,6 +179,21 @@ local function handleClick()
 		print("[Luau Language Server] Listening for DataModel changes")
 		watchChanges()
 	end
-end
+	connectButton.Text = if connected then "Disconnect" else "Connect"
+end)
 
-button.Click:Connect(handleClick)
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 2)
+corner.Parent = portTextBox
+
+local corner2 = Instance.new("UICorner")
+corner2.CornerRadius = UDim.new(0, 2)
+corner2.Parent = connectButton
+
+button.Click:Connect(function()
+	widget.Enabled = not widget.Enabled
+end)
+
+widget:GetPropertyChangedSignal("Enabled"):Connect(function()
+	button:SetActive(widget.Enabled)
+end)
