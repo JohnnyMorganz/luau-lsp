@@ -94,6 +94,17 @@ declare class EnumActuatorType_INTERNAL extends Enum
 	Motor: EnumActuatorType
 	Servo: EnumActuatorType
 end
+declare class EnumAdPortalStatus extends EnumItem end
+declare class EnumAdPortalStatus_INTERNAL extends Enum
+	Invalid: EnumAdPortalStatus
+	Inactive: EnumAdPortalStatus
+	Active: EnumAdPortalStatus
+end
+declare class EnumAdPortalType extends EnumItem end
+declare class EnumAdPortalType_INTERNAL extends Enum
+	Forward: EnumAdPortalType
+	Return: EnumAdPortalType
+end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
 	HorizontalRectangle: EnumAdShape
@@ -1950,11 +1961,6 @@ declare class EnumPlayerChatType_INTERNAL extends Enum
 	Team: EnumPlayerChatType
 	Whisper: EnumPlayerChatType
 end
-declare class EnumPortalType extends EnumItem end
-declare class EnumPortalType_INTERNAL extends Enum
-	Forward: EnumPortalType
-	Return: EnumPortalType
-end
 declare class EnumPoseEasingDirection extends EnumItem end
 declare class EnumPoseEasingDirection_INTERNAL extends Enum
 	Out: EnumPoseEasingDirection
@@ -2932,6 +2938,8 @@ declare Enum: {
 	ActionType: EnumActionType_INTERNAL,
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
+	AdPortalStatus: EnumAdPortalStatus_INTERNAL,
+	AdPortalType: EnumAdPortalType_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdornCullingMode: EnumAdornCullingMode_INTERNAL,
 	AlignType: EnumAlignType_INTERNAL,
@@ -3115,7 +3123,6 @@ declare Enum: {
 	PlaybackState: EnumPlaybackState_INTERNAL,
 	PlayerActions: EnumPlayerActions_INTERNAL,
 	PlayerChatType: EnumPlayerChatType_INTERNAL,
-	PortalType: EnumPortalType_INTERNAL,
 	PoseEasingDirection: EnumPoseEasingDirection_INTERNAL,
 	PoseEasingStyle: EnumPoseEasingStyle_INTERNAL,
 	PositionAlignmentMode: EnumPositionAlignmentMode_INTERNAL,
@@ -4241,7 +4248,8 @@ end
 
 declare class AdPortal extends Instance
 	PortalInvalidReason: string
-	PortalType: EnumPortalType
+	PortalStatus: EnumAdPortalStatus
+	PortalType: EnumAdPortalType
 end
 
 declare class AdService extends Instance
@@ -4460,6 +4468,7 @@ declare class Bone extends Attachment
 end
 
 declare class AvatarEditorService extends Instance
+	function GetAccessoryType(self, avatarAssetType: EnumAvatarAssetType): EnumAccessoryType
 	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string): boolean
 	function NoPromptDeleteOutfit(self, outfitId: number): boolean
 	function NoPromptRenameOutfit(self, outfitId: number, name: string): boolean
@@ -5847,6 +5856,9 @@ declare class GuiObject extends GuiBase2d
 	TouchRotate: RBXScriptSignal<{ any }, number, number, EnumUserInputState>
 	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number>
 	TouchTap: RBXScriptSignal<{ any }>
+	function TweenPosition(self, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> (...any)?): boolean
+	function TweenSize(self, endSize: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> (...any)?): boolean
+	function TweenSizeAndPosition(self, endSize: UDim2, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: (...any) -> (...any)?): boolean
 end
 
 declare class CanvasGroup extends GuiObject
@@ -7495,12 +7507,10 @@ end
 declare class PackageLink extends Instance
 	AutoUpdate: boolean
 	Creator: string
-	Package_Id: Content
 	PackageAssetName: string
 	PackageId: Content
 	PermissionLevel: EnumPackagePermission
 	Status: string
-	Version_Number: number
 	VersionNumber: number
 end
 
@@ -9603,6 +9613,7 @@ declare class VoiceChatInternal extends Instance
 	function SubscribeRetry(self, userId: number): boolean
 	function SubscribeUnblock(self, userId: number): boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
+	LocalPlayerModerated: RBXScriptSignal<>
 end
 
 declare class VoiceChatService extends Instance
