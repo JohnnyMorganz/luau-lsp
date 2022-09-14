@@ -26,8 +26,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "(...any) -> ...any",
-    "function": "(...any) -> ...any",
+    "Function": "((...any) -> ...any)",
+    "function": "((...any) -> ...any)",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
@@ -115,9 +115,7 @@ IGNORED_MEMBERS = {
         "LocalPlayerArrivedFromTeleport",
         "TeleportInitFailed",
     ],
-    "UserService": {
-        "GetUserInfosByUserIdsAsync"
-    }
+    "UserService": {"GetUserInfosByUserIdsAsync"},
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -237,7 +235,7 @@ EXTRA_MEMBERS = {
     ],
     "UserService": [
         "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
-    ]
+    ],
 }
 
 # Hardcoded types
