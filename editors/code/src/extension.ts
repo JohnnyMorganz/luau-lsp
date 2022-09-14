@@ -246,10 +246,11 @@ const startPluginServer = async () => {
     res.sendStatus(200);
   });
 
-  pluginServer = app.listen(3667); // TODO: port
+  const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
+  pluginServer = app.listen(port);
 
   vscode.window.showInformationMessage(
-    `Luau Language Server Studio Plugin is now listening on port ${3667}`
+    `Luau Language Server Studio Plugin is now listening on port ${port}`
   );
 };
 
@@ -482,12 +483,13 @@ export async function activate(context: vscode.ExtensionContext) {
               vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
           });
-      } else if (e.affectsConfiguration("luau-lsp.plugin.enabled")) {
+      } else if (e.affectsConfiguration("luau-lsp.plugin")) {
         if (
           vscode.workspace
             .getConfiguration("luau-lsp.plugin")
             .get<boolean>("enabled")
         ) {
+          stopPluginServer(true);
           startPluginServer();
         } else {
           stopPluginServer();

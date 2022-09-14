@@ -232,6 +232,11 @@
                     "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
                     "type": "boolean",
                     "default": false
+                },
+                "luau-lsp.plugin.port": {
+                    "markdownDescription": "Port number to connect to the Studio Plugin",
+                    "type": "number",
+                    "default": 3667
                 }
             }
         }
