@@ -26,8 +26,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "(...any) -> ...any",
-    "function": "(...any) -> ...any",
+    "Function": "((...any) -> ...any)",
+    "function": "((...any) -> ...any)",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
@@ -97,6 +97,25 @@ IGNORED_MEMBERS = {
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
     "WorldRoot": ["Raycast"],
+    "HttpService": ["RequestAsync"],
+    "HumanoidDescription": [
+        "GetAccessories",
+        "SetAccessories",
+        "GetEmotes",
+        "SetEmotes",
+        "GetEquippedEmotes",
+        "SetEquippedEmotes",
+    ],
+    "TeleportService": [
+        "GetPlayerPlaceInstanceAsync",
+        "TeleportAsync",
+        "TeleportPartyAsync",
+        "TeleportToPrivateServer",
+        "ReserveServer",
+        "LocalPlayerArrivedFromTeleport",
+        "TeleportInitFailed",
+    ],
+    "UserService": {"GetUserInfosByUserIdsAsync"},
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -194,6 +213,29 @@ EXTRA_MEMBERS = {
     "WorldRoot": [
         "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
     ],
+    "HttpService": [
+        "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
+    ],
+    "HumanoidDescription": [
+        "function GetAccessories(self, includeRigidAccessories: boolean): { HumanoidDescriptionAccessory }",
+        "function SetAccessories(self, accessories: { HumanoidDescriptionAccessory }, includeRigidAccessories: boolean): ()",
+        "function GetEmotes(self): { [string]: { number } }",
+        "function SetEmotes(self, emotes: { [string]: { number } }): ()",
+        "function GetEquippedEmotes(self): { { Slot: number, Name: string } }",
+        "function SetEquippedEmotes(self, equippedEmotes: { string } | { Slot: number, Name: string }): ()",
+    ],
+    "TeleportService": [
+        "function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)",
+        "function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult",
+        "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
+        "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
+        "function ReserveServer(self, placeId: number): (string, string)",
+        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
+        "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
+    ],
+    "UserService": [
+        "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
+    ],
 }
 
 # Hardcoded types
@@ -206,6 +248,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Instance = any
 
 declare class Enum
 	function GetEnumItems(self): { any }
@@ -255,9 +298,31 @@ declare function printidentity(prefix: string?)
 POST_DATATYPES_BASE = """
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
-    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
+
+type HttpRequestOptions = {
+    Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
+    Headers: { [string]: string }?,
+    Body: string?,
+}
+
+type HttpResponseData = {
+    Success: boolean,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string },
+    Body: string?,
+}
+
+type HumanoidDescriptionAccessory = {
+    AssetId: number,
+    AccessoryType: EnumAccessoryType,
+    IsLayered: boolean,
+    Order: number?,
+    Puffiness: number?,
 }
 """
 
@@ -593,7 +658,8 @@ def printClasses(dump: ApiDump):
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
-        print(f"type {klass['Name']} = any")
+        if klass["Name"] != "Instance":
+            print(f"type {klass['Name']} = any")
 
     for klass in dump["Classes"]:
         if klass["Name"] in DEFERRED_CLASSES or klass["Name"] in IGNORED_INSTANCES:
@@ -781,7 +847,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
         return None
 
-    def createReference(klassName: str, referenced: str | None):
+    def createReference(klassName: str, referenced: Optional[str]):
         if referenced is not None:
             if klassName == referenced:
                 return
@@ -825,16 +891,14 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
         tempMark.add(n)
 
-        for child in graph[n]:
+        for child in sorted(graph[n]):
             visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
 
         tempMark.remove(n)
         visited.add(n)
         sort.append(klass)
 
-    stack: List[DataType] = []
-    for klass in dataTypes:
-        stack.append(klass)
+    stack = list(sorted(dataTypes, key=lambda x: x["Name"]))
 
     while stack:
         klass = stack.pop()

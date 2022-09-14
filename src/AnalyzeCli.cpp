@@ -140,7 +140,7 @@ int startAnalyze(int argc, char** argv)
             if (path != "-" && !std::filesystem::exists(path))
             {
                 std::cerr << "Cannot get " << path << ": path does not exist\n";
-                continue;
+                return 1;
             }
 
 
@@ -232,6 +232,7 @@ int startAnalyze(int argc, char** argv)
                         report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "TypeError",
                             Luau::toString(error).c_str());
             }
+            return 1;
         }
     }
 
