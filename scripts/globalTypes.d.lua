@@ -10009,7 +10009,7 @@ declare CFrame: {
 	identity: CFrame,
 	fromEulerAnglesYXZ: ((rx: number, ry: number, rz: number) -> CFrame),
 	Angles: ((rx: number, ry: number, rz: number) -> CFrame),
-	fromMatrix: ((pos: Vector3, vX: Vector3, vY: Vector3, vZ: Vector3) -> CFrame),
+	fromMatrix: ((pos: Vector3, vX: Vector3, vY: Vector3, vZ: Vector3?) -> CFrame),
 	fromAxisAngle: ((v: Vector3, r: number) -> CFrame),
 	fromOrientation: ((rx: number, ry: number, rz: number) -> CFrame),
 	fromEulerAnglesXYZ: ((rx: number, ry: number, rz: number) -> CFrame),
