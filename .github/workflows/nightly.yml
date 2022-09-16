@@ -1,0 +1,93 @@
+name: Nightly Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # Runs at 00:00 UTC every day
+
+jobs:
+  dist:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact-name: luau-lsp-win64
+            code-target: [win32-x64]
+          - os: ubuntu-latest
+            artifact-name: luau-lsp-linux
+            code-target: [linux-x64]
+          - os: macos-latest
+            artifact-name: luau-lsp-macos
+            code-target: [darwin-x64, darwin-arm64]
+
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Build Server
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake --build . --config Release --target luau-lsp -j 3
+
+      - name: (MacOS) Verify universal build
+        if: matrix.os == 'macos-latest'
+        run: lipo -archs build/luau-lsp
+
+      - name: Copy Build into Extension
+        shell: bash
+        run: |
+          mkdir -p ./dist
+          mkdir -p editors/code/bin
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp build/Release/luau-lsp.exe editors/code/bin/server.exe
+          else
+            cp build/luau-lsp editors/code/bin/server
+            chmod 777 editors/code/bin/server
+          fi
+
+      - name: Create Release Archive
+        shell: bash
+        run: |
+          mkdir staging
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp "build/Release/luau-lsp.exe" staging/
+            cd staging
+            7z a ../dist/server.zip *
+          else
+            cp "build/luau-lsp" staging/
+            cd staging
+            zip ../dist/server.zip *
+          fi
+
+      - name: Copy README, CHANGELOG, LICENSE
+        shell: bash
+        run: |
+          rm -f editors/code/README.md
+          cp README.md editors/code/README.md
+          rm -f editors/code/CHANGELOG.md
+          cp CHANGELOG.md editors/code/CHANGELOG.md
+          rm -f editors/code/LICENSE.md
+          cp LICENSE.md editors/code/LICENSE
+
+      - run: npm ci
+        working-directory: editors/code
+
+      - name: Package Extension
+        working-directory: editors/code
+        run: npx vsce package -o "../../dist/${{ matrix.artifact-name }}.vsix"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: nightly-${{ matrix.artifact-name }}
+          path: ./dist
