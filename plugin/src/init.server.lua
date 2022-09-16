@@ -62,15 +62,12 @@ local function encodeInstance(instance: Instance, childFilter: ((Instance) -> bo
 	encoded.ClassName = instance.ClassName
 	encoded.Children = {}
 
-	for _, child in pairs(instance:GetChildren()) do
+	for _, child in instance:GetChildren() do
 		if childFilter and not childFilter(child) then
 			continue
 		end
 
-		local success, data = pcall(encodeInstance, child)
-		if success then
-			table.insert(encoded.Children, data)
-		end
+		table.insert(encoded.Children, encodeInstance(child))
 	end
 
 	return encoded
