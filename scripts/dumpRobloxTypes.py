@@ -116,6 +116,7 @@ IGNORED_MEMBERS = {
         "TeleportInitFailed",
     ],
     "UserService": {"GetUserInfosByUserIdsAsync"},
+    "Studio": {"Theme"},
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -236,6 +237,7 @@ EXTRA_MEMBERS = {
     "UserService": [
         "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
     ],
+    "Studio": ["Theme: StudioTheme"],
 }
 
 # Hardcoded types

@@ -8763,12 +8763,12 @@ declare class Studio extends Instance
 	Tab_Width: number
 	Text_Color: Color3
 	Text_Wrapping: boolean
-	Theme: Instance
 	Use_Bounding_Box_Move_Handles: boolean
 	Warning_Color: Color3
 	Whitespace_Color: Color3
 	function GetAvailableThemes(self): { any }
 	ThemeChanged: RBXScriptSignal<>
+	Theme: StudioTheme
 end
 
 declare class StudioAssetService extends Instance
