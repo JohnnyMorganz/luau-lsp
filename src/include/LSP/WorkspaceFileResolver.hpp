@@ -8,6 +8,7 @@
 #include "LSP/Uri.hpp"
 #include "LSP/Protocol.hpp"
 #include "LSP/Sourcemap.hpp"
+#include "LSP/PluginDataModel.hpp"
 #include "LSP/TextDocument.hpp"
 
 struct WorkspaceFileResolver
@@ -21,6 +22,9 @@ struct WorkspaceFileResolver
     SourceNodePtr rootSourceNode;
     mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes;
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes;
+
+    // Plugin-provided DataModel information
+    PluginNodePtr pluginInfo;
 
     // Currently opened files where content is managed by client
     mutable std::unordered_map<Luau::ModuleName, TextDocument> managedFiles;
