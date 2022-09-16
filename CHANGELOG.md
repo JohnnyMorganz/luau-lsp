@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Inlay hints for variables will no longer show if the type hint string is the same as the variable name (i.e., `local tbl = {}`, the hint `: tbl` will no longer show) ([#137](https://github.com/JohnnyMorganz/luau-lsp/issues/137))
+
 ## [1.9.2] - 2022-09-06
 
 ### Changed
