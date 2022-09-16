@@ -10,8 +10,11 @@ import {
 } from "vscode-languageclient/node";
 
 import spawn from "./spawn";
+import { Server } from "http";
+import express from "express";
 
 let client: LanguageClient;
+let pluginServer: Server | undefined = undefined;
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
@@ -215,6 +218,53 @@ const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
       workspaceFolder.name
     } (${workspaceFolder.uri.toString(true)})`
   );
+};
+
+const startPluginServer = async () => {
+  if (pluginServer) {
+    return;
+  }
+
+  const app = express();
+  app.use(
+    express.json({
+      limit: "3mb",
+    })
+  );
+
+  app.post("/full", (req, res) => {
+    if (req.body.tree) {
+      client.sendNotification("$/plugin/full", req.body.tree);
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(400);
+    }
+  });
+
+  app.post("/clear", (_req, res) => {
+    client.sendNotification("$/plugin/clear");
+    res.sendStatus(200);
+  });
+
+  const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
+  pluginServer = app.listen(port);
+
+  vscode.window.showInformationMessage(
+    `Luau Language Server Studio Plugin is now listening on port ${port}`
+  );
+};
+
+const stopPluginServer = async (isDeactivating = false) => {
+  if (pluginServer) {
+    pluginServer.close();
+    pluginServer = undefined;
+
+    if (!isDeactivating) {
+      vscode.window.showInformationMessage(
+        `Luau Language Server Studio Plugin has disconnected`
+      );
+    }
+  }
 };
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -433,6 +483,17 @@ export async function activate(context: vscode.ExtensionContext) {
               vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
           });
+      } else if (e.affectsConfiguration("luau-lsp.plugin")) {
+        if (
+          vscode.workspace
+            .getConfiguration("luau-lsp.plugin")
+            .get<boolean>("enabled")
+        ) {
+          stopPluginServer(true);
+          startPluginServer();
+        } else {
+          stopPluginServer();
+        }
       }
     })
   );
@@ -441,10 +502,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
   console.log("LSP Setup");
   await client.start();
+
+  if (
+    vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")
+  ) {
+    startPluginServer();
+  }
 }
 
 export async function deactivate() {
   if (client) {
     await client.stop();
   }
+  stopPluginServer(true);
 }

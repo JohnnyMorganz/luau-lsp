@@ -14,6 +14,7 @@ set(SOURCES
     src/DocumentationParser.cpp
     src/LuauExt.cpp
     src/Utils.cpp
+    src/StudioPlugin.cpp
     src/operations/Diagnostics.cpp
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
