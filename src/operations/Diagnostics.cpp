@@ -5,6 +5,12 @@
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
+    if (!isConfigured)
+    {
+        lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
+        throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);
+    }
+
     // TODO: should we apply a resultId and return an unchanged report if unchanged?
     lsp::DocumentDiagnosticReport report;
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;

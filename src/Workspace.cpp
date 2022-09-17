@@ -178,6 +178,7 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    isConfigured = true;
     if (configuration.sourcemap.enabled)
     {
         if (!isNullWorkspace() && !updateSourceMap())
