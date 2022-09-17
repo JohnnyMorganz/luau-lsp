@@ -117,8 +117,11 @@ bool WorkspaceFolder::updateSourceMap()
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
 
+        // Recreate instance types
+        instanceTypes.clear();
+        types::createInstanceTypes(frontend.typeChecker, instanceTypes, fileResolver);
         types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ false);
-        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
+        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver, /* TODO - expressiveTypes: */ true);
 
         // Signal diagnostics refresh
         client->terminateWorkspaceDiagnostics();

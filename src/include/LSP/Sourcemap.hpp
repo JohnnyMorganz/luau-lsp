@@ -2,6 +2,7 @@
 #include <optional>
 #include <filesystem>
 #include <Luau/FileResolver.h>
+#include "Luau/TypeVar.h"
 #include "nlohmann/json.hpp"
 #include "LSP/PluginDataModel.hpp"
 using json = nlohmann::json;
@@ -16,6 +17,7 @@ struct SourceNode
     std::vector<std::filesystem::path> filePaths;
     std::vector<SourceNodePtr> children;
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    Luau::TypeId ty;         // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
     bool isScript();
     std::optional<std::filesystem::path> getScriptFilePath();

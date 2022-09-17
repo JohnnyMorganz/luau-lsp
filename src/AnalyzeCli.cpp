@@ -199,7 +199,6 @@ int startAnalyze(int argc, char** argv)
         if (auto sourceMapContents = readFile(*sourcemapPath))
         {
             fileResolver.updateSourceMap(sourceMapContents.value());
-            types::registerInstanceTypes(frontend.typeChecker, fileResolver);
         }
     }
 
@@ -236,7 +235,8 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    types::registerInstanceTypes(frontend.typeChecker, fileResolver);
+    types::createInstanceTypes(frontend.typeChecker, frontend.typeChecker.globalTypes, fileResolver);
+    types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ true);
 
     Luau::freeze(frontend.typeChecker.globalTypes);
 
