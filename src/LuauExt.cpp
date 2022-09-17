@@ -51,14 +51,12 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
     return std::nullopt;
 }
 
-Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope,
-    const SourceNodePtr& node, std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass)
+void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
+    std::optional<Luau::TypeId> parent)
 {
     Luau::LazyTypeVar ltv;
-    ltv.thunk = [&typeChecker, &arena, globalScope, node, parent, baseClass]()
+    ltv.thunk = [&typeChecker, &arena, globalScope, node, parent]()
     {
-        // TODO: we should cache created instance types and reuse them where possible
-
         // Handle if the node is no longer valid
         if (!node)
             return typeChecker.singletonTypes->anyType;
@@ -69,9 +67,7 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
 
         // Look up the base class instance
         Luau::TypeId baseTypeId;
-        if (baseClass)
-            baseTypeId = *baseClass;
-        else if (auto foundId = getTypeIdForClass(globalScope, node->className))
+        if (auto foundId = getTypeIdForClass(globalScope, node->className))
             baseTypeId = *foundId;
         else
             return typeChecker.singletonTypes->anyType;
@@ -91,20 +87,15 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
         if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(typeId))
         {
 
-            // Add the parent
+            // Add parent as property
             if (parent.has_value())
-            {
                 ctv->props["Parent"] = Luau::makeProperty(parent.value());
-            }
-            else if (auto parentNode = node->parent.lock())
-            {
-                ctv->props["Parent"] = Luau::makeProperty(makeLazyInstanceType(typeChecker, arena, globalScope, parentNode, std::nullopt));
-            }
 
-            // Add the children
+            // Add children as properties
             for (const auto& child : node->children)
             {
-                ctv->props[child->name] = Luau::makeProperty(makeLazyInstanceType(typeChecker, arena, globalScope, child, typeId));
+                if (child->ty)
+                    ctv->props[child->name] = Luau::makeProperty(child->ty);
             }
 
             // Add FindFirstAncestor and FindFirstChild
@@ -112,8 +103,9 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
             {
                 auto findFirstAncestorFunction =
                     Luau::makeFunction(arena, typeId, {typeChecker.singletonTypes->stringType}, {"name"}, {*instanceType});
+
                 Luau::attachMagicFunction(findFirstAncestorFunction,
-                    [node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                    [&arena, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                         Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
@@ -126,8 +118,8 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
                         // This is a O(n) search, not great!
                         if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
                         {
-                            return Luau::WithPredicate<Luau::TypePackId>{typeChecker.globalTypes.addTypePack(
-                                {makeLazyInstanceType(typeChecker, typeChecker.globalTypes, scope, *ancestor, std::nullopt)})};
+                            if (ancestor.value()->ty)
+                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({ancestor.value()->ty})};
                         }
 
                         return std::nullopt;
@@ -136,7 +128,7 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
 
                 auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {typeChecker.singletonTypes->stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstChildFunction,
-                    [node, typeId](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                    [node, &arena](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                         Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
@@ -148,8 +140,8 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
 
                         if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
                         {
-                            return Luau::WithPredicate<Luau::TypePackId>{typeChecker.globalTypes.addTypePack(
-                                {makeLazyInstanceType(typeChecker, typeChecker.globalTypes, scope, *child, typeId)})};
+                            if (child.value()->ty)
+                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({child.value()->ty})};
                         }
 
                         return std::nullopt;
@@ -160,7 +152,14 @@ Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::Ty
         return typeId;
     };
 
-    return arena.addType(std::move(ltv));
+    auto ty = arena.addType(std::move(ltv));
+    node->ty = ty;
+
+    // Create types for children
+    for (auto child : node->children)
+    {
+        createSourcemapTypes(typeChecker, arena, globalScope, child, ty);
+    }
 }
 
 // Magic function for `Instance:IsA("ClassName")` predicate
@@ -237,135 +236,132 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
 }
 
+void addChildrenToCTV(const Luau::TypeId& ty, const SourceNodePtr& node)
+{
+    if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
+    {
+        // Clear out all the old registered children
+        for (auto it = ctv->props.begin(); it != ctv->props.end();)
+        {
+            if (hasTag(it->second, "@sourcemap-generated"))
+                it = ctv->props.erase(it);
+            else
+                ++it;
+        }
+
+
+        // Extend the props to include the children
+        for (const auto& child : node->children)
+        {
+            if (child->ty)
+                ctv->props[child->name] = Luau::Property{
+                    child->ty,
+                    /* deprecated */ false,
+                    /* deprecatedSuggestion */ {},
+                    /* location */ std::nullopt,
+                    /* tags */ {"@sourcemap-generated"},
+                    /* documentationSymbol*/ std::nullopt,
+                };
+        }
+    }
+}
+
+/// Populate all sourcemap nodes with a corresponding TypeId to track the instance type
+void createInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& instanceTypes, const WorkspaceFileResolver& fileResolver)
+{
+    Luau::unfreeze(instanceTypes);
+
+    if (fileResolver.rootSourceNode)
+    {
+        // Create LazyTypeVars for all source nodes
+        createSourcemapTypes(typeChecker, instanceTypes, typeChecker.globalScope, fileResolver.rootSourceNode, std::nullopt);
+    }
+
+    Luau::freeze(instanceTypes);
+}
+
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
 // to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
 // Remove this once Luau has improved
 void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
 {
-    // Extend the types from the sourcemap
-    // Extend globally registered types with Instance information
-    if (fileResolver.rootSourceNode)
+    if (!fileResolver.rootSourceNode)
+        return;
+
+    // Mutate globally-registered Services to include children information
+    if (fileResolver.rootSourceNode->className == "DataModel")
     {
-        if (fileResolver.rootSourceNode->className == "DataModel")
+        for (const auto& service : fileResolver.rootSourceNode->children)
         {
-            Luau::unfreeze(typeChecker.globalTypes);
-            // Add instance information for the DataModel tree
-            for (const auto& service : fileResolver.rootSourceNode->children)
-            {
-                auto serviceName = service->className; // We know it must be a service of the same class name
-                if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
-                {
-                    if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(serviceType->type))
-                    {
-                        // Clear out all the old registered children
-                        for (auto it = ctv->props.begin(); it != ctv->props.end();)
-                        {
-                            if (hasTag(it->second, "@sourcemap-generated"))
-                                it = ctv->props.erase(it);
-                            else
-                                ++it;
-                        }
-
-
-                        // Extend the props to include the children
-                        for (const auto& child : service->children)
-                        {
-                            Luau::Property property{
-                                types::makeLazyInstanceType(typeChecker, typeChecker.globalTypes, typeChecker.globalScope, child, serviceType->type),
-                                /* deprecated */ false,
-                                /* deprecatedSuggestion */ {},
-                                /* location */ std::nullopt,
-                                /* tags */ {"@sourcemap-generated"},
-                                /* documentationSymbol*/ std::nullopt,
-                            };
-                            ctv->props[child->name] = property;
-                        }
-                    }
-                }
-            }
-
-            // Add containers to player and copy over instances
-            // Player.Character should contain StarterCharacter instances
-            if (auto playerType = typeChecker.globalScope->lookupType("Player"))
-            {
-                if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(playerType->type))
-                {
-                    // Player.PlayerGui should contain StarterGui instances
-                    if (auto playerGuiType = typeChecker.globalScope->lookupType("PlayerGui"))
-                    {
-                        ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
-                        if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
-                        {
-                            ctv->props["PlayerGui"] = Luau::makeProperty(types::makeLazyInstanceType(typeChecker, typeChecker.globalTypes,
-                                typeChecker.globalScope, starterGui.value(), std::nullopt, playerGuiType->type));
-                        }
-                    }
-
-                    // Player.StarterGear should contain StarterPack instances
-                    if (auto starterGearType = typeChecker.globalScope->lookupType("StarterGear"))
-                    {
-                        ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
-                        if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
-                        {
-                            ctv->props["StarterGear"] = Luau::makeProperty(types::makeLazyInstanceType(typeChecker, typeChecker.globalTypes,
-                                typeChecker.globalScope, starterPack.value(), std::nullopt, starterGearType->type));
-                        }
-                    }
-
-                    // Player.Backpack should be defined
-                    if (auto backpackType = typeChecker.globalScope->lookupType("Backpack"))
-                    {
-                        ctv->props["Backpack"] = Luau::makeProperty(backpackType->type);
-                        // TODO: should we duplicate StarterPack into here as well? Is that a reasonable assumption to make?
-                    }
-
-                    // Player.PlayerScripts should contain StarterPlayerScripts instances
-                    if (auto playerScriptsType = typeChecker.globalScope->lookupType("PlayerScripts"))
-                    {
-                        ctv->props["PlayerScripts"] = Luau::makeProperty(playerScriptsType->type);
-                        if (auto starterPlayer = fileResolver.rootSourceNode->findChild("StarterPlayer"))
-                        {
-                            if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
-                            {
-                                ctv->props["PlayerScripts"] = Luau::makeProperty(types::makeLazyInstanceType(typeChecker, typeChecker.globalTypes,
-                                    typeChecker.globalScope, starterPlayerScripts.value(), std::nullopt, playerScriptsType->type));
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            Luau::freeze(typeChecker.globalTypes);
+            auto serviceName = service->className; // We know it must be a service of the same class name
+            if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
+                addChildrenToCTV(serviceType->type, service);
         }
 
-        // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-        typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+        // Add containers to player and copy over instances
+        // TODO: Player.Character should contain StarterCharacter instances
+        if (auto playerType = typeChecker.globalScope->lookupType("Player"))
         {
-            // TODO: we hope to remove these in future!
-            if (!expressiveTypes)
+            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(playerType->type))
             {
-                scope->bindings[Luau::AstName("script")] = Luau::Binding{typeChecker.singletonTypes->anyType};
-                scope->bindings[Luau::AstName("workspace")] = Luau::Binding{typeChecker.singletonTypes->anyType};
-                scope->bindings[Luau::AstName("game")] = Luau::Binding{typeChecker.singletonTypes->anyType};
-            }
+                // Player.Backpack should be defined
+                if (auto backpackType = typeChecker.globalScope->lookupType("Backpack"))
+                {
+                    ctv->props["Backpack"] = Luau::makeProperty(backpackType->type);
+                    // TODO: should we duplicate StarterPack into here as well? Is that a reasonable assumption to make?
+                }
 
-            if (auto node =
-                    fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
-            {
-                // HACK: we need a way to get the typeArena for the module, but I don't know how
-                // we can see that moduleScope->returnType is assigned before prepareModuleScope is called in TypeInfer, so we could try it
-                // this way...
-                LUAU_ASSERT(scope->returnType);
-                auto typeArena = scope->returnType->owningArena;
-                LUAU_ASSERT(typeArena);
+                // Player.PlayerGui should contain StarterGui instances
+                if (auto playerGuiType = typeChecker.globalScope->lookupType("PlayerGui"))
+                {
+                    if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
+                        addChildrenToCTV(playerGuiType->type, *starterGui);
+                    ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
+                }
 
-                if (expressiveTypes)
-                    scope->bindings[Luau::AstName("script")] =
-                        Luau::Binding{types::makeLazyInstanceType(typeChecker, *typeArena, scope, node.value(), std::nullopt)};
+                // Player.StarterGear should contain StarterPack instances
+                if (auto starterGearType = typeChecker.globalScope->lookupType("StarterGear"))
+                {
+                    if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
+                        addChildrenToCTV(starterGearType->type, *starterPack);
+
+                    ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
+                }
+
+                // Player.PlayerScripts should contain StarterPlayerScripts instances
+                if (auto playerScriptsType = typeChecker.globalScope->lookupType("PlayerScripts"))
+                {
+                    if (auto starterPlayer = fileResolver.rootSourceNode->findChild("StarterPlayer"))
+                    {
+                        if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
+                        {
+                            addChildrenToCTV(playerScriptsType->type, *starterPlayerScripts);
+                        }
+                    }
+                    ctv->props["PlayerScripts"] = Luau::makeProperty(playerScriptsType->type);
+                }
             }
-        };
+        }
     }
+
+    // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
+    typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+    {
+        // TODO: we hope to remove these in future!
+        if (!expressiveTypes)
+        {
+            scope->bindings[Luau::AstName("script")] = Luau::Binding{typeChecker.singletonTypes->anyType};
+            scope->bindings[Luau::AstName("workspace")] = Luau::Binding{typeChecker.singletonTypes->anyType};
+            scope->bindings[Luau::AstName("game")] = Luau::Binding{typeChecker.singletonTypes->anyType};
+        }
+
+        if (auto node =
+                fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
+        {
+            if (expressiveTypes && node.value()->ty)
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{node.value()->ty};
+        }
+    };
 }
 
 Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)

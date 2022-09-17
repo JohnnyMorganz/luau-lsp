@@ -27,6 +27,7 @@ public:
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
     bool isConfigured = false;
+    Luau::TypeArena instanceTypes;
 
 public:
     WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
