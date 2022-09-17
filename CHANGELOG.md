@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.10.0] - 2022-09-17
+
 ### Added
 
 - Introduced a Studio plugin to infer instance trees for partially managed projects. This works alongside Rojo sourcemaps, where instance information retrieved from Studio is merged into the sourcemap. Starting the plugin can be configured using `luau-lsp.plugin.enabled`. Install the plugin from the [Plugin Marketplace](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)
