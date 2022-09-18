@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Children of `game` will now correctly show in autocomplete
+- Fix autocomplete of non-identifier properties: `Packages._Index.roblox_roact-rodux@0.2.1` -> `Packages._Index["roblox_roact-rodux@0.2.1"]`
 
 ## [1.10.0] - 2022-09-17
 
