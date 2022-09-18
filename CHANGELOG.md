@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Further improvements to instance type creation
+
+### Fixed
+
+- Children of `game` will now correctly show in autocomplete
+
 ## [1.10.0] - 2022-09-17
 
 ### Added

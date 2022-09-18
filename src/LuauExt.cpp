@@ -51,11 +51,17 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
     return std::nullopt;
 }
 
-void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
-    std::optional<Luau::TypeId> parent)
+// Retrieves the corresponding Luau type for a Sourcemap node
+// If it does not yet exist, the type is produced
+Luau::TypeId getSourcemapType(
+    const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node)
 {
+    // Gets the type corresponding to the sourcemap node if it exists
+    if (node->ty)
+        return node->ty;
+
     Luau::LazyTypeVar ltv;
-    ltv.thunk = [&typeChecker, &arena, globalScope, node, parent]()
+    ltv.thunk = [&typeChecker, &arena, globalScope, node]()
     {
         // Handle if the node is no longer valid
         if (!node)
@@ -86,17 +92,12 @@ void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena&
         // Get the mutable version of the type var
         if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(typeId))
         {
-
-            // Add parent as property
-            if (parent.has_value())
-                ctv->props["Parent"] = Luau::makeProperty(parent.value());
+            if (auto parentNode = node->parent.lock())
+                ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(typeChecker, arena, globalScope, parentNode));
 
             // Add children as properties
             for (const auto& child : node->children)
-            {
-                if (child->ty)
-                    ctv->props[child->name] = Luau::makeProperty(child->ty);
-            }
+                ctv->props[child->name] = Luau::makeProperty(getSourcemapType(typeChecker, arena, globalScope, child));
 
             // Add FindFirstAncestor and FindFirstChild
             if (auto instanceType = getTypeIdForClass(globalScope, "Instance"))
@@ -118,8 +119,7 @@ void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena&
                         // This is a O(n) search, not great!
                         if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
                         {
-                            if (ancestor.value()->ty)
-                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({ancestor.value()->ty})};
+                            return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(typeChecker, arena, scope, *ancestor)})};
                         }
 
                         return std::nullopt;
@@ -139,10 +139,7 @@ void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena&
                             return std::nullopt;
 
                         if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
-                        {
-                            if (child.value()->ty)
-                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({child.value()->ty})};
-                        }
+                            return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(typeChecker, arena, scope, *child)})};
 
                         return std::nullopt;
                     });
@@ -155,11 +152,7 @@ void createSourcemapTypes(const Luau::TypeChecker& typeChecker, Luau::TypeArena&
     auto ty = arena.addType(std::move(ltv));
     node->ty = ty;
 
-    // Create types for children
-    for (auto child : node->children)
-    {
-        createSourcemapTypes(typeChecker, arena, globalScope, child, ty);
-    }
+    return ty;
 }
 
 // Magic function for `Instance:IsA("ClassName")` predicate
@@ -236,7 +229,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
 }
 
-void addChildrenToCTV(const Luau::TypeId& ty, const SourceNodePtr& node)
+void addChildrenToCTV(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
     if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
     {
@@ -253,49 +246,42 @@ void addChildrenToCTV(const Luau::TypeId& ty, const SourceNodePtr& node)
         // Extend the props to include the children
         for (const auto& child : node->children)
         {
-            if (child->ty)
-                ctv->props[child->name] = Luau::Property{
-                    child->ty,
-                    /* deprecated */ false,
-                    /* deprecatedSuggestion */ {},
-                    /* location */ std::nullopt,
-                    /* tags */ {"@sourcemap-generated"},
-                    /* documentationSymbol*/ std::nullopt,
-                };
+            ctv->props[child->name] = Luau::Property{
+                getSourcemapType(typeChecker, arena, typeChecker.globalScope, child),
+                /* deprecated */ false,
+                /* deprecatedSuggestion */ {},
+                /* location */ std::nullopt,
+                /* tags */ {"@sourcemap-generated"},
+                /* documentationSymbol*/ std::nullopt,
+            };
         }
     }
-}
-
-/// Populate all sourcemap nodes with a corresponding TypeId to track the instance type
-void createInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& instanceTypes, const WorkspaceFileResolver& fileResolver)
-{
-    Luau::unfreeze(instanceTypes);
-
-    if (fileResolver.rootSourceNode)
-    {
-        // Create LazyTypeVars for all source nodes
-        createSourcemapTypes(typeChecker, instanceTypes, typeChecker.globalScope, fileResolver.rootSourceNode, std::nullopt);
-    }
-
-    Luau::freeze(instanceTypes);
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
 // to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
 // Remove this once Luau has improved
-void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
+void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
 {
     if (!fileResolver.rootSourceNode)
         return;
 
-    // Mutate globally-registered Services to include children information
+    // Create a type for the root source node
+    getSourcemapType(typeChecker, arena, typeChecker.globalScope, fileResolver.rootSourceNode);
+
+    // Modify sourcemap types
     if (fileResolver.rootSourceNode->className == "DataModel")
     {
+        // Mutate DataModel with its children
+        if (auto dataModelType = typeChecker.globalScope->lookupType("DataModel"))
+            addChildrenToCTV(typeChecker, arena, dataModelType->type, fileResolver.rootSourceNode);
+
+        // Mutate globally-registered Services to include children information (so its available through :GetService)
         for (const auto& service : fileResolver.rootSourceNode->children)
         {
             auto serviceName = service->className; // We know it must be a service of the same class name
             if (auto serviceType = typeChecker.globalScope->lookupType(serviceName))
-                addChildrenToCTV(serviceType->type, service);
+                addChildrenToCTV(typeChecker, arena, serviceType->type, service);
         }
 
         // Add containers to player and copy over instances
@@ -315,7 +301,7 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                 if (auto playerGuiType = typeChecker.globalScope->lookupType("PlayerGui"))
                 {
                     if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
-                        addChildrenToCTV(playerGuiType->type, *starterGui);
+                        addChildrenToCTV(typeChecker, arena, playerGuiType->type, *starterGui);
                     ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
                 }
 
@@ -323,7 +309,7 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                 if (auto starterGearType = typeChecker.globalScope->lookupType("StarterGear"))
                 {
                     if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
-                        addChildrenToCTV(starterGearType->type, *starterPack);
+                        addChildrenToCTV(typeChecker, arena, starterGearType->type, *starterPack);
 
                     ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
                 }
@@ -335,7 +321,7 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileRe
                     {
                         if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
                         {
-                            addChildrenToCTV(playerScriptsType->type, *starterPlayerScripts);
+                            addChildrenToCTV(typeChecker, arena, playerScriptsType->type, *starterPlayerScripts);
                         }
                     }
                     ctv->props["PlayerScripts"] = Luau::makeProperty(playerScriptsType->type);
