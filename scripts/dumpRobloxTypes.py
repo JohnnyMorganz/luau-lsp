@@ -1,5 +1,6 @@
 # Script to pull in API Dump and export it into a definition file
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
+from itertools import chain
 from typing import List, Literal, Optional, Union, TypedDict
 from collections import defaultdict
 import requests
@@ -664,46 +665,54 @@ def declareClass(klass: ApiClass):
         out += " extends " + klass["Superclass"]
     out += "\n"
 
-    isGetService = False
+    isGetService = klass["Name"] == "ServiceProvider"
 
-    for member in klass["Members"]:
+    def filter_member(member: ApiMember):
         if (
             not INCLUDE_DEPRECATED_METHODS
             and "Tags" in member
             and "Deprecated" in member["Tags"]
         ):
-            continue
+            return False
         if (
             klass["Name"] in IGNORED_MEMBERS
             and member["Name"] in IGNORED_MEMBERS[klass["Name"]]
         ):
-            continue
+            return False
+        if (
+            member["MemberType"] == "Function"
+            and member["Name"] == "GetService"
+        ):
+            return False
+        return True
+        
 
+    def declare_member(member: ApiMember):
         if member["MemberType"] == "Property":
-            out += (
-                f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            )
+            return f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
         elif member["MemberType"] == "Function":
-            if klass["Name"] == "ServiceProvider" and member["Name"] == "GetService":
-                isGetService = True
-                continue
-            out += f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
+            return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
         elif member["MemberType"] == "Event":
             parameters = ", ".join(
                 map(lambda x: resolveType(x["Type"]), member["Parameters"])
             )
-            out += f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
+            return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
         elif member["MemberType"] == "Callback":
-            out += f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+            return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+        
+    member_definitions = map(declare_member, filter(filter_member, klass["Members"]))
+
+    def declare_service(service: str):
+        return f'\tfunction GetService(self, service: "{service}"): {service}\n'
 
     # Special case ServiceProvider:GetService()
     if isGetService:
-        for service in SERVICES:
-            out += f'\tfunction GetService(self, service: "{service}"): {service}\n'
+        member_definitions = chain(member_definitions, map(declare_service, SERVICES))
 
     if klass["Name"] in EXTRA_MEMBERS:
-        for method in EXTRA_MEMBERS[klass["Name"]]:
-            out += f"\t{method}\n"
+        member_definitions = chain(member_definitions, map(lambda member: f'\t{member}\n', EXTRA_MEMBERS[klass["Name"]]))
+
+    out += ''.join(sorted(member_definitions))
 
     out += "end"
 
