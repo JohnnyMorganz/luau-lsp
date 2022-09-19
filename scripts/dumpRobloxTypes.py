@@ -136,6 +136,13 @@ IGNORED_MEMBERS = {
         "GetNavigationGamepads",
         "GetSupportedGamepadKeyCodes",
     ],
+    "Humanoid": [
+        "RootPart",
+        "SeatPart",
+        "WalkToPart",
+        "GetAccessories",
+    ],
+    "Player": ["Character"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -276,6 +283,13 @@ EXTRA_MEMBERS = {
         "function GetNavigationGamepads(self): { EnumUserInputType }",
         "function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { EnumKeyCode }",
     ],
+    "Humanoid": [
+        "RootPart: BasePart?",
+        "SeatPart: BasePart?",
+        "WalkToPart: BasePart?",
+        "function GetAccessories(self): { Accessory }",
+    ],
+    "Player": ["Character: Model?"],
 }
 
 # Hardcoded types

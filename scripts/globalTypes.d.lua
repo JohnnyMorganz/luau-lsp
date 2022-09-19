@@ -6428,13 +6428,10 @@ declare class Humanoid extends Instance
 	PlatformStand: boolean
 	RequiresNeck: boolean
 	RigType: EnumHumanoidRigType
-	RootPart: BasePart
-	SeatPart: BasePart
 	Sit: boolean
 	TargetPoint: Vector3
 	UseJumpPower: boolean
 	WalkSpeed: number
-	WalkToPart: BasePart
 	WalkToPoint: Vector3
 	function AddAccessory(self, accessory: Accessory): nil
 	function ApplyDescriptionBlocking(self, humanoidDescription: HumanoidDescription): nil
@@ -6442,7 +6439,6 @@ declare class Humanoid extends Instance
 	function CacheDefaults(self): nil
 	function ChangeState(self, state: EnumHumanoidStateType?): nil
 	function EquipTool(self, tool: Tool): nil
-	function GetAccessories(self): { any }
 	function GetAccessoryHandleScale(self, instance: Instance, partType: EnumBodyPartR15): Vector3
 	function GetAppliedDescription(self): HumanoidDescription
 	function GetBodyPartR15(self, part: BasePart): EnumBodyPartR15
@@ -6481,6 +6477,10 @@ declare class Humanoid extends Instance
 	Strafing: RBXScriptSignal<boolean>
 	Swimming: RBXScriptSignal<number>
 	Touched: RBXScriptSignal<BasePart, BasePart>
+	RootPart: BasePart?
+	SeatPart: BasePart?
+	WalkToPart: BasePart?
+	function GetAccessories(self): { Accessory }
 end
 
 declare class HumanoidDescription extends Instance
@@ -7709,7 +7709,6 @@ declare class Player extends Instance
 	CameraMinZoomDistance: number
 	CameraMode: EnumCameraMode
 	CanLoadCharacterAppearance: boolean
-	Character: Model
 	CharacterAppearanceId: number
 	ChatMode: EnumChatMode
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
@@ -7777,6 +7776,7 @@ declare class Player extends Instance
 	Idled: RBXScriptSignal<number>
 	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
 	SimulationRadiusChanged: RBXScriptSignal<number>
+	Character: Model?
 end
 
 declare class PlayerEmulatorService extends Instance
