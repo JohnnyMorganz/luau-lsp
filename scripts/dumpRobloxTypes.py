@@ -117,6 +117,25 @@ IGNORED_MEMBERS = {
     ],
     "UserService": {"GetUserInfosByUserIdsAsync"},
     "Studio": {"Theme"},
+    "BasePlayerGui": [
+        "GetGuiObjectsAtPosition",
+        "GetGuiObjectsInCircle",
+    ],
+    "Path": [
+        "GetWaypoints",
+    ],
+    "CollectionService": [
+        "GetAllTags",
+        "GetTags",
+    ],
+    "UserInputService": [
+        "GetConnectedGamepads",
+        "GetGamepadState",
+        "GetKeysPressed",
+        "GetMouseButtonsPressed",
+        "GetNavigationGamepads",
+        "GetSupportedGamepadKeyCodes",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -238,6 +257,25 @@ EXTRA_MEMBERS = {
         "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
     ],
     "Studio": ["Theme: StudioTheme"],
+    "BasePlayerGui": [
+        "function GetGuiObjectsAtPosition(self, x: number, y: number): { GuiObject }",
+        "function GetGuiObjectsInCircle(self, position: Vector2, radius: number): { GuiObject }",
+    ],
+    "Path": [
+        "function GetWaypoints(self): { PathWaypoint }",
+    ],
+    "CollectionService": [
+        "function GetAllTags(self): { string }",
+        "function GetTags(self, instance: Instance): { string }",
+    ],
+    "UserInputService": [
+        "function GetConnectedGamepads(self): { EnumUserInputType }",
+        "function GetGamepadState(self, gamepadNum: EnumUserInputType): { InputObject }",
+        "function GetKeysPressed(self): { InputObject }",
+        "function GetMouseButtonsPressed(self): { InputObject }",
+        "function GetNavigationGamepads(self): { EnumUserInputType }",
+        "function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { EnumKeyCode }",
+    ],
 }
 
 # Hardcoded types

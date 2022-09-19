@@ -4575,8 +4575,8 @@ declare class BadgeService extends Instance
 end
 
 declare class BasePlayerGui extends Instance
-	function GetGuiObjectsAtPosition(self, x: number, y: number): { Instance }
-	function GetGuiObjectsInCircle(self, position: Vector2, radius: number): { Instance }
+	function GetGuiObjectsAtPosition(self, x: number, y: number): { GuiObject }
+	function GetGuiObjectsInCircle(self, position: Vector2, radius: number): { GuiObject }
 end
 
 declare class CoreGui extends BasePlayerGui
@@ -4897,15 +4897,15 @@ end
 
 declare class CollectionService extends Instance
 	function AddTag(self, instance: Instance, tag: string): nil
-	function GetAllTags(self): { any }
 	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal
 	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal
 	function GetTagged(self, tag: string): { Instance }
-	function GetTags(self, instance: Instance): { any }
 	function HasTag(self, instance: Instance, tag: string): boolean
 	function RemoveTag(self, instance: Instance, tag: string): nil
 	TagAdded: RBXScriptSignal<string>
 	TagRemoved: RBXScriptSignal<string>
+	function GetAllTags(self): { string }
+	function GetTags(self, instance: Instance): { string }
 end
 
 declare class CommandInstance extends Instance
@@ -7608,11 +7608,11 @@ end
 
 declare class Path extends Instance
 	Status: EnumPathStatus
-	function GetWaypoints(self): { any }
 	function CheckOcclusionAsync(self, start: number): number
 	function ComputeAsync(self, start: Vector3, finish: Vector3): nil
 	Blocked: RBXScriptSignal<number>
 	Unblocked: RBXScriptSignal<number>
+	function GetWaypoints(self): { PathWaypoint }
 end
 
 declare class PathfindingLink extends Instance
@@ -9387,23 +9387,17 @@ declare class UserInputService extends Instance
 	TouchEnabled: boolean
 	VREnabled: boolean
 	function GamepadSupports(self, gamepadNum: EnumUserInputType, gamepadKeyCode: EnumKeyCode): boolean
-	function GetConnectedGamepads(self): { any }
 	function GetDeviceAcceleration(self): InputObject
 	function GetDeviceGravity(self): InputObject
 	function GetDeviceRotation(self): (number, CFrame)
 	function GetDeviceType(self): EnumDeviceType
 	function GetFocusedTextBox(self): TextBox
 	function GetGamepadConnected(self, gamepadNum: EnumUserInputType): boolean
-	function GetGamepadState(self, gamepadNum: EnumUserInputType): { any }
-	function GetKeysPressed(self): { any }
 	function GetLastInputType(self): EnumUserInputType
-	function GetMouseButtonsPressed(self): { any }
 	function GetMouseDelta(self): Vector2
 	function GetMouseLocation(self): Vector2
-	function GetNavigationGamepads(self): { any }
 	function GetPlatform(self): EnumPlatform
 	function GetStringForKeyCode(self, keyCode: EnumKeyCode): string
-	function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { any }
 	function GetUserCFrame(self, type: EnumUserCFrame): CFrame
 	function IsGamepadButtonDown(self, gamepadNum: EnumUserInputType, gamepadKeyCode: EnumKeyCode): boolean
 	function IsKeyDown(self, keyCode: EnumKeyCode): boolean
@@ -9439,6 +9433,12 @@ declare class UserInputService extends Instance
 	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
 	WindowFocusReleased: RBXScriptSignal<>
 	WindowFocused: RBXScriptSignal<>
+	function GetConnectedGamepads(self): { EnumUserInputType }
+	function GetGamepadState(self, gamepadNum: EnumUserInputType): { InputObject }
+	function GetKeysPressed(self): { InputObject }
+	function GetMouseButtonsPressed(self): { InputObject }
+	function GetNavigationGamepads(self): { EnumUserInputType }
+	function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { EnumKeyCode }
 end
 
 declare class UserService extends Instance
