@@ -665,9 +665,7 @@ def declareClass(klass: ApiClass):
         out += " extends " + klass["Superclass"]
     out += "\n"
 
-    isGetService = klass["Name"] == "ServiceProvider"
-
-    def filter_member(member: ApiMember):
+    def filterMember(member: ApiMember):
         if (
             not INCLUDE_DEPRECATED_METHODS
             and "Tags" in member
@@ -681,13 +679,13 @@ def declareClass(klass: ApiClass):
             return False
         if (
             member["MemberType"] == "Function"
+            and klass["Name"] == "ServiceProvider"
             and member["Name"] == "GetService"
         ):
             return False
         return True
-        
 
-    def declare_member(member: ApiMember):
+    def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
             return f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
         elif member["MemberType"] == "Function":
@@ -699,20 +697,20 @@ def declareClass(klass: ApiClass):
             return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
         elif member["MemberType"] == "Callback":
             return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
-        
-    member_definitions = map(declare_member, filter(filter_member, klass["Members"]))
 
-    def declare_service(service: str):
+    memberDefinitions = map(declareMember, filter(filterMember, klass["Members"]))
+
+    def declareService(service: str):
         return f'\tfunction GetService(self, service: "{service}"): {service}\n'
 
     # Special case ServiceProvider:GetService()
-    if isGetService:
-        member_definitions = chain(member_definitions, map(declare_service, SERVICES))
+    if klass["Name"] == "ServiceProvider":
+        memberDefinitions = chain(memberDefinitions, map(declareService, SERVICES))
 
     if klass["Name"] in EXTRA_MEMBERS:
-        member_definitions = chain(member_definitions, map(lambda member: f'\t{member}\n', EXTRA_MEMBERS[klass["Name"]]))
+        memberDefinitions = chain(memberDefinitions, map(lambda member: f'\t{member}\n', EXTRA_MEMBERS[klass["Name"]]))
 
-    out += ''.join(sorted(member_definitions))
+    out += ''.join(sorted(memberDefinitions))
 
     out += "end"
 
