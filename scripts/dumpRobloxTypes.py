@@ -143,6 +143,7 @@ IGNORED_MEMBERS = {
         "GetAccessories",
     ],
     "Player": ["Character"],
+    "InstanceAdornment": ["Adornee"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -290,6 +291,7 @@ EXTRA_MEMBERS = {
         "function GetAccessories(self): { Accessory }",
     ],
     "Player": ["Character: Model?"],
+    "InstanceAdornment": ["Adornee: Instance?"],
 }
 
 # Hardcoded types

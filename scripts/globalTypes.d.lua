@@ -6150,7 +6150,7 @@ end
 
 
 declare class InstanceAdornment extends GuiBase3d
-	Adornee: Instance
+	Adornee: Instance?
 end
 
 declare class SelectionBox extends InstanceAdornment
