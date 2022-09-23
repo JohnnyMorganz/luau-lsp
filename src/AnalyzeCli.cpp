@@ -58,7 +58,8 @@ static void reportError(const Luau::Frontend& frontend, ReportFormat format, con
     else if (FFlag::LuauTypeMismatchModuleNameResolution)
         report(format, humanReadableName.c_str(), error.location, "TypeError",
             Luau::toString(error, Luau::TypeErrorToStringOptions{frontend.fileResolver}).c_str());
-    report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
+    else
+        report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
 }
 
 static void reportWarning(ReportFormat format, const char* name, const Luau::LintWarning& warning)
