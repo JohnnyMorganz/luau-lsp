@@ -16,7 +16,7 @@ std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
         {
             return path;
         }
-        else if (path.extension() == ".json" && isScript())
+        else if (path.extension() == ".json" && isScript() && !endsWith(path.filename().generic_string(), ".meta.json"))
         {
             return path;
         }
