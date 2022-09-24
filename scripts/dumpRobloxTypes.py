@@ -144,6 +144,14 @@ IGNORED_MEMBERS = {
     ],
     "Player": ["Character"],
     "InstanceAdornment": ["Adornee"],
+    "BasePart": [
+        "GetConnectedParts",
+        "GetJoints",
+        "GetNetworkOwner",
+        "GetTouchingParts",
+        "SubtractAsync",
+        "UnionAsync",
+    ]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -292,6 +300,14 @@ EXTRA_MEMBERS = {
     ],
     "Player": ["Character: Model?"],
     "InstanceAdornment": ["Adornee: Instance?"],
+    "BasePart": [
+        "function GetConnectedParts(self, recursive: boolean?): { BasePart }",
+        "function GetJoints(self): { BasePart }",
+        "function GetNetworkOwner(self): Player?",
+        "function GetTouchingParts(self): { BasePart }",
+        "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
+        "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
+    ]
 }
 
 # Hardcoded types
