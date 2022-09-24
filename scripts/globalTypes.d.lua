@@ -4246,13 +4246,8 @@ declare class Instance
 	function ClearAllChildren(self): nil
 	function Clone(self): Instance
 	function Destroy(self): nil
-	function FindFirstAncestorOfClass(self, className: string): Instance
-	function FindFirstAncestorWhichIsA(self, className: string): Instance
-	function FindFirstChildOfClass(self, className: string): Instance
-	function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance
 	function GetAttribute(self, attribute: string): any
 	function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal
-	function GetAttributes(self): { [any]: any }
 	function GetChildren(self): { Instance }
 	function GetDebugId(self, scopeLength: number?): string
 	function GetDescendants(self): { Instance }
@@ -4262,7 +4257,6 @@ declare class Instance
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
 	function SetAttribute(self, attribute: string, value: any): nil
-	AncestryChanged: RBXScriptSignal<Instance, Instance>
 	AttributeChanged: RBXScriptSignal<string>
 	Changed: RBXScriptSignal<string>
 	ChildAdded: RBXScriptSignal<Instance>
@@ -4271,12 +4265,18 @@ declare class Instance
 	DescendantRemoving: RBXScriptSignal<Instance>
 	Destroying: RBXScriptSignal<>
 	Parent: Instance?
+	AncestryChanged: RBXScriptSignal<Instance, Instance?>
 	function FindFirstAncestor(self, name: string): Instance?
+	function FindFirstAncestorOfClass(self, className: string): Instance?
+	function FindFirstAncestorWhichIsA(self, className: string): Instance?
 	function FindFirstChild(self, name: string, recursive: boolean?): Instance?
+	function FindFirstChildOfClass(self, className: string): Instance?
+	function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
 	function FindFirstDescendant(self, name: string): Instance?
 	function GetActor(self): Actor?
 	function WaitForChild(self, name: string): Instance
 	function WaitForChild(self, name: string, timeout: number): Instance?
+	function GetAttributes(self): { [string]: any }
 end
 
 declare class Accoutrement extends Instance
