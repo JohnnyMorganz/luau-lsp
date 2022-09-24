@@ -7345,23 +7345,23 @@ declare class BasePart extends PVInstance
 	function BreakJoints(self): nil
 	function CanCollideWith(self, part: BasePart): boolean
 	function CanSetNetworkOwnership(self): (boolean, string)
-	function GetConnectedParts(self, recursive: boolean?): { Instance }
-	function GetJoints(self): { Instance }
 	function GetMass(self): number
-	function GetNetworkOwner(self): Player
 	function GetNetworkOwnershipAuto(self): boolean
 	function GetRootPart(self): BasePart
-	function GetTouchingParts(self): { Instance }
 	function GetVelocityAtPosition(self, position: Vector3): Vector3
 	function IsGrounded(self): boolean
 	function MakeJoints(self): nil
 	function Resize(self, normalId: EnumNormalId, deltaAmount: number): boolean
 	function SetNetworkOwner(self, playerInstance: Player?): nil
 	function SetNetworkOwnershipAuto(self): nil
-	function SubtractAsync(self, parts: { Instance }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation
-	function UnionAsync(self, parts: { Instance }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation
 	TouchEnded: RBXScriptSignal<BasePart>
 	Touched: RBXScriptSignal<BasePart>
+	function GetConnectedParts(self, recursive: boolean?): { BasePart }
+	function GetJoints(self): { BasePart }
+	function GetNetworkOwner(self): Player?
+	function GetTouchingParts(self): { BasePart }
+	function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation
+	function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation
 end
 
 declare class CornerWedgePart extends BasePart
