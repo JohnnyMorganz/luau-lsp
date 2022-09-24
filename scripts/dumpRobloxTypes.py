@@ -158,7 +158,9 @@ IGNORED_MEMBERS = {
         "GetTouchingParts",
         "SubtractAsync",
         "UnionAsync",
-    ]
+    ],
+    "Team": ["GetPlayers"],
+    "Teams": ["GetTeams"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -320,7 +322,13 @@ EXTRA_MEMBERS = {
         "function GetTouchingParts(self): { BasePart }",
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
         "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
-    ]
+    ],
+    "Team": [
+        "function GetPlayers(self): { Player }"
+    ],
+    "Teams": [
+        "function GetTeams(self): { Team }"
+    ],
 }
 
 # Hardcoded types

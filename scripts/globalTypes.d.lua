@@ -8954,7 +8954,7 @@ declare class Team extends Instance
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
 	TeamColor: BrickColor
-	function GetPlayers(self): { Instance }
+	function GetPlayers(self): { Player }
 end
 
 declare class TeamCreateService extends Instance
@@ -8962,7 +8962,7 @@ declare class TeamCreateService extends Instance
 end
 
 declare class Teams extends Instance
-	function GetTeams(self): { Instance }
+	function GetTeams(self): { Team }
 end
 
 declare class TeleportAsyncResult extends Instance
