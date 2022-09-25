@@ -37,8 +37,26 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstTypeReference* ref) override
     {
-        tokens.emplace_back(SemanticToken{ref->location.begin, ref->location.end, lsp::SemanticTokenTypes::Type, lsp::SemanticTokenModifiers::None});
-        return false;
+        // HACK: The location information provided only gives location for the whole reference
+        // but we do not want to highlight punctuation inside of it (Module.Type<Param> should not highlight . < >)
+        // So we use the start position and consider the end positions separately.
+        // Here, we make the assumption that there is no comments or newlines present in between the punctuation
+
+        auto startPosition = ref->location.begin;
+        // Highlight prefix if exists
+        if (ref->prefix)
+        {
+            Luau::Position endPosition{startPosition.line, startPosition.column + strlen(ref->prefix->value)};
+            tokens.emplace_back(SemanticToken{startPosition, endPosition, lsp::SemanticTokenTypes::Namespace, lsp::SemanticTokenModifiers::None});
+            startPosition = {endPosition.line, endPosition.column + 1};
+        }
+
+        // Highlight name
+        Luau::Position endPosition{startPosition.line, startPosition.column + strlen(ref->name.value)};
+        tokens.emplace_back(SemanticToken{startPosition, endPosition, lsp::SemanticTokenTypes::Type, lsp::SemanticTokenModifiers::None});
+
+        // Do not highlight parameters as they will be visited later
+        return true;
     }
 
     // bool visit(Luau::AstStatLocal* local) override
