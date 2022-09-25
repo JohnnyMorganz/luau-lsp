@@ -15,6 +15,20 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
     {
         return lsp::SemanticTokenTypes::Function;
     }
+    else if (auto intersection = Luau::get<Luau::IntersectionTypeVar>(followedTy))
+    {
+        if (Luau::isOverloadedFunction(followedTy))
+        {
+            return lsp::SemanticTokenTypes::Function;
+        }
+    }
+    else if (auto ttv = Luau::get<Luau::TableTypeVar>(followedTy))
+    {
+        if (ttv->name && ttv->name == "RBXScriptSignal")
+        {
+            return lsp::SemanticTokenTypes::Event;
+        }
+    }
 
     return default;
 }
@@ -23,7 +37,6 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
     std::vector<SemanticToken> tokens;
-    std::unordered_map<Luau::AstLocal*, lsp::SemanticTokenTypes> localTypes;
 
     explicit SemanticTokensVisitor(Luau::ModulePtr module)
         : module(module)
@@ -59,15 +72,25 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         return true;
     }
 
-    // bool visit(Luau::AstStatLocal* local) override
-    // {
-    //     for (size_t i = 0; i < local->vars.size; ++i)
-    //     {
-    //         createLocalSymbol(local->vars.data[i]);
-    //         // TODO: if the value assigned is a table, should we include its properties?
-    //     }
-    //     return false;
-    // }
+    bool visit(Luau::AstStatLocal* local) override
+    {
+        auto scope = Luau::findScopeAtPosition(*module, local->location.begin);
+        if (!scope)
+            return true;
+
+        for (auto var : local->vars)
+        {
+            auto ty = scope->lookup(var);
+            if (ty)
+            {
+                auto followedTy = Luau::follow(*ty);
+                auto type = inferTokenType(&followedTy, lsp::SemanticTokenTypes::Variable);
+                tokens.emplace_back(SemanticToken{var->location.begin, var->location.end, type, lsp::SemanticTokenModifiers::None});
+            }
+        }
+
+        return true;
+    }
 
     bool visit(Luau::AstStatFunction* func) override
     {
@@ -89,7 +112,6 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         {
             tokens.emplace_back(
                 SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::Declaration});
-            localTypes.emplace(arg, lsp::SemanticTokenTypes::Parameter);
         }
         return true;
     }
@@ -97,63 +119,46 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     bool visit(Luau::AstExprLocal* local) override
     {
         auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Variable);
-        if (contains(localTypes, local->local))
-            type = localTypes.at(local->local);
-
         tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
-        return false;
+        return true;
     }
 
-    // bool visit(Luau::AstStatTypeAlias* alias) override
+    // bool visit(Luau::AstExprGlobal* local) override
     // {
-    //     lsp::DocumentSymbol symbol;
-    //     symbol.name = alias->name.value;
-    //     symbol.kind = lsp::SymbolKind::Interface;
-    //     symbol.range = {convertPosition(alias->location.begin), convertPosition(alias->location.end)};
-    //     symbol.selectionRange = symbol.range;
-    //     addSymbol(symbol);
-    //     return false;
+    //     auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Namespace);
+    //     tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
+    //     return true;
     // }
 
-    // void visitFunction(Luau::AstExprFunction* func, lsp::DocumentSymbol& symbol)
-    // {
-    //     auto oldParent = parent;
-    //     parent = &symbol;
+    bool visit(Luau::AstExprIndexName* index) override
+    {
+        auto parentTy = module->astTypes.find(index->expr);
+        if (!parentTy)
+            return true;
 
-    //     // Create parameter symbols + build function detail
-    //     std::string detail = "function (";
-    //     bool comma = false;
-    //     for (auto* arg : func->args)
-    //     {
-    //         createLocalSymbol(arg);
-    //         if (comma)
-    //             detail += ", ";
-    //         detail += arg->name.value;
-    //         comma = true;
-    //     }
-    //     if (func->vararg)
-    //     {
-    //         lsp::DocumentSymbol symbol;
-    //         symbol.name = "...";
-    //         symbol.kind = lsp::SymbolKind::Variable;
-    //         symbol.range = {convertPosition(func->varargLocation.begin), convertPosition(func->varargLocation.end)};
-    //         addSymbol(symbol);
+        auto ty = Luau::follow(*parentTy);
+        if (auto prop = lookupProp(ty, std::string(index->index.value)))
+        {
+            auto type = inferTokenType(&prop->type, lsp::SemanticTokenTypes::Property);
+            tokens.emplace_back(SemanticToken{index->indexLocation.begin, index->indexLocation.end, type, lsp::SemanticTokenModifiers::None});
+        }
 
-    //         if (comma)
-    //             detail += ", ";
-    //         detail += "...";
-    //     }
-    //     detail += ")";
-    //     symbol.detail = detail;
+        return true;
+    }
 
-    //     // Create symbols for body
-    //     for (Luau::AstStat* stat : func->body->body)
-    //     {
-    //         stat->visit(this);
-    //     }
+    bool visit(Luau::AstExprTable* tbl) override
+    {
+        for (auto item : tbl->items)
+        {
+            if (item.kind == Luau::AstExprTable::Item::Kind::Record)
+            {
+                auto type = inferTokenType(module->astTypes.find(item.value), lsp::SemanticTokenTypes::Property);
+                tokens.emplace_back(SemanticToken{item.key->location.begin, item.key->location.end, type, lsp::SemanticTokenModifiers::None});
+            }
+        }
 
-    //     parent = oldParent;
-    // }
+        return true;
+    }
 
     bool visit(Luau::AstStatBlock* block) override
     {
