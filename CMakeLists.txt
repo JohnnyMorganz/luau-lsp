@@ -14,6 +14,7 @@ set(SOURCES
     src/DocumentationParser.cpp
     src/LuauExt.cpp
     src/Utils.cpp
+    src/StudioPlugin.cpp
     src/operations/Diagnostics.cpp
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
@@ -23,6 +24,7 @@ set(SOURCES
     src/operations/SignatureHelp.cpp
     src/operations/References.cpp
     src/operations/Rename.cpp
+    src/operations/InlayHints.cpp
     src/operations/SemanticTokens.cpp
 )
 add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
@@ -47,6 +49,7 @@ add_executable(luau-lsp-tests
     tests/Utils.test.cpp
     tests/WorkspaceFileResolver.test.cpp
     tests/SemanticTokens.test.cpp
+    tests/Sourcemap.test.cpp
     ${SOURCES}
 )
 target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)

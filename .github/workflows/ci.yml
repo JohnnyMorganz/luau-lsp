@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -55,6 +55,31 @@ jobs:
 
       - name: Run Tests
         run: ${{ matrix.test-path }}
+
+  types_smoketest:
+    name: Types Smoketest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Build Tool
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build . --target luau-lsp -j 3
+
+      - name: Test types
+        run: |
+          touch test.lua
+          build/luau-lsp analyze --defs=scripts/globalTypes.d.lua test.lua
+
+      - name: Test Remodel types
+        run: |
+          touch remodel_test.lua
+          build/luau-lsp analyze --defs=scripts/remodel.d.lua test.lua
 
   lint_extension:
     name: Lint Extension

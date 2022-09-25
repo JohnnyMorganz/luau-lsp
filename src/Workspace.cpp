@@ -2,22 +2,6 @@
 #include <limits.h>
 #include "LSP/Workspace.hpp"
 
-/// Checks whether a provided file is part of the workspace
-bool WorkspaceFolder::isInWorkspace(const lsp::DocumentUri& file)
-{
-    if (file == rootUri)
-        return true;
-
-    // Check if the root uri is a prefix of the file
-    auto prefixStr = rootUri.toString();
-    auto checkStr = file.toString();
-    if (checkStr.compare(0, prefixStr.size(), prefixStr) == 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
     auto moduleName = fileResolver.getModuleName(uri);
@@ -59,6 +43,7 @@ void WorkspaceFolder::updateTextDocument(
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
+    auto config = client->getConfiguration(rootUri);
     auto moduleName = fileResolver.getModuleName(uri);
     fileResolver.managedFiles.erase(moduleName);
 
@@ -68,6 +53,23 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 
     // Mark the module as dirty as we no longer track its changes
     frontend.markDirty(moduleName);
+
+    // Refresh workspace diagnostics to clear diagnostics on ignored files
+    if (!config.diagnostics.workspace || isIgnoredFile(uri.fsPath()))
+    {
+        if (client->workspaceDiagnosticsToken)
+        {
+            lsp::WorkspaceDocumentDiagnosticReport documentReport;
+            documentReport.uri = uri;
+            documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
+            lsp::WorkspaceDiagnosticReportPartialResult report{{documentReport}};
+            client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
+        }
+        else
+        {
+            client->refreshWorkspaceDiagnostics();
+        }
+    }
 }
 
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
@@ -116,8 +118,10 @@ bool WorkspaceFolder::updateSourceMap()
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
 
-        types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ false);
-        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
+        // Recreate instance types
+        instanceTypes.clear();
+        types::registerInstanceTypes(frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ false);
+        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
         // Signal diagnostics refresh
         client->terminateWorkspaceDiagnostics();
@@ -177,6 +181,7 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    isConfigured = true;
     if (configuration.sourcemap.enabled)
     {
         if (!isNullWorkspace() && !updateSourceMap())

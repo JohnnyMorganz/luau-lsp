@@ -58,6 +58,9 @@ private:
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
 
+    void onStudioPluginFullChange(const PluginNode& dataModel);
+    void onStudioPluginClear();
+
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
 
@@ -68,6 +71,7 @@ private:
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
     std::optional<std::vector<size_t>> semanticTokens(const lsp::SemanticTokensParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);

@@ -2,6 +2,7 @@
 #include <optional>
 #include "Luau/Frontend.h"
 #include "Luau/Scope.h"
+#include "Luau/ToString.h"
 #include "LSP/Protocol.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
@@ -10,8 +11,8 @@ namespace types
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className);
 std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
-Luau::TypeId makeLazyInstanceType(Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node,
-    std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass = std::nullopt);
+Luau::TypeId makeLazyInstanceType(const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope,
+    const SourceNodePtr& node, std::optional<Luau::TypeId> parent, std::optional<Luau::TypeId> baseClass = std::nullopt);
 
 // Magic function for `Instance:IsA("ClassName")` predicate
 std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
@@ -25,15 +26,24 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
 std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
     Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> exprResult);
 
-void registerInstanceTypes(Luau::TypeChecker& typeChecker, const WorkspaceFileResolver& fileResolver, bool expressiveTypes = true);
+void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
 Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(
-    Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr, std::optional<Luau::ScopePtr> scope = std::nullopt);
+struct ToStringNamedFunctionOpts
+{
+    bool hideTableKind = false;
+    bool multiline = false;
+};
+
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+    std::optional<Luau::ScopePtr> scope = std::nullopt, ToStringNamedFunctionOpts opts = {});
+
+std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options = {});
+Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options = {});
 
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);

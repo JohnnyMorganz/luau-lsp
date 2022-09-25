@@ -47,7 +47,7 @@ const handleChildProcessPromise = (
   // Resolve with stdout or reject with stderr
   // depending on the exist code and/or data
   cp.on("close", (code) => {
-    if (code === 0 && stderr.length === 0) {
+    if (code === 0) {
       resolve(stdout);
     } else {
       reject({

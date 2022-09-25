@@ -21,13 +21,32 @@ using ClientPtr = std::shared_ptr<Client>;
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
 {
+    WorkspaceFolderPtr bestWorkspace = nullptr;
+    size_t length = 0;
+    auto checkStr = file.toString();
+
+
     for (auto& workspace : workspaceFolders)
     {
-        if (workspace->isInWorkspace(file))
+        if (file == workspace->rootUri)
+            return workspace;
+
+        // Check if the root uri is a prefix of the file
+        auto prefixStr = workspace->rootUri.toString();
+        auto size = prefixStr.size();
+        if (size < length)
+            continue;
+
+        if (checkStr.compare(0, size, prefixStr) == 0)
         {
-            return workspace; // TODO: should we return early here? maybe a better match comes along?
+            bestWorkspace = workspace;
+            length = size;
         }
     }
+
+    if (bestWorkspace)
+        return bestWorkspace;
+
     client->sendTrace("cannot find workspace for " + file.toString());
     return nullWorkspace;
 }
@@ -61,6 +80,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentLinkProvider = {false};
     // Rename Provider
     capabilities.renameProvider = true;
+    // Inlay Hint Provider
+    capabilities.inlayHintProvider = true;
     // Diagnostics Provider
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Semantic Tokens Provider
@@ -138,6 +159,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     {
         response = semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
     }
+    else if (method == "textDocument/inlayHint")
+    {
+        response = inlayHint(REQUIRED_PARAMS(params, "textDocument/inlayHint"));
+    }
     else if (method == "textDocument/diagnostic")
     {
         response = documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
@@ -208,6 +233,14 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     else if (method == "workspace/didChangeWatchedFiles")
     {
         onDidChangeWatchedFiles(REQUIRED_PARAMS(params, "workspace/didChangeWatchedFiles"));
+    }
+    else if (method == "$/plugin/full")
+    {
+        onStudioPluginFullChange(REQUIRED_PARAMS(params, "$/plugin/full"));
+    }
+    else if (method == "$/plugin/clear")
+    {
+        onStudioPluginClear();
     }
     else
     {

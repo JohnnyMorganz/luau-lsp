@@ -29,4 +29,4 @@ jobs:
             - This pull request is **auto-generated**
           branch: auto/update-dump
           commit-message: Update types Dump
-          base: master
+          base: main

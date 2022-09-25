@@ -2,7 +2,9 @@
 #include <optional>
 #include <filesystem>
 #include <Luau/FileResolver.h>
+#include "Luau/TypeVar.h"
 #include "nlohmann/json.hpp"
+#include "LSP/PluginDataModel.hpp"
 using json = nlohmann::json;
 
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
@@ -15,6 +17,7 @@ struct SourceNode
     std::vector<std::filesystem::path> filePaths;
     std::vector<SourceNodePtr> children;
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    Luau::TypeId ty;         // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
     bool isScript();
     std::optional<std::filesystem::path> getScriptFilePath();
@@ -22,6 +25,9 @@ struct SourceNode
     std::optional<SourceNodePtr> findChild(const std::string& name);
     // O(n) search for ancestor of name
     std::optional<SourceNodePtr> findAncestor(const std::string& name);
+
+    // Studio Plugin
+    void mutateWithPluginInfo(const PluginNodePtr pluginInfo);
 };
 
 static void from_json(const json& j, SourceNode& p)

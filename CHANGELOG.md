@@ -6,14 +6,107 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `.meta.json` file being picked as a script's file path instead of the actual Luau file
+- Fixed diagnostics not clearing for files when workspace diagnostics is not enabled
+
+## [1.10.1] - 2022-09-24
+
+### Changed
+
+- Further improvements to instance type creation
+- Sync to upstream Luau 0.546
+
+### Fixed
+
+- Children of `game` will now correctly show in autocomplete
+- Fix autocomplete of non-identifier properties: `Packages._Index.roblox_roact-rodux@0.2.1` -> `Packages._Index["roblox_roact-rodux@0.2.1"]`
+- Fixed mapping of requires from `game.Players.LocalPlayer.PlayerScripts` to `game.StarterPlayer.StarterPlayerScripts` (and PlayerGui + StarterGear)
+- Fixed type errors being reported twice in `luau-lsp analyze`
+
+## [1.10.0] - 2022-09-17
+
+### Added
+
+- Introduced a Studio plugin to infer instance trees for partially managed projects. This works alongside Rojo sourcemaps, where instance information retrieved from Studio is merged into the sourcemap. Starting the plugin can be configured using `luau-lsp.plugin.enabled`. Install the plugin from the [Plugin Marketplace](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)
+
+### Changed
+
+- Sync to upstream Luau 0.545
+- Inlay hints for variables will no longer show if the type hint string is the same as the variable name (i.e., `local tbl = {}`, the hint `: tbl` will no longer show) ([#137](https://github.com/JohnnyMorganz/luau-lsp/issues/137))
+- Restructured instance types system to reduce memory and type creation footprint
+
+### Fixed
+
+- Fixed false document diagnostics showing up for opened tabs when VSCode is first started ([#132](https://github.com/JohnnyMorganz/luau-lsp/issues/132))
+
+## [1.9.2] - 2022-09-06
+
+### Changed
+
+- Sync to upstream Luau 0.543
+
+### Fixed
+
+- Fixed diagnostics for ignored files not clearing when workspace diagnostics is enabled ([#77](https://github.com/JohnnyMorganz/luau-lsp/issues/77))
+- Fixed `luau-lsp analyze` would not exit with non-zero error code when definitions failed to load
+- Fixed `luau-lsp analyze` would not exit with non-zero error code when file path provided was not found
+- Fixed crash when Suggest Imports is enabled and you have a local variable defined with no assigned value (e.g. `local name`)
+
+## [1.9.1] - 2022-08-29
+
+### Changed
+
+- Sync to upstream Luau 0.542
+
+### Fixed
+
+- New service imports which come first alphabetically will group with existing imports rather than going at the beginning of the file
+- Fixed warning messages showing up as notifications when generating Rojo Sourcemap even if it works successfully
+
+## [1.9.0] - 2022-08-16
+
+### Added
+
+- Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
+  - `luau-lsp.completion.enabled`: Autocomplete
+  - `luau-lsp.hover.enabled`: Hover
+  - `luau-lsp.signatureHelp.enabled`: Signature Help
+
+- Added configuration option `luau-lsp.hover.showTableKinds` (default: off) to indicate whether kinds (`{+ ... +}`, `{| ... |}`) are shown in hover information
+- Added configuration option `luau-lsp.hover.multilineFunctionDefinitions` (default: off) to spread function definitions in hover panel across multiple lines
+- Added configuration option `luau-lsp.hover.strictDatamodelTypes` (default: on) to use strict DataModel type information in hover panel (equivalent to autocomplete). When disabled, the same type information that the diagnostic type checker uses is displayed
+- Added support for automatic service importing. When using a service which has not yet been defined, it will be added (alphabetically) to the top of the file. Config setting: `luau-lsp.completion.suggestImports`
+
+### Changed
+
+- Sync to upstream Luau 0.540
+
+### Fixed
+
+- The types of `:FindFirstChild`, `:FindFirstAncestor` and `:FindFirstDescendant` have been changed to return `Instance?`
+- `:GetActor` is fixed to return `Actor?`
+- Fixed bug when using `--definitions=` when calling `luau-lsp analyze`
+
+## [1.8.1] - 2022-08-01
+
+### Fixed
+
+- Fixed `self` being showed as the first inlay hint incorrectly in parameter names and types
+
+## [1.8.0] - 2022-07-30
+
 ### Added
 
 - Added support for cross-file go to definition of functions
 - Added support for go-to definition of properties defined on a metatable with `__index`
+- Added support for inlay hints. It can be enabled by configuring `luau-lsp.inlayHints.parameterNames`, `luau-lsp.inlayHints.parameterTypes`, `luau-lsp.inlayHints.variableTypes`, `luau-lsp.inlayHints.functionReturnTypes`.
 
 ### Changed
 
-- Sync to upstream Luau 0.537
+- Sync to upstream Luau 0.538
 - Improved completion detail function param information with better representative types, and include a trailing type pack if present
 
 ### Fixed
@@ -21,6 +114,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed crash when hovering over local in incomplete syntax tree
 - Fixed language server not working for newly created files not yet stored on disk
 - Luau LSP will now activate if you run an LSP command
+- Fixed finding the incorrect workspace folder to analyze with in a multi-workspace environment
 
 ## [1.7.1] - 2022-07-17
 

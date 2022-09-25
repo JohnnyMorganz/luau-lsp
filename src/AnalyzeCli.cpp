@@ -58,7 +58,8 @@ static void reportError(const Luau::Frontend& frontend, ReportFormat format, con
     else if (FFlag::LuauTypeMismatchModuleNameResolution)
         report(format, humanReadableName.c_str(), error.location, "TypeError",
             Luau::toString(error, Luau::TypeErrorToStringOptions{frontend.fileResolver}).c_str());
-    report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
+    else
+        report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
 }
 
 static void reportWarning(ReportFormat format, const char* name, const Luau::LintWarning& warning)
@@ -129,7 +130,7 @@ int startAnalyze(int argc, char** argv)
             else if (strncmp(argv[i], "--sourcemap=", 12) == 0)
                 sourcemapPath = std::string(argv[i] + 12);
             else if (strncmp(argv[i], "--definitions=", 14) == 0)
-                definitionsPaths.push_back(std::string(argv[i] + 17));
+                definitionsPaths.push_back(std::string(argv[i] + 14));
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));
@@ -140,7 +141,7 @@ int startAnalyze(int argc, char** argv)
             if (path != "-" && !std::filesystem::exists(path))
             {
                 std::cerr << "Cannot get " << path << ": path does not exist\n";
-                continue;
+                return 1;
             }
 
 
@@ -199,7 +200,6 @@ int startAnalyze(int argc, char** argv)
         if (auto sourceMapContents = readFile(*sourcemapPath))
         {
             fileResolver.updateSourceMap(sourceMapContents.value());
-            types::registerInstanceTypes(frontend.typeChecker, fileResolver);
         }
     }
 
@@ -232,10 +232,11 @@ int startAnalyze(int argc, char** argv)
                         report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "TypeError",
                             Luau::toString(error).c_str());
             }
+            return 1;
         }
     }
 
-    types::registerInstanceTypes(frontend.typeChecker, fileResolver);
+    types::registerInstanceTypes(frontend.typeChecker, frontend.typeChecker.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
     Luau::freeze(frontend.typeChecker.globalTypes);
 

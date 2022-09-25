@@ -26,6 +26,8 @@ public:
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
+    bool isConfigured = false;
+    Luau::TypeArena instanceTypes;
 
 public:
     WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
@@ -44,9 +46,6 @@ public:
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
-    /// Checks whether a provided file is part of the workspace
-    bool isInWorkspace(const lsp::DocumentUri& file);
-
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
@@ -62,6 +61,8 @@ public:
 
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
+    void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
+        std::vector<lsp::CompletionItem>& result);
 
 public:
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
@@ -78,6 +79,7 @@ public:
 
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<size_t>> semanticTokens(const lsp::SemanticTokensParams& params);

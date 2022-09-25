@@ -133,6 +133,18 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     return Luau::SourceCode{*source, sourceType};
 }
 
+/// Modify the context so that game/Players/LocalPlayer items point to the correct place
+const std::string mapContext(const std::string& context)
+{
+    if (context == "game/Players/LocalPlayer/PlayerScripts")
+        return "game/StarterPlayer/StarterPlayerScripts";
+    else if (context == "game/Players/LocalPlayer/PlayerGui")
+        return "game/StarterGui";
+    else if (context == "game/Players/LocalPlayer/StarterGear")
+        return "game/StarterPack";
+    return context;
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
@@ -172,22 +184,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
                     return Luau::ModuleInfo{parentPath.value(), context->optional};
             }
 
-            // Map overrides for base name
-            auto baseName = context->name;
-            if (context->name == "game/Players/LocalPlayer/PlayerScripts")
-            {
-                baseName = "game/StarterPlayer/StarterPlayerScripts";
-            }
-            else if (context->name == "game/Players/LocalPlayer/PlayerGui")
-            {
-                baseName = "game/StarterGui";
-            }
-            else if (context->name == "game/Players/LocalPlayer/StarterGear")
-            {
-                baseName = "game/StarterPack";
-            }
-
-            return Luau::ModuleInfo{baseName + '/' + i->index.value, context->optional};
+            return Luau::ModuleInfo{mapContext(context->name) + '/' + i->index.value, context->optional};
         }
     }
     else if (Luau::AstExprIndexExpr* i_expr = node->as<Luau::AstExprIndexExpr>())
@@ -195,7 +192,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         if (Luau::AstExprConstantString* index = i_expr->index->as<Luau::AstExprConstantString>())
         {
             if (context)
-                return Luau::ModuleInfo{context->name + '/' + std::string(index->value.data, index->value.size), context->optional};
+                return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
         }
     }
     else if (Luau::AstExprCall* call = node->as<Luau::AstExprCall>(); call && call->self && call->args.size >= 1 && context)
@@ -211,7 +208,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             else if (func == "WaitForChild" || func == "FindFirstChild")
             {
                 if (context)
-                    return Luau::ModuleInfo{context->name + '/' + std::string(index->value.data, index->value.size), context->optional};
+                    return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
             }
             else if (func == "FindFirstAncestor")
             {
@@ -288,7 +285,7 @@ void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std
     if (auto realPath = node->getScriptFilePath())
     {
         std::error_code ec;
-        auto canonicalName = std::filesystem::weakly_canonical(*realPath, ec);
+        auto canonicalName = std::filesystem::weakly_canonical(rootUri.fsPath() / *realPath, ec);
         if (ec.value() != 0)
             canonicalName = *realPath;
         realPathsToSourceNodes[canonicalName.generic_string()] = node;
@@ -310,6 +307,19 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
+
+        // Mutate with plugin info
+        if (pluginInfo)
+        {
+            if (rootSourceNode->className == "DataModel")
+            {
+                rootSourceNode->mutateWithPluginInfo(pluginInfo);
+            }
+            else
+            {
+                std::cerr << "Attempted to update plugin information for a non-DM instance" << std::endl;
+            }
+        }
 
         // Write paths
         std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";

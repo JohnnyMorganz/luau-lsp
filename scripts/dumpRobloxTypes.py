@@ -1,5 +1,6 @@
 # Script to pull in API Dump and export it into a definition file
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
+from itertools import chain
 from typing import List, Literal, Optional, Union, TypedDict
 from collections import defaultdict
 import requests
@@ -26,8 +27,8 @@ OVERRIDE_DEPRECATED_REMOVAL = [
 TYPE_INDEX = {
     "Tuple": "any",
     "Variant": "any",
-    "Function": "<A..., R...>(A...) -> R...",
-    "function": "<A..., R...>(A...) -> R...",
+    "Function": "((...any) -> ...any)",
+    "function": "((...any) -> ...any)",
     "bool": "boolean",
     "int": "number",
     "int64": "number",
@@ -45,8 +46,9 @@ TYPE_INDEX = {
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
     "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
-    "Enum", # redefined explicitly
-    "EnumItem", # redefined explicitly
+    "Enum",  # redefined explicitly
+    "EnumItem",  # redefined explicitly
+    "GlobalSettings",  # redefined explicitly
 ]
 
 # These classes are deferred to the very end of the dump, so that they have access to all the types
@@ -56,13 +58,27 @@ DEFERRED_CLASSES: List[str] = [
     "DataModel",
     "GenericSettings",
     "AnalysticsSettings",
-    "GlobalSettings",
     "UserSettings",
+    # Plugin is deferred after its items are declared
+    "Plugin",
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
-    "Instance": ["Parent"],
+    "Instance": [
+        "Parent",
+        "FindFirstChild",
+        "FindFirstChildOfClass",
+        "FindFirstChildWhichIsA",
+        "FindFirstAncestor",
+        "FindFirstAncestorOfClass",
+        "FindFirstAncestorWhichIsA",
+        "FindFirstDescendant",
+        "GetActor",
+        "WaitForChild",
+        "GetAttributes",
+        "AncestryChanged",
+    ],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
         "FireAllClients",
@@ -87,6 +103,74 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "WorldRoot": [
+        "Raycast",
+        "ArePartsTouchingOthers",
+        "BulkMoveTo",
+        "GetPartBoundsInBox",
+        "GetPartBoundsInRadius",
+        "GetPartsInPart",
+    ],
+    "HttpService": ["RequestAsync"],
+    "HumanoidDescription": [
+        "GetAccessories",
+        "SetAccessories",
+        "GetEmotes",
+        "SetEmotes",
+        "GetEquippedEmotes",
+        "SetEquippedEmotes",
+    ],
+    "TeleportService": [
+        "GetPlayerPlaceInstanceAsync",
+        "TeleportAsync",
+        "TeleportPartyAsync",
+        "TeleportToPrivateServer",
+        "ReserveServer",
+        "LocalPlayerArrivedFromTeleport",
+        "TeleportInitFailed",
+    ],
+    "UserService": {"GetUserInfosByUserIdsAsync"},
+    "Studio": {"Theme"},
+    "BasePlayerGui": [
+        "GetGuiObjectsAtPosition",
+        "GetGuiObjectsInCircle",
+    ],
+    "Path": [
+        "GetWaypoints",
+    ],
+    "CollectionService": [
+        "GetAllTags",
+        "GetTags",
+    ],
+    "UserInputService": [
+        "GetConnectedGamepads",
+        "GetGamepadState",
+        "GetKeysPressed",
+        "GetMouseButtonsPressed",
+        "GetNavigationGamepads",
+        "GetSupportedGamepadKeyCodes",
+    ],
+    "Humanoid": [
+        "RootPart",
+        "SeatPart",
+        "WalkToPart",
+        "GetAccessories",
+    ],
+    "Player": ["Character"],
+    "InstanceAdornment": ["Adornee"],
+    "BasePart": [
+        "GetConnectedParts",
+        "GetJoints",
+        "GetNetworkOwner",
+        "GetTouchingParts",
+        "SubtractAsync",
+        "UnionAsync",
+    ],
+    "Team": ["GetPlayers"],
+    "Camera": [
+        "CameraSubject",
+        "GetPartsObscuringTarget",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -136,9 +220,24 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: Vector3): Vector3",
     ],
     "UserSettings": [
-        'function GetService(self, service: "UserGameSettings"): UserGameSettings'
+        "GameSettings: UserGameSettings",
+        'function GetService(self, service: "UserGameSettings"): UserGameSettings',
     ],
-    "Instance": ["Parent: Instance?"],
+    "Instance": [
+        "Parent: Instance?",
+        "AncestryChanged: RBXScriptSignal<Instance, Instance?>",
+        "function FindFirstAncestor(self, name: string): Instance?",
+        "function FindFirstAncestorOfClass(self, className: string): Instance?",
+        "function FindFirstAncestorWhichIsA(self, className: string): Instance?",
+        "function FindFirstChild(self, name: string, recursive: boolean?): Instance?",
+        "function FindFirstChildOfClass(self, className: string): Instance?",
+        "function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?",
+        "function FindFirstDescendant(self, name: string): Instance?",
+        "function GetActor(self): Actor?",
+        "function WaitForChild(self, name: string): Instance",
+        "function WaitForChild(self, name: string, timeout: number): Instance?",
+        "function GetAttributes(self): { [string]: any }",
+    ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
@@ -150,8 +249,8 @@ EXTRA_MEMBERS = {
     "RemoteFunction": [
         "function InvokeClient(self, player: Player, ...: any): ...any",
         "function InvokeServer(self, ...: any): ...any",
-        "OnClientInvoke: <A..., R...>(A...) -> R...",
-        "OnServerInvoke: <A..., R...>(player: Player, A...) -> R...",
+        "OnClientInvoke: (...any) -> ...any",
+        "OnServerInvoke: (player: Player, ...any) -> ...any",
     ],
     "BindableEvent": [
         "function Fire(self, ...: any): ()",
@@ -159,12 +258,92 @@ EXTRA_MEMBERS = {
     ],
     "BindableFunction": [
         "function Invoke(self, ...: any): ...any",
-        "OnInvoke: <A..., R...>(A...) -> R...",
+        "OnInvoke: (...any) -> ...any",
     ],
     "Players": ["function GetPlayers(self): { Player }"],
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
+    ],
+    "Plugin": [
+        "function CreateToolbar(self, name: string): PluginToolbar",
+    ],
+    "PluginToolbar": [
+        "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
+    ],
+    "WorldRoot": [
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
+        "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
+        "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }",
+    ],
+    "HttpService": [
+        "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
+    ],
+    "HumanoidDescription": [
+        "function GetAccessories(self, includeRigidAccessories: boolean): { HumanoidDescriptionAccessory }",
+        "function SetAccessories(self, accessories: { HumanoidDescriptionAccessory }, includeRigidAccessories: boolean): ()",
+        "function GetEmotes(self): { [string]: { number } }",
+        "function SetEmotes(self, emotes: { [string]: { number } }): ()",
+        "function GetEquippedEmotes(self): { { Slot: number, Name: string } }",
+        "function SetEquippedEmotes(self, equippedEmotes: { string } | { Slot: number, Name: string }): ()",
+    ],
+    "TeleportService": [
+        "function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)",
+        "function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult",
+        "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
+        "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
+        "function ReserveServer(self, placeId: number): (string, string)",
+        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
+        "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
+    ],
+    "UserService": [
+        "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
+    ],
+    "Studio": ["Theme: StudioTheme"],
+    "BasePlayerGui": [
+        "function GetGuiObjectsAtPosition(self, x: number, y: number): { GuiObject }",
+        "function GetGuiObjectsInCircle(self, position: Vector2, radius: number): { GuiObject }",
+    ],
+    "Path": [
+        "function GetWaypoints(self): { PathWaypoint }",
+    ],
+    "CollectionService": [
+        "function GetAllTags(self): { string }",
+        "function GetTags(self, instance: Instance): { string }",
+    ],
+    "UserInputService": [
+        "function GetConnectedGamepads(self): { EnumUserInputType }",
+        "function GetGamepadState(self, gamepadNum: EnumUserInputType): { InputObject }",
+        "function GetKeysPressed(self): { InputObject }",
+        "function GetMouseButtonsPressed(self): { InputObject }",
+        "function GetNavigationGamepads(self): { EnumUserInputType }",
+        "function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { EnumKeyCode }",
+    ],
+    "Humanoid": [
+        "RootPart: BasePart?",
+        "SeatPart: BasePart?",
+        "WalkToPart: BasePart?",
+        "function GetAccessories(self): { Accessory }",
+    ],
+    "Player": ["Character: Model?"],
+    "InstanceAdornment": ["Adornee: Instance?"],
+    "BasePart": [
+        "function GetConnectedParts(self, recursive: boolean?): { BasePart }",
+        "function GetJoints(self): { BasePart }",
+        "function GetNetworkOwner(self): Player?",
+        "function GetTouchingParts(self): { BasePart }",
+        "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
+        "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
+    ],
+    "Team": [
+        "function GetPlayers(self): { Player }"
+    ],
+    "Camera": [
+        "CameraSubject: Humanoid | BasePart | nil",
+        "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
     ],
 }
 
@@ -178,15 +357,16 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Instance = any
 
 declare class Enum
-	function GetEnumItems(self): { any }
+    function GetEnumItems(self): { any }
 end
 
 declare class EnumItem
-	Name: string
-	Value: number
-	EnumType: Enum
+    Name: string
+    Value: number
+    EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -221,17 +401,55 @@ declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
 declare function spawn<T...>(callback: (T...) -> ())
 declare function version(): string
 declare function printidentity(prefix: string?)
+"""
 
+# Hardcoded types after data types have been defined
+POST_DATATYPES_BASE = """
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
+
+type HttpRequestOptions = {
+    Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
+    Headers: { [string]: string }?,
+    Body: string?,
+}
+
+type HttpResponseData = {
+    Success: boolean,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string },
+    Body: string?,
+}
+
+type HumanoidDescriptionAccessory = {
+    AssetId: number,
+    AccessoryType: EnumAccessoryType,
+    IsLayered: boolean,
+    Order: number?,
+    Puffiness: number?,
 }
 """
 
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare class GlobalSettings extends GenericSettings
+    Lua: LuaSettings
+    Game: GameSettings
+    Studio: Studio
+    Network: NetworkSettings
+    Physics: PhysicsSettings
+    Rendering: RenderSettings
+    Diagnostics: DebugSettings
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
+end
+
 declare game: DataModel
 declare workspace: Workspace
 declare plugin: Plugin
@@ -310,6 +528,7 @@ ApiProperty = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Property"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Category": str,  # TODO: stricter type?
@@ -322,6 +541,7 @@ ApiFunction = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Function"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
@@ -335,6 +555,7 @@ ApiEvent = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Event"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "Tags": Optional[List[str]],  # TODO: stricter type?
@@ -346,6 +567,7 @@ ApiCallback = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Callback"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
@@ -437,7 +659,7 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 
 
 def resolveParameter(param: ApiParameter):
-    paramType = resolveType(param['Type'])
+    paramType = resolveType(param["Type"])
     isOptional = paramType[-1] == "?"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
@@ -452,6 +674,23 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]):
         if "TupleReturns" in member
         else resolveType(member["ReturnType"])
     )
+
+
+def filterMember(klassName: str, member: ApiMember):
+    if not INCLUDE_DEPRECATED_METHODS and (
+        ("Tags" in member and "Deprecated" in member["Tags"])
+        or ("Deprecated" in member and member["Deprecated"])
+    ):
+        return False
+    if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
+        return False
+    if (
+        member["MemberType"] == "Function"
+        and klassName
+        and member["Name"] == "GetService"
+    ):
+        return False
+    return True
 
 
 def declareClass(klass: ApiClass):
@@ -471,46 +710,40 @@ def declareClass(klass: ApiClass):
         out += " extends " + klass["Superclass"]
     out += "\n"
 
-    isGetService = False
-
-    for member in klass["Members"]:
-        if (
-            not INCLUDE_DEPRECATED_METHODS
-            and "Tags" in member
-            and "Deprecated" in member["Tags"]
-        ):
-            continue
-        if (
-            klass["Name"] in IGNORED_MEMBERS
-            and member["Name"] in IGNORED_MEMBERS[klass["Name"]]
-        ):
-            continue
-
+    def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
-            out += (
+            return (
                 f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
             )
         elif member["MemberType"] == "Function":
-            if klass["Name"] == "ServiceProvider" and member["Name"] == "GetService":
-                isGetService = True
-                continue
-            out += f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
+            return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
         elif member["MemberType"] == "Event":
             parameters = ", ".join(
                 map(lambda x: resolveType(x["Type"]), member["Parameters"])
             )
-            out += f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
+            return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
         elif member["MemberType"] == "Callback":
-            out += f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+            return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+
+    memberDefinitions = map(
+        declareMember,
+        filter(lambda member: filterMember(klass["Name"], member), klass["Members"]),
+    )
+
+    def declareService(service: str):
+        return f'\tfunction GetService(self, service: "{service}"): {service}\n'
 
     # Special case ServiceProvider:GetService()
-    if isGetService:
-        for service in SERVICES:
-            out += f'\tfunction GetService(self, service: "{service}"): {service}\n'
+    if klass["Name"] == "ServiceProvider":
+        memberDefinitions = chain(memberDefinitions, map(declareService, SERVICES))
 
     if klass["Name"] in EXTRA_MEMBERS:
-        for method in EXTRA_MEMBERS[klass["Name"]]:
-            out += f"\t{method}\n"
+        memberDefinitions = chain(
+            memberDefinitions,
+            map(lambda member: f"\t{member}\n", EXTRA_MEMBERS[klass["Name"]]),
+        )
+
+    out += "".join(sorted(memberDefinitions))
 
     out += "end"
 
@@ -549,7 +782,8 @@ def printClasses(dump: ApiDump):
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
-        print(f"type {klass['Name']} = any")
+        if klass["Name"] != "Instance":
+            print(f"type {klass['Name']} = any")
 
     for klass in dump["Classes"]:
         if klass["Name"] in DEFERRED_CLASSES or klass["Name"] in IGNORED_INSTANCES:
@@ -563,36 +797,9 @@ def printClasses(dump: ApiDump):
         print()
 
 
-def printDataTypes(types: DataTypesDump):
-    # Forward declare all the types
-    for klass in types["DataTypes"]:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        print(f"type {klass['Name']} = any")
-
-    for klass in types["DataTypes"]:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        name = klass["Name"]
-        members = klass["Members"]
-
-        out = "declare class " + name + "\n"
-        for member in members:
-            if member["MemberType"] == "Property":
-                out += f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            elif member["MemberType"] == "Function":
-                out += f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
-            elif member["MemberType"] == "Event":
-                out += f"\t{escapeName(member['Name'])}: RBXScriptSignal\n"  # TODO: type this
-            elif member["MemberType"] == "Callback":
-                out += f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
-
-        if name in EXTRA_MEMBERS:
-            for method in EXTRA_MEMBERS[name]:
-                out += f"\t{method}\n"
-
-        out += "end"
-        print(out)
+def printDataTypes(types: List[DataType]):
+    for klass in types:
+        print(declareClass(klass))
         print()
 
 
@@ -730,6 +937,80 @@ def loadClassesIntoStructures(dump: ApiDump):
         CLASSES[klass["Name"]] = klass
 
 
+def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
+    # A child of node in graph indicates that the child references the node
+    graph: defaultdict[str, set[str]] = defaultdict(set)
+
+    dataTypeNames = {klass["Name"] for klass in dataTypes}
+
+    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]):
+        name = type["Name"][:-1] if type["Name"][-1] == "?" else type["Name"]
+        if name in dataTypeNames:
+            return name
+
+        return None
+
+    def createReference(klassName: str, referenced: Optional[str]):
+        if referenced is not None:
+            if klassName == referenced:
+                return
+            graph[referenced].add(klassName)
+
+    for klass in dataTypes:
+        klassName = klass["Name"]
+
+        if klassName not in graph:
+            graph[klassName] = set()
+
+        for member in klass["Members"]:
+            if member["MemberType"] == "Property":
+                createReference(klassName, resolveClass(member["ValueType"]))
+            elif (
+                member["MemberType"] == "Function" or member["MemberType"] == "Callback"
+            ):
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+                if "TupleReturns" in member:
+                    for ret in member["TupleReturns"]:
+                        createReference(klassName, resolveClass(ret))
+                else:
+                    createReference(klassName, resolveClass(member["ReturnType"]))
+            elif member["MemberType"] == "Event":
+                for param in member["Parameters"]:
+                    createReference(klassName, resolveClass(param["Type"]))
+
+    visited: set[str] = set()
+    tempMark: set[str] = set()
+    sort: List[DataType] = []
+
+    def visit(klass: DataType):
+        n = klass["Name"]
+
+        if n in visited:
+            return
+
+        if n in tempMark:
+            raise RuntimeError()
+
+        tempMark.add(n)
+
+        for child in sorted(graph[n]):
+            visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
+
+        tempMark.remove(n)
+        visited.add(n)
+        sort.append(klass)
+
+    stack = list(sorted(dataTypes, key=lambda x: x["Name"]))
+
+    while stack:
+        klass = stack.pop()
+        if klass["Name"] not in visited:
+            visit(klass)
+
+    return list(reversed(sort))
+
+
 # Print global types
 dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
@@ -743,7 +1024,8 @@ applyCorrections(dump, corrections)
 
 print(START_BASE)
 printEnums(dump)
-printDataTypes(dataTypes)
+printDataTypes(topologicalSortDataTypes(dataTypes["DataTypes"]))
+print(POST_DATATYPES_BASE)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
 print(END_BASE)

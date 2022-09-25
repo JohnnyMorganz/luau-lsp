@@ -8,7 +8,7 @@ Install the extension from the marketplace: https://marketplace.visualstudio.com
 
 ### For General Users
 
-The langauge server should be immediately usable for general Luau code after installation.
+The language server should be immediately usable for general Luau code after installation.
 String require support is provided for relative module paths, using `require("../module")`.
 
 Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`.
@@ -29,6 +29,9 @@ It is recommend to `.gitignore` the `sourcemap.json` file. In future, the langua
 Note, if you are using the VSCode extension on macOS, you need to configure the location of the Rojo binary at `luau-lsp.sourcemap.rojoPath`.
 
 By default we generate a sourcemap for a `default.project.json` project file. The name can be changed in extension settings, as well as whether non-script instances are included in the sourcemap (included by default). Autogeneration of sourcemaps can also be toggled completely on/off in settings - the server will instead just listen to manual changes to `sourcemap.json` files.
+
+> Note: in the diagnostics type checker, the types for DataModel (DM) instances will resolve to `any`. This is a current limitation to reduce false positives.
+> However, autocomplete and hover intellisense will correctly resolve the DM type. [Read more](https://github.com/JohnnyMorganz/luau-lsp/issues/83#issuecomment-1192865024)
 
 ## Standalone
 
@@ -56,16 +59,13 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Go To Definition
 - [x] Go To Type Definition
 - [x] Find References
-- [ ] Document Highlight
 - [x] Document Link
 - [x] Document Symbol
 - [ ] Color Provider
 - [x] Rename
-- [ ] Folding Range
-- [ ] Selection Range
 - [ ] Call Hierarchy
 - [ ] Semantic Tokens
-- [ ] Inlay Hints
+- [x] Inlay Hints
 - [ ] Workspace Symbols
 
 The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
@@ -75,6 +75,9 @@ They can be investigated at a later time:
 - [ ] Go To Implementation (do not apply)
 - [ ] Code Actions (not necessary - could potentially add "fixers" for lints)
 - [ ] Code Lens (not necessary)
+- [ ] Document Highlight (not necessary - editor highlighting is sufficient)
+- [ ] Folding Range (not necessary - editor folding is sufficient)
+- [ ] Selection Range (not necessary - editor selection is sufficient)
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
