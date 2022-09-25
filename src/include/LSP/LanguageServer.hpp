@@ -58,6 +58,9 @@ private:
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
 
+    void onStudioPluginFullChange(const PluginNode& dataModel);
+    void onStudioPluginClear();
+
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
 

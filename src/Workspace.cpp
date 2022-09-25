@@ -117,8 +117,10 @@ bool WorkspaceFolder::updateSourceMap()
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
 
-        types::registerInstanceTypes(frontend.typeChecker, fileResolver, /* TODO - expressiveTypes: */ false);
-        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, fileResolver);
+        // Recreate instance types
+        instanceTypes.clear();
+        types::registerInstanceTypes(frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ false);
+        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
         // Signal diagnostics refresh
         client->terminateWorkspaceDiagnostics();
@@ -178,6 +180,7 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    isConfigured = true;
     if (configuration.sourcemap.enabled)
     {
         if (!isNullWorkspace() && !updateSourceMap())

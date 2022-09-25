@@ -69,9 +69,16 @@ struct InlayHintVisitor : public Luau::AstVisitor
                             continue;
                     }
 
+                    auto typeString = Luau::toString(followedTy, stringOptions);
+
+                    // If the stringified type is equivalent to the variable name, don't bother
+                    // showing an inlay hint
+                    if (Luau::equalsLower(typeString, var->name.value))
+                        continue;
+
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + Luau::toString(followedTy, stringOptions);
+                    hint.label = ": " + typeString;
                     hint.position = convertPosition(var->location.end);
                     makeInsertable(hint, followedTy);
                     hints.emplace_back(hint);

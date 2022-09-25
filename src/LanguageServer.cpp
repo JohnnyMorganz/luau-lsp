@@ -221,6 +221,14 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     {
         onDidChangeWatchedFiles(REQUIRED_PARAMS(params, "workspace/didChangeWatchedFiles"));
     }
+    else if (method == "$/plugin/full")
+    {
+        onStudioPluginFullChange(REQUIRED_PARAMS(params, "$/plugin/full"));
+    }
+    else if (method == "$/plugin/clear")
+    {
+        onStudioPluginClear();
+    }
     else
     {
         client->sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);

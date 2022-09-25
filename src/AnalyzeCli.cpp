@@ -58,7 +58,8 @@ static void reportError(const Luau::Frontend& frontend, ReportFormat format, con
     else if (FFlag::LuauTypeMismatchModuleNameResolution)
         report(format, humanReadableName.c_str(), error.location, "TypeError",
             Luau::toString(error, Luau::TypeErrorToStringOptions{frontend.fileResolver}).c_str());
-    report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
+    else
+        report(format, humanReadableName.c_str(), error.location, "TypeError", Luau::toString(error).c_str());
 }
 
 static void reportWarning(ReportFormat format, const char* name, const Luau::LintWarning& warning)
@@ -199,7 +200,6 @@ int startAnalyze(int argc, char** argv)
         if (auto sourceMapContents = readFile(*sourcemapPath))
         {
             fileResolver.updateSourceMap(sourceMapContents.value());
-            types::registerInstanceTypes(frontend.typeChecker, fileResolver);
         }
     }
 
@@ -236,7 +236,7 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    types::registerInstanceTypes(frontend.typeChecker, fileResolver);
+    types::registerInstanceTypes(frontend.typeChecker, frontend.typeChecker.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
     Luau::freeze(frontend.typeChecker.globalTypes);
 

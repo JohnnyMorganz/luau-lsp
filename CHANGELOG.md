@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `.meta.json` file being picked as a script's file path instead of the actual Luau file
+
+## [1.10.1] - 2022-09-24
+
+### Changed
+
+- Further improvements to instance type creation
+- Sync to upstream Luau 0.546
+
+### Fixed
+
+- Children of `game` will now correctly show in autocomplete
+- Fix autocomplete of non-identifier properties: `Packages._Index.roblox_roact-rodux@0.2.1` -> `Packages._Index["roblox_roact-rodux@0.2.1"]`
+- Fixed mapping of requires from `game.Players.LocalPlayer.PlayerScripts` to `game.StarterPlayer.StarterPlayerScripts` (and PlayerGui + StarterGear)
+- Fixed type errors being reported twice in `luau-lsp analyze`
+
+## [1.10.0] - 2022-09-17
+
+### Added
+
+- Introduced a Studio plugin to infer instance trees for partially managed projects. This works alongside Rojo sourcemaps, where instance information retrieved from Studio is merged into the sourcemap. Starting the plugin can be configured using `luau-lsp.plugin.enabled`. Install the plugin from the [Plugin Marketplace](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)
+
+### Changed
+
+- Sync to upstream Luau 0.545
+- Inlay hints for variables will no longer show if the type hint string is the same as the variable name (i.e., `local tbl = {}`, the hint `: tbl` will no longer show) ([#137](https://github.com/JohnnyMorganz/luau-lsp/issues/137))
+- Restructured instance types system to reduce memory and type creation footprint
+
+### Fixed
+
+- Fixed false document diagnostics showing up for opened tabs when VSCode is first started ([#132](https://github.com/JohnnyMorganz/luau-lsp/issues/132))
+
 ## [1.9.2] - 2022-09-06
 
 ### Changed

@@ -1,0 +1,12 @@
+{
+  "name": "Plugin Test Place",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Plugin": {
+        "$path": "default.project.json"
+      }
+    }
+  }
+}

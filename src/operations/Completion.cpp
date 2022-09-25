@@ -323,8 +323,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             break;
         }
 
-        // Handle if name is a property with spaces
-        if (entry.kind == Luau::AutocompleteEntryKind::Property && name.find(" ") != std::string::npos)
+        // Handle if name is not an identifier
+        if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
         {
             auto lastAst = result.ancestry.back();
             if (auto indexName = lastAst->as<Luau::AstExprIndexName>())

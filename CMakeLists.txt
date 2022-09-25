@@ -14,6 +14,7 @@ set(SOURCES
     src/DocumentationParser.cpp
     src/LuauExt.cpp
     src/Utils.cpp
+    src/StudioPlugin.cpp
     src/operations/Diagnostics.cpp
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
@@ -45,6 +46,7 @@ add_executable(luau-lsp-tests
     tests/Uri.test.cpp
     tests/Utils.test.cpp
     tests/WorkspaceFileResolver.test.cpp
+    tests/Sourcemap.test.cpp
     ${SOURCES}
 )
 target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)
