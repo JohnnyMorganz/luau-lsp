@@ -347,7 +347,7 @@ EXTRA_MEMBERS = {
     ],
     "Camera": [
         "CameraSubject: Instance | BasePart | nil",
-	    "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
+        "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
     ]
 }
 
@@ -364,13 +364,13 @@ type RotationCurveKey = any
 type Instance = any
 
 declare class Enum
-	function GetEnumItems(self): { any }
+    function GetEnumItems(self): { any }
 end
 
 declare class EnumItem
-	Name: string
-	Value: number
-	EnumType: Enum
+    Name: string
+    Value: number
+    EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -450,8 +450,8 @@ declare class GlobalSettings extends GenericSettings
     Physics: PhysicsSettings
     Rendering: RenderSettings
     Diagnostics: DebugSettings
-	function GetFFlag(self, name: string): boolean
-	function GetFVariable(self, name: string): string
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
 end
 
 declare game: DataModel
