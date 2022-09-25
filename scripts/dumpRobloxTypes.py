@@ -775,30 +775,7 @@ def printClasses(dump: ApiDump):
 
 def printDataTypes(types: List[DataType]):
     for klass in types:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        name = klass["Name"]
-        members = klass["Members"]
-
-        out = "declare class " + name + "\n"
-        for member in members:
-            if not filterMember(klass["Name"], member):
-                continue
-            if member["MemberType"] == "Property":
-                out += f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            elif member["MemberType"] == "Function":
-                out += f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
-            elif member["MemberType"] == "Event":
-                out += f"\t{escapeName(member['Name'])}: RBXScriptSignal\n"  # TODO: type this
-            elif member["MemberType"] == "Callback":
-                out += f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
-
-        if name in EXTRA_MEMBERS:
-            for method in EXTRA_MEMBERS[name]:
-                out += f"\t{method}\n"
-
-        out += "end"
-        print(out)
+        print(declareClass(klass))
         print()
 
 
