@@ -103,7 +103,14 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "WorldRoot": ["Raycast"],
+    "WorldRoot": [
+        "Raycast",
+        "ArePartsTouchingOthers",
+        "BulkMoveTo",
+        "GetPartBoundsInBox",
+        "GetPartBoundsInRadius",
+        "GetPartsInPart",
+    ],
     "HttpService": ["RequestAsync"],
     "HumanoidDescription": [
         "GetAccessories",
@@ -158,6 +165,11 @@ IGNORED_MEMBERS = {
         "GetTouchingParts",
         "SubtractAsync",
         "UnionAsync",
+    ],
+    "Team": ["GetPlayers"],
+    "Camera": [
+        "CameraSubject",
+        "GetPartsObscuringTarget",
     ],
 }
 
@@ -260,7 +272,12 @@ EXTRA_MEMBERS = {
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
     ],
     "WorldRoot": [
-        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
+        "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
+        "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }",
     ],
     "HttpService": [
         "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
@@ -321,6 +338,13 @@ EXTRA_MEMBERS = {
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
         "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
     ],
+    "Team": [
+        "function GetPlayers(self): { Player }"
+    ],
+    "Camera": [
+        "CameraSubject: Humanoid | BasePart | nil",
+        "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
+    ],
 }
 
 # Hardcoded types
@@ -336,13 +360,13 @@ type RotationCurveKey = any
 type Instance = any
 
 declare class Enum
-	function GetEnumItems(self): { any }
+    function GetEnumItems(self): { any }
 end
 
 declare class EnumItem
-	Name: string
-	Value: number
-	EnumType: Enum
+    Name: string
+    Value: number
+    EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -422,8 +446,8 @@ declare class GlobalSettings extends GenericSettings
     Physics: PhysicsSettings
     Rendering: RenderSettings
     Diagnostics: DebugSettings
-	function GetFFlag(self, name: string): boolean
-	function GetFVariable(self, name: string): string
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
 end
 
 declare game: DataModel

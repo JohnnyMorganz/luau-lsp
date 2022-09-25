@@ -9,13 +9,13 @@ type RotationCurveKey = any
 type Instance = any
 
 declare class Enum
-	function GetEnumItems(self): { any }
+    function GetEnumItems(self): { any }
 end
 
 declare class EnumItem
-	Name: string
-	Value: number
-	EnumType: Enum
+    Name: string
+    Value: number
+    EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -4794,7 +4794,7 @@ end
 
 declare class Camera extends Instance
 	CFrame: CFrame
-	CameraSubject: Instance
+	CameraSubject: Humanoid | BasePart | nil
 	CameraType: EnumCameraType
 	DiagonalFieldOfView: number
 	FieldOfView: number
@@ -4808,7 +4808,7 @@ declare class Camera extends Instance
 	NearPlaneZ: number
 	ViewportSize: Vector2
 	function GetPanSpeed(self): number
-	function GetPartsObscuringTarget(self, castPoints: { any }, ignoreList: { Instance }): { Instance }
+	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
 	function GetRenderCFrame(self): CFrame
 	function GetRoll(self): number
 	function GetTiltSpeed(self): number
@@ -7468,11 +7468,11 @@ end
 
 
 declare class WorldRoot extends Model
-	function ArePartsTouchingOthers(self, partList: { Instance }, overlapIgnored: number?): boolean
-	function BulkMoveTo(self, partList: { Instance }, cframeList: { any }, eventMode: EnumBulkMoveMode?): nil
-	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { Instance }
-	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { Instance }
-	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { Instance }
+	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
+	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
+	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
+	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
+	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil
@@ -8925,7 +8925,7 @@ declare class Team extends Instance
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
 	TeamColor: BrickColor
-	function GetPlayers(self): { Instance }
+	function GetPlayers(self): { Player }
 end
 
 declare class TeamCreateService extends Instance
@@ -10137,8 +10137,8 @@ declare class GlobalSettings extends GenericSettings
     Physics: PhysicsSettings
     Rendering: RenderSettings
     Diagnostics: DebugSettings
-	function GetFFlag(self, name: string): boolean
-	function GetFVariable(self, name: string): string
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
 end
 
 declare game: DataModel
