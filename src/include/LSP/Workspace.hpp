@@ -82,7 +82,7 @@ public:
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
-    std::optional<std::vector<size_t>> semanticTokens(const lsp::SemanticTokensParams& params);
+    std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
 
     bool updateSourceMap();
 

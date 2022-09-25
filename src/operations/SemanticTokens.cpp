@@ -195,7 +195,7 @@ std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
     return result;
 }
 
-std::optional<std::vector<size_t>> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
+std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
 
@@ -209,10 +209,12 @@ std::optional<std::vector<size_t>> WorkspaceFolder::semanticTokens(const lsp::Se
         return std::nullopt;
 
     auto tokens = getSemanticTokens(module, sourceModule);
-    return packTokens(tokens);
+    lsp::SemanticTokens result;
+    result.data = packTokens(tokens);
+    return result;
 }
 
-std::optional<std::vector<size_t>> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
+std::optional<lsp::SemanticTokens> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->semanticTokens(params);
