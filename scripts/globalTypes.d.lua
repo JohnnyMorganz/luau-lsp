@@ -4823,7 +4823,7 @@ end
 
 declare class Camera extends Instance
 	CFrame: CFrame
-	CameraSubject: Instance
+	CameraSubject: Instance | BasePart | nil
 	CameraType: EnumCameraType
 	DiagonalFieldOfView: number
 	FieldOfView: number
@@ -4837,7 +4837,7 @@ declare class Camera extends Instance
 	NearPlaneZ: number
 	ViewportSize: Vector2
 	function GetPanSpeed(self): number
-	function GetPartsObscuringTarget(self, castPoints: { any }, ignoreList: { Instance }): { Instance }
+	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
 	function GetRenderCFrame(self): CFrame
 	function GetRoll(self): number
 	function GetTiltSpeed(self): number

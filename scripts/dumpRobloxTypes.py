@@ -168,6 +168,10 @@ IGNORED_MEMBERS = {
     ],
     "Team": ["GetPlayers"],
     "Teams": ["GetTeams"],
+    "Camera": [
+        "CameraSubject",
+        "GetPartsObscuringTarget",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -341,6 +345,10 @@ EXTRA_MEMBERS = {
     "Teams": [
         "function GetTeams(self): { Team }"
     ],
+    "Camera": [
+        "CameraSubject: Instance | BasePart | nil",
+	    "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
+    ]
 }
 
 # Hardcoded types
