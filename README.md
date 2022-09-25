@@ -64,7 +64,7 @@ If you use Luau in a different environment and are interested in using the langu
 - [ ] Color Provider
 - [x] Rename
 - [ ] Call Hierarchy
-- [ ] Semantic Tokens
+- [x] Semantic Tokens
 - [x] Inlay Hints
 - [ ] Workspace Symbols
 

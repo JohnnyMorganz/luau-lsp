@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for Semantic Tokens
+
 ### Fixed
 
 - Fixed `.meta.json` file being picked as a script's file path instead of the actual Luau file
