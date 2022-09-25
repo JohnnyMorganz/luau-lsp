@@ -158,7 +158,7 @@ IGNORED_MEMBERS = {
         "GetTouchingParts",
         "SubtractAsync",
         "UnionAsync",
-    ]
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -320,7 +320,7 @@ EXTRA_MEMBERS = {
         "function GetTouchingParts(self): { BasePart }",
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
         "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
-    ]
+    ],
 }
 
 # Hardcoded types
@@ -504,6 +504,7 @@ ApiProperty = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Property"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Category": str,  # TODO: stricter type?
@@ -516,6 +517,7 @@ ApiFunction = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Function"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
@@ -529,6 +531,7 @@ ApiEvent = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Event"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "Tags": Optional[List[str]],  # TODO: stricter type?
@@ -540,6 +543,7 @@ ApiCallback = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Callback"],
+        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
@@ -648,6 +652,23 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]):
     )
 
 
+def filterMember(klassName: str, member: ApiMember):
+    if not INCLUDE_DEPRECATED_METHODS and (
+        ("Tags" in member and "Deprecated" in member["Tags"])
+        or ("Deprecated" in member and member["Deprecated"])
+    ):
+        return False
+    if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
+        return False
+    if (
+        member["MemberType"] == "Function"
+        and klassName
+        and member["Name"] == "GetService"
+    ):
+        return False
+    return True
+
+
 def declareClass(klass: ApiClass):
     if klass["Name"] in IGNORED_INSTANCES:
         return ""
@@ -665,29 +686,11 @@ def declareClass(klass: ApiClass):
         out += " extends " + klass["Superclass"]
     out += "\n"
 
-    def filterMember(member: ApiMember):
-        if (
-            not INCLUDE_DEPRECATED_METHODS
-            and "Tags" in member
-            and "Deprecated" in member["Tags"]
-        ):
-            return False
-        if (
-            klass["Name"] in IGNORED_MEMBERS
-            and member["Name"] in IGNORED_MEMBERS[klass["Name"]]
-        ):
-            return False
-        if (
-            member["MemberType"] == "Function"
-            and klass["Name"] == "ServiceProvider"
-            and member["Name"] == "GetService"
-        ):
-            return False
-        return True
-
     def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
-            return f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
+            return (
+                f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
+            )
         elif member["MemberType"] == "Function":
             return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
         elif member["MemberType"] == "Event":
@@ -698,7 +701,10 @@ def declareClass(klass: ApiClass):
         elif member["MemberType"] == "Callback":
             return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
 
-    memberDefinitions = map(declareMember, filter(filterMember, klass["Members"]))
+    memberDefinitions = map(
+        declareMember,
+        filter(lambda member: filterMember(klass["Name"], member), klass["Members"]),
+    )
 
     def declareService(service: str):
         return f'\tfunction GetService(self, service: "{service}"): {service}\n'
@@ -708,9 +714,12 @@ def declareClass(klass: ApiClass):
         memberDefinitions = chain(memberDefinitions, map(declareService, SERVICES))
 
     if klass["Name"] in EXTRA_MEMBERS:
-        memberDefinitions = chain(memberDefinitions, map(lambda member: f'\t{member}\n', EXTRA_MEMBERS[klass["Name"]]))
+        memberDefinitions = chain(
+            memberDefinitions,
+            map(lambda member: f"\t{member}\n", EXTRA_MEMBERS[klass["Name"]]),
+        )
 
-    out += ''.join(sorted(memberDefinitions))
+    out += "".join(sorted(memberDefinitions))
 
     out += "end"
 
@@ -766,28 +775,7 @@ def printClasses(dump: ApiDump):
 
 def printDataTypes(types: List[DataType]):
     for klass in types:
-        if klass["Name"] in IGNORED_INSTANCES:
-            continue
-        name = klass["Name"]
-        members = klass["Members"]
-
-        out = "declare class " + name + "\n"
-        for member in members:
-            if member["MemberType"] == "Property":
-                out += f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            elif member["MemberType"] == "Function":
-                out += f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
-            elif member["MemberType"] == "Event":
-                out += f"\t{escapeName(member['Name'])}: RBXScriptSignal\n"  # TODO: type this
-            elif member["MemberType"] == "Callback":
-                out += f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
-
-        if name in EXTRA_MEMBERS:
-            for method in EXTRA_MEMBERS[name]:
-                out += f"\t{method}\n"
-
-        out += "end"
-        print(out)
+        print(declareClass(klass))
         print()
 
 

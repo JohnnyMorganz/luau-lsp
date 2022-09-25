@@ -3279,47 +3279,43 @@ declare Enum: {
 }
 
 declare class Axes
-	Z: boolean
-	Y: boolean
-	Top: boolean
-	Left: boolean
-	X: boolean
-	Right: boolean
+	Back: boolean
 	Bottom: boolean
 	Front: boolean
-	Back: boolean
+	Left: boolean
+	Right: boolean
+	Top: boolean
+	X: boolean
+	Y: boolean
+	Z: boolean
 end
 
 declare class CatalogSearchParams
-	SearchKeyword: string
-	MinPrice: number
-	MaxPrice: number
-	SortType: EnumCatalogSortType
-	CategoryFilter: EnumCatalogCategoryFilter
-	BundleType: { any }
 	AssetTypes: { any }
+	BundleType: { any }
+	CategoryFilter: EnumCatalogCategoryFilter
+	MaxPrice: number
+	MinPrice: number
+	SearchKeyword: string
+	SortType: EnumCatalogSortType
 end
 
 declare class Color3
-	R: number
 	B: number
 	G: number
+	R: number
+	function Lerp(self, color: Color3, alpha: number): Color3
 	function ToHSV(self): (number, number, number)
 	function ToHex(self): string
-	function Lerp(self, color: Color3, alpha: number): Color3
-	r: number
-	g: number
-	b: number
-	function lerp(self, color: Color3, alpha: number): Color3
 end
 
 declare class BrickColor
-	r: number
+	Color: Color3
 	Name: string
 	Number: number
-	Color: Color3
 	b: number
 	g: number
+	r: number
 end
 
 declare class ColorSequence
@@ -3334,40 +3330,44 @@ end
 declare class DateTime
 	UnixTimestamp: number
 	UnixTimestampMillis: number
-	function ToUniversalTime(self): { any }
-	function ToLocalTime(self): { any }
-	function ToIsoDate(self): string
-	function FormatUniversalTime(self, format: string, locale: string): string
 	function FormatLocalTime(self, format: string, locale: string): string
+	function FormatUniversalTime(self, format: string, locale: string): string
+	function ToIsoDate(self): string
+	function ToLocalTime(self): { any }
+	function ToUniversalTime(self): { any }
 end
 
 declare class DockWidgetPluginGuiInfo
-	InitialEnabled: boolean
-	InitialEnabledShouldOverrideRestore: boolean
 	FloatingXSize: number
 	FloatingYSize: number
-	MinWidth: number
+	InitialEnabled: boolean
+	InitialEnabledShouldOverrideRestore: boolean
 	MinHeight: number
+	MinWidth: number
 end
+
+
+
+
 
 declare class Enums
 	function GetEnums(self): { any }
 end
 
 declare class Faces
+	Back: boolean
 	Bottom: boolean
-	Top: boolean
 	Front: boolean
 	Left: boolean
 	Right: boolean
-	Back: boolean
+	Top: boolean
 end
 
 declare class Font
-	Family: string
 	Bold: boolean
-	Weight: EnumFontWeight
+	Family: string
 	Style: EnumFontStyle
+	Weight: EnumFontWeight
 end
 
 declare class NumberRange
@@ -3386,86 +3386,81 @@ declare class NumberSequenceKeypoint
 end
 
 declare class OverlapParams
+	CollisionGroup: string
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
-	CollisionGroup: string
 	MaxParts: number
 end
 
 declare class PhysicalProperties
-	ElasticityWeight: number
-	Elasticity: number
 	Density: number
-	FrictionWeight: number
+	Elasticity: number
+	ElasticityWeight: number
 	Friction: number
+	FrictionWeight: number
 end
 
 declare class RBXScriptConnection
-	function Disconnect(self): nil
 	Connected: boolean
-	function disconnect(self): nil
-	connected: boolean
+	function Disconnect(self): nil
 end
 
+
+
 declare class RaycastParams
+	CollisionGroup: string
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
 	IgnoreWater: boolean
-	CollisionGroup: string
 end
 
 declare class TweenInfo
 	DelayTime: number
-	Time: number
 	EasingDirection: EnumEasingDirection
-	RepeatCount: number
 	EasingStyle: EnumEasingStyle
+	RepeatCount: number
 	Reverses: boolean
+	Time: number
 end
 
 declare class UDim
-	Scale: number
 	Offset: number
+	Scale: number
 	function __add(self, other: UDim): UDim
 	function __sub(self, other: UDim): UDim
 	function __unm(self): UDim
 end
 
 declare class UDim2
+	Height: UDim
+	Width: UDim
+	X: UDim
 	Y: UDim
 	function Lerp(self, goal: UDim2, alpha: number): UDim2
-	Height: UDim
-	X: UDim
-	Width: UDim
 	function __add(self, other: UDim2): UDim2
 	function __sub(self, other: UDim2): UDim2
 	function __unm(self): UDim2
 end
 
 declare class Vector2
-	Y: number
-	X: number
-	Unit: Vector2
 	Magnitude: number
-	function Lerp(self, v: Vector2, alpha: number): Vector2
+	Unit: Vector2
+	X: number
+	Y: number
 	function Cross(self, other: Vector2): number
 	function Dot(self, v: Vector2): number
-	y: number
-	x: number
-	unit: Vector2
-	magnitude: number
-	function lerp(self, v: Vector2, alpha: number): Vector2
+	function Lerp(self, v: Vector2, alpha: number): Vector2
 	function __add(self, other: Vector2): Vector2
-	function __sub(self, other: Vector2): Vector2
-	function __mul(self, other: Vector2 | number): Vector2
 	function __div(self, other: Vector2 | number): Vector2
+	function __mul(self, other: Vector2 | number): Vector2
+	function __sub(self, other: Vector2): Vector2
 	function __unm(self): Vector2
 end
 
 declare class Rect
+	Height: number
 	Max: Vector2
 	Min: Vector2
-	Height: number
 	Width: number
 end
 
@@ -3473,118 +3468,94 @@ declare class Vector2int16
 	X: number
 	Y: number
 	function __add(self, other: Vector2int16): Vector2int16
-	function __sub(self, other: Vector2int16): Vector2int16
-	function __mul(self, other: Vector2int16 | number): Vector2int16
 	function __div(self, other: Vector2int16 | number): Vector2int16
+	function __mul(self, other: Vector2int16 | number): Vector2int16
+	function __sub(self, other: Vector2int16): Vector2int16
 	function __unm(self): Vector2int16
 end
 
 declare class Vector3
-	Z: number
-	Y: number
-	X: number
-	Unit: Vector3
 	Magnitude: number
-	function Dot(self, other: Vector3): number
-	function Lerp(self, goal: Vector3, alpha: number): Vector3
+	Unit: Vector3
+	X: number
+	Y: number
+	Z: number
 	function Cross(self, other: Vector3): Vector3
+	function Dot(self, other: Vector3): number
 	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
-	function lerp(self, goal: Vector3, alpha: number): Vector3
-	z: number
-	y: number
-	x: number
-	unit: Vector3
-	magnitude: number
+	function Lerp(self, goal: Vector3, alpha: number): Vector3
 	function __add(self, other: Vector3): Vector3
-	function __sub(self, other: Vector3): Vector3
-	function __mul(self, other: Vector3 | number): Vector3
 	function __div(self, other: Vector3 | number): Vector3
+	function __mul(self, other: Vector3 | number): Vector3
+	function __sub(self, other: Vector3): Vector3
 	function __unm(self): Vector3
 end
 
 declare class RaycastResult
 	Distance: number
 	Instance: Instance
-	Position: Vector3
 	Material: EnumMaterial
 	Normal: Vector3
+	Position: Vector3
 end
 
 declare class Ray
-	function ClosestPoint(self, point: Vector3): Vector3
+	Direction: Vector3
 	Origin: Vector3
 	Unit: Ray
+	function ClosestPoint(self, point: Vector3): Vector3
 	function Distance(self, point: Vector3): number
-	Direction: Vector3
 end
 
 declare class Random
+	function Clone(self): Random
 	function NextInteger(self, min: number, max: number): number
 	function NextNumber(self): number
 	function NextNumber(self, min: number, max: number): number
 	function NextUnitVector(self): Vector3
-	function Clone(self): Random
 end
 
 declare class PathWaypoint
-	Position: Vector3
 	Action: EnumPathWaypointAction
+	Position: Vector3
 end
 
 declare class CFrame
-	Z: number
-	Y: number
-	X: number
-	function PointToObjectSpace(self, v3: Vector3): Vector3
-	YVector: Vector3
-	XVector: Vector3
-	ZVector: Vector3
-	Position: Vector3
-	Rotation: CFrame
-	RightVector: Vector3
-	function VectorToWorldSpace(self, v3: Vector3): Vector3
-	function ToAxisAngle(self): (Vector3, number)
-	function ToOrientation(self): (number, number, number)
-	function ToEulerAnglesYXZ(self): (number, number, number)
-	function Inverse(self): CFrame
-	UpVector: Vector3
-	function Lerp(self, goal: CFrame, alpha: number): CFrame
-	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
-	function VectorToObjectSpace(self, v3: Vector3): Vector3
 	LookVector: Vector3
-	function PointToWorldSpace(self, v3: Vector3): Vector3
-	function ToWorldSpace(self, cf: CFrame): CFrame
-	function ToObjectSpace(self, cf: CFrame): CFrame
-	function ToEulerAnglesXYZ(self): (number, number, number)
+	Position: Vector3
+	RightVector: Vector3
+	Rotation: CFrame
+	UpVector: Vector3
+	X: number
+	XVector: Vector3
+	Y: number
+	YVector: Vector3
+	Z: number
+	ZVector: Vector3
+	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
+	function Inverse(self): CFrame
+	function Lerp(self, goal: CFrame, alpha: number): CFrame
 	function Orthonormalize(self): CFrame
-	z: number
-	y: number
-	x: number
-	function pointToObjectSpace(self, v3: Vector3): Vector3
-	p: Vector3
-	rightVector: Vector3
-	function vectorToWorldSpace(self, v3: Vector3): Vector3
-	function toAxisAngle(self): (Vector3, number)
-	function inverse(self): CFrame
-	upVector: Vector3
-	function lerp(self, goal: CFrame, alpha: number): CFrame
-	function vectorToObjectSpace(self, v3: Vector3): Vector3
-	lookVector: Vector3
-	function pointToWorldSpace(self, v3: Vector3): Vector3
-	function toWorldSpace(self, cf: CFrame): CFrame
-	function toObjectSpace(self, cf: CFrame): CFrame
-	function toEulerAnglesXYZ(self): (number, number, number)
-	function components(self): (number, number, number, number, number, number, number, number, number, number, number, number)
+	function PointToObjectSpace(self, v3: Vector3): Vector3
+	function PointToWorldSpace(self, v3: Vector3): Vector3
+	function ToAxisAngle(self): (Vector3, number)
+	function ToEulerAnglesXYZ(self): (number, number, number)
+	function ToEulerAnglesYXZ(self): (number, number, number)
+	function ToObjectSpace(self, cf: CFrame): CFrame
+	function ToOrientation(self): (number, number, number)
+	function ToWorldSpace(self, cf: CFrame): CFrame
+	function VectorToObjectSpace(self, v3: Vector3): Vector3
+	function VectorToWorldSpace(self, v3: Vector3): Vector3
 	function __add(self, other: Vector3): CFrame
-	function __sub(self, other: Vector3): CFrame
 	function __mul(self, other: CFrame): CFrame
 	function __mul(self, other: Vector3): Vector3
+	function __sub(self, other: Vector3): CFrame
 end
 
 declare class Region3
 	CFrame: CFrame
-	function ExpandToGrid(self, Region: number): Region3
 	Size: Vector3
+	function ExpandToGrid(self, Region: number): Region3
 end
 
 declare class Vector3int16
@@ -3592,15 +3563,15 @@ declare class Vector3int16
 	Y: number
 	Z: number
 	function __add(self, other: Vector3int16): Vector3int16
-	function __sub(self, other: Vector3int16): Vector3int16
-	function __mul(self, other: Vector3int16 | number): Vector3int16
 	function __div(self, other: Vector3int16 | number): Vector3int16
+	function __mul(self, other: Vector3int16 | number): Vector3int16
+	function __sub(self, other: Vector3int16): Vector3int16
 	function __unm(self): Vector3int16
 end
 
 declare class Region3int16
-	Min: Vector3int16
 	Max: Vector3int16
+	Min: Vector3int16
 end
 
 
