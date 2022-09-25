@@ -7497,11 +7497,11 @@ end
 
 
 declare class WorldRoot extends Model
-	function ArePartsTouchingOthers(self, partList: { Instance }, overlapIgnored: number?): boolean
-	function BulkMoveTo(self, partList: { Instance }, cframeList: { any }, eventMode: EnumBulkMoveMode?): nil
-	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { Instance }
-	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { Instance }
-	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { Instance }
+	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
+	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
+	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
+	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
+	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil

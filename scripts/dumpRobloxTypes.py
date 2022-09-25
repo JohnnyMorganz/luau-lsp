@@ -103,7 +103,14 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "WorldRoot": ["Raycast"],
+    "WorldRoot": [
+        "Raycast",
+        "ArePartsTouchingOthers",
+        "BulkMoveTo",
+        "GetPartBoundsInBox",
+        "GetPartBoundsInRadius",
+        "GetPartsInPart",
+    ],
     "HttpService": ["RequestAsync"],
     "HumanoidDescription": [
         "GetAccessories",
@@ -262,7 +269,12 @@ EXTRA_MEMBERS = {
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
     ],
     "WorldRoot": [
-        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?"
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
+        "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
+        "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }",
+        "function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }",
     ],
     "HttpService": [
         "function RequestAsync(self, options: HttpRequestOptions): HttpResponseData",
