@@ -9,13 +9,13 @@ type RotationCurveKey = any
 type Instance = any
 
 declare class Enum
-	function GetEnumItems(self): { any }
+    function GetEnumItems(self): { any }
 end
 
 declare class EnumItem
-	Name: string
-	Value: number
-	EnumType: Enum
+    Name: string
+    Value: number
+    EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -8962,7 +8962,7 @@ declare class TeamCreateService extends Instance
 end
 
 declare class Teams extends Instance
-	function GetTeams(self): { Team }
+	function GetTeams(self): { Instance }
 end
 
 declare class TeleportAsyncResult extends Instance
@@ -10166,8 +10166,8 @@ declare class GlobalSettings extends GenericSettings
     Physics: PhysicsSettings
     Rendering: RenderSettings
     Diagnostics: DebugSettings
-	function GetFFlag(self, name: string): boolean
-	function GetFVariable(self, name: string): string
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
 end
 
 declare game: DataModel
