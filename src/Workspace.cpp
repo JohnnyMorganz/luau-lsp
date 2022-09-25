@@ -43,6 +43,7 @@ void WorkspaceFolder::updateTextDocument(
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
+    auto config = client->getConfiguration(rootUri);
     auto moduleName = fileResolver.getModuleName(uri);
     fileResolver.managedFiles.erase(moduleName);
 
@@ -54,7 +55,7 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
     frontend.markDirty(moduleName);
 
     // Refresh workspace diagnostics to clear diagnostics on ignored files
-    if (isIgnoredFile(uri.fsPath()))
+    if (!config.diagnostics.workspace || isIgnoredFile(uri.fsPath()))
     {
         if (client->workspaceDiagnosticsToken)
         {
