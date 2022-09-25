@@ -3307,10 +3307,6 @@ declare class Color3
 	function ToHSV(self): (number, number, number)
 	function ToHex(self): string
 	function Lerp(self, color: Color3, alpha: number): Color3
-	r: number
-	g: number
-	b: number
-	function lerp(self, color: Color3, alpha: number): Color3
 end
 
 declare class BrickColor
@@ -3403,8 +3399,6 @@ end
 declare class RBXScriptConnection
 	function Disconnect(self): nil
 	Connected: boolean
-	function disconnect(self): nil
-	connected: boolean
 end
 
 declare class RaycastParams
@@ -3450,11 +3444,6 @@ declare class Vector2
 	function Lerp(self, v: Vector2, alpha: number): Vector2
 	function Cross(self, other: Vector2): number
 	function Dot(self, v: Vector2): number
-	y: number
-	x: number
-	unit: Vector2
-	magnitude: number
-	function lerp(self, v: Vector2, alpha: number): Vector2
 	function __add(self, other: Vector2): Vector2
 	function __sub(self, other: Vector2): Vector2
 	function __mul(self, other: Vector2 | number): Vector2
@@ -3489,12 +3478,6 @@ declare class Vector3
 	function Lerp(self, goal: Vector3, alpha: number): Vector3
 	function Cross(self, other: Vector3): Vector3
 	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
-	function lerp(self, goal: Vector3, alpha: number): Vector3
-	z: number
-	y: number
-	x: number
-	unit: Vector3
-	magnitude: number
 	function __add(self, other: Vector3): Vector3
 	function __sub(self, other: Vector3): Vector3
 	function __mul(self, other: Vector3 | number): Vector3
@@ -3557,24 +3540,6 @@ declare class CFrame
 	function ToObjectSpace(self, cf: CFrame): CFrame
 	function ToEulerAnglesXYZ(self): (number, number, number)
 	function Orthonormalize(self): CFrame
-	z: number
-	y: number
-	x: number
-	function pointToObjectSpace(self, v3: Vector3): Vector3
-	p: Vector3
-	rightVector: Vector3
-	function vectorToWorldSpace(self, v3: Vector3): Vector3
-	function toAxisAngle(self): (Vector3, number)
-	function inverse(self): CFrame
-	upVector: Vector3
-	function lerp(self, goal: CFrame, alpha: number): CFrame
-	function vectorToObjectSpace(self, v3: Vector3): Vector3
-	lookVector: Vector3
-	function pointToWorldSpace(self, v3: Vector3): Vector3
-	function toWorldSpace(self, cf: CFrame): CFrame
-	function toObjectSpace(self, cf: CFrame): CFrame
-	function toEulerAnglesXYZ(self): (number, number, number)
-	function components(self): (number, number, number, number, number, number, number, number, number, number, number, number)
 	function __add(self, other: Vector3): CFrame
 	function __sub(self, other: Vector3): CFrame
 	function __mul(self, other: CFrame): CFrame
