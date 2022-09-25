@@ -59,13 +59,13 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         // Highlight prefix if exists
         if (ref->prefix)
         {
-            Luau::Position endPosition{startPosition.line, startPosition.column + strlen(ref->prefix->value)};
+            Luau::Position endPosition{startPosition.line, startPosition.column + static_cast<unsigned int>(strlen(ref->prefix->value))};
             tokens.emplace_back(SemanticToken{startPosition, endPosition, lsp::SemanticTokenTypes::Namespace, lsp::SemanticTokenModifiers::None});
             startPosition = {endPosition.line, endPosition.column + 1};
         }
 
         // Highlight name
-        Luau::Position endPosition{startPosition.line, startPosition.column + strlen(ref->name.value)};
+        Luau::Position endPosition{startPosition.line, startPosition.column + static_cast<unsigned int>(strlen(ref->name.value))};
         tokens.emplace_back(SemanticToken{startPosition, endPosition, lsp::SemanticTokenTypes::Type, lsp::SemanticTokenModifiers::None});
 
         // Do not highlight parameters as they will be visited later
@@ -80,7 +80,8 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     bool visit(Luau::AstTypePackGeneric* type) override
     {
         // HACK: do not highlight punctuation
-        Luau::Position endPosition{type->location.begin.line, type->location.begin.column + strlen(type->genericName.value)};
+        Luau::Position endPosition{
+            type->location.begin.line, type->location.begin.column + static_cast<unsigned int>(strlen(type->genericName.value))};
         tokens.emplace_back(SemanticToken{type->location.begin, endPosition, lsp::SemanticTokenTypes::Namespace, lsp::SemanticTokenModifiers::None});
         return true;
     }
