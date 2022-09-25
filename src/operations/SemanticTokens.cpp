@@ -15,7 +15,7 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
     {
         return lsp::SemanticTokenTypes::Function;
     }
-    else if (auto intersection = Luau::get<Luau::IntersectionTypeVar>(followedTy))
+    else if (Luau::get<Luau::IntersectionTypeVar>(followedTy))
     {
         if (Luau::isOverloadedFunction(followedTy))
         {
@@ -69,6 +69,19 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         tokens.emplace_back(SemanticToken{startPosition, endPosition, lsp::SemanticTokenTypes::Type, lsp::SemanticTokenModifiers::None});
 
         // Do not highlight parameters as they will be visited later
+        return true;
+    }
+
+    bool visit(Luau::AstTypePack* type) override
+    {
+        return true;
+    }
+
+    bool visit(Luau::AstTypePackGeneric* type) override
+    {
+        // HACK: do not highlight punctuation
+        Luau::Position endPosition{type->location.begin.line, type->location.begin.column + strlen(type->genericName.value)};
+        tokens.emplace_back(SemanticToken{type->location.begin, endPosition, lsp::SemanticTokenTypes::Namespace, lsp::SemanticTokenModifiers::None});
         return true;
     }
 
