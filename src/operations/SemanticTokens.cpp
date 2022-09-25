@@ -4,10 +4,10 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
-static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTokenTypes default)
+static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTokenTypes base)
 {
     if (!ty)
-        return default;
+        return base;
 
     auto followedTy = Luau::follow(*ty);
 
@@ -30,7 +30,7 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
         }
     }
 
-    return default;
+    return base;
 }
 
 struct SemanticTokensVisitor : public Luau::AstVisitor
