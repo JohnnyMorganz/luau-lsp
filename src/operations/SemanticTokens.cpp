@@ -106,19 +106,19 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         return true;
     }
 
-    bool visit(Luau::AstStatFunction* func) override
-    {
-        tokens.emplace_back(SemanticToken{
-            func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
-        return true;
-    }
+    // bool visit(Luau::AstStatFunction* func) override
+    // {
+    //     tokens.emplace_back(SemanticToken{
+    //         func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
+    //     return true;
+    // }
 
-    bool visit(Luau::AstStatLocalFunction* func) override
-    {
-        tokens.emplace_back(SemanticToken{
-            func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
-        return true;
-    }
+    // bool visit(Luau::AstStatLocalFunction* func) override
+    // {
+    //     tokens.emplace_back(SemanticToken{
+    //         func->name->location.begin, func->name->location.end, lsp::SemanticTokenTypes::Function, lsp::SemanticTokenModifiers::None});
+    //     return true;
+    // }
 
     bool visit(Luau::AstExprFunction* func) override
     {
