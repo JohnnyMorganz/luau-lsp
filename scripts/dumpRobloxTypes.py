@@ -342,7 +342,7 @@ EXTRA_MEMBERS = {
         "function GetPlayers(self): { Player }"
     ],
     "Camera": [
-        "CameraSubject: Instance | BasePart | nil",
+        "CameraSubject: Humanoid | BasePart | nil",
         "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
     ]
 }

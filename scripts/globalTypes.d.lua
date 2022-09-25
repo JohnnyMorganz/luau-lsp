@@ -4823,7 +4823,7 @@ end
 
 declare class Camera extends Instance
 	CFrame: CFrame
-	CameraSubject: Instance | BasePart | nil
+	CameraSubject: Humanoid | BasePart | nil
 	CameraType: EnumCameraType
 	DiagonalFieldOfView: number
 	FieldOfView: number
