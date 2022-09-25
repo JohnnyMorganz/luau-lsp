@@ -530,14 +530,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenModifiers, {
                                                          {SemanticTokenModifiers::DefaultLibrary, "defaultLibrary"},
                                                      });
 
-inline constexpr SemanticTokenModifiers operator|(SemanticTokenModifiers a, SemanticTokenModifiers b)
+constexpr SemanticTokenModifiers operator|(SemanticTokenModifiers a, SemanticTokenModifiers b) noexcept
 {
-    return a = static_cast<SemanticTokenModifiers>(a | b);
-}
-
-inline SemanticTokenModifiers& operator|=(SemanticTokenModifiers& a, SemanticTokenModifiers b)
-{
-    return a = static_cast<SemanticTokenModifiers>(a | b);
+    return static_cast<SemanticTokenModifiers>(static_cast<int>(a) | static_cast<int>(b));
 }
 
 enum struct TokenFormat
