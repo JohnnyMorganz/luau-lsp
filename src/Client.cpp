@@ -98,7 +98,7 @@ void Client::removeConfiguration(const lsp::DocumentUri& uri)
     configStore.erase(uri.toString());
 }
 
-void Client::requestConfiguration(std::vector<lsp::DocumentUri>& uris)
+void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
 {
     std::vector<lsp::ConfigurationItem> items;
     for (auto& uri : uris)

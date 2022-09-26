@@ -58,7 +58,7 @@ public:
     const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri);
     void removeConfiguration(const lsp::DocumentUri& uri);
     // TODO: this function only supports getting requests for workspaces
-    void requestConfiguration(std::vector<lsp::DocumentUri>& uris);
+    void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);
     void applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optional<ResponseHandler> handler = std::nullopt);
     void publishDiagnostics(const lsp::PublishDiagnosticsParams& params);
     void refreshWorkspaceDiagnostics();
