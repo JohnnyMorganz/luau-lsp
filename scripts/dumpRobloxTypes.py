@@ -167,6 +167,7 @@ IGNORED_MEMBERS = {
         "UnionAsync",
     ],
     "Team": ["GetPlayers"],
+    "Teams": ["GetTeams"],
     "Camera": [
         "CameraSubject",
         "GetPartsObscuringTarget",
@@ -340,6 +341,9 @@ EXTRA_MEMBERS = {
     ],
     "Team": [
         "function GetPlayers(self): { Player }"
+    ],
+    "Teams": [
+        "function GetTeams(self): { Team }",
     ],
     "Camera": [
         "CameraSubject: Humanoid | BasePart | nil",
