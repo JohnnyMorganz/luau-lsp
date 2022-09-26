@@ -8215,7 +8215,7 @@ declare class RunService extends Instance
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
 	Stepped: RBXScriptSignal<number, number>
-	function BindToRenderStep(self, name: string, priority: number, func: ((...any) -> ...any)): nil
+	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
 	function GetRobloxVersion(self): string
@@ -8934,7 +8934,7 @@ declare class TeamCreateService extends Instance
 end
 
 declare class Teams extends Instance
-	function GetTeams(self): { Instance }
+	function GetTeams(self): { Team }
 end
 
 declare class TeleportAsyncResult extends Instance

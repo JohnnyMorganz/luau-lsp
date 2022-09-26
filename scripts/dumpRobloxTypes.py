@@ -167,9 +167,13 @@ IGNORED_MEMBERS = {
         "UnionAsync",
     ],
     "Team": ["GetPlayers"],
+    "Teams": ["GetTeams"],
     "Camera": [
         "CameraSubject",
         "GetPartsObscuringTarget",
+    ],
+    "RunService": [
+        "BindToRenderStep",
     ],
 }
 
@@ -341,10 +345,16 @@ EXTRA_MEMBERS = {
     "Team": [
         "function GetPlayers(self): { Player }"
     ],
+    "Teams": [
+        "function GetTeams(self): { Team }",
+    ],
     "Camera": [
         "CameraSubject: Humanoid | BasePart | nil",
         "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
     ],
+    "RunService": [
+        "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
+    ]
 }
 
 # Hardcoded types
