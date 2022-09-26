@@ -8933,7 +8933,7 @@ declare class TeamCreateService extends Instance
 end
 
 declare class Teams extends Instance
-	function GetTeams(self): { Instance }
+	function GetTeams(self): { Team }
 end
 
 declare class TeleportAsyncResult extends Instance
