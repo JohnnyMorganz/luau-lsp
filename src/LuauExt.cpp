@@ -659,6 +659,13 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     return std::nullopt;
 }
 
+bool types::isMetamethod(const Luau::Name& name)
+{
+    return name == "__index" || name == "__newindex" || name == "__call" || name == "__concat" || name == "__unm" || name == "__add" ||
+           name == "__sub" || name == "__mul" || name == "__div" || name == "__mod" || name == "__pow" || name == "__tostring" ||
+           name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
+}
+
 Luau::Position convertPosition(const lsp::Position& position)
 {
     LUAU_ASSERT(position.line <= UINT_MAX);

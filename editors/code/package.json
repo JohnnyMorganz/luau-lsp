@@ -58,6 +58,14 @@
                 "path": "./syntaxes/lua.tmLanguage.json"
             }
         ],
+        "semanticTokenScopes": [
+            {
+                "language": "lua",
+                "scopes": {
+                    "property.defaultLibrary": ["variable.language.lua"]
+                }
+            }
+        ],
         "commands": [
             {
                 "command": "luau-lsp.updateApi",

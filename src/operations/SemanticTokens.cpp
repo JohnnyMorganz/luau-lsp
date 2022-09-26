@@ -4,6 +4,14 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
+enum struct AstLocalInfo
+{
+    // local is self
+    Self,
+    // local is a function parameter
+    Parameter,
+};
+
 static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTokenTypes base)
 {
     if (!ty)
@@ -37,6 +45,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
     std::vector<SemanticToken> tokens;
+    std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap;
 
     explicit SemanticTokensVisitor(Luau::ModulePtr module)
         : module(module)
@@ -122,19 +131,41 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprFunction* func) override
     {
+        if (func->self)
+            localMap.insert_or_assign(func->self, AstLocalInfo::Self);
+
         for (auto arg : func->args)
         {
             tokens.emplace_back(
-                SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::Declaration});
+                SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
+            localMap.insert_or_assign(arg, AstLocalInfo::Parameter);
         }
         return true;
     }
 
     bool visit(Luau::AstExprLocal* local) override
     {
-        auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Variable);
+        auto defaultType = lsp::SemanticTokenTypes::Variable;
+        if (localMap.find(local->local) != localMap.end())
+        {
+            auto localInfo = localMap.at(local->local);
+            if (localInfo == AstLocalInfo::Self)
+            {
+                tokens.emplace_back(SemanticToken{
+                    local->location.begin, local->location.end, lsp::SemanticTokenTypes::Property, lsp::SemanticTokenModifiers::DefaultLibrary});
+
+                return true;
+            }
+            else if (localInfo == AstLocalInfo::Parameter)
+            {
+                defaultType = lsp::SemanticTokenTypes::Parameter;
+            }
+        }
+
+        auto type = inferTokenType(module->astTypes.find(local), defaultType);
         if (type == lsp::SemanticTokenTypes::Variable)
             return true;
+
         tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
         return true;
     }
@@ -156,7 +187,12 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         if (auto prop = lookupProp(ty, std::string(index->index.value)))
         {
             auto type = inferTokenType(&prop->type, lsp::SemanticTokenTypes::Property);
-            tokens.emplace_back(SemanticToken{index->indexLocation.begin, index->indexLocation.end, type, lsp::SemanticTokenModifiers::None});
+            auto modifiers = lsp::SemanticTokenModifiers::None;
+            if (types::isMetamethod(std::string(index->index.value)))
+            {
+                modifiers = modifiers | lsp::SemanticTokenModifiers::DefaultLibrary;
+            }
+            tokens.emplace_back(SemanticToken{index->indexLocation.begin, index->indexLocation.end, type, modifiers});
         }
 
         return true;

@@ -492,16 +492,16 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenTypes, {
 enum struct SemanticTokenModifiers : uint16_t
 {
     None = 0,
-    Declaration = 1 << 1,
-    Definition = 1 << 2,
-    Readonly = 1 << 3,
-    Static = 1 << 4,
-    Deprecated = 1 << 5,
-    Abstract = 1 << 6,
-    Async = 1 << 7,
-    Modification = 1 << 8,
-    Documentation = 1 << 9,
-    DefaultLibrary = 1 << 10,
+    Declaration = 1 << 0,
+    Definition = 1 << 1,
+    Readonly = 1 << 2,
+    Static = 1 << 3,
+    Deprecated = 1 << 4,
+    Abstract = 1 << 5,
+    Async = 1 << 6,
+    Modification = 1 << 7,
+    Documentation = 1 << 8,
+    DefaultLibrary = 1 << 9,
 };
 
 const SemanticTokenModifiers SemanticTokenModifiersList[] = {
