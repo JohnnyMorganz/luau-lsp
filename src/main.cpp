@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #endif
 
+LUAU_FASTINT(LuauTarjanChildLimit)
+
 enum class CliMode
 {
     Lsp,
@@ -223,6 +225,11 @@ int main(int argc, char** argv)
                 flag->value = true;
     }
     registerFastFlags(fastFlags);
+
+    // Manually enforce a LuauTarjanChildLimit increase
+    // TODO: re-evaluate the necessity of this change
+    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
+        FInt::LuauTarjanChildLimit.value = 15000;
 
     if (mode == CliMode::Lsp)
         return startLanguageServer(argc, argv);
