@@ -40,6 +40,11 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
     {
         return *typeName;
     }
+    else if (auto mtv = Luau::get<Luau::MetatableTypeVar>(ty))
+    {
+        if (auto mtvName = Luau::getName(mtv->metatable))
+            return *mtvName;
+    }
     else if (auto parentClass = Luau::get<Luau::ClassTypeVar>(ty))
     {
         return parentClass->name;
@@ -657,6 +662,13 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     //     // Find the corresponding ty
     // }
     return std::nullopt;
+}
+
+bool types::isMetamethod(const Luau::Name& name)
+{
+    return name == "__index" || name == "__newindex" || name == "__call" || name == "__concat" || name == "__unm" || name == "__add" ||
+           name == "__sub" || name == "__mul" || name == "__div" || name == "__mod" || name == "__pow" || name == "__tostring" ||
+           name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
 }
 
 Luau::Position convertPosition(const lsp::Position& position)

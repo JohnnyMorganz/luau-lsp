@@ -84,6 +84,15 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.inlayHintProvider = true;
     // Diagnostics Provider
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
+    // Semantic Tokens Provider
+    capabilities.semanticTokensProvider = {
+        {
+            std::vector<lsp::SemanticTokenTypes>(std::begin(lsp::SemanticTokenTypesList), std::end(lsp::SemanticTokenTypesList)),
+            std::vector<lsp::SemanticTokenModifiers>(std::begin(lsp::SemanticTokenModifiersList), std::end(lsp::SemanticTokenModifiersList)),
+        },
+        /* range: */ false,
+        /* full: */ true,
+    };
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
@@ -145,6 +154,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/documentSymbol")
     {
         response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+    }
+    else if (method == "textDocument/semanticTokens/full")
+    {
+        response = semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
     }
     else if (method == "textDocument/inlayHint")
     {
