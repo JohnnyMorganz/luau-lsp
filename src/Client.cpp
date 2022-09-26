@@ -98,16 +98,17 @@ void Client::removeConfiguration(const lsp::DocumentUri& uri)
     configStore.erase(uri.toString());
 }
 
-void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
+void Client::requestConfiguration(std::vector<lsp::DocumentUri>& uris)
 {
-    if (uris.empty())
-        return;
-
     std::vector<lsp::ConfigurationItem> items;
     for (auto& uri : uris)
     {
-        items.emplace_back(lsp::ConfigurationItem{uri, "luau-lsp"});
+        if (uri == Uri()) // Handle null workspace (global config)
+            items.emplace_back(lsp::ConfigurationItem{std::nullopt, "luau-lsp"});
+        else
+            items.emplace_back(lsp::ConfigurationItem{uri, "luau-lsp"});
     }
+
 
     ResponseHandler handler = [uris, this](const JsonRpcMessage& message)
     {

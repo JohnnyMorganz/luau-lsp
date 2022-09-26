@@ -21,10 +21,12 @@ using ClientPtr = std::shared_ptr<Client>;
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
 {
+    if (file == nullWorkspace->rootUri)
+        return nullWorkspace;
+
     WorkspaceFolderPtr bestWorkspace = nullptr;
     size_t length = 0;
     auto checkStr = file.toString();
-
 
     for (auto& workspace : workspaceFolders)
     {
@@ -381,11 +383,9 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         };
 
         // Send off requests to get the configuration for each workspace
-        std::vector<lsp::DocumentUri> items;
+        std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
-        {
             items.emplace_back(workspace->rootUri);
-        }
         client->requestConfiguration(items);
     }
     else
@@ -529,11 +529,9 @@ void LanguageServer::onDidChangeConfiguration(const lsp::DidChangeConfigurationP
         client->configStore.clear();
 
         // Send off requests to get the configuration again for each workspace
-        std::vector<lsp::DocumentUri> items;
+        std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
-        {
             items.emplace_back(workspace->rootUri);
-        }
         client->requestConfiguration(items);
     }
     else
