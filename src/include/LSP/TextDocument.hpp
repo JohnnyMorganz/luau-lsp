@@ -2,6 +2,8 @@
 #include "LSP/Uri.hpp"
 #include "LSP/Protocol.hpp"
 
+size_t lspLength(const std::string& Code);
+
 class TextDocument
 {
 private:

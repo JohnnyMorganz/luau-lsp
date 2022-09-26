@@ -119,6 +119,79 @@ TEST_CASE("Invalid inputs")
     CHECK_EQ(document.positionAt(str.length() + 3), lsp::Position{0, str.length()});
 };
 
+// https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/unittests/SourceCodeTests.cpp
+TEST_CASE("lspLength")
+{
+    CHECK_EQ(lspLength(""), 0UL);
+    CHECK_EQ(lspLength("ascii"), 5UL);
+    // BMP
+    CHECK_EQ(lspLength("↓"), 1UL);
+    CHECK_EQ(lspLength("¥"), 1UL);
+    // astral
+    CHECK_EQ(lspLength("😂"), 2UL);
+
+    // WithContextValue UTF8(kCurrentOffsetEncoding, OffsetEncoding::UTF8);
+    // EXPECT_EQ(lspLength(""), 0UL);
+    // EXPECT_EQ(lspLength("ascii"), 5UL);
+    // // BMP
+    // EXPECT_EQ(lspLength("↓"), 3UL);
+    // EXPECT_EQ(lspLength("¥"), 2UL);
+    // // astral
+    // EXPECT_EQ(lspLength("😂"), 4UL);
+
+    // WithContextValue UTF32(kCurrentOffsetEncoding, OffsetEncoding::UTF32);
+    // EXPECT_EQ(lspLength(""), 0UL);
+    // EXPECT_EQ(lspLength("ascii"), 5UL);
+    // // BMP
+    // EXPECT_EQ(lspLength("↓"), 1UL);
+    // EXPECT_EQ(lspLength("¥"), 1UL);
+    // // astral
+    // EXPECT_EQ(lspLength("😂"), 1UL);
+}
+
+TEST_CASE("PositionToOffset")
+{
+    auto document = newDocument(R"(0:0 = 0
+1:0 → 8
+2:0 🡆 18)");
+
+    // DEVIATION: we do not accept negative positions
+    // line out of bounds
+    // CHECK_EQ(document.offsetAt(lsp::Position{-1, 2}), 0);
+
+    // first line
+    // CHECK_EQ(document.offsetAt(lsp::Position{0, -1}), 0); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 0}), 0); // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 3}), 3); // middle character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 6}), 6); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 7}), 7); // the newline itself
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 7}), 7);
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 8}), 7); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 8}), 0); // out of range
+    // middle line
+    // CHECK_EQ(document.offsetAt(lsp::Position{1, -1}), llvm::Failed()); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 0}), 8);  // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 3}), 11); // middle character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 3}), 11);
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 6}), 16); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 7}), 17); // the newline itself
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 8}), 17); // out of range
+    // CHECK_EQ(document.offsetAt(lsp::Position{1, 8}), llvm::Failed()); // out of range
+    // last line
+    // CHECK_EQ(document.offsetAt(lsp::Position{2, -1}), llvm::Failed()); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 0}), 18); // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 3}), 21); // middle character
+    // CHECK_EQ(document.offsetAt(lsp::Position{2, 5}), llvm::Failed());  // middle of surrogate pair
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 5}), 26); // middle of surrogate pair
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 6}), 26); // end of surrogate pair
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 8}), 28); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 9}), 29); // EOF
+    // CHECK_EQ(document.offsetAt(lsp::Position{2, 10}), llvm::Failed()); // out of range
+    // line out of bounds
+    // CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), llvm::Failed());
+    // CHECK_EQ(document.offsetAt(lsp::Position{3, 1}), llvm::Failed());
+};
+
 TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("Text Document Full Updates");

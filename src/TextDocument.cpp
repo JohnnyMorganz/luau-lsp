@@ -1,6 +1,157 @@
 #include <iostream>
+#include "Luau/Common.h"
+#include "Luau/Location.h"
 #include "Luau/StringUtils.h"
 #include "LSP/TextDocument.hpp"
+
+template<typename T>
+static size_t countLeadingZeros(T n)
+{
+#ifdef _MSC_VER
+    unsigned long rl;
+    return _BitScanReverse(&rl, n) ? 31 - int(rl) : 32;
+#else
+    return n == 0 ? 32 : __builtin_clz(n);
+#endif
+}
+
+template<typename T>
+static size_t countLeadingOnes(T n)
+{
+    return countLeadingZeros(~n);
+}
+
+// https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/SourceCode.cpp
+// Iterates over unicode codepoints in the (UTF-8) string. For each,
+// invokes CB(UTF-8 length, UTF-16 length), and breaks if it returns true.
+// Returns true if CB returned true, false if we hit the end of string.
+//
+// If the string is not valid UTF-8, we log this error and "decode" the
+// text in some arbitrary way. This is pretty sad, but this tends to happen deep
+// within indexing of headers where clang misdetected the encoding, and
+// propagating the error all the way back up is (probably?) not be worth it.
+template<typename Callback>
+static bool iterateCodepoints(const std::string& U8, const Callback& CB)
+{
+    bool LoggedInvalid = false;
+    // A codepoint takes two UTF-16 code unit if it's astral (outside BMP).
+    // Astral codepoints are encoded as 4 bytes in UTF-8, starting with 11110xxx.
+    for (size_t I = 0; I < U8.size();)
+    {
+        unsigned char C = static_cast<unsigned char>(U8[I]);
+        if (LUAU_LIKELY(!(C & 0x80)))
+        { // ASCII character.
+            if (CB(1, 1))
+                return true;
+            ++I;
+            continue;
+        }
+        // This convenient property of UTF-8 holds for all non-ASCII characters.
+        size_t UTF8Length = countLeadingOnes(C);
+        // 0xxx is ASCII, handled above. 10xxx is a trailing byte, invalid here.
+        // 11111xxx is not valid UTF-8 at all, maybe some ISO-8859-*.
+        if (LUAU_UNLIKELY(UTF8Length < 2 || UTF8Length > 4))
+        {
+            if (!LoggedInvalid)
+            {
+                std::cerr << "File has invalid UTF-8 near offset " << I << ": " << U8 << "\n";
+                LoggedInvalid = true;
+            }
+            // We can't give a correct result, but avoid returning something wild.
+            // Pretend this is a valid ASCII byte, for lack of better options.
+            // (Too late to get ISO-8859-* right, we've skipped some bytes already).
+            if (CB(1, 1))
+                return true;
+            ++I;
+            continue;
+        }
+        I += UTF8Length; // Skip over all trailing bytes.
+        // A codepoint takes two UTF-16 code unit if it's astral (outside BMP).
+        // Astral codepoints are encoded as 4 bytes in UTF-8 (11110xxx ...)
+        if (CB(UTF8Length, UTF8Length == 4 ? 2 : 1))
+            return true;
+    }
+    return false;
+}
+
+// https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/SourceCode.cpp
+// Returns the byte offset into the string that is an offset of \p Units in
+// the specified encoding.
+// Conceptually, this converts to the encoding, truncates to CodeUnits,
+// converts back to UTF-8, and returns the length in bytes.
+static size_t measureUnits(const std::string& U8, int Units, lsp::PositionEncodingKind Enc, bool& Valid)
+{
+    Valid = Units >= 0;
+    if (Units <= 0)
+        return 0;
+    size_t Result = 0;
+    switch (Enc)
+    {
+    case lsp::PositionEncodingKind::UTF8:
+        Result = Units;
+        break;
+    case lsp::PositionEncodingKind::UTF16:
+        Valid = iterateCodepoints(U8,
+            [&](int U8Len, int U16Len)
+            {
+                Result += U8Len;
+                Units -= U16Len;
+                return Units <= 0;
+            });
+        if (Units < 0) // Offset in the middle of a surrogate pair.
+            Valid = false;
+        break;
+    case lsp::PositionEncodingKind::UTF32:
+        Valid = iterateCodepoints(U8,
+            [&](int U8Len, int U16Len)
+            {
+                Result += U8Len;
+                Units--;
+                return Units <= 0;
+            });
+        break;
+        // case OffsetEncoding::UnsupportedEncoding:
+        //     llvm_unreachable("unsupported encoding");
+    }
+    // Don't return an out-of-range index if we overran.
+    if (Result > U8.size())
+    {
+        Valid = false;
+        return U8.size();
+    }
+    return Result;
+}
+
+// https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/SourceCode.cpp
+size_t lspLength(const std::string& Code)
+{
+    size_t Count = 0;
+    // switch (lspEncoding())
+    // {
+    // case OffsetEncoding::UTF8:
+    //     Count = Code.size();
+    //     break;
+    // case OffsetEncoding::UTF16:
+    iterateCodepoints(Code,
+        [&](int U8Len, int U16Len)
+        {
+            Count += U16Len;
+            return false;
+        });
+    //  break;
+    // case OffsetEncoding::UTF32:
+    //     iterateCodepoints(Code,
+    //         [&](int U8Len, int U16Len)
+    //         {
+    //             ++Count;
+    //             return false;
+    //         });
+    //     break;
+    // case OffsetEncoding::UnsupportedEncoding:
+    //     llvm_unreachable("unsupported encoding");
+    // }
+    return Count;
+}
 
 static std::vector<size_t> computeLineOffsets(const std::string& content, bool isAtLineStart, size_t textOffset = 0)
 {
@@ -89,8 +240,21 @@ size_t TextDocument::offsetAt(lsp::Position position)
     }
     auto lineOffset = lineOffsets[position.line];
     auto nextLineOffset = position.line + 1 < lineOffsets.size() ? lineOffsets[position.line + 1] : _content.size();
+
+    // position.character is in UTF-16, so we need to convert as necessary
+    // TODO: use positionEncoding negotiated with client
+    bool valid;
+    std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
+    size_t byteInLine = measureUnits(line, position.character, lsp::PositionEncodingKind::UTF16, valid);
+
+    if (!valid)
+        std::cerr << "UTF-16 offset " << position.character << " is invalid for line " << position.line << "\n";
+
     return std::max(std::min(lineOffset + position.character, nextLineOffset), lineOffset);
 }
+
+// lsp::Position convertPosition(const Luau::Position& position) {}
+// Luau::Position convertToUtf8(const lsp::Position& position) {}
 
 void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version)
 {
