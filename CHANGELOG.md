@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed metatable name not being used when hovering over the function of a metatable
 - Manually increased some internal limits to reduce likelihood of type errors
 - Fixed diagnostics (and other global configuration) not loading when not inside of a workspace
+- Fixed server erroring when configuration is not sent by the client
 
 ## [1.10.1] - 2022-09-24
 
