@@ -40,6 +40,11 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
     {
         return *typeName;
     }
+    else if (auto mtv = Luau::get<Luau::MetatableTypeVar>(ty))
+    {
+        if (auto mtvName = Luau::getName(mtv->metatable))
+            return *mtvName;
+    }
     else if (auto parentClass = Luau::get<Luau::ClassTypeVar>(ty))
     {
         return parentClass->name;
