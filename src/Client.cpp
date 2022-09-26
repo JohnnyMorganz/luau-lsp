@@ -124,7 +124,9 @@ void Client::requestConfiguration(std::vector<lsp::DocumentUri>& uris)
                 while (workspaceIt != uris.end() && configIt != configs.end())
                 {
                     auto uri = *workspaceIt;
-                    ClientConfiguration config = *configIt;
+                    ClientConfiguration config;
+                    if (!configIt->is_null())
+                        config = *configIt;
                     configStore.insert_or_assign(uri.toString(), config);
                     sendLogMessage(lsp::MessageType::Info, "loaded configuration for " + uri.toString());
                     if (configChangedCallback)
