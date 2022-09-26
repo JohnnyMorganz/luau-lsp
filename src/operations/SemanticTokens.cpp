@@ -133,6 +133,8 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     bool visit(Luau::AstExprLocal* local) override
     {
         auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Variable);
+        if (type == lsp::SemanticTokenTypes::Variable)
+            return true;
         tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
         return true;
     }
