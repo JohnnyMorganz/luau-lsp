@@ -171,6 +171,9 @@ IGNORED_MEMBERS = {
         "CameraSubject",
         "GetPartsObscuringTarget",
     ],
+    "RunService": [
+        "BindToRenderStep",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -345,6 +348,9 @@ EXTRA_MEMBERS = {
         "CameraSubject: Humanoid | BasePart | nil",
         "function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }",
     ],
+    "RunService": [
+        "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
+    ]
 }
 
 # Hardcoded types
