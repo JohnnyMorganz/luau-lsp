@@ -14,7 +14,7 @@ void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
 {
     Luau::ToStringOptions opts;
     auto result = Luau::toStringDetailed(ty, opts);
-    if (result.invalid || result.truncated)
+    if (result.invalid || result.truncated || result.error || result.cycle)
         return;
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
 }
@@ -22,7 +22,7 @@ void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
 void makeInsertable(lsp::InlayHint& hint, Luau::TypePackId ty)
 {
     auto result = types::toStringReturnTypeDetailed(ty);
-    if (result.invalid || result.truncated)
+    if (result.invalid || result.truncated || result.error || result.cycle)
         return;
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
 }
