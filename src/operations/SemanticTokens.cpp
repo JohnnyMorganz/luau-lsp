@@ -4,7 +4,7 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
-static void fillBuiltinGlobals(std::unordered_set<Luau::AstName>& builtins, const Luau::AstNameTable& names, Luau::ScopePtr& env)
+static void fillBuiltinGlobals(std::unordered_set<Luau::AstName>& builtins, const Luau::AstNameTable& names, const Luau::ScopePtr& env)
 {
     Luau::ScopePtr current = env;
     while (true)
