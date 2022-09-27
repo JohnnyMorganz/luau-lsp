@@ -103,7 +103,6 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "Plugin": ["CreateToolbar",],
     "PluginToolbar": ["CreateButton",],
     "WorldRoot": [
         "Raycast",
@@ -270,9 +269,6 @@ EXTRA_MEMBERS = {
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
-    ],
-    "Plugin": [
-        "function CreateToolbar(self, name: string): PluginToolbar",
     ],
     "PluginToolbar": [
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
