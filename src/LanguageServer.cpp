@@ -368,15 +368,33 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             // Update the workspace setup with the new configuration
             workspace->setupWithConfiguration(config);
 
-            // Recompute workspace diagnostics if requested, but only if the diagnostics pull model is not available
-            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) && config.diagnostics.workspace)
+            // Handle diagnostics if in push-mode
+            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
             {
-                auto diagnostics = workspace->workspaceDiagnostics({});
-                for (const auto& report : diagnostics.items)
+                // Recompute workspace diagnostics if requested
+                if (config.diagnostics.workspace)
                 {
-                    if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                    auto diagnostics = workspace->workspaceDiagnostics({});
+                    for (const auto& report : diagnostics.items)
                     {
-                        client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                        {
+                            client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        }
+                    }
+                }
+                // Recompute diagnostics for all currently opened files
+                else
+                {
+                    for (const auto& [file, document] : workspace->fileResolver.managedFiles)
+                    {
+                        auto filePath = workspace->fileResolver.resolveToRealPath(file);
+                        if (filePath)
+                        {
+
+                            auto uri = Uri::file(*filePath);
+                            this->pushDiagnostics(workspace, uri, document.version());
+                        }
                     }
                 }
             }

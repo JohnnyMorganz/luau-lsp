@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Manually increased some internal limits to reduce likelihood of type errors
 - Fixed diagnostics (and other global configuration) not loading when not inside of a workspace
 - Fixed server erroring when configuration is not sent by the client
+- Fixed diagnostics not showing on initial startup in push diagnostics mode (Sublime Text)
 
 ## [1.10.1] - 2022-09-24
 
