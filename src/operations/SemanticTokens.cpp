@@ -4,6 +4,26 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
+static void fillBuiltinGlobals(std::unordered_set<Luau::AstName>& builtins, const Luau::AstNameTable& names, Luau::ScopePtr& env)
+{
+    Luau::ScopePtr current = env;
+    while (true)
+    {
+        for (auto& [global, binding] : current->bindings)
+        {
+            Luau::AstName name = names.get(global.c_str());
+
+            if (name.value)
+                builtins.emplace(name);
+        }
+
+        if (current->parent)
+            current = current->parent;
+        else
+            break;
+    }
+}
+
 enum struct AstLocalInfo
 {
     // local is self
@@ -46,9 +66,11 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     Luau::ModulePtr module;
     std::vector<SemanticToken> tokens;
     std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap;
+    std::unordered_set<Luau::AstName> builtinGlobals;
 
-    explicit SemanticTokensVisitor(Luau::ModulePtr module)
+    explicit SemanticTokensVisitor(Luau::ModulePtr module, std::unordered_set<Luau::AstName> builtinGlobals)
         : module(module)
+        , builtinGlobals(builtinGlobals)
     {
     }
 
@@ -170,12 +192,27 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         return true;
     }
 
-    // bool visit(Luau::AstExprGlobal* local) override
-    // {
-    //     auto type = inferTokenType(module->astTypes.find(local), lsp::SemanticTokenTypes::Namespace);
-    //     tokens.emplace_back(SemanticToken{local->location.begin, local->location.end, type, lsp::SemanticTokenModifiers::None});
-    //     return true;
-    // }
+    bool visit(Luau::AstExprGlobal* global) override
+    {
+        auto isBuiltin = builtinGlobals.find(global->name) != builtinGlobals.end();
+        if (isBuiltin && strlen(global->name.value) > 0)
+        {
+            // If it starts with an uppercase letter, flag it as a class
+            // Otherwise, flag it as a builtin
+            if (isupper(global->name.value[0]))
+            {
+                tokens.emplace_back(SemanticToken{
+                    global->location.begin, global->location.end, lsp::SemanticTokenTypes::Class, lsp::SemanticTokenModifiers::DefaultLibrary});
+            }
+            else
+            {
+                tokens.emplace_back(SemanticToken{global->location.begin, global->location.end, lsp::SemanticTokenTypes::Variable,
+                    lsp::SemanticTokenModifiers::DefaultLibrary | lsp::SemanticTokenModifiers::Readonly});
+            }
+        }
+
+        return true;
+    }
 
     bool visit(Luau::AstExprIndexName* index) override
     {
@@ -183,12 +220,20 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         if (!parentTy)
             return true;
 
+        auto parentIsBuiltin = false;
+        if (auto global = index->expr->as<Luau::AstExprGlobal>())
+            parentIsBuiltin = builtinGlobals.find(global->name) != builtinGlobals.end();
+
         auto ty = Luau::follow(*parentTy);
         if (auto prop = lookupProp(ty, std::string(index->index.value)))
         {
             auto type = inferTokenType(&prop->type, lsp::SemanticTokenTypes::Property);
             auto modifiers = lsp::SemanticTokenModifiers::None;
-            if (types::isMetamethod(std::string(index->index.value)))
+            if (parentIsBuiltin)
+            {
+                modifiers = modifiers | lsp::SemanticTokenModifiers::DefaultLibrary | lsp::SemanticTokenModifiers::Readonly;
+            }
+            else if (types::isMetamethod(std::string(index->index.value)))
             {
                 modifiers = modifiers | lsp::SemanticTokenModifiers::DefaultLibrary;
             }
@@ -225,7 +270,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
 std::vector<SemanticToken> getSemanticTokens(Luau::ModulePtr module, Luau::SourceModule* sourceModule)
 {
-    SemanticTokensVisitor visitor{module};
+    std::unordered_set<Luau::AstName> builtinGlobals;
+    fillBuiltinGlobals(builtinGlobals, *sourceModule->names, module->getModuleScope());
+
+    SemanticTokensVisitor visitor{module, builtinGlobals};
     visitor.visit(sourceModule->root);
     return visitor.tokens;
 }
