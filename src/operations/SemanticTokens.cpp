@@ -70,12 +70,37 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     std::vector<SemanticToken> tokens;
     std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap;
     std::unordered_set<Luau::AstName> builtinGlobals;
+    std::unordered_set<Luau::AstType*> syntheticTypes;
 
     explicit SemanticTokensVisitor(Luau::ModulePtr module, std::unordered_set<Luau::AstName> builtinGlobals)
         : module(module)
         , builtinGlobals(builtinGlobals)
     {
     }
+
+    // HACK: Luau introduces some synthetic tokens in the AST for types
+    // { T } gets converted to { [number]: T } (where number is an introduced AstTypeReference)
+    // string? gets converted to string | nil (where nil is an introduced AstTypeReference)
+    // We do not want to highlight these synthetic tokens, as they don't exist in real code.
+    // We apply visitors in these locations to try and check for synthetic tokens, and mark them as such
+    bool visit(Luau::AstTypeTable* table) override
+    {
+        // If the indexer location is the same as a result type, the indexer was synthetically added
+        if (table->indexer && table->indexer->indexType->location == table->indexer->resultType->location)
+            syntheticTypes.emplace(table->indexer->indexType);
+        return true;
+    }
+
+    bool visit(Luau::AstTypeUnion* unionType) override
+    {
+        // If its a 2 part union "T | nil", and the size of "nil" is only 1 column (replacing ?), then it is synthetic
+        if (unionType->types.size == 2)
+            if (auto ref = unionType->types.data[1]->as<Luau::AstTypeReference>())
+                if (!ref->prefix && !ref->hasParameterList && ref->name == "nil" && ref->location.end.column == ref->location.begin.column + 1)
+                    syntheticTypes.emplace(ref);
+        return true;
+    }
+
 
     bool visit(Luau::AstType* type) override
     {
@@ -84,6 +109,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstTypeReference* ref) override
     {
+        // Ignore synthetic type references
+        if (syntheticTypes.find(ref) != syntheticTypes.end())
+            return false;
+
         // HACK: The location information provided only gives location for the whole reference
         // but we do not want to highlight punctuation inside of it (Module.Type<Param> should not highlight . < >)
         // So we use the start position and consider the end positions separately.
