@@ -3,6 +3,18 @@
 #include "LSP/Protocol.hpp"
 #include "LSP/LuauExt.hpp"
 
+/// Defining sort text levels assigned to completion items
+/// Note that sort text is lexicographically
+namespace SortText
+{
+static constexpr const char* CorrectTypeKind = "0";
+static constexpr const char* CorrectFunctionResult = "1";
+static constexpr const char* Default = "2";
+static constexpr const char* WrongIndexType = "3";
+static constexpr const char* AutoImports = "4";
+static constexpr const char* Keywords = "5";
+} // namespace SortText
+
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
 {
     return std::nullopt;
@@ -264,6 +276,7 @@ void WorkspaceFolder::suggestImports(
             item.detail = "Auto-import";
             item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", importText)};
             item.insertText = service;
+            item.sortText = SortText::AutoImports;
 
             lsp::Position placement{lineNumber, 0};
             item.additionalTextEdits.emplace_back(lsp::TextEdit{{placement, placement}, importText});
@@ -297,9 +310,17 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
         item.deprecated = entry.deprecated;
+        item.sortText = SortText::Default;
 
         if (entry.documentationSymbol)
             item.documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *entry.documentationSymbol)};
+
+        if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
+            item.sortText = SortText::CorrectTypeKind;
+        else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
+            item.sortText = SortText::CorrectFunctionResult;
+        else if (entry.wrongIndexType)
+            item.sortText = SortText::WrongIndexType;
 
         switch (entry.kind)
         {
@@ -311,6 +332,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             break;
         case Luau::AutocompleteEntryKind::Keyword:
             item.kind = lsp::CompletionItemKind::Keyword;
+            item.sortText = SortText::Keywords;
             break;
         case Luau::AutocompleteEntryKind::String:
             item.kind = lsp::CompletionItemKind::Constant; // TODO: is a string autocomplete always a singleton constant?
