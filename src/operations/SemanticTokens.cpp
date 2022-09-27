@@ -321,10 +321,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     }
 };
 
-std::vector<SemanticToken> getSemanticTokens(Luau::ModulePtr module, Luau::SourceModule* sourceModule)
+std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr module, const Luau::SourceModule* sourceModule)
 {
     std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals;
-    fillBuiltinGlobals(builtinGlobals, *sourceModule->names, module->getModuleScope());
+    fillBuiltinGlobals(builtinGlobals, *sourceModule->names, frontend.typeChecker.globalScope);
 
     SemanticTokensVisitor visitor{module, builtinGlobals};
     visitor.visit(sourceModule->root);
@@ -384,7 +384,7 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
     if (!sourceModule || !module)
         return std::nullopt;
 
-    auto tokens = getSemanticTokens(module, sourceModule);
+    auto tokens = getSemanticTokens(frontend, module, sourceModule);
     lsp::SemanticTokens result;
     result.data = packTokens(tokens);
     return result;
