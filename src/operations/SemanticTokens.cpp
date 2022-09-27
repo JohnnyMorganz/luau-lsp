@@ -4,7 +4,7 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 
-static void fillBuiltinGlobals(std::unordered_set<Luau::AstName>& builtins, const Luau::AstNameTable& names, const Luau::ScopePtr& env)
+static void fillBuiltinGlobals(std::unordered_map<Luau::AstName, Luau::TypeId>& builtins, const Luau::AstNameTable& names, const Luau::ScopePtr& env)
 {
     Luau::ScopePtr current = env;
     while (true)
@@ -14,7 +14,7 @@ static void fillBuiltinGlobals(std::unordered_set<Luau::AstName>& builtins, cons
             Luau::AstName name = names.get(global.c_str());
 
             if (name.value)
-                builtins.emplace(name);
+                builtins.insert_or_assign(name, binding.typeId);
         }
 
         if (current->parent)
@@ -69,10 +69,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     Luau::ModulePtr module;
     std::vector<SemanticToken> tokens;
     std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap;
-    std::unordered_set<Luau::AstName> builtinGlobals;
+    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals;
     std::unordered_set<Luau::AstType*> syntheticTypes;
 
-    explicit SemanticTokensVisitor(Luau::ModulePtr module, std::unordered_set<Luau::AstName> builtinGlobals)
+    explicit SemanticTokensVisitor(Luau::ModulePtr module, std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals)
         : module(module)
         , builtinGlobals(builtinGlobals)
     {
@@ -229,8 +229,8 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprGlobal* global) override
     {
-        auto isBuiltin = builtinGlobals.find(global->name) != builtinGlobals.end();
-        if (isBuiltin && strlen(global->name.value) > 0)
+        auto it = builtinGlobals.find(global->name);
+        if (it != builtinGlobals.end() && strlen(global->name.value) > 0)
         {
             // SPECIAL CASE: if name is "Enum", classify it as an enum
             if (global->name == "Enum")
@@ -247,7 +247,8 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             }
             else
             {
-                tokens.emplace_back(SemanticToken{global->location.begin, global->location.end, lsp::SemanticTokenTypes::Variable,
+                auto type = inferTokenType(&it->second, lsp::SemanticTokenTypes::Variable);
+                tokens.emplace_back(SemanticToken{global->location.begin, global->location.end, type,
                     lsp::SemanticTokenModifiers::DefaultLibrary | lsp::SemanticTokenModifiers::Readonly});
             }
         }
@@ -322,7 +323,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
 std::vector<SemanticToken> getSemanticTokens(Luau::ModulePtr module, Luau::SourceModule* sourceModule)
 {
-    std::unordered_set<Luau::AstName> builtinGlobals;
+    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals;
     fillBuiltinGlobals(builtinGlobals, *sourceModule->names, module->getModuleScope());
 
     SemanticTokensVisitor visitor{module, builtinGlobals};
