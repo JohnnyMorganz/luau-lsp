@@ -93,9 +93,12 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstTypeUnion* unionType) override
     {
-        // If its a 2 part union "T | nil", and the size of "nil" is only 1 column (replacing ?), then it is synthetic
-        if (unionType->types.size == 2)
-            if (auto ref = unionType->types.data[1]->as<Luau::AstTypeReference>())
+        // If the union contains a "nil" part, but it has the the size of only 1 column, then it is synthetic
+        // Note that the union could contain > 2 parts:
+        //  T? -> T | nil
+        //  U | V? -> U | V | nil
+        for (const auto& ty : unionType->types)
+            if (auto ref = ty->as<Luau::AstTypeReference>())
                 if (!ref->prefix && !ref->hasParameterList && ref->name == "nil" && ref->location.end.column == ref->location.begin.column + 1)
                     syntheticTypes.emplace(ref);
         return true;
