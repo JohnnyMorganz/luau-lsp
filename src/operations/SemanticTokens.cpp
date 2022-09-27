@@ -39,9 +39,12 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
 
     auto followedTy = Luau::follow(*ty);
 
-    if (Luau::get<Luau::FunctionTypeVar>(followedTy))
+    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
     {
-        return lsp::SemanticTokenTypes::Function;
+        if (ftv->hasSelf)
+            return lsp::SemanticTokenTypes::Method;
+        else
+            return lsp::SemanticTokenTypes::Function;
     }
     else if (Luau::get<Luau::IntersectionTypeVar>(followedTy))
     {
