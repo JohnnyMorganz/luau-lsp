@@ -103,6 +103,8 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "Plugin": ["CreateToolbar",],
+    "PluginToolbar": ["CreateButton",],
     "WorldRoot": [
         "Raycast",
         "ArePartsTouchingOthers",

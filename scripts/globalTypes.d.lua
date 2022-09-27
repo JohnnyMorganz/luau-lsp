@@ -7927,7 +7927,6 @@ declare class PluginPolicyService extends Instance
 end
 
 declare class PluginToolbar extends Instance
-	function CreateButton(self, buttonId: string, tooltip: string, iconname: string, text: string?): PluginToolbarButton
 	function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton
 end
 
@@ -9927,7 +9926,6 @@ declare class Plugin extends Instance
 	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
 	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
 	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
-	function CreateToolbar(self, name: string): PluginToolbar
 	function CreateToolbar(self, name: string): PluginToolbar
 	function Deactivate(self): nil
 	function GetItem(self, key: string, defaultValue: any): any
