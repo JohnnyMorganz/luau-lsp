@@ -252,6 +252,18 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
                     lsp::SemanticTokenModifiers::DefaultLibrary | lsp::SemanticTokenModifiers::Readonly});
             }
         }
+        else
+        {
+            auto ty = module->astTypes.find(global);
+            if (!ty)
+                return true;
+
+            auto type = inferTokenType(ty, lsp::SemanticTokenTypes::Variable);
+            if (type == lsp::SemanticTokenTypes::Variable)
+                return true;
+
+            tokens.emplace_back(SemanticToken{global->location.begin, global->location.end, type, lsp::SemanticTokenModifiers::None});
+        }
 
         return true;
     }
