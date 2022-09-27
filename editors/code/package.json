@@ -62,6 +62,7 @@
             {
                 "language": "lua",
                 "scopes": {
+                    "variable.defaultLibrary.readonly": ["constant.language.global.lua"],
                     "property.defaultLibrary": ["variable.language.lua"],
                     "enum.defaultLibrary": ["constant.language.enum.lua"]
                 }
