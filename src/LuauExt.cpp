@@ -672,13 +672,15 @@ bool types::isMetamethod(const Luau::Name& name)
            name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
 }
 
-// NOTE: this does NOT apply UTF-16 transformations
-static lsp::Position convertPosition(const Luau::Position& position)
+static lsp::Position toUTF16(const TextDocument* textDocument, const Luau::Position& position)
 {
-    return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
+    if (textDocument)
+        return textDocument->convertPosition(position);
+    else
+        return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
 }
 
-lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver)
+lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver, const TextDocument* textDocument)
 {
     std::string message;
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
@@ -693,12 +695,12 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::Fi
     diagnostic.code = error.code();
     diagnostic.message = message;
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
-    diagnostic.range = {convertPosition(error.location.begin), convertPosition(error.location.end)};
+    diagnostic.range = {toUTF16(textDocument, error.location.begin), toUTF16(textDocument, error.location.end)};
     diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/typecheck")};
     return diagnostic;
 }
 
-lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
+lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDocument* textDocument)
 {
     std::string lintName = Luau::LintWarning::getName(lint.code);
 
@@ -707,7 +709,7 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
     diagnostic.code = lint.code;
     diagnostic.message = lintName + ": " + lint.text;
     diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
-    diagnostic.range = {convertPosition(lint.location.begin), convertPosition(lint.location.end)};
+    diagnostic.range = {toUTF16(textDocument, lint.location.begin), toUTF16(textDocument, lint.location.end)};
     diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
 
     if (lint.code == Luau::LintWarning::Code::Code_LocalUnused || lint.code == Luau::LintWarning::Code::Code_ImportUnused ||
@@ -723,14 +725,14 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint)
     return diagnostic;
 }
 
-lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error)
+lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const TextDocument* textDocument)
 {
     lsp::Diagnostic diagnostic;
     diagnostic.source = "Luau";
     diagnostic.code = "SyntaxError";
     diagnostic.message = "SyntaxError: " + error.getMessage();
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
-    diagnostic.range = {convertPosition(error.getLocation().begin), convertPosition(error.getLocation().end)};
+    diagnostic.range = {toUTF16(textDocument, error.getLocation().begin), toUTF16(textDocument, error.getLocation().end)};
     diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
     return diagnostic;
 }
