@@ -37,10 +37,7 @@ struct WorkspaceFileResolver
     }
 
     /// The file is managed by the client, so FS will be out of date
-    bool isManagedFile(const Luau::ModuleName& name) const
-    {
-        return managedFiles.find(name) != managedFiles.end();
-    }
+    const TextDocument* getTextDocument(const Luau::ModuleName& name) const;
 
     /// The name points to a virtual path (i.e., game/ or ProjectRoot/)
     bool isVirtualPath(const Luau::ModuleName& name) const

@@ -98,8 +98,8 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         lsp::WorkspaceDocumentDiagnosticReport documentReport;
         documentReport.uri = uri;
         documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-        if (fileResolver.isManagedFile(moduleName))
-            documentReport.version = fileResolver.managedFiles.at(moduleName).version();
+        if (auto document = fileResolver.getTextDocument(moduleName))
+            documentReport.version = document->version();
 
         // If we don't have workspace diagnostics enabled, or we are are ignoring this file
         // Then provide an empty report to clear the file diagnostics
