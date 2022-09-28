@@ -95,17 +95,20 @@
             "messages",
             "verbose"
           ],
+          "scope": "window",
           "default": "off"
         },
         "luau-lsp.autocompleteEnd": {
           "markdownDescription": "Automatically insert an `end` when opening a block",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.completion.suggestImports": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.ignoreGlobs": {
           "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
@@ -115,42 +118,50 @@
           },
           "default": [
             "**/_Index/**"
-          ]
+          ],
+          "scope": "resource"
         },
         "luau-lsp.sourcemap.enabled": {
           "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.sourcemap.autogenerate": {
           "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.sourcemap.rojoPath": {
           "markdownDescription": "Path to the Rojo executable. If not provided, attempts to run `rojo` in the workspace directory, so it must be available on the PATH",
           "type": "string",
-          "default": null
+          "default": null,
+          "scope": "resource"
         },
         "luau-lsp.sourcemap.rojoProjectFile": {
           "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
           "type": "string",
-          "default": "default.project.json"
+          "default": "default.project.json",
+          "scope": "resource"
         },
         "luau-lsp.sourcemap.includeNonScripts": {
           "markdownDescription": "Include non-script instances in the generated sourcemap",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.fflags.enableByDefault": {
           "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "window"
         },
         "luau-lsp.fflags.sync": {
           "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "window"
         },
         "luau-lsp.fflags.override": {
           "markdownDescription": "Override FFlags passed to Luau",
@@ -158,17 +169,20 @@
           "default": {},
           "additionalProperties": {
             "type": "string"
-          }
+          },
+          "scope": "window"
         },
         "luau-lsp.diagnostics.includeDependents": {
           "markdownDescription": "Recompute diagnostics for dependents when a file changes. If `#luau-lsp.diagnostics.workspace#` is enabled, this is ignored",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.diagnostics.workspace": {
           "markdownDescription": "Compute diagnostics for the whole workspace",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.types.definitionFiles": {
           "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
@@ -176,12 +190,14 @@
           "default": [],
           "items": {
             "type": "string"
-          }
+          },
+          "scope": "resource"
         },
         "luau-lsp.types.roblox": {
           "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
@@ -191,68 +207,81 @@
             "none",
             "literals",
             "all"
-          ]
+          ],
+          "scope": "resource"
         },
         "luau-lsp.inlayHints.variableTypes": {
           "markdownDescription": "Show inlay hints for variable types",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.inlayHints.parameterTypes": {
           "markdownDescription": "Show inlay hints for parameter types",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.inlayHints.functionReturnTypes": {
           "markdownDescription": "Show inlay hints for function return types",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.inlayHints.typeHintMaxLength": {
           "markdownDescription": "The maximum length a type hint should be before being truncated",
           "type": "number",
           "default": 50,
-          "minimum": 10
+          "minimum": 10,
+          "scope": "resource"
         },
         "luau-lsp.hover.enabled": {
           "markdownDescription": "Enable hover",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.hover.showTableKinds": {
           "markdownDescription": "Show table kinds",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.hover.multilineFunctionDefinitions": {
           "markdownDescription": "Show function definitions on multiple lines",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "resource"
         },
         "luau-lsp.hover.strictDatamodelTypes": {
           "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.completion.enabled": {
           "markdownDescription": "Enable autocomplete",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.plugin.enabled": {
           "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
           "type": "boolean",
-          "default": false
+          "default": false,
+          "scope": "window"
         },
         "luau-lsp.plugin.port": {
           "markdownDescription": "Port number to connect to the Studio Plugin",
           "type": "number",
-          "default": 3667
+          "default": 3667,
+          "scope": "window"
         }
       }
     }
