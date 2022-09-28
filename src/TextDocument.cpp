@@ -68,7 +68,7 @@ static bool iterateCodepoints(const std::string& U8, const CodepointsCallback& C
         I += UTF8Length; // Skip over all trailing bytes.
         // A codepoint takes two UTF-16 code unit if it's astral (outside BMP).
         // Astral codepoints are encoded as 4 bytes in UTF-8 (11110xxx ...)
-        if (CB(UTF8Length, UTF8Length == 4 ? 2 : 1))
+        if (CB(static_cast<int>(UTF8Length), UTF8Length == 4 ? 2 : 1))
             return true;
     }
     return false;
@@ -257,7 +257,7 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     // position.character may be in UTF-16, so we need to convert as necessary
     bool valid;
     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
-    size_t byteInLine = measureUnits(line, position.character, positionEncoding(), valid);
+    size_t byteInLine = measureUnits(line, static_cast<int>(position.character), positionEncoding(), valid);
 
     if (!valid)
         std::cerr << "UTF-16 offset " << position.character << " is invalid for line " << position.line << "\n";
