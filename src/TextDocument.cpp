@@ -184,7 +184,7 @@ static lsp::Range getWellformedRange(lsp::Range range)
 }
 
 
-std::string TextDocument::getText(std::optional<lsp::Range> range)
+const std::string& TextDocument::getText(std::optional<lsp::Range> range) const
 {
     if (range)
     {
@@ -195,7 +195,7 @@ std::string TextDocument::getText(std::optional<lsp::Range> range)
     return _content;
 }
 
-lsp::Position TextDocument::positionAt(size_t offset)
+lsp::Position TextDocument::positionAt(size_t offset) const
 {
     offset = std::max(std::min(offset, _content.size()), (size_t)0);
     auto lineOffsets = getLineOffsets();
@@ -226,7 +226,7 @@ lsp::Position TextDocument::positionAt(size_t offset)
     return lsp::Position{line, lspLength(currentContent)};
 }
 
-size_t TextDocument::offsetAt(const lsp::Position& position)
+size_t TextDocument::offsetAt(const lsp::Position& position) const
 {
     auto utf8Position = convertPosition(position);
     auto lineOffsets = getLineOffsets();
@@ -235,13 +235,13 @@ size_t TextDocument::offsetAt(const lsp::Position& position)
 }
 
 // We treat all lsp:Positions as UTF-16 encoded. We must convert between the two when necessary
-Luau::Position TextDocument::convertPosition(const lsp::Position& position)
+Luau::Position TextDocument::convertPosition(const lsp::Position& position) const
 {
     LUAU_ASSERT(position.line <= UINT_MAX);
     LUAU_ASSERT(position.character <= UINT_MAX);
 
     auto lineOffsets = getLineOffsets();
-    if (position.line >= lineOffsets.size())
+    if (position.line >= lineCount())
     {
         return Luau::Position{lineOffsets.size() - 1, _content.size() - lineOffsets.back()};
     }
@@ -320,12 +320,12 @@ void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>
     }
 }
 
-size_t TextDocument::lineCount()
+size_t TextDocument::lineCount() const
 {
     return getLineOffsets().size();
 }
 
-const std::vector<size_t>& TextDocument::getLineOffsets()
+const std::vector<size_t>& TextDocument::getLineOffsets() const
 {
     if (!_lineOffsets)
     {
@@ -335,7 +335,7 @@ const std::vector<size_t>& TextDocument::getLineOffsets()
 }
 
 // TODO: this is a bit expensive
-std::vector<std::string_view> TextDocument::getLines()
+std::vector<std::string_view> TextDocument::getLines() const
 {
     return Luau::split(_content, '\n');
 }
