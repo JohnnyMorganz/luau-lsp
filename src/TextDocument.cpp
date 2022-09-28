@@ -30,8 +30,8 @@ static size_t countLeadingOnes(unsigned char n)
 // text in some arbitrary way. This is pretty sad, but this tends to happen deep
 // within indexing of headers where clang misdetected the encoding, and
 // propagating the error all the way back up is (probably?) not be worth it.
-template<typename Callback>
-static bool iterateCodepoints(const std::string& U8, const Callback& CB)
+using CodepointsCallback = std::function<bool(int, int)>;
+static bool iterateCodepoints(const std::string& U8, const CodepointsCallback& CB)
 {
     bool LoggedInvalid = false;
     // A codepoint takes two UTF-16 code unit if it's astral (outside BMP).
