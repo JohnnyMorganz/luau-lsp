@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed handling of UTF-16 characters of different size to UTF-8 (i.e., emojis, non-english text). Will no longer produce malformed strings and weird diagnostics
+
 ## [1.11.0] - 2022-09-28
 
 ### Added
