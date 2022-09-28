@@ -1,4 +1,5 @@
 #include <iostream>
+#include <climits>
 #include "Luau/Common.h"
 #include "Luau/Location.h"
 #include "Luau/StringUtils.h"
@@ -243,7 +244,7 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     auto lineOffsets = getLineOffsets();
     if (position.line >= lineCount())
     {
-        return Luau::Position{lineOffsets.size() - 1, _content.size() - lineOffsets.back()};
+        return Luau::Position{static_cast<unsigned int>(lineOffsets.size() - 1), static_cast<unsigned int>(_content.size() - lineOffsets.back())};
     }
     else if (position.line < 0)
     {

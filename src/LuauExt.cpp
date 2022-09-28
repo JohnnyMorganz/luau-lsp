@@ -1,4 +1,3 @@
-#include <climits>
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
 #include "Luau/Transpiler.h"
