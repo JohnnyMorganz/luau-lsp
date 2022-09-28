@@ -430,6 +430,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                         for (auto& [name, prop] : ctv->props)
                         {
                             prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                            Luau::attachTag(prop, "EnumItem");
                         }
 
                         // Prefix the name (after its been placed into enumTypes) with "Enum."

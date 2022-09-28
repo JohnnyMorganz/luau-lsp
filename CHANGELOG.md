@@ -6,9 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.11.0] - 2022-09-28
+
 ### Added
 
 - Added support for Semantic Tokens
+
+### Changed
+
+- Improved autocomplete items ordering by applying heuristics to sort items
+- Table keys are prioritised when autocompleting inside of a table
 
 ### Fixed
 
@@ -16,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed diagnostics not clearing for files when workspace diagnostics is not enabled
 - Fixed metatable name not being used when hovering over the function of a metatable
 - Manually increased some internal limits to reduce likelihood of type errors
+- Fixed diagnostics (and other global configuration) not loading when not inside of a workspace
+- Fixed server erroring when configuration is not sent by the client
+- Fixed diagnostics not showing on initial startup in push diagnostics mode (Sublime Text)
+- Fixed "insert inlay hint" incorrectly enabled for error types
 
 ## [1.10.1] - 2022-09-24
 

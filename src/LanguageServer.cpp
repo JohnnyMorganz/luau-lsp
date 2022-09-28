@@ -21,10 +21,12 @@ using ClientPtr = std::shared_ptr<Client>;
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
 {
+    if (file == nullWorkspace->rootUri)
+        return nullWorkspace;
+
     WorkspaceFolderPtr bestWorkspace = nullptr;
     size_t length = 0;
     auto checkStr = file.toString();
-
 
     for (auto& workspace : workspaceFolders)
     {
@@ -366,26 +368,42 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             // Update the workspace setup with the new configuration
             workspace->setupWithConfiguration(config);
 
-            // Recompute workspace diagnostics if requested, but only if the diagnostics pull model is not available
-            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) && config.diagnostics.workspace)
+            // Handle diagnostics if in push-mode
+            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
             {
-                auto diagnostics = workspace->workspaceDiagnostics({});
-                for (const auto& report : diagnostics.items)
+                // Recompute workspace diagnostics if requested
+                if (config.diagnostics.workspace)
                 {
-                    if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                    auto diagnostics = workspace->workspaceDiagnostics({});
+                    for (const auto& report : diagnostics.items)
                     {
-                        client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                        {
+                            client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                        }
+                    }
+                }
+                // Recompute diagnostics for all currently opened files
+                else
+                {
+                    for (const auto& [file, document] : workspace->fileResolver.managedFiles)
+                    {
+                        auto filePath = workspace->fileResolver.resolveToRealPath(file);
+                        if (filePath)
+                        {
+
+                            auto uri = Uri::file(*filePath);
+                            this->pushDiagnostics(workspace, uri, document.version());
+                        }
                     }
                 }
             }
         };
 
         // Send off requests to get the configuration for each workspace
-        std::vector<lsp::DocumentUri> items;
+        std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
-        {
             items.emplace_back(workspace->rootUri);
-        }
         client->requestConfiguration(items);
     }
     else
@@ -529,11 +547,9 @@ void LanguageServer::onDidChangeConfiguration(const lsp::DidChangeConfigurationP
         client->configStore.clear();
 
         // Send off requests to get the configuration again for each workspace
-        std::vector<lsp::DocumentUri> items;
+        std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
-        {
             items.emplace_back(workspace->rootUri);
-        }
         client->requestConfiguration(items);
     }
     else

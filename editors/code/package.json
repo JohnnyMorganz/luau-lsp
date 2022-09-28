@@ -1,287 +1,324 @@
 {
-    "name": "luau-lsp",
-    "displayName": "Luau Language Server",
-    "description": "A Language Server Client for Luau",
-    "author": "JohnnyMorganz",
-    "publisher": "JohnnyMorganz",
-    "license": "MIT",
-    "icon": "assets/icon.png",
-    "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/JohnnyMorganz/luau-lsp"
-    },
-    "bugs": {
-        "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
-    },
-    "sponsor": {
-        "url": "https://github.com/sponsors/JohnnyMorganz"
-    },
-    "version": "1.10.1",
-    "engines": {
-        "vscode": "^1.67.0"
-    },
-    "categories": [
-        "Programming Languages",
-        "Linters"
+  "name": "luau-lsp",
+  "displayName": "Luau Language Server",
+  "description": "A Language Server Client for Luau",
+  "author": "JohnnyMorganz",
+  "publisher": "JohnnyMorganz",
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JohnnyMorganz/luau-lsp"
+  },
+  "bugs": {
+    "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
+  },
+  "sponsor": {
+    "url": "https://github.com/sponsors/JohnnyMorganz"
+  },
+  "version": "1.11.0",
+  "engines": {
+    "vscode": "^1.67.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "lua",
+    "luau",
+    "roblox"
+  ],
+  "activationEvents": [
+    "onLanguage:lua",
+    "onLanguage:luau",
+    "onCommand:luau-lsp.updateApi",
+    "onCommand:luau-lsp.regenerateSourcemap"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "lua",
+        "aliases": [
+          "Luau"
+        ],
+        "extensions": [
+          ".lua",
+          ".luau"
+        ],
+        "configuration": "./language-configuration.json"
+      }
     ],
-    "keywords": [
-        "lua",
-        "luau",
-        "roblox"
+    "grammars": [
+      {
+        "language": "lua",
+        "scopeName": "source.lua",
+        "path": "./syntaxes/lua.tmLanguage.json"
+      }
     ],
-    "activationEvents": [
-        "onLanguage:lua",
-        "onLanguage:luau",
-        "onCommand:luau-lsp.updateApi",
-        "onCommand:luau-lsp.regenerateSourcemap"
-    ],
-    "main": "./dist/extension.js",
-    "contributes": {
-        "languages": [
-            {
-                "id": "lua",
-                "aliases": [
-                    "Luau"
-                ],
-                "extensions": [
-                    ".lua",
-                    ".luau"
-                ],
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "lua",
-                "scopeName": "source.lua",
-                "path": "./syntaxes/lua.tmLanguage.json"
-            }
-        ],
-        "semanticTokenScopes": [
-            {
-                "language": "lua",
-                "scopes": {
-                    "property.defaultLibrary": ["variable.language.lua"]
-                }
-            }
-        ],
-        "commands": [
-            {
-                "command": "luau-lsp.updateApi",
-                "title": "Luau: Redownload API Types"
-            },
-            {
-                "command": "luau-lsp.regenerateSourcemap",
-                "title": "Luau: Regenerate Rojo Sourcemap"
-            }
-        ],
-        "configuration": {
-            "title": "Luau Language Server",
-            "properties": {
-                "luau.trace.server": {
-                    "markdownDescription": "Traces the communication between VS Code and the Luau language server.",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                    ],
-                    "default": "off"
-                },
-                "luau-lsp.autocompleteEnd": {
-                    "markdownDescription": "Automatically insert an `end` when opening a block",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.completion.suggestImports": {
-                    "markdownDescription": "Suggest automatic imports in completion items",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.ignoreGlobs": {
-                    "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "default": [
-                        "**/_Index/**"
-                    ]
-                },
-                "luau-lsp.sourcemap.enabled": {
-                    "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.sourcemap.autogenerate": {
-                    "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.sourcemap.rojoPath": {
-                    "markdownDescription": "Path to the Rojo executable. If not provided, attempts to run `rojo` in the workspace directory, so it must be available on the PATH",
-                    "type": "string",
-                    "default": null
-                },
-                "luau-lsp.sourcemap.rojoProjectFile": {
-                    "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
-                    "type": "string",
-                    "default": "default.project.json"
-                },
-                "luau-lsp.sourcemap.includeNonScripts": {
-                    "markdownDescription": "Include non-script instances in the generated sourcemap",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.fflags.enableByDefault": {
-                    "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.fflags.sync": {
-                    "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.fflags.override": {
-                    "markdownDescription": "Override FFlags passed to Luau",
-                    "type": "object",
-                    "default": {},
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "luau-lsp.diagnostics.includeDependents": {
-                    "markdownDescription": "Recompute diagnostics for dependents when a file changes. If `#luau-lsp.diagnostics.workspace#` is enabled, this is ignored",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.diagnostics.workspace": {
-                    "markdownDescription": "Compute diagnostics for the whole workspace",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.types.definitionFiles": {
-                    "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
-                    "type": "array",
-                    "default": [],
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "luau-lsp.types.roblox": {
-                    "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.inlayHints.parameterNames": {
-                    "markdownDescription": "Show inlay hints for function parameter names",
-                    "type": "string",
-                    "default": "none",
-                    "enum": [
-                        "none",
-                        "literals",
-                        "all"
-                    ]
-                },
-                "luau-lsp.inlayHints.variableTypes": {
-                    "markdownDescription": "Show inlay hints for variable types",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.inlayHints.parameterTypes": {
-                    "markdownDescription": "Show inlay hints for parameter types",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.inlayHints.functionReturnTypes": {
-                    "markdownDescription": "Show inlay hints for function return types",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.inlayHints.typeHintMaxLength": {
-                    "markdownDescription": "The maximum length a type hint should be before being truncated",
-                    "type": "number",
-                    "default": 50,
-                    "minimum": 10
-                },
-                "luau-lsp.hover.enabled": {
-                    "markdownDescription": "Enable hover",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.hover.showTableKinds": {
-                    "markdownDescription": "Show table kinds",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.hover.multilineFunctionDefinitions": {
-                    "markdownDescription": "Show function definitions on multiple lines",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.hover.strictDatamodelTypes": {
-                    "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.completion.enabled": {
-                    "markdownDescription": "Enable autocomplete",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.signatureHelp.enabled": {
-                    "markdownDescription": "Enable signature help",
-                    "type": "boolean",
-                    "default": true
-                },
-                "luau-lsp.plugin.enabled": {
-                    "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
-                    "type": "boolean",
-                    "default": false
-                },
-                "luau-lsp.plugin.port": {
-                    "markdownDescription": "Port number to connect to the Studio Plugin",
-                    "type": "number",
-                    "default": 3667
-                }
-            }
+    "semanticTokenScopes": [
+      {
+        "language": "lua",
+        "scopes": {
+          "variable.defaultLibrary.readonly": [
+            "constant.language.global.lua"
+          ],
+          "property.defaultLibrary": [
+            "variable.language.lua"
+          ],
+          "enum.defaultLibrary": [
+            "constant.language.enum.lua"
+          ]
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "webpack",
-        "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
-        "compile-tests": "tsc -p . --outDir out",
-        "watch-tests": "tsc -p . -w --outDir out",
-        "pretest": "npm run compile-tests && npm run compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js",
-        "check:format": "prettier --check src"
-    },
-    "devDependencies": {
-        "@types/express": "^4.17.14",
-        "@types/glob": "^7.2.0",
-        "@types/mocha": "^9.1.1",
-        "@types/node": "14.x",
-        "@types/vscode": "^1.67.0",
-        "@typescript-eslint/eslint-plugin": "^5.21.0",
-        "@typescript-eslint/parser": "^5.21.0",
-        "@vscode/test-electron": "^2.1.4",
-        "eslint": "^8.14.0",
-        "glob": "^8.0.1",
-        "mocha": "^9.2.2",
-        "prettier": "^2.6.2",
-        "ts-loader": "^9.2.8",
-        "typescript": "^4.6.4",
-        "webpack": "^5.70.0",
-        "webpack-cli": "^4.9.2"
-    },
-    "dependencies": {
-        "express": "^4.18.1",
-        "node-fetch": "^3.2.4",
-        "vscode-languageclient": "^8.0.2"
+      }
+    ],
+    "commands": [
+      {
+        "command": "luau-lsp.updateApi",
+        "title": "Luau: Redownload API Types"
+      },
+      {
+        "command": "luau-lsp.regenerateSourcemap",
+        "title": "Luau: Regenerate Rojo Sourcemap"
+      }
+    ],
+    "configuration": {
+      "title": "Luau Language Server",
+      "properties": {
+        "luau.trace.server": {
+          "markdownDescription": "Traces the communication between VS Code and the Luau language server.",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "scope": "window",
+          "default": "off"
+        },
+        "luau-lsp.autocompleteEnd": {
+          "markdownDescription": "Automatically insert an `end` when opening a block",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.suggestImports": {
+          "markdownDescription": "Suggest automatic imports in completion items",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.ignoreGlobs": {
+          "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/_Index/**"
+          ],
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.enabled": {
+          "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.autogenerate": {
+          "markdownDescription": "Automatically run the `rojo sourcemap` command to regenerate sourcemaps on changes",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.rojoPath": {
+          "markdownDescription": "Path to the Rojo executable. If not provided, attempts to run `rojo` in the workspace directory, so it must be available on the PATH",
+          "type": "string",
+          "default": null,
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.rojoProjectFile": {
+          "markdownDescription": "The name of the Rojo project file to generate a sourcemap for.\nOnly applies if `#luau-lsp.sourcemap.autogenerate#` is enabled",
+          "type": "string",
+          "default": "default.project.json",
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.includeNonScripts": {
+          "markdownDescription": "Include non-script instances in the generated sourcemap",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.fflags.enableByDefault": {
+          "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
+          "type": "boolean",
+          "default": true,
+          "scope": "window"
+        },
+        "luau-lsp.fflags.sync": {
+          "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
+          "type": "boolean",
+          "default": true,
+          "scope": "window"
+        },
+        "luau-lsp.fflags.override": {
+          "markdownDescription": "Override FFlags passed to Luau",
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          },
+          "scope": "window"
+        },
+        "luau-lsp.diagnostics.includeDependents": {
+          "markdownDescription": "Recompute diagnostics for dependents when a file changes. If `#luau-lsp.diagnostics.workspace#` is enabled, this is ignored",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.diagnostics.workspace": {
+          "markdownDescription": "Compute diagnostics for the whole workspace",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.types.definitionFiles": {
+          "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "resource"
+        },
+        "luau-lsp.types.roblox": {
+          "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.parameterNames": {
+          "markdownDescription": "Show inlay hints for function parameter names",
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "literals",
+            "all"
+          ],
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.variableTypes": {
+          "markdownDescription": "Show inlay hints for variable types",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.parameterTypes": {
+          "markdownDescription": "Show inlay hints for parameter types",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.functionReturnTypes": {
+          "markdownDescription": "Show inlay hints for function return types",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.typeHintMaxLength": {
+          "markdownDescription": "The maximum length a type hint should be before being truncated",
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "scope": "resource"
+        },
+        "luau-lsp.hover.enabled": {
+          "markdownDescription": "Enable hover",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.hover.showTableKinds": {
+          "markdownDescription": "Show table kinds",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.hover.multilineFunctionDefinitions": {
+          "markdownDescription": "Show function definitions on multiple lines",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.hover.strictDatamodelTypes": {
+          "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.enabled": {
+          "markdownDescription": "Enable autocomplete",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.signatureHelp.enabled": {
+          "markdownDescription": "Enable signature help",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.plugin.enabled": {
+          "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
+          "type": "boolean",
+          "default": false,
+          "scope": "window"
+        },
+        "luau-lsp.plugin.port": {
+          "markdownDescription": "Port number to connect to the Studio Plugin",
+          "type": "number",
+          "default": 3667,
+          "scope": "window"
+        }
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "check:format": "prettier --check src"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.67.0",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "@vscode/test-electron": "^2.1.4",
+    "eslint": "^8.14.0",
+    "glob": "^8.0.1",
+    "mocha": "^9.2.2",
+    "prettier": "^2.6.2",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.4",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "node-fetch": "^3.2.4",
+    "vscode-languageclient": "^8.0.2"
+  }
 }

@@ -100,14 +100,15 @@ void Client::removeConfiguration(const lsp::DocumentUri& uri)
 
 void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
 {
-    if (uris.empty())
-        return;
-
     std::vector<lsp::ConfigurationItem> items;
     for (auto& uri : uris)
     {
-        items.emplace_back(lsp::ConfigurationItem{uri, "luau-lsp"});
+        if (uri == Uri()) // Handle null workspace (global config)
+            items.emplace_back(lsp::ConfigurationItem{std::nullopt, "luau-lsp"});
+        else
+            items.emplace_back(lsp::ConfigurationItem{uri, "luau-lsp"});
     }
+
 
     ResponseHandler handler = [uris, this](const JsonRpcMessage& message)
     {
@@ -123,7 +124,9 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                 while (workspaceIt != uris.end() && configIt != configs.end())
                 {
                     auto uri = *workspaceIt;
-                    ClientConfiguration config = *configIt;
+                    ClientConfiguration config;
+                    if (!configIt->is_null())
+                        config = *configIt;
                     configStore.insert_or_assign(uri.toString(), config);
                     sendLogMessage(lsp::MessageType::Info, "loaded configuration for " + uri.toString());
                     if (configChangedCallback)
