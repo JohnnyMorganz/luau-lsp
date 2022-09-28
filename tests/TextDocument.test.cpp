@@ -1,6 +1,7 @@
 // Source: https://github.com/microsoft/vscode-languageserver-node/blob/main/textDocument/src/test/textdocument.test.ts
 
 #include "doctest.h"
+#include "LSP/LanguageServer.hpp"
 #include "LSP/Protocol.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Uri.hpp"
@@ -122,6 +123,7 @@ TEST_CASE("Invalid inputs")
 // https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/unittests/SourceCodeTests.cpp
 TEST_CASE("lspLength")
 {
+    positionEncoding() = lsp::PositionEncodingKind::UTF16;
     CHECK_EQ(lspLength(""), 0UL);
     CHECK_EQ(lspLength("ascii"), 5UL);
     // BMP
@@ -130,23 +132,23 @@ TEST_CASE("lspLength")
     // astral
     CHECK_EQ(lspLength("😂"), 2UL);
 
-    // WithContextValue UTF8(kCurrentOffsetEncoding, OffsetEncoding::UTF8);
-    // EXPECT_EQ(lspLength(""), 0UL);
-    // EXPECT_EQ(lspLength("ascii"), 5UL);
-    // // BMP
-    // EXPECT_EQ(lspLength("↓"), 3UL);
-    // EXPECT_EQ(lspLength("¥"), 2UL);
-    // // astral
-    // EXPECT_EQ(lspLength("😂"), 4UL);
+    positionEncoding() = lsp::PositionEncodingKind::UTF8;
+    CHECK_EQ(lspLength(""), 0UL);
+    CHECK_EQ(lspLength("ascii"), 5UL);
+    // BMP
+    CHECK_EQ(lspLength("↓"), 3UL);
+    CHECK_EQ(lspLength("¥"), 2UL);
+    // astral
+    CHECK_EQ(lspLength("😂"), 4UL);
 
-    // WithContextValue UTF32(kCurrentOffsetEncoding, OffsetEncoding::UTF32);
-    // EXPECT_EQ(lspLength(""), 0UL);
-    // EXPECT_EQ(lspLength("ascii"), 5UL);
-    // // BMP
-    // EXPECT_EQ(lspLength("↓"), 1UL);
-    // EXPECT_EQ(lspLength("¥"), 1UL);
-    // // astral
-    // EXPECT_EQ(lspLength("😂"), 1UL);
+    positionEncoding() = lsp::PositionEncodingKind::UTF32;
+    CHECK_EQ(lspLength(""), 0UL);
+    CHECK_EQ(lspLength("ascii"), 5UL);
+    // BMP
+    CHECK_EQ(lspLength("↓"), 1UL);
+    CHECK_EQ(lspLength("¥"), 1UL);
+    // astral
+    CHECK_EQ(lspLength("😂"), 1UL);
 }
 
 TEST_CASE("PositionToOffset")
@@ -154,6 +156,8 @@ TEST_CASE("PositionToOffset")
     auto document = newDocument(R"(0:0 = 0
 1:0 → 8
 2:0 🡆 18)");
+
+    positionEncoding() = lsp::PositionEncodingKind::UTF16;
 
     // DEVIATION: we do not accept negative positions
     // line out of bounds
@@ -186,6 +190,49 @@ TEST_CASE("PositionToOffset")
     // line out of bounds
     CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), 29);
     CHECK_EQ(document.offsetAt(lsp::Position{3, 1}), 29);
+
+    // Codepoints are similar, except near astral characters.
+    positionEncoding() = lsp::PositionEncodingKind::UTF32;
+    // line out of bounds
+    // CHECK_EQ(document.offsetAt(lsp::Position{-1, 2}), 0);
+    // first line
+    // CHECK_EQ(document.offsetAt(lsp::Position{0, -1}), 0); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 0}), 0); // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 3}), 3); // middle character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 6}), 6); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 7}), 7); // the newline itself
+    CHECK_EQ(document.offsetAt(lsp::Position{0, 8}), 8); // out of range
+    // middle line
+    // CHECK_EQ(document.offsetAt(lsp::Position{1, -1}), 0); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 0}), 8);  // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 3}), 11); // middle character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 6}), 16); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 7}), 17); // the newline itself
+    CHECK_EQ(document.offsetAt(lsp::Position{1, 8}), 18); // out of range
+    // last line
+    // CHECK_EQ(document.offsetAt(lsp::Position{2, -1}), 0); // out of range
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 0}), 18); // first character
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 4}), 22); // Before astral character.
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 5}), 26); // after astral character
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 7}), 28); // last character
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 8}), 29); // EOF
+    CHECK_EQ(document.offsetAt(lsp::Position{2, 9}), 29); // out of range
+    // line out of bounds
+    CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), 29);
+    CHECK_EQ(document.offsetAt(lsp::Position{3, 1}), 29);
+
+    // Test UTF-8, where transformations are trivial.
+    positionEncoding() = lsp::PositionEncodingKind::UTF8;
+    // CHECK_EQ(document.offsetAt(lsp::Position{-1, 2}), 0);
+    CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), 29);
+    for (unsigned int i = 0; i < document.lineCount(); i++)
+    {
+        auto line = document.getLines()[i];
+        auto offset = document.getLineOffsets()[i];
+        // CHECK_EQ(document.offsetAt(lsp::Position{i, -1}), 0); // out of range
+        for (unsigned I = 0; I < line.length(); ++I)
+            CHECK_EQ(document.offsetAt(lsp::Position{i, I}), offset + I);
+    }
 };
 
 TEST_CASE("OffsetToPosition")
@@ -193,6 +240,7 @@ TEST_CASE("OffsetToPosition")
     auto document = newDocument(R"(0:0 = 0
 1:0 → 8
 2:0 🡆 18)");
+    positionEncoding() = lsp::PositionEncodingKind::UTF16;
     CHECK_EQ(document.positionAt(0), lsp::Position{0, 0});  // "start of file"
     CHECK_EQ(document.positionAt(3), lsp::Position{0, 3});  // "in first line"
     CHECK_EQ(document.positionAt(6), lsp::Position{0, 6});  // "end of first line"
@@ -213,33 +261,35 @@ TEST_CASE("OffsetToPosition")
     CHECK_EQ(document.positionAt(30), lsp::Position{2, 9}); // "out of bounds"
 
     // // Codepoints are similar, except near astral characters.
-    // WithContextValue UTF32(kCurrentOffsetEncoding, OffsetEncoding::UTF32);
-    // CHECK_EQ(document.positionAt(0), lsp::Position{0, 0}) << "start of file";
-    // CHECK_EQ(document.positionAt(3), lsp::Position{0, 3}) << "in first line";
-    // CHECK_EQ(document.positionAt(6), lsp::Position{0, 6}) << "end of first line";
-    // CHECK_EQ(document.positionAt(7), lsp::Position{0, 7}) << "first newline";
-    // CHECK_EQ(document.positionAt(8), lsp::Position{1, 0}) << "start of second line";
-    // CHECK_EQ(document.positionAt(12), lsp::Position{1, 4}) << "before BMP char";
-    // CHECK_EQ(document.positionAt(13), lsp::Position{1, 5}) << "in BMP char";
-    // CHECK_EQ(document.positionAt(15), lsp::Position{1, 5}) << "after BMP char";
-    // CHECK_EQ(document.positionAt(16), lsp::Position{1, 6}) << "end of second line";
-    // CHECK_EQ(document.positionAt(17), lsp::Position{1, 7}) << "second newline";
-    // CHECK_EQ(document.positionAt(18), lsp::Position{2, 0}) << "start of last line";
-    // CHECK_EQ(document.positionAt(21), lsp::Position{2, 3}) << "in last line";
-    // CHECK_EQ(document.positionAt(22), lsp::Position{2, 4}) << "before astral char";
-    // CHECK_EQ(document.positionAt(24), lsp::Position{2, 5}) << "in astral char";
-    // CHECK_EQ(document.positionAt(26), lsp::Position{2, 5}) << "after astral char";
-    // CHECK_EQ(document.positionAt(28), lsp::Position{2, 7}) << "end of last line";
-    // CHECK_EQ(document.positionAt(29), lsp::Position{2, 8}) << "EOF";
-    // CHECK_EQ(document.positionAt(30), lsp::Position{2, 8}) << "out of bounds";
+    positionEncoding() = lsp::PositionEncodingKind::UTF32;
+    CHECK_EQ(document.positionAt(0), lsp::Position{0, 0});  // "start of file";
+    CHECK_EQ(document.positionAt(3), lsp::Position{0, 3});  // "in first line";
+    CHECK_EQ(document.positionAt(6), lsp::Position{0, 6});  // "end of first line";
+    CHECK_EQ(document.positionAt(7), lsp::Position{0, 7});  // "first newline";
+    CHECK_EQ(document.positionAt(8), lsp::Position{1, 0});  // "start of second line";
+    CHECK_EQ(document.positionAt(12), lsp::Position{1, 4}); // "before BMP char";
+    CHECK_EQ(document.positionAt(13), lsp::Position{1, 5}); // "in BMP char";
+    CHECK_EQ(document.positionAt(15), lsp::Position{1, 5}); // "after BMP char";
+    CHECK_EQ(document.positionAt(16), lsp::Position{1, 6}); // "end of second line";
+    CHECK_EQ(document.positionAt(17), lsp::Position{1, 7}); // "second newline";
+    CHECK_EQ(document.positionAt(18), lsp::Position{2, 0}); // "start of last line";
+    CHECK_EQ(document.positionAt(21), lsp::Position{2, 3}); // "in last line";
+    CHECK_EQ(document.positionAt(22), lsp::Position{2, 4}); // "before astral char";
+    CHECK_EQ(document.positionAt(24), lsp::Position{2, 5}); // "in astral char";
+    CHECK_EQ(document.positionAt(26), lsp::Position{2, 5}); // "after astral char";
+    CHECK_EQ(document.positionAt(28), lsp::Position{2, 7}); // "end of last line";
+    CHECK_EQ(document.positionAt(29), lsp::Position{2, 8}); // "EOF";
+    CHECK_EQ(document.positionAt(30), lsp::Position{2, 8}); // "out of bounds";
 
-    // WithContextValue UTF8(kCurrentOffsetEncoding, OffsetEncoding::UTF8);
-    // for (Line L : FileLines)
-    // {
-    //     for (unsigned I = 0; I <= L.Length; ++I)
-    //         CHECK_EQ(document.positionAt(L.Offset + I), Pos(L.Number, I));
-    // }
-    // CHECK_EQ(document.positionAt(30), lsp::Position{2, 11}) << "out of bounds";
+    positionEncoding() = lsp::PositionEncodingKind::UTF8;
+    for (unsigned int i = 0; i < document.lineCount(); i++)
+    {
+        auto line = document.getLines()[i];
+        auto offset = document.getLineOffsets()[i];
+        for (unsigned I = 0; I <= line.length(); ++I)
+            CHECK_EQ(document.positionAt(offset + I), lsp::Position{i, I});
+    }
+    CHECK_EQ(document.positionAt(30), lsp::Position{2, 11}); // "out of bounds";
 }
 
 TEST_SUITE_END();
