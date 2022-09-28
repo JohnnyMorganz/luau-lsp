@@ -5,7 +5,11 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 {
     // TODO: currently we only support searching for a binding at a current position
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        return std::nullopt;
+
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     // TODO: we only need the parse result here - can typechecking be skipped?

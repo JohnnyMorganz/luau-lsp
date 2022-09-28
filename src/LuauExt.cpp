@@ -672,13 +672,6 @@ bool types::isMetamethod(const Luau::Name& name)
            name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
 }
 
-Luau::Position convertPosition(const lsp::Position& position)
-{
-    LUAU_ASSERT(position.line <= UINT_MAX);
-    LUAU_ASSERT(position.character <= UINT_MAX);
-    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
-}
-
 lsp::Position convertPosition(const Luau::Position& position)
 {
     return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};

@@ -38,7 +38,7 @@ public:
         return _version;
     }
 
-    const std::string& getText(std::optional<lsp::Range> range = std::nullopt) const;
+    std::string getText(std::optional<lsp::Range> range = std::nullopt) const;
 
     lsp::Position positionAt(size_t offset) const;
     size_t offsetAt(const lsp::Position& position) const;

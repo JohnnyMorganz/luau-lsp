@@ -6,7 +6,10 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     lsp::DefinitionResult result;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
@@ -131,7 +134,10 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     // If its a type, then just find the definintion of that type (i.e. the type alias)
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))

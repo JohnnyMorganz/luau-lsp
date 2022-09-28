@@ -184,7 +184,7 @@ static lsp::Range getWellformedRange(lsp::Range range)
 }
 
 
-const std::string& TextDocument::getText(std::optional<lsp::Range> range) const
+std::string TextDocument::getText(std::optional<lsp::Range> range) const
 {
     if (range)
     {
