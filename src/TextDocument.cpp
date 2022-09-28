@@ -222,7 +222,8 @@ lsp::Position TextDocument::positionAt(size_t offset)
     // low is the least x for which the line offset is larger than the current offset
     // or array.length if no line offset is larger than the current offset
     auto line = low - 1;
-    return lsp::Position{line, offset - lineOffsets[line]};
+    std::string currentContent = _content.substr(lineOffsets[line], offset - lineOffsets[line]);
+    return lsp::Position{line, lspLength(currentContent)};
 }
 
 size_t TextDocument::offsetAt(lsp::Position position)
@@ -251,8 +252,17 @@ size_t TextDocument::offsetAt(lsp::Position position)
     return std::max(std::min(lineOffset + byteInLine, nextLineOffset), lineOffset);
 }
 
-// lsp::Position convertPosition(const Luau::Position& position) {}
-// Luau::Position convertToUtf8(const lsp::Position& position) {}
+// // We treat all lsp:Positions as UTF-16 encoded. We must convert between the two when necessary
+// Luau::Position TextDocument::convertPosition(const lsp::Position& position)
+// {
+//     LUAU_ASSERT(position.line <= UINT_MAX);
+//     LUAU_ASSERT(position.character <= UINT_MAX);
+
+//     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
+
+//     return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
+// }
+// lsp::Position TextDocument::convertPosition(const Luau::Position& position) {}
 
 void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version)
 {

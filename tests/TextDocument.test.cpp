@@ -188,6 +188,60 @@ TEST_CASE("PositionToOffset")
     CHECK_EQ(document.offsetAt(lsp::Position{3, 1}), 29);
 };
 
+TEST_CASE("OffsetToPosition")
+{
+    auto document = newDocument(R"(0:0 = 0
+1:0 → 8
+2:0 🡆 18)");
+    CHECK_EQ(document.positionAt(0), lsp::Position{0, 0});  // "start of file"
+    CHECK_EQ(document.positionAt(3), lsp::Position{0, 3});  // "in first line"
+    CHECK_EQ(document.positionAt(6), lsp::Position{0, 6});  // "end of first line"
+    CHECK_EQ(document.positionAt(7), lsp::Position{0, 7});  // "first newline"
+    CHECK_EQ(document.positionAt(8), lsp::Position{1, 0});  // "start of second line"
+    CHECK_EQ(document.positionAt(12), lsp::Position{1, 4}); // "before BMP char"
+    CHECK_EQ(document.positionAt(13), lsp::Position{1, 5}); // "in BMP char"
+    CHECK_EQ(document.positionAt(15), lsp::Position{1, 5}); // "after BMP char"
+    CHECK_EQ(document.positionAt(16), lsp::Position{1, 6}); // "end of second line"
+    CHECK_EQ(document.positionAt(17), lsp::Position{1, 7}); // "second newline"
+    CHECK_EQ(document.positionAt(18), lsp::Position{2, 0}); // "start of last line"
+    CHECK_EQ(document.positionAt(21), lsp::Position{2, 3}); // "in last line"
+    CHECK_EQ(document.positionAt(22), lsp::Position{2, 4}); // "before astral char"
+    CHECK_EQ(document.positionAt(24), lsp::Position{2, 6}); // "in astral char"
+    CHECK_EQ(document.positionAt(26), lsp::Position{2, 6}); // "after astral char"
+    CHECK_EQ(document.positionAt(28), lsp::Position{2, 8}); // "end of last line"
+    CHECK_EQ(document.positionAt(29), lsp::Position{2, 9}); // "EOF"
+    CHECK_EQ(document.positionAt(30), lsp::Position{2, 9}); // "out of bounds"
+
+    // // Codepoints are similar, except near astral characters.
+    // WithContextValue UTF32(kCurrentOffsetEncoding, OffsetEncoding::UTF32);
+    // CHECK_EQ(document.positionAt(0), lsp::Position{0, 0}) << "start of file";
+    // CHECK_EQ(document.positionAt(3), lsp::Position{0, 3}) << "in first line";
+    // CHECK_EQ(document.positionAt(6), lsp::Position{0, 6}) << "end of first line";
+    // CHECK_EQ(document.positionAt(7), lsp::Position{0, 7}) << "first newline";
+    // CHECK_EQ(document.positionAt(8), lsp::Position{1, 0}) << "start of second line";
+    // CHECK_EQ(document.positionAt(12), lsp::Position{1, 4}) << "before BMP char";
+    // CHECK_EQ(document.positionAt(13), lsp::Position{1, 5}) << "in BMP char";
+    // CHECK_EQ(document.positionAt(15), lsp::Position{1, 5}) << "after BMP char";
+    // CHECK_EQ(document.positionAt(16), lsp::Position{1, 6}) << "end of second line";
+    // CHECK_EQ(document.positionAt(17), lsp::Position{1, 7}) << "second newline";
+    // CHECK_EQ(document.positionAt(18), lsp::Position{2, 0}) << "start of last line";
+    // CHECK_EQ(document.positionAt(21), lsp::Position{2, 3}) << "in last line";
+    // CHECK_EQ(document.positionAt(22), lsp::Position{2, 4}) << "before astral char";
+    // CHECK_EQ(document.positionAt(24), lsp::Position{2, 5}) << "in astral char";
+    // CHECK_EQ(document.positionAt(26), lsp::Position{2, 5}) << "after astral char";
+    // CHECK_EQ(document.positionAt(28), lsp::Position{2, 7}) << "end of last line";
+    // CHECK_EQ(document.positionAt(29), lsp::Position{2, 8}) << "EOF";
+    // CHECK_EQ(document.positionAt(30), lsp::Position{2, 8}) << "out of bounds";
+
+    // WithContextValue UTF8(kCurrentOffsetEncoding, OffsetEncoding::UTF8);
+    // for (Line L : FileLines)
+    // {
+    //     for (unsigned I = 0; I <= L.Length; ++I)
+    //         CHECK_EQ(document.positionAt(L.Offset + I), Pos(L.Number, I));
+    // }
+    // CHECK_EQ(document.positionAt(30), lsp::Position{2, 11}) << "out of bounds";
+}
+
 TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("Text Document Full Updates");
