@@ -17,7 +17,10 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 
     // TODO: currently we only support renaming local bindings in the current file
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     // TODO: we only need the parse result here - can typechecking be skipped?
@@ -42,7 +45,8 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     std::vector<lsp::TextEdit> localChanges;
     for (auto& location : references)
     {
-        localChanges.emplace_back(lsp::TextEdit{{convertPosition(location.begin), convertPosition(location.end)}, params.newName});
+        localChanges.emplace_back(
+            lsp::TextEdit{{textDocument->convertPosition(location.begin), textDocument->convertPosition(location.end)}, params.newName});
     }
 
     return lsp::WorkspaceEdit{{{params.textDocument.uri.toString(), localChanges}}};

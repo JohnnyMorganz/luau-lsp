@@ -5,8 +5,14 @@
 
 struct DocumentSymbolsVisitor : public Luau::AstVisitor
 {
+    const TextDocument* textDocument;
     std::vector<lsp::DocumentSymbol> symbols;
     lsp::DocumentSymbol* parent = nullptr;
+
+    explicit DocumentSymbolsVisitor(const TextDocument* textDocument)
+        : textDocument(textDocument)
+    {
+    }
 
     void addSymbol(const lsp::DocumentSymbol& symbol)
     {
@@ -21,7 +27,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         lsp::DocumentSymbol symbol;
         symbol.name = local->name.value;
         symbol.kind = lsp::SymbolKind::Variable;
-        symbol.range = {convertPosition(local->location.begin), convertPosition(local->location.end)};
+        symbol.range = {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)};
         symbol.selectionRange = symbol.range;
         addSymbol(symbol);
     }
@@ -41,8 +47,9 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         lsp::DocumentSymbol symbol;
         symbol.name = Luau::toString(function->name);
         symbol.kind = lsp::SymbolKind::Function;
-        symbol.range = {convertPosition(function->location.begin), convertPosition(function->location.end)};
-        symbol.selectionRange = {convertPosition(function->name->location.begin), convertPosition(function->name->location.end)};
+        symbol.range = {textDocument->convertPosition(function->location.begin), textDocument->convertPosition(function->location.end)};
+        symbol.selectionRange = {
+            textDocument->convertPosition(function->name->location.begin), textDocument->convertPosition(function->name->location.end)};
         trim(symbol.name);
         visitFunction(function->func, symbol);
         addSymbol(symbol);
@@ -54,8 +61,8 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         lsp::DocumentSymbol symbol;
         symbol.name = Luau::toString(func->name);
         symbol.kind = lsp::SymbolKind::Function;
-        symbol.range = {convertPosition(func->location.begin), convertPosition(func->location.end)};
-        symbol.selectionRange = {convertPosition(func->name->location.begin), convertPosition(func->name->location.end)};
+        symbol.range = {textDocument->convertPosition(func->location.begin), textDocument->convertPosition(func->location.end)};
+        symbol.selectionRange = {textDocument->convertPosition(func->name->location.begin), textDocument->convertPosition(func->name->location.end)};
         visitFunction(func->func, symbol);
         addSymbol(symbol);
         return false;
@@ -66,7 +73,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         lsp::DocumentSymbol symbol;
         symbol.name = alias->name.value;
         symbol.kind = lsp::SymbolKind::Interface;
-        symbol.range = {convertPosition(alias->location.begin), convertPosition(alias->location.end)};
+        symbol.range = {textDocument->convertPosition(alias->location.begin), textDocument->convertPosition(alias->location.end)};
         symbol.selectionRange = symbol.range;
         addSymbol(symbol);
         return false;
@@ -93,7 +100,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
             lsp::DocumentSymbol symbol;
             symbol.name = "...";
             symbol.kind = lsp::SymbolKind::Variable;
-            symbol.range = {convertPosition(func->varargLocation.begin), convertPosition(func->varargLocation.end)};
+            symbol.range = {textDocument->convertPosition(func->varargLocation.begin), textDocument->convertPosition(func->varargLocation.end)};
             addSymbol(symbol);
 
             if (comma)
@@ -126,6 +133,9 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
 std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(const lsp::DocumentSymbolParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        return std::nullopt;
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
@@ -135,7 +145,7 @@ std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(
     if (!sourceModule)
         return std::nullopt;
 
-    DocumentSymbolsVisitor visitor;
+    DocumentSymbolsVisitor visitor{textDocument};
     visitor.visit(sourceModule->root);
     return visitor.symbols;
 }

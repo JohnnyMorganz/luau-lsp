@@ -1,6 +1,9 @@
 #pragma once
 #include "LSP/Uri.hpp"
 #include "LSP/Protocol.hpp"
+#include "Luau/Location.h"
+
+size_t lspLength(const std::string& Code);
 
 class TextDocument
 {
@@ -9,7 +12,7 @@ private:
     std::string _languageId;
     size_t _version;
     std::string _content;
-    std::optional<std::vector<size_t>> _lineOffsets = std::nullopt;
+    mutable std::optional<std::vector<size_t>> _lineOffsets = std::nullopt;
 
 public:
     TextDocument(const lsp::DocumentUri& uri, const std::string& languageId, size_t version, const std::string& content)
@@ -20,12 +23,12 @@ public:
     {
     }
 
-    lsp::DocumentUri uri() const
+    const lsp::DocumentUri& uri() const
     {
         return _uri;
     }
 
-    std::string languageId() const
+    const std::string& languageId() const
     {
         return _languageId;
     }
@@ -35,18 +38,21 @@ public:
         return _version;
     }
 
-    std::string getText(std::optional<lsp::Range> range = std::nullopt);
+    std::string getText(std::optional<lsp::Range> range = std::nullopt) const;
 
-    lsp::Position positionAt(size_t offset);
-    size_t offsetAt(lsp::Position position);
+    lsp::Position positionAt(size_t offset) const;
+    size_t offsetAt(const lsp::Position& position) const;
+
+    Luau::Position convertPosition(const lsp::Position& position) const;
+    lsp::Position convertPosition(const Luau::Position& position) const;
 
     bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
 
-    void update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version);
+    void update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version);
 
-    std::vector<size_t> getLineOffsets();
-    size_t lineCount();
+    const std::vector<size_t>& getLineOffsets() const;
+    size_t lineCount() const;
 
     // TODO: this is a bit expensive
-    std::vector<std::string_view> getLines();
+    std::vector<std::string_view> getLines() const;
 };

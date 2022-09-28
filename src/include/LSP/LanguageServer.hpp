@@ -14,6 +14,12 @@ using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 using ClientPtr = std::shared_ptr<Client>;
 
+inline lsp::PositionEncodingKind& positionEncoding()
+{
+    static lsp::PositionEncodingKind encoding = lsp::PositionEncodingKind::UTF16;
+    return encoding;
+}
+
 class LanguageServer
 {
 public:

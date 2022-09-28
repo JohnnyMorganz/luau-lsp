@@ -6,7 +6,10 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     lsp::DefinitionResult result;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
@@ -30,8 +33,8 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             return result;
 
         // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
-        result.emplace_back(
-            lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(binding->location.begin), convertPosition(binding->location.end)}});
+        result.emplace_back(lsp::Location{params.textDocument.uri,
+            lsp::Range{textDocument->convertPosition(binding->location.begin), textDocument->convertPosition(binding->location.end)}});
     }
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
@@ -94,14 +97,14 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             {
                 if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
                 {
-                    result.emplace_back(
-                        lsp::Location{Uri::file(*file), lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
+                    result.emplace_back(lsp::Location{
+                        Uri::file(*file), lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
                 }
             }
             else
             {
-                result.emplace_back(
-                    lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
+                result.emplace_back(lsp::Location{params.textDocument.uri,
+                    lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
             }
         }
     }
@@ -119,7 +122,8 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         if (!location)
             return result;
 
-        result.emplace_back(lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}});
+        result.emplace_back(lsp::Location{
+            params.textDocument.uri, lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
     }
 
     return result;
@@ -131,7 +135,10 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     // If its a type, then just find the definintion of that type (i.e. the type alias)
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
@@ -151,7 +158,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     if (!node)
         return std::nullopt;
 
-    auto findTypeLocation = [&module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
+    auto findTypeLocation = [textDocument, &module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
     {
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
@@ -168,7 +175,8 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             if (!location)
                 return std::nullopt;
 
-            return lsp::Location{params.textDocument.uri, lsp::Range{convertPosition(location->begin), convertPosition(location->end)}};
+            return lsp::Location{
+                params.textDocument.uri, lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}};
         }
         return std::nullopt;
     };

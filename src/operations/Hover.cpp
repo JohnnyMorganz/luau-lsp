@@ -9,7 +9,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         return std::nullopt;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+
+    auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed

@@ -15,6 +15,13 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 
     return fsPath;
 }
+const TextDocument* WorkspaceFileResolver::getTextDocument(const Luau::ModuleName& name) const
+{
+    auto it = managedFiles.find(name);
+    if (it == managedFiles.end())
+        return nullptr;
+    return &it->second;
+}
 
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
 {
@@ -105,9 +112,9 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
         sourceType = sourceCodeTypeFromPath(realFileName);
     }
 
-    if (isManagedFile(name))
+    if (auto textDocument = getTextDocument(name))
     {
-        source = managedFiles.at(name).getText();
+        source = textDocument->getText();
     }
     else
     {

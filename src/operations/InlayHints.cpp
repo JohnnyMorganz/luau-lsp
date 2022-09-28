@@ -30,12 +30,14 @@ struct InlayHintVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
     const ClientConfiguration& config;
+    const TextDocument* textDocument;
     std::vector<lsp::InlayHint> hints;
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config)
+    explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config, const TextDocument* textDocument)
         : module(module)
         , config(config)
+        , textDocument(textDocument)
 
     {
         stringOptions.maxTableLength = 30;
@@ -79,7 +81,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
                     hint.label = ": " + typeString;
-                    hint.position = convertPosition(var->location.end);
+                    hint.position = textDocument->convertPosition(var->location.end);
                     makeInsertable(hint, followedTy);
                     hints.emplace_back(hint);
                 }
@@ -120,7 +122,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
                         hint.label = ": " + Luau::toString(argType, stringOptions);
-                        hint.position = convertPosition(param->location.end);
+                        hint.position = textDocument->convertPosition(param->location.end);
                         makeInsertable(hint, argType);
                         hints.emplace_back(hint);
                     }
@@ -137,7 +139,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
                     hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
-                    hint.position = convertPosition(func->argLocation->end);
+                    hint.position = textDocument->convertPosition(func->argLocation->end);
                     makeInsertable(hint, ftv->retTypes);
                     hints.emplace_back(hint);
                 }
@@ -198,7 +200,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Parameter;
                     hint.label = paramName + ":";
-                    hint.position = convertPosition(param->location.begin);
+                    hint.position = textDocument->convertPosition(param->location.begin);
                     hint.paddingRight = true;
                     hints.emplace_back(hint);
                 }
@@ -227,6 +229,10 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     auto config = client->getConfiguration(rootUri);
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (textDocument)
+        return {};
+
     std::vector<lsp::DocumentLink> result;
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
@@ -237,7 +243,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config};
+    InlayHintVisitor visitor{module, config, textDocument};
     visitor.visit(sourceModule->root);
     return visitor.hints;
 }

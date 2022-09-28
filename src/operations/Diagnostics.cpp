@@ -16,6 +16,10 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+
     Luau::CheckResult cr = frontend.check(moduleName);
 
     // If there was an error retrieving the source module
@@ -33,9 +37,9 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     // Note that type errors can extend to related modules in the require graph - so we report related information here
     for (auto& error : cr.errors)
     {
-        auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
         if (error.moduleName == moduleName)
         {
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
             report.items.emplace_back(diagnostic);
         }
         else
@@ -43,6 +47,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto fileName = fileResolver.resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
                 continue;
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, fileResolver.getTextDocument(error.moduleName));
             auto uri = Uri::file(*fileName);
             auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
             currentDiagnostics.emplace_back(diagnostic);
@@ -65,12 +70,12 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     Luau::LintResult lr = frontend.lint(moduleName);
     for (auto& error : lr.errors)
     {
-        auto diagnostic = createLintDiagnostic(error);
+        auto diagnostic = createLintDiagnostic(error, textDocument);
         diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
         report.items.emplace_back(diagnostic);
     }
     for (auto& error : lr.warnings)
-        report.items.emplace_back(createLintDiagnostic(error));
+        report.items.emplace_back(createLintDiagnostic(error, textDocument));
 
     return report;
 }
@@ -95,11 +100,13 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     for (auto uri : files)
     {
         auto moduleName = fileResolver.getModuleName(uri);
+        auto document = fileResolver.getTextDocument(moduleName);
+
         lsp::WorkspaceDocumentDiagnosticReport documentReport;
         documentReport.uri = uri;
         documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-        if (fileResolver.isManagedFile(moduleName))
-            documentReport.version = fileResolver.managedFiles.at(moduleName).version();
+        if (document)
+            documentReport.version = document->version();
 
         // If we don't have workspace diagnostics enabled, or we are are ignoring this file
         // Then provide an empty report to clear the file diagnostics
@@ -121,7 +128,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Only report errors for the current file
         for (auto& error : cr.errors)
         {
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, document);
             if (error.moduleName == moduleName)
             {
                 documentReport.items.emplace_back(diagnostic);
@@ -132,12 +139,12 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         Luau::LintResult lr = frontend.lint(moduleName);
         for (auto& error : lr.errors)
         {
-            auto diagnostic = createLintDiagnostic(error);
+            auto diagnostic = createLintDiagnostic(error, document);
             diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
             documentReport.items.emplace_back(diagnostic);
         }
         for (auto& error : lr.warnings)
-            documentReport.items.emplace_back(createLintDiagnostic(error));
+            documentReport.items.emplace_back(createLintDiagnostic(error, document));
 
         workspaceReport.items.emplace_back(documentReport);
     }

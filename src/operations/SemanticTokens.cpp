@@ -348,7 +348,7 @@ size_t convertTokenType(const lsp::SemanticTokenTypes tokenType)
     return static_cast<size_t>(tokenType);
 }
 
-std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
+std::vector<size_t> packTokens(const TextDocument* textDocument, std::vector<SemanticToken>& tokens)
 {
     // Sort the tokens into the correct ordering
     std::sort(tokens.begin(), tokens.end(),
@@ -366,12 +366,15 @@ std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
 
     for (auto& token : tokens)
     {
-        auto line = token.start.line;
-        auto startChar = token.start.column;
+        auto start = textDocument->convertPosition(token.start);
+        auto end = textDocument->convertPosition(token.end);
+
+        auto line = start.line;
+        auto startChar = start.character;
 
         auto deltaLine = line - lastLine;
         auto deltaStartChar = deltaLine == 0 ? startChar - lastChar : startChar;
-        auto length = token.end.column - token.start.column;
+        auto length = end.character - start.character;
 
         result.insert(
             result.end(), {deltaLine, deltaStartChar, length, convertTokenType(token.tokenType), static_cast<size_t>(token.tokenModifiers)});
@@ -386,6 +389,9 @@ std::vector<size_t> packTokens(std::vector<SemanticToken>& tokens)
 std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        return std::nullopt;
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
@@ -398,7 +404,7 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
 
     auto tokens = getSemanticTokens(frontend, module, sourceModule);
     lsp::SemanticTokens result;
-    result.data = packTokens(tokens);
+    result.data = packTokens(textDocument, tokens);
     return result;
 }
 

@@ -24,7 +24,10 @@ static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, s
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto document = fileResolver.getTextDocument(moduleName);
+    if (!document)
+        return;
+    auto position = document->convertPosition(params.position);
 
     if (frontend.isDirty(moduleName))
         frontend.check(moduleName);
@@ -69,10 +72,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     if (unclosedBlock)
     {
-        if (!fileResolver.isManagedFile(moduleName))
-            return;
-        auto document = fileResolver.managedFiles.at(moduleName);
-        auto lines = document.getLines();
+        auto lines = document->getLines();
 
         // If the position marker is at the very end of the file, if we insert one line further then vscode will
         // not be happy and will insert at the position marker.
@@ -302,7 +302,11 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto position = convertPosition(params.position);
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+        return {};
+
+    auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position, nullCallback);
     std::vector<lsp::CompletionItem> items;
 
@@ -357,13 +361,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             {
                 lsp::TextEdit textEdit;
                 textEdit.newText = "[\"" + name + "\"]";
-                textEdit.range = {convertPosition(indexName->indexLocation.begin), convertPosition(indexName->indexLocation.end)};
+                textEdit.range = {
+                    textDocument->convertPosition(indexName->indexLocation.begin), textDocument->convertPosition(indexName->indexLocation.end)};
                 item.textEdit = textEdit;
 
                 // For some reason, the above text edit can't handle replacing the index operator
                 // Hence we remove it using an additional text edit
-                item.additionalTextEdits.emplace_back(
-                    lsp::TextEdit{{convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
+                item.additionalTextEdits.emplace_back(lsp::TextEdit{
+                    {textDocument->convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
             }
         }
 
