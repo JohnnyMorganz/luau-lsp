@@ -672,7 +672,8 @@ bool types::isMetamethod(const Luau::Name& name)
            name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
 }
 
-lsp::Position convertPosition(const Luau::Position& position)
+// NOTE: this does NOT apply UTF-16 transformations
+static lsp::Position convertPosition(const Luau::Position& position)
 {
     return lsp::Position{static_cast<size_t>(position.line), static_cast<size_t>(position.column)};
 }

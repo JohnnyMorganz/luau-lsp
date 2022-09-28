@@ -361,13 +361,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             {
                 lsp::TextEdit textEdit;
                 textEdit.newText = "[\"" + name + "\"]";
-                textEdit.range = {convertPosition(indexName->indexLocation.begin), convertPosition(indexName->indexLocation.end)};
+                textEdit.range = {
+                    textDocument->convertPosition(indexName->indexLocation.begin), textDocument->convertPosition(indexName->indexLocation.end)};
                 item.textEdit = textEdit;
 
                 // For some reason, the above text edit can't handle replacing the index operator
                 // Hence we remove it using an additional text edit
-                item.additionalTextEdits.emplace_back(
-                    lsp::TextEdit{{convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
+                item.additionalTextEdits.emplace_back(lsp::TextEdit{
+                    {textDocument->convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
             }
         }
 

@@ -44,6 +44,7 @@ public:
     size_t offsetAt(const lsp::Position& position) const;
 
     Luau::Position convertPosition(const lsp::Position& position) const;
+    lsp::Position convertPosition(const Luau::Position& position) const;
 
     bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
 

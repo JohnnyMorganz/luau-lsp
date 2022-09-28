@@ -35,7 +35,8 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     for (auto& location : references)
     {
-        result.emplace_back(lsp::Location{params.textDocument.uri, {convertPosition(location.begin), convertPosition(location.end)}});
+        result.emplace_back(
+            lsp::Location{params.textDocument.uri, {textDocument->convertPosition(location.begin), textDocument->convertPosition(location.end)}});
     }
 
     return result;

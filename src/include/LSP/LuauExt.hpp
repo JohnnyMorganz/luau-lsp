@@ -116,8 +116,6 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type);
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
 std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
 
-lsp::Position convertPosition(const Luau::Position& position);
-
 lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver);
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint);
 lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error);

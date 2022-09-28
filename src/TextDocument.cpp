@@ -264,7 +264,13 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(byteInLine)};
 }
 
-// lsp::Position TextDocument::convertPosition(const Luau::Position& position) {}
+lsp::Position TextDocument::convertPosition(const Luau::Position& position) const
+{
+    auto lineOffsets = getLineOffsets();
+    auto line = position.line;
+    std::string currentContent = _content.substr(lineOffsets[line], position.column);
+    return lsp::Position{line, lspLength(currentContent)};
+}
 
 void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version)
 {

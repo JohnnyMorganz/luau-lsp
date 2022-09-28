@@ -45,7 +45,8 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     std::vector<lsp::TextEdit> localChanges;
     for (auto& location : references)
     {
-        localChanges.emplace_back(lsp::TextEdit{{convertPosition(location.begin), convertPosition(location.end)}, params.newName});
+        localChanges.emplace_back(
+            lsp::TextEdit{{textDocument->convertPosition(location.begin), textDocument->convertPosition(location.end)}, params.newName});
     }
 
     return lsp::WorkspaceEdit{{{params.textDocument.uri.toString(), localChanges}}};
