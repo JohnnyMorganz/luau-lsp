@@ -266,7 +266,7 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position)
 
 // lsp::Position TextDocument::convertPosition(const Luau::Position& position) {}
 
-void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version)
+void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version)
 {
     _version = version;
     for (auto& change : changes)
@@ -325,7 +325,7 @@ size_t TextDocument::lineCount()
     return getLineOffsets().size();
 }
 
-std::vector<size_t> TextDocument::getLineOffsets()
+const std::vector<size_t>& TextDocument::getLineOffsets()
 {
     if (!_lineOffsets)
     {

@@ -23,12 +23,12 @@ public:
     {
     }
 
-    lsp::DocumentUri uri() const
+    const lsp::DocumentUri& uri() const
     {
         return _uri;
     }
 
-    std::string languageId() const
+    const std::string& languageId() const
     {
         return _languageId;
     }
@@ -47,9 +47,9 @@ public:
 
     bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
 
-    void update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version);
+    void update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version);
 
-    std::vector<size_t> getLineOffsets();
+    const std::vector<size_t>& getLineOffsets();
     size_t lineCount();
 
     // TODO: this is a bit expensive
