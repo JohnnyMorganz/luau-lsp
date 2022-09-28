@@ -329,15 +329,15 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     result.capabilities = getServerCapabilities();
 
     // Position Encoding
-    // TODO: we should check what the client prefers here, and try to support that.
-    // For the time being, we just assume UTF-8 if its available, as thats the only thing we really support right now
-    // TODO: we should really support UTF-16, but need to work on that
-    // if (client->capabilities.general && client->capabilities.general->positionEncodings)
-    // {
-    //     auto& encodings = *client->capabilities.general->positionEncodings;
-    //     if (std::find(encodings.begin(), encodings.end(), lsp::PositionEncodingKind::UTF8) != encodings.end())
-    //         result.capabilities.positionEncoding = lsp::PositionEncodingKind::UTF8;
-    // }
+    if (client->capabilities.general && client->capabilities.general->positionEncodings &&
+        client->capabilities.general->positionEncodings->size() > 0)
+    {
+        auto& encodings = *client->capabilities.general->positionEncodings;
+        if (encodings[0] == lsp::PositionEncodingKind::UTF8 || encodings[0] == lsp::PositionEncodingKind::UTF16)
+            positionEncoding() = encodings[0];
+    }
+    result.capabilities.positionEncoding = positionEncoding();
+    client->sendLogMessage(lsp::MessageType::Info, "negotiated position encoding: " + json(positionEncoding()).dump());
 
     client->sendTrace("server capabilities:" + json(result).dump(), std::nullopt);
     return result;

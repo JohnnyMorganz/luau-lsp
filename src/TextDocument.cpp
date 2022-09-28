@@ -4,6 +4,7 @@
 #include "Luau/Location.h"
 #include "Luau/StringUtils.h"
 #include "LSP/TextDocument.hpp"
+#include "LSP/LanguageServer.hpp"
 
 static size_t countLeadingZeros(unsigned char n)
 {
@@ -125,30 +126,30 @@ static size_t measureUnits(const std::string& U8, int Units, lsp::PositionEncodi
 size_t lspLength(const std::string& Code)
 {
     size_t Count = 0;
-    // switch (lspEncoding())
-    // {
-    // case OffsetEncoding::UTF8:
-    //     Count = Code.size();
-    //     break;
-    // case OffsetEncoding::UTF16:
-    iterateCodepoints(Code,
-        [&](int U8Len, int U16Len)
-        {
-            Count += U16Len;
-            return false;
-        });
-    //  break;
-    // case OffsetEncoding::UTF32:
-    //     iterateCodepoints(Code,
-    //         [&](int U8Len, int U16Len)
-    //         {
-    //             ++Count;
-    //             return false;
-    //         });
-    //     break;
-    // case OffsetEncoding::UnsupportedEncoding:
-    //     llvm_unreachable("unsupported encoding");
-    // }
+    switch (positionEncoding())
+    {
+    case lsp::PositionEncodingKind::UTF8:
+        Count = Code.size();
+        break;
+    case lsp::PositionEncodingKind::UTF16:
+        iterateCodepoints(Code,
+            [&](int U8Len, int U16Len)
+            {
+                Count += U16Len;
+                return false;
+            });
+        break;
+    case lsp::PositionEncodingKind::UTF32:
+        iterateCodepoints(Code,
+            [&](int U8Len, int U16Len)
+            {
+                ++Count;
+                return false;
+            });
+        break;
+        // case OffsetEncoding::UnsupportedEncoding:
+        //     llvm_unreachable("unsupported encoding");
+    }
     return Count;
 }
 
@@ -253,11 +254,10 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     auto lineOffset = lineOffsets[position.line];
     auto nextLineOffset = position.line + 1 < lineOffsets.size() ? lineOffsets[position.line + 1] : _content.size();
 
-    // position.character is in UTF-16, so we need to convert as necessary
-    // TODO: use positionEncoding negotiated with client
+    // position.character may be in UTF-16, so we need to convert as necessary
     bool valid;
     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
-    size_t byteInLine = measureUnits(line, position.character, lsp::PositionEncodingKind::UTF16, valid);
+    size_t byteInLine = measureUnits(line, position.character, positionEncoding(), valid);
 
     if (!valid)
         std::cerr << "UTF-16 offset " << position.character << " is invalid for line " << position.line << "\n";
