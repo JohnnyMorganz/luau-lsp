@@ -226,16 +226,28 @@ lsp::Position TextDocument::positionAt(size_t offset)
     return lsp::Position{line, lspLength(currentContent)};
 }
 
-size_t TextDocument::offsetAt(lsp::Position position)
+size_t TextDocument::offsetAt(const lsp::Position& position)
 {
+    auto utf8Position = convertPosition(position);
+    auto lineOffsets = getLineOffsets();
+    auto lineOffset = lineOffsets[utf8Position.line];
+    return lineOffset + utf8Position.column;
+}
+
+// We treat all lsp:Positions as UTF-16 encoded. We must convert between the two when necessary
+Luau::Position TextDocument::convertPosition(const lsp::Position& position)
+{
+    LUAU_ASSERT(position.line <= UINT_MAX);
+    LUAU_ASSERT(position.character <= UINT_MAX);
+
     auto lineOffsets = getLineOffsets();
     if (position.line >= lineOffsets.size())
     {
-        return _content.length();
+        return Luau::Position{lineOffsets.size() - 1, _content.size() - lineOffsets.back()};
     }
     else if (position.line < 0)
     {
-        return 0;
+        return Luau::Position{0, 0};
     }
     auto lineOffset = lineOffsets[position.line];
     auto nextLineOffset = position.line + 1 < lineOffsets.size() ? lineOffsets[position.line + 1] : _content.size();
@@ -249,19 +261,9 @@ size_t TextDocument::offsetAt(lsp::Position position)
     if (!valid)
         std::cerr << "UTF-16 offset " << position.character << " is invalid for line " << position.line << "\n";
 
-    return std::max(std::min(lineOffset + byteInLine, nextLineOffset), lineOffset);
+    return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(byteInLine)};
 }
 
-// // We treat all lsp:Positions as UTF-16 encoded. We must convert between the two when necessary
-// Luau::Position TextDocument::convertPosition(const lsp::Position& position)
-// {
-//     LUAU_ASSERT(position.line <= UINT_MAX);
-//     LUAU_ASSERT(position.character <= UINT_MAX);
-
-//     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
-
-//     return Luau::Position{static_cast<unsigned int>(position.line), static_cast<unsigned int>(position.character)};
-// }
 // lsp::Position TextDocument::convertPosition(const Luau::Position& position) {}
 
 void TextDocument::update(std::vector<lsp::TextDocumentContentChangeEvent> changes, size_t version)
