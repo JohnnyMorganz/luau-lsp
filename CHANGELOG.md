@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Improved autocomplete items ordering by applying heuristics to sort items
+- Table keys are prioritised when autocompleting inside of a table
 
 ### Fixed
 

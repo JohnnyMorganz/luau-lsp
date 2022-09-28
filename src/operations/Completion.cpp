@@ -7,12 +7,13 @@
 /// Note that sort text is lexicographically
 namespace SortText
 {
-static constexpr const char* CorrectTypeKind = "0";
-static constexpr const char* CorrectFunctionResult = "1";
-static constexpr const char* Default = "2";
-static constexpr const char* WrongIndexType = "3";
-static constexpr const char* AutoImports = "4";
-static constexpr const char* Keywords = "5";
+static constexpr const char* TableProperties = "0";
+static constexpr const char* CorrectTypeKind = "1";
+static constexpr const char* CorrectFunctionResult = "2";
+static constexpr const char* Default = "3";
+static constexpr const char* WrongIndexType = "4";
+static constexpr const char* AutoImports = "5";
+static constexpr const char* Keywords = "6";
 } // namespace SortText
 
 static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
@@ -321,6 +322,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.sortText = SortText::CorrectFunctionResult;
         else if (entry.wrongIndexType)
             item.sortText = SortText::WrongIndexType;
+        else if (entry.kind == Luau::AutocompleteEntryKind::Property)
+            item.sortText = SortText::TableProperties;
+        else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
+            item.sortText = SortText::Keywords;
 
         switch (entry.kind)
         {
@@ -332,7 +337,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             break;
         case Luau::AutocompleteEntryKind::Keyword:
             item.kind = lsp::CompletionItemKind::Keyword;
-            item.sortText = SortText::Keywords;
             break;
         case Luau::AutocompleteEntryKind::String:
             item.kind = lsp::CompletionItemKind::Constant; // TODO: is a string autocomplete always a singleton constant?
