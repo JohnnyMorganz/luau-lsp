@@ -79,7 +79,7 @@ static bool iterateCodepoints(const std::string& U8, const Callback& CB)
 // the specified encoding.
 // Conceptually, this converts to the encoding, truncates to CodeUnits,
 // converts back to UTF-8, and returns the length in bytes.
-static size_t measureUnits(const std::string& U8, int Units, lsp::PositionEncodingKind Enc, bool& Valid)
+static size_t measureUnits(const std::string& U8, size_t Units, lsp::PositionEncodingKind Enc, bool& Valid)
 {
     Valid = Units >= 0;
     if (Units <= 0)
@@ -92,7 +92,7 @@ static size_t measureUnits(const std::string& U8, int Units, lsp::PositionEncodi
         break;
     case lsp::PositionEncodingKind::UTF16:
         Valid = iterateCodepoints(U8,
-            [&](int U8Len, int U16Len)
+            [&](size_t U8Len, size_t U16Len)
             {
                 Result += U8Len;
                 Units -= U16Len;
@@ -103,7 +103,7 @@ static size_t measureUnits(const std::string& U8, int Units, lsp::PositionEncodi
         break;
     case lsp::PositionEncodingKind::UTF32:
         Valid = iterateCodepoints(U8,
-            [&](int U8Len, int U16Len)
+            [&](size_t U8Len, size_t U16Len)
             {
                 Result += U8Len;
                 Units--;
@@ -133,7 +133,7 @@ size_t lspLength(const std::string& Code)
         break;
     case lsp::PositionEncodingKind::UTF16:
         iterateCodepoints(Code,
-            [&](int U8Len, int U16Len)
+            [&](size_t U8Len, size_t U16Len)
             {
                 Count += U16Len;
                 return false;
@@ -141,7 +141,7 @@ size_t lspLength(const std::string& Code)
         break;
     case lsp::PositionEncodingKind::UTF32:
         iterateCodepoints(Code,
-            [&](int U8Len, int U16Len)
+            [&](size_t U8Len, size_t U16Len)
             {
                 ++Count;
                 return false;
