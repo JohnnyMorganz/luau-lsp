@@ -4,21 +4,19 @@
 #include "Luau/StringUtils.h"
 #include "LSP/TextDocument.hpp"
 
-template<typename T>
-static size_t countLeadingZeros(T n)
+static size_t countLeadingZeros(unsigned char n)
 {
 #ifdef _MSC_VER
     unsigned long rl;
-    return _BitScanReverse(&rl, n) ? 31 - int(rl) : 32;
+    return _BitScanReverse(&rl, n) ? 31 - int(rl) - 24 : 8;
 #else
-    return n == 0 ? 32 : __builtin_clz(n);
+    return n == 0 ? 8 : __builtin_clz(n) - 24;
 #endif
 }
 
-template<typename T>
-static size_t countLeadingOnes(T n)
+static size_t countLeadingOnes(unsigned char n)
 {
-    return countLeadingZeros(~n);
+    return countLeadingZeros((unsigned char)~n);
 }
 
 // https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/SourceCode.cpp
