@@ -17,9 +17,10 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 }
 const TextDocument* WorkspaceFileResolver::getTextDocument(const Luau::ModuleName& name) const
 {
-    if (managedFiles.find(name) != managedFiles.end())
+    auto it = managedFiles.find(name);
+    if (it == managedFiles.end())
         return nullptr;
-    return &managedFiles.at(name);
+    return &it->second;
 }
 
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
