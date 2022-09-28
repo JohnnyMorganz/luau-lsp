@@ -248,7 +248,7 @@ size_t TextDocument::offsetAt(lsp::Position position)
     if (!valid)
         std::cerr << "UTF-16 offset " << position.character << " is invalid for line " << position.line << "\n";
 
-    return std::max(std::min(lineOffset + position.character, nextLineOffset), lineOffset);
+    return std::max(std::min(lineOffset + byteInLine, nextLineOffset), lineOffset);
 }
 
 // lsp::Position convertPosition(const Luau::Position& position) {}
