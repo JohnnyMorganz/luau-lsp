@@ -1287,12 +1287,10 @@ declare class EnumIKCollisionsMode_INTERNAL extends Enum
 end
 declare class EnumIKControlType extends EnumItem end
 declare class EnumIKControlType_INTERNAL extends Enum
-	Null: EnumIKControlType
+	Transform: EnumIKControlType
 	Position: EnumIKControlType
 	Rotation: EnumIKControlType
-	Transform: EnumIKControlType
 	LookAt: EnumIKControlType
-	Length: EnumIKControlType
 end
 declare class EnumIXPLoadingStatus extends EnumItem end
 declare class EnumIXPLoadingStatus_INTERNAL extends Enum
@@ -5250,6 +5248,7 @@ declare class GroundController extends ControllerBase
 	DecelerationTime: number
 	Friction: number
 	FrictionWeight: number
+	GroundOffset: number
 	MaxSlopeAngle: number
 	StandForce: number
 	StandSpeed: number
@@ -6350,6 +6349,7 @@ declare class GuiService extends Instance
 	function SetEmotesMenuOpen(self, isOpen: boolean): nil
 	function SetGameplayPausedNotificationEnabled(self, enabled: boolean): nil
 	function SetGlobalGuiInset(self, x1: number, y1: number, x2: number, y2: number): nil
+	function SetHardwareSafeAreaInsets(self, left: number, top: number, right: number, bottom: number): nil
 	function SetInspectMenuEnabled(self, enabled: boolean): nil
 	function SetMenuIsOpen(self, open: boolean, menuName: string?): nil
 	function SetSafeZoneOffsets(self, top: number, bottom: number, left: number, right: number): nil
@@ -6562,7 +6562,6 @@ declare class IKControl extends Instance
 	Enabled: boolean
 	EndEffector: Instance
 	Offset: CFrame
-	Pole: Instance
 	Priority: number
 	Target: Instance
 	Type: EnumIKControlType
@@ -6955,6 +6954,7 @@ declare class MarketplaceService extends Instance
 	ClientLuaDialogRequested: RBXScriptSignal<any>
 	ClientPurchaseSuccess: RBXScriptSignal<string, number, number>
 	NativePurchaseFinished: RBXScriptSignal<Player, string, boolean>
+	NativePurchaseFinishedWithLocalPlayer: RBXScriptSignal<string, boolean>
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
 	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
 	PromptBundlePurchaseRequested: RBXScriptSignal<Instance, number>
@@ -6983,6 +6983,7 @@ declare class MarketplaceService extends Instance
 	function PromptBundlePurchase(self, player: Player, bundleId: number): nil
 	function PromptGamePassPurchase(self, player: Player, gamePassId: number): nil
 	function PromptNativePurchase(self, player: Instance, productId: string): nil
+	function PromptNativePurchaseWithLocalPlayer(self, productId: string): nil
 	function PromptPremiumPurchase(self, player: Player): nil
 	function PromptProductPurchase(self, player: Player, productId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
 	function PromptPurchase(self, player: Player, assetId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
@@ -7688,6 +7689,7 @@ declare class PhysicsService extends Instance
 	function GetMaxCollisionGroups(self): number
 	function GetRegisteredCollisionGroups(self): { any }
 	function IkSolve(self, part: BasePart, target: CFrame, translateStiffness: number, rotateStiffness: number): nil
+	function IsCollisionGroupRegistered(self, name: string): boolean
 	function LocalIkSolve(self, part: BasePart, target: CFrame, translateStiffness: number, rotateStiffness: number): nil
 	function RegisterCollisionGroup(self, name: string): nil
 	function RemoveCollisionGroup(self, name: string): nil
@@ -7796,6 +7798,7 @@ declare class Player extends Instance
 	function RevokeFriendship(self, player: Player): nil
 	function SetAccountAge(self, accountAge: number): nil
 	function SetCharacterAppearanceJson(self, jsonBlob: string): nil
+	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetMembershipType(self, membershipType: EnumMembershipType): nil
 	function SetModerationAccessKey(self, moderationAccessKey: string): nil
 	function SetSuperSafeChat(self, value: boolean): nil
@@ -8323,10 +8326,11 @@ declare class ScriptEditorService extends Instance
 	TextDocumentDidChange: RBXScriptSignal<ScriptDocument, any>
 	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
 	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
+	function DeregisterAutocompleteCallback(self, name: string): nil
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
 	function GetScriptDocuments(self): { Instance }
 	function OpenScriptDocumentAsync(self, script: LuaSourceContainer): any
-	function RegisterAutocompleteCallback(self, callbackFunction: ((...any) -> ...any)): nil
+	function RegisterAutocompleteCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
 end
 
 declare class ScriptRegistrationService extends Instance
@@ -8950,6 +8954,7 @@ end
 
 declare class TeleportService extends Instance
 	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
+	MenuTeleportAttempt: RBXScriptSignal<>
 	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
 	function GetArrivingTeleportGui(self): ScreenGui
 	function GetLocalPlayerTeleportData(self): any
