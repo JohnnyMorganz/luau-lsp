@@ -191,13 +191,13 @@
           "items": {
             "type": "string"
           },
-          "scope": "resource"
+          "scope": "window"
         },
         "luau-lsp.types.roblox": {
           "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
           "type": "boolean",
           "default": true,
-          "scope": "resource"
+          "scope": "window"
         },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
