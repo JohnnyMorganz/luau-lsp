@@ -3,8 +3,12 @@ local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
 local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
-local button =
-	toolbar:CreateButton("Language Server Setup", "Toggle Menu", "rbxassetid://11115506617", "Luau LSP") :: PluginToolbarButton
+local button = toolbar:CreateButton(
+	"Luau Language Server Setup",
+	"Toggle Menu",
+	"rbxassetid://11115506617",
+	"Luau Language Server"
+) :: PluginToolbarButton
 
 local widgetInfo = DockWidgetPluginGuiInfo.new(
 	-- widget info
@@ -17,15 +21,20 @@ local widgetInfo = DockWidgetPluginGuiInfo.new(
 	70
 )
 
-local ConnectAction =
-	plugin:CreatePluginAction("Luau LSP Connect", "Connect", "Connects to Luau LSP", "rbxassetid://11115506617", true)
+local ConnectAction = plugin:CreatePluginAction(
+	"Luau Language Server Connect",
+	"Connect",
+	"Connects to Luau Language Server",
+	"rbxassetid://11115506617",
+	true
+)
 
 local widget = plugin:CreateDockWidgetPluginGui("Luau Language Server", widgetInfo)
 widget.Title = "Luau Language Server"
 button.ClickableWhenViewportHidden = true
 
 local port = plugin:GetSetting("Port") or 3667
-local connected = false
+local connected: BoolValue = Instance.new("BoolValue")
 local connections = {}
 
 local INCLUDED_SERVICES = {
@@ -76,7 +85,7 @@ local function cleanup()
 	for _, connection in pairs(connections) do
 		connection:Disconnect()
 	end
-	connected = false
+	connected.Value = false
 end
 
 local function sendFullDMInfo()
@@ -95,18 +104,21 @@ local function sendFullDMInfo()
 
 	if not success then
 		warn("[Luau Language Server] Connecting to server failed: " .. result)
+		connected.Value = false
 	elseif not result.Success then
 		warn("[Luau Language Server] Sending full DM info failed: " .. result.StatusCode .. ": " .. result.Body)
+		connected.Value = false
+	else
+		print("[Luau Language Server] Listening for DataModel changes")
+		connected.Value = true
 	end
 end
 
 local function watchChanges()
-	if connected or port == nil then
+	if connected.Value or port == nil then
 		return
 	end
 	cleanup()
-
-	connected = true
 
 	-- TODO: we should only send delta info if possible
 	local function descendantChanged(instance: Instance)
@@ -121,6 +133,16 @@ local function watchChanges()
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
 
 	sendFullDMInfo()
+end
+
+function connectServer()
+	if connected.Value then
+		print("[Luau Language Server] Disconnecting from DataModel changes")
+		cleanup()
+	else
+		print("[Luau Language Server] Connecting to server")
+		watchChanges()
+	end
 end
 
 -- Interface
@@ -164,20 +186,16 @@ local connectButton = Instance.new("TextButton")
 connectButton.BackgroundColor3 = theme:GetColor(Enum.StudioStyleGuideColor.MainButton)
 connectButton.BorderColor3 = theme:GetColor(Enum.StudioStyleGuideColor.ButtonBorder)
 connectButton.TextColor3 = theme:GetColor(Enum.StudioStyleGuideColor.ButtonText)
-connectButton.Text = if connected then "Disconnect" else "Connect"
+connectButton.Text = if connected.Value then "Disconnect" else "Connect"
 connectButton.TextSize = 16
 connectButton.Size = UDim2.new(1, 0, 0, 25)
 connectButton.LayoutOrder = 1
 connectButton.Parent = frame
-connectButton.Activated:Connect(function()
-	if connected then
-		print("[Luau Language Server] Disconnecting from DataModel changes")
-		cleanup()
-	else
-		print("[Luau Language Server] Listening for DataModel changes")
-		watchChanges()
-	end
-	connectButton.Text = if connected then "Disconnect" else "Connect"
+connectButton.Activated:Connect(connectServer)
+
+connected.Changed:Connect(function()
+	connectButton.Text = if connected.Value then "Disconnect" else "Connect"
+	button.Icon = if connected.Value then "rbxassetid://11116536087" else "rbxassetid://11115506617"
 end)
 
 local corner = Instance.new("UICorner")
@@ -196,13 +214,4 @@ widget:GetPropertyChangedSignal("Enabled"):Connect(function()
 	button:SetActive(widget.Enabled)
 end)
 
-ConnectAction.Triggered:Connect(function()
-	if connected then
-		print("[Luau Language Server] Disconnecting from DataModel changes")
-		cleanup()
-	else
-		print("[Luau Language Server] Listening for DataModel changes")
-		watchChanges()
-	end
-	connectButton.Text = if connected then "Disconnect" else "Connect"
-end)
+ConnectAction.Triggered:Connect(connectServer)
