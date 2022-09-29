@@ -3,12 +3,8 @@ local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
 local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
-local button = toolbar:CreateButton(
-	"Language Server Setup",
-	"Connect to Server",
-	"rbxassetid://10913079454",
-	"Connect to Server"
-) :: PluginToolbarButton
+local button =
+	toolbar:CreateButton("Language Server Setup", "Toggle Menu", "rbxassetid://11115506617", "Luau LSP") :: PluginToolbarButton
 
 local widgetInfo = DockWidgetPluginGuiInfo.new(
 	-- widget info
@@ -20,6 +16,9 @@ local widgetInfo = DockWidgetPluginGuiInfo.new(
 	120,
 	70
 )
+
+local ConnectAction =
+	plugin:CreatePluginAction("Luau LSP Connect", "Connect", "Connects to Luau LSP", "rbxassetid://11115506617", true)
 
 local widget = plugin:CreateDockWidgetPluginGui("Luau Language Server", widgetInfo)
 widget.Title = "Luau Language Server"
@@ -102,7 +101,7 @@ local function sendFullDMInfo()
 end
 
 local function watchChanges()
-	if connected then
+	if connected or port == nil then
 		return
 	end
 	cleanup()
@@ -154,7 +153,9 @@ portTextBox.TextSize = 20
 portTextBox.Size = UDim2.new(1, 0, 0, 30)
 portTextBox.LayoutOrder = 0
 portTextBox.Parent = frame
+portTextBox.ClearTextOnFocus = false
 portTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+	portTextBox.Text = portTextBox.Text:gsub("%D+", ""):sub(1, 5)
 	port = tonumber(portTextBox.Text)
 	plugin:SetSetting("Port", port)
 end)
@@ -193,4 +194,15 @@ end)
 
 widget:GetPropertyChangedSignal("Enabled"):Connect(function()
 	button:SetActive(widget.Enabled)
+end)
+
+ConnectAction.Triggered:Connect(function()
+	if connected then
+		print("[Luau Language Server] Disconnecting from DataModel changes")
+		cleanup()
+	else
+		print("[Luau Language Server] Listening for DataModel changes")
+		watchChanges()
+	end
+	connectButton.Text = if connected then "Disconnect" else "Connect"
 end)
