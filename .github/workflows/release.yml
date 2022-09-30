@@ -22,6 +22,36 @@ jobs:
           release_name: ${{ github.ref }}
           draft: true
 
+  build-plugin:
+    needs: ["create-release"]
+    name: Build Roblox Studio Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: Roblox/setup-foreman@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Plugin
+        run: rojo build plugin --output Luau.rbxm
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Luau.rbxm
+          path: Luau.rbxm
+
+      - name: Upload Plugin to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: Luau.rbxm
+          asset_name: Luau.rbxm
+          asset_content_type: application/octet-stream
+
   dist:
     needs: ["create-release"]
     strategy:
