@@ -203,8 +203,8 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    Luau::registerBuiltinTypes(frontend.typeChecker);
-    Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend.typeChecker);
+    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete);
 
     for (auto& definitionsPath : definitionsPaths)
     {

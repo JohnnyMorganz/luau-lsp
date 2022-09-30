@@ -140,8 +140,8 @@ bool WorkspaceFolder::updateSourceMap()
 
 void WorkspaceFolder::initialize()
 {
-    Luau::registerBuiltinTypes(frontend.typeChecker);
-    Luau::registerBuiltinTypes(frontend.typeCheckerForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend.typeChecker);
+    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete);
 
     if (client->definitionsFiles.empty())
     {
