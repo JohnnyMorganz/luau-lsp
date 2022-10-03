@@ -19,7 +19,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date

@@ -18,7 +18,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document");
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
 
     Luau::CheckResult cr = frontend.check(moduleName);
 
