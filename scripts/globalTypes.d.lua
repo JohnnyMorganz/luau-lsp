@@ -1899,6 +1899,12 @@ declare class EnumParticleFlipbookMode_INTERNAL extends Enum
 	PingPong: EnumParticleFlipbookMode
 	Random: EnumParticleFlipbookMode
 end
+declare class EnumParticleFlipbookTextureCompatible extends EnumItem end
+declare class EnumParticleFlipbookTextureCompatible_INTERNAL extends Enum
+	NotCompatible: EnumParticleFlipbookTextureCompatible
+	Compatible: EnumParticleFlipbookTextureCompatible
+	Unknown: EnumParticleFlipbookTextureCompatible
+end
 declare class EnumParticleOrientation extends EnumItem end
 declare class EnumParticleOrientation_INTERNAL extends Enum
 	FacingCamera: EnumParticleOrientation
@@ -2112,6 +2118,13 @@ declare class EnumResamplerMode extends EnumItem end
 declare class EnumResamplerMode_INTERNAL extends Enum
 	Default: EnumResamplerMode
 	Pixelated: EnumResamplerMode
+end
+declare class EnumReservedHighlightId extends EnumItem end
+declare class EnumReservedHighlightId_INTERNAL extends Enum
+	Standard: EnumReservedHighlightId
+	Selection: EnumReservedHighlightId
+	Hover: EnumReservedHighlightId
+	Active: EnumReservedHighlightId
 end
 declare class EnumReturnKeyType extends EnumItem end
 declare class EnumReturnKeyType_INTERNAL extends Enum
@@ -2758,6 +2771,13 @@ declare class EnumTrackerError_INTERNAL extends Enum
 	AudioError: EnumTrackerError
 	AudioNoPermission: EnumTrackerError
 end
+declare class EnumTrackerExtrapolationFlagMode extends EnumItem end
+declare class EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum
+	Auto: EnumTrackerExtrapolationFlagMode
+	ForceDisabled: EnumTrackerExtrapolationFlagMode
+	ExtrapolateFacsAndPose: EnumTrackerExtrapolationFlagMode
+	ExtrapolateFacsOnly: EnumTrackerExtrapolationFlagMode
+end
 declare class EnumTrackerLodFlagMode extends EnumItem end
 declare class EnumTrackerLodFlagMode_INTERNAL extends Enum
 	Auto: EnumTrackerLodFlagMode
@@ -3155,6 +3175,7 @@ declare Enum: {
 	ParticleEmitterShapeStyle: EnumParticleEmitterShapeStyle_INTERNAL,
 	ParticleFlipbookLayout: EnumParticleFlipbookLayout_INTERNAL,
 	ParticleFlipbookMode: EnumParticleFlipbookMode_INTERNAL,
+	ParticleFlipbookTextureCompatible: EnumParticleFlipbookTextureCompatible_INTERNAL,
 	ParticleOrientation: EnumParticleOrientation_INTERNAL,
 	PathStatus: EnumPathStatus_INTERNAL,
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
@@ -3183,6 +3204,7 @@ declare Enum: {
 	RenderingTestComparisonMethod: EnumRenderingTestComparisonMethod_INTERNAL,
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting_INTERNAL,
 	ResamplerMode: EnumResamplerMode_INTERNAL,
+	ReservedHighlightId: EnumReservedHighlightId_INTERNAL,
 	ReturnKeyType: EnumReturnKeyType_INTERNAL,
 	ReverbType: EnumReverbType_INTERNAL,
 	RibbonTool: EnumRibbonTool_INTERNAL,
@@ -3246,6 +3268,7 @@ declare Enum: {
 	TouchCameraMovementMode: EnumTouchCameraMovementMode_INTERNAL,
 	TouchMovementMode: EnumTouchMovementMode_INTERNAL,
 	TrackerError: EnumTrackerError_INTERNAL,
+	TrackerExtrapolationFlagMode: EnumTrackerExtrapolationFlagMode_INTERNAL,
 	TrackerLodFlagMode: EnumTrackerLodFlagMode_INTERNAL,
 	TrackerLodValueMode: EnumTrackerLodValueMode_INTERNAL,
 	TrackerMode: EnumTrackerMode_INTERNAL,
@@ -3759,6 +3782,7 @@ type Dragger = any
 type DraggerService = any
 type EulerRotationCurve = any
 type EventIngestService = any
+type ExperienceInviteOptions = any
 type Explosion = any
 type FaceAnimatorService = any
 type FaceControls = any
@@ -3897,6 +3921,7 @@ type AppStorageService = any
 type UserStorageService = any
 type LocalizationService = any
 type LocalizationTable = any
+type CloudLocalizationTable = any
 type LodDataEntity = any
 type LodDataService = any
 type LogService = any
@@ -4270,6 +4295,8 @@ declare class AdPortal extends Instance
 end
 
 declare class AdService extends Instance
+	AdTeleportEnded: RBXScriptSignal<>
+	AdTeleportInitiated: RBXScriptSignal<>
 end
 
 declare class AdvancedDragger extends Instance
@@ -4366,6 +4393,7 @@ end
 declare class Animator extends Instance
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
 	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
+	PreferLodEnabled: boolean
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { any }
 	function GetPlayingAnimationTracksCoreScript(self): { any }
@@ -5560,6 +5588,7 @@ declare class DraggerService extends Instance
 	DraggerMovementMode: EnumDraggerMovementMode
 	GeometrySnapColor: Color3
 	HoverAnimateFrequency: number
+	HoverLineThickness: number
 	HoverThickness: number
 	JointsEnabled: boolean
 	LinearSnapEnabled: boolean
@@ -5583,6 +5612,13 @@ declare class EventIngestService extends Instance
 	function SendEventImmediately(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEvent(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEventStream(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
+end
+
+declare class ExperienceInviteOptions extends Instance
+	InviteMessageId: number
+	InviteUser: number
+	LaunchData: string
+	PromptMessage: string
 end
 
 declare class Explosion extends Instance
@@ -6389,8 +6425,10 @@ declare class Highlight extends Instance
 	Enabled: boolean
 	FillColor: Color3
 	FillTransparency: number
+	LineThickness: number
 	OutlineColor: Color3
 	OutlineTransparency: number
+	ReservedId: EnumReservedHighlightId
 end
 
 
@@ -6437,6 +6475,7 @@ declare class Humanoid extends Instance
 	DisplayDistanceType: EnumHumanoidDisplayDistanceType
 	DisplayName: string
 	EmoteTriggered: RBXScriptSignal<boolean, AnimationTrack>
+	EvaluateStateMachine: boolean
 	FallingDown: RBXScriptSignal<boolean>
 	FloorMaterial: EnumMaterial
 	FreeFalling: RBXScriptSignal<boolean>
@@ -6660,6 +6699,8 @@ declare class ImporterRootSettings extends ImporterBaseSettings
 end
 
 declare class IncrementalPatchBuilder extends Instance
+	HighCompression: boolean
+	ZstdCompression: boolean
 end
 
 declare class InputObject extends Instance
@@ -6856,7 +6897,6 @@ declare class LocalizationService extends Instance
 	function PromptExportToCSVs(self): nil
 	function PromptImportFromCSVs(self): nil
 	function PromptUploadCSVToGameTable(self): Instance
-	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetRobloxLocaleId(self, locale: string): nil
 	function StartTextScraper(self): nil
 	function StopTextScraper(self): nil
@@ -6876,6 +6916,9 @@ declare class LocalizationTable extends Instance
 	function SetEntrySource(self, key: string, source: string, context: string, newSource: string): nil
 	function SetEntryValue(self, key: string, source: string, context: string, localeId: string, text: string): nil
 	function SetIsExemptFromUGCAnalytics(self, value: boolean): nil
+end
+
+declare class CloudLocalizationTable extends LocalizationTable
 end
 
 declare class LodDataEntity extends Instance
@@ -7216,6 +7259,7 @@ declare class ClientReplicator extends NetworkReplicator
 	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
 	StatsReceived: RBXScriptSignal<{ [any]: any }>
 	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
+	function RequestServerScriptProfiling(self, start: boolean): nil
 	function RequestServerStats(self, request: boolean): nil
 end
 
@@ -7770,6 +7814,7 @@ declare class Player extends Instance
 	TeamColor: BrickColor
 	Teleported: boolean
 	TeleportedIn: boolean
+	UnfilteredChat: boolean
 	UserId: number
 	VRDevice: string
 	function AddToBlockList(self, userIds: { any }): nil
@@ -8047,6 +8092,8 @@ end
 declare class RbxAnalyticsService extends Instance
 	function AddGlobalPointsField(self, key: string, value: number): nil
 	function AddGlobalPointsTag(self, key: string, value: string): nil
+	function DEPRECATED_TrackEvent(self, category: string, action: string, label: string, value: number?): nil
+	function DEPRECATED_TrackEventWithArgs(self, category: string, action: string, label: string, args: { [any]: any }, value: number?): nil
 	function GetClientId(self): string
 	function GetSessionId(self): string
 	function ReleaseRBXEventStream(self, target: string): nil
@@ -8270,10 +8317,12 @@ declare class ScriptContext extends Instance
 	ScriptsDisabled: boolean
 	function AddCoreScriptLocal(self, name: string, parent: Instance): nil
 	function ClearScriptProfilingData(self): nil
+	function DeserializeScriptProfilerString(self, jsonString: string): { [any]: any }
 	function GetCoverageStats(self): { any }
+	function SaveScriptProfilingData(self, filename: string): nil
 	function SetTimeout(self, seconds: number): nil
 	function StartScriptProfiling(self): nil
-	function StopScriptProfiling(self): string
+	function StopScriptProfiling(self): { [any]: any }
 end
 
 declare class ScriptDebugger extends Instance
@@ -8343,6 +8392,7 @@ end
 declare class Selection extends Instance
 	ActiveInstance: Instance
 	SelectionChanged: RBXScriptSignal<>
+	SelectionLineThickness: number
 	SelectionThickness: number
 	function Add(self, instancesToAdd: { Instance }): nil
 	function ClearTerrainSelectionHack(self): nil
@@ -8715,6 +8765,7 @@ declare class Studio extends Instance
 	Highlight_Occurances: boolean
 	Hover_Animate_Speed: EnumHoverAnimateSpeed
 	Hover_Box_Thickness: number
+	Hover_Line_Thickness: number
 	Hover_Over_Color: Color3
 	IconOverrideDir: QDir
 	Indent_Using_Spaces: boolean
@@ -8762,6 +8813,7 @@ declare class Studio extends Instance
 	Selection_Background_Color: Color3
 	Selection_Color: Color3
 	Selection_Highlight_Thickness: number
+	Selection_Line_Thickness: number
 	Server_Audio_Behavior: EnumServerAudioBehavior
 	Set_Pivot_of_Imported_Parts: boolean
 	ShowCorePackagesInExplorer: boolean
@@ -8956,6 +9008,7 @@ declare class TeleportService extends Instance
 	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
 	MenuTeleportAttempt: RBXScriptSignal<>
 	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
+	function Block(self): nil
 	function GetArrivingTeleportGui(self): ScreenGui
 	function GetLocalPlayerTeleportData(self): any
 	function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)
@@ -8970,6 +9023,7 @@ declare class TeleportService extends Instance
 	function TeleportToPlaceInstance(self, placeId: number, instanceId: string, player: Player?, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToSpawnByName(self, placeId: number, spawnName: string, player: Player?, teleportData: any, customLoadingScreen: GuiObject?): nil
+	function UnblockAsync(self): any
 end
 
 declare class TemporaryCageMeshProvider extends Instance
@@ -9071,6 +9125,8 @@ declare class ChatWindowConfiguration extends TextChatConfigurations
 	AbsoluteSize: Vector2
 	AbsoluteSizeWrite: Vector2
 	Enabled: boolean
+	HorizontalAlignment: EnumHorizontalAlignment
+	VerticalAlignment: EnumVerticalAlignment
 end
 
 declare class TextChatMessage extends Instance
@@ -9159,8 +9215,10 @@ end
 declare class TrackerLodController extends Instance
 	AudioMode: EnumTrackerLodFlagMode
 	UpdateState: RBXScriptSignal<>
+	VideoExtrapolationMode: EnumTrackerExtrapolationFlagMode
 	VideoLodMode: EnumTrackerLodValueMode
 	VideoMode: EnumTrackerLodFlagMode
+	function getExtrapolation(self): number
 	function getVideoLod(self): number
 	function isAudioEnabled(self): boolean
 	function isVideoEnabled(self): boolean
@@ -9229,6 +9287,11 @@ declare class UGCValidationService extends Instance
 	function ValidateMeshVertColors(self, meshId: string): boolean
 	function ValidateTextureSize(self, textureId: string): boolean
 	function ValidateUVSpace(self, meshId: string): boolean
+	function validateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): { any }
+	function validateCageNonManifoldAndHoles(self, meshId: string): { any }
+	function validateFullBodyCageDeletion(self, meshId: string): boolean
+	function validateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
+	function validateOverlappingVertices(self, meshId: string): boolean
 end
 
 declare class UIBase extends Instance
@@ -9966,7 +10029,7 @@ declare class Plugin extends Instance
 end
 
 declare Instance: {
-	new: ((className: "Accoutrement") -> Accoutrement) & ((className: "Accessory") -> Accessory) & ((className: "Hat") -> Hat) & ((className: "AdvancedDragger") -> AdvancedDragger) & ((className: "AnalyticsService") -> AnalyticsService) & ((className: "Animation") -> Animation) & ((className: "CurveAnimation") -> CurveAnimation) & ((className: "KeyframeSequence") -> KeyframeSequence) & ((className: "AnimationController") -> AnimationController) & ((className: "AnimationRigData") -> AnimationRigData) & ((className: "Animator") -> Animator) & ((className: "Atmosphere") -> Atmosphere) & ((className: "Attachment") -> Attachment) & ((className: "Bone") -> Bone) & ((className: "Backpack") -> Backpack) & ((className: "HopperBin") -> HopperBin) & ((className: "Tool") -> Tool) & ((className: "Flag") -> Flag) & ((className: "WrapLayer") -> WrapLayer) & ((className: "WrapTarget") -> WrapTarget) & ((className: "Beam") -> Beam) & ((className: "BindableEvent") -> BindableEvent) & ((className: "BindableFunction") -> BindableFunction) & ((className: "BodyAngularVelocity") -> BodyAngularVelocity) & ((className: "BodyForce") -> BodyForce) & ((className: "BodyGyro") -> BodyGyro) & ((className: "BodyPosition") -> BodyPosition) & ((className: "BodyThrust") -> BodyThrust) & ((className: "BodyVelocity") -> BodyVelocity) & ((className: "RocketPropulsion") -> RocketPropulsion) & ((className: "Breakpoint") -> Breakpoint) & ((className: "Camera") -> Camera) & ((className: "BodyColors") -> BodyColors) & ((className: "CharacterMesh") -> CharacterMesh) & ((className: "Pants") -> Pants) & ((className: "Shirt") -> Shirt) & ((className: "ShirtGraphic") -> ShirtGraphic) & ((className: "Skin") -> Skin) & ((className: "ClickDetector") -> ClickDetector) & ((className: "Clouds") -> Clouds) & ((className: "Configuration") -> Configuration) & ((className: "AlignOrientation") -> AlignOrientation) & ((className: "AlignPosition") -> AlignPosition) & ((className: "AngularVelocity") -> AngularVelocity) & ((className: "BallSocketConstraint") -> BallSocketConstraint) & ((className: "HingeConstraint") -> HingeConstraint) & ((className: "LineForce") -> LineForce) & ((className: "LinearVelocity") -> LinearVelocity) & ((className: "PlaneConstraint") -> PlaneConstraint) & ((className: "Plane") -> Plane) & ((className: "RigidConstraint") -> RigidConstraint) & ((className: "RodConstraint") -> RodConstraint) & ((className: "RopeConstraint") -> RopeConstraint) & ((className: "CylindricalConstraint") -> CylindricalConstraint) & ((className: "PrismaticConstraint") -> PrismaticConstraint) & ((className: "SpringConstraint") -> SpringConstraint) & ((className: "Torque") -> Torque) & ((className: "TorsionSpringConstraint") -> TorsionSpringConstraint) & ((className: "UniversalConstraint") -> UniversalConstraint) & ((className: "VectorForce") -> VectorForce) & ((className: "HumanoidController") -> HumanoidController) & ((className: "SkateboardController") -> SkateboardController) & ((className: "VehicleController") -> VehicleController) & ((className: "AirController") -> AirController) & ((className: "ClimbController") -> ClimbController) & ((className: "GroundController") -> GroundController) & ((className: "SwimController") -> SwimController) & ((className: "ControllerManager") -> ControllerManager) & ((className: "CustomEvent") -> CustomEvent) & ((className: "CustomEventReceiver") -> CustomEventReceiver) & ((className: "CylinderMesh") -> CylinderMesh) & ((className: "FileMesh") -> FileMesh) & ((className: "SpecialMesh") -> SpecialMesh) & ((className: "DataStoreIncrementOptions") -> DataStoreIncrementOptions) & ((className: "DataStoreOptions") -> DataStoreOptions) & ((className: "DataStoreSetOptions") -> DataStoreSetOptions) & ((className: "DebuggerWatch") -> DebuggerWatch) & ((className: "Dialog") -> Dialog) & ((className: "DialogChoice") -> DialogChoice) & ((className: "Dragger") -> Dragger) & ((className: "EulerRotationCurve") -> EulerRotationCurve) & ((className: "Explosion") -> Explosion) & ((className: "FaceControls") -> FaceControls) & ((className: "Decal") -> Decal) & ((className: "Texture") -> Texture) & ((className: "Hole") -> Hole) & ((className: "MotorFeature") -> MotorFeature) & ((className: "Fire") -> Fire) & ((className: "FloatCurve") -> FloatCurve) & ((className: "FlyweightService") -> FlyweightService) & ((className: "CSGDictionaryService") -> CSGDictionaryService) & ((className: "NonReplicatedCSGDictionaryService") -> NonReplicatedCSGDictionaryService) & ((className: "Folder") -> Folder) & ((className: "ForceField") -> ForceField) & ((className: "FunctionalTest") -> FunctionalTest) & ((className: "GetTextBoundsParams") -> GetTextBoundsParams) & ((className: "CanvasGroup") -> CanvasGroup) & ((className: "Frame") -> Frame) & ((className: "ImageButton") -> ImageButton) & ((className: "TextButton") -> TextButton) & ((className: "ImageLabel") -> ImageLabel) & ((className: "TextLabel") -> TextLabel) & ((className: "ScrollingFrame") -> ScrollingFrame) & ((className: "TextBox") -> TextBox) & ((className: "VideoFrame") -> VideoFrame) & ((className: "ViewportFrame") -> ViewportFrame) & ((className: "BillboardGui") -> BillboardGui) & ((className: "ScreenGui") -> ScreenGui) & ((className: "GuiMain") -> GuiMain) & ((className: "AdGui") -> AdGui) & ((className: "SurfaceGui") -> SurfaceGui) & ((className: "FloorWire") -> FloorWire) & ((className: "SelectionBox") -> SelectionBox) & ((className: "BoxHandleAdornment") -> BoxHandleAdornment) & ((className: "ConeHandleAdornment") -> ConeHandleAdornment) & ((className: "CylinderHandleAdornment") -> CylinderHandleAdornment) & ((className: "ImageHandleAdornment") -> ImageHandleAdornment) & ((className: "LineHandleAdornment") -> LineHandleAdornment) & ((className: "SphereHandleAdornment") -> SphereHandleAdornment) & ((className: "WireframeHandleAdornment") -> WireframeHandleAdornment) & ((className: "ParabolaAdornment") -> ParabolaAdornment) & ((className: "SelectionSphere") -> SelectionSphere) & ((className: "ArcHandles") -> ArcHandles) & ((className: "Handles") -> Handles) & ((className: "SurfaceSelection") -> SurfaceSelection) & ((className: "SelectionPartLasso") -> SelectionPartLasso) & ((className: "SelectionPointLasso") -> SelectionPointLasso) & ((className: "HeightmapImporterService") -> HeightmapImporterService) & ((className: "HiddenSurfaceRemovalAsset") -> HiddenSurfaceRemovalAsset) & ((className: "Highlight") -> Highlight) & ((className: "Humanoid") -> Humanoid) & ((className: "HumanoidDescription") -> HumanoidDescription) & ((className: "IKControl") -> IKControl) & ((className: "RotateP") -> RotateP) & ((className: "RotateV") -> RotateV) & ((className: "Glue") -> Glue) & ((className: "ManualGlue") -> ManualGlue) & ((className: "ManualWeld") -> ManualWeld) & ((className: "Motor") -> Motor) & ((className: "Motor6D") -> Motor6D) & ((className: "Rotate") -> Rotate) & ((className: "Snap") -> Snap) & ((className: "VelocityMotor") -> VelocityMotor) & ((className: "Weld") -> Weld) & ((className: "Keyframe") -> Keyframe) & ((className: "KeyframeMarker") -> KeyframeMarker) & ((className: "PointLight") -> PointLight) & ((className: "SpotLight") -> SpotLight) & ((className: "SurfaceLight") -> SurfaceLight) & ((className: "LocalizationTable") -> LocalizationTable) & ((className: "Script") -> Script) & ((className: "LocalScript") -> LocalScript) & ((className: "ModuleScript") -> ModuleScript) & ((className: "MarkerCurve") -> MarkerCurve) & ((className: "MaterialVariant") -> MaterialVariant) & ((className: "MemoryStoreService") -> MemoryStoreService) & ((className: "Message") -> Message) & ((className: "Hint") -> Hint) & ((className: "NoCollisionConstraint") -> NoCollisionConstraint) & ((className: "CornerWedgePart") -> CornerWedgePart) & ((className: "Part") -> Part) & ((className: "FlagStand") -> FlagStand) & ((className: "Seat") -> Seat) & ((className: "SkateboardPlatform") -> SkateboardPlatform) & ((className: "SpawnLocation") -> SpawnLocation) & ((className: "WedgePart") -> WedgePart) & ((className: "MeshPart") -> MeshPart) & ((className: "PartOperation") -> PartOperation) & ((className: "NegateOperation") -> NegateOperation) & ((className: "UnionOperation") -> UnionOperation) & ((className: "TrussPart") -> TrussPart) & ((className: "VehicleSeat") -> VehicleSeat) & ((className: "Model") -> Model) & ((className: "Actor") -> Actor) & ((className: "WorldModel") -> WorldModel) & ((className: "PartOperationAsset") -> PartOperationAsset) & ((className: "ParticleEmitter") -> ParticleEmitter) & ((className: "PathfindingLink") -> PathfindingLink) & ((className: "PathfindingModifier") -> PathfindingModifier) & ((className: "Player") -> Player) & ((className: "PluginAction") -> PluginAction) & ((className: "NumberPose") -> NumberPose) & ((className: "Pose") -> Pose) & ((className: "BloomEffect") -> BloomEffect) & ((className: "BlurEffect") -> BlurEffect) & ((className: "ColorCorrectionEffect") -> ColorCorrectionEffect) & ((className: "DepthOfFieldEffect") -> DepthOfFieldEffect) & ((className: "SunRaysEffect") -> SunRaysEffect) & ((className: "ProximityPrompt") -> ProximityPrompt) & ((className: "ProximityPromptService") -> ProximityPromptService) & ((className: "ReflectionMetadata") -> ReflectionMetadata) & ((className: "ReflectionMetadataCallbacks") -> ReflectionMetadataCallbacks) & ((className: "ReflectionMetadataClasses") -> ReflectionMetadataClasses) & ((className: "ReflectionMetadataEnums") -> ReflectionMetadataEnums) & ((className: "ReflectionMetadataEvents") -> ReflectionMetadataEvents) & ((className: "ReflectionMetadataFunctions") -> ReflectionMetadataFunctions) & ((className: "ReflectionMetadataClass") -> ReflectionMetadataClass) & ((className: "ReflectionMetadataEnum") -> ReflectionMetadataEnum) & ((className: "ReflectionMetadataEnumItem") -> ReflectionMetadataEnumItem) & ((className: "ReflectionMetadataMember") -> ReflectionMetadataMember) & ((className: "ReflectionMetadataProperties") -> ReflectionMetadataProperties) & ((className: "ReflectionMetadataYieldFunctions") -> ReflectionMetadataYieldFunctions) & ((className: "RemoteEvent") -> RemoteEvent) & ((className: "RemoteFunction") -> RemoteFunction) & ((className: "RenderingTest") -> RenderingTest) & ((className: "RotationCurve") -> RotationCurve) & ((className: "Sky") -> Sky) & ((className: "Smoke") -> Smoke) & ((className: "Sound") -> Sound) & ((className: "ChorusSoundEffect") -> ChorusSoundEffect) & ((className: "CompressorSoundEffect") -> CompressorSoundEffect) & ((className: "ChannelSelectorSoundEffect") -> ChannelSelectorSoundEffect) & ((className: "DistortionSoundEffect") -> DistortionSoundEffect) & ((className: "EchoSoundEffect") -> EchoSoundEffect) & ((className: "EqualizerSoundEffect") -> EqualizerSoundEffect) & ((className: "FlangeSoundEffect") -> FlangeSoundEffect) & ((className: "PitchShiftSoundEffect") -> PitchShiftSoundEffect) & ((className: "ReverbSoundEffect") -> ReverbSoundEffect) & ((className: "TremoloSoundEffect") -> TremoloSoundEffect) & ((className: "SoundGroup") -> SoundGroup) & ((className: "Sparkles") -> Sparkles) & ((className: "Speaker") -> Speaker) & ((className: "StandalonePluginScripts") -> StandalonePluginScripts) & ((className: "StarterGear") -> StarterGear) & ((className: "SurfaceAppearance") -> SurfaceAppearance) & ((className: "Team") -> Team) & ((className: "TeleportOptions") -> TeleportOptions) & ((className: "TerrainDetail") -> TerrainDetail) & ((className: "TerrainRegion") -> TerrainRegion) & ((className: "TestService") -> TestService) & ((className: "TextChannel") -> TextChannel) & ((className: "TextChatCommand") -> TextChatCommand) & ((className: "TextChatMessageProperties") -> TextChatMessageProperties) & ((className: "TrackerStreamAnimation") -> TrackerStreamAnimation) & ((className: "Trail") -> Trail) & ((className: "Tween") -> Tween) & ((className: "UIAspectRatioConstraint") -> UIAspectRatioConstraint) & ((className: "UISizeConstraint") -> UISizeConstraint) & ((className: "UITextSizeConstraint") -> UITextSizeConstraint) & ((className: "UICorner") -> UICorner) & ((className: "UIGradient") -> UIGradient) & ((className: "UIGridLayout") -> UIGridLayout) & ((className: "UIListLayout") -> UIListLayout) & ((className: "UIPageLayout") -> UIPageLayout) & ((className: "UITableLayout") -> UITableLayout) & ((className: "UIPadding") -> UIPadding) & ((className: "UIScale") -> UIScale) & ((className: "UIStroke") -> UIStroke) & ((className: "BinaryStringValue") -> BinaryStringValue) & ((className: "BoolValue") -> BoolValue) & ((className: "BrickColorValue") -> BrickColorValue) & ((className: "CFrameValue") -> CFrameValue) & ((className: "Color3Value") -> Color3Value) & ((className: "DoubleConstrainedValue") -> DoubleConstrainedValue) & ((className: "IntConstrainedValue") -> IntConstrainedValue) & ((className: "IntValue") -> IntValue) & ((className: "NumberValue") -> NumberValue) & ((className: "ObjectValue") -> ObjectValue) & ((className: "RayValue") -> RayValue) & ((className: "StringValue") -> StringValue) & ((className: "Vector3Value") -> Vector3Value) & ((className: "Vector3Curve") -> Vector3Curve) & ((className: "VirtualInputManager") -> VirtualInputManager) & ((className: "VoiceChannel") -> VoiceChannel) & ((className: "WeldConstraint") -> WeldConstraint),
+	new: ((className: "Accoutrement") -> Accoutrement) & ((className: "Accessory") -> Accessory) & ((className: "Hat") -> Hat) & ((className: "AdPortal") -> AdPortal) & ((className: "AdvancedDragger") -> AdvancedDragger) & ((className: "AnalyticsService") -> AnalyticsService) & ((className: "Animation") -> Animation) & ((className: "CurveAnimation") -> CurveAnimation) & ((className: "KeyframeSequence") -> KeyframeSequence) & ((className: "AnimationController") -> AnimationController) & ((className: "AnimationRigData") -> AnimationRigData) & ((className: "Animator") -> Animator) & ((className: "Atmosphere") -> Atmosphere) & ((className: "Attachment") -> Attachment) & ((className: "Bone") -> Bone) & ((className: "Backpack") -> Backpack) & ((className: "HopperBin") -> HopperBin) & ((className: "Tool") -> Tool) & ((className: "Flag") -> Flag) & ((className: "WrapLayer") -> WrapLayer) & ((className: "WrapTarget") -> WrapTarget) & ((className: "Beam") -> Beam) & ((className: "BindableEvent") -> BindableEvent) & ((className: "BindableFunction") -> BindableFunction) & ((className: "BodyAngularVelocity") -> BodyAngularVelocity) & ((className: "BodyForce") -> BodyForce) & ((className: "BodyGyro") -> BodyGyro) & ((className: "BodyPosition") -> BodyPosition) & ((className: "BodyThrust") -> BodyThrust) & ((className: "BodyVelocity") -> BodyVelocity) & ((className: "RocketPropulsion") -> RocketPropulsion) & ((className: "Breakpoint") -> Breakpoint) & ((className: "Camera") -> Camera) & ((className: "BodyColors") -> BodyColors) & ((className: "CharacterMesh") -> CharacterMesh) & ((className: "Pants") -> Pants) & ((className: "Shirt") -> Shirt) & ((className: "ShirtGraphic") -> ShirtGraphic) & ((className: "Skin") -> Skin) & ((className: "ClickDetector") -> ClickDetector) & ((className: "Clouds") -> Clouds) & ((className: "Configuration") -> Configuration) & ((className: "AlignOrientation") -> AlignOrientation) & ((className: "AlignPosition") -> AlignPosition) & ((className: "AngularVelocity") -> AngularVelocity) & ((className: "BallSocketConstraint") -> BallSocketConstraint) & ((className: "HingeConstraint") -> HingeConstraint) & ((className: "LineForce") -> LineForce) & ((className: "LinearVelocity") -> LinearVelocity) & ((className: "PlaneConstraint") -> PlaneConstraint) & ((className: "Plane") -> Plane) & ((className: "RigidConstraint") -> RigidConstraint) & ((className: "RodConstraint") -> RodConstraint) & ((className: "RopeConstraint") -> RopeConstraint) & ((className: "CylindricalConstraint") -> CylindricalConstraint) & ((className: "PrismaticConstraint") -> PrismaticConstraint) & ((className: "SpringConstraint") -> SpringConstraint) & ((className: "Torque") -> Torque) & ((className: "TorsionSpringConstraint") -> TorsionSpringConstraint) & ((className: "UniversalConstraint") -> UniversalConstraint) & ((className: "VectorForce") -> VectorForce) & ((className: "HumanoidController") -> HumanoidController) & ((className: "SkateboardController") -> SkateboardController) & ((className: "VehicleController") -> VehicleController) & ((className: "AirController") -> AirController) & ((className: "ClimbController") -> ClimbController) & ((className: "GroundController") -> GroundController) & ((className: "SwimController") -> SwimController) & ((className: "ControllerManager") -> ControllerManager) & ((className: "CustomEvent") -> CustomEvent) & ((className: "CustomEventReceiver") -> CustomEventReceiver) & ((className: "CylinderMesh") -> CylinderMesh) & ((className: "FileMesh") -> FileMesh) & ((className: "SpecialMesh") -> SpecialMesh) & ((className: "DataStoreIncrementOptions") -> DataStoreIncrementOptions) & ((className: "DataStoreOptions") -> DataStoreOptions) & ((className: "DataStoreSetOptions") -> DataStoreSetOptions) & ((className: "DebuggerWatch") -> DebuggerWatch) & ((className: "Dialog") -> Dialog) & ((className: "DialogChoice") -> DialogChoice) & ((className: "Dragger") -> Dragger) & ((className: "EulerRotationCurve") -> EulerRotationCurve) & ((className: "ExperienceInviteOptions") -> ExperienceInviteOptions) & ((className: "Explosion") -> Explosion) & ((className: "FaceControls") -> FaceControls) & ((className: "Decal") -> Decal) & ((className: "Texture") -> Texture) & ((className: "Hole") -> Hole) & ((className: "MotorFeature") -> MotorFeature) & ((className: "Fire") -> Fire) & ((className: "FloatCurve") -> FloatCurve) & ((className: "FlyweightService") -> FlyweightService) & ((className: "CSGDictionaryService") -> CSGDictionaryService) & ((className: "NonReplicatedCSGDictionaryService") -> NonReplicatedCSGDictionaryService) & ((className: "Folder") -> Folder) & ((className: "ForceField") -> ForceField) & ((className: "FunctionalTest") -> FunctionalTest) & ((className: "GetTextBoundsParams") -> GetTextBoundsParams) & ((className: "CanvasGroup") -> CanvasGroup) & ((className: "Frame") -> Frame) & ((className: "ImageButton") -> ImageButton) & ((className: "TextButton") -> TextButton) & ((className: "ImageLabel") -> ImageLabel) & ((className: "TextLabel") -> TextLabel) & ((className: "ScrollingFrame") -> ScrollingFrame) & ((className: "TextBox") -> TextBox) & ((className: "VideoFrame") -> VideoFrame) & ((className: "ViewportFrame") -> ViewportFrame) & ((className: "BillboardGui") -> BillboardGui) & ((className: "ScreenGui") -> ScreenGui) & ((className: "GuiMain") -> GuiMain) & ((className: "AdGui") -> AdGui) & ((className: "SurfaceGui") -> SurfaceGui) & ((className: "FloorWire") -> FloorWire) & ((className: "SelectionBox") -> SelectionBox) & ((className: "BoxHandleAdornment") -> BoxHandleAdornment) & ((className: "ConeHandleAdornment") -> ConeHandleAdornment) & ((className: "CylinderHandleAdornment") -> CylinderHandleAdornment) & ((className: "ImageHandleAdornment") -> ImageHandleAdornment) & ((className: "LineHandleAdornment") -> LineHandleAdornment) & ((className: "SphereHandleAdornment") -> SphereHandleAdornment) & ((className: "WireframeHandleAdornment") -> WireframeHandleAdornment) & ((className: "ParabolaAdornment") -> ParabolaAdornment) & ((className: "SelectionSphere") -> SelectionSphere) & ((className: "ArcHandles") -> ArcHandles) & ((className: "Handles") -> Handles) & ((className: "SurfaceSelection") -> SurfaceSelection) & ((className: "SelectionPartLasso") -> SelectionPartLasso) & ((className: "SelectionPointLasso") -> SelectionPointLasso) & ((className: "HeightmapImporterService") -> HeightmapImporterService) & ((className: "HiddenSurfaceRemovalAsset") -> HiddenSurfaceRemovalAsset) & ((className: "Highlight") -> Highlight) & ((className: "Humanoid") -> Humanoid) & ((className: "HumanoidDescription") -> HumanoidDescription) & ((className: "IKControl") -> IKControl) & ((className: "RotateP") -> RotateP) & ((className: "RotateV") -> RotateV) & ((className: "Glue") -> Glue) & ((className: "ManualGlue") -> ManualGlue) & ((className: "ManualWeld") -> ManualWeld) & ((className: "Motor") -> Motor) & ((className: "Motor6D") -> Motor6D) & ((className: "Rotate") -> Rotate) & ((className: "Snap") -> Snap) & ((className: "VelocityMotor") -> VelocityMotor) & ((className: "Weld") -> Weld) & ((className: "Keyframe") -> Keyframe) & ((className: "KeyframeMarker") -> KeyframeMarker) & ((className: "PointLight") -> PointLight) & ((className: "SpotLight") -> SpotLight) & ((className: "SurfaceLight") -> SurfaceLight) & ((className: "LocalizationTable") -> LocalizationTable) & ((className: "Script") -> Script) & ((className: "LocalScript") -> LocalScript) & ((className: "ModuleScript") -> ModuleScript) & ((className: "MarkerCurve") -> MarkerCurve) & ((className: "MaterialVariant") -> MaterialVariant) & ((className: "MemoryStoreService") -> MemoryStoreService) & ((className: "Message") -> Message) & ((className: "Hint") -> Hint) & ((className: "NoCollisionConstraint") -> NoCollisionConstraint) & ((className: "CornerWedgePart") -> CornerWedgePart) & ((className: "Part") -> Part) & ((className: "FlagStand") -> FlagStand) & ((className: "Seat") -> Seat) & ((className: "SkateboardPlatform") -> SkateboardPlatform) & ((className: "SpawnLocation") -> SpawnLocation) & ((className: "WedgePart") -> WedgePart) & ((className: "MeshPart") -> MeshPart) & ((className: "PartOperation") -> PartOperation) & ((className: "NegateOperation") -> NegateOperation) & ((className: "UnionOperation") -> UnionOperation) & ((className: "TrussPart") -> TrussPart) & ((className: "VehicleSeat") -> VehicleSeat) & ((className: "Model") -> Model) & ((className: "Actor") -> Actor) & ((className: "WorldModel") -> WorldModel) & ((className: "PartOperationAsset") -> PartOperationAsset) & ((className: "ParticleEmitter") -> ParticleEmitter) & ((className: "PathfindingLink") -> PathfindingLink) & ((className: "PathfindingModifier") -> PathfindingModifier) & ((className: "Player") -> Player) & ((className: "PluginAction") -> PluginAction) & ((className: "NumberPose") -> NumberPose) & ((className: "Pose") -> Pose) & ((className: "BloomEffect") -> BloomEffect) & ((className: "BlurEffect") -> BlurEffect) & ((className: "ColorCorrectionEffect") -> ColorCorrectionEffect) & ((className: "DepthOfFieldEffect") -> DepthOfFieldEffect) & ((className: "SunRaysEffect") -> SunRaysEffect) & ((className: "ProximityPrompt") -> ProximityPrompt) & ((className: "ProximityPromptService") -> ProximityPromptService) & ((className: "ReflectionMetadata") -> ReflectionMetadata) & ((className: "ReflectionMetadataCallbacks") -> ReflectionMetadataCallbacks) & ((className: "ReflectionMetadataClasses") -> ReflectionMetadataClasses) & ((className: "ReflectionMetadataEnums") -> ReflectionMetadataEnums) & ((className: "ReflectionMetadataEvents") -> ReflectionMetadataEvents) & ((className: "ReflectionMetadataFunctions") -> ReflectionMetadataFunctions) & ((className: "ReflectionMetadataClass") -> ReflectionMetadataClass) & ((className: "ReflectionMetadataEnum") -> ReflectionMetadataEnum) & ((className: "ReflectionMetadataEnumItem") -> ReflectionMetadataEnumItem) & ((className: "ReflectionMetadataMember") -> ReflectionMetadataMember) & ((className: "ReflectionMetadataProperties") -> ReflectionMetadataProperties) & ((className: "ReflectionMetadataYieldFunctions") -> ReflectionMetadataYieldFunctions) & ((className: "RemoteEvent") -> RemoteEvent) & ((className: "RemoteFunction") -> RemoteFunction) & ((className: "RenderingTest") -> RenderingTest) & ((className: "RotationCurve") -> RotationCurve) & ((className: "Sky") -> Sky) & ((className: "Smoke") -> Smoke) & ((className: "Sound") -> Sound) & ((className: "ChorusSoundEffect") -> ChorusSoundEffect) & ((className: "CompressorSoundEffect") -> CompressorSoundEffect) & ((className: "ChannelSelectorSoundEffect") -> ChannelSelectorSoundEffect) & ((className: "DistortionSoundEffect") -> DistortionSoundEffect) & ((className: "EchoSoundEffect") -> EchoSoundEffect) & ((className: "EqualizerSoundEffect") -> EqualizerSoundEffect) & ((className: "FlangeSoundEffect") -> FlangeSoundEffect) & ((className: "PitchShiftSoundEffect") -> PitchShiftSoundEffect) & ((className: "ReverbSoundEffect") -> ReverbSoundEffect) & ((className: "TremoloSoundEffect") -> TremoloSoundEffect) & ((className: "SoundGroup") -> SoundGroup) & ((className: "Sparkles") -> Sparkles) & ((className: "Speaker") -> Speaker) & ((className: "StandalonePluginScripts") -> StandalonePluginScripts) & ((className: "StarterGear") -> StarterGear) & ((className: "SurfaceAppearance") -> SurfaceAppearance) & ((className: "Team") -> Team) & ((className: "TeleportOptions") -> TeleportOptions) & ((className: "TerrainDetail") -> TerrainDetail) & ((className: "TerrainRegion") -> TerrainRegion) & ((className: "TestService") -> TestService) & ((className: "TextChannel") -> TextChannel) & ((className: "TextChatCommand") -> TextChatCommand) & ((className: "TextChatMessageProperties") -> TextChatMessageProperties) & ((className: "TrackerStreamAnimation") -> TrackerStreamAnimation) & ((className: "Trail") -> Trail) & ((className: "Tween") -> Tween) & ((className: "UIAspectRatioConstraint") -> UIAspectRatioConstraint) & ((className: "UISizeConstraint") -> UISizeConstraint) & ((className: "UITextSizeConstraint") -> UITextSizeConstraint) & ((className: "UICorner") -> UICorner) & ((className: "UIGradient") -> UIGradient) & ((className: "UIGridLayout") -> UIGridLayout) & ((className: "UIListLayout") -> UIListLayout) & ((className: "UIPageLayout") -> UIPageLayout) & ((className: "UITableLayout") -> UITableLayout) & ((className: "UIPadding") -> UIPadding) & ((className: "UIScale") -> UIScale) & ((className: "UIStroke") -> UIStroke) & ((className: "BinaryStringValue") -> BinaryStringValue) & ((className: "BoolValue") -> BoolValue) & ((className: "BrickColorValue") -> BrickColorValue) & ((className: "CFrameValue") -> CFrameValue) & ((className: "Color3Value") -> Color3Value) & ((className: "DoubleConstrainedValue") -> DoubleConstrainedValue) & ((className: "IntConstrainedValue") -> IntConstrainedValue) & ((className: "IntValue") -> IntValue) & ((className: "NumberValue") -> NumberValue) & ((className: "ObjectValue") -> ObjectValue) & ((className: "RayValue") -> RayValue) & ((className: "StringValue") -> StringValue) & ((className: "Vector3Value") -> Vector3Value) & ((className: "Vector3Curve") -> Vector3Curve) & ((className: "VirtualInputManager") -> VirtualInputManager) & ((className: "VoiceChannel") -> VoiceChannel) & ((className: "WeldConstraint") -> WeldConstraint),
 }
 
 declare Ray: {
