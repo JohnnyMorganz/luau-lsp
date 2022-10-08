@@ -348,8 +348,8 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& aren
         if (auto node =
                 fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
         {
-            if (expressiveTypes && node.value()->ty)
-                scope->bindings[Luau::AstName("script")] = Luau::Binding{node.value()->ty};
+            if (expressiveTypes)
+                scope->bindings[Luau::AstName("script")] = Luau::Binding{getSourcemapType(typeChecker, arena, typeChecker.globalScope, node.value())};
         }
     };
 }

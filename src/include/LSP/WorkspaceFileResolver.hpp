@@ -42,7 +42,7 @@ struct WorkspaceFileResolver
     /// The name points to a virtual path (i.e., game/ or ProjectRoot/)
     bool isVirtualPath(const Luau::ModuleName& name) const
     {
-        return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot");
+        return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
 
     // Return the corresponding module name from a file Uri
