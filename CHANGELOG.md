@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed inlay hints no longer showing up
+- Fixed inlay hints not showing up in first load of file until a dummy change is made
 
 ## [1.11.1] - 2022-10-01
 

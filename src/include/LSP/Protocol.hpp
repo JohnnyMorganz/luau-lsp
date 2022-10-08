@@ -169,6 +169,26 @@ struct DiagnosticClientCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
 
+/**
+ * Client workspace capabilities specific to inlay hints.
+ *
+ * @since 3.17.0
+ */
+struct InlayHintWorkspaceClientCapabilities
+{
+    /**
+     * Whether the client implementation supports a refresh request sent from
+     * the server to the client.
+     *
+     * Note that this event is global and will force the client to refresh all
+     * inlay hints currently shown. It should be used with absolute care and
+     * is useful for situation where a server for example detects a project wide
+     * change that requires such a calculation.
+     */
+    bool refreshSupport = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(InlayHintWorkspaceClientCapabilities, refreshSupport);
+
 struct DiagnosticWorkspaceClientCapabilities
 {
     /**
@@ -240,13 +260,20 @@ struct ClientWorkspaceCapabilities
     bool configuration = false;
 
     /**
+     * Client workspace capabilities specific to inlay hints.
+     *
+     * @since 3.17.0
+     */
+    std::optional<InlayHintWorkspaceClientCapabilities> inlayHint;
+
+    /**
      * Client workspace capabilities specific to diagnostics.
      *
      * @since 3.17.0.
      */
     std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics;
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, diagnostics);
+NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics);
 
 struct ClientGeneralCapabilities
 {

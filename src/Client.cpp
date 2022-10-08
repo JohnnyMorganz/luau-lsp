@@ -127,10 +127,15 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                     ClientConfiguration config;
                     if (!configIt->is_null())
                         config = *configIt;
+
+                    ClientConfiguration* oldConfig = nullptr;
+                    if (auto it = configStore.find(uri.toString()); it != configStore.end())
+                        oldConfig = &it->second;
+
                     configStore.insert_or_assign(uri.toString(), config);
                     sendLogMessage(lsp::MessageType::Info, "loaded configuration for " + uri.toString());
                     if (configChangedCallback)
-                        configChangedCallback(uri, config);
+                        configChangedCallback(uri, config, oldConfig);
                     ++workspaceIt;
                     ++configIt;
                 }
@@ -163,6 +168,12 @@ void Client::refreshWorkspaceDiagnostics()
     {
         sendRequest(nextRequestId++, "workspace/diagnostics/refresh", nullptr);
     }
+}
+
+void Client::refreshInlayHints()
+{
+    if (capabilities.workspace && capabilities.workspace->inlayHint && capabilities.workspace->inlayHint->refreshSupport)
+        sendRequest(nextRequestId++, "workspace/inlayHint/refresh", nullptr);
 }
 
 void Client::setTrace(const lsp::SetTraceParams& params)

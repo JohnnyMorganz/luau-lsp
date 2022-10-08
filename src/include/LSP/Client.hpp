@@ -8,7 +8,7 @@
 
 using namespace json_rpc;
 using ResponseHandler = std::function<void(const JsonRpcMessage&)>;
-using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const ClientConfiguration&)>;
+using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const ClientConfiguration&, /* oldConfig: */ const ClientConfiguration*)>;
 
 class Client
 {
@@ -63,6 +63,7 @@ public:
     void publishDiagnostics(const lsp::PublishDiagnosticsParams& params);
     void refreshWorkspaceDiagnostics();
     void terminateWorkspaceDiagnostics(bool retriggerRequest = true);
+    void refreshInlayHints();
 
     void setTrace(const lsp::SetTraceParams& params);
 

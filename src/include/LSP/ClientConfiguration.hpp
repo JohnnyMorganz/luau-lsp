@@ -52,6 +52,17 @@ struct ClientInlayHintsConfiguration
     bool parameterTypes = false;
     bool functionReturnTypes = false;
     size_t typeHintMaxLength = 50;
+
+    inline bool operator==(const ClientInlayHintsConfiguration& rhs) const
+    {
+        return this->parameterNames == rhs.parameterNames && this->variableTypes == rhs.variableTypes && this->parameterTypes == rhs.parameterTypes &&
+               this->functionReturnTypes == rhs.functionReturnTypes && this->typeHintMaxLength == rhs.typeHintMaxLength;
+    }
+
+    inline bool operator!=(const ClientInlayHintsConfiguration& rhs) const
+    {
+        return !(*this == rhs);
+    }
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
     ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength);

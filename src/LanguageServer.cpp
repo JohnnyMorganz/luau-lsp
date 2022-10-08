@@ -361,7 +361,8 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
-        client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config)
+        client->configChangedCallback =
+            [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
         {
             auto workspace = findWorkspace(workspaceUri);
 
@@ -398,6 +399,10 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
                     }
                 }
             }
+
+            // Refresh inlay hint if changed
+            if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
+                client->refreshInlayHints();
         };
 
         // Send off requests to get the configuration for each workspace
