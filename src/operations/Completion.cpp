@@ -304,7 +304,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-        return {};
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
 
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position, nullCallback);

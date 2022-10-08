@@ -7,7 +7,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-        return std::nullopt;
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
 
     auto position = textDocument->convertPosition(params.position);
 

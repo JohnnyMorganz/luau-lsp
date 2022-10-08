@@ -135,7 +135,7 @@ std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-        return std::nullopt;
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))

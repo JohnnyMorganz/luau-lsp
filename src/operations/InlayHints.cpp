@@ -230,8 +230,8 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
-    if (textDocument)
-        return {};
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
 
     std::vector<lsp::DocumentLink> result;
 

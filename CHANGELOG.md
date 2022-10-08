@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed inlay hints no longer showing up
+
 ## [1.11.1] - 2022-10-01
 
 ### Changed
