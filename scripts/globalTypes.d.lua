@@ -4258,13 +4258,13 @@ declare class Instance
 	function FindFirstDescendant(self, name: string): Instance?
 	function GetActor(self): Actor?
 	function GetAttribute(self, attribute: string): any
-	function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal
+	function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
 	function GetAttributes(self): { [string]: any }
 	function GetChildren(self): { Instance }
 	function GetDebugId(self, scopeLength: number?): string
 	function GetDescendants(self): { Instance }
 	function GetFullName(self): string
-	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
+	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
 	function IsA(self, className: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
@@ -4945,8 +4945,8 @@ declare class CollectionService extends Instance
 	TagRemoved: RBXScriptSignal<string>
 	function AddTag(self, instance: Instance, tag: string): nil
 	function GetAllTags(self): { string }
-	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal
-	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal
+	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<Instance>
+	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<Instance>
 	function GetTagged(self, tag: string): { Instance }
 	function GetTags(self, instance: Instance): { string }
 	function HasTag(self, instance: Instance, tag: string): boolean
