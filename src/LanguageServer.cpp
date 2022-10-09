@@ -212,6 +212,11 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     {
         client->setTrace(REQUIRED_PARAMS(params, "$/setTrace"));
     }
+    else if (method == "$/cancelRequest")
+    {
+        // NO-OP
+        // TODO: support cancellation
+    }
     else if (method == "textDocument/didOpen")
     {
         onDidOpenTextDocument(REQUIRED_PARAMS(params, "textDocument/didOpen"));
@@ -219,6 +224,10 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     else if (method == "textDocument/didChange")
     {
         onDidChangeTextDocument(REQUIRED_PARAMS(params, "textDocument/didChange"));
+    }
+    else if (method == "textDocument/didSave")
+    {
+        // NO-OP
     }
     else if (method == "textDocument/didClose")
     {
