@@ -334,7 +334,7 @@ EXTRA_MEMBERS = {
     ],
     "Humanoid": [
         "RootPart: BasePart?",
-        "SeatPart: BasePart?",
+        "SeatPart: Seat | VehicleSeat | nil",
         "WalkToPart: BasePart?",
         "function GetAccessories(self): { Accessory }",
     ],

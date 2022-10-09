@@ -6502,7 +6502,7 @@ declare class Humanoid extends Instance
 	RigType: EnumHumanoidRigType
 	RootPart: BasePart?
 	Running: RBXScriptSignal<number>
-	SeatPart: BasePart?
+	SeatPart: Seat | VehicleSeat | nil
 	Seated: RBXScriptSignal<boolean, Seat>
 	Sit: boolean
 	StateChanged: RBXScriptSignal<EnumHumanoidStateType, EnumHumanoidStateType>
