@@ -38,6 +38,18 @@ declare task: {
     desynchronize: () -> (),
 }
 
+declare utf8: {
+    char: (...number) -> string,
+    charpattern: string,
+    codepoint: (string, number?, number?) -> (...number),
+    codes: (string) -> ((string, number) -> (number, number), string, number),
+    graphemes: (string, number?, number?) -> (() -> (number, number)),
+    len: (string, number?, number?) -> (number?, number?),
+    nfcnormalize: (string) -> string,
+    nfdnormalize: (string) -> string,
+    offset: (string, number, number?) -> number?,
+}
+
 declare shared: any
 
 declare function collectgarbage(mode: "count"): number
