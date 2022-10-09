@@ -78,6 +78,8 @@ IGNORED_MEMBERS = {
         "WaitForChild",
         "GetAttributes",
         "AncestryChanged",
+        "GetAttributeChangedSignal",
+        "GetPropertyChangedSignal",
     ],
     "Model": ["PrimaryPart"],
     "RemoteEvent": [
@@ -142,6 +144,8 @@ IGNORED_MEMBERS = {
     "CollectionService": [
         "GetAllTags",
         "GetTags",
+        "GetInstanceAddedSignal",
+        "GetInstanceRemovedSignal",
     ],
     "UserInputService": [
         "GetConnectedGamepads",
@@ -242,6 +246,8 @@ EXTRA_MEMBERS = {
         "function WaitForChild(self, name: string): Instance",
         "function WaitForChild(self, name: string, timeout: number): Instance?",
         "function GetAttributes(self): { [string]: any }",
+        "function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>",
+        "function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>",
     ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
@@ -315,6 +321,8 @@ EXTRA_MEMBERS = {
     "CollectionService": [
         "function GetAllTags(self): { string }",
         "function GetTags(self, instance: Instance): { string }",
+        "function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<Instance>",
+        "function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<Instance>",
     ],
     "UserInputService": [
         "function GetConnectedGamepads(self): { EnumUserInputType }",
@@ -326,7 +334,7 @@ EXTRA_MEMBERS = {
     ],
     "Humanoid": [
         "RootPart: BasePart?",
-        "SeatPart: BasePart?",
+        "SeatPart: Seat | VehicleSeat | nil",
         "WalkToPart: BasePart?",
         "function GetAccessories(self): { Accessory }",
     ],
