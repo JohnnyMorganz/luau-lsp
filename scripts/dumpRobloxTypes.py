@@ -105,7 +105,9 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "PluginToolbar": ["CreateButton",],
+    "PluginToolbar": [
+        "CreateButton",
+    ],
     "WorldRoot": [
         "Raycast",
         "ArePartsTouchingOthers",
@@ -348,9 +350,7 @@ EXTRA_MEMBERS = {
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
         "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
     ],
-    "Team": [
-        "function GetPlayers(self): { Player }"
-    ],
+    "Team": ["function GetPlayers(self): { Player }"],
     "Teams": [
         "function GetTeams(self): { Team }",
     ],
@@ -360,7 +360,7 @@ EXTRA_MEMBERS = {
     ],
     "RunService": [
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
-    ]
+    ],
 }
 
 # Hardcoded types
