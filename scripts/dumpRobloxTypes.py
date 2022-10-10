@@ -105,7 +105,9 @@ IGNORED_MEMBERS = {
     ],
     "Players": ["GetPlayers"],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "PluginToolbar": ["CreateButton",],
+    "PluginToolbar": [
+        "CreateButton",
+    ],
     "WorldRoot": [
         "Raycast",
         "ArePartsTouchingOthers",
@@ -348,9 +350,7 @@ EXTRA_MEMBERS = {
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
         "function UnionAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",
     ],
-    "Team": [
-        "function GetPlayers(self): { Player }"
-    ],
+    "Team": ["function GetPlayers(self): { Player }"],
     "Teams": [
         "function GetTeams(self): { Team }",
     ],
@@ -360,7 +360,7 @@ EXTRA_MEMBERS = {
     ],
     "RunService": [
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
-    ]
+    ],
 }
 
 # Hardcoded types
@@ -797,10 +797,11 @@ def printEnums(dump: ApiDump):
     print()
 
     # Declare enums as a whole
-    out = "declare Enum: {\n"
+    out = "type ENUM_LIST = {\n"
     for enum in enums:
         out += f"\t{enum}: Enum{enum}_INTERNAL,\n"
-    out += "}"
+    out += "} & { GetEnums: (self: ENUM_LIST) -> { Enum } }\n"
+    out += "declare Enum: ENUM_LIST"
     print(out)
     print()
 

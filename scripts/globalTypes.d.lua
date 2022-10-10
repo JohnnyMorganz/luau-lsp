@@ -3003,7 +3003,7 @@ declare class EnumZIndexBehavior_INTERNAL extends Enum
 end
 
 
-declare Enum: {
+type ENUM_LIST = {
 	AccessoryType: EnumAccessoryType_INTERNAL,
 	ActionType: EnumActionType_INTERNAL,
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
@@ -3309,7 +3309,8 @@ declare Enum: {
 	WrapLayerDebugMode: EnumWrapLayerDebugMode_INTERNAL,
 	WrapTargetDebugMode: EnumWrapTargetDebugMode_INTERNAL,
 	ZIndexBehavior: EnumZIndexBehavior_INTERNAL,
-}
+} & { GetEnums: (self: ENUM_LIST) -> { Enum } }
+declare Enum: ENUM_LIST
 
 declare class Axes
 	Back: boolean
