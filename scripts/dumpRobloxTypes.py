@@ -797,10 +797,11 @@ def printEnums(dump: ApiDump):
     print()
 
     # Declare enums as a whole
-    out = "declare Enum: {\n"
+    out = "type ENUM_LIST = {\n"
     for enum in enums:
         out += f"\t{enum}: Enum{enum}_INTERNAL,\n"
-    out += "}"
+    out += "} & { GetEnums: (self: ENUM_LIST) -> { Enum } }\n"
+    out += "declare Enum: ENUM_LIST"
     print(out)
     print()
 
