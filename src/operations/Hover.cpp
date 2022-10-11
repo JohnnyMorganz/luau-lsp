@@ -13,14 +13,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (!textDocument)
     {
         // TODO: REMOVE TRACE LOGGING
-        if (client->traceMode != lsp::TraceValue::Off)
-        {
-            std::vector<std::string> managed;
-            managed.reserve(fileResolver.managedFiles.size());
-            for (auto [file, _] : fileResolver.managedFiles)
-                managed.push_back(file);
-            client->sendTrace("managed document info", json(managed).dump());
-        }
+        std::vector<std::string> managed;
+        managed.reserve(fileResolver.managedFiles.size());
+        for (auto [file, _] : fileResolver.managedFiles)
+            managed.push_back(file);
+        client->sendLogMessage(lsp::MessageType::Error, "managed document info: " + json(managed).dump());
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
     }
 
