@@ -1,6 +1,7 @@
 # Script to pull in API Dump and export it into a definition file
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
 from itertools import chain
+import re
 from typing import List, Literal, Optional, Union, TypedDict
 from collections import defaultdict
 import requests
@@ -657,18 +658,15 @@ DataTypesDump = TypedDict(
 )
 
 
+def isIdentifier(name: str):
+    return re.match(r"^[a-zA-Z_]+[a-zA-Z_0-9]*$", name)  # TODO: 'function'
+
+
 def escapeName(name: str):
     """Escape a name string to be property-compatible"""
     if name == "function":
         return "func"
-    return (
-        name.replace(" ", "_")
-        .replace("-", "")
-        .replace('"', "")
-        .replace("(", "")
-        .replace(")", "")
-        .replace("/", "_")
-    )
+    return name
 
 
 def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
@@ -718,6 +716,11 @@ def filterMember(klassName: str, member: ApiMember):
         and member["Name"] == "GetService"
     ):
         return False
+
+    # TODO: support ["prop"] in CTVs
+    if not isIdentifier(member["Name"]):
+        return False
+
     return True
 
 
