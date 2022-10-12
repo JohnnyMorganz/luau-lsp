@@ -33,6 +33,8 @@ By default we generate a sourcemap for a `default.project.json` project file. Th
 > Note: in the diagnostics type checker, the types for DataModel (DM) instances will resolve to `any`. This is a current limitation to reduce false positives.
 > However, autocomplete and hover intellisense will correctly resolve the DM type. [Read more](https://github.com/JohnnyMorganz/luau-lsp/issues/83#issuecomment-1192865024)
 
+#### A companion Studio plugin is available to provide DataModel information for Instances which are not part of your Rojo build / filetree: [Plugin Marketplace](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)
+
 ## Standalone
 
 The tool can run standalone, similar to [`luau-analyze`](https://github.com/JohnnyMorganz/luau-analyze-rojo), to provide type and lint warnings in CI, with full Rojo resolution and API types support.
