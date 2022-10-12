@@ -743,7 +743,6 @@ declare class EnumCoreGuiType_INTERNAL extends Enum
 	Chat: EnumCoreGuiType
 	All: EnumCoreGuiType
 	EmotesMenu: EnumCoreGuiType
-	SelfView: EnumCoreGuiType
 end
 declare class EnumCreateOutfitFailure extends EnumItem end
 declare class EnumCreateOutfitFailure_INTERNAL extends Enum
@@ -1789,11 +1788,6 @@ declare class EnumModelLevelOfDetail_INTERNAL extends Enum
 	StreamingMesh: EnumModelLevelOfDetail
 	Disabled: EnumModelLevelOfDetail
 end
-declare class EnumModelStreamingMode extends EnumItem end
-declare class EnumModelStreamingMode_INTERNAL extends Enum
-	Default: EnumModelStreamingMode
-	Atomic: EnumModelStreamingMode
-end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
 	Alt: EnumModifierKey
@@ -2350,7 +2344,6 @@ declare class EnumStreamingIntegrityMode_INTERNAL extends Enum
 	Default: EnumStreamingIntegrityMode
 	Disabled: EnumStreamingIntegrityMode
 	MinimumRadiusPause: EnumStreamingIntegrityMode
-	PauseOutsideLoadedArea: EnumStreamingIntegrityMode
 end
 declare class EnumStreamingPauseMode extends EnumItem end
 declare class EnumStreamingPauseMode_INTERNAL extends Enum
@@ -3175,7 +3168,6 @@ type ENUM_LIST = {
 	MeshType: EnumMeshType_INTERNAL,
 	MessageType: EnumMessageType_INTERNAL,
 	ModelLevelOfDetail: EnumModelLevelOfDetail_INTERNAL,
-	ModelStreamingMode: EnumModelStreamingMode_INTERNAL,
 	ModifierKey: EnumModifierKey_INTERNAL,
 	MouseBehavior: EnumMouseBehavior_INTERNAL,
 	MoveState: EnumMoveState_INTERNAL,
@@ -5420,7 +5412,7 @@ declare class DataStoreService extends Instance
 	function GetGlobalDataStore(self): GlobalDataStore
 	function GetOrderedDataStore(self, name: string, scope: string?): OrderedDataStore
 	function GetRequestBudgetForRequestType(self, requestType: EnumDataStoreRequestType): number
-	function ListDataStoresAsync(self, prefix: string?, pageSize: number?, cursor: string?): DataStoreListingPages
+	function ListDataStoresAsync(self, prefix: string?, pageSize: number?): DataStoreListingPages
 end
 
 declare class DataStoreSetOptions extends Instance
@@ -5527,7 +5519,6 @@ declare class DebuggerUIService extends Instance
 	function Pause(self): nil
 	function RemoveScriptLineMarkers(self, debuggerConnectionId: number, allMarkers: boolean): nil
 	function Resume(self): nil
-	function SetCurrentFrameId(self, debuggerThreadId: number, debuggerFrameId: number): nil
 	function SetCurrentThreadId(self, debuggerThreadId: number): nil
 	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
 end
@@ -5773,7 +5764,6 @@ declare class Fire extends Instance
 	SecondaryColor: Color3
 	Size: number
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class FlagStandService extends Instance
@@ -5851,7 +5841,7 @@ end
 
 declare class DataStore extends GlobalDataStore
 	function GetVersionAsync(self, key: string, version: string): any
-	function ListKeysAsync(self, prefix: string?, pageSize: number?, cursor: string?): DataStoreKeyPages
+	function ListKeysAsync(self, prefix: string?, pageSize: number?): DataStoreKeyPages
 	function ListVersionsAsync(self, key: string, sortDirection: EnumSortDirection?, minDate: number?, maxDate: number?, pageSize: number?): DataStoreVersionPages
 	function RemoveVersionAsync(self, key: string, version: string): nil
 end
@@ -6620,12 +6610,10 @@ declare class HumanoidDescription extends Instance
 end
 
 declare class IKControl extends Instance
-	AlignmentOffset: CFrame
 	ChainRoot: Instance
 	Enabled: boolean
 	EndEffector: Instance
 	Offset: CFrame
-	Pole: Instance
 	Priority: number
 	Target: Instance
 	Type: EnumIKControlType
@@ -6645,7 +6633,6 @@ declare class IXPService extends Instance
 	function GetBrowserTrackerLayerLoadingStatus(self): EnumIXPLoadingStatus
 	function GetBrowserTrackerLayerVariables(self, layerName: string): { [any]: any }
 	function GetBrowserTrackerStatusForLayer(self, layerName: string): EnumIXPLoadingStatus?
-	function GetRegisteredUserLayersToStatus(self): { [any]: any }
 	function GetUserLayerLoadingStatus(self): EnumIXPLoadingStatus
 	function GetUserLayerVariables(self, layerName: string): { [any]: any }
 	function GetUserStatusForLayer(self, layerName: string): EnumIXPLoadingStatus?
@@ -7521,7 +7508,6 @@ end
 
 declare class Model extends PVInstance
 	LevelOfDetail: EnumModelLevelOfDetail
-	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
 	WorldPivot: CFrame
 	World_Pivot_Orientation: Vector3
@@ -7562,7 +7548,6 @@ declare class Workspace extends WorldRoot
 	HumanoidOnlySetCollisionsOnStateChange: EnumHumanoidOnlySetCollisionsOnStateChange
 	InterpolationThrottling: EnumInterpolationThrottlingMode
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
-	PersistentLoaded: RBXScriptSignal<Player>
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting
 	Retargeting: EnumAnimatorRetargetingMode
@@ -7571,6 +7556,7 @@ declare class Workspace extends WorldRoot
 	StreamingEnabled: boolean
 	StreamingIntegrityMode: EnumStreamingIntegrityMode
 	StreamingMinRadius: number
+	StreamingPauseMode: EnumStreamingPauseMode
 	StreamingTargetRadius: number
 	Terrain: Terrain
 	TouchesUseCollisionGroups: boolean
@@ -7628,11 +7614,9 @@ declare class CatalogPages extends Pages
 end
 
 declare class DataStoreKeyPages extends Pages
-	Cursor: string
 end
 
 declare class DataStoreListingPages extends Pages
-	Cursor: string
 end
 
 declare class DataStorePages extends Pages
@@ -8473,7 +8457,6 @@ declare class Smoke extends Instance
 	RiseVelocity: number
 	Size: number
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class SnippetService extends Instance
@@ -8620,7 +8603,6 @@ declare class Sparkles extends Instance
 	Enabled: boolean
 	SparkleColor: Color3
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class SpawnerService extends Instance
@@ -8787,7 +8769,6 @@ declare class Studio extends Instance
 	Enable_Temporary_Tabs_In_Explorer: boolean
 	Enable_Type_Hover: boolean
 	Error_Color: Color3
-	File_>_New_creates_a_place_with_Team_Create_off: boolean
 	Find_Selection_Background_Color: Color3
 	Font: QFont
 	Format_On_Paste: boolean
@@ -9017,7 +8998,6 @@ end
 
 declare class TeamCreateService extends Instance
 	ToggleManageCollaborators: RBXScriptSignal<>
-	function SendUnarchiveUniverseAsync(self, universeId: number): nil
 end
 
 declare class Teams extends Instance
@@ -9316,15 +9296,15 @@ declare class UGCValidationService extends Instance
 	function GetTextureSizeSync(self, textureId: string): Vector2
 	function ResetCollisionFidelity(self, meshPart: Instance): nil
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
-	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
-	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
-	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
 	function ValidateMeshTriangles(self, meshId: string): boolean
 	function ValidateMeshVertColors(self, meshId: string): boolean
-	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
-	function ValidateOverlappingVertices(self, meshId: string): boolean
 	function ValidateTextureSize(self, textureId: string): boolean
 	function ValidateUVSpace(self, meshId: string): boolean
+	function validateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): { any }
+	function validateCageNonManifoldAndHoles(self, meshId: string): { any }
+	function validateFullBodyCageDeletion(self, meshId: string): boolean
+	function validateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
+	function validateOverlappingVertices(self, meshId: string): boolean
 end
 
 declare class UIBase extends Instance
@@ -9593,8 +9573,6 @@ declare class VRService extends Instance
 	function GetTouchpadMode(self, pad: EnumVRTouchpad): EnumVRTouchpadMode
 	function GetUserCFrame(self, type: EnumUserCFrame): CFrame
 	function GetUserCFrameEnabled(self, type: EnumUserCFrame): boolean
-	function IsMaquettes(self): boolean
-	function IsVRAppBuild(self): boolean
 	function RecenterUserHeadCFrame(self): nil
 	function RequestNavigation(self, cframe: CFrame, inputUserCFrame: EnumUserCFrame): nil
 	function SetTouchpadMode(self, pad: EnumVRTouchpad, mode: EnumVRTouchpadMode): nil
@@ -10227,9 +10205,6 @@ declare CatalogSearchParams: {
 
 declare Font: {
 	new: ((family: string, weight: EnumFontWeight?, style: EnumFontStyle?) -> Font),
-	fromEnum: ((font: EnumFont) -> Font),
-	fromName: ((name: string, weight: EnumFontWeight?, style: EnumFontStyle?) -> Font),
-	fromId: ((id: number, weight: EnumFontWeight?, style: EnumFontStyle?) -> Font),
 }
 
 
