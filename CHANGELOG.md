@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed inlay hints not showing for variable types when `hover.strictDataModelTypes` is disabled
+
 ## [1.11.2] - 2022-10-08
 
 ### Changed
