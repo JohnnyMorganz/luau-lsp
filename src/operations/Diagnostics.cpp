@@ -128,9 +128,9 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Only report errors for the current file
         for (auto& error : cr.errors)
         {
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, document);
             if (error.moduleName == moduleName)
             {
+                auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, document);
                 documentReport.items.emplace_back(diagnostic);
             }
         }
