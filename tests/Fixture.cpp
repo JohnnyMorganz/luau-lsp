@@ -10,64 +10,17 @@
 
 static const char* mainModuleName = "MainModule";
 
-std::optional<Luau::ModuleInfo> TestFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* expr)
-{
-    if (Luau::AstExprGlobal* g = expr->as<Luau::AstExprGlobal>())
-    {
-        if (g->name == "game")
-            return Luau::ModuleInfo{"game"};
-        if (g->name == "workspace")
-            return Luau::ModuleInfo{"workspace"};
-        if (g->name == "script")
-            return context ? std::optional<Luau::ModuleInfo>(*context) : std::nullopt;
-    }
-    else if (Luau::AstExprIndexName* i = expr->as<Luau::AstExprIndexName>(); i && context)
-    {
-        if (i->index == "Parent")
-        {
-            std::string_view view = context->name;
-            size_t lastSeparatorIndex = view.find_last_of('/');
-
-            if (lastSeparatorIndex == std::string_view::npos)
-                return std::nullopt;
-
-            return Luau::ModuleInfo{Luau::ModuleName(view.substr(0, lastSeparatorIndex)), context->optional};
-        }
-        else
-        {
-            return Luau::ModuleInfo{context->name + '/' + i->index.value, context->optional};
-        }
-    }
-    else if (Luau::AstExprIndexExpr* i = expr->as<Luau::AstExprIndexExpr>(); i && context)
-    {
-        if (Luau::AstExprConstantString* index = i->index->as<Luau::AstExprConstantString>())
-        {
-            return Luau::ModuleInfo{context->name + '/' + std::string(index->value.data, index->value.size), context->optional};
-        }
-    }
-    else if (Luau::AstExprCall* call = expr->as<Luau::AstExprCall>(); call && call->self && call->args.size >= 1 && context)
-    {
-        if (Luau::AstExprConstantString* index = call->args.data[0]->as<Luau::AstExprConstantString>())
-        {
-            Luau::AstName func = call->func->as<Luau::AstExprIndexName>()->index;
-
-            if (func == "GetService" && context->name == "game")
-                return Luau::ModuleInfo{"game/" + std::string(index->value.data, index->value.size)};
-        }
-    }
-
-    return std::nullopt;
-}
-
 Fixture::Fixture()
-    : frontend(&fileResolver, &configResolver, {/* retainFullTypeGraphs= */ true})
+    : client(std::make_shared<Client>(Client{}))
+    , workspace(client, "$TEST_WORKSPACE", Uri())
 {
-    configResolver.defaultConfig.mode = Luau::Mode::Strict;
-    configResolver.defaultConfig.parseOptions.captureComments = true;
 
-    Luau::registerBuiltinTypes(frontend);
-    Luau::registerBuiltinGlobals(frontend);
-    types::registerDefinitions(frontend.typeChecker, std::string(R"BUILTIN_SRC(
+    std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
+    workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
+
+    workspace.initialize();
+    Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
+    types::registerDefinitions(workspace.frontend.typeChecker, std::string(R"BUILTIN_SRC(
         export type RBXScriptSignal<T... = ...any> = {
             Wait: (self: RBXScriptSignal<T...>) -> T...,
             Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
@@ -127,7 +80,7 @@ Fixture::Fixture()
             new: (("Part") -> Part) & (("TextLabel") -> TextLabel)
         }
     )BUILTIN_SRC"));
-    Luau::freeze(frontend.typeChecker.globalTypes);
+    Luau::freeze(workspace.frontend.typeChecker.globalTypes);
 
     Luau::setPrintLine([](auto s) {});
 }
@@ -142,35 +95,21 @@ Luau::ModuleName fromString(std::string_view name)
     return Luau::ModuleName(name);
 }
 
-Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
+void Fixture::newDocument(const std::string& name, const std::string& source)
 {
-    sourceModule.reset(new Luau::SourceModule);
-
-    Luau::ParseResult result = Luau::Parser::parse(source.c_str(), source.length(), *sourceModule->names, *sourceModule->allocator, parseOptions);
-
-    sourceModule->name = fromString(mainModuleName);
-    sourceModule->root = result.root;
-    sourceModule->mode = Luau::parseMode(result.hotcomments);
-    sourceModule->hotcomments = std::move(result.hotcomments);
-
-    if (!result.errors.empty())
-    {
-        throw Luau::ParseErrors(result.errors);
-    }
-
-    return result.root;
+    Uri uri("file", "", name);
+    workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
 }
 
 Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
     Luau::ModuleName mm = fromString(mainModuleName);
-    configResolver.defaultConfig.mode = mode;
-    fileResolver.source[mm] = std::move(source);
-    frontend.markDirty(mm);
+    workspace.fileResolver.defaultConfig.mode = mode;
+    workspace.fileResolver.managedFiles[mm] = TextDocument{Uri("file", "", mainModuleName), "luau", 0, std::move(source)};
+    workspace.frontend.markDirty(mm);
 
-    return frontend.check(mm);
+    return workspace.frontend.check(mm);
 }
-
 
 Luau::CheckResult Fixture::check(const std::string& source)
 {
@@ -179,10 +118,10 @@ Luau::CheckResult Fixture::check(const std::string& source)
 
 Luau::ModulePtr Fixture::getMainModule()
 {
-    return frontend.moduleResolver.getModule(fromString(mainModuleName));
+    return workspace.frontend.moduleResolver.getModule(fromString(mainModuleName));
 }
 
 Luau::SourceModule* Fixture::getMainSourceModule()
 {
-    return frontend.getSourceModule(fromString(mainModuleName));
+    return workspace.frontend.getSourceModule(fromString(mainModuleName));
 }
