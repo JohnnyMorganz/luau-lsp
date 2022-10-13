@@ -29,6 +29,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhic
     Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> exprResult);
 
 void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::string& definitions);
 Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
