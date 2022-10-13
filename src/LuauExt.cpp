@@ -354,103 +354,108 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& aren
     };
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::string& definitions)
 {
-    if (auto definitions = readFile(definitionsFile))
+    auto loadResult = Luau::loadDefinitionFile(typeChecker, typeChecker.globalScope, definitions, "@roblox");
+    if (!loadResult.success)
     {
-        auto loadResult = Luau::loadDefinitionFile(typeChecker, typeChecker.globalScope, *definitions, "@roblox");
-        if (!loadResult.success)
-        {
-            return loadResult;
-        }
+        return loadResult;
+    }
 
-        // Extend Instance types
-        if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
+    // Extend Instance types
+    if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
+    {
+        if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
         {
-            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
+            Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
+
+            // Go through all the defined classes and if they are a subclass of Instance then give them the
+            // same metatable identity as Instance so that equality comparison works.
+            // NOTE: This will OVERWRITE any metatables set on these classes!
+            // We assume that all subclasses of instance don't have any metamethaods
+            for (auto& [_, ty] : typeChecker.globalScope->exportedTypeBindings)
             {
-                Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
-                Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-                Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-                Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-                Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-                Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
-
-                // Go through all the defined classes and if they are a subclass of Instance then give them the
-                // same metatable identity as Instance so that equality comparison works.
-                // NOTE: This will OVERWRITE any metatables set on these classes!
-                // We assume that all subclasses of instance don't have any metamethaods
-                for (auto& [_, ty] : typeChecker.globalScope->exportedTypeBindings)
+                if (auto* c = Luau::getMutable<Luau::ClassTypeVar>(ty.type))
                 {
-                    if (auto* c = Luau::getMutable<Luau::ClassTypeVar>(ty.type))
+                    // Check if the ctv is a subclass of instance
+                    if (Luau::isSubclass(c, ctv))
                     {
-                        // Check if the ctv is a subclass of instance
-                        if (Luau::isSubclass(c, ctv))
-                        {
-                            c->metatable = ctv->metatable;
-                        }
+                        c->metatable = ctv->metatable;
                     }
                 }
             }
         }
+    }
 
-        // Move Enums over as imported type bindings
-        std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes;
-        for (auto it = typeChecker.globalScope->exportedTypeBindings.begin(); it != typeChecker.globalScope->exportedTypeBindings.end();)
+    // Move Enums over as imported type bindings
+    std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes;
+    for (auto it = typeChecker.globalScope->exportedTypeBindings.begin(); it != typeChecker.globalScope->exportedTypeBindings.end();)
+    {
+        auto erase = false;
+        auto ty = it->second.type;
+        if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
         {
-            auto erase = false;
-            auto ty = it->second.type;
-            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
+            if (Luau::startsWith(ctv->name, "Enum"))
             {
-                if (Luau::startsWith(ctv->name, "Enum"))
+                if (ctv->name == "EnumItem")
                 {
-                    if (ctv->name == "EnumItem")
-                    {
-                        Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
-                    }
-                    else if (ctv->name != "Enum" && ctv->name != "Enums")
-                    {
-                        // Erase the "Enum" at the start
-                        ctv->name = ctv->name.substr(4);
-
-                        // Move the enum over to the imported types if it is not internal, otherwise rename the type
-                        if (endsWith(ctv->name, "_INTERNAL"))
-                        {
-                            ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
-                        }
-                        else
-                        {
-                            enumTypes.emplace(ctv->name, it->second);
-                            // Erase the metatable for the type so it can be used in comparison
-                        }
-
-                        // Update the documentation symbol
-                        Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
-                        for (auto& [name, prop] : ctv->props)
-                        {
-                            prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
-                            Luau::attachTag(prop, "EnumItem");
-                        }
-
-                        // Prefix the name (after its been placed into enumTypes) with "Enum."
-                        ctv->name = "Enum." + ctv->name;
-
-                        erase = true;
-                    }
-
-                    // Erase the metatable from the type to allow comparison
-                    ctv->metatable = std::nullopt;
+                    Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
                 }
-            };
+                else if (ctv->name != "Enum" && ctv->name != "Enums")
+                {
+                    // Erase the "Enum" at the start
+                    ctv->name = ctv->name.substr(4);
 
-            if (erase)
-                it = typeChecker.globalScope->exportedTypeBindings.erase(it);
-            else
-                ++it;
-        }
-        typeChecker.globalScope->importedTypeBindings.emplace("Enum", enumTypes);
+                    // Move the enum over to the imported types if it is not internal, otherwise rename the type
+                    if (endsWith(ctv->name, "_INTERNAL"))
+                    {
+                        ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
+                    }
+                    else
+                    {
+                        enumTypes.emplace(ctv->name, it->second);
+                        // Erase the metatable for the type so it can be used in comparison
+                    }
 
-        return loadResult;
+                    // Update the documentation symbol
+                    Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
+                    for (auto& [name, prop] : ctv->props)
+                    {
+                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                        Luau::attachTag(prop, "EnumItem");
+                    }
+
+                    // Prefix the name (after its been placed into enumTypes) with "Enum."
+                    ctv->name = "Enum." + ctv->name;
+
+                    erase = true;
+                }
+
+                // Erase the metatable from the type to allow comparison
+                ctv->metatable = std::nullopt;
+            }
+        };
+
+        if (erase)
+            it = typeChecker.globalScope->exportedTypeBindings.erase(it);
+        else
+            ++it;
+    }
+    typeChecker.globalScope->importedTypeBindings.emplace("Enum", enumTypes);
+
+    return loadResult;
+}
+
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile)
+{
+    if (auto definitions = readFile(definitionsFile))
+    {
+        return registerDefinitions(typeChecker, definitions.value());
     }
     else
     {

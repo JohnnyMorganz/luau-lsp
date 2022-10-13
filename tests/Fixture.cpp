@@ -2,6 +2,8 @@
 #include "Fixture.h"
 
 #include "Luau/Parser.h"
+#include "Luau/BuiltinDefinitions.h"
+#include "LSP/LuauExt.hpp"
 
 #include "doctest.h"
 #include <string_view>
@@ -62,6 +64,70 @@ Fixture::Fixture()
 {
     configResolver.defaultConfig.mode = Luau::Mode::Strict;
     configResolver.defaultConfig.parseOptions.captureComments = true;
+
+    Luau::registerBuiltinTypes(frontend);
+    Luau::registerBuiltinGlobals(frontend);
+    types::registerDefinitions(frontend.typeChecker, std::string(R"BUILTIN_SRC(
+        export type RBXScriptSignal<T... = ...any> = {
+            Wait: (self: RBXScriptSignal<T...>) -> T...,
+            Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+            ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+        }
+
+        declare class Instance
+            AncestryChanged: RBXScriptSignal<Instance, Instance?>
+            AttributeChanged: RBXScriptSignal<string>
+            Changed: RBXScriptSignal<string>
+            ChildAdded: RBXScriptSignal<Instance>
+            ChildRemoved: RBXScriptSignal<Instance>
+            ClassName: string
+            DescendantAdded: RBXScriptSignal<Instance>
+            DescendantRemoving: RBXScriptSignal<Instance>
+            Destroying: RBXScriptSignal<>
+            Name: string
+            Parent: Instance?
+            RobloxLocked: boolean
+            SourceAssetId: number
+            function ClearAllChildren(self): nil
+            function Clone(self): Instance
+            function Destroy(self): nil
+            function FindFirstAncestor(self, name: string): Instance?
+            function FindFirstAncestorOfClass(self, className: string): Instance?
+            function FindFirstAncestorWhichIsA(self, className: string): Instance?
+            function FindFirstChild(self, name: string, recursive: boolean?): Instance?
+            function FindFirstChildOfClass(self, className: string): Instance?
+            function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
+            function FindFirstDescendant(self, name: string): Instance?
+            function GetActor(self): Actor?
+            function GetAttribute(self, attribute: string): any
+            function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
+            function GetAttributes(self): { [string]: any }
+            function GetChildren(self): { Instance }
+            function GetDebugId(self, scopeLength: number?): string
+            function GetDescendants(self): { Instance }
+            function GetFullName(self): string
+            function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
+            function IsA(self, className: string): boolean
+            function IsAncestorOf(self, descendant: Instance): boolean
+            function IsDescendantOf(self, ancestor: Instance): boolean
+            function SetAttribute(self, attribute: string, value: any): nil
+            function WaitForChild(self, name: string): Instance
+            function WaitForChild(self, name: string, timeout: number): Instance?
+        end
+
+        declare class Part
+            Anchored: boolean
+        end
+
+        declare class TextLabel extends Instance
+            Text: string
+        end
+
+        declare Instance: {
+            new: (("Part") -> Part) & (("TextLabel") -> TextLabel)
+        }
+    )BUILTIN_SRC"));
+    Luau::freeze(frontend.typeChecker.globalTypes);
 
     Luau::setPrintLine([](auto s) {});
 }
