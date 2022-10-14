@@ -14,8 +14,6 @@ Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
     , workspace(client, "$TEST_WORKSPACE", Uri())
 {
-
-    std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
 
     workspace.initialize();
@@ -105,7 +103,7 @@ Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
     Luau::ModuleName mm = fromString(mainModuleName);
     workspace.fileResolver.defaultConfig.mode = mode;
-    workspace.fileResolver.managedFiles[mm] = TextDocument{Uri("file", "", mainModuleName), "luau", 0, std::move(source)};
+    workspace.fileResolver.managedFiles.emplace(std::make_pair(mm, TextDocument(Uri("file", "", mainModuleName), "luau", 0, std::move(source))));
     workspace.frontend.markDirty(mm);
 
     return workspace.frontend.check(mm);
