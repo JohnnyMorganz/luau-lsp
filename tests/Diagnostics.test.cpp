@@ -26,4 +26,25 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_unknown_class")
     CHECK(toString(result.errors[0]) == "Unknown type 'unknown'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:GetPropertyChangedSignal("Anchored")
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:GetPropertyChangedSignal("unknown")
+    )");
+
+    REQUIRE_EQ(1, result.errors.size());
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+}
+
 TEST_SUITE_END();
