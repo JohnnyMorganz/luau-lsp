@@ -18,7 +18,12 @@ Fixture::Fixture()
 
     workspace.initialize();
     Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
-    types::registerDefinitions(workspace.frontend.typeChecker, std::string(R"BUILTIN_SRC(
+    auto result = types::registerDefinitions(workspace.frontend.typeChecker, std::string(R"BUILTIN_SRC(
+        declare class RBXScriptConnection
+            Connected: boolean
+            function Disconnect(self): nil
+        end
+
         export type RBXScriptSignal<T... = ...any> = {
             Wait: (self: RBXScriptSignal<T...>) -> T...,
             Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
@@ -37,8 +42,6 @@ Fixture::Fixture()
             Destroying: RBXScriptSignal<>
             Name: string
             Parent: Instance?
-            RobloxLocked: boolean
-            SourceAssetId: number
             function ClearAllChildren(self): nil
             function Clone(self): Instance
             function Destroy(self): nil
@@ -49,12 +52,10 @@ Fixture::Fixture()
             function FindFirstChildOfClass(self, className: string): Instance?
             function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
             function FindFirstDescendant(self, name: string): Instance?
-            function GetActor(self): Actor?
             function GetAttribute(self, attribute: string): any
             function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
             function GetAttributes(self): { [string]: any }
             function GetChildren(self): { Instance }
-            function GetDebugId(self, scopeLength: number?): string
             function GetDescendants(self): { Instance }
             function GetFullName(self): string
             function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
@@ -66,7 +67,7 @@ Fixture::Fixture()
             function WaitForChild(self, name: string, timeout: number): Instance?
         end
 
-        declare class Part
+        declare class Part extends Instance
             Anchored: boolean
         end
 
@@ -78,7 +79,12 @@ Fixture::Fixture()
             new: (("Part") -> Part) & (("TextLabel") -> TextLabel)
         }
     )BUILTIN_SRC"));
+    REQUIRE_MESSAGE(result.success, "loadDefinition failed");
     Luau::freeze(workspace.frontend.typeChecker.globalTypes);
+
+    ClientConfiguration config;
+    config.sourcemap.enabled = false;
+    workspace.setupWithConfiguration(config);
 
     Luau::setPrintLine([](auto s) {});
 }
@@ -122,4 +128,28 @@ Luau::ModulePtr Fixture::getMainModule()
 Luau::SourceModule* Fixture::getMainSourceModule()
 {
     return workspace.frontend.getSourceModule(fromString(mainModuleName));
+}
+
+std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& name)
+{
+    auto binding = scope->linearSearchForBinding(name);
+    if (binding)
+        return binding->typeId;
+    else
+        return std::nullopt;
+}
+
+std::optional<Luau::TypeId> Fixture::getType(const std::string& name)
+{
+    Luau::ModulePtr module = getMainModule();
+    REQUIRE(module);
+
+    return lookupName(module->getModuleScope(), name);
+}
+
+Luau::TypeId Fixture::requireType(const std::string& name)
+{
+    std::optional<Luau::TypeId> ty = getType(name);
+    REQUIRE_MESSAGE(bool(ty), "Unable to requireType \"" << name << "\"");
+    return Luau::follow(*ty);
 }

@@ -38,4 +38,7 @@ struct Fixture
     Luau::CheckResult check(const std::string& source);
     Luau::ModulePtr getMainModule();
     Luau::SourceModule* getMainSourceModule();
+
+    std::optional<Luau::TypeId> getType(const std::string& name);
+    Luau::TypeId requireType(const std::string& name);
 };
