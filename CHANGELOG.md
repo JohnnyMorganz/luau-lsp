@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed inlay hints not showing for variable types when `hover.strictDataModelTypes` is disabled
 - Fixed Internal Errors for workspace diagnostics when a type error was being displayed backed by the incorrect text document causing string errors
+- Fixed Internal Errors for goto definitions as incorrect document used for string conversions
 
 ## [1.11.2] - 2022-10-08
 
