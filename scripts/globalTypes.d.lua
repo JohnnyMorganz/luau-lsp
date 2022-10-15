@@ -3333,8 +3333,8 @@ declare class Axes
 end
 
 declare class CatalogSearchParams
-	AssetTypes: { any }
-	BundleType: { any }
+	AssetTypes: { EnumAssetType }
+	BundleType: { EnumBundleType }
 	CategoryFilter: EnumCatalogCategoryFilter
 	MaxPrice: number
 	MinPrice: number
@@ -3360,13 +3360,13 @@ declare class BrickColor
 	r: number
 end
 
-declare class ColorSequence
-	Keypoints: { any }
-end
-
 declare class ColorSequenceKeypoint
 	Time: number
 	Value: Color3
+end
+
+declare class ColorSequence
+	Keypoints: { ColorSequenceKeypoint }
 end
 
 declare class DateTime
@@ -3393,7 +3393,7 @@ end
 
 
 declare class Enums
-	function GetEnums(self): { any }
+	function GetEnums(self): { Enum }
 end
 
 declare class Faces
@@ -3417,14 +3417,14 @@ declare class NumberRange
 	Min: number
 end
 
-declare class NumberSequence
-	Keypoints: { any }
-end
-
 declare class NumberSequenceKeypoint
 	Envelope: number
 	Time: number
 	Value: number
+end
+
+declare class NumberSequence
+	Keypoints: { NumberSequenceKeypoint }
 end
 
 declare class OverlapParams
@@ -4416,7 +4416,7 @@ declare class Animator extends Instance
 	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
 	PreferLodEnabled: boolean
 	function ApplyJointVelocities(self, motors: any): nil
-	function GetPlayingAnimationTracks(self): { any }
+	function GetPlayingAnimationTracks(self): { AnimationTrack }
 	function GetPlayingAnimationTracksCoreScript(self): { any }
 	function LoadAnimation(self, animation: Animation): AnimationTrack
 	function LoadAnimationCoreScript(self, animation: Animation): AnimationTrack
@@ -5400,7 +5400,7 @@ declare class DataStoreKeyInfo extends Instance
 	UpdatedTime: number
 	Version: string
 	function GetMetadata(self): { [any]: any }
-	function GetUserIds(self): { any }
+	function GetUserIds(self): { number }
 end
 
 declare class DataStoreObjectVersionInfo extends Instance
@@ -5563,7 +5563,7 @@ declare class Dialog extends Instance
 	Tone: EnumDialogTone
 	TriggerDistance: number
 	TriggerOffset: Vector3
-	function GetCurrentPlayers(self): { Instance }
+	function GetCurrentPlayers(self): { Player }
 	function SetPlayerIsUsing(self, player: Instance, isUsing: boolean): nil
 	function SignalDialogChoiceSelected(self, player: Instance, dialogChoice: Instance): nil
 end
@@ -5843,9 +5843,9 @@ end
 
 declare class GlobalDataStore extends Instance
 	function GetAsync(self, key: string): any
-	function IncrementAsync(self, key: string, delta: number?, userIds: { any }?, options: DataStoreIncrementOptions?): any
+	function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): any
 	function RemoveAsync(self, key: string): any
-	function SetAsync(self, key: string, value: any, userIds: { any }?, options: DataStoreSetOptions?): any
+	function SetAsync(self, key: string, value: any, userIds: { number }?, options: DataStoreSetOptions?): any
 	function UpdateAsync(self, key: string, transformFunction: ((...any) -> ...any)): any
 end
 
@@ -5923,12 +5923,12 @@ declare class GuiObject extends GuiBase2d
 	SelectionOrder: number
 	Size: UDim2
 	SizeConstraint: EnumSizeConstraint
-	TouchLongPress: RBXScriptSignal<{ any }, EnumUserInputState>
-	TouchPan: RBXScriptSignal<{ any }, Vector2, Vector2, EnumUserInputState>
-	TouchPinch: RBXScriptSignal<{ any }, number, number, EnumUserInputState>
-	TouchRotate: RBXScriptSignal<{ any }, number, number, EnumUserInputState>
+	TouchLongPress: RBXScriptSignal<{ Vector2 }, EnumUserInputState>
+	TouchPan: RBXScriptSignal<{ Vector2 }, Vector2, Vector2, EnumUserInputState>
+	TouchPinch: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState>
+	TouchRotate: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState>
 	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number>
-	TouchTap: RBXScriptSignal<{ any }>
+	TouchTap: RBXScriptSignal<{ Vector2 }>
 	Transparency: number
 	Visible: boolean
 	ZIndex: number
@@ -9409,14 +9409,14 @@ declare class UserInputService extends Instance
 	TextBoxFocused: RBXScriptSignal<TextBox>
 	TouchEnabled: boolean
 	TouchEnded: RBXScriptSignal<InputObject, boolean>
-	TouchLongPress: RBXScriptSignal<{ any }, EnumUserInputState, boolean>
+	TouchLongPress: RBXScriptSignal<{ Vector2 }, EnumUserInputState, boolean>
 	TouchMoved: RBXScriptSignal<InputObject, boolean>
-	TouchPan: RBXScriptSignal<{ any }, Vector2, Vector2, EnumUserInputState, boolean>
-	TouchPinch: RBXScriptSignal<{ any }, number, number, EnumUserInputState, boolean>
-	TouchRotate: RBXScriptSignal<{ any }, number, number, EnumUserInputState, boolean>
+	TouchPan: RBXScriptSignal<{ Vector2 }, Vector2, Vector2, EnumUserInputState, boolean>
+	TouchPinch: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState, boolean>
+	TouchRotate: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState, boolean>
 	TouchStarted: RBXScriptSignal<InputObject, boolean>
 	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number, boolean>
-	TouchTap: RBXScriptSignal<{ any }, boolean>
+	TouchTap: RBXScriptSignal<{ Vector2 }, boolean>
 	TouchTapInWorld: RBXScriptSignal<Vector2, boolean>
 	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
 	VREnabled: boolean
@@ -9917,7 +9917,7 @@ declare class Plugin extends Instance
 	function Invoke(self, key: string, arguments: any): nil
 	function IsActivated(self): boolean
 	function IsActivatedWithExclusiveMouse(self): boolean
-	function Negate(self, objects: { Instance }): { Instance }
+	function Negate(self, objects: { Instance }): { NegateOperation }
 	function OnInvoke(self, key: string, callback: ((...any) -> ...any)): Instance
 	function OnSetItem(self, key: string, callback: ((...any) -> ...any)): Instance
 	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
@@ -9929,7 +9929,7 @@ declare class Plugin extends Instance
 	function ResumeSound(self, sound: Instance): nil
 	function SaveSelectedToRoblox(self): nil
 	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
-	function Separate(self, objects: { Instance }): { Instance }
+	function Separate(self, objects: { Instance }): { UnionOperation }
 	function SetItem(self, key: string, value: any): nil
 	function SetReady(self): nil
 	function SetSetting(self, key: string, value: any): nil
@@ -10070,11 +10070,11 @@ declare DateTime: {
 }
 
 declare NumberSequence: {
-	new: ((n: number) -> NumberSequence) & ((n0: number, n1: number) -> NumberSequence) & ((keypoints: { any }) -> NumberSequence),
+	new: ((n: number) -> NumberSequence) & ((n0: number, n1: number) -> NumberSequence) & ((keypoints: { NumberSequenceKeypoint }) -> NumberSequence),
 }
 
 declare ColorSequence: {
-	new: ((c: Color3) -> ColorSequence) & ((c0: Color3, c1: Color3) -> ColorSequence) & ((keypoints: { any }) -> ColorSequence),
+	new: ((c: Color3) -> ColorSequence) & ((c0: Color3, c1: Color3) -> ColorSequence) & ((keypoints: { ColorSequenceKeypoint }) -> ColorSequence),
 }
 
 declare NumberSequenceKeypoint: {

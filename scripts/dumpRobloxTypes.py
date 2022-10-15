@@ -499,6 +499,7 @@ CorrectionsValueType = TypedDict(
         "Name": str,
         "Category": None,
         "Default": Optional[str],
+        "Generic": Optional[str],
     },
 )
 
@@ -516,9 +517,7 @@ CorrectionsMember = TypedDict(
         "Name": str,
         "ValueType": Optional[CorrectionsValueType],
         "Parameters": Optional[List[CorrectionsParameter]],
-        "ReturnType": Optional[
-            CorrectionsValueType
-        ],  # TODO: it can also be { "Generic": "X" }, which I think signifies an array or smth?
+        "ReturnType": Optional[CorrectionsValueType],
         "TupleReturns": Optional[List[CorrectionsValueType]],
     },
 )
@@ -670,6 +669,12 @@ def escapeName(name: str):
 
 
 def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
+    if "Generic" in type:
+        name = type["Generic"]
+        if name.startswith("Enum."):
+            name = "Enum" + name[5:]
+        return "{ " + name + " }"
+
     name, category = (
         type["Name"],
         type["Category"] if "Category" in type else "Primitive",
@@ -976,7 +981,13 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
     dataTypeNames = {klass["Name"] for klass in dataTypes}
 
     def resolveClass(type: Union[ApiValueType, CorrectionsValueType]):
-        name = type["Name"][:-1] if type["Name"][-1] == "?" else type["Name"]
+        name = (
+            type["Generic"]
+            if "Generic" in type
+            else type["Name"][:-1]
+            if type["Name"][-1] == "?"
+            else type["Name"]
+        )
         if name in dataTypeNames:
             return name
 
@@ -990,6 +1001,9 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
     for klass in dataTypes:
         klassName = klass["Name"]
+
+        if klassName in IGNORED_INSTANCES:
+            continue
 
         if klassName not in graph:
             graph[klassName] = set()
@@ -1022,7 +1036,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
             return
 
         if n in tempMark:
-            raise RuntimeError()
+            raise RuntimeError(n)
 
         tempMark.add(n)
 
