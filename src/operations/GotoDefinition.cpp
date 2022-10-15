@@ -97,8 +97,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             {
                 if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
                 {
-                    result.emplace_back(lsp::Location{
-                        Uri::file(*file), lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+                    auto document = fileResolver.getTextDocument(*definitionModuleName);
+                    auto uri = document ? document->uri() : Uri::file(*file);
+                    result.emplace_back(lsp::Location{uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
                 }
             }
             else
