@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Provide autocomplete to class names for `Instance:IsA("ClassName")` and errors when ClassName is unknown
+- Provide autocomplete for class names in `Instance:IsA("ClassName")` and errors when ClassName is unknown
+- Provide autocomplete for properties in `Instance:GetPropertyChangedSignal("Property")` and errors when Property is unknown
 
 ### Fixed
 

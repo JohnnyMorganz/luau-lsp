@@ -179,7 +179,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
     std::optional<Luau::TypeFun> tfun = scope->lookupType(className);
     if (!tfun)
     {
-        typeChecker.reportError(Luau::TypeError{expr.location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
         return std::nullopt;
     }
 
@@ -238,6 +238,34 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+}
+
+// Magic function for `instance:GetPropertyChangedSignal()`, so that we can perform type checking on the provided property
+static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetPropertyChangedSignal(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+{
+    if (expr.args.size != 1)
+        return std::nullopt;
+
+    auto index = expr.func->as<Luau::AstExprIndexName>();
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return std::nullopt;
+
+
+    auto instanceType = typeChecker.checkExpr(scope, *index->expr);
+    auto ctv = Luau::get<Luau::ClassTypeVar>(Luau::follow(instanceType.type));
+    if (!ctv)
+        return std::nullopt;
+
+    std::string property(str->value.data, str->value.size);
+    if (!Luau::lookupClassProp(ctv, property))
+    {
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownProperty{instanceType.type, property}});
+        return std::nullopt;
+    }
+
+    return std::nullopt;
 }
 
 void addChildrenToCTV(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
@@ -380,6 +408,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
+            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type, magicFunctionGetPropertyChangedSignal);
 
             // Autocomplete ClassNames for :IsA("") and counterparts
             Luau::attachTag(ctv->props["IsA"].type, "ClassNames");
@@ -387,6 +416,9 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             Luau::attachTag(ctv->props["FindFirstChildOfClass"].type, "ClassNames");
             Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type, "ClassNames");
             Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type, "ClassNames");
+
+            // Autocomplete Properties for :GetPropertyChangedSignal("")
+            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type, "Properties");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
