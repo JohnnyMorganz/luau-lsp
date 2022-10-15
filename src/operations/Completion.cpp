@@ -450,6 +450,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (entry.type.has_value())
         {
             auto id = Luau::follow(entry.type.value());
+            if (Luau::isOverloadedFunction(id))
+                item.kind = lsp::CompletionItemKind::Function;
+
             // Try to infer more type info about the entry to provide better suggestion info
             if (auto ftv = Luau::get<Luau::FunctionTypeVar>(id))
             {
