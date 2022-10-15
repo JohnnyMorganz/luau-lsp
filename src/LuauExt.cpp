@@ -172,9 +172,16 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
         return std::nullopt;
 
     std::optional<Luau::LValue> lvalue = tryGetLValue(*index->expr);
-    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
-    if (!lvalue || !tfun)
+    if (!lvalue)
         return std::nullopt;
+
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = scope->lookupType(className);
+    if (!tfun)
+    {
+        typeChecker.reportError(Luau::TypeError{expr.location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+        return std::nullopt;
+    }
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
@@ -373,6 +380,13 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
+
+            // Autocomplete ClassNames for :IsA("") and counterparts
+            Luau::attachTag(ctv->props["IsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type, "ClassNames");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
