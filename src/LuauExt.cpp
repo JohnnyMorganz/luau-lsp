@@ -676,7 +676,7 @@ bool types::isMetamethod(const Luau::Name& name)
            name == "__metatable" || name == "__eq" || name == "__lt" || name == "__le" || name == "__mode" || name == "__iter" || name == "__len";
 }
 
-static lsp::Position toUTF16(const TextDocument* textDocument, const Luau::Position& position)
+lsp::Position toUTF16(const TextDocument* textDocument, const Luau::Position& position)
 {
     if (textDocument)
         return textDocument->convertPosition(position);
