@@ -172,9 +172,16 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
         return std::nullopt;
 
     std::optional<Luau::LValue> lvalue = tryGetLValue(*index->expr);
-    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
-    if (!lvalue || !tfun)
+    if (!lvalue)
         return std::nullopt;
+
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = scope->lookupType(className);
+    if (!tfun)
+    {
+        typeChecker.reportError(Luau::TypeError{expr.location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+        return std::nullopt;
+    }
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
