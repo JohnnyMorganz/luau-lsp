@@ -16,11 +16,6 @@ static constexpr const char* AutoImports = "5";
 static constexpr const char* Keywords = "6";
 } // namespace SortText
 
-static std::optional<Luau::AutocompleteEntryMap> nullCallback(std::string tag, std::optional<const Luau::ClassTypeVar*> ptr)
-{
-    return std::nullopt;
-}
-
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -315,7 +310,38 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
 
     auto position = textDocument->convertPosition(params.position);
-    auto result = Luau::autocomplete(frontend, moduleName, position, nullCallback);
+    auto result = Luau::autocomplete(frontend, moduleName, position,
+        [&](std::string tag, std::optional<const Luau::ClassTypeVar*> ctx) -> std::optional<Luau::AutocompleteEntryMap>
+        {
+            if (tag == "ClassNames")
+            {
+                if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))
+                {
+                    if (auto* ctv = Luau::get<Luau::ClassTypeVar>(instanceType->type))
+                    {
+                        Luau::AutocompleteEntryMap result;
+                        for (auto& [_, ty] : frontend.typeChecker.globalScope->exportedTypeBindings)
+                        {
+                            if (auto* c = Luau::get<Luau::ClassTypeVar>(ty.type))
+                            {
+                                // Check if the ctv is a subclass of instance
+                                if (Luau::isSubclass(c, ctv))
+
+                                    result.insert_or_assign(
+                                        c->name, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.singletonTypes->stringType,
+                                                     false, false, Luau::TypeCorrectKind::Correct});
+                            }
+                        }
+
+                        return result;
+                    }
+                }
+            }
+
+            return std::nullopt;
+        });
+
+
     std::vector<lsp::CompletionItem> items;
 
     for (auto& [name, entry] : result.entryMap)

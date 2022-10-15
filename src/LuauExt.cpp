@@ -381,6 +381,13 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
 
+            // Autocomplete ClassNames for :IsA("") and counterparts
+            Luau::attachTag(ctv->props["IsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type, "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type, "ClassNames");
+
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
             // NOTE: This will OVERWRITE any metatables set on these classes!
