@@ -337,6 +337,27 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     }
                 }
             }
+            else if (tag == "Properties")
+            {
+                if (ctx && ctx.value())
+                {
+                    Luau::AutocompleteEntryMap result;
+                    auto ctv = ctx.value();
+                    while (ctv)
+                    {
+                        for (auto& [propName, _] : ctv->props)
+                        {
+                            result.insert_or_assign(propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
+                                                                  frontend.singletonTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                        }
+                        if (ctv->parent)
+                            ctv = Luau::get<Luau::ClassTypeVar>(*ctv->parent);
+                        else
+                            break;
+                    }
+                    return result;
+                }
+            }
 
             return std::nullopt;
         });
