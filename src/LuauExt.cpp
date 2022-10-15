@@ -179,7 +179,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
     std::optional<Luau::TypeFun> tfun = scope->lookupType(className);
     if (!tfun)
     {
-        typeChecker.reportError(Luau::TypeError{expr.location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
         return std::nullopt;
     }
 
@@ -261,7 +261,7 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
     std::string property(str->value.data, str->value.size);
     if (!Luau::lookupClassProp(ctv, property))
     {
-        typeChecker.reportError(Luau::TypeError{expr.location, Luau::UnknownProperty{instanceType.type, property}});
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownProperty{instanceType.type, property}});
         return std::nullopt;
     }
 
