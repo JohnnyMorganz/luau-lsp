@@ -196,7 +196,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
 
             // Parse return type
             auto retType = returnText;
-            if (auto delim = returnText.find("--"); delim != std::string::npos)
+            if (auto delim = returnText.find(" --"); delim != std::string::npos)
             {
                 retType = returnText.substr(0, delim);
                 returnText = returnText.substr(delim);
