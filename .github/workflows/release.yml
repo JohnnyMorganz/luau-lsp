@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: Roblox/setup-foreman@v1
+      - uses: Roblox/setup-foreman@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -70,15 +70,15 @@ jobs:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
 
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version: 16.x
 
       - name: Build Server
         run: |
@@ -127,7 +127,7 @@ jobs:
           cp LICENSE.md editors/code/LICENSE
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: dist-${{ matrix.artifact-name }}
           path: ./dist
