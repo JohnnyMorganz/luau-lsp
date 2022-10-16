@@ -122,4 +122,39 @@ TEST_CASE_FIXTURE(Fixture, "print_multiline_comment")
     CHECK(comments[3] == "@return number -- Returns `x` with 5 added to it");
 }
 
+TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
+{
+    auto result = check(R"(
+        --[=[
+            Adds 5 to the input number
+
+            ```lua
+            do
+                local x = 5
+            end
+            ```
+        ]=]
+        function foo(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    REQUIRE_EQ(7, comments.size());
+    CHECK(comments[0] == "Adds 5 to the input number");
+    CHECK(comments[1] == "");
+    CHECK(comments[2] == "```lua");
+    CHECK(comments[3] == "do");
+    CHECK(comments[4] == "    local x = 5");
+    CHECK(comments[5] == "end");
+    CHECK(comments[6] == "```");
+}
+
 TEST_SUITE_END();

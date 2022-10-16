@@ -327,17 +327,28 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 {
                     auto lineText = std::string(line);
                     trim_end(lineText);
-                    if (lineText == "--[=[" || lineText == "]=]")
+
+                    auto trimmedLineText = std::string(line);
+                    trim(trimmedLineText);
+                    if (trimmedLineText == "--[=[" || trimmedLineText == "]=]")
                         continue;
                     comments.emplace_back(lineText);
                 }
 
-                // Trim common indentation
+                // Trim common indentation, but ignore empty lines
                 size_t indentLevel = std::string::npos;
                 for (auto& line : comments)
+                {
+                    if (line == "")
+                        continue;
                     indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
+                }
                 for (auto& line : comments)
+                {
+                    if (line == "")
+                        continue;
                     line.erase(0, indentLevel);
+                }
             }
         }
     }
