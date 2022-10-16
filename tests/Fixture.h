@@ -41,4 +41,6 @@ struct Fixture
 
     std::optional<Luau::TypeId> getType(const std::string& name);
     Luau::TypeId requireType(const std::string& name);
+
+    std::vector<std::string> getComments(const Luau::Location& node);
 };

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Provide autocomplete for class names in `Instance:IsA("ClassName")` and errors when ClassName is unknown
 - Provide autocomplete for properties in `Instance:GetPropertyChangedSignal("Property")` and errors when Property is unknown
+- Added support for moonwave-style documentation comments! Currently only supports comments attached to functions directly. See https://eryn.io/moonwave for how to write doc comments
 
 ### Fixed
 

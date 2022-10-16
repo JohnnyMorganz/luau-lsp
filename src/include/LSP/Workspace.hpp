@@ -65,6 +65,8 @@ private:
         std::vector<lsp::CompletionItem>& result);
 
 public:
+    std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
+
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
 
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);

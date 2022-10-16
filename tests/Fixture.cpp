@@ -130,6 +130,11 @@ Luau::SourceModule* Fixture::getMainSourceModule()
     return workspace.frontend.getSourceModule(fromString(mainModuleName));
 }
 
+std::vector<std::string> Fixture::getComments(const Luau::Location& node)
+{
+    return workspace.getComments(fromString(mainModuleName), node);
+}
+
 std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& name)
 {
     auto binding = scope->linearSearchForBinding(name);

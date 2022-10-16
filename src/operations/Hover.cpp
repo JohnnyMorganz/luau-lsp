@@ -190,6 +190,14 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString += "\n----------\n";
         typeString += printDocumentation(client->documentation, *symbol);
     }
+    else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+    {
+        if (ftv->definition && ftv->definition->definitionModuleName)
+        {
+            typeString += "\n----------\n";
+            typeString += printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
+        }
+    }
 
     return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
 }

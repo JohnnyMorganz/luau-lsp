@@ -2,6 +2,8 @@
 #include <optional>
 #include <filesystem>
 #include "Luau/Documentation.h"
+#include "Luau/Module.h"
+#include "Luau/Location.h"
 #include "nlohmann/json.hpp"
 #include "LSP/Utils.hpp"
 #include "LSP/Client.hpp"
@@ -14,3 +16,9 @@ void parseDocumentation(
 
 /// Returns a markdown string of the provided documentation
 std::string printDocumentation(const Luau::DocumentationDatabase& database, const Luau::DocumentationSymbol& symbol);
+
+/// Returns a markdown string of moonwave-parsed comments
+std::string printMoonwaveDocumentation(const std::vector<std::string> comments);
+
+/// Get comments attached to a node (given the node's location)
+std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node);

@@ -1,4 +1,5 @@
 #include "LSP/DocumentationParser.hpp"
+#include "LSP/Workspace.hpp"
 #include <regex>
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
@@ -143,4 +144,195 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
         return result;
     }
     return symbol;
+}
+
+std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
+{
+    if (comments.empty())
+        return "";
+
+    std::string result;
+    std::vector<std::string> params;
+    std::vector<std::string> returns;
+
+    for (auto& comment : comments)
+    {
+        if (Luau::startsWith(comment, "@param "))
+            params.emplace_back(comment);
+        else if (Luau::startsWith(comment, "@return "))
+            returns.emplace_back(comment);
+        else if (comment == "@yields" || comment == "@unreleased")
+            // Boldify
+            result += "**" + comment + "**\n";
+        else
+            result += comment + "\n";
+    }
+
+    if (!params.empty())
+    {
+        result += "\n\n**Parameters**";
+        for (auto& param : params)
+        {
+            auto paramText = param.substr(7);
+
+            // Parse name
+            auto paramName = paramText;
+            if (auto space = paramText.find(" "); space != std::string::npos)
+            {
+                paramName = paramText.substr(0, space);
+                paramText = paramText.substr(space);
+            }
+
+            result += "\n- `" + paramName + "` " + paramText;
+        }
+    }
+
+    if (!returns.empty())
+    {
+        result += "\n\n**Returns**";
+        for (auto& ret : returns)
+        {
+            auto returnText = ret.substr(8);
+
+            // Parse return type
+            auto retType = returnText;
+            if (auto delim = returnText.find(" --"); delim != std::string::npos)
+            {
+                retType = returnText.substr(0, delim);
+                returnText = returnText.substr(delim);
+            }
+
+            if (!retType.empty() && retType != returnText)
+                result += "\n- `" + retType + "` " + returnText;
+            else
+                result += "\n- " + returnText;
+        }
+    }
+
+    return result;
+}
+
+struct AttachCommentsVisitor : public Luau::AstVisitor
+{
+    Luau::Position pos;
+    std::vector<Luau::Comment> moduleComments; // A list of all comments in the module
+    Luau::AstStat* closestPreviousNode = nullptr;
+
+    explicit AttachCommentsVisitor(const Luau::Location node, const std::vector<Luau::Comment> moduleComments)
+        : pos(node.begin)
+        , moduleComments(moduleComments)
+    {
+    }
+
+    std::vector<Luau::Comment> attachComments()
+    {
+        std::vector<Luau::Comment> result;
+        for (auto& comment : moduleComments)
+            // The comment needs to be present before the node for it to be attached
+            if (comment.location.begin <= pos)
+                // They should be after the closest previous node
+                if (!closestPreviousNode || comment.location.begin >= closestPreviousNode->location.end)
+                    result.emplace_back(comment);
+        return result;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            if (stat->location.end > pos)
+                continue;
+            if (closestPreviousNode)
+            {
+                if (stat->location.end <= pos && stat->location.end > closestPreviousNode->location.end)
+                    closestPreviousNode = stat;
+            }
+            else
+            {
+                closestPreviousNode = stat;
+            }
+        }
+
+        return true;
+    }
+};
+
+std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node)
+{
+    if (!module)
+        return {};
+
+    AttachCommentsVisitor visitor{node, module->commentLocations};
+    visitor.visit(module->root);
+    return visitor.attachComments();
+}
+
+/// Get all moonwave-style documentation comments
+/// Performs transformations so that the comments are normalised to lines inside of it (i.e., trimming whitespace, removing comment start/end)
+std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& moduleName, const Luau::Location& node)
+{
+    auto sourceModule = frontend.getSourceModule(moduleName);
+    if (!sourceModule)
+        return {};
+
+    auto commentLocations = getCommentLocations(sourceModule, node);
+    if (commentLocations.empty())
+        return {};
+
+    // Get relevant text document
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    bool tempDocument = false;
+    if (!textDocument)
+    {
+        // Open a temporary text document so we can perform operations on it
+        if (auto source = fileResolver.readSource(moduleName))
+        {
+            tempDocument = true;
+            textDocument = new TextDocument{Uri(), "luau", 0, source->source};
+        }
+        else
+            return {};
+    }
+
+    std::vector<std::string> comments;
+    for (auto& comment : commentLocations)
+    {
+        if (comment.type == Luau::Lexeme::Type::BrokenComment)
+            continue;
+
+        auto commentText = textDocument->getText(
+            lsp::Range{textDocument->convertPosition(comment.location.begin), textDocument->convertPosition(comment.location.end)});
+
+        // Trim whitespace
+        trim(commentText);
+
+        // Parse the comment text for information
+        if (comment.type == Luau::Lexeme::Type::Comment)
+        {
+            if (Luau::startsWith(commentText, "--- "))
+            {
+                comments.emplace_back(commentText.substr(4));
+            }
+        }
+        else if (comment.type == Luau::Lexeme::Type::BlockComment)
+        {
+            if (Luau::startsWith(commentText, "--[=["))
+            {
+                // Parse each line separately
+                for (auto& line : Luau::split(commentText, '\n'))
+                {
+                    auto lineText = std::string(line);
+                    trim(lineText);
+                    if (lineText == "--[=[" || lineText == "]=]")
+                        continue;
+                    comments.emplace_back(lineText);
+                }
+            }
+        }
+    }
+
+    if (tempDocument)
+        delete textDocument;
+
+    return comments;
 }
