@@ -281,11 +281,15 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
 
     // Get relevant text document
     auto textDocument = fileResolver.getTextDocument(moduleName);
+    bool tempDocument = false;
     if (!textDocument)
     {
         // Open a temporary text document so we can perform operations on it
         if (auto source = fileResolver.readSource(moduleName))
-            textDocument = &TextDocument{Uri(), "luau", 0, source->source};
+        {
+            tempDocument = true;
+            textDocument = new TextDocument{Uri(), "luau", 0, source->source};
+        }
         else
             return {};
     }
@@ -326,6 +330,9 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             }
         }
     }
+
+    if (tempDocument)
+        delete textDocument;
 
     return comments;
 }
