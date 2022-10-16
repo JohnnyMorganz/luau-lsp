@@ -675,7 +675,7 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     }
     else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
     {
-        if (auto mtable = Luau::get<Luau::TableTypeVar>(mt->metatable))
+        if (auto mtable = Luau::get<Luau::TableTypeVar>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
             if (indexIt != mtable->props.end())
@@ -693,7 +693,7 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             }
         }
 
-        if (auto tbl = Luau::get<Luau::TableTypeVar>(mt->table))
+        if (auto tbl = Luau::get<Luau::TableTypeVar>(Luau::follow(mt->table)))
         {
             if (tbl->props.find(name) != tbl->props.end())
             {
