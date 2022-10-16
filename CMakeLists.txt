@@ -45,6 +45,7 @@ add_executable(luau-lsp-tests
     tests/main.cpp
     tests/Fixture.cpp
     tests/Diagnostics.test.cpp
+    tests/Documentation.test.cpp
     tests/TextDocument.test.cpp
     tests/Uri.test.cpp
     tests/Utils.test.cpp
