@@ -325,11 +325,18 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 for (auto& line : Luau::split(commentText, '\n'))
                 {
                     auto lineText = std::string(line);
-                    trim(lineText);
+                    trim_end(lineText);
                     if (lineText == "--[=[" || lineText == "]=]")
                         continue;
                     comments.emplace_back(lineText);
                 }
+
+                // Trim common indentation
+                size_t indentLevel = std::string::npos;
+                for (auto& line : comments)
+                    indentLevel = __min(indentLevel, line.find_first_not_of(" \n\r\t"));
+                for (auto& line : comments)
+                    line.erase(0, indentLevel);
             }
         }
     }
