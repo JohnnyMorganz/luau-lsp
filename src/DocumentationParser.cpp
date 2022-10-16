@@ -1,6 +1,7 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
 #include <regex>
+#include <algorithm>
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
 {
@@ -334,7 +335,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 // Trim common indentation
                 size_t indentLevel = std::string::npos;
                 for (auto& line : comments)
-                    indentLevel = __min(indentLevel, line.find_first_not_of(" \n\r\t"));
+                    indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
                 for (auto& line : comments)
                     line.erase(0, indentLevel);
             }
