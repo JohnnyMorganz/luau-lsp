@@ -12,12 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Provide autocomplete for properties in `Instance:GetPropertyChangedSignal("Property")` and errors when Property is unknown
 - Added support for moonwave-style documentation comments! Currently only supports comments attached to functions directly. See https://eryn.io/moonwave for how to write doc comments
 
+### Changed
+
+- Sync to upstream Luau 0.549
+
 ### Fixed
 
 - Fixed inlay hints not showing for variable types when `hover.strictDataModelTypes` is disabled
 - Fixed Internal Errors for workspace diagnostics when a type error was being displayed backed by the incorrect text document causing string errors
 - Fixed Internal Errors for goto definitions as incorrect document used for string conversions
 - Fixed overloaded functions not being highlighted as functions in autocomplete
+- Potential fix to Request Failed errors
 
 ## [1.11.2] - 2022-10-08
 
