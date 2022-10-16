@@ -157,4 +157,33 @@ TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
     CHECK(comments[6] == "```");
 }
 
+TEST_CASE_FIXTURE(Fixture, "ignored_tags")
+{
+    auto result = check(R"(
+        --[=[
+            Adds 5 to the input number
+            @param x number -- Testing
+            @tag Testing
+            @within X.Y.Z
+        ]=]
+        function foo(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    auto documentation = printMoonwaveDocumentation(comments);
+
+    CHECK_EQ(documentation, "Adds 5 to the input number\n"
+                            "\n\n**Parameters**"
+                            "\n- `x`  number -- Testing");
+}
+
 TEST_SUITE_END();

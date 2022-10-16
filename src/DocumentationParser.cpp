@@ -165,6 +165,9 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
         else if (comment == "@yields" || comment == "@unreleased")
             // Boldify
             result += "**" + comment + "**\n";
+        else if (Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within "))
+            // Ignore
+            continue;
         else
             result += comment + "\n";
     }
