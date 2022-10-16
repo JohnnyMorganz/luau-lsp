@@ -393,6 +393,25 @@
         }
       ]
     },
+    "doc_comment_tags": {
+      "patterns": [
+        {
+          "match": "((?<=[\\s*!\\/])[\\\\@]param)(?:\\s)+(\\b\\w+\\b)",
+          "captures": {
+            "1": {
+              "name": "storage.type.class.luadoc.cpp"
+            },
+            "2": {
+              "name": "variable.parameter.cpp"
+            }
+          }
+        },
+        {
+          "match": "@\\w+",
+          "name": "storage.type.class.luadoc.lua"
+        }
+      ]
+    },
     "comments": {
       "patterns": [
         {
@@ -419,19 +438,26 @@
                   "include": "source.lua"
                 }
               ]
+            },
+            {
+              "include": "#doc_comment_tags"
+            }
+          ]
+        },
+        {
+          "begin": "---",
+          "end": "\\n",
+          "name": "comment.line.double-dash.documentation.lua",
+          "patterns": [
+            {
+              "include": "#doc_comment_tags"
             }
           ]
         },
         {
           "begin": "--",
           "end": "\\n",
-          "name": "comment.line.double-dash.lua",
-          "patterns": [
-            {
-              "match": "@\\w+",
-              "name": "storage.type.class.lua"
-            }
-          ]
+          "name": "comment.line.double-dash.lua"
         }
       ]
     },

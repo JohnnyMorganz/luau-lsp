@@ -183,7 +183,10 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
                 paramText = paramText.substr(space);
             }
 
-            result += "\n- `" + paramName + "` " + paramText;
+            if (paramText == paramName)
+                result += "\n- `" + paramName + "`";
+            else
+                result += "\n- `" + paramName + "` " + paramText;
         }
     }
 
