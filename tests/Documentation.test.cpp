@@ -157,6 +157,69 @@ TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
     CHECK(comments[6] == "```");
 }
 
+TEST_CASE_FIXTURE(Fixture, "print_moonwave_documentation")
+{
+    auto result = check(R"(
+        --[=[
+            Adds 5 to the input number
+            @param x number -- Input number
+            @return number
+        ]=]
+        function foo(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    auto documentation = printMoonwaveDocumentation(comments);
+
+    CHECK_EQ(documentation, "Adds 5 to the input number\n"
+                            "\n\n**Parameters**"
+                            "\n- `x` number -- Input number"
+                            "\n\n**Returns**"
+                            "\n- number");
+}
+
+TEST_CASE_FIXTURE(Fixture, "print_throws_info")
+{
+    auto result = check(R"(
+        --[=[
+            Adds 5 to the input number
+            @param x number -- Input number
+            @return number
+            @error NotANumber -- Input is not a number
+        ]=]
+        function foo(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    auto documentation = printMoonwaveDocumentation(comments);
+
+    CHECK_EQ(documentation, "Adds 5 to the input number\n"
+                            "\n\n**Parameters**"
+                            "\n- `x` number -- Input number"
+                            "\n\n**Returns**"
+                            "\n- number"
+                            "\n\n**Throws**"
+                            "\n- `NotANumber` -- Input is not a number");
+}
+
 TEST_CASE_FIXTURE(Fixture, "ignored_tags")
 {
     auto result = check(R"(
@@ -183,7 +246,7 @@ TEST_CASE_FIXTURE(Fixture, "ignored_tags")
 
     CHECK_EQ(documentation, "Adds 5 to the input number\n"
                             "\n\n**Parameters**"
-                            "\n- `x`  number -- Testing");
+                            "\n- `x` number -- Testing");
 }
 
 TEST_SUITE_END();

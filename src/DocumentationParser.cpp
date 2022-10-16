@@ -155,6 +155,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
     std::string result;
     std::vector<std::string> params;
     std::vector<std::string> returns;
+    std::vector<std::string> throws;
 
     for (auto& comment : comments)
     {
@@ -162,6 +163,8 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
             params.emplace_back(comment);
         else if (Luau::startsWith(comment, "@return "))
             returns.emplace_back(comment);
+        else if (Luau::startsWith(comment, "@error "))
+            throws.emplace_back(comment);
         else if (comment == "@yields" || comment == "@unreleased")
             // Boldify
             result += "**" + comment + "**\n";
@@ -190,7 +193,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
             if (paramText == paramName)
                 result += "\n- `" + paramName + "`";
             else
-                result += "\n- `" + paramName + "` " + paramText;
+                result += "\n- `" + paramName + "`" + paramText;
         }
     }
 
@@ -210,9 +213,31 @@ std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
             }
 
             if (!retType.empty() && retType != returnText)
-                result += "\n- `" + retType + "` " + returnText;
+                result += "\n- `" + retType + "`" + returnText;
             else
                 result += "\n- " + returnText;
+        }
+    }
+
+    if (!throws.empty())
+    {
+        result += "\n\n**Throws**";
+        for (auto& thr : throws)
+        {
+            auto throwText = thr.substr(7);
+
+            // Parse throw type
+            auto throwType = throwText;
+            if (auto delim = throwText.find(" --"); delim != std::string::npos)
+            {
+                throwType = throwText.substr(0, delim);
+                throwText = throwText.substr(delim);
+            }
+
+            if (!throwType.empty() && throwType != throwText)
+                result += "\n- `" + throwType + "`" + throwText;
+            else
+                result += "\n- " + throwText;
         }
     }
 
