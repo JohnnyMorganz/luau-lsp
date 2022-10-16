@@ -18,8 +18,21 @@ void WorkspaceFolder::updateTextDocument(
 
     if (!contains(fileResolver.managedFiles, moduleName))
     {
-        client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
-        return;
+        // Check if we have the original file URI stored (https://github.com/JohnnyMorganz/luau-lsp/issues/26)
+        // TODO: can be potentially removed when server generates sourcemap
+        auto fsPath = uri.fsPath().generic_string();
+        if (fsPath != moduleName && contains(fileResolver.managedFiles, fsPath))
+        {
+            // Change the managed file key to use the new modulename
+            auto nh = fileResolver.managedFiles.extract(fsPath);
+            nh.key() = moduleName;
+            fileResolver.managedFiles.insert(std::move(nh));
+        }
+        else
+        {
+            client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
+            return;
+        }
     }
     auto& textDocument = fileResolver.managedFiles.at(moduleName);
     textDocument.update(params.contentChanges, params.textDocument.version);
