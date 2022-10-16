@@ -1,4 +1,5 @@
 #include "LSP/DocumentationParser.hpp"
+#include "LSP/Workspace.hpp"
 #include <regex>
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
@@ -190,7 +191,7 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
     }
 };
 
-std::vector<Luau::Comment> getCommentLocations(Luau::SourceModule* module, Luau::Location node)
+std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node)
 {
     if (!module)
         return {};
@@ -198,4 +199,67 @@ std::vector<Luau::Comment> getCommentLocations(Luau::SourceModule* module, Luau:
     AttachCommentsVisitor visitor{node, module->commentLocations};
     visitor.visit(module->root);
     return visitor.attachComments();
+}
+
+/// Get all moonwave-style documentation comments
+/// Performs transformations so that the comments are normalised to lines inside of it (i.e., trimming whitespace, removing comment start/end)
+std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& moduleName, const Luau::Location& node)
+{
+    auto sourceModule = frontend.getSourceModule(moduleName);
+    if (!sourceModule)
+        return {};
+
+    auto commentLocations = getCommentLocations(sourceModule, node);
+    if (commentLocations.empty())
+        return {};
+
+    // Get relevant text document
+    auto textDocument = fileResolver.getTextDocument(moduleName);
+    if (!textDocument)
+    {
+        // Open a temporary text document so we can perform operations on it
+        if (auto source = fileResolver.readSource(moduleName))
+            textDocument = &TextDocument{Uri(), "luau", 0, source->source};
+        else
+            return {};
+    }
+
+    std::vector<std::string> comments;
+    for (auto& comment : commentLocations)
+    {
+        if (comment.type == Luau::Lexeme::Type::BrokenComment)
+            continue;
+
+        auto commentText = textDocument->getText(
+            lsp::Range{textDocument->convertPosition(comment.location.begin), textDocument->convertPosition(comment.location.end)});
+
+        // Trim whitespace
+        trim(commentText);
+
+        // Parse the comment text for information
+        if (comment.type == Luau::Lexeme::Type::Comment)
+        {
+            if (Luau::startsWith(commentText, "--- "))
+            {
+                comments.emplace_back(commentText.substr(4));
+            }
+        }
+        else if (comment.type == Luau::Lexeme::Type::BlockComment)
+        {
+            if (Luau::startsWith(commentText, "--[=["))
+            {
+                // Parse each line separately
+                for (auto& line : Luau::split(commentText, '\n'))
+                {
+                    auto lineText = std::string(line);
+                    trim(lineText);
+                    if (lineText == "--[=[" || lineText == "]=]")
+                        continue;
+                    comments.emplace_back(lineText);
+                }
+            }
+        }
+    }
+
+    return comments;
 }

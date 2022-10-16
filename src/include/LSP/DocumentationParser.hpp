@@ -18,4 +18,4 @@ void parseDocumentation(
 std::string printDocumentation(const Luau::DocumentationDatabase& database, const Luau::DocumentationSymbol& symbol);
 
 /// Get comments attached to a node (given the node's location)
-std::vector<Luau::Comment> getCommentLocations(Luau::SourceModule* module, Luau::Location node);
+std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node);
