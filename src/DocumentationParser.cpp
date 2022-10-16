@@ -148,8 +148,68 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
 
 std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
 {
-    // TODO: more fancy documentation?
-    return Luau::join(comments, "\n\n");
+    if (comments.empty())
+        return "";
+
+    std::string result;
+    std::vector<std::string> params;
+    std::vector<std::string> returns;
+
+    for (auto& comment : comments)
+    {
+        if (Luau::startsWith(comment, "@param "))
+            params.emplace_back(comment);
+        else if (Luau::startsWith(comment, "@return "))
+            returns.emplace_back(comment);
+        else if (comment == "@yields" || comment == "@unreleased")
+            // Boldify
+            result += "**" + comment + "**\n";
+        else
+            result += comment + "\n";
+    }
+
+    if (!params.empty())
+    {
+        result += "\n\n**Parameters**";
+        for (auto& param : params)
+        {
+            auto paramText = param.substr(7);
+
+            // Parse name
+            auto paramName = paramText;
+            if (auto space = paramText.find(" "); space != std::string::npos)
+            {
+                paramName = paramText.substr(0, space);
+                paramText = paramText.substr(space);
+            }
+
+            result += "\n- `" + paramName + "` " + paramText;
+        }
+    }
+
+    if (!returns.empty())
+    {
+        result += "\n\n**Returns**";
+        for (auto& ret : returns)
+        {
+            auto returnText = ret.substr(8);
+
+            // Parse return type
+            auto retType = returnText;
+            if (auto delim = returnText.find("--"); delim != std::string::npos)
+            {
+                retType = returnText.substr(0, delim);
+                returnText = returnText.substr(delim);
+            }
+
+            if (!retType.empty() && retType != returnText)
+                result += "\n- `" + retType + "` " + returnText;
+            else
+                result += "\n- " + returnText;
+        }
+    }
+
+    return result;
 }
 
 struct AttachCommentsVisitor : public Luau::AstVisitor
