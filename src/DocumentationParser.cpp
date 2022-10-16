@@ -144,3 +144,58 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
     }
     return symbol;
 }
+
+struct AttachCommentsVisitor : public Luau::AstVisitor
+{
+    Luau::Position pos;
+    std::vector<Luau::Comment> moduleComments; // A list of all comments in the module
+    Luau::AstStat* closestPreviousNode = nullptr;
+
+    explicit AttachCommentsVisitor(const Luau::Location node, const std::vector<Luau::Comment> moduleComments)
+        : pos(node.begin)
+        , moduleComments(moduleComments)
+    {
+    }
+
+    std::vector<Luau::Comment> attachComments()
+    {
+        std::vector<Luau::Comment> result;
+        for (auto& comment : moduleComments)
+            // The comment needs to be present before the node for it to be attached
+            if (comment.location.begin <= pos)
+                // They should be after the closest previous node
+                if (!closestPreviousNode || comment.location.begin >= closestPreviousNode->location.end)
+                    result.emplace_back(comment);
+        return result;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            if (stat->location.end > pos)
+                continue;
+            if (closestPreviousNode)
+            {
+                if (stat->location.end <= pos && stat->location.end > closestPreviousNode->location.end)
+                    closestPreviousNode = stat;
+            }
+            else
+            {
+                closestPreviousNode = stat;
+            }
+        }
+
+        return true;
+    }
+};
+
+std::vector<Luau::Comment> getCommentLocations(Luau::SourceModule* module, Luau::Location node)
+{
+    if (!module)
+        return {};
+
+    AttachCommentsVisitor visitor{node, module->commentLocations};
+    visitor.visit(module->root);
+    return visitor.attachComments();
+}
