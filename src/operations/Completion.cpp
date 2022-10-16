@@ -487,6 +487,13 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 detail += ")";
                 item.labelDetails = {detail};
+
+                // Add documentation
+                if (!entry.documentationSymbol && ftv->definition && ftv->definition->definitionModuleName)
+                {
+                    item.documentation = {lsp::MarkupKind::Markdown,
+                        printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation))};
+                }
             }
             else if (auto ttv = Luau::get<Luau::TableTypeVar>(id))
             {

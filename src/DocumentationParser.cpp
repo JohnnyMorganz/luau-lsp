@@ -146,6 +146,12 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
     return symbol;
 }
 
+std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
+{
+    // TODO: more fancy documentation?
+    return Luau::join(comments, "\n\n");
+}
+
 struct AttachCommentsVisitor : public Luau::AstVisitor
 {
     Luau::Position pos;

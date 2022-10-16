@@ -57,6 +57,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
         if (followedId->documentationSymbol)
             documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
+        else if (ftv->definition && ftv->definition->definitionModuleName)
+            documentation = {lsp::MarkupKind::Markdown,
+                printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation))};
 
         // Create each parameter label
         std::vector<lsp::ParameterInformation> parameters;
