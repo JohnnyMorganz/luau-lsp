@@ -457,6 +457,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                 if (ctv->name == "EnumItem")
                 {
                     Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
+                    Luau::attachTag(ctv->props["IsA"].type, "Enums");
                 }
                 else if (ctv->name != "Enum" && ctv->name != "Enums")
                 {
