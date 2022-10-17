@@ -232,9 +232,15 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
         return std::nullopt;
 
     std::optional<Luau::LValue> lvalue = tryGetLValue(*index->expr);
-    std::optional<Luau::TypeFun> tfun = scope->lookupImportedType("Enum", std::string(str->value.data, str->value.size));
-    if (!lvalue || !tfun)
+    if (!lvalue)
         return std::nullopt;
+
+    std::string enumItem(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = scope->lookupImportedType("Enum", enumItem);
+    if (!tfun) {
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{enumItem, Luau::UnknownSymbol::Type}});
+        return std::nullopt;
+    }
 
     Luau::TypePackId booleanPack = typeChecker.globalTypes.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
@@ -451,6 +457,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                 if (ctv->name == "EnumItem")
                 {
                     Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
+                    Luau::attachTag(ctv->props["IsA"].type, "Enums");
                 }
                 else if (ctv->name != "Enum" && ctv->name != "Enums")
                 {

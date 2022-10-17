@@ -19,6 +19,26 @@ Fixture::Fixture()
     workspace.initialize();
     Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
     auto result = types::registerDefinitions(workspace.frontend.typeChecker, std::string(R"BUILTIN_SRC(
+        declare class Enum
+            function GetEnumItems(self): { any }
+        end
+        declare class EnumItem
+            Name: string
+            Value: number
+            EnumType: Enum
+            function IsA(self, enumName: string): boolean
+        end
+
+        declare class EnumHumanoidRigType extends EnumItem end
+        declare class EnumHumanoidRigType_INTERNAL extends Enum
+            R6: EnumHumanoidRigType
+            R15: EnumHumanoidRigType
+        end
+        type ENUM_LIST = {
+            HumanoidRigType: EnumHumanoidRigType_INTERNAL,
+        } & { GetEnums: (self: ENUM_LIST) -> { Enum } }
+        declare Enum: ENUM_LIST
+
         declare class RBXScriptConnection
             Connected: boolean
             function Disconnect(self): nil

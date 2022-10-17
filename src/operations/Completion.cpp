@@ -359,6 +359,19 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     return result;
                 }
             }
+            else if (tag == "Enums")
+            {
+                auto it = frontend.typeChecker.globalScope->importedTypeBindings.find("Enum");
+                if (it == frontend.typeChecker.globalScope->importedTypeBindings.end())
+                    return std::nullopt;
+
+                Luau::AutocompleteEntryMap result;
+                for (auto& [enumName, _] : it->second)
+                    result.insert_or_assign(enumName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
+                                                          frontend.singletonTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+
+                return result;
+            }
 
             return std::nullopt;
         });
