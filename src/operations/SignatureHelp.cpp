@@ -69,7 +69,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         while (it != Luau::end(ftv->argTypes))
         {
             // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
-            if (idx == 0 && ftv->hasSelf && candidate->self)
+            // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
+            if (idx == 0 && (ftv->hasSelf || ftv->argNames.size() > 0 && ftv->argNames[0].has_value() && ftv->argNames[0]->name == "self") &&
+                candidate->self)
             {
                 it++;
                 idx++;

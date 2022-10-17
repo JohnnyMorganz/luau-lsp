@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed Internal Errors for goto definitions as incorrect document used for string conversions
 - Fixed overloaded functions not being highlighted as functions in autocomplete
 - Potential fix to Request Failed errors
+- Fixed `self` incorrectly showing up in Inlay Hints and Signature Help
 
 ## [1.11.2] - 2022-10-08
 
