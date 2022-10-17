@@ -47,4 +47,27 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property")
     CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "enum_is_a")
+{
+    auto result = check(R"(
+        local x: EnumItem = Enum.HumanoidRigType.R15
+        assert(x:IsA("HumanoidRigType"))
+        local y = x
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+    CHECK(Luau::toString(requireType("y")) == "Enum.HumanoidRigType");
+}
+
+TEST_CASE_FIXTURE(Fixture, "enum_is_a_unknown_enum")
+{
+    auto result = check(R"(
+        local x = Enum.HumanoidRigType.R15
+        local y = x:IsA("unknown")
+    )");
+
+    REQUIRE_EQ(1, result.errors.size());
+    CHECK(toString(result.errors[0]) == "Unknown type 'unknown'");
+}
+
 TEST_SUITE_END();
