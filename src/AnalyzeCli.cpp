@@ -68,12 +68,17 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool isIgnoredFile(std::string* relativePath, std::vector<std::string>& ignoreGlobPatterns) {
-    for (auto& pattern : ignoreGlobPatterns) {
-        if (glob::fnmatch_case(*relativePath, pattern)) {
+static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::filesystem::path& path, std::vector<std::string>& ignoreGlobPatterns) {
+    auto relativePath = path.lexically_relative(rootUriPath).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+    //luau analyze returns relative path for files that are to be analyzed
+    if (relativePath.empty())
+        relativePath = path;
+
+    for (auto& pattern : ignoreGlobPatterns)
+        if (glob::fnmatch_case(relativePath, pattern))
             return true;
-        }
-    }
+
     return false;
 }
 
@@ -93,11 +98,11 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
     WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
     std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
 
-    for (auto& error : cr.errors) {
+    for (auto& error : cr.errors) 
+    {
         auto path = fileResolver->resolveToRealPath(error.moduleName);
-        auto relativePath = path.value().lexically_relative(rootUriPath).generic_string();
 
-        if (isIgnoredFile(&relativePath, ignoreGlobPatterns)) {
+        if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns)) {
             continue;
         }
 
