@@ -97,7 +97,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             if (lines.size() > 1)
             {
                 // Use the indentation of the previous line, as thats where the stat begins
-                auto prevLine = lines.at(params.position.line - 1);
+                auto& prevLine = lines.at(params.position.line - 1);
                 if (prevLine.size() > 0)
                 {
                     auto ch = prevLine.at(0);
@@ -230,12 +230,12 @@ void WorkspaceFolder::suggestImports(
 
         // Place after any hot comments and TODO: already imported services
         size_t minimumLineNumber = 0;
-        for (auto hotComment : sourceModule->hotcomments)
+        for (const auto& hotComment : sourceModule->hotcomments)
         {
             if (!hotComment.header)
                 continue;
             if (hotComment.location.begin.line >= minimumLineNumber)
-                minimumLineNumber = hotComment.location.begin.line + 1;
+                minimumLineNumber = hotComment.location.begin.line + 1U;
         }
 
         ImportLocationVisitor visitor;
@@ -304,7 +304,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         // TODO: REMOVE TRACE LOGGING
         std::vector<std::string> managed;
         managed.reserve(fileResolver.managedFiles.size());
-        for (auto [file, _] : fileResolver.managedFiles)
+        for (const auto& [file, _] : fileResolver.managedFiles)
             managed.push_back(file);
         client->sendLogMessage(lsp::MessageType::Error, "managed document info: " + json(managed).dump());
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
@@ -439,7 +439,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 // For some reason, the above text edit can't handle replacing the index operator
                 // Hence we remove it using an additional text edit
                 item.additionalTextEdits.emplace_back(lsp::TextEdit{
-                    {textDocument->convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1}}, ""});
+                    {textDocument->convertPosition(indexName->opPosition), {indexName->opPosition.line, indexName->opPosition.column + 1U}}, ""});
             }
         }
 

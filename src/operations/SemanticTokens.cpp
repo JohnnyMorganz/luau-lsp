@@ -310,7 +310,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprTable* tbl) override
     {
-        for (auto item : tbl->items)
+        for (const auto& item : tbl->items)
         {
             if (item.kind == Luau::AstExprTable::Item::Kind::Record)
             {
@@ -395,7 +395,7 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
         // TODO: REMOVE TRACE LOGGING
         std::vector<std::string> managed;
         managed.reserve(fileResolver.managedFiles.size());
-        for (auto [file, _] : fileResolver.managedFiles)
+        for (const auto& [file, _] : fileResolver.managedFiles)
             managed.push_back(file);
         client->sendLogMessage(lsp::MessageType::Error, "managed document info: " + json(managed).dump());
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);

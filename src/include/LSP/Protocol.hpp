@@ -644,8 +644,8 @@ inline void from_json(const json&, InitializedParams&){};
 
 struct Position
 {
-    size_t line;
-    size_t character;
+    size_t line = 0;
+    size_t character = 0;
     friend bool operator==(const Position& lhs, const Position& rhs);
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Position, line, character);
@@ -665,14 +665,14 @@ struct TextDocumentItem
 {
     DocumentUri uri;
     std::string languageId;
-    size_t version;
+    size_t version = 0;
     std::string text;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentItem, uri, languageId, version, text);
 
 struct VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
-    size_t version;
+    size_t version = 0;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(VersionedTextDocumentIdentifier, uri, version);
 
@@ -786,7 +786,7 @@ enum struct FileChangeType
 struct FileEvent
 {
     DocumentUri uri;
-    FileChangeType type;
+    FileChangeType type = FileChangeType::Created;
 };
 NLOHMANN_DEFINE_OPTIONAL(FileEvent, uri, type);
 
@@ -949,7 +949,7 @@ enum struct CompletionTriggerKind
 
 struct CompletionContext
 {
-    CompletionTriggerKind triggerKind;
+    CompletionTriggerKind triggerKind = CompletionTriggerKind::Invoked;
     std::optional<std::string> triggerCharacter;
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionContext, triggerKind, triggerCharacter);
@@ -1022,7 +1022,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(MarkupKind, {{MarkupKind::PlainText, "plaintext"}, 
 
 struct MarkupContent
 {
-    MarkupKind kind;
+    MarkupKind kind = MarkupKind::PlainText;
     std::string value;
 };
 NLOHMANN_DEFINE_OPTIONAL(MarkupContent, kind, value);
@@ -1111,9 +1111,9 @@ enum struct SignatureHelpTriggerKind
 
 struct SignatureHelpContext
 {
-    SignatureHelpTriggerKind triggerKind;
+    SignatureHelpTriggerKind triggerKind = SignatureHelpTriggerKind::Invoked;
     std::optional<std::string> triggerCharacter;
-    bool isRetrigger;
+    bool isRetrigger = false;
     std::optional<SignatureHelp> activeSignatureHelp;
 };
 NLOHMANN_DEFINE_OPTIONAL(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
@@ -1135,7 +1135,7 @@ struct TypeDefinitionParams : TextDocumentPositionParams
 
 struct ReferenceContext
 {
-    bool includeDeclaration;
+    bool includeDeclaration = false;
 };
 NLOHMANN_DEFINE_OPTIONAL(ReferenceContext, includeDeclaration);
 
@@ -1192,7 +1192,7 @@ struct DocumentSymbol
 {
     std::string name;
     std::optional<std::string> detail;
-    SymbolKind kind;
+    SymbolKind kind = SymbolKind::Array;
     std::vector<SymbolTag> tags;
     bool deprecated = false;
     Range range;
@@ -1238,7 +1238,7 @@ NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditParams, label, edit);
 
 struct ApplyWorkspaceEditResult
 {
-    bool applied;
+    bool applied = false;
     std::optional<std::string> failureReason;
     std::optional<size_t> failedChange;
 };
@@ -1260,14 +1260,14 @@ enum struct MessageType
 
 struct LogMessageParams
 {
-    MessageType type;
+    MessageType type = MessageType::Error;
     std::string message;
 };
 NLOHMANN_DEFINE_OPTIONAL(LogMessageParams, type, message);
 
 struct ShowMessageParams
 {
-    MessageType type;
+    MessageType type = MessageType::Error;
     std::string message;
 };
 NLOHMANN_DEFINE_OPTIONAL(ShowMessageParams, type, message);

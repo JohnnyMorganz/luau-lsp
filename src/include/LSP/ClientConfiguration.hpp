@@ -47,7 +47,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(InlayHintsParameterNamesConfig, {
 
 struct ClientInlayHintsConfiguration
 {
-    InlayHintsParameterNamesConfig parameterNames;
+    InlayHintsParameterNamesConfig parameterNames = InlayHintsParameterNamesConfig::None;
     bool variableTypes = false;
     bool parameterTypes = false;
     bool functionReturnTypes = false;
