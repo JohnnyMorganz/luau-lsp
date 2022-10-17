@@ -9,6 +9,7 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 #include "Analyze/AnalyzeCli.hpp"
+#include "glob/glob.hpp"
 #include <iostream>
 #include <filesystem>
 #include <vector>
@@ -67,7 +68,16 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate)
+static bool isIgnoredFile(std::string* relativePath, std::vector<std::string>& ignoreGlobPatterns) {
+    for (auto& pattern : ignoreGlobPatterns) {
+        if (glob::fnmatch_case(*relativePath, pattern)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate, std::vector<std::string> &ignoreGlobPatterns)
 {
     Luau::CheckResult cr;
 
@@ -80,8 +90,19 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
         return false;
     }
 
-    for (auto& error : cr.errors)
+    WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
+    std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
+
+    for (auto& error : cr.errors) {
+        auto path = fileResolver->resolveToRealPath(error.moduleName);
+        auto relativePath = path.value().lexically_relative(rootUriPath).generic_string();
+
+        if (isIgnoredFile(&relativePath, ignoreGlobPatterns)) {
+            continue;
+        }
+
         reportError(frontend, format, error);
+    }
 
     Luau::LintResult lr = frontend.lint(name);
 
@@ -113,6 +134,7 @@ int startAnalyze(int argc, char** argv)
     std::optional<std::filesystem::path> sourcemapPath = std::nullopt;
     std::vector<std::filesystem::path> definitionsPaths;
     std::vector<std::filesystem::path> files;
+    std::vector<std::string> ignoreGlobPatterns;
 
     for (int i = 2; i < argc; ++i)
     {
@@ -134,6 +156,8 @@ int startAnalyze(int argc, char** argv)
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));
+            else if (strncmp(argv[i], "--ignoreGlobs=", 14) == 0)
+                ignoreGlobPatterns.push_back(std::string(argv[i] + 14));
         }
         else
         {
@@ -243,7 +267,7 @@ int startAnalyze(int argc, char** argv)
     int failed = 0;
 
     for (const std::filesystem::path& path : files)
-        failed += !analyzeFile(frontend, path.relative_path().generic_string().c_str(), format, annotate);
+        failed += !analyzeFile(frontend, path.relative_path().generic_string().c_str(), format, annotate, ignoreGlobPatterns);
 
     if (!fileResolver.configErrors.empty())
     {
