@@ -12,8 +12,9 @@ static constexpr const char* CorrectTypeKind = "1";
 static constexpr const char* CorrectFunctionResult = "2";
 static constexpr const char* Default = "3";
 static constexpr const char* WrongIndexType = "4";
-static constexpr const char* AutoImports = "5";
-static constexpr const char* Keywords = "6";
+static constexpr const char* MetatableIndex = "5";
+static constexpr const char* AutoImports = "6";
+static constexpr const char* Keywords = "7";
 } // namespace SortText
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
@@ -379,6 +380,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.sortText = SortText::CorrectTypeKind;
         else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
             item.sortText = SortText::CorrectFunctionResult;
+        else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
+            item.sortText = SortText::MetatableIndex;
         else if (entry.wrongIndexType)
             item.sortText = SortText::WrongIndexType;
         else if (entry.kind == Luau::AutocompleteEntryKind::Property)
