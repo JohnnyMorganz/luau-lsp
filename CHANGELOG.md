@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed attempting to run workspace diagnostics on null workspace causing Internal Server errors (affecting Sublime Text)
+
 ## [1.12.0] - 2022-10-18
 
 ### Added

@@ -83,6 +83,11 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
     lsp::WorkspaceDiagnosticReport workspaceReport;
+
+    // Don't compute any workspace diagnostics for null workspace
+    if (isNullWorkspace())
+        return workspaceReport;
+
     auto config = client->getConfiguration(rootUri);
 
     // Find a list of files to compute diagnostics for
