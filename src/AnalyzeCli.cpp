@@ -102,7 +102,7 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
         return false;
     }
 
-    for (auto& error : cr.errors) 
+    for (auto& error : cr.errors)
         reportError(frontend, format, error, ignoreGlobPatterns);
 
     Luau::LintResult lr = frontend.lint(name);
@@ -157,8 +157,8 @@ int startAnalyze(int argc, char** argv)
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));
-            else if (strncmp(argv[i], "--ignoreGlobs=", 14) == 0)
-                ignoreGlobPatterns.push_back(std::string(argv[i] + 14));
+            else if (strncmp(argv[i], "--ignore=", 9) == 0)
+                ignoreGlobPatterns.push_back(std::string(argv[i] + 9));
         }
         else
         {
