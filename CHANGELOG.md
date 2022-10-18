@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.12.0] - 2022-10-18
+
 ### Added
 
 - Provide autocomplete for class names in `Instance:IsA("ClassName")` and errors when ClassName is unknown
