@@ -9,6 +9,7 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 #include "Analyze/AnalyzeCli.hpp"
+#include "glob/glob.hpp"
 #include <iostream>
 #include <filesystem>
 #include <vector>
@@ -49,9 +50,30 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
     }
 }
 
-static void reportError(const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error)
+static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::filesystem::path& path, std::vector<std::string>& ignoreGlobPatterns) {
+    auto relativePath = path.lexically_relative(rootUriPath).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+    //luau analyze returns relative path for files that are to be analyzed
+    if (relativePath.empty())
+        relativePath = path.generic_string();
+
+    for (auto& pattern : ignoreGlobPatterns)
+        if (glob::fnmatch_case(relativePath, pattern))
+            return true;
+
+    return false;
+}
+
+static void reportError(const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
-    std::string humanReadableName = frontend.fileResolver->getHumanReadableModuleName(error.moduleName);
+    WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
+    std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
+    std::string humanReadableName = fileResolver->getHumanReadableModuleName(error.moduleName);
+    auto path = fileResolver->resolveToRealPath(error.moduleName);
+
+    if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns)) {
+        return;
+    }
 
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         report(format, humanReadableName.c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
@@ -67,7 +89,7 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate)
+static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate, std::vector<std::string> &ignoreGlobPatterns)
 {
     Luau::CheckResult cr;
 
@@ -81,7 +103,7 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
     }
 
     for (auto& error : cr.errors)
-        reportError(frontend, format, error);
+        reportError(frontend, format, error, ignoreGlobPatterns);
 
     Luau::LintResult lr = frontend.lint(name);
 
@@ -113,6 +135,7 @@ int startAnalyze(int argc, char** argv)
     std::optional<std::filesystem::path> sourcemapPath = std::nullopt;
     std::vector<std::filesystem::path> definitionsPaths;
     std::vector<std::filesystem::path> files;
+    std::vector<std::string> ignoreGlobPatterns;
 
     for (int i = 2; i < argc; ++i)
     {
@@ -134,6 +157,8 @@ int startAnalyze(int argc, char** argv)
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));
+            else if (strncmp(argv[i], "--ignore=", 9) == 0)
+                ignoreGlobPatterns.push_back(std::string(argv[i] + 9));
         }
         else
         {
@@ -243,7 +268,7 @@ int startAnalyze(int argc, char** argv)
     int failed = 0;
 
     for (const std::filesystem::path& path : files)
-        failed += !analyzeFile(frontend, path.relative_path().generic_string().c_str(), format, annotate);
+        failed += !analyzeFile(frontend, path.relative_path().generic_string().c_str(), format, annotate, ignoreGlobPatterns);
 
     if (!fileResolver.configErrors.empty())
     {

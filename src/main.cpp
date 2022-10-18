@@ -46,6 +46,7 @@ static void displayHelp(const char* argv0)
     printf("  --timetrace: record compiler time tracing information into trace.json\n");
     printf("  --sourcemap=PATH: path to a Rojo-style sourcemap\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
+    printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");
     printf("LSP options:\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");
