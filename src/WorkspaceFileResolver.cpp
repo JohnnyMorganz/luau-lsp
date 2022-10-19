@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <optional>
 #include <unordered_map>
 #include <iostream>
@@ -157,14 +158,18 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
     // Handle require("path") for compatibility
     if (Luau::AstExprConstantString* expr = node->as<Luau::AstExprConstantString>())
     {
-        Luau::ModuleName name = std::string(expr->value.data, expr->value.size) + ".luau";
-        if (!readFile(name))
+        std::filesystem::path rootFs = rootUri.fsPath();
+        std::string requiredString(expr->value.data, expr->value.size);
+
+        std::error_code ec;
+        auto filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".luau"), ec);
+        if (ec.value() != 0 || !std::filesystem::exists(filePath))
         {
             // fall back to .lua if a module with .luau doesn't exist
-            name = std::string(expr->value.data, expr->value.size) + ".lua";
+            filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".lua"), ec);
         }
 
-        return {{name}};
+        return {{filePath.generic_string()}};
     }
     else if (Luau::AstExprGlobal* g = node->as<Luau::AstExprGlobal>())
     {

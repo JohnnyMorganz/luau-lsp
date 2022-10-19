@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed string-based requires to use a fully-qualified file path, fixing Document Link (Follow Link) support for requires
+
 ## [1.12.1] - 2022-10-18
 
 ### Fixed
