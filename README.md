@@ -9,7 +9,8 @@ Install the extension from the marketplace: https://marketplace.visualstudio.com
 ### For General Users
 
 The language server should be immediately usable for general Luau code after installation.
-String require support is provided for relative module paths, using `require("../module")`.
+String require support is provided for module paths, using `require("module")`.
+Note that the file is searched **relative to the workspace root** (equivalent to the [command-line REPL](https://github.com/Roblox/luau#usage) `luau`).
 
 Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`.
 
