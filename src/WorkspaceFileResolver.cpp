@@ -168,8 +168,9 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             // fall back to .lua if a module with .luau doesn't exist
             filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".lua"), ec);
         }
-
-        return {{filePath.generic_string()}};
+        
+        // URI-ify the file path so that its normalised (in particular, the drive letter)
+        return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
     }
     else if (Luau::AstExprGlobal* g = node->as<Luau::AstExprGlobal>())
     {
