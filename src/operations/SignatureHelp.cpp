@@ -37,7 +37,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     if (!candidate)
         return std::nullopt;
 
-    size_t activeParameter = candidate->args.size == 0 ? 0 : candidate->args.size - 1;
+    size_t activeParameter = candidate->args.size;
 
     auto it = module->astTypes.find(candidate->func);
     if (!it)
@@ -65,6 +65,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         std::vector<lsp::ParameterInformation> parameters;
         auto it = Luau::begin(ftv->argTypes);
         size_t idx = 0;
+        size_t previousParamPos = 0;
 
         while (it != Luau::end(ftv->argTypes))
         {
@@ -78,39 +79,46 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 continue;
             }
 
-            std::string label;
+            // TODO: parameter documentation
             lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::PlainText, ""};
-            if (idx < ftv->argNames.size() && ftv->argNames[idx])
-            {
-                label = ftv->argNames[idx]->name + ": ";
-            }
-            label += Luau::toString(*it);
 
-            parameters.push_back(lsp::ParameterInformation{label, parameterDocumentation});
+            // Compute the label
+            // We attempt to search for the position in the string for this label, and if we don't find it,
+            // then we give up and just use the string label
+            std::variant<std::string, std::vector<size_t>> paramLabel;
+            std::string labelString;
+            if (idx < ftv->argNames.size() && ftv->argNames[idx])
+                labelString = ftv->argNames[idx]->name + ": ";
+            labelString += Luau::toString(*it);
+
+            auto position = label.find(labelString, previousParamPos);
+            if (position != std::string::npos)
+            {
+                auto length = labelString.size();
+                previousParamPos = position + length;
+                paramLabel = std::vector{position, position + length};
+            }
+            else
+                paramLabel = labelString;
+
+            parameters.push_back(lsp::ParameterInformation{paramLabel, parameterDocumentation});
             it++;
             idx++;
         }
 
-        signatures.push_back(lsp::SignatureInformation{label, documentation, parameters});
+        signatures.push_back(lsp::SignatureInformation{
+            label, documentation, parameters, std::min(activeParameter, parameters.size() == 0 ? 0 : parameters.size() - 1)});
     };
 
+    // Handle single function
     if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedId))
-    {
-        // Single function
         addSignature(ftv);
-    }
 
     // Handle overloaded function
     if (auto intersect = Luau::get<Luau::IntersectionTypeVar>(followedId))
-    {
         for (Luau::TypeId part : intersect->parts)
-        {
             if (auto candidateFunctionType = Luau::get<Luau::FunctionTypeVar>(part))
-            {
                 addSignature(candidateFunctionType);
-            }
-        }
-    }
 
     return lsp::SignatureHelp{signatures, 0, activeParameter};
 }

@@ -106,6 +106,33 @@ struct adl_serializer<std::variant<int, bool>>
             data = j.get<int>();
     }
 };
+
+template<>
+struct adl_serializer<std::variant<std::string, std::vector<size_t>>>
+{
+    static void to_json(json& j, const std::variant<std::string, std::vector<size_t>>& data)
+    {
+        if (auto str = std::get_if<std::string>(&data))
+        {
+            j = *str;
+        }
+        else if (auto vec = std::get_if<std::vector<size_t>>(&data))
+        {
+            j = *vec;
+        }
+    }
+
+    static void from_json(const json& j, std::variant<std::string, std::vector<size_t>>& data)
+    {
+        // TODO: handle nicely?
+        assert(j.is_boolean() || j.is_array());
+
+        if (j.is_boolean())
+            data = j.get<std::string>();
+        else if (j.is_array())
+            data = j.get<std::vector<size_t>>();
+    }
+};
 } // namespace nlohmann
 
 
@@ -1078,9 +1105,30 @@ struct Hover
 };
 NLOHMANN_DEFINE_OPTIONAL(Hover, contents, range);
 
+/**
+ * Represents a parameter of a callable-signature. A parameter can
+ * have a label and a doc-comment.
+ */
 struct ParameterInformation
 {
-    std::string label;
+    /**
+     * The label of this parameter information.
+     *
+     * Either a string or an inclusive start and exclusive end offsets within
+     * its containing signature label. (see SignatureInformation.label). The
+     * offsets are based on a UTF-16 string representation as `Position` and
+     * `Range` does.
+     *
+     * *Note*: a label of type string should be a substring of its containing
+     * signature label. Its intended use case is to highlight the parameter
+     * label part in the `SignatureInformation.label`.
+     */
+    std::variant<std::string, std::vector<size_t>> label;
+
+    /**
+     * The human-readable doc-comment of this parameter. Will be shown
+     * in the UI but can be omitted.
+     */
     std::optional<MarkupContent> documentation;
 };
 NLOHMANN_DEFINE_OPTIONAL(ParameterInformation, label, documentation);
