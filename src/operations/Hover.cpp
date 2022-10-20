@@ -42,6 +42,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 
     std::string typeName;
     std::optional<Luau::TypeId> type = std::nullopt;
+    std::optional<std::string> documentationSymbol = getDocumentationSymbolAtPosition(*sourceModule, *module, position);
 
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
@@ -134,6 +135,9 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         return std::nullopt;
     type = Luau::follow(*type);
 
+    if (!documentationSymbol)
+        documentationSymbol = type.value()->documentationSymbol;
+
     Luau::ToStringOptions opts;
     opts.exhaustive = true;
     opts.useLineBreaks = true;
@@ -185,10 +189,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString = codeBlock("lua", typeString);
     }
 
-    if (auto symbol = type.value()->documentationSymbol)
+    if (documentationSymbol)
     {
         typeString += "\n----------\n";
-        typeString += printDocumentation(client->documentation, *symbol);
+        typeString += printDocumentation(client->documentation, *documentationSymbol);
     }
     else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
     {

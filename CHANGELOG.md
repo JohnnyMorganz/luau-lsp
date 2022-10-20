@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed string-based requires to use a fully-qualified file path, fixing Document Link (Follow Link) support for requires
 - Fixed reverse dependencies not being marked as dirty when using string requries due to unnormalised file paths
 - Fixed incorrect highlighting of unnamed parameters in signature help when multiple parameters present of same type
+- Fixed documentation not provided for some built-ins on hover
 
 ## [1.12.1] - 2022-10-18
 
