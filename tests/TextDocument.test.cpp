@@ -321,7 +321,7 @@ void assertValidLineNumbers(TextDocument& doc)
 {
     auto text = doc.getText();
     auto expectedLineNumber = 0;
-    for (auto i = 0; i < text.length(); i++)
+    for (size_t i = 0; i < text.length(); i++)
     {
         CHECK_EQ(doc.positionAt(i).line, expectedLineNumber);
         auto ch = text[i];
