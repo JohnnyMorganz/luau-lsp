@@ -71,6 +71,10 @@ struct InlayHintVisitor : public Luau::AstVisitor
                             continue;
                     }
 
+                    // If the variable is named "_", don't include an inlay hint
+                    if (var->name == "_")
+                        continue;
+
                     auto typeString = Luau::toString(followedTy, stringOptions);
 
                     // If the stringified type is equivalent to the variable name, don't bother
@@ -118,7 +122,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         break;
 
                     auto argType = *it;
-                    if (!param->annotation)
+                    if (!param->annotation && param->name != "_")
                     {
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
