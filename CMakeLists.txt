@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.19)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-project(luau-lsp LANGUAGES CXX)
+project(Luau.LanguageServer LANGUAGES CXX)
 
-set(SOURCES
+add_subdirectory(luau)
+add_library(Luau.LanguageServer STATIC)
+add_executable(Luau.LanguageServer.CLI)
+add_executable(Luau.LanguageServer.Test)
+
+target_sources(Luau.LanguageServer PRIVATE
     src/LanguageServer.cpp
     src/JsonRpc.cpp
     src/Uri.cpp
@@ -27,21 +32,13 @@ set(SOURCES
     src/operations/InlayHints.cpp
     src/operations/SemanticTokens.cpp
 )
-add_executable(luau-lsp src/main.cpp src/AnalyzeCli.cpp ${SOURCES})
 
-add_subdirectory(luau)
+target_sources(Luau.LanguageServer.CLI PRIVATE
+    src/main.cpp
+    src/AnalyzeCli.cpp
+)
 
-target_compile_features(luau-lsp PUBLIC cxx_std_17)
-target_include_directories(luau-lsp PRIVATE "${PROJECT_BINARY_DIR}" src/include luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)
-target_link_libraries(luau-lsp PRIVATE Luau.Ast Luau.Analysis)
-
-if(MSVC)
-    target_compile_options(luau-lsp PRIVATE /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
-else()
-    target_compile_options(luau-lsp PRIVATE -Wall -Werror)
-endif()
-
-add_executable(luau-lsp-tests
+target_sources(Luau.LanguageServer.Test PRIVATE
     tests/main.cpp
     tests/Fixture.cpp
     tests/Diagnostics.test.cpp
@@ -52,8 +49,30 @@ add_executable(luau-lsp-tests
     tests/WorkspaceFileResolver.test.cpp
     tests/SemanticTokens.test.cpp
     tests/Sourcemap.test.cpp
-    ${SOURCES}
 )
-target_compile_features(luau-lsp-tests PRIVATE cxx_std_17)
-target_include_directories(luau-lsp-tests PRIVATE "${PROJECT_BINARY_DIR}" src/include tests/ luau/Analysis/include luau/Ast/include extern/json-rpc-cxx/include extern/json/include extern/glob/single_include extern/doctest)
-target_link_libraries(luau-lsp-tests PRIVATE Luau.Ast Luau.Analysis)
+
+# TODO: Set Luau.Analysis at O2 to speed up debugging
+if(MSVC)
+    list(APPEND LUAU_LSP_OPTIONS /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
+    list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
+else()
+    list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
+endif()
+
+set(EXTERN_INCLUDES extern/json/include extern/glob/single_include)
+
+target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
+target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
+target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
+target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis)
+
+set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
+target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)
+target_compile_options(Luau.LanguageServer.CLI PRIVATE ${LUAU_LSP_OPTIONS})
+target_include_directories(Luau.LanguageServer.CLI PRIVATE src/include ${EXTERN_INCLUDES})
+target_link_libraries(Luau.LanguageServer.CLI PRIVATE Luau.LanguageServer Luau.Analysis)
+
+target_compile_features(Luau.LanguageServer.Test PRIVATE cxx_std_17)
+target_compile_options(Luau.LanguageServer.Test PRIVATE ${LUAU_LSP_OPTIONS})
+target_include_directories(Luau.LanguageServer.Test PRIVATE tests ${EXTERN_INCLUDES} extern/doctest)
+target_link_libraries(Luau.LanguageServer.Test PRIVATE Luau.Ast Luau.Analysis Luau.LanguageServer)

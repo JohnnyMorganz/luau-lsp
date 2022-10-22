@@ -35,9 +35,9 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            test-path: ./build/Debug/luau-lsp-tests
+            test-path: ./build/Debug/Luau.LanguageServer.Test
           - os: ubuntu-latest
-            test-path: ./build/luau-lsp-tests
+            test-path: ./build/Luau.LanguageServer.Test
 
     name: Run Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target luau-lsp-tests -j 3
+          cmake --build . --target Luau.LanguageServer.Test -j 3
 
       - name: Run Tests
         run: ${{ matrix.test-path }}

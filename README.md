@@ -91,5 +91,5 @@ They can be investigated at a later time:
 ```sh
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target luau-lsp --config Release
+cmake --build . --target Luau.LanguageServer.CLI --config Release
 ```
