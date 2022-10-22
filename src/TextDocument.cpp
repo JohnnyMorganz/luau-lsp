@@ -197,6 +197,15 @@ std::string TextDocument::getText(std::optional<lsp::Range> range) const
     return _content;
 }
 
+std::string TextDocument::getLine(size_t index) const
+{
+    LUAU_ASSERT(index < lineCount());
+    auto lineOffsets = getLineOffsets();
+    auto startOffset = lineOffsets[index];
+    auto nextLineOffset = index + 1 < lineCount() ? lineOffsets[index + 1] : _content.size();
+    return _content.substr(startOffset, nextLineOffset - startOffset - 1);
+}
+
 lsp::Position TextDocument::positionAt(size_t offset) const
 {
     offset = std::max(std::min(offset, _content.size()), (size_t)0);
@@ -339,10 +348,4 @@ const std::vector<size_t>& TextDocument::getLineOffsets() const
         _lineOffsets = computeLineOffsets(_content, true);
     }
     return *_lineOffsets;
-}
-
-// TODO: this is a bit expensive
-std::vector<std::string_view> TextDocument::getLines() const
-{
-    return Luau::split(_content, '\n');
 }

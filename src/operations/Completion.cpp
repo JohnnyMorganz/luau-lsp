@@ -68,12 +68,10 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     if (unclosedBlock)
     {
-        auto lines = document->getLines();
-
         // If the position marker is at the very end of the file, if we insert one line further then vscode will
         // not be happy and will insert at the position marker.
         // If its in the middle of the file, vscode won't change the marker
-        if (params.position.line == lines.size() - 1)
+        if (params.position.line == document->lineCount() - 1)
         {
             // Insert an end at the current position, with a newline before it
             // We replace all the current contents of the line since it will just be whitespace
@@ -94,10 +92,10 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         {
             // Find the indentation level to stick the end on
             std::string indent = "";
-            if (lines.size() > 1)
+            if (document->lineCount() > 1)
             {
                 // Use the indentation of the previous line, as thats where the stat begins
-                auto& prevLine = lines.at(params.position.line - 1);
+                auto& prevLine = document->getLine(params.position.line - 1);
                 if (prevLine.size() > 0)
                 {
                     auto ch = prevLine.at(0);

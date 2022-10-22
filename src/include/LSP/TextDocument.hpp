@@ -39,6 +39,7 @@ public:
     }
 
     std::string getText(std::optional<lsp::Range> range = std::nullopt) const;
+    std::string getLine(size_t index) const;
 
     lsp::Position positionAt(size_t offset) const;
     size_t offsetAt(const lsp::Position& position) const;
@@ -52,7 +53,4 @@ public:
 
     const std::vector<size_t>& getLineOffsets() const;
     size_t lineCount() const;
-
-    // TODO: this is a bit expensive
-    std::vector<std::string_view> getLines() const;
 };

@@ -5,6 +5,7 @@
 #include "LSP/Protocol.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Uri.hpp"
+#include "LSP/IostreamHelpers.hpp"
 
 TextDocument newDocument(const std::string& content)
 {
@@ -227,7 +228,7 @@ TEST_CASE("PositionToOffset")
     CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), 29);
     for (unsigned int i = 0; i < document.lineCount(); i++)
     {
-        auto line = document.getLines()[i];
+        auto line = document.getLine(i);
         auto offset = document.getLineOffsets()[i];
         // CHECK_EQ(document.offsetAt(lsp::Position{i, -1}), 0); // out of range
         for (unsigned I = 0; I < line.length(); ++I)
@@ -284,7 +285,7 @@ TEST_CASE("OffsetToPosition")
     positionEncoding() = lsp::PositionEncodingKind::UTF8;
     for (unsigned int i = 0; i < document.lineCount(); i++)
     {
-        auto line = document.getLines()[i];
+        auto line = document.getLine(i);
         auto offset = document.getLineOffsets()[i];
         for (unsigned I = 0; I <= line.length(); ++I)
             CHECK_EQ(document.positionAt(offset + I), lsp::Position{i, I});
