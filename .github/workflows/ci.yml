@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target luau-lsp -j 3
+          cmake --build . --target Luau.LanguageServer.CLI -j 3
 
   run_tests:
     strategy:
@@ -69,7 +69,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target luau-lsp -j 3
+          cmake --build . --target Luau.LanguageServer.CLI -j 3
 
       - name: Test types
         run: |
