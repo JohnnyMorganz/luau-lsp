@@ -37,6 +37,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     if (!candidate)
         return std::nullopt;
 
+    // FIXME: should not be necessary if the `ty` has the doc symbol attached to it
+    auto documentationSymbol = Luau::getDocumentationSymbolAtPosition(
+        *sourceModule, *module, {candidate->func->location.end.line, candidate->func->location.end.column - 1});
     size_t activeParameter = candidate->args.size;
 
     auto it = module->astTypes.find(candidate->func);
@@ -49,17 +52,27 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     std::vector<lsp::SignatureInformation> signatures;
 
-    auto addSignature = [&](const Luau::FunctionTypeVar* ftv)
+    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionTypeVar* ftv, bool isOverloaded = false)
     {
         // Create the whole label
         std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope, opts);
-        lsp::MarkupContent documentation{lsp::MarkupKind::PlainText, ""};
+        lsp::MarkupContent documentation{lsp::MarkupKind::Markdown, ""};
 
-        if (followedId->documentationSymbol)
-            documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *followedId->documentationSymbol)};
+        auto baseDocumentationSymbol = documentationSymbol;
+        if (baseDocumentationSymbol && isOverloaded)
+        {
+            // We need to trim "/overload/" from the base symbol if its been resolved to something
+            // FIXME: can be removed once we use docSymbol from `ty`
+            if (auto idx = baseDocumentationSymbol->find("/overload/"); idx != std::string::npos)
+                baseDocumentationSymbol = baseDocumentationSymbol->substr(0, idx);
+            baseDocumentationSymbol = *baseDocumentationSymbol + "/overload/" + toString(ty);
+        }
+
+        if (baseDocumentationSymbol)
+            documentation.value = printDocumentation(client->documentation, *baseDocumentationSymbol);
         else if (ftv->definition && ftv->definition->definitionModuleName)
-            documentation = {lsp::MarkupKind::Markdown,
-                printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation))};
+            documentation.value =
+                printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
 
         // Create each parameter label
         std::vector<lsp::ParameterInformation> parameters;
@@ -112,13 +125,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     // Handle single function
     if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedId))
-        addSignature(ftv);
+        addSignature(followedId, ftv);
 
     // Handle overloaded function
     if (auto intersect = Luau::get<Luau::IntersectionTypeVar>(followedId))
         for (Luau::TypeId part : intersect->parts)
             if (auto candidateFunctionType = Luau::get<Luau::FunctionTypeVar>(part))
-                addSignature(candidateFunctionType);
+                addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
     return lsp::SignatureHelp{signatures, 0, activeParameter};
 }
