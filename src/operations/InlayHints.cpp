@@ -197,6 +197,10 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         createHint = false;
                 }
 
+                // Ignore the parameter name if its just "_"
+                if (paramName == "_")
+                    createHint = false;
+
                 // TODO: only apply in specific situations
                 if (createHint)
                 {
