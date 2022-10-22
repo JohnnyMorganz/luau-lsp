@@ -4,8 +4,6 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
 
-LUAU_FASTFLAG(LuauTypeMismatchModuleNameResolution)
-
 namespace types
 {
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
@@ -237,7 +235,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
 
     std::string enumItem(str->value.data, str->value.size);
     std::optional<Luau::TypeFun> tfun = scope->lookupImportedType("Enum", enumItem);
-    if (!tfun) {
+    if (!tfun)
+    {
         typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{enumItem, Luau::UnknownSymbol::Type}});
         return std::nullopt;
     }
@@ -742,10 +741,8 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::Fi
     std::string message;
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         message = "SyntaxError: " + syntaxError->message;
-    else if (FFlag::LuauTypeMismatchModuleNameResolution)
-        message = "TypeError: " + Luau::toString(error, Luau::TypeErrorToStringOptions{fileResolver});
     else
-        message = "TypeError: " + Luau::toString(error);
+        message = "TypeError: " + Luau::toString(error, Luau::TypeErrorToStringOptions{fileResolver});
 
     lsp::Diagnostic diagnostic;
     diagnostic.source = "Luau";
