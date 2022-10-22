@@ -134,6 +134,17 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
             if (!func->codeSample.empty())
                 result += "\n\n" + codeBlock("lua", func->codeSample);
         }
+        else if (auto* overloaded = documentation->get_if<Luau::OverloadedFunctionDocumentation>())
+        {
+            if (overloaded->overloads.size() > 0)
+            {
+                // Use the first overload
+                result = printDocumentation(database, overloaded->overloads.begin()->second);
+
+                auto remainingOverloads = overloaded->overloads.size() - 1;
+                result += "\n\n*+" + std::to_string(remainingOverloads) + " overload" + (remainingOverloads == 1 ? "*" : "s*");
+            }
+        }
         else if (auto* tbl = documentation->get_if<Luau::TableDocumentation>())
         {
             result = tbl->documentation;

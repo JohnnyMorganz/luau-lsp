@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Show documentation for overloaded functions in completion and hover. We show the documentation string of the first overload, and how many other overloads are present.
+
 ### Changed
 
 - Sync to upstream Luau 0.550
