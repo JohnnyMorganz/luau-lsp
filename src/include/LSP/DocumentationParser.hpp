@@ -18,7 +18,7 @@ void parseDocumentation(
 std::string printDocumentation(const Luau::DocumentationDatabase& database, const Luau::DocumentationSymbol& symbol);
 
 /// Returns a markdown string of moonwave-parsed comments
-std::string printMoonwaveDocumentation(const std::vector<std::string> comments);
+std::string printMoonwaveDocumentation(const std::vector<std::string>& comments);
 
 /// Get comments attached to a node (given the node's location)
 std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node);

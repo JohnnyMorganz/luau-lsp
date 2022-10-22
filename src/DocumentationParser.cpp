@@ -158,7 +158,7 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
     return symbol;
 }
 
-std::string printMoonwaveDocumentation(const std::vector<std::string> comments)
+std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 {
     if (comments.empty())
         return "";
