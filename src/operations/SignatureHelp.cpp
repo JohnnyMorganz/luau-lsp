@@ -103,7 +103,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             // then we give up and just use the string label
             std::variant<std::string, std::vector<size_t>> paramLabel;
             std::string labelString;
-            if (idx < ftv->argNames.size() && ftv->argNames[idx])
+            if (idx < ftv->argNames.size() && ftv->argNames[idx] && ftv->argNames[idx]->name != "_")
                 labelString = ftv->argNames[idx]->name + ": ";
             labelString += Luau::toString(*it);
 
