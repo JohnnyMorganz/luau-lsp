@@ -157,6 +157,30 @@ TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
     CHECK(comments[6] == "```");
 }
 
+
+TEST_CASE_FIXTURE(Fixture, "nested_functions")
+{
+    auto result = check(R"(
+        --- Foo function
+        function foo()
+            --- Bar function
+            function bar()
+            end
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("bar");
+    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    REQUIRE_EQ(1, comments.size());
+    CHECK(comments[0] == "Bar function");
+}
+
 TEST_CASE_FIXTURE(Fixture, "print_moonwave_documentation")
 {
     auto result = check(R"(

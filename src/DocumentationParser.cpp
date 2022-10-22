@@ -259,7 +259,7 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 {
     Luau::Position pos;
     std::vector<Luau::Comment> moduleComments; // A list of all comments in the module
-    Luau::AstStat* closestPreviousNode = nullptr;
+    Luau::Position closestPreviousNode{0, 0};
 
     explicit AttachCommentsVisitor(const Luau::Location node, const std::vector<Luau::Comment> moduleComments)
         : pos(node.begin)
@@ -274,7 +274,7 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
             // The comment needs to be present before the node for it to be attached
             if (comment.location.begin <= pos)
                 // They should be after the closest previous node
-                if (!closestPreviousNode || comment.location.begin >= closestPreviousNode->location.end)
+                if (comment.location.begin >= closestPreviousNode)
                     result.emplace_back(comment);
         return result;
     }
@@ -283,20 +283,16 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
     {
         for (Luau::AstStat* stat : block->body)
         {
-            if (stat->location.end > pos)
+            if (stat->location.begin >= pos)
                 continue;
-            if (closestPreviousNode)
-            {
-                if (stat->location.end <= pos && stat->location.end > closestPreviousNode->location.end)
-                    closestPreviousNode = stat;
-            }
-            else
-            {
-                closestPreviousNode = stat;
-            }
+            if (stat->location.begin > closestPreviousNode)
+                closestPreviousNode = stat->location.begin;
+            stat->visit(this);
+            if (stat->location.end <= pos && stat->location.end > closestPreviousNode)
+                closestPreviousNode = stat->location.end;
         }
 
-        return true;
+        return false;
     }
 };
 
