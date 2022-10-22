@@ -92,8 +92,11 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 continue;
             }
 
-            // TODO: parameter documentation
-            lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::PlainText, ""};
+            // Show parameter documentation
+            // TODO: parse moonwave docs for param documentation?
+            lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
+            if (baseDocumentationSymbol)
+                parameterDocumentation.value = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx));
 
             // Compute the label
             // We attempt to search for the position in the string for this label, and if we don't find it,

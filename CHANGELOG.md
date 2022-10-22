@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Show documentation for overloaded functions in completion and hover. We show the documentation string of the first overload, and how many other overloads are present.
 - Show documentation for builtin class methods in signature help, including for the correct overload
+- Show documentation for parameters in signature help
 
 ### Changed
 
