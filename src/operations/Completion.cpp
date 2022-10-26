@@ -95,7 +95,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             if (document->lineCount() > 1)
             {
                 // Use the indentation of the previous line, as thats where the stat begins
-                auto& prevLine = document->getLine(params.position.line - 1);
+                auto prevLine = document->getLine(params.position.line - 1);
                 if (prevLine.size() > 0)
                 {
                     auto ch = prevLine.at(0);
