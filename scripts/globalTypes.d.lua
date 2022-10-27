@@ -690,6 +690,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectModeratedGame: EnumConnectionError
 	DisconnectOutOfMemoryExitContinue: EnumConnectionError
 	DisconnectOutOfMemoryKeepPlayingExit: EnumConnectionError
+	ReplicatorTimeout: EnumConnectionError
 	PlacelaunchErrors: EnumConnectionError
 	PlacelaunchDisabled: EnumConnectionError
 	PlacelaunchError: EnumConnectionError
@@ -2907,6 +2908,13 @@ declare class EnumUserInputType_INTERNAL extends Enum
 	InputMethod: EnumUserInputType
 	None: EnumUserInputType
 end
+declare class EnumVRSessionState extends EnumItem end
+declare class EnumVRSessionState_INTERNAL extends Enum
+	Idle: EnumVRSessionState
+	Visible: EnumVRSessionState
+	Focused: EnumVRSessionState
+	Undefined: EnumVRSessionState
+end
 declare class EnumVRTouchpad extends EnumItem end
 declare class EnumVRTouchpad_INTERNAL extends Enum
 	Left: EnumVRTouchpad
@@ -3325,6 +3333,7 @@ type ENUM_LIST = {
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
 	UserInputType: EnumUserInputType_INTERNAL,
+	VRSessionState: EnumVRSessionState_INTERNAL,
 	VRTouchpad: EnumVRTouchpad_INTERNAL,
 	VRTouchpadMode: EnumVRTouchpadMode_INTERNAL,
 	VelocityConstraintMode: EnumVelocityConstraintMode_INTERNAL,
@@ -3827,8 +3836,10 @@ type DialogChoice = any
 type DraftsService = any
 type Dragger = any
 type DraggerService = any
+type DynamicTextureAlpha = any
 type EulerRotationCurve = any
 type EventIngestService = any
+type ExperienceAuthService = any
 type ExperienceInviteOptions = any
 type Explosion = any
 type FaceAnimatorService = any
@@ -4273,6 +4284,7 @@ type VersionControlService = any
 type VideoCaptureService = any
 type VirtualInputManager = any
 type VirtualUser = any
+type VisibilityCheckDispatcher = any
 type VisibilityService = any
 type Visit = any
 type VoiceChannel = any
@@ -4404,7 +4416,6 @@ declare class AnimationStreamTrack extends Instance
 	Animation: TrackerStreamAnimation
 	IsPlaying: boolean
 	Priority: EnumAnimationPriority
-	Stopped: RBXScriptSignal<>
 	WeightCurrent: number
 	WeightTarget: number
 	function AdjustWeight(self, weight: number?, fadeTime: number?): nil
@@ -4416,6 +4427,7 @@ end
 declare class AnimationTrack extends Instance
 	Animation: Animation
 	DidLoop: RBXScriptSignal<>
+	Ended: RBXScriptSignal<>
 	IsPlaying: boolean
 	KeyframeReached: RBXScriptSignal<string>
 	Length: number
@@ -4588,8 +4600,8 @@ declare class AvatarEditorService extends Instance
 	function GetInventory(self, assetTypes: { any }): InventoryPages
 	function GetItemDetails(self, itemId: number, itemType: EnumAvatarItemType): { [any]: any }
 	function GetOutfits(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
-	function GetRecommendedAssetsV2(self, assetType: EnumAvatarAssetType, assetId: number, numItems: number, includeDetails: boolean): { any }
-	function GetRecommendedBundlesV2(self, bundleType: EnumBundleType, bundleId: number, numItems: number, includeDetails: boolean): { any }
+	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
+	function GetRecommendedBundles(self, bundleId: number): { any }
 	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string): boolean
 	function NoPromptDeleteOutfit(self, outfitId: number): boolean
 	function NoPromptRenameOutfit(self, outfitId: number, name: string): boolean
@@ -5658,6 +5670,9 @@ declare class DraggerService extends Instance
 	ShowPivotIndicator: boolean
 end
 
+declare class DynamicTextureAlpha extends Instance
+end
+
 declare class EulerRotationCurve extends Instance
 	RotationOrder: EnumRotationOrder
 	function GetAnglesAtTime(self, time: number): { any }
@@ -5672,6 +5687,9 @@ declare class EventIngestService extends Instance
 	function SendEventImmediately(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEvent(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 	function SetRBXEventStream(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
+end
+
+declare class ExperienceAuthService extends Instance
 end
 
 declare class ExperienceInviteOptions extends Instance
@@ -7381,6 +7399,7 @@ declare class NotificationService extends Instance
 end
 
 declare class PVInstance extends Instance
+	Origin: CFrame
 	function GetPivot(self): CFrame
 	function PivotTo(self, targetCFrame: CFrame): nil
 end
@@ -7406,6 +7425,8 @@ declare class BasePart extends PVInstance
 	Color: Color3
 	CurrentPhysicalProperties: PhysicalProperties
 	CustomPhysicalProperties: PhysicalProperties
+	ExtentsCFrame: CFrame
+	ExtentsSize: Vector3
 	FrontSurface: EnumSurfaceType
 	LeftSurface: EnumSurfaceType
 	LocalTransparencyModifier: number
@@ -8529,10 +8550,10 @@ end
 
 declare class SocialService extends Instance
 	GameInvitePromptClosed: RBXScriptSignal<Instance, { any }>
-	PromptInviteRequested: RBXScriptSignal<Instance>
+	PromptInviteRequested: RBXScriptSignal<Instance, Instance>
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
 	function InvokeGameInvitePromptClosed(self, player: Instance, recipientIds: { any }): nil
-	function PromptGameInvite(self, player: Player): nil
+	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
 end
 
 declare class Sound extends Instance
@@ -8655,12 +8676,15 @@ declare class SoundService extends Instance
 	VolumetricAudio: EnumVolumetricAudio
 	function BeginRecording(self): boolean
 	function EndRecording(self): { [any]: any }
+	function GetInputDevice(self): any
+	function GetInputDevices(self): any
 	function GetListener(self): (EnumListenerType, any)
 	function GetOutputDevice(self): any
 	function GetOutputDevices(self): any
 	function GetRecordingDevices(self): { [any]: any }
 	function GetSoundMemoryData(self): { [any]: any }
 	function PlayLocalSound(self, sound: Sound): nil
+	function SetInputDevice(self, name: string, guid: string): nil
 	function SetListener(self, listenerType: EnumListenerType, listener: any): nil
 	function SetOutputDevice(self, name: string, guid: string): nil
 	function SetRecordingDevice(self, deviceIndex: number): boolean
@@ -9525,6 +9549,7 @@ declare class VRService extends Instance
 	VRDeviceAvailable: boolean
 	VRDeviceName: string
 	VREnabled: boolean
+	VRSessionState: EnumVRSessionState
 	function GetTouchpadMode(self, pad: EnumVRTouchpad): EnumVRTouchpadMode
 	function GetUserCFrame(self, type: EnumUserCFrame): CFrame
 	function GetUserCFrameEnabled(self, type: EnumUserCFrame): boolean
@@ -9662,6 +9687,9 @@ declare class VirtualUser extends Instance
 	function TypeKey(self, key: string): nil
 end
 
+declare class VisibilityCheckDispatcher extends Instance
+end
+
 declare class VisibilityService extends Instance
 end
 
@@ -9750,6 +9778,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "DraftsService"): DraftsService
 	function GetService(self, service: "DraggerService"): DraggerService
 	function GetService(self, service: "EventIngestService"): EventIngestService
+	function GetService(self, service: "ExperienceAuthService"): ExperienceAuthService
 	function GetService(self, service: "FaceAnimatorService"): FaceAnimatorService
 	function GetService(self, service: "FacialAnimationRecordingService"): FacialAnimationRecordingService
 	function GetService(self, service: "FacialAnimationStreamingService"): FacialAnimationStreamingService
@@ -9883,6 +9912,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "VideoCaptureService"): VideoCaptureService
 	function GetService(self, service: "VirtualInputManager"): VirtualInputManager
 	function GetService(self, service: "VirtualUser"): VirtualUser
+	function GetService(self, service: "VisibilityCheckDispatcher"): VisibilityCheckDispatcher
 	function GetService(self, service: "VisibilityService"): VisibilityService
 	function GetService(self, service: "Visit"): Visit
 	function GetService(self, service: "VoiceChatInternal"): VoiceChatInternal
