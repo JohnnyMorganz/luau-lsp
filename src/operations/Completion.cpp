@@ -456,34 +456,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             {
                 std::string parenthesesSnippet = config.completion.addTabstopAfterParentheses ? "($1)$0" : "($0)";
 
-                // If we had CursorAfter, then the function call would not have any arguments
-                if (config.completion.fillCallArguments && entry.type.has_value())
-                {
-                    auto ty = Luau::follow(entry.type.value());
-                    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(ty))
-                    {
-                        parenthesesSnippet = "(";
-                        size_t id = 1;
-
-                        auto it = ftv->argNames.begin();
-                        if (ftv->hasSelf || (it != ftv->argNames.end() && it->has_value() && it->value().name == "self"))
-                            it++;
-
-                        for (; it != ftv->argNames.end(); it++)
-                        {
-                            auto name = *it;
-                            if (id > 1)
-                                parenthesesSnippet += ", ";
-
-                            parenthesesSnippet += "${" + std::to_string(id) + ":" + name.value_or(Luau::FunctionArgument{"_", {}}).name + "}";
-                            id++;
-                        }
-                        parenthesesSnippet += ")";
-                        if (config.completion.addTabstopAfterParentheses)
-                            parenthesesSnippet += "$0";
-                    }
-                }
-
                 if (item.textEdit)
                     item.textEdit->newText += parenthesesSnippet;
                 else
@@ -506,34 +478,64 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.kind = lsp::CompletionItemKind::Function;
 
                 // Add label details
+                // We also create a better detailed parentheses snippet if we are filling arguments
                 std::string detail = "(";
+                std::string parenthesesSnippet = "(";
+
                 bool comma = false;
                 size_t argIndex = 0;
+                size_t snippetIndex = 1;
 
                 auto it = Luau::begin(ftv->argTypes);
-                for (; it != Luau::end(ftv->argTypes); ++it)
+                for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
                 {
-                    if (comma)
-                        detail += ", ";
-
+                    std::string argName = "_";
                     if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
-                        detail += ftv->argNames.at(argIndex)->name;
-                    else
-                        detail += "_"; // TODO: can we produce a basic type name
+                        argName = ftv->argNames.at(argIndex)->name;
+
+                    // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
+                    if (argIndex == 0 && (ftv->hasSelf || argName == "self"))
+                        continue;
+
+                    if (comma)
+                    {
+                        detail += ", ";
+                        parenthesesSnippet += ", ";
+                    }
+
+                    detail += argName;
+                    parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
 
                     comma = true;
-                    argIndex++;
+                    snippetIndex++;
                 }
 
                 if (auto tail = it.tail())
                 {
                     if (comma)
+                    {
                         detail += ", ";
+                        parenthesesSnippet += ", ";
+                    }
                     detail += Luau::toString(*tail);
+                    parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":...}";
                 }
 
                 detail += ")";
+                parenthesesSnippet += ")";
                 item.labelDetails = {detail};
+
+                // If we had CursorAfter, then the function call would not have any arguments
+                if (config.completion.fillCallArguments)
+                {
+                    if (config.completion.addTabstopAfterParentheses)
+                        parenthesesSnippet += "$0";
+
+                    if (item.textEdit)
+                        item.textEdit->newText += parenthesesSnippet;
+                    else
+                        item.insertText = name + parenthesesSnippet;
+                }
 
                 // Add documentation
                 if (!entry.documentationSymbol && ftv->definition && ftv->definition->definitionModuleName)
