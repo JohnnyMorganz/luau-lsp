@@ -2,7 +2,7 @@
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
 from itertools import chain
 import re
-from typing import List, Literal, Optional, Union, TypedDict
+from typing import List, Literal, Optional, Set, Union, TypedDict
 from collections import defaultdict
 import requests
 import json
@@ -11,6 +11,7 @@ import json
 DATA_TYPES_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json"
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
 CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/Corrections.json"
+BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
@@ -490,6 +491,7 @@ declare function UserSettings(): UserSettings
 CLASSES = {}  # All loaded classes from the API Dump, including corrections
 SERVICES: List[str] = []  # All available services name
 CREATABLE: List[str] = []  # All creatable instances
+BRICK_COLORS: Set[str] = set()
 
 # Type Hints
 
@@ -848,6 +850,7 @@ def printDataTypeConstructors(types: DataTypesDump):
         members = klass["Members"]
 
         isInstanceNew = False
+        isBrickColorNew = False
 
         # Handle overloadable functions
         functions: defaultdict[str, List[ApiFunction]] = defaultdict(list)
@@ -855,6 +858,14 @@ def printDataTypeConstructors(types: DataTypesDump):
             if member["MemberType"] == "Function":
                 if name == "Instance" and member["Name"] == "new":
                     isInstanceNew = True
+                    continue
+                elif (
+                    name == "BrickColor"
+                    and member["Name"] == "new"
+                    and len(member["Parameters"]) == 1
+                    and member["Parameters"][0]["Type"]["Name"] == "string"
+                ):
+                    isBrickColorNew = True
                     continue
                 functions[member["Name"]].append(member)
 
@@ -885,6 +896,18 @@ def printDataTypeConstructors(types: DataTypesDump):
                     },
                     CREATABLE,
                 )
+            )
+
+        # Special case string BrickColor new
+        if isBrickColorNew:
+            colors = " | ".join(map(lambda c: f'"{c}"', sorted(BRICK_COLORS)))
+
+            functions["new"].append(
+                {
+                    "Parameters": [{"Name": "name", "Type": {"Name": colors}}],
+                    "ReturnType": {"Name": "BrickColor", "Category": "DataType"},
+                    "Name": "new",
+                }
             )
 
         for function, overloads in functions.items():
@@ -1056,6 +1079,15 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
     return list(reversed(sort))
 
+
+def processBrickColors(colors):
+    for color in colors["BrickColors"]:
+        BRICK_COLORS.add(color["Name"])
+
+
+# Load BrickColors
+brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
+processBrickColors(brickColors)
 
 # Print global types
 dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
