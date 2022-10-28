@@ -487,7 +487,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 size_t argIndex = 0;
                 size_t snippetIndex = 1;
 
-                auto& [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
+                auto [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
 
                 auto it = Luau::begin(ftv->argTypes);
                 for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
