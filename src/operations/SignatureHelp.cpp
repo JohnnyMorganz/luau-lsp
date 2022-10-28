@@ -88,17 +88,14 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         size_t idx = 0;
         size_t previousParamPos = 0;
 
-        while (it != Luau::end(ftv->argTypes))
+        for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
             // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
             // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
             if (idx == 0 && (ftv->hasSelf || (ftv->argNames.size() > 0 && ftv->argNames[0].has_value() && ftv->argNames[0]->name == "self")) &&
                 candidate->self)
-            {
-                it++;
-                idx++;
                 continue;
-            }
+
 
             // Show parameter documentation
             // TODO: parse moonwave docs for param documentation?
@@ -126,8 +123,43 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 paramLabel = labelString;
 
             parameters.push_back(lsp::ParameterInformation{paramLabel, parameterDocumentation});
-            it++;
-            idx++;
+        }
+
+        // Handle varargs
+        if (auto tp = it.tail())
+        {
+            if (auto vtp = Luau::get<Luau::VariadicTypePack>(*tp); !vtp || !vtp->hidden)
+            {
+                // Show parameter documentation
+                // TODO: parse moonwave docs for param documentation?
+                lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
+                if (baseDocumentationSymbol)
+                    parameterDocumentation.value =
+                        printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx));
+
+                // Compute the label
+                // We attempt to search for the position in the string for this label, and if we don't find it,
+                // then we give up and just use the string label
+                std::variant<std::string, std::vector<size_t>> paramLabel;
+                std::string labelString = "...: ";
+
+                if (vtp)
+                    labelString += Luau::toString(vtp->ty);
+                else
+                    labelString += Luau::toString(*tp);
+
+                auto position = label.find(labelString, previousParamPos);
+                if (position != std::string::npos)
+                {
+                    auto length = labelString.size();
+                    previousParamPos = position + length;
+                    paramLabel = std::vector{position, position + length};
+                }
+                else
+                    paramLabel = labelString;
+
+                parameters.push_back(lsp::ParameterInformation{paramLabel, parameterDocumentation});
+            }
         }
 
         signatures.push_back(lsp::SignatureInformation{
