@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.550
+- Sync to upstream Luau 0.551
 - Hide parameter name and variable inlay hint if the name is just `_`
 
 ### Fixed
