@@ -40,7 +40,15 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     // FIXME: should not be necessary if the `ty` has the doc symbol attached to it
     auto documentationSymbol = Luau::getDocumentationSymbolAtPosition(
         *sourceModule, *module, {candidate->func->location.end.line, candidate->func->location.end.column - 1});
-    size_t activeParameter = candidate->args.size;
+    size_t activeParameter = 0;
+
+    // Use the position to determine which parameter is active
+    for (auto param : candidate->args)
+    {
+        if (param->location.containsClosed(position) || param->location.begin > position)
+            break;
+        activeParameter++;
+    }
 
     auto it = module->astTypes.find(candidate->func);
     if (!it)

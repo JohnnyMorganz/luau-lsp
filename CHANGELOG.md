@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed documentation not provided for some built-ins on hover
 - Fixed signature help highlighting of parameters named `_`
 - Fixed documentation comments of parent function being attached to a nested function
+- Use location to determine which parameter is active in signature help
 
 ## [1.12.1] - 2022-10-18
 
