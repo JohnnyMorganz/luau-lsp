@@ -265,6 +265,18 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.addParentheses": {
+          "markdownDescription": "Add parentheses after completing a function call",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.addTabstopAfterParentheses": {
+          "markdownDescription": "If `#luau-lsp.completion.addParentheses#` is enabled, then include a tabstop after the parentheses for the cursor to move to",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",
           "type": "boolean",

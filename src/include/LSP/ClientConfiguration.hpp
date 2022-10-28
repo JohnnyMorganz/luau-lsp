@@ -82,9 +82,13 @@ struct ClientCompletionConfiguration
     bool enabled = true;
     /// Whether we should suggest automatic imports in completions
     bool suggestImports = false;
+    /// Automatically add parentheses to a function call
+    bool addParentheses = true;
+    /// If parentheses are added, include a $0 tabstop after the parentheses
+    bool addTabstopAfterParentheses = true;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports, addParentheses, addTabstopAfterParentheses);
 
 struct ClientSignatureHelpConfiguration
 {
