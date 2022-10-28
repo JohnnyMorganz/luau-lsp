@@ -104,7 +104,11 @@ IGNORED_MEMBERS = {
         "Invoke",
         "OnInvoke",
     ],
-    "Players": ["GetPlayers"],
+    "Players": [
+        "PlayerChatted",
+        "GetPlayerByUserId",
+        "GetPlayerFromCharacter",
+    ],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
     "PluginToolbar": [
         "CreateButton",
@@ -164,7 +168,10 @@ IGNORED_MEMBERS = {
         "WalkToPart",
         "GetAccessories",
     ],
-    "Player": ["Character"],
+    "Player": [
+        "Character",
+        "Chatted",
+     ],
     "InstanceAdornment": ["Adornee"],
     "BasePart": [
         "GetConnectedParts",
@@ -277,7 +284,11 @@ EXTRA_MEMBERS = {
         "function Invoke(self, ...: any): ...any",
         "OnInvoke: (...any) -> ...any",
     ],
-    "Players": ["function GetPlayers(self): { Player }"],
+    "Players": [
+        "PlayerChatted: RBXScriptSignal<EnumPlayerChatType, Player, string, Player?>",
+        "function GetPlayerByUserId(self, userId: number): Player?",
+        "function GetPlayerFromCharacter(self, character: Model): Player?",
+    ],
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
@@ -344,7 +355,10 @@ EXTRA_MEMBERS = {
         "WalkToPart: BasePart?",
         "function GetAccessories(self): { Accessory }",
     ],
-    "Player": ["Character: Model?"],
+    "Player": [
+        "Character: Model?",
+        "Chatted: RBXScriptSignal<string, Player?>",
+    ],
     "InstanceAdornment": ["Adornee: Instance?"],
     "BasePart": [
         "function GetConnectedParts(self, recursive: boolean?): { BasePart }",

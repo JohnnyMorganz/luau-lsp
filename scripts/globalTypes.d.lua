@@ -7876,7 +7876,7 @@ declare class Player extends Instance
 	CharacterAppearanceLoaded: RBXScriptSignal<Model>
 	CharacterRemoving: RBXScriptSignal<Model>
 	ChatMode: EnumChatMode
-	Chatted: RBXScriptSignal<string, Player>
+	Chatted: RBXScriptSignal<string, Player?>
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
@@ -7982,7 +7982,7 @@ declare class Players extends Instance
 	MaxPlayers: number
 	MaxPlayersInternal: number
 	PlayerAdded: RBXScriptSignal<Player>
-	PlayerChatted: RBXScriptSignal<EnumPlayerChatType, Player, string, Player>
+	PlayerChatted: RBXScriptSignal<EnumPlayerChatType, Player, string, Player?>
 	PlayerConnecting: RBXScriptSignal<Player>
 	PlayerDisconnecting: RBXScriptSignal<Player>
 	PlayerMembershipChanged: RBXScriptSignal<Player>
@@ -8000,8 +8000,8 @@ declare class Players extends Instance
 	function GetHumanoidDescriptionFromOutfitId(self, outfitId: number): HumanoidDescription
 	function GetHumanoidDescriptionFromUserId(self, userId: number): HumanoidDescription
 	function GetNameFromUserIdAsync(self, userId: number): string
-	function GetPlayerByUserId(self, userId: number): Player
-	function GetPlayerFromCharacter(self, character: Model): Player
+	function GetPlayerByUserId(self, userId: number): Player?
+	function GetPlayerFromCharacter(self, character: Model): Player?
 	function GetPlayers(self): { Player }
 	function GetUserIdFromNameAsync(self, userName: string): number
 	function GetUserThumbnailAsync(self, userId: number, thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
