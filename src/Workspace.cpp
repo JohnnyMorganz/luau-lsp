@@ -139,10 +139,6 @@ bool WorkspaceFolder::updateSourceMap()
             }
         }
 
-        // Signal diagnostics refresh
-        client->terminateWorkspaceDiagnostics();
-        client->refreshWorkspaceDiagnostics();
-
         return true;
     }
     else

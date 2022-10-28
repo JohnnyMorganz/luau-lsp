@@ -56,6 +56,7 @@ private:
     void onInitialized(const lsp::InitializedParams& params);
 
     void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version);
+    void recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config);
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);

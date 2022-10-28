@@ -378,36 +378,8 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             // Update the workspace setup with the new configuration
             workspace->setupWithConfiguration(config);
 
-            // Handle diagnostics if in push-mode
-            if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
-            {
-                // Recompute workspace diagnostics if requested
-                if (config.diagnostics.workspace)
-                {
-                    auto diagnostics = workspace->workspaceDiagnostics({});
-                    for (const auto& report : diagnostics.items)
-                    {
-                        if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
-                        {
-                            client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
-                        }
-                    }
-                }
-                // Recompute diagnostics for all currently opened files
-                else
-                {
-                    for (const auto& [file, document] : workspace->fileResolver.managedFiles)
-                    {
-                        auto filePath = workspace->fileResolver.resolveToRealPath(file);
-                        if (filePath)
-                        {
-
-                            auto uri = Uri::file(*filePath);
-                            this->pushDiagnostics(workspace, uri, document.version());
-                        }
-                    }
-                }
-            }
+            // Refresh diagnostics
+            this->recomputeDiagnostics(workspace, config);
 
             // Refresh inlay hint if changed
             if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
@@ -464,6 +436,46 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
                 client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
             }
         }
+    }
+}
+
+/// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
+void LanguageServer::recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config)
+{
+    // Handle diagnostics if in push-mode
+    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
+    {
+        // Recompute workspace diagnostics if requested
+        if (config.diagnostics.workspace)
+        {
+            auto diagnostics = workspace->workspaceDiagnostics({});
+            for (const auto& report : diagnostics.items)
+            {
+                if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                }
+            }
+        }
+        // Recompute diagnostics for all currently opened files
+        else
+        {
+            for (const auto& [file, document] : workspace->fileResolver.managedFiles)
+            {
+                auto filePath = workspace->fileResolver.resolveToRealPath(file);
+                if (filePath)
+                {
+
+                    auto uri = Uri::file(*filePath);
+                    this->pushDiagnostics(workspace, uri, document.version());
+                }
+            }
+        }
+    }
+    else
+    {
+        client->terminateWorkspaceDiagnostics();
+        client->refreshWorkspaceDiagnostics();
     }
 }
 
@@ -619,12 +631,16 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     for (const auto& change : params.changes)
     {
         auto workspace = findWorkspace(change.uri);
+        auto config = client->getConfiguration(workspace->rootUri);
         auto filePath = change.uri.fsPath();
         // Flag sourcemap changes
         if (filePath.filename() == "sourcemap.json")
         {
             client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspace->name);
             workspace->updateSourceMap();
+
+            // Recompute diagnostics
+            this->recomputeDiagnostics(workspace, config);
         }
         else if (filePath.filename() == ".luaurc")
         {
@@ -632,8 +648,8 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
                 lsp::MessageType::Info, "Acknowledge config changed for workspace " + workspace->name + ", clearing configuration cache");
             workspace->fileResolver.clearConfigCache();
 
-            // Send client request to refresh diagnostics
-            client->refreshWorkspaceDiagnostics();
+            // Recompute diagnostics
+            this->recomputeDiagnostics(workspace, config);
         }
     }
 }
