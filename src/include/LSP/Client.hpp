@@ -22,7 +22,7 @@ public:
     /// Parsed documentation database
     Luau::DocumentationDatabase documentation{""};
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
-    ClientConfiguration globalConfig;
+    ClientConfiguration globalConfig{};
     /// Configuration passed from the language client. Currently we only handle configuration at the workspace level
     std::unordered_map<std::string /* DocumentUri */, ClientConfiguration> configStore;
 

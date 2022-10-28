@@ -29,7 +29,7 @@ struct ClientTypesConfiguration
     /// Whether Roblox-related definitions should be supported
     bool roblox = true;
     /// Any definition files to load globally
-    std::vector<std::filesystem::path> definitionFiles;
+    std::vector<std::filesystem::path> definitionFiles{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
 
@@ -100,14 +100,14 @@ struct ClientConfiguration
 {
     /// Whether to automatically autocomplete end
     bool autocompleteEnd = false;
-    std::vector<std::string> ignoreGlobs;
-    ClientSourcemapConfiguration sourcemap;
-    ClientDiagnosticsConfiguration diagnostics;
-    ClientTypesConfiguration types;
-    ClientInlayHintsConfiguration inlayHints;
-    ClientHoverConfiguration hover;
-    ClientCompletionConfiguration completion;
-    ClientSignatureHelpConfiguration signatureHelp;
+    std::vector<std::string> ignoreGlobs{};
+    ClientSourcemapConfiguration sourcemap{};
+    ClientDiagnosticsConfiguration diagnostics{};
+    ClientTypesConfiguration types{};
+    ClientInlayHintsConfiguration inlayHints{};
+    ClientHoverConfiguration hover{};
+    ClientCompletionConfiguration completion{};
+    ClientSignatureHelpConfiguration signatureHelp{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
     ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp);
