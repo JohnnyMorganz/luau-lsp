@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Show documentation for builtin class methods in signature help, including for the correct overload
 - Show documentation for parameters in signature help
 - Added `luau-lsp.completion.addParentheses` and `luau-lsp.completion.addTabstopAfterParentheses` to configure whether parentheses are added when completing a function call, and whether we include a tab stop after the parentheses respectively.
+- Automatically fill function call arguments using parameter names. This can be disabled using `luau-lsp.completion.fillCallArguments`.
 
 ### Changed
 

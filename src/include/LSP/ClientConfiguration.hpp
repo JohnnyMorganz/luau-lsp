@@ -86,9 +86,12 @@ struct ClientCompletionConfiguration
     bool addParentheses = true;
     /// If parentheses are added, include a $0 tabstop after the parentheses
     bool addTabstopAfterParentheses = true;
+    /// If parentheses are added, fill call arguments with parameter names
+    bool fillCallArguments = true;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, suggestImports, addParentheses, addTabstopAfterParentheses);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientCompletionConfiguration, enabled, suggestImports, addParentheses, addTabstopAfterParentheses, fillCallArguments);
 
 struct ClientSignatureHelpConfiguration
 {

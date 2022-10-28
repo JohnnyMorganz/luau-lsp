@@ -454,7 +454,36 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             }
             else if (entry.parens == Luau::ParenthesesRecommendation::CursorInside)
             {
-                auto parenthesesSnippet = config.completion.addTabstopAfterParentheses ? "($1)$0" : "($0)";
+                std::string parenthesesSnippet = config.completion.addTabstopAfterParentheses ? "($1)$0" : "($0)";
+
+                // If we had CursorAfter, then the function call would not have any arguments
+                if (config.completion.fillCallArguments && entry.type.has_value())
+                {
+                    auto ty = Luau::follow(entry.type.value());
+                    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(ty))
+                    {
+                        parenthesesSnippet = "(";
+                        size_t id = 1;
+
+                        auto it = ftv->argNames.begin();
+                        if (ftv->hasSelf || (it != ftv->argNames.end() && it->has_value() && it->value().name == "self"))
+                            it++;
+
+                        for (; it != ftv->argNames.end(); it++)
+                        {
+                            auto name = *it;
+                            if (id > 1)
+                                parenthesesSnippet += ", ";
+
+                            parenthesesSnippet += "${" + std::to_string(id) + ":" + name.value_or(Luau::FunctionArgument{"_", {}}).name + "}";
+                            id++;
+                        }
+                        parenthesesSnippet += ")";
+                        if (config.completion.addTabstopAfterParentheses)
+                            parenthesesSnippet += "$0";
+                    }
+                }
+
                 if (item.textEdit)
                     item.textEdit->newText += parenthesesSnippet;
                 else
