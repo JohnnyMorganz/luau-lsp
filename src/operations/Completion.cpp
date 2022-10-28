@@ -2,6 +2,7 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/Protocol.hpp"
 #include "LSP/LuauExt.hpp"
+#include "Luau/TypeUtils.h"
 
 /// Defining sort text levels assigned to completion items
 /// Note that sort text is lexicographically
@@ -486,6 +487,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 size_t argIndex = 0;
                 size_t snippetIndex = 1;
 
+                auto& [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
+
                 auto it = Luau::begin(ftv->argTypes);
                 for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
                 {
@@ -497,14 +500,19 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     if (argIndex == 0 && (ftv->hasSelf || argName == "self"))
                         continue;
 
+                    // If the rest of the arguments are optional, don't include in filled call arguments
+                    bool includeParensSnippet = argIndex < minCount;
+
                     if (comma)
                     {
                         detail += ", ";
-                        parenthesesSnippet += ", ";
+                        if (includeParensSnippet)
+                            parenthesesSnippet += ", ";
                     }
 
                     detail += argName;
-                    parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
+                    if (includeParensSnippet)
+                        parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
 
                     comma = true;
                     snippetIndex++;
@@ -515,10 +523,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     if (comma)
                     {
                         detail += ", ";
-                        parenthesesSnippet += ", ";
                     }
                     detail += Luau::toString(*tail);
-                    parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":...}";
                 }
 
                 detail += ")";
