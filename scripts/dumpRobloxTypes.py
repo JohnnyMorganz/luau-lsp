@@ -183,6 +183,9 @@ IGNORED_MEMBERS = {
     "RunService": [
         "BindToRenderStep",
     ],
+    "GuiService": [
+        "SelectedObject"
+    ]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -362,6 +365,9 @@ EXTRA_MEMBERS = {
     "RunService": [
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
     ],
+    "GuiService": [
+        "SelectedObject: GuiObject?"
+    ]
 }
 
 # Hardcoded types

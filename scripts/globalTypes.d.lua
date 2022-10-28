@@ -6433,7 +6433,7 @@ declare class GuiService extends Instance
 	Open9SliceEditor: RBXScriptSignal<Instance>
 	SafeZoneOffsetsChanged: RBXScriptSignal<>
 	SelectedCoreObject: GuiObject
-	SelectedObject: GuiObject
+	SelectedObject: GuiObject?
 	SendCoreUiNotification: (title: string, text: string) -> nil
 	ShowLeaveConfirmation: RBXScriptSignal<>
 	SpecialKeyPressed: RBXScriptSignal<EnumSpecialKey, string>
