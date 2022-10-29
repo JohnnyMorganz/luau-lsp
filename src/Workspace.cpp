@@ -130,19 +130,26 @@ bool WorkspaceFolder::updateSourceMap()
 
         // Update managed file paths as they may be converted to virtual
         // Check if we have the original file URIs stored (https://github.com/JohnnyMorganz/luau-lsp/issues/26)
-        for (auto& [filePath, textDocument] : fileResolver.managedFiles)
+        std::vector<std::pair<Luau::ModuleName, TextDocument>> movedFiles;
+        for (auto it = fileResolver.managedFiles.begin(); it != fileResolver.managedFiles.end();)
         {
-            if (!fileResolver.isVirtualPath(filePath))
+            if (!fileResolver.isVirtualPath(it->first))
             {
-                if (auto virtualPath = fileResolver.resolveToVirtualPath(filePath); virtualPath && virtualPath != filePath)
+                if (auto virtualPath = fileResolver.resolveToVirtualPath(it->first); virtualPath && virtualPath != it->first)
                 {
-                    // Change the managed file key to use the new modulename
-                    auto nh = fileResolver.managedFiles.extract(filePath);
-                    nh.key() = *virtualPath;
-                    fileResolver.managedFiles.insert(std::move(nh));
+                    // Store the new ModuleName pairing into a vector and remove the old key
+                    movedFiles.emplace_back(std::make_pair(*virtualPath, it->second));
+                    it = fileResolver.managedFiles.erase(it);
+                    continue; // Ensure we continue so we don't increment iterator and skip next element
                 }
             }
+
+            it++;
         }
+
+        // Add any new pairings back into the map
+        for (auto& pair : movedFiles)
+            fileResolver.managedFiles.emplace(pair);
 
         return true;
     }
