@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Respect client capabilities for snippet support in completion items
 - Respect `luau-lsp.completion.addParentheses` when `fillCallArguments` is enabled
+- Fixed Inlay Hints crash when calling a function which only takes varargs
 
 ## [1.13.0] - 2022-10-28
 

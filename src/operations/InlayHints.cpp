@@ -117,7 +117,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                 // Skip first item if it is self
                 // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                if (ftv->hasSelf || func->args.data[0]->name == "self")
+                if (ftv->hasSelf || (func->args.size > 0 && func->args.data[0]->name == "self"))
                     it++;
 
                 for (auto param : func->args)
