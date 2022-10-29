@@ -1,6 +1,7 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
+#include "LSP/LuauExt.hpp"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {

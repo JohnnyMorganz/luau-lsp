@@ -1,6 +1,7 @@
+#include "LSP/Client.hpp"
+
 #include <iostream>
 #include <optional>
-#include "LSP/Client.hpp"
 
 void Client::sendRequest(const id_type& id, const std::string& method, std::optional<json> params, std::optional<ResponseHandler> handler)
 {

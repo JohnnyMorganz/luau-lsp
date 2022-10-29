@@ -1,7 +1,11 @@
+#include "Luau/AstQuery.h"
+#include "Luau/Autocomplete.h"
+#include "Luau/TypeUtils.h"
+
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
-#include "Luau/TypeUtils.h"
+#include "LSP/DocumentationParser.hpp"
 
 /// Defining sort text levels assigned to completion items
 /// Note that sort text is lexicographically

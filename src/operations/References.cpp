@@ -1,6 +1,9 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+#include "Luau/AstQuery.h"
+#include "LSP/LuauExt.hpp"
+
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
     // TODO: currently we only support searching for a binding at a current position

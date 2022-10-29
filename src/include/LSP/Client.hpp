@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <optional>
 #include "Luau/Documentation.h"
 #include "Protocol/Lifecycle.hpp"

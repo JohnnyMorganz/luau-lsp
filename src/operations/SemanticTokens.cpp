@@ -1,7 +1,9 @@
+#include "LSP/SemanticTokens.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
+
+#include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
-#include "LSP/SemanticTokens.hpp"
 
 static void fillBuiltinGlobals(std::unordered_map<Luau::AstName, Luau::TypeId>& builtins, const Luau::AstNameTable& names, const Luau::ScopePtr& env)
 {

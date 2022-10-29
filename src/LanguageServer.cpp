@@ -1,21 +1,24 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <optional>
-#include <variant>
-#include <exception>
-#include <filesystem>
-#include <algorithm>
 #include "LSP/LanguageServer.hpp"
 
-using json = nlohmann::json;
-using namespace json_rpc;
-using Response = json;
-using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
-using ClientPtr = std::shared_ptr<Client>;
+#include <string>
+#include <variant>
+#include <exception>
+#include <algorithm>
+
+#include "LSP/Uri.hpp"
+#include "LSP/DocumentationParser.hpp"
 
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
+
+LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
+    : client(std::make_shared<Client>())
+{
+    client->definitionsFiles = definitionsFiles;
+    client->documentationFile = documentationFile;
+    parseDocumentation(documentationFile, client->documentation, client);
+    nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
+}
 
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
+#include "Protocol/Structures.hpp"
 
 namespace lsp
 {

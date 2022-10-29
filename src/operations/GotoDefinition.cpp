@@ -1,6 +1,9 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+#include "Luau/AstQuery.h"
+#include "LSP/LuauExt.hpp"
+
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
     lsp::DefinitionResult result;

@@ -1,6 +1,11 @@
+#include "LSP/Workspace.hpp"
+
 #include <iostream>
 #include <limits.h>
-#include "LSP/Workspace.hpp"
+
+#include "glob/glob.hpp"
+#include "Luau/BuiltinDefinitions.h"
+#include "LSP/LuauExt.hpp"
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {

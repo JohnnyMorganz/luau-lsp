@@ -1,6 +1,9 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+#include "Luau/AstQuery.h"
+#include "LSP/LuauExt.hpp"
+
 lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 {
     // Verify the new name is valid (is an identifier)

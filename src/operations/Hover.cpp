@@ -1,6 +1,11 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+#include "Luau/AstQuery.h"
+#include "Luau/ToString.h"
+#include "LSP/LuauExt.hpp"
+#include "LSP/DocumentationParser.hpp"
+
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
     auto config = client->getConfiguration(rootUri);

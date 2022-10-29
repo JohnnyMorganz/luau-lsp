@@ -1,6 +1,10 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
+#include "Luau/AstQuery.h"
+#include "LSP/LuauExt.hpp"
+#include "LSP/DocumentationParser.hpp"
+
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
     auto config = client->getConfiguration(rootUri);

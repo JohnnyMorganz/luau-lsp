@@ -1,11 +1,14 @@
 #pragma once
+
 #include <optional>
 #include <filesystem>
+#include <string>
+#include <vector>
+
+#include "nlohmann/json.hpp"
 #include "Luau/Documentation.h"
 #include "Luau/Module.h"
 #include "Luau/Location.h"
-#include "nlohmann/json.hpp"
-#include "LSP/Utils.hpp"
 #include "LSP/Client.hpp"
 
 using json = nlohmann::json;

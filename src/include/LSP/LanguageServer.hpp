@@ -1,15 +1,14 @@
 #include <optional>
 #include <filesystem>
 
+#include "nlohmann/json.hpp"
+
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
 
 #include "LSP/Client.hpp"
 #include "LSP/JsonRpc.hpp"
-#include "LSP/Uri.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/DocumentationParser.hpp"
-#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 using namespace json_rpc;
@@ -33,14 +32,7 @@ public:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
 
-    LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
-        : client(std::make_shared<Client>())
-    {
-        client->definitionsFiles = definitionsFiles;
-        client->documentationFile = documentationFile;
-        parseDocumentation(documentationFile, client->documentation, client);
-        nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
-    }
+    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile);
 
     lsp::ServerCapabilities getServerCapabilities();
 

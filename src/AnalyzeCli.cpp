@@ -1,4 +1,6 @@
 // Source: https://github.com/Roblox/luau/blob/master/CLI/Analyze.cpp; licensed under MIT License
+#include "Analyze/AnalyzeCli.hpp"
+
 #include "Luau/ModuleResolver.h"
 #include "Luau/TypeInfer.h"
 #include "Luau/BuiltinDefinitions.h"
@@ -8,7 +10,6 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
-#include "Analyze/AnalyzeCli.hpp"
 #include "glob/glob.hpp"
 #include <iostream>
 #include <filesystem>
@@ -49,10 +50,11 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
     }
 }
 
-static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::filesystem::path& path, std::vector<std::string>& ignoreGlobPatterns) {
+static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::filesystem::path& path, std::vector<std::string>& ignoreGlobPatterns)
+{
     auto relativePath = path.lexically_relative(rootUriPath).generic_string(); // HACK: we convert to generic string so we get '/' separators
 
-    //luau analyze returns relative path for files that are to be analyzed
+    // luau analyze returns relative path for files that are to be analyzed
     if (relativePath.empty())
         relativePath = path.generic_string();
 
@@ -63,14 +65,16 @@ static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::f
     return false;
 }
 
-static void reportError(const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
+static void reportError(
+    const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
     WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
     std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
     std::string humanReadableName = fileResolver->getHumanReadableModuleName(error.moduleName);
     auto path = fileResolver->resolveToRealPath(error.moduleName);
 
-    if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns)) {
+    if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns))
+    {
         return;
     }
 
@@ -86,7 +90,7 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate, std::vector<std::string> &ignoreGlobPatterns)
+static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate, std::vector<std::string>& ignoreGlobPatterns)
 {
     Luau::CheckResult cr;
 
