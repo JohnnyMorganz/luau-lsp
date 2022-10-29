@@ -1,7 +1,7 @@
 #pragma once
 #include "Luau/Ast.h"
 #include "Luau/Module.h"
-#include "LSP/Protocol.hpp"
+#include "Protocol/SemanticTokens.hpp"
 
 struct SemanticToken
 {

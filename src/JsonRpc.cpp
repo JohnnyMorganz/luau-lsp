@@ -1,9 +1,10 @@
+#include "LSP/JsonRpc.hpp"
+
 #include <exception>
 #include <variant>
-#include "Luau/StringUtils.h"
+
 #include "nlohmann/json.hpp"
-#include "LSP/Protocol.hpp"
-#include "LSP/JsonRpc.hpp"
+#include "Luau/StringUtils.h"
 #include "LSP/Utils.hpp"
 
 using json = nlohmann::json;

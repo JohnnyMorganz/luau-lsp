@@ -2,8 +2,13 @@
 #include <iostream>
 #include <optional>
 #include "Luau/Documentation.h"
+#include "Protocol/Lifecycle.hpp"
+#include "Protocol/ClientCapabilities.hpp"
+#include "Protocol/Structures.hpp"
+#include "Protocol/Diagnostics.hpp"
+#include "Protocol/Window.hpp"
+#include "Protocol/Workspace.hpp"
 #include "LSP/JsonRpc.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/ClientConfiguration.hpp"
 
 using namespace json_rpc;

@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <limits.h>
+#include "glob/glob.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/BuiltinDefinitions.h"
@@ -8,9 +9,11 @@
 #include "Luau/AstQuery.h"
 #include "Luau/TypeInfer.h"
 #include "Luau/Transpiler.h"
-#include "glob/glob.hpp"
+#include "Protocol/Structures.hpp"
+#include "Protocol/LanguageFeatures.hpp"
+#include "Protocol/SignatureHelp.hpp"
+#include "Protocol/SemanticTokens.hpp"
 #include "LSP/Client.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/Sourcemap.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/DocumentationParser.hpp"

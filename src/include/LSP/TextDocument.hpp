@@ -1,7 +1,8 @@
 #pragma once
 #include "LSP/Uri.hpp"
-#include "LSP/Protocol.hpp"
 #include "Luau/Location.h"
+#include "Protocol/Structures.hpp"
+#include "Protocol/DocumentSync.hpp"
 
 size_t lspLength(const std::string& Code);
 

@@ -2,7 +2,6 @@
 
 #include "doctest.h"
 #include "LSP/LanguageServer.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/IostreamHelpers.hpp"

@@ -6,7 +6,6 @@
 #include "Luau/StringUtils.h"
 #include "Luau/Config.h"
 #include "LSP/Uri.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/Sourcemap.hpp"
 #include "LSP/PluginDataModel.hpp"
 #include "LSP/TextDocument.hpp"
@@ -18,7 +17,7 @@ struct WorkspaceFileResolver
     Luau::Config defaultConfig;
 
     // The root source node from a parsed Rojo source map
-    lsp::DocumentUri rootUri;
+    Uri rootUri;
     SourceNodePtr rootSourceNode;
     mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes;
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes;

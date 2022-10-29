@@ -1,7 +1,8 @@
 #pragma once
 
-#include "LSP/Protocol.hpp"
 #include <ostream>
+
+#include "Protocol/Structures.hpp"
 
 namespace lsp
 {

@@ -1,6 +1,5 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/SemanticTokens.hpp"
 

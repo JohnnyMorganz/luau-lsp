@@ -1,4 +1,3 @@
-#include "LSP/Protocol.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"

@@ -1,6 +1,6 @@
+#include "Protocol/LanguageFeatures.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/LuauExt.hpp"
 
 struct DocumentSymbolsVisitor : public Luau::AstVisitor

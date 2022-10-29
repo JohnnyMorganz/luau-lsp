@@ -3,8 +3,9 @@
 #include "Luau/Frontend.h"
 #include "Luau/Scope.h"
 #include "Luau/ToString.h"
-#include "LSP/Protocol.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Protocol/Structures.hpp"
+#include "Protocol/Diagnostics.hpp"
 
 namespace types
 {

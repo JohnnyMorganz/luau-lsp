@@ -4,7 +4,7 @@
 #include <iostream>
 #include "Luau/StringUtils.h"
 #include "nlohmann/json.hpp"
-#include "LSP/Protocol.hpp"
+#include "Protocol/Base.hpp"
 #include "LSP/Utils.hpp"
 
 using json = nlohmann::json;

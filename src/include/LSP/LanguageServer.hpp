@@ -1,7 +1,10 @@
 #include <optional>
 #include <filesystem>
+
+#include "Protocol/Structures.hpp"
+#include "Protocol/LanguageFeatures.hpp"
+
 #include "LSP/Client.hpp"
-#include "LSP/Protocol.hpp"
 #include "LSP/JsonRpc.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/Workspace.hpp"
