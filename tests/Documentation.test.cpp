@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "Fixture.h"
 
+#include "LSP/DocumentationParser.hpp"
+
 TEST_SUITE_BEGIN("Documentation");
 
 TEST_CASE_FIXTURE(Fixture, "attach_comments_to_function")
