@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.13.1] - 2022-10-29
+
 ### Fixed
 
 - Respect client capabilities for snippet support in completion items
