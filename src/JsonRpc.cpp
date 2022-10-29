@@ -109,7 +109,7 @@ bool readRawMessage(std::istream& input, std::string& output)
 
     // Read the JSON message into output
     output.resize(contentLength);
-    std::cin.read(&output[0], contentLength);
+    input.read(&output[0], contentLength);
     return true;
 }
 
