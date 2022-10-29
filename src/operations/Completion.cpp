@@ -282,6 +282,12 @@ void WorkspaceFolder::suggestImports(
     }
 }
 
+static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.textDocument && capabilities.textDocument->completion && capabilities.textDocument->completion->completionItem &&
+           capabilities.textDocument->completion->completionItem->snippetSupport;
+}
+
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
     auto config = client->getConfiguration(rootUri);
@@ -445,25 +451,39 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         // Handle parentheses suggestions
         if (config.completion.addParentheses)
         {
-            if (entry.parens == Luau::ParenthesesRecommendation::CursorAfter)
+            if (canUseSnippets(client->capabilities))
             {
-                if (item.textEdit)
-                    item.textEdit->newText += "()$0";
-                else
-                    item.insertText = name + "()$0";
-                item.insertTextFormat = lsp::InsertTextFormat::Snippet;
-            }
-            else if (entry.parens == Luau::ParenthesesRecommendation::CursorInside)
-            {
-                std::string parenthesesSnippet = config.completion.addTabstopAfterParentheses ? "($1)$0" : "($0)";
+                if (entry.parens == Luau::ParenthesesRecommendation::CursorAfter)
+                {
+                    if (item.textEdit)
+                        item.textEdit->newText += "()$0";
+                    else
+                        item.insertText = name + "()$0";
+                    item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                }
+                else if (entry.parens == Luau::ParenthesesRecommendation::CursorInside)
+                {
+                    std::string parenthesesSnippet = config.completion.addTabstopAfterParentheses ? "($1)$0" : "($0)";
 
-                if (item.textEdit)
-                    item.textEdit->newText += parenthesesSnippet;
-                else
-                    item.insertText = name + parenthesesSnippet;
-                item.insertTextFormat = lsp::InsertTextFormat::Snippet;
-                // Trigger Signature Help
-                item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
+                    if (item.textEdit)
+                        item.textEdit->newText += parenthesesSnippet;
+                    else
+                        item.insertText = name + parenthesesSnippet;
+                    item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                    // Trigger Signature Help
+                    item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
+                }
+            }
+            else
+            {
+                // We don't support snippets, so just add parentheses
+                if (entry.parens == Luau::ParenthesesRecommendation::CursorAfter || entry.parens == Luau::ParenthesesRecommendation::CursorInside)
+                {
+                    if (item.textEdit)
+                        item.textEdit->newText += "()";
+                    else
+                        item.insertText = name + "()";
+                }
             }
         }
 
@@ -532,7 +552,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.labelDetails = {detail};
 
                 // If we had CursorAfter, then the function call would not have any arguments
-                if (config.completion.fillCallArguments)
+                if (canUseSnippets(client->capabilities) && config.completion.fillCallArguments)
                 {
                     if (config.completion.addTabstopAfterParentheses)
                         parenthesesSnippet += "$0";
@@ -541,6 +561,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                         item.textEdit->newText += parenthesesSnippet;
                     else
                         item.insertText = name + parenthesesSnippet;
+
+                    item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                    // Trigger Signature Help
+                    item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
                 }
 
                 // Add documentation
