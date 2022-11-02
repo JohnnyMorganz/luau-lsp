@@ -393,8 +393,6 @@ type ProtectedString = string
 type BinaryString = string
 type QDir = string
 type QFont = string
-type FloatCurveKey = any
-type RotationCurveKey = any
 type Instance = any
 
 declare class Enum
@@ -483,6 +481,22 @@ type HumanoidDescriptionAccessory = {
     IsLayered: boolean,
     Order: number?,
     Puffiness: number?,
+}
+
+type FloatCurveKey = {
+    Interpolation: EnumKeyInterpolationMode,
+    Time: number,
+    Value: number,
+    RightTangent: number?,
+    LeftTangent: number?
+}
+
+type RotationCurveKey = {
+    Interpolation: EnumKeyInterpolationMode,
+    Time: number,
+    Value: CFrame,
+    RightTangent: number?,
+    LeftTangent: number?
 }
 """
 
