@@ -282,6 +282,7 @@ declare class EnumAssetType_INTERNAL extends Enum
 	EyebrowAccessory: EnumAssetType
 	EyelashAccessory: EnumAssetType
 	DynamicHead: EnumAssetType
+	FontFamily: EnumAssetType
 end
 declare class EnumAssetTypeVerification extends EnumItem end
 declare class EnumAssetTypeVerification_INTERNAL extends Enum
@@ -1810,6 +1811,7 @@ declare class EnumModelStreamingMode extends EnumItem end
 declare class EnumModelStreamingMode_INTERNAL extends Enum
 	Default: EnumModelStreamingMode
 	Atomic: EnumModelStreamingMode
+	Persistent: EnumModelStreamingMode
 end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
@@ -3438,6 +3440,14 @@ declare class Faces
 	Top: boolean
 end
 
+declare class FloatCurveKey
+	Interpolation: EnumKeyInterpolationMode
+	LeftTangent: number
+	RightTangent: number
+	Time: number
+	Value: number
+end
+
 declare class Font
 	Bold: boolean
 	Family: string
@@ -3625,6 +3635,14 @@ declare class CFrame
 	function __mul(self, other: CFrame): CFrame
 	function __mul(self, other: Vector3): Vector3
 	function __sub(self, other: Vector3): CFrame
+end
+
+declare class RotationCurveKey
+	Interpolation: EnumKeyInterpolationMode
+	LeftTangent: number
+	RightTangent: number
+	Time: number
+	Value: CFrame
 end
 
 declare class Region3
@@ -4417,6 +4435,7 @@ declare class AnimationStreamTrack extends Instance
 	Animation: TrackerStreamAnimation
 	IsPlaying: boolean
 	Priority: EnumAnimationPriority
+	Stopped: RBXScriptSignal<>
 	WeightCurrent: number
 	WeightTarget: number
 	function AdjustWeight(self, weight: number?, fadeTime: number?): nil
@@ -4450,6 +4469,7 @@ end
 declare class Animator extends Instance
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
 	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
+	AnimationStreamTrackPlayed: RBXScriptSignal<AnimationStreamTrack>
 	PreferLodEnabled: boolean
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { AnimationTrack }
@@ -5348,7 +5368,6 @@ declare class GroundController extends ControllerBase
 	Friction: number
 	FrictionWeight: number
 	GroundOffset: number
-	MaxSlopeAngle: number
 	StandForce: number
 	StandSpeed: number
 	TurningFactor: number
@@ -5367,7 +5386,6 @@ declare class ControllerManager extends Instance
 	BaseMoveSpeed: number
 	BaseTurnSpeed: number
 	FacingDirection: Vector3
-	HipHeight: number
 	MovingDirection: Vector3
 	function GetControllers(self): { Instance }
 end
@@ -5578,7 +5596,6 @@ declare class DebuggerUIService extends Instance
 	function Pause(self): nil
 	function RemoveScriptLineMarkers(self, debuggerConnectionId: number, allMarkers: boolean): nil
 	function Resume(self): nil
-	function SetCurrentFrameId(self, debuggerThreadId: number, debuggerFrameId: number): nil
 	function SetCurrentThreadId(self, debuggerThreadId: number): nil
 	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
 end
@@ -5694,7 +5711,7 @@ declare class ExperienceAuthService extends Instance
 end
 
 declare class ExperienceInviteOptions extends Instance
-	InviteMessageId: number
+	InviteMessageId: string
 	InviteUser: number
 	LaunchData: string
 	PromptMessage: string
@@ -8849,8 +8866,6 @@ end
 
 declare class StudioData extends Instance
 	EnableScriptCollabByDefaultOnLoad: boolean
-	SrcPlaceId: number
-	SrcUniverseId: number
 end
 
 declare class StudioDeviceEmulatorService extends Instance
@@ -9095,6 +9110,7 @@ declare class BubbleChatConfiguration extends TextChatConfigurations
 	BubblesSpacing: number
 	Enabled: boolean
 	Font: EnumFont
+	FontFace: Font
 	LocalPlayerStudsOffset: Vector3
 	MaxDistance: number
 	MinimizeDistance: number
@@ -9117,9 +9133,18 @@ declare class ChatWindowConfiguration extends TextChatConfigurations
 	AbsolutePositionWrite: Vector2
 	AbsoluteSize: Vector2
 	AbsoluteSizeWrite: Vector2
+	BackgroundColor3: Color3
+	BackgroundTransparency: number
 	Enabled: boolean
+	FontFace: Font
+	HeightScale: number
 	HorizontalAlignment: EnumHorizontalAlignment
+	TextColor3: Color3
+	TextSize: number
+	TextStrokeColor3: Color3
+	TextStrokeTransparency: number
 	VerticalAlignment: EnumVerticalAlignment
+	WidthScale: number
 end
 
 declare class TextChatMessage extends Instance
@@ -9272,6 +9297,7 @@ declare class UGCValidationService extends Instance
 	function GetMeshVertColors(self, meshId: string): { any }
 	function GetMeshVerts(self, meshId: string): { any }
 	function GetMeshVertsSync(self, meshId: string): { any }
+	function GetPropertyValue(self, instance: Instance, property: string): any
 	function GetTextureSize(self, textureId: string): Vector2
 	function GetTextureSizeSync(self, textureId: string): Vector2
 	function ResetCollisionFidelity(self, meshPart: Instance): nil
@@ -10197,6 +10223,14 @@ declare Font: {
 	fromEnum: ((font: EnumFont) -> Font),
 	fromName: ((name: string, weight: EnumFontWeight?, style: EnumFontStyle?) -> Font),
 	fromId: ((id: number, weight: EnumFontWeight?, style: EnumFontStyle?) -> Font),
+}
+
+declare FloatCurveKey: {
+	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode) -> FloatCurveKey),
+}
+
+declare RotationCurveKey: {
+	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode) -> RotationCurveKey),
 }
 
 
