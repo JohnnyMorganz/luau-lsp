@@ -692,6 +692,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectOutOfMemoryExitContinue: EnumConnectionError
 	DisconnectOutOfMemoryKeepPlayingExit: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
+	PlayerRemoved: EnumConnectionError
 	PlacelaunchErrors: EnumConnectionError
 	PlacelaunchDisabled: EnumConnectionError
 	PlacelaunchError: EnumConnectionError
@@ -4591,7 +4592,6 @@ declare class Attachment extends Instance
 end
 
 declare class Bone extends Attachment
-	IsCFrameDriven: boolean
 	Transform: CFrame
 	TransformedCFrame: CFrame
 	TransformedWorldCFrame: CFrame
@@ -7629,11 +7629,14 @@ end
 declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
+	function CacheCurrentTerrain(self, id: string, center: Vector3, radius: number): string
+	function ClearCachedTerrain(self, id: string): boolean
 	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
 	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
 	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
+	function RaycastCachedTerrain(self, id: string, origin: Vector3, direction: Vector3, ignoreWater: boolean): RaycastResult
 	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil
 end
 
@@ -9181,6 +9184,7 @@ end
 declare class TextService extends Instance
 	function FilterStringAsync(self, stringToFilter: string, fromUserId: number, textContext: EnumTextFilterContext?): Instance
 	function GetFamilyInfoAsync(self, assetId: Content): { [any]: any }
+	function GetFontMemoryData(self): { [any]: any }
 	function GetTextBoundsAsync(self, params: GetTextBoundsParams): Vector2
 	function GetTextSize(self, string: string, fontSize: number, font: EnumFont, frameSize: Vector2): Vector2
 	function SetResolutionScale(self, scale: number): nil
@@ -9731,6 +9735,8 @@ declare class VoiceChatInternal extends Instance
 	LocalPlayerModerated: RBXScriptSignal<>
 	function GetChannelId(self): string
 	function GetGroupId(self): string
+	function GetSessionId(self): string
+	function GetVoiceExperienceId(self): string
 	function IsContextVoiceEnabled(self): boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
 	function SubscribeBlock(self, userId: number): boolean
