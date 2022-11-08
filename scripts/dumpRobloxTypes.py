@@ -193,6 +193,20 @@ IGNORED_MEMBERS = {
     ],
     "GuiService": [
         "SelectedObject"
+    ],
+    "GlobalDataStore": [
+        "GetAsync",
+        "IncrementAsync",
+        "RemoveAsync",
+        "SetAsync",
+        "UpdateAsync",
+    ],
+    "OrderedDataStore": [
+        "GetAsync",
+        "GetSortedAsync",
+        "RemoveAsync",
+        "SetAsync",
+        "UpdateAsync",
     ]
 }
 
@@ -382,6 +396,29 @@ EXTRA_MEMBERS = {
     ],
     "GuiService": [
         "SelectedObject: GuiObject?"
+    ],
+    "GlobalDataStore": [
+        # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
+        "function GetAsync(self, key: string): (any, DataStoreKeyInfo)",
+        # IncrementAsync didn't have a second return value of DataStoreKeyInfo, and the first return value is always a number
+        "function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): (number, DataStoreKeyInfo)",
+        # RemoveAsync didn't have a second return value of DataStoreKeyInfo
+        "function RemoveAsync(self, key: string): (any, DataStoreKeyInfo)",
+        # SetAsync returns the version as a string, upstream says it's any
+        "function SetAsync(self, key: string, value: any, userIds: { number }?, options: DataStoreSetOptions?): string",
+        # UpdateAsync didn't have a second return value of DataStoreKeyInfo
+        # and the second parameter passed to the transform function is always a DataStoreKeyInfo
+        # and the return of the transform function was incorrect
+        "function UpdateAsync(self, key: string, transformFunction: ((any, DataStoreKeyInfo) -> (any, { number }?, {}?))): (any, DataStoreKeyInfo)",
+    ],
+    # Trying to set the value in a OrderedDataStore to anything other than a number will error,
+    # So we override the method's types to use numbers instead of any
+    "OrderedDataStore": [
+        "function GetAsync(self, key: string): (number?, DataStoreKeyInfo)",
+        "function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number, maxValue: number): DataStorePages",
+        "function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)",
+        "function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string",
+        "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
     ]
 }
 
