@@ -5926,11 +5926,11 @@ declare class GetTextBoundsParams extends Instance
 end
 
 declare class GlobalDataStore extends Instance
-	function GetAsync(self, key: string): any
-	function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): any
-	function RemoveAsync(self, key: string): any
-	function SetAsync(self, key: string, value: any, userIds: { number }?, options: DataStoreSetOptions?): any
-	function UpdateAsync(self, key: string, transformFunction: ((...any) -> ...any)): any
+	function GetAsync(self, key: string): (any, DataStoreKeyInfo)
+	function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): (number, DataStoreKeyInfo)
+	function RemoveAsync(self, key: string): (any, DataStoreKeyInfo)
+	function SetAsync(self, key: string, value: any, userIds: { number }?, options: DataStoreSetOptions?): string
+	function UpdateAsync(self, key: string, transformFunction: ((any, DataStoreKeyInfo) -> (any, { number }?, {}?))): (any, DataStoreKeyInfo)
 end
 
 declare class DataStore extends GlobalDataStore
@@ -5941,7 +5941,11 @@ declare class DataStore extends GlobalDataStore
 end
 
 declare class OrderedDataStore extends GlobalDataStore
-	function GetSortedAsync(self, ascending: boolean, pagesize: number, minValue: any, maxValue: any): DataStorePages
+	function GetAsync(self, key: string): (number?, DataStoreKeyInfo)
+	function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number, maxValue: number): DataStorePages
+	function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)
+	function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string
+	function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)
 end
 
 declare class GoogleAnalyticsConfiguration extends Instance
