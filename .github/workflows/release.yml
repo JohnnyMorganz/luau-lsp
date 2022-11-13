@@ -151,4 +151,4 @@ jobs:
 
       - name: Publish OpenVSX Extension
         working-directory: editors/code
-        run: npx vsce publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+        run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
