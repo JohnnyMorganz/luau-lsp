@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Show inlay hints for variables in `for x in y` loops
+
 ### Changed
 
 - Sync to upstream Luau 0.553

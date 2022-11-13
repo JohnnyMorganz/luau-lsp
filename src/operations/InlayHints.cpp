@@ -99,6 +99,49 @@ struct InlayHintVisitor : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstStatForIn* forIn) override
+    {
+        if (!config.inlayHints.variableTypes)
+            return true;
+
+        auto scope = Luau::findScopeAtPosition(*module, forIn->location.begin);
+        if (!scope)
+            return false;
+
+        for (size_t i = 0; i < forIn->vars.size; i++)
+        {
+            auto var = forIn->vars.data[i];
+            if (!var->annotation)
+            {
+                auto ty = scope->lookup(var);
+                if (ty)
+                {
+                    auto followedTy = Luau::follow(*ty);
+
+                    // If the variable is named "_", don't include an inlay hint
+                    if (var->name == "_")
+                        continue;
+
+                    auto typeString = Luau::toString(followedTy, stringOptions);
+
+                    // If the stringified type is equivalent to the variable name, don't bother
+                    // showing an inlay hint
+                    if (Luau::equalsLower(typeString, var->name.value))
+                        continue;
+
+                    lsp::InlayHint hint;
+                    hint.kind = lsp::InlayHintKind::Type;
+                    hint.label = ": " + typeString;
+                    hint.position = textDocument->convertPosition(var->location.end);
+                    makeInsertable(hint, followedTy);
+                    hints.emplace_back(hint);
+                }
+            }
+        }
+
+        return true;
+    }
+
     bool visit(Luau::AstExprFunction* func) override
     {
         auto ty = module->astTypes.find(func);
