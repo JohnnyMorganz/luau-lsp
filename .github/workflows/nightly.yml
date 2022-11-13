@@ -8,6 +8,7 @@ on:
 jobs:
   dist:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
