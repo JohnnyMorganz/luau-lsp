@@ -791,6 +791,106 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
     return diagnostic;
 }
 
+// Based on upstream, except we use containsClosed
+struct FindExprOrLocalClosed : public Luau::AstVisitor
+{
+    const Luau::Position pos;
+    Luau::ExprOrLocal result;
+
+    explicit FindExprOrLocalClosed(Luau::Position pos)
+        : pos(pos)
+    {
+    }
+
+    // We want to find the result with the smallest location range.
+    bool isCloserMatch(Luau::Location newLocation)
+    {
+        auto current = result.getLocation();
+        return newLocation.containsClosed(pos) && (!current || current->encloses(newLocation));
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            if (stat->location.end <= pos)
+                continue;
+            if (stat->location.begin > pos)
+                break;
+
+            stat->visit(this);
+        }
+
+        return false;
+    }
+
+    bool visit(Luau::AstExpr* expr) override
+    {
+        if (isCloserMatch(expr->location))
+        {
+            result.setExpr(expr);
+            return true;
+        }
+        return false;
+    }
+
+    bool visitLocal(Luau::AstLocal* local)
+    {
+        if (isCloserMatch(local->location))
+        {
+            result.setLocal(local);
+            return true;
+        }
+        return false;
+    }
+
+    bool visit(Luau::AstStatLocalFunction* function) override
+    {
+        visitLocal(function->name);
+        return true;
+    }
+
+    bool visit(Luau::AstStatLocal* al) override
+    {
+        for (size_t i = 0; i < al->vars.size; ++i)
+        {
+            visitLocal(al->vars.data[i]);
+        }
+        return true;
+    }
+
+    virtual bool visit(Luau::AstExprFunction* fn) override
+    {
+        for (size_t i = 0; i < fn->args.size; ++i)
+        {
+            visitLocal(fn->args.data[i]);
+        }
+        return visit((class Luau::AstExpr*)fn);
+    }
+
+    virtual bool visit(Luau::AstStatFor* forStat) override
+    {
+        visitLocal(forStat->var);
+        return true;
+    }
+
+    virtual bool visit(Luau::AstStatForIn* forIn) override
+    {
+        for (Luau::AstLocal* var : forIn->vars)
+        {
+            visitLocal(var);
+        }
+        return true;
+    }
+};
+
+Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos)
+{
+    FindExprOrLocalClosed findVisitor{pos};
+    findVisitor.visit(source.root);
+    return findVisitor.result;
+}
+
 struct FindSymbolReferences : public Luau::AstVisitor
 {
     const Luau::Symbol symbol;

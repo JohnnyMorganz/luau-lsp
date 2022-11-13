@@ -1,7 +1,6 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 
-#include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
 lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
@@ -34,7 +33,10 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     if (!sourceModule)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
 
-    auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
+    auto exprOrLocal = findExprOrLocalAtPositionClosed(*sourceModule, position);
+    if (!exprOrLocal.getLocal() && !exprOrLocal.getExpr())
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to find symbol. Ensure the variable is highlighted correctly");
+
     Luau::Symbol symbol;
 
     if (exprOrLocal.getLocal())

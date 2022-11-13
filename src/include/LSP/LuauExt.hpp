@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include "Luau/AstQuery.h"
 #include "Luau/Frontend.h"
 #include "Luau/Scope.h"
 #include "Luau/ToString.h"
@@ -111,6 +112,7 @@ struct FindNodeType : public Luau::AstVisitor
 };
 
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos);
+Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos);
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol);
 
 std::optional<Luau::Location> getLocation(Luau::TypeId type);

@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.553
 
+### Fixed
+
+- Fixed rename symbol not working when cursor after variable
+- Fixed rename symbol causing server crashing when attempting to rename a token which is not a variable
+
 ## [1.13.1] - 2022-10-29
 
 ### Fixed
