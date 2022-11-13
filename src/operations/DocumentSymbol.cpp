@@ -137,15 +137,7 @@ std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(moduleName);
     if (!textDocument)
-    {
-        // TODO: REMOVE TRACE LOGGING
-        std::vector<std::string> managed;
-        managed.reserve(fileResolver.managedFiles.size());
-        for (auto [file, _] : fileResolver.managedFiles)
-            managed.push_back(file);
-        client->sendLogMessage(lsp::MessageType::Error, "managed document info: " + json(managed).dump());
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
-    }
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))
