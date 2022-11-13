@@ -4,7 +4,10 @@ An implementation of a language server for the [Luau](https://github.com/Roblox/
 
 ## Getting Started
 
-Install the extension from the marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
+Install the extension from the VSCode Marketplace or OpenVSX Registry:
+
+- VSCode Marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
+- OpenVSX Registry: https://open-vsx.org/extension/JohnnyMorganz/luau-lsp
 
 ### For General Users
 
