@@ -207,6 +207,9 @@ IGNORED_MEMBERS = {
         "RemoveAsync",
         "SetAsync",
         "UpdateAsync",
+    ],
+    "Highlight": [
+        "Adornee"
     ]
 }
 
@@ -419,6 +422,10 @@ EXTRA_MEMBERS = {
         "function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)",
         "function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string",
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
+    ],
+    # The Adornee property is optional
+    "Highlight": [
+        "Adornee: Instance?"
     ]
 }
 
