@@ -2288,6 +2288,12 @@ declare class EnumScaleType_INTERNAL extends Enum
 	Fit: EnumScaleType
 	Crop: EnumScaleType
 end
+declare class EnumScreenInsets extends EnumItem end
+declare class EnumScreenInsets_INTERNAL extends Enum
+	None: EnumScreenInsets
+	DeviceSafeInsets: EnumScreenInsets
+	CoreUISafeInsets: EnumScreenInsets
+end
 declare class EnumScreenOrientation extends EnumItem end
 declare class EnumScreenOrientation_INTERNAL extends Enum
 	LandscapeLeft: EnumScreenOrientation
@@ -3272,6 +3278,7 @@ type ENUM_LIST = {
 	SaveFilter: EnumSaveFilter_INTERNAL,
 	SavedQualitySetting: EnumSavedQualitySetting_INTERNAL,
 	ScaleType: EnumScaleType_INTERNAL,
+	ScreenInsets: EnumScreenInsets_INTERNAL,
 	ScreenOrientation: EnumScreenOrientation_INTERNAL,
 	ScrollBarInset: EnumScrollBarInset_INTERNAL,
 	ScrollingDirection: EnumScrollingDirection_INTERNAL,
@@ -3857,6 +3864,7 @@ type DraftsService = any
 type Dragger = any
 type DraggerService = any
 type DynamicTextureAlpha = any
+type DynamicTextureLayerAlpha = any
 type EulerRotationCurve = any
 type EventIngestService = any
 type ExperienceAuthService = any
@@ -5346,6 +5354,8 @@ end
 
 declare class AirController extends ControllerBase
 	CancelAirMomentum: boolean
+	MaintainAngularMomentum: boolean
+	MaintainLinearMomentum: boolean
 	MoveMaxForce: number
 	OrientationMaxTorque: number
 	OrientationSpeedFactor: number
@@ -5689,6 +5699,11 @@ declare class DraggerService extends Instance
 end
 
 declare class DynamicTextureAlpha extends Instance
+	function CreateLayer(self): DynamicTextureLayerAlpha
+end
+
+declare class DynamicTextureLayerAlpha extends Instance
+	ZIndex: number
 end
 
 declare class EulerRotationCurve extends Instance
@@ -6284,6 +6299,7 @@ declare class ScreenGui extends LayerCollector
 	IgnoreGuiInset: boolean
 	OnTopOfCoreBlur: boolean
 	SafeAreaCompatibility: EnumSafeAreaCompatibility
+	ScreenInsets: EnumScreenInsets
 end
 
 
@@ -8016,6 +8032,7 @@ declare class Players extends Instance
 	PreferredPlayers: number
 	PreferredPlayersInternal: number
 	RespawnTime: number
+	UseStrafingAnimations: boolean
 	function Chat(self, message: string): nil
 	function CreateHumanoidModelFromDescription(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	function CreateHumanoidModelFromUserId(self, userId: number): Model
@@ -8999,6 +9016,7 @@ end
 declare class TeamCreateService extends Instance
 	ToggleManageCollaborators: RBXScriptSignal<>
 	function SendUnarchiveUniverseAsync(self, universeId: number): nil
+	function SendUnarchiveUniverseWithReasonAsync(self, universeId: number, reason: string): nil
 end
 
 declare class Teams extends Instance
@@ -9113,6 +9131,7 @@ end
 declare class BubbleChatConfiguration extends TextChatConfigurations
 	AdorneeName: string
 	BackgroundColor3: Color3
+	BackgroundTransparency: number
 	BubbleDuration: number
 	BubblesSpacing: number
 	Enabled: boolean
@@ -9313,6 +9332,7 @@ declare class UGCValidationService extends Instance
 	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
 	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
 	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
+	function ValidateMeshBounds(self, meshId: string, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
 	function ValidateMeshTriangles(self, meshId: string): boolean
 	function ValidateMeshVertColors(self, meshId: string): boolean
 	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
