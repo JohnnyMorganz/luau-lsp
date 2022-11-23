@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.554
+
 ### Fixed
 
 - Fixed stack overflow when looking up properties on a table type where the `__index` is set to itself
