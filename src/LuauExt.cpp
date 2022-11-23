@@ -687,7 +687,8 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             if (indexIt != mtable->props.end())
             {
                 Luau::TypeId followed = Luau::follow(indexIt->second.type);
-                if (Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed))
+                if ((Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed)) &&
+                    followed != parentType) // ensure acyclic
                 {
                     return lookupProp(followed, name);
                 }
