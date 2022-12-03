@@ -955,7 +955,14 @@ def printDataTypeConstructors(types: DataTypesDump):
                                     "Name": f'"{inst}"',
                                     "Category": "PRIMITIVE_SERVICE_NAME",
                                 },
-                            }
+                            },
+                            {
+                                "Name": "parent",
+                                "Type": {
+                                    "Name": "Instance?",
+                                    "Category": "Class",
+                                },
+                            },
                         ],
                         "ReturnType": {"Name": inst, "Category": "PRIMITIVE_SERVICE"},
                     },
