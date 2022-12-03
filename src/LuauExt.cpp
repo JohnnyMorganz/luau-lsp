@@ -527,7 +527,7 @@ std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTy
     opts.hideNamedFunctionTypeParameters = false;
     opts.hideTableKind = stringOpts.hideTableKind;
     opts.useLineBreaks = stringOpts.multiline;
-    opts.indent = stringOpts.multiline;
+    opts.DEPRECATED_indent = stringOpts.multiline;
     if (scope)
         opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
