@@ -4184,6 +4184,7 @@ type GenericSettings = any
 type AnalysticsSettings = any
 type UserSettings = any
 type SessionService = any
+type ShorelineUpgraderService = any
 type Sky = any
 type Smoke = any
 type SnippetService = any
@@ -6726,16 +6727,18 @@ declare class HumanoidDescription extends Instance
 end
 
 declare class IKControl extends Instance
-	AlignmentOffset: CFrame
 	ChainRoot: Instance
 	Enabled: boolean
 	EndEffector: Instance
+	EndEffectorOffset: CFrame
 	Offset: CFrame
 	Pole: Instance
 	Priority: number
 	Target: Instance
 	Type: EnumIKControlType
 	Weight: number
+	function GetChainCount(self): number
+	function GetChainLength(self): number
 end
 
 declare class ILegacyStudioBridge extends Instance
@@ -7550,11 +7553,13 @@ declare class Terrain extends BasePart
 	LastUsedModificationMethod: EnumTerrainAcquisitionMethod
 	MaterialColors: BinaryString
 	MaxExtents: Region3int16
+	ShorelinesUpgraded: boolean
 	WaterColor: Color3
 	WaterReflectance: number
 	WaterTransparency: number
 	WaterWaveSize: number
 	WaterWaveSpeed: number
+	function CanShorelinesBeUpgraded(self): boolean
 	function CellCenterToWorld(self, x: number, y: number, z: number): Vector3
 	function CellCornerToWorld(self, x: number, y: number, z: number): Vector3
 	function Clear(self): nil
@@ -7929,6 +7934,7 @@ declare class Player extends Instance
 	FriendStatusChanged: RBXScriptSignal<Player, EnumFriendStatus>
 	GameplayPaused: boolean
 	Guest: boolean
+	HasVerifiedBadge: boolean
 	HealthDisplayDistance: number
 	Idled: RBXScriptSignal<number>
 	LocaleId: string
@@ -8562,6 +8568,12 @@ declare class SessionService extends Instance
 	function SetSession(self, parentSid: string, childSid: string, tag: string): nil
 end
 
+declare class ShorelineUpgraderService extends Instance
+	Status: RBXScriptSignal<number>
+	function Cancel(self): nil
+	function Start(self): nil
+end
+
 declare class Sky extends Instance
 	CelestialBodiesShown: boolean
 	MoonAngularSize: number
@@ -8883,8 +8895,10 @@ end
 
 declare class StudioAssetService extends Instance
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
+	OnPublishPackageResult: RBXScriptSignal<{ [any]: any }, string>
 	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
+	function PublishPackage(self, instance: Instance, publishInfo: { [any]: any }): nil
 	function SerializeInstances(self, instances: { Instance }): string
 end
 
@@ -9150,8 +9164,16 @@ declare class ChatInputBarConfiguration extends TextChatConfigurations
 	AbsolutePositionWrite: Vector2
 	AbsoluteSize: Vector2
 	AbsoluteSizeWrite: Vector2
+	BackgroundColor3: Color3
+	BackgroundTransparency: number
 	Enabled: boolean
+	FontFace: Font
+	PlaceholderColor3: Color3
 	TargetTextChannel: TextChannel
+	TextColor3: Color3
+	TextSize: number
+	TextStrokeColor3: Color3
+	TextStrokeTransparency: number
 end
 
 declare class ChatWindowConfiguration extends TextChatConfigurations
@@ -9925,6 +9947,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ServerScriptService"): ServerScriptService
 	function GetService(self, service: "ServerStorage"): ServerStorage
 	function GetService(self, service: "SessionService"): SessionService
+	function GetService(self, service: "ShorelineUpgraderService"): ShorelineUpgraderService
 	function GetService(self, service: "SnippetService"): SnippetService
 	function GetService(self, service: "SocialService"): SocialService
 	function GetService(self, service: "SolidModelContentProvider"): SolidModelContentProvider
