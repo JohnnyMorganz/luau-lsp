@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.14.2] - 2022-12-04
+
 ### Changed
 
 - Sync to upstream Luau 0.555 (in particular, this has improvements to class definitions)
