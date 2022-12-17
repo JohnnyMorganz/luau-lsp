@@ -3505,6 +3505,7 @@ declare class RaycastParams
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
 	IgnoreWater: boolean
+	RespectCanCollide: boolean
 end
 
 declare class TweenInfo
