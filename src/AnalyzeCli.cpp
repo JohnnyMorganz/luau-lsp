@@ -65,7 +65,7 @@ static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::f
     return false;
 }
 
-static void reportError(
+static bool reportError(
     const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
     WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
@@ -74,15 +74,15 @@ static void reportError(
     auto path = fileResolver->resolveToRealPath(error.moduleName);
 
     if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns))
-    {
-        return;
-    }
+        return false;
 
     if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         report(format, humanReadableName.c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
     else
         report(format, humanReadableName.c_str(), error.location, "TypeError",
             Luau::toString(error, Luau::TypeErrorToStringOptions{frontend.fileResolver}).c_str());
+
+    return true;
 }
 
 static void reportWarning(ReportFormat format, const char* name, const Luau::LintWarning& warning)
@@ -103,8 +103,9 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
         return false;
     }
 
+    unsigned int reportedErrors = 0;
     for (auto& error : cr.errors)
-        reportError(frontend, format, error, ignoreGlobPatterns);
+        reportedErrors += reportError(frontend, format, error, ignoreGlobPatterns);
 
     Luau::LintResult lr = frontend.lint(name);
 
@@ -126,7 +127,7 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
         printf("%s", annotated.c_str());
     }
 
-    return cr.errors.empty() && lr.errors.empty();
+    return reportedErrors == 0 && lr.errors.empty();
 }
 
 int startAnalyze(int argc, char** argv)
