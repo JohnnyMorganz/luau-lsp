@@ -168,7 +168,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             // fall back to .lua if a module with .luau doesn't exist
             filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".lua"), ec);
         }
-        
+
         // URI-ify the file path so that its normalised (in particular, the drive letter)
         return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
     }
@@ -218,7 +218,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             {
                 return Luau::ModuleInfo{"game/" + std::string(index->value.data, index->value.size)};
             }
-            else if (func == "WaitForChild" || func == "FindFirstChild")
+            else if (func == "WaitForChild" || (func == "FindFirstChild" && call->args.size == 1)) // Don't allow recursive FFC
             {
                 if (context)
                     return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
