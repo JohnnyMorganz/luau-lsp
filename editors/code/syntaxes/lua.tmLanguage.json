@@ -334,6 +334,19 @@
           "begin": "\\[(=*)\\[",
           "end": "\\]\\1\\]",
           "name": "string.other.multiline.lua"
+        },
+        {
+          "begin": "`",
+          "end": "`",
+          "patterns": [
+            {
+              "include": "#interpolated-string-expression"
+            },
+            {
+              "include": "#string_escape"
+            }
+          ],
+          "name": "string.interpolated.lua"
         }
       ]
     },
@@ -341,7 +354,7 @@
       "patterns": [
         {
           "comment": "As it turns out, because backslashes have to be escaped in both JSON and Regex, a single backslash is represented as 4 here",
-          "match": "\\\\[abfnrtvz'\"\\\\]",
+          "match": "\\\\[abfnrtvz'\"`{\\\\]",
           "name": "constant.character.escape.lua"
         },
         {
@@ -357,6 +370,45 @@
           "name": "constant.character.escape.lua"
         }
       ]
+    },
+    "interpolated-string-expression": {
+      "begin": "\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.interpolated-string-expression.begin.lua"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.interpolated-string-expression.end.lua"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#keywords"
+        },
+        {
+          "include": "#standard_library"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#language_constants"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#identifier"
+        }
+      ],
+      "name": "meta.template.expression.lua",
+      "contentName": "meta.embedded.line.lua"
     },
     "identifier": {
       "patterns": [

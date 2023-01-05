@@ -55,7 +55,12 @@
       {
         "language": "lua",
         "scopeName": "source.lua",
-        "path": "./syntaxes/lua.tmLanguage.json"
+        "path": "./syntaxes/lua.tmLanguage.json",
+        "tokenTypes": {
+          "meta.template.expression": "other",
+          "meta.template.expression string": "string",
+          "meta.template.expression comment": "comment"
+        }
       }
     ],
     "semanticTokenScopes": [
