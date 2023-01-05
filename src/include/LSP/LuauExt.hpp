@@ -44,7 +44,7 @@ struct ToStringNamedFunctionOpts
     bool multiline = false;
 };
 
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,
     std::optional<Luau::ScopePtr> scope = std::nullopt, ToStringNamedFunctionOpts opts = {});
 
 std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options = {});

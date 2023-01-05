@@ -150,7 +150,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     {
         typeString = codeBlock("lua", "type " + typeName + " = " + typeString);
     }
-    else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+    else if (auto ftv = Luau::get<Luau::FunctionType>(*type))
     {
         types::NameOrExpr name = "";
         if (auto localName = exprOrLocal.getName())
@@ -191,7 +191,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString += "\n----------\n";
         typeString += printDocumentation(client->documentation, *documentationSymbol);
     }
-    else if (auto ftv = Luau::get<Luau::FunctionTypeVar>(*type))
+    else if (auto ftv = Luau::get<Luau::FunctionType>(*type))
     {
         if (ftv->definition && ftv->definition->definitionModuleName)
         {

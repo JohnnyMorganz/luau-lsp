@@ -40,21 +40,21 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
 
     auto followedTy = Luau::follow(*ty);
 
-    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
+    if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
     {
         if (ftv->hasSelf)
             return lsp::SemanticTokenTypes::Method;
         else
             return lsp::SemanticTokenTypes::Function;
     }
-    else if (Luau::get<Luau::IntersectionTypeVar>(followedTy))
+    else if (Luau::get<Luau::IntersectionType>(followedTy))
     {
         if (Luau::isOverloadedFunction(followedTy))
         {
             return lsp::SemanticTokenTypes::Function;
         }
     }
-    else if (auto ttv = Luau::get<Luau::TableTypeVar>(followedTy))
+    else if (auto ttv = Luau::get<Luau::TableType>(followedTy))
     {
         if (ttv->name && ttv->name == "RBXScriptSignal")
         {

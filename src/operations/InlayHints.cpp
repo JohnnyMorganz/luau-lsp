@@ -71,7 +71,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     // since we can already infer stuff from the assigned function
                     if (local->values.size > i)
                     {
-                        if (Luau::get<Luau::FunctionTypeVar>(followedTy) && local->values.data[i]->is<Luau::AstExprFunction>())
+                        if (Luau::get<Luau::FunctionType>(followedTy) && local->values.data[i]->is<Luau::AstExprFunction>())
                             continue;
                     }
 
@@ -149,7 +149,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
             return false;
 
         auto followedTy = Luau::follow(*ty);
-        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
+        if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
         {
             // Parameter types hint
             if (config.inlayHints.parameterTypes)
@@ -211,7 +211,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
             return false;
 
         auto followedTy = Luau::follow(*ty);
-        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedTy))
+        if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
         {
             if (ftv->argNames.size() == 0)
                 return true;

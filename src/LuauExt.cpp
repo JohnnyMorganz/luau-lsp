@@ -37,18 +37,18 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
     {
         return *typeName;
     }
-    else if (auto mtv = Luau::get<Luau::MetatableTypeVar>(ty))
+    else if (auto mtv = Luau::get<Luau::MetatableType>(ty))
     {
         if (auto mtvName = Luau::getName(mtv->metatable))
             return *mtvName;
     }
-    else if (auto parentClass = Luau::get<Luau::ClassTypeVar>(ty))
+    else if (auto parentClass = Luau::get<Luau::ClassType>(ty))
     {
         return parentClass->name;
     }
-    // if (auto parentUnion = Luau::get<UnionTypeVar>(ty))
+    // if (auto parentUnion = Luau::get<UnionType>(ty))
     // {
-    //     return returnFirstNonnullOptionOfType<ClassTypeVar>(parentUnion);
+    //     return returnFirstNonnullOptionOfType<ClassType>(parentUnion);
     // }
     return std::nullopt;
 }
@@ -62,37 +62,37 @@ Luau::TypeId getSourcemapType(
     if (node->ty)
         return node->ty;
 
-    Luau::LazyTypeVar ltv;
+    Luau::LazyType ltv;
     ltv.thunk = [&typeChecker, &arena, globalScope, node]()
     {
         // Handle if the node is no longer valid
         if (!node)
-            return typeChecker.singletonTypes->anyType;
+            return typeChecker.builtinTypes->anyType;
 
         auto instanceTy = globalScope->lookupType("Instance");
         if (!instanceTy)
-            return typeChecker.singletonTypes->anyType;
+            return typeChecker.builtinTypes->anyType;
 
         // Look up the base class instance
         Luau::TypeId baseTypeId;
         if (auto foundId = getTypeIdForClass(globalScope, node->className))
             baseTypeId = *foundId;
         else
-            return typeChecker.singletonTypes->anyType;
+            return typeChecker.builtinTypes->anyType;
 
         // Point the metatable to the metatable of "Instance" so that we allow equality
         std::optional<Luau::TypeId> instanceMetaIdentity;
-        if (auto* ctv = Luau::get<Luau::ClassTypeVar>(instanceTy->type))
+        if (auto* ctv = Luau::get<Luau::ClassType>(instanceTy->type))
             instanceMetaIdentity = ctv->metatable;
 
-        // Create the ClassTypeVar representing the instance
+        // Create the ClassType representing the instance
         std::string typeName = getTypeName(baseTypeId).value_or(node->name);
-        Luau::ClassTypeVar ctv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
+        Luau::ClassType ctv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
         auto typeId = arena.addType(std::move(ctv));
 
         // Attach Parent and Children info
         // Get the mutable version of the type var
-        if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(typeId))
+        if (Luau::ClassType* ctv = Luau::getMutable<Luau::ClassType>(typeId))
         {
             if (auto parentNode = node->parent.lock())
                 ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(typeChecker, arena, globalScope, parentNode));
@@ -104,8 +104,7 @@ Luau::TypeId getSourcemapType(
             // Add FindFirstAncestor and FindFirstChild
             if (auto instanceType = getTypeIdForClass(globalScope, "Instance"))
             {
-                auto findFirstAncestorFunction =
-                    Luau::makeFunction(arena, typeId, {typeChecker.singletonTypes->stringType}, {"name"}, {*instanceType});
+                auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {typeChecker.builtinTypes->stringType}, {"name"}, {*instanceType});
 
                 Luau::attachMagicFunction(findFirstAncestorFunction,
                     [&arena, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
@@ -128,7 +127,7 @@ Luau::TypeId getSourcemapType(
                     });
                 ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
 
-                auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {typeChecker.singletonTypes->stringType}, {"name"}, {*instanceType});
+                auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {typeChecker.builtinTypes->stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstChildFunction,
                     [node, &arena](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                         Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
@@ -259,7 +258,7 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
 
 
     auto instanceType = typeChecker.checkExpr(scope, *index->expr);
-    auto ctv = Luau::get<Luau::ClassTypeVar>(Luau::follow(instanceType.type));
+    auto ctv = Luau::get<Luau::ClassType>(Luau::follow(instanceType.type));
     if (!ctv)
         return std::nullopt;
 
@@ -275,7 +274,7 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
 
 void addChildrenToCTV(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
-    if (Luau::ClassTypeVar* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
+    if (Luau::ClassType* ctv = Luau::getMutable<Luau::ClassType>(ty))
     {
         // Clear out all the old registered children
         for (auto it = ctv->props.begin(); it != ctv->props.end();)
@@ -332,7 +331,7 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& aren
         // TODO: Player.Character should contain StarterCharacter instances
         if (auto playerType = typeChecker.globalScope->lookupType("Player"))
         {
-            if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(playerType->type))
+            if (auto* ctv = Luau::getMutable<Luau::ClassType>(playerType->type))
             {
                 // Player.Backpack should be defined
                 if (auto backpackType = typeChecker.globalScope->lookupType("Backpack"))
@@ -380,9 +379,9 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& aren
         // TODO: we hope to remove these in future!
         if (!expressiveTypes)
         {
-            scope->bindings[Luau::AstName("script")] = Luau::Binding{typeChecker.singletonTypes->anyType};
-            scope->bindings[Luau::AstName("workspace")] = Luau::Binding{typeChecker.singletonTypes->anyType};
-            scope->bindings[Luau::AstName("game")] = Luau::Binding{typeChecker.singletonTypes->anyType};
+            scope->bindings[Luau::AstName("script")] = Luau::Binding{typeChecker.builtinTypes->anyType};
+            scope->bindings[Luau::AstName("workspace")] = Luau::Binding{typeChecker.builtinTypes->anyType};
+            scope->bindings[Luau::AstName("game")] = Luau::Binding{typeChecker.builtinTypes->anyType};
         }
 
         if (auto node =
@@ -405,7 +404,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
     // Extend Instance types
     if (auto instanceType = typeChecker.globalScope->lookupType("Instance"))
     {
-        if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(instanceType->type))
+        if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
         {
             Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
@@ -431,7 +430,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             // We assume that all subclasses of instance don't have any metamethaods
             for (auto& [_, ty] : typeChecker.globalScope->exportedTypeBindings)
             {
-                if (auto* c = Luau::getMutable<Luau::ClassTypeVar>(ty.type))
+                if (auto* c = Luau::getMutable<Luau::ClassType>(ty.type))
                 {
                     // Check if the ctv is a subclass of instance
                     if (Luau::isSubclass(c, ctv))
@@ -449,7 +448,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
     {
         auto erase = false;
         auto ty = it->second.type;
-        if (auto* ctv = Luau::getMutable<Luau::ClassTypeVar>(ty))
+        if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
         {
             if (Luau::startsWith(ctv->name, "Enum"))
             {
@@ -519,7 +518,7 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTypeVar* ftv, const NameOrExpr nameOrFuncExpr,
+std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,
     std::optional<Luau::ScopePtr> scope, ToStringNamedFunctionOpts stringOpts)
 {
     Luau::ToStringOptions opts;
@@ -563,7 +562,7 @@ std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionTy
         return "function" + functionString;
     }
 
-    // See if the name belongs to a ClassTypeVar
+    // See if the name belongs to a ClassType
     Luau::TypeId* parentIt = nullptr;
     std::string methodName;
     std::string baseName;
@@ -667,32 +666,31 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 
 std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
-    if (auto ctv = Luau::get<Luau::ClassTypeVar>(parentType))
+    if (auto ctv = Luau::get<Luau::ClassType>(parentType))
     {
         if (auto prop = Luau::lookupClassProp(ctv, name))
             return *prop;
     }
-    else if (auto tbl = Luau::get<Luau::TableTypeVar>(parentType))
+    else if (auto tbl = Luau::get<Luau::TableType>(parentType))
     {
         if (tbl->props.find(name) != tbl->props.end())
         {
             return tbl->props.at(name);
         }
     }
-    else if (auto mt = Luau::get<Luau::MetatableTypeVar>(parentType))
+    else if (auto mt = Luau::get<Luau::MetatableType>(parentType))
     {
-        if (auto mtable = Luau::get<Luau::TableTypeVar>(Luau::follow(mt->metatable)))
+        if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
             if (indexIt != mtable->props.end())
             {
                 Luau::TypeId followed = Luau::follow(indexIt->second.type);
-                if ((Luau::get<Luau::TableTypeVar>(followed) || Luau::get<Luau::MetatableTypeVar>(followed)) &&
-                    followed != parentType) // ensure acyclic
+                if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
                     return lookupProp(followed, name);
                 }
-                else if (Luau::get<Luau::FunctionTypeVar>(followed))
+                else if (Luau::get<Luau::FunctionType>(followed))
                 {
                     // TODO: can we handle an index function...?
                     return std::nullopt;
@@ -700,7 +698,7 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             }
         }
 
-        if (auto tbl = Luau::get<Luau::TableTypeVar>(Luau::follow(mt->table)))
+        if (auto tbl = Luau::get<Luau::TableType>(Luau::follow(mt->table)))
         {
             if (tbl->props.find(name) != tbl->props.end())
             {
@@ -708,14 +706,14 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             }
         }
     }
-    // else if (auto i = get<Luau::IntersectionTypeVar>(parentType))
+    // else if (auto i = get<Luau::IntersectionType>(parentType))
     // {
     //     for (Luau::TypeId ty : i->parts)
     //     {
     //         // TODO: find the corresponding ty
     //     }
     // }
-    // else if (auto u = get<Luau::UnionTypeVar>(parentType))
+    // else if (auto u = get<Luau::UnionType>(parentType))
     // {
     //     // Find the corresponding ty
     // }
@@ -996,7 +994,7 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
 {
     type = follow(type);
 
-    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(type))
+    if (auto ftv = Luau::get<Luau::FunctionType>(type))
     {
         if (ftv->definition)
             return ftv->definition->originalNameLocation;

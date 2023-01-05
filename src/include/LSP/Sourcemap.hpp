@@ -2,7 +2,7 @@
 #include <optional>
 #include <filesystem>
 #include <Luau/FileResolver.h>
-#include "Luau/TypeVar.h"
+#include "Luau/Type.h"
 #include "nlohmann/json.hpp"
 #include "LSP/PluginDataModel.hpp"
 using json = nlohmann::json;

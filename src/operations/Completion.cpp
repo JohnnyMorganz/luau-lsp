@@ -182,22 +182,22 @@ static std::vector<std::string> getServiceNames(const Luau::ScopePtr scope)
 
     if (auto dataModelType = scope->lookupType("ServiceProvider"))
     {
-        if (auto ctv = Luau::get<Luau::ClassTypeVar>(dataModelType->type))
+        if (auto ctv = Luau::get<Luau::ClassType>(dataModelType->type))
         {
             if (auto getService = Luau::lookupClassProp(ctv, "GetService"))
             {
-                if (auto itv = Luau::get<Luau::IntersectionTypeVar>(getService->type))
+                if (auto itv = Luau::get<Luau::IntersectionType>(getService->type))
                 {
                     for (auto part : itv->parts)
                     {
-                        if (auto ftv = Luau::get<Luau::FunctionTypeVar>(part))
+                        if (auto ftv = Luau::get<Luau::FunctionType>(part))
                         {
                             auto it = Luau::begin(ftv->argTypes);
                             auto end = Luau::end(ftv->argTypes);
 
                             if (it != end && ++it != end)
                             {
-                                if (auto stv = Luau::get<Luau::SingletonTypeVar>(*it))
+                                if (auto stv = Luau::get<Luau::SingletonType>(*it))
                                 {
                                     if (auto ss = Luau::get<Luau::StringSingleton>(stv))
                                     {
@@ -312,24 +312,24 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](std::string tag, std::optional<const Luau::ClassTypeVar*> ctx) -> std::optional<Luau::AutocompleteEntryMap>
+        [&](std::string tag, std::optional<const Luau::ClassType*> ctx) -> std::optional<Luau::AutocompleteEntryMap>
         {
             if (tag == "ClassNames")
             {
                 if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))
                 {
-                    if (auto* ctv = Luau::get<Luau::ClassTypeVar>(instanceType->type))
+                    if (auto* ctv = Luau::get<Luau::ClassType>(instanceType->type))
                     {
                         Luau::AutocompleteEntryMap result;
                         for (auto& [_, ty] : frontend.typeChecker.globalScope->exportedTypeBindings)
                         {
-                            if (auto* c = Luau::get<Luau::ClassTypeVar>(ty.type))
+                            if (auto* c = Luau::get<Luau::ClassType>(ty.type))
                             {
                                 // Check if the ctv is a subclass of instance
                                 if (Luau::isSubclass(c, ctv))
 
                                     result.insert_or_assign(
-                                        c->name, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.singletonTypes->stringType,
+                                        c->name, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType,
                                                      false, false, Luau::TypeCorrectKind::Correct});
                             }
                         }
@@ -349,10 +349,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                         for (auto& [propName, _] : ctv->props)
                         {
                             result.insert_or_assign(propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
-                                                                  frontend.singletonTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                                                                  frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
                         }
                         if (ctv->parent)
-                            ctv = Luau::get<Luau::ClassTypeVar>(*ctv->parent);
+                            ctv = Luau::get<Luau::ClassType>(*ctv->parent);
                         else
                             break;
                     }
@@ -367,8 +367,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 Luau::AutocompleteEntryMap result;
                 for (auto& [enumName, _] : it->second)
-                    result.insert_or_assign(enumName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
-                                                          frontend.singletonTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                    result.insert_or_assign(enumName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType,
+                                                          false, false, Luau::TypeCorrectKind::Correct});
 
                 return result;
             }
@@ -489,7 +489,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.kind = lsp::CompletionItemKind::Function;
 
             // Try to infer more type info about the entry to provide better suggestion info
-            if (auto ftv = Luau::get<Luau::FunctionTypeVar>(id))
+            if (auto ftv = Luau::get<Luau::FunctionType>(id))
             {
                 item.kind = lsp::CompletionItemKind::Function;
 
@@ -569,7 +569,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                         printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation))};
                 }
             }
-            else if (auto ttv = Luau::get<Luau::TableTypeVar>(id))
+            else if (auto ttv = Luau::get<Luau::TableType>(id))
             {
                 // Special case the RBXScriptSignal type as a connection
                 if (ttv->name && ttv->name.value() == "RBXScriptSignal")
@@ -577,7 +577,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     item.kind = lsp::CompletionItemKind::Event;
                 }
             }
-            else if (Luau::get<Luau::ClassTypeVar>(id))
+            else if (Luau::get<Luau::ClassType>(id))
             {
                 item.kind = lsp::CompletionItemKind::Class;
             }

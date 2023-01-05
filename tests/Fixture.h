@@ -11,7 +11,7 @@
 #include "Luau/Scope.h"
 #include "Luau/ToString.h"
 #include "Luau/TypeInfer.h"
-#include "Luau/TypeVar.h"
+#include "Luau/Type.h"
 
 #include "LSP/Workspace.hpp"
 

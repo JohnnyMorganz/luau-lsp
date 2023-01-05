@@ -64,7 +64,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     std::vector<lsp::SignatureInformation> signatures;
 
-    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionTypeVar* ftv, bool isOverloaded = false)
+    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
     {
         // Create the whole label
         std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope, opts);
@@ -171,13 +171,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     };
 
     // Handle single function
-    if (auto ftv = Luau::get<Luau::FunctionTypeVar>(followedId))
+    if (auto ftv = Luau::get<Luau::FunctionType>(followedId))
         addSignature(followedId, ftv);
 
     // Handle overloaded function
-    if (auto intersect = Luau::get<Luau::IntersectionTypeVar>(followedId))
+    if (auto intersect = Luau::get<Luau::IntersectionType>(followedId))
         for (Luau::TypeId part : intersect->parts)
-            if (auto candidateFunctionType = Luau::get<Luau::FunctionTypeVar>(part))
+            if (auto candidateFunctionType = Luau::get<Luau::FunctionType>(part))
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
     return lsp::SignatureHelp{signatures, 0, activeParameter};

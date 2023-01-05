@@ -17,7 +17,7 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_function")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("add5");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -41,7 +41,7 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_function_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("add5");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -61,7 +61,7 @@ TEST_CASE_FIXTURE(Fixture, "print_comments")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("add5");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -86,7 +86,7 @@ TEST_CASE_FIXTURE(Fixture, "print_comments_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("add5");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -112,7 +112,7 @@ TEST_CASE_FIXTURE(Fixture, "print_multiline_comment")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("add5");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -144,7 +144,7 @@ TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("foo");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -174,7 +174,7 @@ TEST_CASE_FIXTURE(Fixture, "nested_functions")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("bar");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -199,7 +199,7 @@ TEST_CASE_FIXTURE(Fixture, "print_moonwave_documentation")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("foo");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -230,7 +230,7 @@ TEST_CASE_FIXTURE(Fixture, "print_throws_info")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("foo");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 
@@ -263,7 +263,7 @@ TEST_CASE_FIXTURE(Fixture, "ignored_tags")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("foo");
-    auto ftv = Luau::get<Luau::FunctionTypeVar>(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
 

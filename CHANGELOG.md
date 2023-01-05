@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added syntax highlighting support for interpolated strings
 
+### Changed
+
+- Sync to upstream Luau 0.557
+
 ### Fixed
 
 - Luau analyze now exits with code 0 if there are no reported errors (all errors are ignored)
