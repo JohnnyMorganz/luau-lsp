@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.557
+- All Luau FFlags are no longer enabled by default. This can be re-enabled by configuring `luau-lsp.fflags.enableByDefault`. It is recommended to keep `luau-lsp.fflags.sync` enabled so that FFlags sync with upstream Luau
 
 ### Fixed
 
