@@ -36,35 +36,35 @@ static RGB hsvToRgb(double h, double s, double v)
     switch (i)
     {
     case 0:
-    {
-        r, g, b = v, t, p;
+        r = v;
+        g = t;
+        b = p;
         break;
-    }
     case 1:
-    {
-        r, g, b = q, v, p;
+        r = q;
+        g = v;
+        b = p;
         break;
-    }
     case 2:
-    {
-        r, g, b = p, v, t;
+        r = p;
+        g = v;
+        b = t;
         break;
-    }
     case 3:
-    {
-        r, g, b = p, q, v;
+        r = p;
+        g = q;
+        b = v;
         break;
-    }
     case 4:
-    {
-        r, g, b = t, p, v;
+        r = t;
+        g = p;
+        b = v;
         break;
-    }
     case 5:
-    {
-        r, g, b = v, p, q;
+        r = v;
+        g = p;
+        b = q;
         break;
-    }
     }
 
     return {(unsigned char)(r * 255), (unsigned char)(g * 255), (unsigned char)(b * 255)};
@@ -160,7 +160,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                     color[1] = data.g / 255.0;
                                     color[2] = data.b / 255.0;
                                 }
-                                catch (std::exception _)
+                                catch (const std::exception& _)
                                 {
                                     return true; // Invalid hex string
                                 }
