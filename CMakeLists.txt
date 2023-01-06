@@ -25,6 +25,7 @@ target_sources(Luau.LanguageServer PRIVATE
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
     src/operations/DocumentLink.cpp
+    src/operations/ColorProvider.cpp
     src/operations/GotoDefinition.cpp
     src/operations/Hover.cpp
     src/operations/SignatureHelp.cpp
