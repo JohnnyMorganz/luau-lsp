@@ -81,6 +81,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.referencesProvider = true;
     // Document Symbol Provider
     capabilities.documentSymbolProvider = true;
+    // Color Provider
+    capabilities.colorProvider = true;
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Rename Provider
