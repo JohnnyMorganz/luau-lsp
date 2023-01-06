@@ -168,6 +168,14 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     {
         response = inlayHint(REQUIRED_PARAMS(params, "textDocument/inlayHint"));
     }
+    else if (method == "textDocument/documentColor")
+    {
+        response = documentColor(REQUIRED_PARAMS(params, "textDocument/documentColor"));
+    }
+    else if (method == "textDocument/colorPresentation")
+    {
+        response = colorPresentation(REQUIRED_PARAMS(params, "textDocument/colorPresentation"));
+    }
     else if (method == "textDocument/diagnostic")
     {
         response = documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
