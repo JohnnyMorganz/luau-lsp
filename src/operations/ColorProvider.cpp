@@ -160,7 +160,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                     color[1] = data.g / 255.0;
                                     color[2] = data.b / 255.0;
                                 }
-                                catch (const std::exception& _)
+                                catch (const std::exception&)
                                 {
                                     return true; // Invalid hex string
                                 }
