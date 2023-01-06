@@ -210,8 +210,10 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
     }
     else if (Luau::AstExprCall* call = node->as<Luau::AstExprCall>(); call && call->self && call->args.size >= 1 && context)
     {
+        std::cerr << "A\n";
         if (Luau::AstExprConstantString* index = call->args.data[0]->as<Luau::AstExprConstantString>())
         {
+            std::cerr << "B\n";
             Luau::AstName func = call->func->as<Luau::AstExprIndexName>()->index;
 
             if (func == "GetService" && context->name == "game")
@@ -220,6 +222,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             }
             else if (func == "WaitForChild" || (func == "FindFirstChild" && call->args.size == 1)) // Don't allow recursive FFC
             {
+                std::cerr << "C\n";
                 if (context)
                     return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
             }
