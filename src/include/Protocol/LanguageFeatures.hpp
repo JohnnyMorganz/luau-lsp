@@ -148,4 +148,50 @@ NLOHMANN_DEFINE_OPTIONAL(InlayHint, position, label, kind, textEdits, tooltip, p
 
 using InlayHintResult = std::vector<InlayHint>;
 
+struct DocumentColorParams
+{
+    /**
+     * The text document.
+     */
+    TextDocumentIdentifier textDocument;
+};
+
+struct Color
+{
+    /**
+     * The red component of this color in the range [0-1].
+     */
+    double red = 0.0;
+
+    /**
+     * The green component of this color in the range [0-1].
+     */
+    double green = 0.0;
+
+    /**
+     * The blue component of this color in the range [0-1].
+     */
+    double blue = 0.0;
+
+    /**
+     * The alpha component of this color in the range [0-1].
+     */
+    double alpha = 0.0;
+};
+
+struct ColorInformation
+{
+    /**
+     * The range in the document where this color appears.
+     */
+    Range range;
+
+    /**
+     * The actual color value for this color range.
+     */
+    Color color;
+};
+
+using DocumentColorResult = std::vector<ColorInformation>;
+
 } // namespace lsp
