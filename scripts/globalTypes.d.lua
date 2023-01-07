@@ -3700,11 +3700,11 @@ declare class Region3int16
 end
 
 
-export type RBXScriptSignal<T... = ...any> = {
-    Wait: (self: RBXScriptSignal<T...>) -> T...,
-    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+export type RBXScriptSignal<CB = (...any) -> (), T... = ...any> = {
+    Wait: (self: RBXScriptSignal<CB, T...>) -> T...,
+    Connect: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
+    ConnectParallel: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
+    Once: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
 }
 
 type HttpRequestOptions = {
@@ -4344,15 +4344,15 @@ type VoiceChatService = any
 type VoiceSource = any
 type WeldConstraint = any
 declare class Instance
-	AncestryChanged: RBXScriptSignal<Instance, Instance?>
+	AncestryChanged: RBXScriptSignal<(child: Instance, parent: Instance?) -> (), Instance, Instance?>
 	Archivable: boolean
-	AttributeChanged: RBXScriptSignal<string>
-	Changed: RBXScriptSignal<string>
-	ChildAdded: RBXScriptSignal<Instance>
-	ChildRemoved: RBXScriptSignal<Instance>
+	AttributeChanged: RBXScriptSignal<(attribute: string) -> (), string>
+	Changed: RBXScriptSignal<(property: string) -> (), string>
+	ChildAdded: RBXScriptSignal<(child: Instance) -> (), Instance>
+	ChildRemoved: RBXScriptSignal<(child: Instance) -> (), Instance>
 	ClassName: string
-	DescendantAdded: RBXScriptSignal<Instance>
-	DescendantRemoving: RBXScriptSignal<Instance>
+	DescendantAdded: RBXScriptSignal<(descendant: Instance) -> (), Instance>
+	DescendantRemoving: RBXScriptSignal<(descendant: Instance) -> (), Instance>
 	Destroying: RBXScriptSignal<>
 	Name: string
 	Parent: Instance?
@@ -4481,7 +4481,7 @@ declare class AnimationTrack extends Instance
 	DidLoop: RBXScriptSignal<>
 	Ended: RBXScriptSignal<>
 	IsPlaying: boolean
-	KeyframeReached: RBXScriptSignal<string>
+	KeyframeReached: RBXScriptSignal<(keyframeName: string) -> (), string>
 	Length: number
 	Looped: boolean
 	Priority: EnumAnimationPriority
@@ -4499,9 +4499,9 @@ declare class AnimationTrack extends Instance
 end
 
 declare class Animator extends Instance
-	AnimationPlayed: RBXScriptSignal<AnimationTrack>
-	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
-	AnimationStreamTrackPlayed: RBXScriptSignal<AnimationStreamTrack>
+	AnimationPlayed: RBXScriptSignal<(animationTrack: AnimationTrack) -> (), AnimationTrack>
+	AnimationPlayedCoreScript: RBXScriptSignal<(animationTrack: AnimationTrack) -> (), AnimationTrack>
+	AnimationStreamTrackPlayed: RBXScriptSignal<(animationTrack: AnimationStreamTrack) -> (), AnimationStreamTrack>
 	PreferLodEnabled: boolean
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { AnimationTrack }
@@ -4534,8 +4534,8 @@ declare class AssetImportService extends Instance
 end
 
 declare class AssetImportSession extends Instance
-	UploadComplete: RBXScriptSignal<boolean, { [any]: any }>
-	UploadProgress: RBXScriptSignal<number>
+	UploadComplete: RBXScriptSignal<(succeeded: boolean, errorMap: { [any]: any }) -> (), boolean, { [any]: any }>
+	UploadProgress: RBXScriptSignal<(progressRatio: number) -> (), number>
 	function Cancel(self): nil
 	function GetCurrentStatusTable(self): { [any]: any }
 	function GetFilename(self): string
@@ -4546,10 +4546,10 @@ declare class AssetImportSession extends Instance
 end
 
 declare class AssetManagerService extends Instance
-	AssetImportedSignal: RBXScriptSignal<EnumAssetType, string, number>
+	AssetImportedSignal: RBXScriptSignal<(assetType: EnumAssetType, assetId: string, assetName: number) -> (), EnumAssetType, string, number>
 	ImportSessionFinished: RBXScriptSignal<>
 	ImportSessionStarted: RBXScriptSignal<>
-	MayBeLinkedSourceModified: RBXScriptSignal<string>
+	MayBeLinkedSourceModified: RBXScriptSignal<(aliasName: string) -> (), string>
 	function AddNewPlace(self): number
 	function CreateAlias(self, assetType: number, assetId: number, aliasName: string): nil
 	function DeleteAlias(self, aliasName: string): nil
@@ -4630,20 +4630,20 @@ end
 
 declare class AvatarEditorService extends Instance
 	OpenAllowInventoryReadAccess: RBXScriptSignal<>
-	OpenPromptCreateOufit: RBXScriptSignal<HumanoidDescription, EnumHumanoidRigType>
-	OpenPromptDeleteOutfit: RBXScriptSignal<number>
-	OpenPromptRenameOutfit: RBXScriptSignal<number>
-	OpenPromptSaveAvatar: RBXScriptSignal<HumanoidDescription, EnumHumanoidRigType>
-	OpenPromptSetFavorite: RBXScriptSignal<number, EnumAvatarItemType, boolean>
-	OpenPromptUpdateOutfit: RBXScriptSignal<number, HumanoidDescription, EnumHumanoidRigType>
-	PromptAllowInventoryReadAccessCompleted: RBXScriptSignal<EnumAvatarPromptResult>
-	PromptCreateOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult, any>
-	PromptDeleteOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
-	PromptRenameOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
-	PromptSaveAvatarCompleted: RBXScriptSignal<EnumAvatarPromptResult, HumanoidDescription>
-	PromptSaveAvatarThumbnailCustomizationCompleted: RBXScriptSignal<EnumAvatarPromptResult, any>
-	PromptSetFavoriteCompleted: RBXScriptSignal<EnumAvatarPromptResult>
-	PromptUpdateOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
+	OpenPromptCreateOufit: RBXScriptSignal<(humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType) -> (), HumanoidDescription, EnumHumanoidRigType>
+	OpenPromptDeleteOutfit: RBXScriptSignal<(outfitId: number) -> (), number>
+	OpenPromptRenameOutfit: RBXScriptSignal<(outfitId: number) -> (), number>
+	OpenPromptSaveAvatar: RBXScriptSignal<(humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType) -> (), HumanoidDescription, EnumHumanoidRigType>
+	OpenPromptSetFavorite: RBXScriptSignal<(itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean) -> (), number, EnumAvatarItemType, boolean>
+	OpenPromptUpdateOutfit: RBXScriptSignal<(outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType) -> (), number, HumanoidDescription, EnumHumanoidRigType>
+	PromptAllowInventoryReadAccessCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult) -> (), EnumAvatarPromptResult>
+	PromptCreateOutfitCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult, failureType: any) -> (), EnumAvatarPromptResult, any>
+	PromptDeleteOutfitCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult) -> (), EnumAvatarPromptResult>
+	PromptRenameOutfitCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult) -> (), EnumAvatarPromptResult>
+	PromptSaveAvatarCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult, humanoidDescription: HumanoidDescription) -> (), EnumAvatarPromptResult, HumanoidDescription>
+	PromptSaveAvatarThumbnailCustomizationCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult, failureType: any) -> (), EnumAvatarPromptResult, any>
+	PromptSetFavoriteCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult) -> (), EnumAvatarPromptResult>
+	PromptUpdateOutfitCompleted: RBXScriptSignal<(result: EnumAvatarPromptResult) -> (), EnumAvatarPromptResult>
 	function CheckApplyDefaultClothing(self, humanoidDescription: HumanoidDescription): HumanoidDescription
 	function ConformToAvatarRules(self, humanoidDescription: HumanoidDescription): HumanoidDescription
 	function GetAccessoryType(self, avatarAssetType: EnumAvatarAssetType): EnumAccessoryType
@@ -4713,7 +4713,7 @@ declare class Tool extends BackpackItem
 	CanBeDropped: boolean
 	Deactivated: RBXScriptSignal<>
 	Enabled: boolean
-	Equipped: RBXScriptSignal<Mouse>
+	Equipped: RBXScriptSignal<(mouse: Mouse) -> (), Mouse>
 	Grip: CFrame
 	GripForward: Vector3
 	GripPos: Vector3
@@ -4730,8 +4730,8 @@ end
 
 
 declare class BadgeService extends Instance
-	BadgeAwarded: RBXScriptSignal<string, number, number>
-	OnBadgeAwarded: RBXScriptSignal<number, number, number>
+	BadgeAwarded: RBXScriptSignal<(message: string, userId: number, badgeId: number) -> (), string, number, number>
+	OnBadgeAwarded: RBXScriptSignal<(userId: number, creatorId: number, badgeId: number) -> (), number, number, number>
 	function AwardBadge(self, userId: number, badgeId: number): boolean
 	function GetBadgeInfoAsync(self, badgeId: number): { [any]: any }
 	function UserHasBadgeAsync(self, userId: number, badgeId: number): boolean
@@ -4757,7 +4757,7 @@ declare class PlayerGui extends BasePlayerGui
 end
 
 declare class StarterGui extends BasePlayerGui
-	CoreGuiChangedSignal: RBXScriptSignal<EnumCoreGuiType, boolean>
+	CoreGuiChangedSignal: RBXScriptSignal<(coreGuiType: EnumCoreGuiType, enabled: boolean) -> (), EnumCoreGuiType, boolean>
 	ProcessUserInput: boolean
 	ScreenOrientation: EnumScreenOrientation
 	ShowDevelopmentGui: boolean
@@ -4827,7 +4827,7 @@ declare class Beam extends Instance
 end
 
 declare class BindableEvent extends Instance
-	Event: RBXScriptSignal<...any>
+	Event: RBXScriptSignal<(...any) -> (), ...any>
 	function Fire(self, ...: any): ()
 end
 
@@ -4896,8 +4896,8 @@ end
 declare class BrowserService extends Instance
 	AuthCookieCopiedToEngine: RBXScriptSignal<>
 	BrowserWindowClosed: RBXScriptSignal<>
-	BrowserWindowWillNavigate: RBXScriptSignal<string>
-	JavaScriptCallback: RBXScriptSignal<string>
+	BrowserWindowWillNavigate: RBXScriptSignal<(url: string) -> (), string>
+	JavaScriptCallback: RBXScriptSignal<(content: string) -> (), string>
 	function CloseBrowserWindow(self): nil
 	function CopyAuthCookieFromBrowserToEngine(self): nil
 	function EmitHybridEvent(self, moduleName: string, eventName: string, params: string): nil
@@ -4910,8 +4910,8 @@ declare class BrowserService extends Instance
 end
 
 declare class BulkImportService extends Instance
-	AssetImported: RBXScriptSignal<EnumAssetType, string, number>
-	BulkImportFinished: RBXScriptSignal<number>
+	AssetImported: RBXScriptSignal<(assetType: EnumAssetType, name: string, id: number) -> (), EnumAssetType, string, number>
+	BulkImportFinished: RBXScriptSignal<(state: number) -> (), number>
 	BulkImportStarted: RBXScriptSignal<>
 	function LaunchBulkImport(self, assetTypeToImport: number): nil
 	function ShowBulkImportView(self): nil
@@ -4943,7 +4943,7 @@ declare class Camera extends Instance
 	DiagonalFieldOfView: number
 	FieldOfView: number
 	FieldOfViewMode: EnumFieldOfViewMode
-	FirstPersonTransition: RBXScriptSignal<boolean>
+	FirstPersonTransition: RBXScriptSignal<(entering: boolean) -> (), boolean>
 	Focus: CFrame
 	HeadLocked: boolean
 	HeadScale: number
@@ -4967,8 +4967,8 @@ declare class Camera extends Instance
 end
 
 declare class ChangeHistoryService extends Instance
-	OnRedo: RBXScriptSignal<string>
-	OnUndo: RBXScriptSignal<string>
+	OnRedo: RBXScriptSignal<(waypoint: string) -> (), string>
+	OnUndo: RBXScriptSignal<(waypoint: string) -> (), string>
 	function GetCanRedo(self): any
 	function GetCanUndo(self): any
 	function Redo(self): nil
@@ -5024,8 +5024,8 @@ end
 
 declare class Chat extends Instance
 	BubbleChatEnabled: boolean
-	BubbleChatSettingsChanged: RBXScriptSignal<any>
-	Chatted: RBXScriptSignal<BasePart, string, EnumChatColor>
+	BubbleChatSettingsChanged: RBXScriptSignal<(settings: any) -> (), any>
+	Chatted: RBXScriptSignal<(part: BasePart, message: string, color: EnumChatColor) -> (), BasePart, string, EnumChatColor>
 	LoadDefaultChat: boolean
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
@@ -5042,10 +5042,10 @@ end
 declare class ClickDetector extends Instance
 	CursorIcon: Content
 	MaxActivationDistance: number
-	MouseClick: RBXScriptSignal<Player>
-	MouseHoverEnter: RBXScriptSignal<Player>
-	MouseHoverLeave: RBXScriptSignal<Player>
-	RightMouseClick: RBXScriptSignal<Player>
+	MouseClick: RBXScriptSignal<(playerWhoClicked: Player) -> (), Player>
+	MouseHoverEnter: RBXScriptSignal<(playerWhoHovered: Player) -> (), Player>
+	MouseHoverLeave: RBXScriptSignal<(playerWhoHovered: Player) -> (), Player>
+	RightMouseClick: RBXScriptSignal<(playerWhoClicked: Player) -> (), Player>
 end
 
 declare class Clouds extends Instance
@@ -5059,12 +5059,12 @@ declare class ClusterPacketCache extends Instance
 end
 
 declare class CollectionService extends Instance
-	TagAdded: RBXScriptSignal<string>
-	TagRemoved: RBXScriptSignal<string>
+	TagAdded: RBXScriptSignal<(tag: string) -> (), string>
+	TagRemoved: RBXScriptSignal<(tag: string) -> (), string>
 	function AddTag(self, instance: Instance, tag: string): nil
 	function GetAllTags(self): { string }
-	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<Instance>
-	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<Instance>
+	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<(instance: Instance) -> (), Instance>
+	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<(instance: Instance) -> (), Instance>
 	function GetTagged(self, tag: string): { Instance }
 	function GetTags(self, instance: Instance): { string }
 	function HasTag(self, instance: Instance, tag: string): boolean
@@ -5086,7 +5086,7 @@ declare class CommandInstance extends Instance
 end
 
 declare class CommandService extends Instance
-	CommandExecuting: RBXScriptSignal<string, any>
+	CommandExecuting: RBXScriptSignal<(name: string, params: any) -> (), string, any>
 	function Execute(self, name: string, params: any): any
 	function RegisterCommand(self, plugin: Plugin, name: string, context: string, permission: EnumCommandPermission?): CommandInstance
 end
@@ -5305,7 +5305,7 @@ declare class VectorForce extends Constraint
 end
 
 declare class ContentProvider extends Instance
-	AssetFetchFailed: RBXScriptSignal<Content>
+	AssetFetchFailed: RBXScriptSignal<(assetId: Content) -> (), Content>
 	BaseUrl: string
 	RequestQueueSize: number
 	function CalculateNumTrianglesInMesh(self, meshId: string): number
@@ -5324,12 +5324,12 @@ declare class ContentProvider extends Instance
 end
 
 declare class ContextActionService extends Instance
-	BoundActionAdded: RBXScriptSignal<string, boolean, { [any]: any }, boolean>
-	BoundActionChanged: RBXScriptSignal<string, string, { [any]: any }>
-	BoundActionRemoved: RBXScriptSignal<string, { [any]: any }, boolean>
-	GetActionButtonEvent: RBXScriptSignal<string>
-	LocalToolEquipped: RBXScriptSignal<Tool>
-	LocalToolUnequipped: RBXScriptSignal<Tool>
+	BoundActionAdded: RBXScriptSignal<(actionAdded: string, createTouchButton: boolean, functionInfoTable: { [any]: any }, isCore: boolean) -> (), string, boolean, { [any]: any }, boolean>
+	BoundActionChanged: RBXScriptSignal<(actionChanged: string, changeName: string, changeTable: { [any]: any }) -> (), string, string, { [any]: any }>
+	BoundActionRemoved: RBXScriptSignal<(actionRemoved: string, functionInfoTable: { [any]: any }, isCore: boolean) -> (), string, { [any]: any }, boolean>
+	GetActionButtonEvent: RBXScriptSignal<(actionName: string) -> (), string>
+	LocalToolEquipped: RBXScriptSignal<(toolEquipped: Tool) -> (), Tool>
+	LocalToolUnequipped: RBXScriptSignal<(toolUnequipped: Tool) -> (), Tool>
 	function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()
 	function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()
 	function BindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodesForActivation: any): nil
@@ -5354,7 +5354,7 @@ declare class ContextActionService extends Instance
 end
 
 declare class Controller extends Instance
-	ButtonChanged: RBXScriptSignal<EnumButton>
+	ButtonChanged: RBXScriptSignal<(button: EnumButton) -> (), EnumButton>
 	function BindButton(self, button: EnumButton, caption: string): nil
 	function GetButton(self, button: EnumButton): boolean
 	function UnbindButton(self, button: EnumButton): nil
@@ -5364,7 +5364,7 @@ declare class HumanoidController extends Controller
 end
 
 declare class SkateboardController extends Controller
-	AxisChanged: RBXScriptSignal<string>
+	AxisChanged: RBXScriptSignal<(axis: string) -> (), string>
 	Steer: number
 	Throttle: number
 end
@@ -5439,8 +5439,8 @@ declare class CoreScriptSyncService extends Instance
 end
 
 declare class CrossDMScriptChangeListener extends Instance
-	GuidLineContentsChanged: RBXScriptSignal<string, number, string>
-	GuidNameChanged: RBXScriptSignal<string, string>
+	GuidLineContentsChanged: RBXScriptSignal<(guid: string, lineNumber: number, contents: string) -> (), string, number, string>
+	GuidNameChanged: RBXScriptSignal<(guid: string, fullName: string) -> (), string, string>
 	function IsWatchingScriptLine(self, scriptRef: string, lineNumber: number): boolean
 	function StartWatchingScriptLine(self, scriptRef: string, debuggerConnectionId: number, lineNumber: number): nil
 end
@@ -5476,10 +5476,10 @@ end
 
 declare class DataModelSession extends Instance
 	CurrentDataModelType: EnumStudioDataModelType
-	CurrentDataModelTypeAboutToChange: RBXScriptSignal<EnumStudioDataModelType>
+	CurrentDataModelTypeAboutToChange: RBXScriptSignal<(dataModelType: EnumStudioDataModelType) -> (), EnumStudioDataModelType>
 	CurrentDataModelTypeChanged: RBXScriptSignal<>
-	DataModelCreated: RBXScriptSignal<EnumStudioDataModelType>
-	DataModelWillBeDestroyed: RBXScriptSignal<EnumStudioDataModelType>
+	DataModelCreated: RBXScriptSignal<(gameStateType: EnumStudioDataModelType) -> (), EnumStudioDataModelType>
+	DataModelWillBeDestroyed: RBXScriptSignal<(gameStateType: EnumStudioDataModelType) -> (), EnumStudioDataModelType>
 	SessionId: string
 end
 
@@ -5560,15 +5560,15 @@ declare class DebuggerBreakpoint extends Instance
 end
 
 declare class DebuggerConnection extends Instance
-	BreakpointAdded: RBXScriptSignal<Breakpoint>
-	BreakpointChanged: RBXScriptSignal<Breakpoint>
-	BreakpointRemoved: RBXScriptSignal<Breakpoint, EnumBreakpointRemoveReason>
+	BreakpointAdded: RBXScriptSignal<(breakpoint: Breakpoint) -> (), Breakpoint>
+	BreakpointChanged: RBXScriptSignal<(breakpoint: Breakpoint) -> (), Breakpoint>
+	BreakpointRemoved: RBXScriptSignal<(breakpoint: Breakpoint, reason: EnumBreakpointRemoveReason) -> (), Breakpoint, EnumBreakpointRemoveReason>
 	ErrorMessage: string
 	HasError: boolean
 	Id: number
 	IsPaused: boolean
-	Paused: RBXScriptSignal<PausedState, EnumDebuggerPauseReason>
-	Resumed: RBXScriptSignal<PausedState>
+	Paused: RBXScriptSignal<(pausedState: PausedState, reason: EnumDebuggerPauseReason) -> (), PausedState, EnumDebuggerPauseReason>
+	Resumed: RBXScriptSignal<(pausedState: PausedState) -> (), PausedState>
 	function AddBreakpoint(self, script: string, line: number, breakpoint: Breakpoint): nil
 	function Close(self): nil
 	function EvaluateWatch(self, expression: string, frame: StackFrame, callback: ((...any) -> ...any)): number
@@ -5593,9 +5593,9 @@ declare class LocalDebuggerConnection extends DebuggerConnection
 end
 
 declare class DebuggerConnectionManager extends Instance
-	ConnectionEnded: RBXScriptSignal<DebuggerConnection, EnumDebuggerEndReason>
-	ConnectionStarted: RBXScriptSignal<DebuggerConnection>
-	FocusChanged: RBXScriptSignal<DebuggerConnection>
+	ConnectionEnded: RBXScriptSignal<(connection: DebuggerConnection, reason: EnumDebuggerEndReason) -> (), DebuggerConnection, EnumDebuggerEndReason>
+	ConnectionStarted: RBXScriptSignal<(connection: DebuggerConnection) -> (), DebuggerConnection>
+	FocusChanged: RBXScriptSignal<(connection: DebuggerConnection) -> (), DebuggerConnection>
 	Timeout: number
 	function ConnectLocal(self, dataModel: DataModel): number
 	function ConnectRemote(self, host: string, port: number): number
@@ -5613,8 +5613,8 @@ declare class DebuggerLuaResponse extends Instance
 end
 
 declare class DebuggerManager extends Instance
-	DebuggerAdded: RBXScriptSignal<Instance>
-	DebuggerRemoved: RBXScriptSignal<Instance>
+	DebuggerAdded: RBXScriptSignal<(debugger: Instance) -> (), Instance>
+	DebuggerRemoved: RBXScriptSignal<(debugger: Instance) -> (), Instance>
 	DebuggingEnabled: boolean
 	function AddDebugger(self, script: Instance): Instance
 	function EnableDebugging(self): nil
@@ -5623,7 +5623,7 @@ declare class DebuggerManager extends Instance
 end
 
 declare class DebuggerUIService extends Instance
-	ExpressionAdded: RBXScriptSignal<string>
+	ExpressionAdded: RBXScriptSignal<(expression: string) -> (), string>
 	function EditBreakpoint(self, metaBreakpointId: number): nil
 	function EditWatch(self, expression: string): nil
 	function IsConnectionForPlayDataModel(self, debuggerConnectionId: number): boolean
@@ -5657,7 +5657,7 @@ end
 declare class Dialog extends Instance
 	BehaviorType: EnumDialogBehaviorType
 	ConversationDistance: number
-	DialogChoiceSelected: RBXScriptSignal<Player, DialogChoice>
+	DialogChoiceSelected: RBXScriptSignal<(player: Player, dialogChoice: DialogChoice) -> (), Player, DialogChoice>
 	GoodbyeChoiceActive: boolean
 	GoodbyeDialog: string
 	InUse: boolean
@@ -5679,12 +5679,12 @@ declare class DialogChoice extends Instance
 end
 
 declare class DraftsService extends Instance
-	CommitStatusChanged: RBXScriptSignal<Instance, EnumDraftStatusCode>
-	DraftAdded: RBXScriptSignal<Instance>
-	DraftRemoved: RBXScriptSignal<Instance>
-	DraftStatusChanged: RBXScriptSignal<Instance>
-	EditorsListChanged: RBXScriptSignal<Instance>
-	UpdateStatusChanged: RBXScriptSignal<Instance, EnumDraftStatusCode>
+	CommitStatusChanged: RBXScriptSignal<(script: Instance, status: EnumDraftStatusCode) -> (), Instance, EnumDraftStatusCode>
+	DraftAdded: RBXScriptSignal<(script: Instance) -> (), Instance>
+	DraftRemoved: RBXScriptSignal<(script: Instance) -> (), Instance>
+	DraftStatusChanged: RBXScriptSignal<(script: Instance) -> (), Instance>
+	EditorsListChanged: RBXScriptSignal<(script: Instance) -> (), Instance>
+	UpdateStatusChanged: RBXScriptSignal<(script: Instance, status: EnumDraftStatusCode) -> (), Instance, EnumDraftStatusCode>
 	function CommitEdits(self, scripts: { Instance }): nil
 	function DiscardEdits(self, scripts: { Instance }): nil
 	function GetDraftStatus(self, script: Instance): EnumDraftStatusCode
@@ -5762,7 +5762,7 @@ declare class Explosion extends Instance
 	BlastRadius: number
 	DestroyJointRadiusPercent: number
 	ExplosionType: EnumExplosionType
-	Hit: RBXScriptSignal<BasePart, number>
+	Hit: RBXScriptSignal<(part: BasePart, distance: number) -> (), BasePart, number>
 	Position: Vector3
 	TimeScale: number
 	Visible: boolean
@@ -5771,7 +5771,7 @@ end
 declare class FaceAnimatorService extends Instance
 	AudioAnimationEnabled: boolean
 	FlipHeadOrientation: boolean
-	TrackerError: RBXScriptSignal<EnumTrackerError>
+	TrackerError: RBXScriptSignal<(error: EnumTrackerError) -> (), EnumTrackerError>
 	VideoAnimationEnabled: boolean
 	function GetTrackerLodController(self): TrackerLodController
 	function Init(self, videoEnabled: boolean, audioEnabled: boolean): nil
@@ -5931,7 +5931,7 @@ declare class ForceField extends Instance
 end
 
 declare class FriendService extends Instance
-	FriendsUpdated: RBXScriptSignal<{ any }>
+	FriendsUpdated: RBXScriptSignal<(friendData: { any }) -> (), { any }>
 	function GetPlatformFriends(self): { any }
 end
 
@@ -5943,12 +5943,12 @@ end
 declare class GameSettings extends Instance
 	VideoCaptureEnabled: boolean
 	VideoRecording: boolean
-	VideoRecordingChangeRequest: RBXScriptSignal<boolean>
+	VideoRecordingChangeRequest: RBXScriptSignal<(recording: boolean) -> (), boolean>
 end
 
 declare class GamepadService extends Instance
 	GamepadCursorEnabled: boolean
-	GamepadThumbstick1Changed: RBXScriptSignal<Vector2>
+	GamepadThumbstick1Changed: RBXScriptSignal<(event: Vector2) -> (), Vector2>
 	function DisableGamepadCursor(self): nil
 	function EnableGamepadCursor(self, guiObject: Instance): nil
 	function GetGamepadCursorPosition(self): Vector2
@@ -6014,7 +6014,7 @@ declare class GuiBase2d extends GuiBase
 	SelectionBehaviorLeft: EnumSelectionBehavior
 	SelectionBehaviorRight: EnumSelectionBehavior
 	SelectionBehaviorUp: EnumSelectionBehavior
-	SelectionChanged: RBXScriptSignal<boolean, GuiObject, GuiObject>
+	SelectionChanged: RBXScriptSignal<(amISelected: boolean, previousSelection: GuiObject, newSelection: GuiObject) -> (), boolean, GuiObject, GuiObject>
 	SelectionGroup: boolean
 	TotalGroupScale: number
 end
@@ -6029,15 +6029,15 @@ declare class GuiObject extends GuiBase2d
 	BorderMode: EnumBorderMode
 	BorderSizePixel: number
 	ClipsDescendants: boolean
-	InputBegan: RBXScriptSignal<InputObject>
-	InputChanged: RBXScriptSignal<InputObject>
-	InputEnded: RBXScriptSignal<InputObject>
+	InputBegan: RBXScriptSignal<(input: InputObject) -> (), InputObject>
+	InputChanged: RBXScriptSignal<(input: InputObject) -> (), InputObject>
+	InputEnded: RBXScriptSignal<(input: InputObject) -> (), InputObject>
 	LayoutOrder: number
-	MouseEnter: RBXScriptSignal<number, number>
-	MouseLeave: RBXScriptSignal<number, number>
-	MouseMoved: RBXScriptSignal<number, number>
-	MouseWheelBackward: RBXScriptSignal<number, number>
-	MouseWheelForward: RBXScriptSignal<number, number>
+	MouseEnter: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseLeave: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseMoved: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseWheelBackward: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseWheelForward: RBXScriptSignal<(x: number, y: number) -> (), number, number>
 	NextSelectionDown: GuiObject
 	NextSelectionLeft: GuiObject
 	NextSelectionRight: GuiObject
@@ -6051,12 +6051,12 @@ declare class GuiObject extends GuiBase2d
 	SelectionOrder: number
 	Size: UDim2
 	SizeConstraint: EnumSizeConstraint
-	TouchLongPress: RBXScriptSignal<{ Vector2 }, EnumUserInputState>
-	TouchPan: RBXScriptSignal<{ Vector2 }, Vector2, Vector2, EnumUserInputState>
-	TouchPinch: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState>
-	TouchRotate: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState>
-	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number>
-	TouchTap: RBXScriptSignal<{ Vector2 }>
+	TouchLongPress: RBXScriptSignal<(touchPositions: { Vector2 }, state: EnumUserInputState) -> (), { Vector2 }, EnumUserInputState>
+	TouchPan: RBXScriptSignal<(touchPositions: { Vector2 }, totalTranslation: Vector2, velocity: Vector2, state: EnumUserInputState) -> (), { Vector2 }, Vector2, Vector2, EnumUserInputState>
+	TouchPinch: RBXScriptSignal<(touchPositions: { Vector2 }, scale: number, velocity: number, state: EnumUserInputState) -> (), { Vector2 }, number, number, EnumUserInputState>
+	TouchRotate: RBXScriptSignal<(touchPositions: { Vector2 }, rotation: number, velocity: number, state: EnumUserInputState) -> (), { Vector2 }, number, number, EnumUserInputState>
+	TouchSwipe: RBXScriptSignal<(swipeDirection: EnumSwipeDirection, numberOfTouches: number) -> (), EnumSwipeDirection, number>
+	TouchTap: RBXScriptSignal<(touchPositions: { Vector2 }) -> (), { Vector2 }>
 	Transparency: number
 	Visible: boolean
 	ZIndex: number
@@ -6075,15 +6075,15 @@ declare class Frame extends GuiObject
 end
 
 declare class GuiButton extends GuiObject
-	Activated: RBXScriptSignal<InputObject, number>
+	Activated: RBXScriptSignal<(inputObject: InputObject, clickCount: number) -> (), InputObject, number>
 	AutoButtonColor: boolean
 	Modal: boolean
 	MouseButton1Click: RBXScriptSignal<>
-	MouseButton1Down: RBXScriptSignal<number, number>
-	MouseButton1Up: RBXScriptSignal<number, number>
+	MouseButton1Down: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseButton1Up: RBXScriptSignal<(x: number, y: number) -> (), number, number>
 	MouseButton2Click: RBXScriptSignal<>
-	MouseButton2Down: RBXScriptSignal<number, number>
-	MouseButton2Up: RBXScriptSignal<number, number>
+	MouseButton2Down: RBXScriptSignal<(x: number, y: number) -> (), number, number>
+	MouseButton2Up: RBXScriptSignal<(x: number, y: number) -> (), number, number>
 	Selected: boolean
 	Style: EnumButtonStyle
 end
@@ -6204,7 +6204,7 @@ declare class TextBox extends GuiObject
 	ClearTextOnFocus: boolean
 	ContentText: string
 	CursorPosition: number
-	FocusLost: RBXScriptSignal<boolean, InputObject>
+	FocusLost: RBXScriptSignal<(enterPressed: boolean, inputThatCausedFocusLoss: InputObject) -> (), boolean, InputObject>
 	Focused: RBXScriptSignal<>
 	Font: EnumFont
 	FontFace: Font
@@ -6243,13 +6243,13 @@ declare class TextBox extends GuiObject
 end
 
 declare class VideoFrame extends GuiObject
-	DidLoop: RBXScriptSignal<string>
-	Ended: RBXScriptSignal<string>
+	DidLoop: RBXScriptSignal<(video: string) -> (), string>
+	Ended: RBXScriptSignal<(video: string) -> (), string>
 	IsLoaded: boolean
-	Loaded: RBXScriptSignal<string>
+	Loaded: RBXScriptSignal<(video: string) -> (), string>
 	Looped: boolean
-	Paused: RBXScriptSignal<string>
-	Played: RBXScriptSignal<string>
+	Paused: RBXScriptSignal<(video: string) -> (), string>
+	Played: RBXScriptSignal<(video: string) -> (), string>
 	Playing: boolean
 	Resolution: Vector2
 	TimeLength: number
@@ -6299,10 +6299,10 @@ declare class BillboardGui extends LayerCollector
 end
 
 declare class PluginGui extends LayerCollector
-	PluginDragDropped: RBXScriptSignal<{ [any]: any }>
-	PluginDragEntered: RBXScriptSignal<{ [any]: any }>
-	PluginDragLeft: RBXScriptSignal<{ [any]: any }>
-	PluginDragMoved: RBXScriptSignal<{ [any]: any }>
+	PluginDragDropped: RBXScriptSignal<(dragData: { [any]: any }) -> (), { [any]: any }>
+	PluginDragEntered: RBXScriptSignal<(dragData: { [any]: any }) -> (), { [any]: any }>
+	PluginDragLeft: RBXScriptSignal<(dragData: { [any]: any }) -> (), { [any]: any }>
+	PluginDragMoved: RBXScriptSignal<(dragData: { [any]: any }) -> (), { [any]: any }>
 	Title: string
 	WindowFocusReleased: RBXScriptSignal<>
 	WindowFocused: RBXScriptSignal<>
@@ -6447,20 +6447,20 @@ end
 
 declare class ArcHandles extends HandlesBase
 	Axes: Axes
-	MouseButton1Down: RBXScriptSignal<EnumAxis>
-	MouseButton1Up: RBXScriptSignal<EnumAxis>
-	MouseDrag: RBXScriptSignal<EnumAxis, number, number>
-	MouseEnter: RBXScriptSignal<EnumAxis>
-	MouseLeave: RBXScriptSignal<EnumAxis>
+	MouseButton1Down: RBXScriptSignal<(axis: EnumAxis) -> (), EnumAxis>
+	MouseButton1Up: RBXScriptSignal<(axis: EnumAxis) -> (), EnumAxis>
+	MouseDrag: RBXScriptSignal<(axis: EnumAxis, relativeAngle: number, deltaRadius: number) -> (), EnumAxis, number, number>
+	MouseEnter: RBXScriptSignal<(axis: EnumAxis) -> (), EnumAxis>
+	MouseLeave: RBXScriptSignal<(axis: EnumAxis) -> (), EnumAxis>
 end
 
 declare class Handles extends HandlesBase
 	Faces: Faces
-	MouseButton1Down: RBXScriptSignal<EnumNormalId>
-	MouseButton1Up: RBXScriptSignal<EnumNormalId>
-	MouseDrag: RBXScriptSignal<EnumNormalId, number>
-	MouseEnter: RBXScriptSignal<EnumNormalId>
-	MouseLeave: RBXScriptSignal<EnumNormalId>
+	MouseButton1Down: RBXScriptSignal<(face: EnumNormalId) -> (), EnumNormalId>
+	MouseButton1Up: RBXScriptSignal<(face: EnumNormalId) -> (), EnumNormalId>
+	MouseDrag: RBXScriptSignal<(face: EnumNormalId, distance: number) -> (), EnumNormalId, number>
+	MouseEnter: RBXScriptSignal<(face: EnumNormalId) -> (), EnumNormalId>
+	MouseLeave: RBXScriptSignal<(face: EnumNormalId) -> (), EnumNormalId>
 	Style: EnumHandlesStyle
 end
 
@@ -6483,27 +6483,27 @@ declare class GuiService extends Instance
 	CoreGuiFolder: Folder
 	CoreGuiNavigationEnabled: boolean
 	CoreGuiRenderOverflowed: RBXScriptSignal<>
-	EmotesMenuOpenChanged: RBXScriptSignal<boolean>
+	EmotesMenuOpenChanged: RBXScriptSignal<(isOpen: boolean) -> (), boolean>
 	GuiNavigationEnabled: boolean
-	GuiVisibilityChangedSignal: RBXScriptSignal<EnumGuiType, boolean>
-	InspectMenuEnabledChangedSignal: RBXScriptSignal<boolean>
-	InspectPlayerFromHumanoidDescriptionRequest: RBXScriptSignal<Instance, string>
-	InspectPlayerFromUserIdWithCtxRequest: RBXScriptSignal<number, string>
-	KeyPressed: RBXScriptSignal<string, string>
+	GuiVisibilityChangedSignal: RBXScriptSignal<(guiType: EnumGuiType, visible: boolean) -> (), EnumGuiType, boolean>
+	InspectMenuEnabledChangedSignal: RBXScriptSignal<(enabled: boolean) -> (), boolean>
+	InspectPlayerFromHumanoidDescriptionRequest: RBXScriptSignal<(humanoidDescription: Instance, name: string) -> (), Instance, string>
+	InspectPlayerFromUserIdWithCtxRequest: RBXScriptSignal<(userId: number, ctx: string) -> (), number, string>
+	KeyPressed: RBXScriptSignal<(key: string, modifiers: string) -> (), string, string>
 	MenuClosed: RBXScriptSignal<>
 	MenuIsOpen: boolean
 	MenuOpened: RBXScriptSignal<>
 	NativeClose: RBXScriptSignal<>
-	NetworkPausedEnabledChanged: RBXScriptSignal<boolean>
-	Open9SliceEditor: RBXScriptSignal<Instance>
+	NetworkPausedEnabledChanged: RBXScriptSignal<(enabled: boolean) -> (), boolean>
+	Open9SliceEditor: RBXScriptSignal<(selectedImageObject: Instance) -> (), Instance>
 	SafeZoneOffsetsChanged: RBXScriptSignal<>
 	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject?
 	SendCoreUiNotification: (title: string, text: string) -> nil
 	ShowLeaveConfirmation: RBXScriptSignal<>
-	SpecialKeyPressed: RBXScriptSignal<EnumSpecialKey, string>
+	SpecialKeyPressed: RBXScriptSignal<(key: EnumSpecialKey, modifiers: string) -> (), EnumSpecialKey, string>
 	TouchControlsEnabled: boolean
-	UiMessageChanged: RBXScriptSignal<EnumUiMessageType, string>
+	UiMessageChanged: RBXScriptSignal<(msgType: EnumUiMessageType, newUiMessage: string) -> (), EnumUiMessageType, string>
 	function AddCenterDialog(self, dialog: Instance, centerDialogType: EnumCenterDialogType, showFunction: ((...any) -> ...any), hideFunction: ((...any) -> ...any)): nil
 	function AddKey(self, key: string): nil
 	function AddSelectionParent(self, selectionName: string, selectionParent: Instance): nil
@@ -6563,7 +6563,7 @@ end
 
 declare class HeightmapImporterService extends Instance
 	ColormapHasUnknownPixels: RBXScriptSignal<>
-	ProgressUpdate: RBXScriptSignal<number, string>
+	ProgressUpdate: RBXScriptSignal<(progressRatio: number, operation: string) -> (), number, string>
 	function CancelImportHeightmap(self): nil
 	function GetHeightmapPreviewAsync(self, heightmapAssetId: Content): any
 	function ImportHeightmap(self, region: Region3, heightmapAssetId: Content, colormapAssetId: Content, defaultMaterial: EnumMaterial): nil
@@ -6625,48 +6625,48 @@ declare class Humanoid extends Instance
 	AutomaticScalingEnabled: boolean
 	BreakJointsOnDeath: boolean
 	CameraOffset: Vector3
-	Climbing: RBXScriptSignal<number>
+	Climbing: RBXScriptSignal<(speed: number) -> (), number>
 	ClusterCompositionFinished: RBXScriptSignal<>
 	Died: RBXScriptSignal<>
 	DisplayDistanceType: EnumHumanoidDisplayDistanceType
 	DisplayName: string
-	EmoteTriggered: RBXScriptSignal<boolean, AnimationTrack>
+	EmoteTriggered: RBXScriptSignal<(success: boolean, animationTrack: AnimationTrack) -> (), boolean, AnimationTrack>
 	EvaluateStateMachine: boolean
-	FallingDown: RBXScriptSignal<boolean>
+	FallingDown: RBXScriptSignal<(active: boolean) -> (), boolean>
 	FloorMaterial: EnumMaterial
-	FreeFalling: RBXScriptSignal<boolean>
-	GettingUp: RBXScriptSignal<boolean>
+	FreeFalling: RBXScriptSignal<(active: boolean) -> (), boolean>
+	GettingUp: RBXScriptSignal<(active: boolean) -> (), boolean>
 	Health: number
-	HealthChanged: RBXScriptSignal<number>
+	HealthChanged: RBXScriptSignal<(health: number) -> (), number>
 	HealthDisplayDistance: number
 	HealthDisplayType: EnumHumanoidHealthDisplayType
 	HipHeight: number
 	Jump: boolean
 	JumpHeight: number
 	JumpPower: number
-	Jumping: RBXScriptSignal<boolean>
+	Jumping: RBXScriptSignal<(active: boolean) -> (), boolean>
 	MaxHealth: number
 	MaxSlopeAngle: number
 	MoveDirection: Vector3
-	MoveToFinished: RBXScriptSignal<boolean>
+	MoveToFinished: RBXScriptSignal<(reached: boolean) -> (), boolean>
 	NameDisplayDistance: number
 	NameOcclusion: EnumNameOcclusion
 	PlatformStand: boolean
-	PlatformStanding: RBXScriptSignal<boolean>
-	Ragdoll: RBXScriptSignal<boolean>
+	PlatformStanding: RBXScriptSignal<(active: boolean) -> (), boolean>
+	Ragdoll: RBXScriptSignal<(active: boolean) -> (), boolean>
 	RequiresNeck: boolean
 	RigType: EnumHumanoidRigType
 	RootPart: BasePart?
-	Running: RBXScriptSignal<number>
+	Running: RBXScriptSignal<(speed: number) -> (), number>
 	SeatPart: Seat | VehicleSeat | nil
-	Seated: RBXScriptSignal<boolean, Seat>
+	Seated: RBXScriptSignal<(active: boolean, currentSeatPart: Seat) -> (), boolean, Seat>
 	Sit: boolean
-	StateChanged: RBXScriptSignal<EnumHumanoidStateType, EnumHumanoidStateType>
-	StateEnabledChanged: RBXScriptSignal<EnumHumanoidStateType, boolean>
-	Strafing: RBXScriptSignal<boolean>
-	Swimming: RBXScriptSignal<number>
+	StateChanged: RBXScriptSignal<(old: EnumHumanoidStateType, new: EnumHumanoidStateType) -> (), EnumHumanoidStateType, EnumHumanoidStateType>
+	StateEnabledChanged: RBXScriptSignal<(state: EnumHumanoidStateType, isEnabled: boolean) -> (), EnumHumanoidStateType, boolean>
+	Strafing: RBXScriptSignal<(active: boolean) -> (), boolean>
+	Swimming: RBXScriptSignal<(speed: number) -> (), number>
 	TargetPoint: Vector3
-	Touched: RBXScriptSignal<BasePart, BasePart>
+	Touched: RBXScriptSignal<(touchingPart: BasePart, humanoidPart: BasePart) -> (), BasePart, BasePart>
 	UseJumpPower: boolean
 	WalkSpeed: number
 	WalkToPart: BasePart?
@@ -6705,8 +6705,8 @@ declare class HumanoidDescription extends Instance
 	BodyTypeScale: number
 	ClimbAnimation: number
 	DepthScale: number
-	EmotesChanged: RBXScriptSignal<{ [any]: any }>
-	EquippedEmotesChanged: RBXScriptSignal<{ any }>
+	EmotesChanged: RBXScriptSignal<(newEmotes: { [any]: any }) -> (), { [any]: any }>
+	EquippedEmotesChanged: RBXScriptSignal<(newEquippedEmotes: { any }) -> (), { any }>
 	Face: number
 	FaceAccessory: string
 	FallAnimation: number
@@ -6774,8 +6774,8 @@ declare class LegacyStudioBridge extends ILegacyStudioBridge
 end
 
 declare class IXPService extends Instance
-	OnBrowserTrackerLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
-	OnUserLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
+	OnBrowserTrackerLayerLoadingStatusChanged: RBXScriptSignal<(status: EnumIXPLoadingStatus) -> (), EnumIXPLoadingStatus>
+	OnUserLayerLoadingStatusChanged: RBXScriptSignal<(status: EnumIXPLoadingStatus) -> (), EnumIXPLoadingStatus>
 	function ClearUserLayers(self): nil
 	function GetBrowserTrackerLayerLoadingStatus(self): EnumIXPLoadingStatus
 	function GetBrowserTrackerLayerVariables(self, layerName: string): { [any]: any }
@@ -7014,7 +7014,7 @@ declare class Lighting extends Instance
 	FogStart: number
 	GeographicLatitude: number
 	GlobalShadows: boolean
-	LightingChanged: RBXScriptSignal<boolean>
+	LightingChanged: RBXScriptSignal<(skyChanged: boolean) -> (), boolean>
 	OutdoorAmbient: Color3
 	ShadowSoftness: number
 	Technology: EnumTechnology
@@ -7028,7 +7028,7 @@ declare class Lighting extends Instance
 end
 
 declare class LocalStorageService extends Instance
-	ItemWasSet: RBXScriptSignal<string, string>
+	ItemWasSet: RBXScriptSignal<(key: string, value: string) -> (), string, string>
 	StoreWasCleared: RBXScriptSignal<>
 	function Flush(self): nil
 	function GetItem(self, key: string): string
@@ -7093,11 +7093,11 @@ declare class LodDataService extends Instance
 end
 
 declare class LogService extends Instance
-	HttpResultOut: RBXScriptSignal<{ [any]: any }>
-	MessageOut: RBXScriptSignal<string, EnumMessageType>
-	OnHttpResultApproved: RBXScriptSignal<boolean>
-	ServerHttpResultOut: RBXScriptSignal<{ [any]: any }>
-	ServerMessageOut: RBXScriptSignal<string, EnumMessageType, number>
+	HttpResultOut: RBXScriptSignal<(httpResult: { [any]: any }) -> (), { [any]: any }>
+	MessageOut: RBXScriptSignal<(message: string, messageType: EnumMessageType) -> (), string, EnumMessageType>
+	OnHttpResultApproved: RBXScriptSignal<(isApproved: boolean) -> (), boolean>
+	ServerHttpResultOut: RBXScriptSignal<(httpResult: { [any]: any }) -> (), { [any]: any }>
+	ServerMessageOut: RBXScriptSignal<(message: string, messageType: EnumMessageType, timestamp: number) -> (), string, EnumMessageType, number>
 	function ExecuteScript(self, source: string): nil
 	function GetHttpResultHistory(self): { any }
 	function GetLogHistory(self): { any }
@@ -7107,8 +7107,8 @@ declare class LogService extends Instance
 end
 
 declare class LoginService extends Instance
-	LoginFailed: RBXScriptSignal<string>
-	LoginSucceeded: RBXScriptSignal<string>
+	LoginFailed: RBXScriptSignal<(loginError: string) -> (), string>
+	LoginSucceeded: RBXScriptSignal<(username: string) -> (), string>
 	function Logout(self): nil
 	function PromptLogin(self): nil
 end
@@ -7158,28 +7158,28 @@ declare class MarkerCurve extends Instance
 end
 
 declare class MarketplaceService extends Instance
-	ClientLuaDialogRequested: RBXScriptSignal<any>
-	ClientPurchaseSuccess: RBXScriptSignal<string, number, number>
-	NativePurchaseFinished: RBXScriptSignal<Player, string, boolean>
-	NativePurchaseFinishedWithLocalPlayer: RBXScriptSignal<string, boolean>
+	ClientLuaDialogRequested: RBXScriptSignal<(arguments: any) -> (), any>
+	ClientPurchaseSuccess: RBXScriptSignal<(ticket: string, playerId: number, productId: number) -> (), string, number, number>
+	NativePurchaseFinished: RBXScriptSignal<(player: Player, productId: string, wasPurchased: boolean) -> (), Player, string, boolean>
+	NativePurchaseFinishedWithLocalPlayer: RBXScriptSignal<(productId: string, wasPurchased: boolean) -> (), string, boolean>
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
-	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
-	PromptBundlePurchaseRequested: RBXScriptSignal<Instance, number>
-	PromptGamePassPurchaseFinished: RBXScriptSignal<Player, number, boolean>
-	PromptGamePassPurchaseRequested: RBXScriptSignal<Player, number>
+	PromptBundlePurchaseFinished: RBXScriptSignal<(player: Instance, bundleId: number, wasPurchased: boolean) -> (), Instance, number, boolean>
+	PromptBundlePurchaseRequested: RBXScriptSignal<(player: Instance, bundleId: number) -> (), Instance, number>
+	PromptGamePassPurchaseFinished: RBXScriptSignal<(player: Player, gamePassId: number, wasPurchased: boolean) -> (), Player, number, boolean>
+	PromptGamePassPurchaseRequested: RBXScriptSignal<(player: Player, gamePassId: number) -> (), Player, number>
 	PromptPremiumPurchaseFinished: RBXScriptSignal<>
-	PromptPremiumPurchaseRequested: RBXScriptSignal<Instance>
-	PromptProductPurchaseFinished: RBXScriptSignal<number, number, boolean>
-	PromptProductPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
-	PromptPurchaseFinished: RBXScriptSignal<Player, number, boolean>
-	PromptPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
-	PromptRobloxPurchaseRequested: RBXScriptSignal<number, boolean>
-	PromptSubscriptionCancellationFinished: RBXScriptSignal<Player, number, boolean>
-	PromptSubscriptionCancellationRequested: RBXScriptSignal<Instance, number>
-	PromptSubscriptionPurchaseFinished: RBXScriptSignal<Player, number, boolean>
-	PromptSubscriptionPurchaseRequested: RBXScriptSignal<Player, number>
-	ServerPurchaseVerification: RBXScriptSignal<{ [any]: any }>
-	ThirdPartyPurchaseFinished: RBXScriptSignal<Instance, string, string, boolean>
+	PromptPremiumPurchaseRequested: RBXScriptSignal<(player: Instance) -> (), Instance>
+	PromptProductPurchaseFinished: RBXScriptSignal<(userId: number, productId: number, isPurchased: boolean) -> (), number, number, boolean>
+	PromptProductPurchaseRequested: RBXScriptSignal<(player: Player, productId: number, equipIfPurchased: boolean, currencyType: EnumCurrencyType) -> (), Player, number, boolean, EnumCurrencyType>
+	PromptPurchaseFinished: RBXScriptSignal<(player: Player, assetId: number, isPurchased: boolean) -> (), Player, number, boolean>
+	PromptPurchaseRequested: RBXScriptSignal<(player: Player, assetId: number, equipIfPurchased: boolean, currencyType: EnumCurrencyType) -> (), Player, number, boolean, EnumCurrencyType>
+	PromptRobloxPurchaseRequested: RBXScriptSignal<(assetId: number, equipIfPurchased: boolean) -> (), number, boolean>
+	PromptSubscriptionCancellationFinished: RBXScriptSignal<(player: Player, subscriptionId: number, wasCanceled: boolean) -> (), Player, number, boolean>
+	PromptSubscriptionCancellationRequested: RBXScriptSignal<(player: Instance, subscriptionId: number) -> (), Instance, number>
+	PromptSubscriptionPurchaseFinished: RBXScriptSignal<(player: Player, subscriptionId: number, wasPurchased: boolean) -> (), Player, number, boolean>
+	PromptSubscriptionPurchaseRequested: RBXScriptSignal<(player: Player, subscriptionId: number) -> (), Player, number>
+	ServerPurchaseVerification: RBXScriptSignal<(serverResponseTable: { [any]: any }) -> (), { [any]: any }>
+	ThirdPartyPurchaseFinished: RBXScriptSignal<(player: Instance, productId: string, receipt: string, wasPurchased: boolean) -> (), Instance, string, string, boolean>
 	function GetDeveloperProductsAsync(self): Pages
 	function GetProductInfo(self, assetId: number, infoType: EnumInfoType?): { [any]: any }
 	function GetRobuxBalance(self): number
@@ -7236,7 +7236,7 @@ declare class MaterialService extends Instance
 	MarbleName: string
 	MetalName: string
 	MudName: string
-	OverrideStatusChanged: RBXScriptSignal<EnumMaterial>
+	OverrideStatusChanged: RBXScriptSignal<(material: EnumMaterial) -> (), EnumMaterial>
 	PavementName: string
 	PebbleName: string
 	PlasticName: string
@@ -7352,10 +7352,10 @@ declare class MetaBreakpointContext extends Instance
 end
 
 declare class MetaBreakpointManager extends Instance
-	MetaBreakpointAdded: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointChanged: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointRemoved: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointSetChanged: RBXScriptSignal<MetaBreakpoint, { [any]: any }>
+	MetaBreakpointAdded: RBXScriptSignal<(breakpoint: MetaBreakpoint) -> (), MetaBreakpoint>
+	MetaBreakpointChanged: RBXScriptSignal<(breakpoint: MetaBreakpoint) -> (), MetaBreakpoint>
+	MetaBreakpointRemoved: RBXScriptSignal<(breakpoint: MetaBreakpoint) -> (), MetaBreakpoint>
+	MetaBreakpointSetChanged: RBXScriptSignal<(breakpoint: MetaBreakpoint, detail: { [any]: any }) -> (), MetaBreakpoint, { [any]: any }>
 	function AddBreakpoint(self, script: Instance, line: number, condition: Instance): Instance
 	function GetBreakpointById(self, metaBreakpointId: number): MetaBreakpoint
 	function RemoveBreakpointById(self, metaBreakpointId: number): nil
@@ -7387,15 +7387,15 @@ declare class PlayerMouse extends Mouse
 end
 
 declare class PluginMouse extends Mouse
-	DragEnter: RBXScriptSignal<{ Instance }>
+	DragEnter: RBXScriptSignal<(instances: { Instance }) -> (), { Instance }>
 end
 
 declare class MouseService extends Instance
 end
 
 declare class MultipleDocumentInterfaceInstance extends Instance
-	DataModelSessionEnded: RBXScriptSignal<Instance>
-	DataModelSessionStarted: RBXScriptSignal<Instance>
+	DataModelSessionEnded: RBXScriptSignal<(dataModelSession: Instance) -> (), Instance>
+	DataModelSessionStarted: RBXScriptSignal<(dataModelSession: Instance) -> (), Instance>
 	FocusedDataModelSession: Instance
 end
 
@@ -7408,8 +7408,8 @@ declare class NetworkPeer extends Instance
 end
 
 declare class NetworkClient extends NetworkPeer
-	ConnectionAccepted: RBXScriptSignal<string, Instance>
-	ConnectionFailed: RBXScriptSignal<string, number, string>
+	ConnectionAccepted: RBXScriptSignal<(peer: string, replicator: Instance) -> (), string, Instance>
+	ConnectionFailed: RBXScriptSignal<(peer: string, code: number, reason: string) -> (), string, number, string>
 end
 
 declare class NetworkServer extends NetworkPeer
@@ -7421,8 +7421,8 @@ declare class NetworkReplicator extends Instance
 end
 
 declare class ClientReplicator extends NetworkReplicator
-	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
-	StatsReceived: RBXScriptSignal<{ [any]: any }>
+	RCCProfilerDataComplete: RBXScriptSignal<(success: boolean, message: string) -> (), boolean, string>
+	StatsReceived: RBXScriptSignal<(stats: { [any]: any }) -> (), { [any]: any }>
 	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
 	function RequestServerScriptProfiling(self, start: boolean): nil
 	function RequestServerStats(self, request: boolean): nil
@@ -7455,10 +7455,10 @@ declare class NotificationService extends Instance
 	IsConnected: boolean
 	IsLuaChatEnabled: boolean
 	IsLuaGameDetailsEnabled: boolean
-	Roblox17sConnectionChanged: RBXScriptSignal<string, EnumConnectionState, string>
-	Roblox17sEventReceived: RBXScriptSignal<{ [any]: any }>
-	RobloxConnectionChanged: RBXScriptSignal<string, EnumConnectionState, string, string>
-	RobloxEventReceived: RBXScriptSignal<{ [any]: any }>
+	Roblox17sConnectionChanged: RBXScriptSignal<(connectionName: string, connectionState: EnumConnectionState, namespaceSequenceNumbers: string) -> (), string, EnumConnectionState, string>
+	Roblox17sEventReceived: RBXScriptSignal<(eventData: { [any]: any }) -> (), { [any]: any }>
+	RobloxConnectionChanged: RBXScriptSignal<(connectionName: string, connectionState: EnumConnectionState, sequenceNumber: string, namespaceSequenceNumbers: string) -> (), string, EnumConnectionState, string, string>
+	RobloxEventReceived: RBXScriptSignal<(eventData: { [any]: any }) -> (), { [any]: any }>
 	SelectedTheme: string
 	function ActionEnabled(self, actionType: EnumAppShellActionType): nil
 	function ActionTaken(self, actionType: EnumAppShellActionType): nil
@@ -7518,8 +7518,8 @@ declare class BasePart extends PVInstance
 	Rotation: Vector3
 	Size: Vector3
 	TopSurface: EnumSurfaceType
-	TouchEnded: RBXScriptSignal<BasePart>
-	Touched: RBXScriptSignal<BasePart>
+	TouchEnded: RBXScriptSignal<(otherPart: BasePart) -> (), BasePart>
+	Touched: RBXScriptSignal<(otherPart: BasePart) -> (), BasePart>
 	Transparency: number
 	function ApplyAngularImpulse(self, impulse: Vector3): nil
 	function ApplyImpulse(self, impulse: Vector3): nil
@@ -7711,7 +7711,7 @@ declare class Workspace extends WorldRoot
 	HumanoidOnlySetCollisionsOnStateChange: EnumHumanoidOnlySetCollisionsOnStateChange
 	InterpolationThrottling: EnumInterpolationThrottlingMode
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
-	PersistentLoaded: RBXScriptSignal<Player>
+	PersistentLoaded: RBXScriptSignal<(player: Player) -> (), Player>
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting
@@ -7760,8 +7760,8 @@ declare class PackageService extends Instance
 end
 
 declare class PackageUIService extends Instance
-	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
-	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
+	OnConvertToPackageResult: RBXScriptSignal<(isSuccessful: boolean, errorMessage: string) -> (), boolean, string>
+	OnOpenConvertToPackagePlugin: RBXScriptSignal<(instances: { Instance }, name: string, cloneInstances: { Instance }) -> (), { Instance }, string, { Instance }>
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function GetPackageInfo(self, packageAssetId: number): { [any]: any }
 	function PublishPackage(self, packageInstance: Instance): nil
@@ -7848,9 +7848,9 @@ declare class ParticleEmitter extends Instance
 end
 
 declare class Path extends Instance
-	Blocked: RBXScriptSignal<number>
+	Blocked: RBXScriptSignal<(blockedWaypointIdx: number) -> (), number>
 	Status: EnumPathStatus
-	Unblocked: RBXScriptSignal<number>
+	Unblocked: RBXScriptSignal<(unblockedWaypointIdx: number) -> (), number>
 	function CheckOcclusionAsync(self, start: number): number
 	function ComputeAsync(self, start: Vector3, finish: Vector3): nil
 	function GetWaypoints(self): { PathWaypoint }
@@ -7945,12 +7945,12 @@ declare class Player extends Instance
 	CameraMode: EnumCameraMode
 	CanLoadCharacterAppearance: boolean
 	Character: Model?
-	CharacterAdded: RBXScriptSignal<Model>
+	CharacterAdded: RBXScriptSignal<(character: Model) -> (), Model>
 	CharacterAppearanceId: number
-	CharacterAppearanceLoaded: RBXScriptSignal<Model>
-	CharacterRemoving: RBXScriptSignal<Model>
+	CharacterAppearanceLoaded: RBXScriptSignal<(character: Model) -> (), Model>
+	CharacterRemoving: RBXScriptSignal<(character: Model) -> (), Model>
 	ChatMode: EnumChatMode
-	Chatted: RBXScriptSignal<string, Player?>
+	Chatted: RBXScriptSignal<(message: string, recipient: Player?) -> (), string, Player?>
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
@@ -7959,24 +7959,24 @@ declare class Player extends Instance
 	DevTouchMovementMode: EnumDevTouchMovementMode
 	DisplayName: string
 	FollowUserId: number
-	FriendStatusChanged: RBXScriptSignal<Player, EnumFriendStatus>
+	FriendStatusChanged: RBXScriptSignal<(player: Player, friendStatus: EnumFriendStatus) -> (), Player, EnumFriendStatus>
 	GameplayPaused: boolean
 	Guest: boolean
 	HasVerifiedBadge: boolean
 	HealthDisplayDistance: number
-	Idled: RBXScriptSignal<number>
+	Idled: RBXScriptSignal<(time: number) -> (), number>
 	LocaleId: string
 	MaximumSimulationRadius: number
 	MembershipType: EnumMembershipType
 	NameDisplayDistance: number
 	Neutral: boolean
-	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
+	OnTeleport: RBXScriptSignal<(teleportState: EnumTeleportState, placeId: number, spawnName: string) -> (), EnumTeleportState, number, string>
 	OsPlatform: string
 	PlatformName: string
 	ReplicationFocus: Instance
 	RespawnLocation: SpawnLocation
 	SimulationRadius: number
-	SimulationRadiusChanged: RBXScriptSignal<number>
+	SimulationRadiusChanged: RBXScriptSignal<(radius: number) -> (), number>
 	Team: Team
 	TeamColor: BrickColor
 	Teleported: boolean
@@ -8052,18 +8052,18 @@ declare class Players extends Instance
 	BubbleChat: boolean
 	CharacterAutoLoads: boolean
 	ClassicChat: boolean
-	FriendRequestEvent: RBXScriptSignal<Player, Player, EnumFriendRequestEvent>
-	GameAnnounce: RBXScriptSignal<string>
+	FriendRequestEvent: RBXScriptSignal<(player: Player, player: Player, friendRequestEvent: EnumFriendRequestEvent) -> (), Player, Player, EnumFriendRequestEvent>
+	GameAnnounce: RBXScriptSignal<(message: string) -> (), string>
 	LocalPlayer: Player
 	MaxPlayers: number
 	MaxPlayersInternal: number
-	PlayerAdded: RBXScriptSignal<Player>
-	PlayerChatted: RBXScriptSignal<EnumPlayerChatType, Player, string, Player?>
-	PlayerConnecting: RBXScriptSignal<Player>
-	PlayerDisconnecting: RBXScriptSignal<Player>
-	PlayerMembershipChanged: RBXScriptSignal<Player>
-	PlayerRejoining: RBXScriptSignal<Player>
-	PlayerRemoving: RBXScriptSignal<Player>
+	PlayerAdded: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerChatted: RBXScriptSignal<(chatType: EnumPlayerChatType, player: Player, message: string, targetPlayer: Player?) -> (), EnumPlayerChatType, Player, string, Player?>
+	PlayerConnecting: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerDisconnecting: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerMembershipChanged: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerRejoining: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerRemoving: RBXScriptSignal<(player: Player) -> (), Player>
 	PreferredPlayers: number
 	PreferredPlayersInternal: number
 	RespawnTime: number
@@ -8228,15 +8228,15 @@ declare class ProximityPrompt extends Instance
 	KeyboardKeyCode: EnumKeyCode
 	MaxActivationDistance: number
 	ObjectText: string
-	PromptButtonHoldBegan: RBXScriptSignal<Player>
-	PromptButtonHoldEnded: RBXScriptSignal<Player>
+	PromptButtonHoldBegan: RBXScriptSignal<(playerWhoTriggered: Player) -> (), Player>
+	PromptButtonHoldEnded: RBXScriptSignal<(playerWhoTriggered: Player) -> (), Player>
 	PromptHidden: RBXScriptSignal<>
-	PromptShown: RBXScriptSignal<EnumProximityPromptInputType>
+	PromptShown: RBXScriptSignal<(inputType: EnumProximityPromptInputType) -> (), EnumProximityPromptInputType>
 	RequiresLineOfSight: boolean
 	RootLocalizationTable: LocalizationTable
 	Style: EnumProximityPromptStyle
-	TriggerEnded: RBXScriptSignal<Player>
-	Triggered: RBXScriptSignal<Player>
+	TriggerEnded: RBXScriptSignal<(playerWhoTriggered: Player) -> (), Player>
+	Triggered: RBXScriptSignal<(playerWhoTriggered: Player) -> (), Player>
 	UIOffset: Vector2
 	function InputHoldBegin(self): nil
 	function InputHoldEnd(self): nil
@@ -8245,12 +8245,12 @@ end
 declare class ProximityPromptService extends Instance
 	Enabled: boolean
 	MaxPromptsVisible: number
-	PromptButtonHoldBegan: RBXScriptSignal<ProximityPrompt, Player>
-	PromptButtonHoldEnded: RBXScriptSignal<ProximityPrompt, Player>
-	PromptHidden: RBXScriptSignal<ProximityPrompt>
-	PromptShown: RBXScriptSignal<ProximityPrompt, EnumProximityPromptInputType>
-	PromptTriggerEnded: RBXScriptSignal<ProximityPrompt, Player>
-	PromptTriggered: RBXScriptSignal<ProximityPrompt, Player>
+	PromptButtonHoldBegan: RBXScriptSignal<(prompt: ProximityPrompt, playerWhoTriggered: Player) -> (), ProximityPrompt, Player>
+	PromptButtonHoldEnded: RBXScriptSignal<(prompt: ProximityPrompt, playerWhoTriggered: Player) -> (), ProximityPrompt, Player>
+	PromptHidden: RBXScriptSignal<(prompt: ProximityPrompt) -> (), ProximityPrompt>
+	PromptShown: RBXScriptSignal<(prompt: ProximityPrompt, inputType: EnumProximityPromptInputType) -> (), ProximityPrompt, EnumProximityPromptInputType>
+	PromptTriggerEnded: RBXScriptSignal<(prompt: ProximityPrompt, playerWhoTriggered: Player) -> (), ProximityPrompt, Player>
+	PromptTriggered: RBXScriptSignal<(prompt: ProximityPrompt, playerWhoTriggered: Player) -> (), ProximityPrompt, Player>
 end
 
 declare class PublishService extends Instance
@@ -8344,8 +8344,8 @@ declare class RemoteDebuggerServer extends Instance
 end
 
 declare class RemoteEvent extends Instance
-	OnClientEvent: RBXScriptSignal<...any>
-	OnServerEvent: RBXScriptSignal<(Player, ...any)>
+	OnClientEvent: RBXScriptSignal<(...any) -> (), ...any>
+	OnServerEvent: RBXScriptSignal<(player: Player, ...any) -> (), (Player, ...any)>
 	function FireAllClients(self, ...: any): ()
 	function FireClient(self, player: Player, ...: any): ()
 	function FireServer(self, ...: any): ()
@@ -8425,13 +8425,13 @@ end
 
 declare class RunService extends Instance
 	ClientGitHash: string
-	Heartbeat: RBXScriptSignal<number>
-	PostSimulation: RBXScriptSignal<number>
-	PreAnimation: RBXScriptSignal<number>
-	PreRender: RBXScriptSignal<number>
-	PreSimulation: RBXScriptSignal<number>
-	RenderStepped: RBXScriptSignal<number>
-	Stepped: RBXScriptSignal<number, number>
+	Heartbeat: RBXScriptSignal<(deltaTime: number) -> (), number>
+	PostSimulation: RBXScriptSignal<(deltaTimeSim: number) -> (), number>
+	PreAnimation: RBXScriptSignal<(deltaTimeSim: number) -> (), number>
+	PreRender: RBXScriptSignal<(deltaTimeRender: number) -> (), number>
+	PreSimulation: RBXScriptSignal<(deltaTimeSim: number) -> (), number>
+	RenderStepped: RBXScriptSignal<(deltaTime: number) -> (), number>
+	Stepped: RBXScriptSignal<(time: number, deltaTime: number) -> (), number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
@@ -8472,11 +8472,11 @@ declare class CoreScriptBuilder extends ScriptBuilder
 end
 
 declare class ScriptChangeService extends Instance
-	ScriptAdded: RBXScriptSignal<LuaSourceContainer>
-	ScriptBeingRemoved: RBXScriptSignal<LuaSourceContainer>
-	ScriptChanged: RBXScriptSignal<LuaSourceContainer, string>
-	ScriptFullNameChanged: RBXScriptSignal<LuaSourceContainer>
-	ScriptSourceChanged: RBXScriptSignal<LuaSourceContainer>
+	ScriptAdded: RBXScriptSignal<(script: LuaSourceContainer) -> (), LuaSourceContainer>
+	ScriptBeingRemoved: RBXScriptSignal<(script: LuaSourceContainer) -> (), LuaSourceContainer>
+	ScriptChanged: RBXScriptSignal<(script: LuaSourceContainer, property: string) -> (), LuaSourceContainer, string>
+	ScriptFullNameChanged: RBXScriptSignal<(script: LuaSourceContainer) -> (), LuaSourceContainer>
+	ScriptSourceChanged: RBXScriptSignal<(script: LuaSourceContainer) -> (), LuaSourceContainer>
 end
 
 declare class ScriptCloneWatcher extends Instance
@@ -8486,8 +8486,8 @@ declare class ScriptCloneWatcherHelper extends Instance
 end
 
 declare class ScriptContext extends Instance
-	Error: RBXScriptSignal<string, string, Instance>
-	ErrorDetailed: RBXScriptSignal<string, string, Instance, string, number>
+	Error: RBXScriptSignal<(message: string, stackTrace: string, script: Instance) -> (), string, string, Instance>
+	ErrorDetailed: RBXScriptSignal<(message: string, stackTrace: string, script: Instance, details: string, securityLevel: number) -> (), string, string, Instance, string, number>
 	ScriptsDisabled: boolean
 	function AddCoreScriptLocal(self, name: string, parent: Instance): nil
 	function ClearScriptProfilingData(self): nil
@@ -8500,16 +8500,16 @@ declare class ScriptContext extends Instance
 end
 
 declare class ScriptDebugger extends Instance
-	BreakpointAdded: RBXScriptSignal<Instance>
-	BreakpointRemoved: RBXScriptSignal<Instance>
+	BreakpointAdded: RBXScriptSignal<(breakpoint: Instance) -> (), Instance>
+	BreakpointRemoved: RBXScriptSignal<(breakpoint: Instance) -> (), Instance>
 	CurrentLine: number
-	EncounteredBreak: RBXScriptSignal<number, EnumBreakReason>
+	EncounteredBreak: RBXScriptSignal<(line: number, breakReason: EnumBreakReason) -> (), number, EnumBreakReason>
 	IsDebugging: boolean
 	IsPaused: boolean
 	Resuming: RBXScriptSignal<>
 	Script: Instance
-	WatchAdded: RBXScriptSignal<Instance>
-	WatchRemoved: RBXScriptSignal<Instance>
+	WatchAdded: RBXScriptSignal<(watch: Instance) -> (), Instance>
+	WatchRemoved: RBXScriptSignal<(watch: Instance) -> (), Instance>
 	function AddWatch(self, expression: string): Instance
 	function GetBreakpoints(self): { Instance }
 	function GetGlobals(self, stackFrame: number?): { [any]: any }
@@ -8525,8 +8525,8 @@ declare class ScriptDebugger extends Instance
 end
 
 declare class ScriptDocument extends Instance
-	SelectionChanged: RBXScriptSignal<number, number, number, number>
-	ViewportChanged: RBXScriptSignal<number, number>
+	SelectionChanged: RBXScriptSignal<(positionLine: number, positionCharacter: number, anchorLine: number, anchorCharacter: number) -> (), number, number, number, number>
+	ViewportChanged: RBXScriptSignal<(startLine: number, endLine: number) -> (), number, number>
 	function CloseAsync(self): any
 	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
 	function ForceSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
@@ -8546,9 +8546,9 @@ declare class ScriptDocument extends Instance
 end
 
 declare class ScriptEditorService extends Instance
-	TextDocumentDidChange: RBXScriptSignal<ScriptDocument, any>
-	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
-	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
+	TextDocumentDidChange: RBXScriptSignal<(document: ScriptDocument, changesArray: any) -> (), ScriptDocument, any>
+	TextDocumentDidClose: RBXScriptSignal<(oldDocument: ScriptDocument) -> (), ScriptDocument>
+	TextDocumentDidOpen: RBXScriptSignal<(newDocument: ScriptDocument) -> (), ScriptDocument>
 	function DeregisterAutocompleteCallback(self, name: string): nil
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
 	function GetScriptDocuments(self): { Instance }
@@ -8597,7 +8597,7 @@ declare class SessionService extends Instance
 end
 
 declare class ShorelineUpgraderService extends Instance
-	Status: RBXScriptSignal<number>
+	Status: RBXScriptSignal<(progressRatio: number) -> (), number>
 	function Cancel(self): nil
 	function Start(self): nil
 end
@@ -8631,8 +8631,8 @@ declare class SnippetService extends Instance
 end
 
 declare class SocialService extends Instance
-	GameInvitePromptClosed: RBXScriptSignal<Instance, { any }>
-	PromptInviteRequested: RBXScriptSignal<Instance, Instance>
+	GameInvitePromptClosed: RBXScriptSignal<(player: Instance, recipientIds: { any }) -> (), Instance, { any }>
+	PromptInviteRequested: RBXScriptSignal<(player: Instance, experienceInviteOptions: Instance) -> (), Instance, Instance>
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
 	function InvokeGameInvitePromptClosed(self, player: Instance, recipientIds: { any }): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
@@ -8640,29 +8640,29 @@ end
 
 declare class Sound extends Instance
 	ChannelCount: number
-	DidLoop: RBXScriptSignal<string, number>
-	Ended: RBXScriptSignal<string>
+	DidLoop: RBXScriptSignal<(soundId: string, numOfTimesLooped: number) -> (), string, number>
+	Ended: RBXScriptSignal<(soundId: string) -> (), string>
 	IsLoaded: boolean
 	IsPaused: boolean
 	IsPlaying: boolean
-	Loaded: RBXScriptSignal<string>
+	Loaded: RBXScriptSignal<(soundId: string) -> (), string>
 	LoopRegion: NumberRange
 	Looped: boolean
-	Paused: RBXScriptSignal<string>
+	Paused: RBXScriptSignal<(soundId: string) -> (), string>
 	PlayOnRemove: boolean
 	PlaybackLoudness: number
 	PlaybackRegion: NumberRange
 	PlaybackRegionsEnabled: boolean
 	PlaybackSpeed: number
-	Played: RBXScriptSignal<string>
+	Played: RBXScriptSignal<(soundId: string) -> (), string>
 	Playing: boolean
-	Resumed: RBXScriptSignal<string>
+	Resumed: RBXScriptSignal<(soundId: string) -> (), string>
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
 	SoundGroup: SoundGroup
 	SoundId: Content
-	Stopped: RBXScriptSignal<string>
+	Stopped: RBXScriptSignal<(soundId: string) -> (), string>
 	TimeLength: number
 	TimePosition: number
 	UsageContextPermission: EnumUsageContext
@@ -8750,7 +8750,7 @@ end
 
 declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
-	DeviceListChanged: RBXScriptSignal<any>
+	DeviceListChanged: RBXScriptSignal<(newDevices: any) -> (), any>
 	DistanceFactor: number
 	DopplerScale: number
 	RespectFilteringEnabled: boolean
@@ -8916,9 +8916,9 @@ declare class Studio extends Instance
 end
 
 declare class StudioAssetService extends Instance
-	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
-	OnPublishPackageResult: RBXScriptSignal<{ [any]: any }, string>
-	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
+	OnConvertToPackageResult: RBXScriptSignal<(isSuccessful: boolean, errorMessage: string) -> (), boolean, string>
+	OnPublishPackageResult: RBXScriptSignal<(result: { [any]: any }, errorMessage: string) -> (), { [any]: any }, string>
+	OnSaveToRoblox: RBXScriptSignal<(instances: { Instance }) -> (), { Instance }>
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function PublishPackage(self, instance: Instance, publishInfo: { [any]: any }): nil
 	function SerializeInstances(self, instances: { Instance }): string
@@ -8953,10 +8953,10 @@ declare class StudioHighDpiService extends Instance
 end
 
 declare class StudioPublishService extends Instance
-	GameNameUpdated: RBXScriptSignal<string>
+	GameNameUpdated: RBXScriptSignal<(name: string) -> (), string>
 	GamePublishCancelled: RBXScriptSignal<>
-	GamePublishFinished: RBXScriptSignal<boolean, number>
-	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
+	GamePublishFinished: RBXScriptSignal<(success: boolean, gameId: number) -> (), boolean, number>
+	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<(showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode) -> (), boolean, boolean, EnumStudioCloseMode>
 	function ClearUploadNames(self): nil
 	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
 	function PublishThenTurnOnTeamCreate(self): nil
@@ -8979,16 +8979,16 @@ declare class StudioService extends Instance
 	HoverInstance: Instance
 	InstalledPluginData: string
 	OnImportFromRoblox: RBXScriptSignal<>
-	OnOpenGameSettings: RBXScriptSignal<string>
-	OnOpenManagePackagePlugin: RBXScriptSignal<number, number>
+	OnOpenGameSettings: RBXScriptSignal<(pageIdentifier: string) -> (), string>
+	OnOpenManagePackagePlugin: RBXScriptSignal<(userId: number, assetId: number) -> (), number, number>
 	OnPluginInstalledFromToolbox: RBXScriptSignal<>
-	OnPluginInstalledFromWeb: RBXScriptSignal<string>
-	OnPublishAsPlugin: RBXScriptSignal<{ Instance }>
-	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
+	OnPluginInstalledFromWeb: RBXScriptSignal<(pluginId: string) -> (), string>
+	OnPublishAsPlugin: RBXScriptSignal<(instances: { Instance }) -> (), { Instance }>
+	OnSaveToRoblox: RBXScriptSignal<(instances: { Instance }) -> (), { Instance }>
 	PivotSnapToGeometry: boolean
 	PromptTransformPluginCheckEnable: RBXScriptSignal<>
 	RotateIncrement: number
-	SaveLocallyAsComplete: RBXScriptSignal<boolean>
+	SaveLocallyAsComplete: RBXScriptSignal<(success: boolean) -> (), boolean>
 	ShowActiveInstanceHighlight: boolean
 	ShowConstraintDetails: boolean
 	StudioLocaleId: string
@@ -9043,8 +9043,8 @@ end
 declare class Team extends Instance
 	AutoAssignable: boolean
 	ChildOrder: number
-	PlayerAdded: RBXScriptSignal<Player>
-	PlayerRemoved: RBXScriptSignal<Player>
+	PlayerAdded: RBXScriptSignal<(player: Player) -> (), Player>
+	PlayerRemoved: RBXScriptSignal<(player: Player) -> (), Player>
 	TeamColor: BrickColor
 	function GetPlayers(self): { Player }
 end
@@ -9073,9 +9073,9 @@ declare class TeleportOptions extends Instance
 end
 
 declare class TeleportService extends Instance
-	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
+	LocalPlayerArrivedFromTeleport: RBXScriptSignal<(customLoadingScreen: Instance?, dataTable: any) -> (), Instance?, any>
 	MenuTeleportAttempt: RBXScriptSignal<>
-	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
+	TeleportInitFailed: RBXScriptSignal<(player: Player, teleportResult: EnumTeleportResult, errorMessage: string, placeId: number, teleportOptions: TeleportOptions) -> (), Player, EnumTeleportResult, string, number, TeleportOptions>
 	function Block(self): nil
 	function GetArrivingTeleportGui(self): ScreenGui
 	function GetLocalPlayerTeleportData(self): any
@@ -9124,8 +9124,8 @@ declare class TestService extends Instance
 	IsPhysicsEnvironmentalThrottled: boolean
 	IsSleepAllowed: boolean
 	NumberOfPlayers: number
-	ServerCollectConditionalResult: RBXScriptSignal<boolean, string, Instance, number>
-	ServerCollectResult: RBXScriptSignal<string, Instance, number>
+	ServerCollectConditionalResult: RBXScriptSignal<(condition: boolean, text: string, script: Instance, line: number) -> (), boolean, string, Instance, number>
+	ServerCollectResult: RBXScriptSignal<(text: string, script: Instance, line: number) -> (), string, Instance, number>
 	SimulateSecondsLag: number
 	TestCount: number
 	Timeout: number
@@ -9147,7 +9147,7 @@ declare class TextBoxService extends Instance
 end
 
 declare class TextChannel extends Instance
-	MessageReceived: RBXScriptSignal<TextChatMessage>
+	MessageReceived: RBXScriptSignal<(incomingMessage: TextChatMessage) -> (), TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> any
 	ShouldDeliverCallback: (message: TextChatMessage, textSource: TextSource) -> any
 	function AddUserAsync(self, userId: number): any
@@ -9159,7 +9159,7 @@ declare class TextChatCommand extends Instance
 	Enabled: boolean
 	PrimaryAlias: string
 	SecondaryAlias: string
-	Triggered: RBXScriptSignal<TextSource, string>
+	Triggered: RBXScriptSignal<(originTextSource: TextSource, unfilteredText: string) -> (), TextSource, string>
 end
 
 declare class TextChatConfigurations extends Instance
@@ -9238,9 +9238,9 @@ declare class TextChatService extends Instance
 	ChatVersion: EnumChatVersion
 	CreateDefaultCommands: boolean
 	CreateDefaultTextChannels: boolean
-	MessageReceived: RBXScriptSignal<TextChatMessage>
+	MessageReceived: RBXScriptSignal<(textChatMessage: TextChatMessage) -> (), TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> any
-	SendingMessage: RBXScriptSignal<TextChatMessage>
+	SendingMessage: RBXScriptSignal<(textChatMessage: TextChatMessage) -> (), TextChatMessage>
 end
 
 declare class TextFilterResult extends Instance
@@ -9266,7 +9266,7 @@ end
 declare class ThirdPartyUserService extends Instance
 	ActiveGamepadAdded: RBXScriptSignal<>
 	ActiveGamepadRemoved: RBXScriptSignal<>
-	ActiveUserSignedOut: RBXScriptSignal<number>
+	ActiveUserSignedOut: RBXScriptSignal<(signOutStatus: number) -> (), number>
 	function GetUserPlatformId(self): string
 	function GetUserPlatformName(self): string
 	function HaveActiveUser(self): boolean
@@ -9345,7 +9345,7 @@ declare class Translator extends Instance
 end
 
 declare class TweenBase extends Instance
-	Completed: RBXScriptSignal<EnumPlaybackState>
+	Completed: RBXScriptSignal<(playbackState: EnumPlaybackState) -> (), EnumPlaybackState>
 	PlaybackState: EnumPlaybackState
 	function Cancel(self): nil
 	function Pause(self): nil
@@ -9455,10 +9455,10 @@ declare class UIPageLayout extends UIGridStyleLayout
 	EasingStyle: EnumEasingStyle
 	GamepadInputEnabled: boolean
 	Padding: UDim
-	PageEnter: RBXScriptSignal<Instance>
-	PageLeave: RBXScriptSignal<Instance>
+	PageEnter: RBXScriptSignal<(page: Instance) -> (), Instance>
+	PageLeave: RBXScriptSignal<(page: Instance) -> (), Instance>
 	ScrollWheelInputEnabled: boolean
-	Stopped: RBXScriptSignal<Instance>
+	Stopped: RBXScriptSignal<(currentPage: Instance) -> (), Instance>
 	TouchInputEnabled: boolean
 	TweenTime: number
 	function JumpTo(self, page: Instance): nil
@@ -9510,7 +9510,7 @@ declare class UserGameSettings extends Instance
 	ControlMode: EnumControlMode
 	DefaultCameraID: string
 	Fullscreen: boolean
-	FullscreenChanged: RBXScriptSignal<boolean>
+	FullscreenChanged: RBXScriptSignal<(isFullscreen: boolean) -> (), boolean>
 	GamepadCameraSensitivity: number
 	GraphicsQualityLevel: number
 	HasEverUsedVR: boolean
@@ -9526,7 +9526,7 @@ declare class UserGameSettings extends Instance
 	OnScreenProfilerEnabled: boolean
 	OnboardingsCompleted: string
 	PerformanceStatsVisible: boolean
-	PerformanceStatsVisibleChanged: RBXScriptSignal<boolean>
+	PerformanceStatsVisibleChanged: RBXScriptSignal<(isPerformanceStatsVisible: boolean) -> (), boolean>
 	RCCProfilerRecordFrameRate: number
 	RCCProfilerRecordTimeFrame: number
 	RotationType: EnumRotationType
@@ -9534,7 +9534,7 @@ declare class UserGameSettings extends Instance
 	StartMaximized: boolean
 	StartScreenPosition: Vector2
 	StartScreenSize: Vector2
-	StudioModeChanged: RBXScriptSignal<boolean>
+	StudioModeChanged: RBXScriptSignal<(isStudioMode: boolean) -> (), boolean>
 	TouchCameraMovementMode: EnumTouchCameraMovementMode
 	TouchMovementMode: EnumTouchMovementMode
 	UsedCoreGuiIsVisibleToggle: boolean
@@ -9559,20 +9559,20 @@ end
 declare class UserInputService extends Instance
 	AccelerometerEnabled: boolean
 	BottomBarSize: Vector2
-	DeviceAccelerationChanged: RBXScriptSignal<InputObject>
-	DeviceGravityChanged: RBXScriptSignal<InputObject>
-	DeviceRotationChanged: RBXScriptSignal<InputObject, CFrame>
-	GamepadConnected: RBXScriptSignal<EnumUserInputType>
-	GamepadDisconnected: RBXScriptSignal<EnumUserInputType>
+	DeviceAccelerationChanged: RBXScriptSignal<(acceleration: InputObject) -> (), InputObject>
+	DeviceGravityChanged: RBXScriptSignal<(gravity: InputObject) -> (), InputObject>
+	DeviceRotationChanged: RBXScriptSignal<(rotation: InputObject, cframe: CFrame) -> (), InputObject, CFrame>
+	GamepadConnected: RBXScriptSignal<(gamepadNum: EnumUserInputType) -> (), EnumUserInputType>
+	GamepadDisconnected: RBXScriptSignal<(gamepadNum: EnumUserInputType) -> (), EnumUserInputType>
 	GamepadEnabled: boolean
 	GazeSelectionEnabled: boolean
 	GyroscopeEnabled: boolean
-	InputBegan: RBXScriptSignal<InputObject, boolean>
-	InputChanged: RBXScriptSignal<InputObject, boolean>
-	InputEnded: RBXScriptSignal<InputObject, boolean>
+	InputBegan: RBXScriptSignal<(input: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
+	InputChanged: RBXScriptSignal<(input: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
+	InputEnded: RBXScriptSignal<(input: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
 	JumpRequest: RBXScriptSignal<>
 	KeyboardEnabled: boolean
-	LastInputTypeChanged: RBXScriptSignal<EnumUserInputType>
+	LastInputTypeChanged: RBXScriptSignal<(lastInputType: EnumUserInputType) -> (), EnumUserInputType>
 	LegacyInputEventsEnabled: boolean
 	MouseBehavior: EnumMouseBehavior
 	MouseDeltaSensitivity: number
@@ -9584,24 +9584,24 @@ declare class UserInputService extends Instance
 	OnScreenKeyboardSize: Vector2
 	OnScreenKeyboardVisible: boolean
 	OverrideMouseIconBehavior: EnumOverrideMouseIconBehavior
-	PointerAction: RBXScriptSignal<number, Vector2, number, boolean>
+	PointerAction: RBXScriptSignal<(wheel: number, pan: Vector2, pinch: number, gameProcessedEvent: boolean) -> (), number, Vector2, number, boolean>
 	RightBarSize: Vector2
 	StatusBarSize: Vector2
-	StatusBarTapped: RBXScriptSignal<Vector2>
-	TextBoxFocusReleased: RBXScriptSignal<TextBox>
-	TextBoxFocused: RBXScriptSignal<TextBox>
+	StatusBarTapped: RBXScriptSignal<(position: Vector2) -> (), Vector2>
+	TextBoxFocusReleased: RBXScriptSignal<(textboxReleased: TextBox) -> (), TextBox>
+	TextBoxFocused: RBXScriptSignal<(textboxFocused: TextBox) -> (), TextBox>
 	TouchEnabled: boolean
-	TouchEnded: RBXScriptSignal<InputObject, boolean>
-	TouchLongPress: RBXScriptSignal<{ Vector2 }, EnumUserInputState, boolean>
-	TouchMoved: RBXScriptSignal<InputObject, boolean>
-	TouchPan: RBXScriptSignal<{ Vector2 }, Vector2, Vector2, EnumUserInputState, boolean>
-	TouchPinch: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState, boolean>
-	TouchRotate: RBXScriptSignal<{ Vector2 }, number, number, EnumUserInputState, boolean>
-	TouchStarted: RBXScriptSignal<InputObject, boolean>
-	TouchSwipe: RBXScriptSignal<EnumSwipeDirection, number, boolean>
-	TouchTap: RBXScriptSignal<{ Vector2 }, boolean>
-	TouchTapInWorld: RBXScriptSignal<Vector2, boolean>
-	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
+	TouchEnded: RBXScriptSignal<(touch: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
+	TouchLongPress: RBXScriptSignal<(touchPositions: { Vector2 }, state: EnumUserInputState, gameProcessedEvent: boolean) -> (), { Vector2 }, EnumUserInputState, boolean>
+	TouchMoved: RBXScriptSignal<(touch: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
+	TouchPan: RBXScriptSignal<(touchPositions: { Vector2 }, totalTranslation: Vector2, velocity: Vector2, state: EnumUserInputState, gameProcessedEvent: boolean) -> (), { Vector2 }, Vector2, Vector2, EnumUserInputState, boolean>
+	TouchPinch: RBXScriptSignal<(touchPositions: { Vector2 }, scale: number, velocity: number, state: EnumUserInputState, gameProcessedEvent: boolean) -> (), { Vector2 }, number, number, EnumUserInputState, boolean>
+	TouchRotate: RBXScriptSignal<(touchPositions: { Vector2 }, rotation: number, velocity: number, state: EnumUserInputState, gameProcessedEvent: boolean) -> (), { Vector2 }, number, number, EnumUserInputState, boolean>
+	TouchStarted: RBXScriptSignal<(touch: InputObject, gameProcessedEvent: boolean) -> (), InputObject, boolean>
+	TouchSwipe: RBXScriptSignal<(swipeDirection: EnumSwipeDirection, numberOfTouches: number, gameProcessedEvent: boolean) -> (), EnumSwipeDirection, number, boolean>
+	TouchTap: RBXScriptSignal<(touchPositions: { Vector2 }, gameProcessedEvent: boolean) -> (), { Vector2 }, boolean>
+	TouchTapInWorld: RBXScriptSignal<(position: Vector2, processedByUI: boolean) -> (), Vector2, boolean>
+	UserCFrameChanged: RBXScriptSignal<(type: EnumUserCFrame, value: CFrame) -> (), EnumUserCFrame, CFrame>
 	VREnabled: boolean
 	WindowFocusReleased: RBXScriptSignal<>
 	WindowFocused: RBXScriptSignal<>
@@ -9641,11 +9641,11 @@ declare class VRService extends Instance
 	DidPointerHit: boolean
 	GuiInputUserCFrame: EnumUserCFrame
 	LaserDistance: number
-	NavigationRequested: RBXScriptSignal<CFrame, EnumUserCFrame>
+	NavigationRequested: RBXScriptSignal<(cframe: CFrame, inputUserCFrame: EnumUserCFrame) -> (), CFrame, EnumUserCFrame>
 	PointerHitCFrame: CFrame
-	TouchpadModeChanged: RBXScriptSignal<EnumVRTouchpad, EnumVRTouchpadMode>
-	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
-	UserCFrameEnabled: RBXScriptSignal<EnumUserCFrame, boolean>
+	TouchpadModeChanged: RBXScriptSignal<(pad: EnumVRTouchpad, mode: EnumVRTouchpadMode) -> (), EnumVRTouchpad, EnumVRTouchpadMode>
+	UserCFrameChanged: RBXScriptSignal<(type: EnumUserCFrame, value: CFrame) -> (), EnumUserCFrame, CFrame>
+	UserCFrameEnabled: RBXScriptSignal<(type: EnumUserCFrame, enabled: boolean) -> (), EnumUserCFrame, boolean>
 	VRDeviceAvailable: boolean
 	VRDeviceName: string
 	VREnabled: boolean
@@ -9664,26 +9664,26 @@ declare class ValueBase extends Instance
 end
 
 declare class BinaryStringValue extends ValueBase
-	Changed: RBXScriptSignal<BinaryString>
+	Changed: RBXScriptSignal<(value: BinaryString) -> (), BinaryString>
 end
 
 declare class BoolValue extends ValueBase
-	Changed: RBXScriptSignal<boolean>
+	Changed: RBXScriptSignal<(value: boolean) -> (), boolean>
 	Value: boolean
 end
 
 declare class BrickColorValue extends ValueBase
-	Changed: RBXScriptSignal<BrickColor>
+	Changed: RBXScriptSignal<(value: BrickColor) -> (), BrickColor>
 	Value: BrickColor
 end
 
 declare class CFrameValue extends ValueBase
-	Changed: RBXScriptSignal<CFrame>
+	Changed: RBXScriptSignal<(value: CFrame) -> (), CFrame>
 	Value: CFrame
 end
 
 declare class Color3Value extends ValueBase
-	Changed: RBXScriptSignal<Color3>
+	Changed: RBXScriptSignal<(value: Color3) -> (), Color3>
 	Value: Color3
 end
 
@@ -9692,32 +9692,32 @@ end
 
 
 declare class IntValue extends ValueBase
-	Changed: RBXScriptSignal<number>
+	Changed: RBXScriptSignal<(value: number) -> (), number>
 	Value: number
 end
 
 declare class NumberValue extends ValueBase
-	Changed: RBXScriptSignal<number>
+	Changed: RBXScriptSignal<(value: number) -> (), number>
 	Value: number
 end
 
 declare class ObjectValue extends ValueBase
-	Changed: RBXScriptSignal<Instance>
+	Changed: RBXScriptSignal<(value: Instance) -> (), Instance>
 	Value: Instance
 end
 
 declare class RayValue extends ValueBase
-	Changed: RBXScriptSignal<Ray>
+	Changed: RBXScriptSignal<(value: Ray) -> (), Ray>
 	Value: Ray
 end
 
 declare class StringValue extends ValueBase
-	Changed: RBXScriptSignal<string>
+	Changed: RBXScriptSignal<(value: string) -> (), string>
 	Value: string
 end
 
 declare class Vector3Value extends ValueBase
-	Changed: RBXScriptSignal<Vector3>
+	Changed: RBXScriptSignal<(value: Vector3) -> (), Vector3>
 	Value: Vector3
 end
 
@@ -9736,16 +9736,16 @@ declare class VideoCaptureService extends Instance
 	Active: boolean
 	CameraID: string
 	DevicesChanged: RBXScriptSignal<>
-	Error: RBXScriptSignal<string, string>
-	Started: RBXScriptSignal<string>
-	Stopped: RBXScriptSignal<string>
+	Error: RBXScriptSignal<(cameraid: string, errorcode: string) -> (), string, string>
+	Started: RBXScriptSignal<(cameraid: string) -> (), string>
+	Stopped: RBXScriptSignal<(cameraid: string) -> (), string>
 	function GetCameraDevices(self): { [any]: any }
 end
 
 declare class VirtualInputManager extends Instance
 	AdditionalLuaState: string
-	PlaybackCompleted: RBXScriptSignal<string>
-	RecordingCompleted: RBXScriptSignal<string>
+	PlaybackCompleted: RBXScriptSignal<(additionalLuaState: string) -> (), string>
+	RecordingCompleted: RBXScriptSignal<(result: string) -> (), string>
 	function Dump(self): nil
 	function HandleGamepadAxisInput(self, objectId: number, keyCode: EnumKeyCode, x: number, y: number, z: number): nil
 	function HandleGamepadButtonInput(self, deviceId: number, keyCode: EnumKeyCode, buttonState: number): nil
@@ -9828,8 +9828,8 @@ end
 declare class ServiceProvider extends Instance
 	Close: RBXScriptSignal<>
 	CloseLate: RBXScriptSignal<>
-	ServiceAdded: RBXScriptSignal<Instance>
-	ServiceRemoving: RBXScriptSignal<Instance>
+	ServiceAdded: RBXScriptSignal<(service: Instance) -> (), Instance>
+	ServiceRemoving: RBXScriptSignal<(service: Instance) -> (), Instance>
 	function FindService(self, className: string): Instance
 	function GetService(self, service: "AdService"): AdService
 	function GetService(self, service: "AnalyticsService"): AnalyticsService
@@ -10023,7 +10023,7 @@ declare class DataModel extends ServiceProvider
 	CreatorType: EnumCreatorType
 	GameId: number
 	Genre: EnumGenre
-	GraphicsQualityChangeRequest: RBXScriptSignal<boolean>
+	GraphicsQualityChangeRequest: RBXScriptSignal<(betterQuality: boolean) -> (), boolean>
 	IsSFFlagsLoaded: boolean
 	JobId: string
 	Loaded: RBXScriptSignal<>
@@ -10031,8 +10031,8 @@ declare class DataModel extends ServiceProvider
 	PlaceVersion: number
 	PrivateServerId: string
 	PrivateServerOwnerId: number
-	ScreenshotReady: RBXScriptSignal<string>
-	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
+	ScreenshotReady: RBXScriptSignal<(path: string) -> (), string>
+	ScreenshotSavedToAlbum: RBXScriptSignal<(filename: string, success: boolean, message: string) -> (), string, boolean, string>
 	Workspace: Workspace
 	function BindToClose(self, func: ((...any) -> ...any)): nil
 	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
