@@ -1,4 +1,5 @@
 #include "doctest.h"
+#include "Fixture.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
@@ -41,42 +42,45 @@ TEST_CASE("resolveModule handles LocalPlayer StarterGear")
     CHECK_EQ(resolved->name, "game/StarterPack/GearScript");
 }
 
-TEST_CASE("resolveModule handles FindFirstChild")
+TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstChild")
 {
     WorkspaceFileResolver fileResolver;
 
     Luau::ModuleInfo baseContext{"game/ReplicatedStorage"};
 
-    // :FindFirstChild("Testing")
-    std::string tempString = "Testing";
-    Luau::AstArray<char> testingStr{tempString.data(), tempString.size()};
-    std::vector<Luau::AstExpr*> tempArgs{Luau::AstExprConstantString(Luau::Location(), testingStr).asExpr()};
-    Luau::AstArray<Luau::AstExpr*> args{tempArgs.data(), tempArgs.size()};
-    auto expr = Luau::AstExprCall(Luau::Location(),
-        Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("FindFirstChild"), Luau::Location(), Luau::Position(0, 0), ':').asExpr(),
-        args, true, Luau::Location());
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    Luau::AstStatBlock* block = parse(R"(
+        local _ = node:FindFirstChild("Testing")
+    )");
+    REQUIRE(block != nullptr);
+    REQUIRE(block->body.size > 0);
+
+    Luau::AstStatLocal* local = block->body.data[0]->as<Luau::AstStatLocal>();
+    REQUIRE(local != nullptr);
+    REQUIRE_EQ(1, local->values.size);
+
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/ReplicatedStorage/Testing");
 }
 
-TEST_CASE("resolveModule fails on FindFirstChild with recursive enabled")
+TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive enabled")
 {
     WorkspaceFileResolver fileResolver;
 
-    Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/StarterGear"};
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage"};
 
-    // :FindFirstChild("Testing", true)
-    std::string tempString = "Testing";
-    Luau::AstArray<char> testingStr{tempString.data(), tempString.size()};
-    std::vector<Luau::AstExpr*> tempArgs{
-        Luau::AstExprConstantString(Luau::Location(), testingStr).asExpr(), Luau::AstExprConstantBool(Luau::Location(), true).asExpr()};
-    Luau::AstArray<Luau::AstExpr*> args{tempArgs.data(), tempArgs.size()};
-    auto expr = Luau::AstExprCall(Luau::Location(),
-        Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("FindFirstChild"), Luau::Location(), Luau::Position(0, 0), ':').asExpr(),
-        args, true, Luau::Location());
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    Luau::AstStatBlock* block = parse(R"(
+        local _ = node:FindFirstChild("Testing", true)
+    )");
+    REQUIRE(block != nullptr);
+    REQUIRE(block->body.size > 0);
+
+    Luau::AstStatLocal* local = block->body.data[0]->as<Luau::AstStatLocal>();
+    REQUIRE(local != nullptr);
+    REQUIRE_EQ(1, local->values.size);
+
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
 
     CHECK_FALSE(resolved.has_value());
 }

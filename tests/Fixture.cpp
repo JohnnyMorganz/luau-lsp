@@ -125,6 +125,20 @@ void Fixture::newDocument(const std::string& name, const std::string& source)
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
 }
 
+Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
+{
+    sourceModule.reset(new Luau::SourceModule);
+
+    Luau::ParseResult result = Luau::Parser::parse(source.c_str(), source.length(), *sourceModule->names, *sourceModule->allocator, parseOptions);
+
+    sourceModule->name = fromString(mainModuleName);
+    sourceModule->root = result.root;
+    sourceModule->mode = parseMode(result.hotcomments);
+    sourceModule->hotcomments = std::move(result.hotcomments);
+
+    return result.root;
+}
+
 Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
     Luau::ModuleName mm = fromString(mainModuleName);
