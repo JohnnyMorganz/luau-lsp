@@ -291,6 +291,46 @@ static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
            capabilities.textDocument->completion->completionItem->snippetSupport;
 }
 
+// Lifted from Autocomplete.cpp
+static std::optional<Luau::TypeId> findExpectedTypeAt(const Luau::Module& module, Luau::AstNode* node, Luau::Position position)
+{
+    auto expr = node->asExpr();
+    if (!expr)
+        return std::nullopt;
+
+    // Extra care for first function call argument location
+    // When we don't have anything inside () yet, we also don't have an AST node to base our lookup
+    if (Luau::AstExprCall* exprCall = expr->as<Luau::AstExprCall>())
+    {
+        if (exprCall->args.size == 0 && exprCall->argLocation.contains(position))
+        {
+            auto it = module.astTypes.find(exprCall->func);
+
+            if (!it)
+                return std::nullopt;
+
+            const Luau::FunctionTypeVar* ftv = Luau::get<Luau::FunctionTypeVar>(follow(*it));
+
+            if (!ftv)
+                return std::nullopt;
+
+            auto [head, tail] = flatten(ftv->argTypes);
+            unsigned index = exprCall->self ? 1 : 0;
+
+            if (index < head.size())
+                return head[index];
+
+            return std::nullopt;
+        }
+    }
+
+    auto it = module.astExpectedTypes.find(expr);
+    if (!it)
+        return std::nullopt;
+
+    return *it;
+}
+
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
     auto config = client->getConfiguration(rootUri);
@@ -591,6 +631,68 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
     {
         suggestImports(moduleName, position, config, items);
+    }
+
+    // Autocomplete anonymous function snippets for callbacks
+    if (result.ancestry.size() > 0)
+    {
+        if (auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName))
+        {
+            if (auto ty = findExpectedTypeAt(*module, result.ancestry.back(), position))
+            {
+                if (auto ftv = Luau::get<Luau::FunctionTypeVar>(Luau::follow(*ty)))
+                {
+                    lsp::CompletionItem item;
+                    item.sortText = SortText::Default;
+                    item.kind = lsp::CompletionItemKind::Snippet;
+
+                    // Construct label and snippet
+                    std::string label = "function(";
+                    std::string snippet = "function(";
+
+                    bool comma = false;
+                    size_t argIndex = 0;
+                    size_t snippetIndex = 1;
+
+                    auto it = Luau::begin(ftv->argTypes);
+                    for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
+                    {
+                        std::string argName = "_";
+                        if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
+                            argName = ftv->argNames.at(argIndex)->name;
+
+                        // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
+                        if (argIndex == 0 && (ftv->hasSelf || argName == "self"))
+                            continue;
+
+                        if (comma)
+                        {
+                            label += ", ";
+                            snippet += ", ";
+                        }
+
+                        label += argName;
+                        snippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
+
+                        comma = true;
+                        snippetIndex++;
+                    }
+
+                    label += ")";
+                    snippet += ")\n\t$0\nend";
+
+                    item.label = label;
+                    if (canUseSnippets(client->capabilities))
+                    {
+                        item.insertText = snippet;
+                        item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                        item.insertTextMode = lsp::InsertTextMode::AdjustIndentation;
+                    }
+
+                    items.emplace_back(item);
+                }
+            }
+        }
     }
 
     return items;
