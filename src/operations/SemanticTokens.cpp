@@ -166,6 +166,8 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             {
                 auto followedTy = Luau::follow(*ty);
                 auto type = inferTokenType(&followedTy, lsp::SemanticTokenTypes::Variable);
+                if (type == lsp::SemanticTokenTypes::Variable)
+                    return true; // No special semantic token needed, fall back to syntax highlighting
                 tokens.emplace_back(SemanticToken{var->location.begin, var->location.end, type, lsp::SemanticTokenModifiers::None});
             }
         }
