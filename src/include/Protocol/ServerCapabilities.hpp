@@ -88,6 +88,7 @@ struct ServerCapabilities
     bool referencesProvider = false;
     bool documentSymbolProvider = false;
     std::optional<DocumentLinkOptions> documentLinkProvider;
+    bool colorProvider = false;
     bool renameProvider = false;
     bool inlayHintProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider;
@@ -96,5 +97,5 @@ struct ServerCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, renameProvider, inlayHintProvider, diagnosticProvider, semanticTokensProvider, workspace);
+    documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, semanticTokensProvider, workspace);
 } // namespace lsp

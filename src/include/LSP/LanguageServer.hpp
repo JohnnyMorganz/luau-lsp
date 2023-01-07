@@ -65,6 +65,8 @@ private:
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
+    lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
+    lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);

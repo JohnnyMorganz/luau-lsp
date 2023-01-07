@@ -148,4 +148,98 @@ NLOHMANN_DEFINE_OPTIONAL(InlayHint, position, label, kind, textEdits, tooltip, p
 
 using InlayHintResult = std::vector<InlayHint>;
 
+struct DocumentColorParams
+{
+    /**
+     * The text document.
+     */
+    TextDocumentIdentifier textDocument;
+};
+NLOHMANN_DEFINE_OPTIONAL(DocumentColorParams, textDocument);
+
+struct Color
+{
+    /**
+     * The red component of this color in the range [0-1].
+     */
+    double red = 0.0;
+
+    /**
+     * The green component of this color in the range [0-1].
+     */
+    double green = 0.0;
+
+    /**
+     * The blue component of this color in the range [0-1].
+     */
+    double blue = 0.0;
+
+    /**
+     * The alpha component of this color in the range [0-1].
+     */
+    double alpha = 0.0;
+};
+NLOHMANN_DEFINE_OPTIONAL(Color, red, green, blue, alpha);
+
+struct ColorInformation
+{
+    /**
+     * The range in the document where this color appears.
+     */
+    Range range;
+
+    /**
+     * The actual color value for this color range.
+     */
+    Color color;
+};
+NLOHMANN_DEFINE_OPTIONAL(ColorInformation, range, color);
+
+using DocumentColorResult = std::vector<ColorInformation>;
+
+struct ColorPresentationParams
+{
+    /**
+     * The text document.
+     */
+    TextDocumentIdentifier textDocument;
+
+    /**
+     * The color information to request presentations for.
+     */
+    Color color;
+
+    /**
+     * The range where the color would be inserted. Serves as a context.
+     */
+    Range range;
+};
+NLOHMANN_DEFINE_OPTIONAL(ColorPresentationParams, textDocument, color, range);
+
+
+struct ColorPresentation
+{
+    /**
+     * The label of this color presentation. It will be shown on the color
+     * picker header. By default this is also the text that is inserted when
+     * selecting this color presentation.
+     */
+    std::string label;
+    /**
+     * An [edit](#TextEdit) which is applied to a document when selecting
+     * this presentation for the color. When `falsy` the
+     * [label](#ColorPresentation.label) is used.
+     */
+    std::optional<TextEdit> textEdit;
+    /**
+     * An optional array of additional [text edits](#TextEdit) that are applied
+     * when selecting this color presentation. Edits must not overlap with the
+     * main [edit](#ColorPresentation.textEdit) nor with themselves.
+     */
+    std::optional<std::vector<TextEdit>> additionalTextEdits;
+};
+NLOHMANN_DEFINE_OPTIONAL(ColorPresentation, label, textEdit, additionalTextEdits);
+
+using ColorPresentationResult = std::vector<ColorPresentation>;
+
 } // namespace lsp
