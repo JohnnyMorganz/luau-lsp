@@ -309,7 +309,7 @@ static std::optional<Luau::TypeId> findExpectedTypeAt(const Luau::Module& module
             if (!it)
                 return std::nullopt;
 
-            const Luau::FunctionTypeVar* ftv = Luau::get<Luau::FunctionTypeVar>(follow(*it));
+            const Luau::FunctionType* ftv = Luau::get<Luau::FunctionType>(follow(*it));
 
             if (!ftv)
                 return std::nullopt;
@@ -640,10 +640,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         {
             if (auto ty = findExpectedTypeAt(*module, result.ancestry.back(), position))
             {
-                if (auto ftv = Luau::get<Luau::FunctionTypeVar>(Luau::follow(*ty)))
+                if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*ty)))
                 {
                     lsp::CompletionItem item;
-                    item.sortText = SortText::Default;
+                    item.sortText = SortText::CorrectTypeKind;
                     item.kind = lsp::CompletionItemKind::Snippet;
 
                     // Construct label and snippet
