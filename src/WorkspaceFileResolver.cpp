@@ -212,6 +212,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
     {
         std::cerr << "A\n";
         std::cerr << call->args.size << "\n";
+        std::cerr << call->args.data[0] << "\n";
         std::cerr << call->args.data[0]->is<Luau::AstExprConstantString>() << "\n";
         if (Luau::AstExprConstantString* index = call->args.data[0]->as<Luau::AstExprConstantString>())
         {
