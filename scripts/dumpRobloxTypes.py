@@ -172,7 +172,7 @@ IGNORED_MEMBERS = {
     "Player": [
         "Character",
         "Chatted",
-     ],
+    ],
     "InstanceAdornment": ["Adornee"],
     "BasePart": [
         "GetConnectedParts",
@@ -191,9 +191,7 @@ IGNORED_MEMBERS = {
     "RunService": [
         "BindToRenderStep",
     ],
-    "GuiService": [
-        "SelectedObject"
-    ],
+    "GuiService": ["SelectedObject"],
     "GlobalDataStore": [
         "GetAsync",
         "IncrementAsync",
@@ -208,9 +206,7 @@ IGNORED_MEMBERS = {
         "SetAsync",
         "UpdateAsync",
     ],
-    "Highlight": [
-        "Adornee"
-    ]
+    "Highlight": ["Adornee"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -265,7 +261,7 @@ EXTRA_MEMBERS = {
     ],
     "Instance": [
         "Parent: Instance?",
-        "AncestryChanged: RBXScriptSignal<Instance, Instance?>",
+        "AncestryChanged: RBXScriptSignal<(child: Instance, parent: Instance?) -> (), Instance, Instance?>",
         "function FindFirstAncestor(self, name: string): Instance?",
         "function FindFirstAncestorOfClass(self, className: string): Instance?",
         "function FindFirstAncestorWhichIsA(self, className: string): Instance?",
@@ -285,8 +281,8 @@ EXTRA_MEMBERS = {
         "function FireAllClients(self, ...: any): ()",
         "function FireClient(self, player: Player, ...: any): ()",
         "function FireServer(self, ...: any): ()",
-        "OnClientEvent: RBXScriptSignal<...any>",
-        "OnServerEvent: RBXScriptSignal<(Player, ...any)>",
+        "OnClientEvent: RBXScriptSignal<(...any) -> (), ...any>",
+        "OnServerEvent: RBXScriptSignal<(player: Player, ...any) -> (), (Player, ...any)>",
     ],
     "RemoteFunction": [
         "function InvokeClient(self, player: Player, ...: any): ...any",
@@ -296,14 +292,14 @@ EXTRA_MEMBERS = {
     ],
     "BindableEvent": [
         "function Fire(self, ...: any): ()",
-        "Event: RBXScriptSignal<...any>",
+        "Event: RBXScriptSignal<(...any) -> (), ...any>",
     ],
     "BindableFunction": [
         "function Invoke(self, ...: any): ...any",
         "OnInvoke: (...any) -> ...any",
     ],
     "Players": [
-        "PlayerChatted: RBXScriptSignal<EnumPlayerChatType, Player, string, Player?>",
+        "PlayerChatted: RBXScriptSignal<(chatType: EnumPlayerChatType, player: Player, message: string, targetPlayer: Player?) -> (), EnumPlayerChatType, Player, string, Player?>",
         "function GetPlayerByUserId(self, userId: number): Player?",
         "function GetPlayerFromCharacter(self, character: Model): Player?",
     ],
@@ -339,8 +335,8 @@ EXTRA_MEMBERS = {
         "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
         "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
         "function ReserveServer(self, placeId: number): (string, string)",
-        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
-        "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
+        "LocalPlayerArrivedFromTeleport: RBXScriptSignal<(customLoadingScreen: Instance?, dataTable: any) -> (), Instance?, any>",
+        "TeleportInitFailed: RBXScriptSignal<(player: Player, teleportResult: EnumTeleportResult, errorMessage: string, placeId: number, teleportOptions: TeleportOptions) -> (), Player, EnumTeleportResult, string, number, TeleportOptions>",
     ],
     "UserService": [
         "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
@@ -356,8 +352,8 @@ EXTRA_MEMBERS = {
     "CollectionService": [
         "function GetAllTags(self): { string }",
         "function GetTags(self, instance: Instance): { string }",
-        "function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<Instance>",
-        "function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<Instance>",
+        "function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<(instance: Instance) -> (), Instance>",
+        "function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<(instance: Instance) -> (), Instance>",
     ],
     "UserInputService": [
         "function GetConnectedGamepads(self): { EnumUserInputType }",
@@ -375,7 +371,7 @@ EXTRA_MEMBERS = {
     ],
     "Player": [
         "Character: Model?",
-        "Chatted: RBXScriptSignal<string, Player?>",
+        "Chatted: RBXScriptSignal<(message: string, recipient: Player?) -> (), string, Player?>",
     ],
     "InstanceAdornment": ["Adornee: Instance?"],
     "BasePart": [
@@ -397,9 +393,7 @@ EXTRA_MEMBERS = {
     "RunService": [
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
     ],
-    "GuiService": [
-        "SelectedObject: GuiObject?"
-    ],
+    "GuiService": ["SelectedObject: GuiObject?"],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
         "function GetAsync(self, key: string): (any, DataStoreKeyInfo)",
@@ -424,9 +418,7 @@ EXTRA_MEMBERS = {
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
     ],
     # The Adornee property is optional
-    "Highlight": [
-        "Adornee: Instance?"
-    ]
+    "Highlight": ["Adornee: Instance?"],
 }
 
 # Hardcoded types
@@ -499,11 +491,11 @@ declare function printidentity(prefix: string?)
 
 # Hardcoded types after data types have been defined
 POST_DATATYPES_BASE = """
-export type RBXScriptSignal<T... = ...any> = {
-    Wait: (self: RBXScriptSignal<T...>) -> T...,
-    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+export type RBXScriptSignal<CB = (...any) -> (), T... = ...any> = {
+    Wait: (self: RBXScriptSignal<CB, T...>) -> T...,
+    Connect: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
+    ConnectParallel: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
+    Once: (self: RBXScriptSignal<CB, T...>, callback: CB) -> RBXScriptConnection,
 }
 
 type HttpRequestOptions = {
@@ -821,10 +813,19 @@ def declareClass(klass: ApiClass):
         elif member["MemberType"] == "Function":
             return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
         elif member["MemberType"] == "Event":
-            parameters = ", ".join(
-                map(lambda x: resolveType(x["Type"]), member["Parameters"])
-            )
-            return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
+            if len(member["Parameters"]) > 0:
+                callbackParameters = ", ".join(
+                    map(
+                        lambda x: f"{x['Name']}: {resolveType(x['Type'])}",
+                        member["Parameters"],
+                    )
+                )
+                parameters = ", ".join(
+                    map(lambda x: resolveType(x["Type"]), member["Parameters"])
+                )
+                return f"\t{escapeName(member['Name'])}: RBXScriptSignal<({callbackParameters}) -> (), {parameters}>\n"
+            else:
+                return f"\t{escapeName(member['Name'])}: RBXScriptSignal<>\n"
         elif member["MemberType"] == "Callback":
             return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
 
