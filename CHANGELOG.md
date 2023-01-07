@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Luau analyze now exits with code 0 if there are no reported errors (all errors are ignored)
 - `require(instance:FindFirstChild("Testing", true))` will no longer resolve as an immediate child of instance due to the recursive argument
+- Constant variables will now be syntax highlighted appropriately at definition site (`local CONSTANT`)
 
 ## [1.14.3] - 2022-12-10
 
