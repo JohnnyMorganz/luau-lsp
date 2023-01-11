@@ -59,8 +59,9 @@ Luau::TypeId getSourcemapType(
     const Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::ScopePtr& globalScope, const SourceNodePtr& node)
 {
     // Gets the type corresponding to the sourcemap node if it exists
-    if (node->ty)
-        return node->ty;
+    // Make sure to use the correct ty version (base typeChecker vs autocomplete typeChecker)
+    if (node->tys.find(&typeChecker) != node->tys.end())
+        return node->tys.at(&typeChecker);
 
     Luau::LazyType ltv;
     ltv.thunk = [&typeChecker, &arena, globalScope, node]()
@@ -151,7 +152,7 @@ Luau::TypeId getSourcemapType(
     };
 
     auto ty = arena.addType(std::move(ltv));
-    node->ty = ty;
+    node->tys.insert_or_assign(&typeChecker, ty);
 
     return ty;
 }

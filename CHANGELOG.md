@@ -10,16 +10,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added syntax highlighting support for interpolated strings
 - Added color viewers for Color3.new/fromRGB/fromHSV/fromHex
+- Support documentation comments on variables:
+
+```lua
+--- documentation comment
+local x = "string"
+
+--- another doc comment
+local y = function()
+end
+```
+
+- Support documentation comments on table properties, such as the following:
+
+```lua
+local tbl = {
+    --- This is some special information
+    data = "hello",
+    --- This is a doc comment
+    values = function()
+    end,
+}
+
+local x = tbl.values -- Should give "This is a doc comment"
+local y = tbl.data -- Should give "This is some special information"
+```
 
 ### Changed
 
 - Sync to upstream Luau 0.558
 - All Luau FFlags are no longer enabled by default. This can be re-enabled by configuring `luau-lsp.fflags.enableByDefault`. It is recommended to keep `luau-lsp.fflags.sync` enabled so that FFlags sync with upstream Luau
+- Allow variable number of `=` sign for multiline doc comments, so `--[[` and `--[===[` etc. are valid openers
 
 ### Fixed
 
 - Luau analyze now exits with code 0 if there are no reported errors (all errors are ignored)
 - `require(instance:FindFirstChild("Testing", true))` will no longer resolve as an immediate child of instance due to the recursive argument
+- Fixed a bug where internally the wrong pointer to an Instance type was being used for DM nodes which manifested into failed unification and `never` types
 - Constant variables will now be syntax highlighted appropriately at definition site (`local CONSTANT`)
 
 ## [1.14.3] - 2022-12-10

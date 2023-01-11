@@ -279,20 +279,73 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return result;
     }
 
+    bool visit(Luau::AstExprTable* tbl) override
+    {
+        if (tbl->location.begin >= pos)
+            return false;
+        if (tbl->location.begin > closestPreviousNode)
+            closestPreviousNode = tbl->location.begin;
+
+        for (Luau::AstExprTable::Item item : tbl->items)
+        {
+            if (item.value->location.begin >= pos)
+                continue;
+            if (item.value->location.begin > closestPreviousNode)
+                closestPreviousNode = item.value->location.begin;
+            item.value->visit(this);
+            if (item.value->location.end <= pos && item.value->location.end > closestPreviousNode)
+                closestPreviousNode = item.value->location.end;
+        }
+
+        return false;
+    }
+
+    bool visit(Luau::AstTypeTable* tbl) override
+    {
+        if (tbl->location.begin >= pos)
+            return false;
+        if (tbl->location.begin > closestPreviousNode)
+            closestPreviousNode = tbl->location.begin;
+
+        for (Luau::AstTableProp item : tbl->props)
+        {
+            if (item.type->location.begin >= pos)
+                continue;
+            if (item.type->location.begin > closestPreviousNode)
+                closestPreviousNode = item.type->location.begin;
+            item.type->visit(this);
+            if (item.type->location.end <= pos && item.type->location.end > closestPreviousNode)
+                closestPreviousNode = item.type->location.end;
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
+        // If the position is after the block, then it can be ignored
+        // If the position is within the block, then we know we can cut anything before the block,
+        // so set the previous node location to the block entry
+        if (block->location.begin >= pos)
+            return false;
+        if (block->location.begin > closestPreviousNode)
+            closestPreviousNode = block->location.begin;
+
         for (Luau::AstStat* stat : block->body)
         {
             if (stat->location.begin >= pos)
                 continue;
-            if (stat->location.begin > closestPreviousNode)
-                closestPreviousNode = stat->location.begin;
             stat->visit(this);
             if (stat->location.end <= pos && stat->location.end > closestPreviousNode)
                 closestPreviousNode = stat->location.end;
         }
 
         return false;
+    }
+
+    bool visit(Luau::AstType* ty) override
+    {
+        return true;
     }
 };
 
@@ -355,8 +408,16 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
         {
-            if (Luau::startsWith(commentText, "--[=["))
+            std::regex comment_regex("^--\\[(=*)\\[");
+            std::smatch comment_match;
+
+            if (std::regex_search(commentText, comment_match, comment_regex))
             {
+                LUAU_ASSERT(comment_match.size() == 2);
+                // Construct "--[=[" and "--]=]" which will be ignored
+                std::string start_string = "--[" + std::string(comment_match[1].length(), '=') + "[";
+                std::string end_string = "]" + std::string(comment_match[1].length(), '=') + "]";
+
                 // Parse each line separately
                 for (auto& line : Luau::split(commentText, '\n'))
                 {
@@ -365,7 +426,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
 
                     auto trimmedLineText = std::string(line);
                     trim(trimmedLineText);
-                    if (trimmedLineText == "--[=[" || trimmedLineText == "]=]")
+                    if (trimmedLineText == start_string || trimmedLineText == end_string)
                         continue;
                     comments.emplace_back(lineText);
                 }
