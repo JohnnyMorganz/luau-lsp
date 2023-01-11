@@ -164,6 +164,8 @@ void WorkspaceFolder::initialize()
     Luau::registerBuiltinGlobals(frontend.typeChecker);
     Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete);
 
+    Luau::attachTag(Luau::getGlobalBinding(frontend.typeCheckerForAutocomplete, "require"), "Require");
+
     if (client->definitionsFiles.empty())
     {
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
