@@ -6,6 +6,12 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
+struct DocumentationLocation
+{
+    Luau::ModuleName moduleName;
+    Luau::Location location;
+};
+
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
     auto config = client->getConfiguration(rootUri);
@@ -40,6 +46,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     std::string typeName;
     std::optional<Luau::TypeId> type = std::nullopt;
     std::optional<std::string> documentationSymbol = getDocumentationSymbolAtPosition(*sourceModule, *module, position);
+    std::optional<DocumentationLocation> documentationLocation = std::nullopt;
 
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
@@ -76,6 +83,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
         type = scope->lookup(local);
+        documentationLocation = {moduleName, local->location};
     }
     else if (auto expr = exprOrLocal.getExpr())
     {
@@ -100,6 +108,29 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             }
         }
 
+        // Handle table properties (so that we can get documentation info)
+        if (auto index = expr->as<Luau::AstExprIndexName>())
+        {
+            if (auto parentIt = module->astTypes.find(index->expr))
+            {
+                auto parentType = Luau::follow(*parentIt);
+                auto indexName = index->index.value;
+                auto prop = lookupProp(parentType, indexName);
+                if (prop)
+                {
+                    type = prop->type;
+                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType); definitionModuleName && prop->location)
+                        documentationLocation = {definitionModuleName.value(), prop->location.value()};
+                }
+            }
+        }
+
+        // Handle local variables separately to retrieve documentation location info
+        if (auto local = expr->as<Luau::AstExprLocal>(); !documentationLocation.has_value() && local && local->local)
+        {
+            documentationLocation = {moduleName, local->local->location};
+        }
+
         if (!type)
         {
             if (auto it = module->astTypes.find(expr))
@@ -113,17 +144,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             else if (auto local = expr->as<Luau::AstExprLocal>())
             {
                 type = scope->lookup(local->local);
-            }
-            else if (auto index = expr->as<Luau::AstExprIndexName>())
-            {
-                if (auto parentIt = module->astTypes.find(index->expr))
-                {
-                    auto parentType = Luau::follow(*parentIt);
-                    auto indexName = index->index.value;
-                    auto prop = lookupProp(parentType, indexName);
-                    if (prop)
-                        type = prop->type;
-                }
             }
         }
     }
@@ -191,13 +211,20 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString += "\n----------\n";
         typeString += printDocumentation(client->documentation, *documentationSymbol);
     }
-    else if (auto ftv = Luau::get<Luau::FunctionType>(*type))
+    else if (auto ftv = Luau::get<Luau::FunctionType>(*type); ftv && ftv->definition && ftv->definition->definitionModuleName)
     {
-        if (ftv->definition && ftv->definition->definitionModuleName)
-        {
-            typeString += "\n----------\n";
-            typeString += printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
-        }
+        typeString += "\n----------\n";
+        typeString += printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
+    }
+    // else if (auto ttv = Luau::get<Luau::TableType>(*type); ttv && !ttv->definitionModuleName.empty())
+    // {
+    //     typeString += "\n----------\n";
+    //     typeString += printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    // }
+    else if (documentationLocation)
+    {
+        typeString += "\n----------\n";
+        typeString += printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location));
     }
 
     return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
