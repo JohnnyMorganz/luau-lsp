@@ -312,7 +312,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](std::string tag, std::optional<const Luau::ClassType*> ctx) -> std::optional<Luau::AutocompleteEntryMap>
+        [&](std::string tag, std::optional<const Luau::ClassType*> ctx,
+            std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
         {
             if (tag == "ClassNames")
             {
@@ -372,6 +373,46 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 return result;
             }
+            else if (tag == "Require")
+            {
+                if (!contents.has_value())
+                    return std::nullopt;
+
+                try
+                {
+                    auto contentsString = contents.value();
+                    auto currentDirectory = rootUri.fsPath().append(contentsString);
+
+                    Luau::AutocompleteEntryMap result;
+                    for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))
+                    {
+                        if (dir_entry.is_regular_file() || dir_entry.is_directory())
+                        {
+                            std::string fileName = dir_entry.path().filename().generic_string();
+                            Luau::AutocompleteEntry entry{
+                                Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
+                            entry.tags.push_back(dir_entry.is_directory() ? "Directory" : "File");
+
+                            result.insert_or_assign(fileName, entry);
+                        }
+                    }
+
+                    // Add in ".." support
+                    if (currentDirectory.has_parent_path())
+                    {
+                        Luau::AutocompleteEntry dotdotEntry{
+                            Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
+                        dotdotEntry.tags.push_back("Directory");
+                        result.insert_or_assign("..", dotdotEntry);
+                    }
+
+                    return result;
+                }
+                catch (std::exception&)
+                {
+                    return std::nullopt;
+                }
+            }
 
             return std::nullopt;
         });
@@ -423,6 +464,18 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.kind = lsp::CompletionItemKind::Module;
             break;
         }
+
+        // Special cases: Files and directory
+        if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
+        {
+            item.kind = lsp::CompletionItemKind::File;
+            // We shouldn't include the extension when inserting
+            std::string insertText = name;
+            insertText.erase(insertText.find_last_of('.'));
+            item.insertText = insertText;
+        }
+        else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
+            item.kind = lsp::CompletionItemKind::Folder;
 
         // Handle if name is not an identifier
         if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
