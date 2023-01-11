@@ -1,7 +1,9 @@
 #include "doctest.h"
 #include "Fixture.h"
 
+#include "Luau/AstQuery.h"
 #include "LSP/DocumentationParser.hpp"
+#include "LSP/LuauExt.hpp"
 
 TEST_SUITE_BEGIN("Documentation");
 
@@ -90,6 +92,88 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_table_property_function_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("x");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_props_1")
+{
+    auto result = check(R"(
+        local tbl = {
+            --- This is some special information
+            data = "hello",
+        }
+
+        local x = tbl.data
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto expr = Luau::findExprOrLocalAtPosition(*getMainSourceModule(), Luau::Position{6, 24}).getExpr(); // Hovering on "tbl.data"
+    REQUIRE(expr);
+
+    auto index = expr->as<Luau::AstExprIndexName>();
+    REQUIRE(index);
+
+    auto parentTyPtr = getMainModule()->astTypes.find(index->expr);
+    REQUIRE(parentTyPtr);
+    auto parentTy = Luau::follow(*parentTyPtr);
+
+    auto indexName = index->index.value;
+    auto prop = lookupProp(parentTy, indexName);
+    REQUIRE(prop);
+    REQUIRE(prop->location);
+
+    auto comments = getCommentLocations(getMainSourceModule(), prop->location.value());
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_props_2")
+{
+    auto result = check(R"(
+        --- doc comment
+        local tbl = {
+            --- This is some special information
+            data = "hello",
+        }
+
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    // Assume hovering over a var "tbl.data", which would give the position set to the property
+    auto comments = getCommentLocations(getMainSourceModule(), Luau::Location{{4, 19}, {4, 26}});
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_variable_1")
+{
+    auto result = check(R"(
+        --- doc comment
+        local var = "yo"
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto comments = getCommentLocations(getMainSourceModule(), Luau::Location{{2, 14}, {2, 17}});
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_variable_2")
+{
+    auto result = check(R"(
+        --- Another doc comment
+        local foo = function()
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
     auto ftv = Luau::get<Luau::FunctionType>(ty);
     REQUIRE(ftv);
     REQUIRE(ftv->definition);
