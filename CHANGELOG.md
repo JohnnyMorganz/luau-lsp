@@ -40,6 +40,7 @@ local y = tbl.data -- Should give "This is some special information"
 
 - Sync to upstream Luau 0.558
 - All Luau FFlags are no longer enabled by default. This can be re-enabled by configuring `luau-lsp.fflags.enableByDefault`. It is recommended to keep `luau-lsp.fflags.sync` enabled so that FFlags sync with upstream Luau
+- Allow variable number of `=` sign for multiline doc comments, so `--[[` and `--[===[` etc. are valid openers
 
 ### Fixed
 

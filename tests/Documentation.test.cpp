@@ -257,6 +257,65 @@ TEST_CASE_FIXTURE(Fixture, "print_multiline_comment")
     CHECK(comments[3] == "@return number -- Returns `x` with 5 added to it");
 }
 
+TEST_CASE_FIXTURE(Fixture, "print_multiline_comment_no_equals")
+{
+    auto result = check(R"(
+        --[[
+            Adds 5 to the input number
+
+            @param x number -- The number to add 5 to
+            @return number -- Returns `x` with 5 added to it
+        ]]
+        function add5(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("add5");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    REQUIRE_EQ(4, comments.size());
+    CHECK(comments[0] == "Adds 5 to the input number");
+    CHECK(comments[1] == "");
+    CHECK(comments[2] == "@param x number -- The number to add 5 to");
+    CHECK(comments[3] == "@return number -- Returns `x` with 5 added to it");
+}
+
+
+TEST_CASE_FIXTURE(Fixture, "print_multiline_comment_variable_equals")
+{
+    auto result = check(R"(
+        --[====[
+            Adds 5 to the input number
+
+            @param x number -- The number to add 5 to
+            @return number -- Returns `x` with 5 added to it
+        ]====]
+        function add5(x: number)
+            return x + 5
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("add5");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    REQUIRE_EQ(4, comments.size());
+    CHECK(comments[0] == "Adds 5 to the input number");
+    CHECK(comments[1] == "");
+    CHECK(comments[2] == "@param x number -- The number to add 5 to");
+    CHECK(comments[3] == "@return number -- Returns `x` with 5 added to it");
+}
+
 TEST_CASE_FIXTURE(Fixture, "trim_common_leading_whitespace")
 {
     auto result = check(R"(

@@ -408,8 +408,16 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
         {
-            if (Luau::startsWith(commentText, "--[=["))
+            std::regex comment_regex("^--\\[(=*)\\[");
+            std::smatch comment_match;
+
+            if (std::regex_search(commentText, comment_match, comment_regex))
             {
+                LUAU_ASSERT(comment_match.size() == 2);
+                // Construct "--[=[" and "--]=]" which will be ignored
+                std::string start_string = "--[" + std::string(comment_match[1].length(), '=') + "[";
+                std::string end_string = "]" + std::string(comment_match[1].length(), '=') + "]";
+
                 // Parse each line separately
                 for (auto& line : Luau::split(commentText, '\n'))
                 {
@@ -418,7 +426,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
 
                     auto trimmedLineText = std::string(line);
                     trim(trimmedLineText);
-                    if (trimmedLineText == "--[=[" || trimmedLineText == "]=]")
+                    if (trimmedLineText == start_string || trimmedLineText == end_string)
                         continue;
                     comments.emplace_back(lineText);
                 }
