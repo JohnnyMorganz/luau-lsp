@@ -47,6 +47,7 @@ local y = tbl.data -- Should give "This is some special information"
 - Luau analyze now exits with code 0 if there are no reported errors (all errors are ignored)
 - `require(instance:FindFirstChild("Testing", true))` will no longer resolve as an immediate child of instance due to the recursive argument
 - Fixed a bug where internally the wrong pointer to an Instance type was being used for DM nodes which manifested into failed unification and `never` types
+- Constant variables will now be syntax highlighted appropriately at definition site (`local CONSTANT`)
 
 ## [1.14.3] - 2022-12-10
 

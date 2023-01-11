@@ -386,6 +386,15 @@
       },
       "patterns": [
         {
+          "include": "#expression"
+        }
+      ],
+      "name": "meta.template.expression.lua",
+      "contentName": "meta.embedded.line.lua"
+    },
+    "expression": {
+      "patterns": [
+        {
           "include": "#keywords"
         },
         {
@@ -406,9 +415,7 @@
         {
           "include": "#identifier"
         }
-      ],
-      "name": "meta.template.expression.lua",
-      "contentName": "meta.embedded.line.lua"
+      ]
     },
     "identifier": {
       "patterns": [
@@ -533,13 +540,9 @@
           },
           "patterns": [
             {
-              "include": "source.lua"
+              "include": "#expression"
             }
           ]
-        },
-        {
-          "match": "\\b(readonly)\\b",
-          "name": "storage.modifier.readonly.lua"
         },
         {
           "match": "\\btrue\\b",
