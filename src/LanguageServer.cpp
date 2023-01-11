@@ -61,7 +61,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     lsp::ServerCapabilities capabilities;
     capabilities.textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
     // Completion
-    std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "\n"}; // \n is used to trigger end completion
+    std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "/", "\n"}; // \n is used to trigger end completion
     lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
     capabilities.completionProvider = {completionTriggerCharacters, std::nullopt, /* resolveProvider: */ false, completionItem};
     // Hover Provider
