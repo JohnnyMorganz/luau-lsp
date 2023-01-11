@@ -279,6 +279,22 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return result;
     }
 
+    bool visit(Luau::AstExprTable* tbl) override
+    {
+        for (Luau::AstExprTable::Item item : tbl->items)
+        {
+            if (item.value->location.begin >= pos)
+                continue;
+            if (item.value->location.begin > closestPreviousNode)
+                closestPreviousNode = item.value->location.begin;
+            item.value->visit(this);
+            if (item.value->location.end <= pos && item.value->location.end > closestPreviousNode)
+                closestPreviousNode = item.value->location.end;
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         for (Luau::AstStat* stat : block->body)

@@ -49,6 +49,55 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_function_2")
     CHECK_EQ(1, comments.size());
 }
 
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_table_property_function_1")
+{
+    auto result = check(R"(
+        local tbl = {
+            --- This is a function inside of a table
+            values = function()
+            end,
+        }
+
+        local x = tbl.values
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("x");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_table_property_function_2")
+{
+    auto result = check(R"(
+        local tbl = {
+            --- This is a function inside of a table
+            values = function()
+            end,
+            --- This is another function, and there should only be one comment connected to it
+            map = function()
+            end,
+        }
+
+        local x = tbl.map
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("x");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(1, comments.size());
+}
+
 TEST_CASE_FIXTURE(Fixture, "print_comments")
 {
     auto result = check(R"(
