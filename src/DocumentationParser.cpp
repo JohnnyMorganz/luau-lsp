@@ -281,6 +281,11 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 
     bool visit(Luau::AstExprTable* tbl) override
     {
+        if (tbl->location.begin >= pos)
+            return false;
+        if (tbl->location.begin > closestPreviousNode)
+            closestPreviousNode = tbl->location.begin;
+
         for (Luau::AstExprTable::Item item : tbl->items)
         {
             if (item.value->location.begin >= pos)
@@ -295,20 +300,52 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return false;
     }
 
+    bool visit(Luau::AstTypeTable* tbl) override
+    {
+        if (tbl->location.begin >= pos)
+            return false;
+        if (tbl->location.begin > closestPreviousNode)
+            closestPreviousNode = tbl->location.begin;
+
+        for (Luau::AstTableProp item : tbl->props)
+        {
+            if (item.type->location.begin >= pos)
+                continue;
+            if (item.type->location.begin > closestPreviousNode)
+                closestPreviousNode = item.type->location.begin;
+            item.type->visit(this);
+            if (item.type->location.end <= pos && item.type->location.end > closestPreviousNode)
+                closestPreviousNode = item.type->location.end;
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
+        // If the position is after the block, then it can be ignored
+        // If the position is within the block, then we know we can cut anything before the block,
+        // so set the previous node location to the block entry
+        if (block->location.begin >= pos)
+            return false;
+        if (block->location.begin > closestPreviousNode)
+            closestPreviousNode = block->location.begin;
+
         for (Luau::AstStat* stat : block->body)
         {
             if (stat->location.begin >= pos)
                 continue;
-            if (stat->location.begin > closestPreviousNode)
-                closestPreviousNode = stat->location.begin;
             stat->visit(this);
             if (stat->location.end <= pos && stat->location.end > closestPreviousNode)
                 closestPreviousNode = stat->location.end;
         }
 
         return false;
+    }
+
+    bool visit(Luau::AstType* ty) override
+    {
+        return true;
     }
 };
 
