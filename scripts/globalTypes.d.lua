@@ -693,6 +693,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectOutOfMemoryKeepPlayingExit: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
 	PlayerRemoved: EnumConnectionError
+	DisconnectOutOfMemoryKeepPlayingLeave: EnumConnectionError
 	PlacelaunchErrors: EnumConnectionError
 	PlacelaunchDisabled: EnumConnectionError
 	PlacelaunchError: EnumConnectionError
@@ -1814,6 +1815,7 @@ declare class EnumModelStreamingMode_INTERNAL extends Enum
 	Atomic: EnumModelStreamingMode
 	Persistent: EnumModelStreamingMode
 	PersistentPerPlayer: EnumModelStreamingMode
+	Nonatomic: EnumModelStreamingMode
 end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
@@ -6759,6 +6761,7 @@ declare class IKControl extends Instance
 	Offset: CFrame
 	Pole: Instance
 	Priority: number
+	SmoothTime: number
 	Target: Instance
 	Type: EnumIKControlType
 	Weight: number
@@ -9192,6 +9195,7 @@ declare class ChatInputBarConfiguration extends TextChatConfigurations
 	FontFace: Font
 	PlaceholderColor3: Color3
 	TargetTextChannel: TextChannel
+	TextBox: TextBox
 	TextColor3: Color3
 	TextSize: number
 	TextStrokeColor3: Color3
@@ -9638,6 +9642,7 @@ end
 
 declare class VRService extends Instance
 	DidPointerHit: boolean
+	FadeOutViewOnCollision: boolean
 	GuiInputUserCFrame: EnumUserCFrame
 	LaserDistance: number
 	NavigationRequested: RBXScriptSignal<CFrame, EnumUserCFrame>
