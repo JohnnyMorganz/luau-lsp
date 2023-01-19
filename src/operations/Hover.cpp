@@ -160,7 +160,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     opts.useLineBreaks = true;
     opts.functionTypeArguments = true;
     opts.hideNamedFunctionTypeParameters = false;
-    opts.DEPRECATED_indent = true;
     opts.hideTableKind = !config.hover.showTableKinds;
     opts.scope = scope;
     std::string typeString = Luau::toString(*type, opts);
