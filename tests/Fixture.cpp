@@ -17,8 +17,7 @@ Fixture::Fixture()
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
 
     workspace.initialize();
-    Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
-    auto result = types::registerDefinitions(workspace.frontend.typeChecker, std::string(R"BUILTIN_SRC(
+    loadDefinition(R"BUILTIN_SRC(
         declare class Enum
             function GetEnumItems(self): { any }
         end
@@ -98,9 +97,7 @@ Fixture::Fixture()
         declare Instance: {
             new: (("Part") -> Part) & (("TextLabel") -> TextLabel)
         }
-    )BUILTIN_SRC"));
-    REQUIRE_MESSAGE(result.success, "loadDefinition failed");
-    Luau::freeze(workspace.frontend.typeChecker.globalTypes);
+    )BUILTIN_SRC");
 
     ClientConfiguration config;
     config.sourcemap.enabled = false;
@@ -191,4 +188,14 @@ Luau::TypeId Fixture::requireType(const std::string& name)
     std::optional<Luau::TypeId> ty = getType(name);
     REQUIRE_MESSAGE(bool(ty), "Unable to requireType \"" << name << "\"");
     return Luau::follow(*ty);
+}
+
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source)
+{
+    Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend.typeChecker, source);
+    Luau::freeze(workspace.frontend.typeChecker.globalTypes);
+
+    REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");
+    return result;
 }
