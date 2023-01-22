@@ -454,3 +454,17 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
 
     return comments;
 }
+
+std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::TypeId ty)
+{
+    auto followedTy = Luau::follow(ty);
+    if (auto ftv = Luau::get<Luau::FunctionType>(followedTy); ftv && ftv->definition && ftv->definition->definitionModuleName)
+    {
+        return printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
+    }
+    else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv && !ttv->definitionModuleName.empty())
+    {
+        return printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    }
+    return std::nullopt;
+}

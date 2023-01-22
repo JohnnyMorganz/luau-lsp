@@ -427,8 +427,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         item.deprecated = entry.deprecated;
         item.sortText = SortText::Default;
 
+        // Handle documentation
+        std::optional<std::string> documentationString = std::nullopt;
         if (entry.documentationSymbol)
-            item.documentation = {lsp::MarkupKind::Markdown, printDocumentation(client->documentation, *entry.documentationSymbol)};
+            documentationString = printDocumentation(client->documentation, *entry.documentationSymbol);
+        else if (entry.type.has_value())
+            documentationString = getDocumentationForType(entry.type.value());
+        // TODO: Handle documentation on properties
+        if (documentationString)
+            item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
             item.sortText = SortText::CorrectTypeKind;

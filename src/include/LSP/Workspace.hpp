@@ -67,6 +67,7 @@ private:
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
+    std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
 
