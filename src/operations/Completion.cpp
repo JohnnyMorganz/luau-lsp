@@ -429,8 +429,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         // Handle documentation
         std::optional<std::string> documentationString = std::nullopt;
-        if (entry.documentationSymbol)
-            documentationString = printDocumentation(client->documentation, *entry.documentationSymbol);
+        if (std::optional<std::string> docs;
+            entry.documentationSymbol && (docs = printDocumentation(client->documentation, *entry.documentationSymbol)) && docs)
+            documentationString = *docs;
         else if (entry.type.has_value())
             documentationString = getDocumentationForType(entry.type.value());
         // TODO: Handle documentation on properties

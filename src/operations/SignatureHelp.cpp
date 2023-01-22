@@ -80,8 +80,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             baseDocumentationSymbol = *baseDocumentationSymbol + "/overload/" + toString(ty);
         }
 
-        if (baseDocumentationSymbol)
-            documentation.value = printDocumentation(client->documentation, *baseDocumentationSymbol);
+        if (std::optional<std::string> docs;
+            baseDocumentationSymbol && (docs = printDocumentation(client->documentation, *baseDocumentationSymbol)) && docs)
+            documentation.value = *docs;
         else if (ftv->definition && ftv->definition->definitionModuleName)
             documentation.value =
                 printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
@@ -105,7 +106,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             // TODO: parse moonwave docs for param documentation?
             lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
             if (baseDocumentationSymbol)
-                parameterDocumentation.value = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx));
+                if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
+                    parameterDocumentation.value = *docs;
 
             // Compute the label
             // We attempt to search for the position in the string for this label, and if we don't find it,
@@ -138,8 +140,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 // TODO: parse moonwave docs for param documentation?
                 lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
                 if (baseDocumentationSymbol)
-                    parameterDocumentation.value =
-                        printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx));
+                    if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
+                        parameterDocumentation.value = *docs;
 
                 // Compute the label
                 // We attempt to search for the position in the string for this label, and if we don't find it,

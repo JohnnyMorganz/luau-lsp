@@ -27,6 +27,7 @@ type Contents = {
 ### Changed
 
 - Sync to upstream Luau 0.560
+- Class symbols with no documentation present in the docs file will no longer show anything on hover/autocomplete (i.e. won't show `@luau/global/require`)
 
 ## [1.15.0] - 2023-01-11
 

@@ -205,10 +205,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString = codeBlock("lua", typeString);
     }
 
-    if (documentationSymbol)
+    if (std::optional<std::string> docs; documentationSymbol && (docs = printDocumentation(client->documentation, *documentationSymbol)) && docs)
     {
         typeString += "\n----------\n";
-        typeString += printDocumentation(client->documentation, *documentationSymbol);
+        typeString += *docs;
     }
     else if (auto documentation = getDocumentationForType(*type))
     {

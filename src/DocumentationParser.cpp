@@ -113,11 +113,12 @@ void parseDocumentation(std::optional<std::filesystem::path> documentationFile, 
 }
 
 /// Returns a markdown string of the provided documentation
-std::string printDocumentation(const Luau::DocumentationDatabase& database, const Luau::DocumentationSymbol& symbol)
+/// If we can't find any documentation for the given symbol, then we return nullopt
+std::optional<std::string> printDocumentation(const Luau::DocumentationDatabase& database, const Luau::DocumentationSymbol& symbol)
 {
     if (auto documentation = database.find(symbol))
     {
-        std::string result = symbol;
+        std::string result = "";
         if (auto* basic = documentation->get_if<Luau::BasicDocumentation>())
         {
             result = basic->documentation;
@@ -139,7 +140,8 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
             if (overloaded->overloads.size() > 0)
             {
                 // Use the first overload
-                result = printDocumentation(database, overloaded->overloads.begin()->second);
+                if (auto firstOverloadDocs = printDocumentation(database, overloaded->overloads.begin()->second))
+                    result = *firstOverloadDocs;
 
                 auto remainingOverloads = overloaded->overloads.size() - 1;
                 result += "\n\n*+" + std::to_string(remainingOverloads) + " overload" + (remainingOverloads == 1 ? "*" : "s*");
@@ -155,7 +157,8 @@ std::string printDocumentation(const Luau::DocumentationDatabase& database, cons
         }
         return result;
     }
-    return symbol;
+
+    return std::nullopt;
 }
 
 std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
