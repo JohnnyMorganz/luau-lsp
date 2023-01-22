@@ -166,7 +166,10 @@
           "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
           "type": "boolean",
           "default": true,
-          "scope": "window"
+          "scope": "window",
+          "tags": [
+            "usesOnlineServices"
+          ]
         },
         "luau-lsp.fflags.override": {
           "markdownDescription": "Override FFlags passed to Luau",
@@ -202,7 +205,10 @@
           "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
           "type": "boolean",
           "default": true,
-          "scope": "window"
+          "scope": "window",
+          "tags": [
+            "usesOnlineServices"
+          ]
         },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
