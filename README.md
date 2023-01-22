@@ -67,7 +67,7 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Find References
 - [x] Document Link
 - [x] Document Symbol
-- [ ] Color Provider
+- [x] Color Provider
 - [x] Rename
 - [ ] Call Hierarchy
 - [x] Semantic Tokens
