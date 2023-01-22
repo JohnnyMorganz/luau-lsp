@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Support documentation comments attached to a table, e.g. on `DATA` in the followign:
+
+```lua
+--- Doc comment
+local DATA = {
+    ...
+}
+```
+
 ### Changed
 
 - Sync to upstream Luau 0.560

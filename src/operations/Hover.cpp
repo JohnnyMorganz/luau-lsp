@@ -215,11 +215,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString += "\n----------\n";
         typeString += printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
     }
-    // else if (auto ttv = Luau::get<Luau::TableType>(*type); ttv && !ttv->definitionModuleName.empty())
-    // {
-    //     typeString += "\n----------\n";
-    //     typeString += printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
-    // }
+    else if (auto ttv = Luau::get<Luau::TableType>(*type); ttv && !ttv->definitionModuleName.empty())
+    {
+        typeString += "\n----------\n";
+        typeString += printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    }
     else if (documentationLocation)
     {
         typeString += "\n----------\n";
