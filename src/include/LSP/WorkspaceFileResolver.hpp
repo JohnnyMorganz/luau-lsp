@@ -46,7 +46,7 @@ struct WorkspaceFileResolver
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
 
-    std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
+    std::filesystem::path getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
 
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path
