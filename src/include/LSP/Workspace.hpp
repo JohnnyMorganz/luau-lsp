@@ -38,6 +38,7 @@ public:
         , fileResolver(WorkspaceFileResolver())
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
+        fileResolver.client = client;
         fileResolver.rootUri = uri;
     }
 

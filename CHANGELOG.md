@@ -23,6 +23,7 @@ type Contents = {
 ```
 
 - Include documentation comments on functions and tables in autocompletion
+- Added configuration option `luau-lsp.require.mode` to configure how string requires are resolved. It can either be `relativeToWorkspaceRoot` (default) or `relativeToFile`
 
 ### Changed
 

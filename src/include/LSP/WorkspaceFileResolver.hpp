@@ -5,6 +5,7 @@
 #include "Luau/FileResolver.h"
 #include "Luau/StringUtils.h"
 #include "Luau/Config.h"
+#include "LSP/Client.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/Sourcemap.hpp"
 #include "LSP/PluginDataModel.hpp"
@@ -15,6 +16,7 @@ struct WorkspaceFileResolver
     , Luau::ConfigResolver
 {
     Luau::Config defaultConfig;
+    std::shared_ptr<Client> client;
 
     // The root source node from a parsed Rojo source map
     Uri rootUri;
@@ -43,6 +45,8 @@ struct WorkspaceFileResolver
     {
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
+
+    std::filesystem::path getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
 
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path

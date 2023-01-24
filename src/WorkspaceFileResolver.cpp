@@ -153,20 +153,52 @@ const std::string mapContext(const std::string& context)
     return context;
 }
 
+/// Returns the base path to use in a string require.
+/// This depends on user configuration, whether requires are taken relative to file or workspace root, defaulting to the latter
+std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const
+{
+    if (!client)
+        return rootUri.fsPath();
+
+    auto config = client->getConfiguration(rootUri);
+    switch (config.require.mode)
+    {
+    case RequireModeConfig::RelativeToWorkspaceRoot:
+        return rootUri.fsPath();
+    case RequireModeConfig::RelativeToFile:
+    {
+        if (fileModuleName.has_value())
+        {
+            auto filePath = resolveToRealPath(*fileModuleName);
+            if (filePath)
+                return filePath->parent_path();
+            else
+                return rootUri.fsPath();
+        }
+        else
+        {
+            return rootUri.fsPath();
+        }
+    }
+    }
+
+    return rootUri.fsPath();
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
     if (Luau::AstExprConstantString* expr = node->as<Luau::AstExprConstantString>())
     {
-        std::filesystem::path rootFs = rootUri.fsPath();
+        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
         std::string requiredString(expr->value.data, expr->value.size);
 
         std::error_code ec;
-        auto filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".luau"), ec);
+        auto filePath = std::filesystem::weakly_canonical(basePath / (requiredString + ".luau"), ec);
         if (ec.value() != 0 || !std::filesystem::exists(filePath))
         {
             // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(rootUri.fsPath() / (requiredString + ".lua"), ec);
+            filePath = std::filesystem::weakly_canonical(basePath / (requiredString + ".lua"), ec);
         }
 
         // URI-ify the file path so that its normalised (in particular, the drive letter)

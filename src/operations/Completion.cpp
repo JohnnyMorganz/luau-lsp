@@ -381,7 +381,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 try
                 {
                     auto contentsString = contents.value();
-                    auto currentDirectory = rootUri.fsPath().append(contentsString);
+                    auto currentDirectory = fileResolver.getRequireBasePath(moduleName).append(contentsString);
 
                     Luau::AutocompleteEntryMap result;
                     for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))

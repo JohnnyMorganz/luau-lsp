@@ -100,6 +100,23 @@ struct ClientSignatureHelpConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSignatureHelpConfiguration, enabled);
 
+enum struct RequireModeConfig
+{
+    RelativeToWorkspaceRoot,
+    RelativeToFile,
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(RequireModeConfig, {
+                                                    {RequireModeConfig::RelativeToWorkspaceRoot, "relativeToWorkspaceRoot"},
+                                                    {RequireModeConfig::RelativeToFile, "relativeToFile"},
+                                                });
+
+struct ClientRequireConfiguration
+{
+    RequireModeConfig mode = RequireModeConfig::RelativeToWorkspaceRoot;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode);
+
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -115,6 +132,7 @@ struct ClientConfiguration
     ClientHoverConfiguration hover{};
     ClientCompletionConfiguration completion{};
     ClientSignatureHelpConfiguration signatureHelp{};
+    ClientRequireConfiguration require{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp);
+    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp, require);

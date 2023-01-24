@@ -311,6 +311,19 @@
           "type": "number",
           "default": 3667,
           "scope": "window"
+        },
+        "luau-lsp.require.mode": {
+          "markdownDescription": "How string requires should be interpreted",
+          "type": "string",
+          "default": "relativeToWorkspaceRoot",
+          "enum": [
+            "relativeToWorkspaceRoot",
+            "relativeToFile"
+          ],
+          "enumDescriptions": [
+            "String requires are interpreted relative to the root of the workspace",
+            "String requires are interpreted relative to the current file"
+          ]
         }
       }
     }
