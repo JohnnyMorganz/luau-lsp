@@ -172,7 +172,7 @@ IGNORED_MEMBERS = {
     "Player": [
         "Character",
         "Chatted",
-     ],
+    ],
     "InstanceAdornment": ["Adornee"],
     "BasePart": [
         "GetConnectedParts",
@@ -191,9 +191,7 @@ IGNORED_MEMBERS = {
     "RunService": [
         "BindToRenderStep",
     ],
-    "GuiService": [
-        "SelectedObject"
-    ],
+    "GuiService": ["SelectedObject"],
     "GlobalDataStore": [
         "GetAsync",
         "IncrementAsync",
@@ -208,9 +206,7 @@ IGNORED_MEMBERS = {
         "SetAsync",
         "UpdateAsync",
     ],
-    "Highlight": [
-        "Adornee"
-    ]
+    "Highlight": ["Adornee"],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -397,9 +393,7 @@ EXTRA_MEMBERS = {
     "RunService": [
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
     ],
-    "GuiService": [
-        "SelectedObject: GuiObject?"
-    ],
+    "GuiService": ["SelectedObject: GuiObject?"],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
         "function GetAsync(self, key: string): (any, DataStoreKeyInfo)",
@@ -424,9 +418,7 @@ EXTRA_MEMBERS = {
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
     ],
     # The Adornee property is optional
-    "Highlight": [
-        "Adornee: Instance?"
-    ]
+    "Highlight": ["Adornee: Instance?"],
 }
 
 # Hardcoded types
@@ -945,30 +937,49 @@ def printDataTypeConstructors(types: DataTypesDump):
 
         # Special case instance new
         if isInstanceNew:
-            functions["new"] = list(
-                map(
-                    lambda inst: {
-                        "Parameters": [
-                            {
-                                "Name": "className",
-                                "Type": {
-                                    "Name": f'"{inst}"',
-                                    "Category": "PRIMITIVE_SERVICE_NAME",
-                                },
+            functions["new"] = [
+                {
+                    "Parameters": [
+                        {
+                            "Name": "className",
+                            "Type": {
+                                "Name": f'"{inst}"',
+                                "Category": "PRIMITIVE_SERVICE_NAME",
                             },
-                            {
-                                "Name": "parent",
-                                "Type": {
-                                    "Name": "Instance?",
-                                    "Category": "Class",
-                                },
+                        },
+                        {
+                            "Name": "parent",
+                            "Type": {
+                                "Name": "Instance?",
+                                "Category": "Class",
                             },
-                        ],
-                        "ReturnType": {"Name": inst, "Category": "PRIMITIVE_SERVICE"},
-                    },
-                    CREATABLE,
-                )
-            )
+                        },
+                    ],
+                    "ReturnType": {"Name": inst, "Category": "PRIMITIVE_SERVICE"},
+                }
+                for inst in CREATABLE
+            ] + [
+                # Instance.new(string) -> Instance fallback
+                {
+                    "Parameters": [
+                        {
+                            "Name": "className",
+                            "Type": {
+                                "Name": "string",
+                                "Category": "PRIMITIVE_SERVICE_NAME",
+                            },
+                        },
+                        {
+                            "Name": "parent",
+                            "Type": {
+                                "Name": "Instance?",
+                                "Category": "Class",
+                            },
+                        },
+                    ],
+                    "ReturnType": {"Name": "Instance", "Category": "PRIMITIVE_SERVICE"},
+                }
+            ]
 
         # Special case string BrickColor new
         if isBrickColorNew:
