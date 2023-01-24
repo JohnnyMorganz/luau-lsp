@@ -273,6 +273,21 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
     return std::nullopt;
 }
 
+// Magic function attached to `Instance.new(string) -> Instance`, where if the argument given is a string literal
+// then we must error since we have hit the fallback value
+static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceNew(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    if (auto str = expr.args.data[0]->as<Luau::AstExprConstantString>())
+        typeChecker.reportError(Luau::TypeError{
+            expr.args.data[0]->location, Luau::GenericError{"Invalid class name '" + std::string(str->value.data, str->value.size) + "'"}});
+
+    return std::nullopt;
+}
+
 void addChildrenToCTV(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
     if (Luau::ClassType* ctv = Luau::getMutable<Luau::ClassType>(ty))
@@ -442,6 +457,17 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
             }
         }
     }
+
+    // Attach onto Instance.new()
+    if (auto instanceGlobal = typeChecker.globalScope->lookup(Luau::AstName("Instance")))
+        if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
+            if (auto newFunction = ttv->props.find("new"); newFunction != ttv->props.end())
+                if (auto itv = Luau::get<Luau::IntersectionType>(newFunction->second.type))
+                    for (auto& part : itv->parts)
+                        if (auto ftv = Luau::get<Luau::FunctionType>(part))
+                            if (auto it = Luau::begin(ftv->argTypes); it != Luau::end(ftv->argTypes))
+                                if (Luau::isPrim(*it, Luau::PrimitiveType::String))
+                                    Luau::attachMagicFunction(part, magicFunctionInstanceNew);
 
     // Move Enums over as imported type bindings
     std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes;
