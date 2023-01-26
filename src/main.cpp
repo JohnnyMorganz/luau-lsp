@@ -15,6 +15,46 @@ enum class CliMode
     Analyze
 };
 
+/// Validate to ensure the flag is correct
+static bool validateFlag(char* str, int argIndex)
+{
+    // Ignore arguments not starting with "-"
+    if (str[0] != '-')
+        return true;
+
+    int n = strlen(str);
+
+    if (argIndex == 1 && strcmp(str, "--help") == 0)
+        return true;
+    else if (argIndex == 1 && strcmp(str, "--show-flags") == 0)
+        return true;
+    else if (argIndex == 1 && strncmp(str, "--flag:", 7) == 0 && n > 8)
+        return true;
+    else if (strcmp(str, "--no-flags-enabled") == 0)
+        return true;
+    else if (strncmp(str, "--definitions=", 14) == 0 && n > 15)
+        return true;
+    else if (strncmp(str, "--docs=", 7) == 0 && n > 8)
+        return true;
+    else if (strcmp(str, "--formatter=plain") == 0)
+        return true;
+    else if (strcmp(str, "--formatter=gnu") == 0)
+        return true;
+    else if (strcmp(str, "--annotate") == 0)
+        return true;
+    else if (strcmp(str, "--timetrace") == 0)
+        return true;
+    else if (strncmp(str, "--sourcemap=", 12) == 0 && n > 13)
+        return true;
+    else if (strncmp(str, "--definitions=", 14) == 0 && n > 15)
+        return true;
+    else if (strncmp(str, "--defs=", 7) == 0 && n > 8)
+        return true;
+    else if (strncmp(str, "--ignore=", 9) == 0 && n > 10)
+        return true;
+    return false;
+}
+
 static void displayInvalidCommand(const std::string& argv0)
 {
     std::cout << "Invalid command. You must specify a mode to run\n";
@@ -185,6 +225,16 @@ int main(int argc, char** argv)
     {
         displayInvalidCommand(argv[0]);
         return 1;
+    }
+
+    for (int i = 1; i < argc; i++)
+    {
+        if (!validateFlag(argv[i], i))
+        {
+            std::cerr << "Unknown option '" << std::string(argv[i]) << "'\n";
+            std::cerr << "Run '" + std::string(argv[0]) + " --help' for more information\n";
+            return 1;
+        }
     }
 
     Luau::assertHandler() = [](const char* expr, const char* file, int line, const char*) -> int

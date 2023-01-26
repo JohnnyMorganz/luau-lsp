@@ -32,6 +32,7 @@ type Contents = {
 - Class symbols with no documentation present in the docs file will no longer show anything on hover/autocomplete (i.e. won't show `@luau/global/require`)
 - `Instance.new()` now excepts variables which are of type string without erroring. It will instead error when Instance.new is called with a string literal which is an unknown class name
 - In the CLI, `luau-lsp lsp` now supports passing multiple `--docs=` parameters
+- The CLI will now error when an unknown option is passed to it
 
 ## [1.15.0] - 2023-01-11
 
