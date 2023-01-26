@@ -25,6 +25,8 @@ type Contents = {
 - Include documentation comments on functions and tables in autocompletion
 - Added configuration option `luau-lsp.require.mode` to configure how string requires are resolved. It can either be `relativeToWorkspaceRoot` (default) or `relativeToFile`
 - Added `luau-lsp.types.documentationFiles` to support adding extra documentation symbols to the database. These are used to support definition files, and should be in the same format as [shown here](https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json)
+- Added `luau-lsp.diagnostics.strictDatamodelTypes` (default: `false`) which configures whether we use expressive DataModel types to power diagnostics.
+  When off, `game` / `script` / `workspace` (and all their members) are typed as `any`, which helps to prevent false positives, but may lead to false negatives.
 
 ### Changed
 

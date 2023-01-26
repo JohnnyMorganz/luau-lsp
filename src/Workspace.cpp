@@ -124,8 +124,10 @@ bool WorkspaceFolder::updateSourceMap()
         fileResolver.updateSourceMap(sourceMapContents.value());
 
         // Recreate instance types
+        auto config = client->getConfiguration(rootUri);
         instanceTypes.clear();
-        types::registerInstanceTypes(frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ false);
+        types::registerInstanceTypes(
+            frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
         types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
         // Update managed file paths as they may be converted to virtual
