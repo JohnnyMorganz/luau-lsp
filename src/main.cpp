@@ -28,7 +28,7 @@ static bool validateFlag(char* str, int argIndex)
         return true;
     else if (argIndex == 1 && strcmp(str, "--show-flags") == 0)
         return true;
-    else if (argIndex == 1 && strncmp(str, "--flag:", 7) == 0 && n > 8)
+    else if (strncmp(str, "--flag:", 7) == 0 && n > 8)
         return true;
     else if (strcmp(str, "--no-flags-enabled") == 0)
         return true;
