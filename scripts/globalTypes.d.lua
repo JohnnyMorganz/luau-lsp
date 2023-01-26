@@ -493,8 +493,8 @@ declare class EnumCatalogSortType_INTERNAL extends Enum
 	Relevance: EnumCatalogSortType
 	PriceHighToLow: EnumCatalogSortType
 	PriceLowToHigh: EnumCatalogSortType
-	RecentlyUpdated: EnumCatalogSortType
 	MostFavorited: EnumCatalogSortType
+	RecentlyCreated: EnumCatalogSortType
 end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
@@ -2890,12 +2890,6 @@ declare class EnumUiMessageType_INTERNAL extends Enum
 	UiMessageError: EnumUiMessageType
 	UiMessageInfo: EnumUiMessageType
 end
-declare class EnumUnionsScaleNonuniformly extends EnumItem end
-declare class EnumUnionsScaleNonuniformly_INTERNAL extends Enum
-	Default: EnumUnionsScaleNonuniformly
-	Disabled: EnumUnionsScaleNonuniformly
-	Enabled: EnumUnionsScaleNonuniformly
-end
 declare class EnumUsageContext extends EnumItem end
 declare class EnumUsageContext_INTERNAL extends Enum
 	Default: EnumUsageContext
@@ -3363,7 +3357,6 @@ type ENUM_LIST = {
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
 	UiMessageType: EnumUiMessageType_INTERNAL,
-	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly_INTERNAL,
 	UsageContext: EnumUsageContext_INTERNAL,
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
@@ -4029,6 +4022,7 @@ type PointLight = any
 type SpotLight = any
 type SurfaceLight = any
 type Lighting = any
+type LiveScriptingService = any
 type LocalStorageService = any
 type AppStorageService = any
 type UserStorageService = any
@@ -4213,6 +4207,7 @@ type SessionService = any
 type ShorelineUpgraderService = any
 type Sky = any
 type Smoke = any
+type SmoothVoxelsUpgraderService = any
 type SnippetService = any
 type SocialService = any
 type Sound = any
@@ -4254,6 +4249,7 @@ type StudioDeviceEmulatorService = any
 type StudioHighDpiService = any
 type StudioPublishService = any
 type StudioScriptDebugEventListener = any
+type StudioSdkService = any
 type StudioService = any
 type StudioTheme = any
 type SurfaceAppearance = any
@@ -7029,6 +7025,9 @@ declare class Lighting extends Instance
 	function SetMinutesAfterMidnight(self, minutes: number): nil
 end
 
+declare class LiveScriptingService extends Instance
+end
+
 declare class LocalStorageService extends Instance
 	ItemWasSet: RBXScriptSignal<string, string>
 	StoreWasCleared: RBXScriptSignal<>
@@ -7588,12 +7587,14 @@ declare class Terrain extends BasePart
 	MaterialColors: BinaryString
 	MaxExtents: Region3int16
 	ShorelinesUpgraded: boolean
+	SmoothVoxelsUpgraded: boolean
 	WaterColor: Color3
 	WaterReflectance: number
 	WaterTransparency: number
 	WaterWaveSize: number
 	WaterWaveSpeed: number
 	function CanShorelinesBeUpgraded(self): boolean
+	function CanSmoothVoxelsBeUpgraded(self): boolean
 	function CellCenterToWorld(self, x: number, y: number, z: number): Vector3
 	function CellCornerToWorld(self, x: number, y: number, z: number): Vector3
 	function Clear(self): nil
@@ -7726,7 +7727,6 @@ declare class Workspace extends WorldRoot
 	StreamingTargetRadius: number
 	Terrain: Terrain
 	TouchesUseCollisionGroups: boolean
-	UnionsScaleNonuniformly: EnumUnionsScaleNonuniformly
 	function BreakJoints(self, objects: { Instance }): nil
 	function CalculateJumpDistance(self, gravity: number, jumpPower: number, walkSpeed: number): number
 	function CalculateJumpHeight(self, gravity: number, jumpPower: number): number
@@ -8629,6 +8629,12 @@ declare class Smoke extends Instance
 	function FastForward(self, numFrames: number): nil
 end
 
+declare class SmoothVoxelsUpgraderService extends Instance
+	Status: RBXScriptSignal<number>
+	function Cancel(self): nil
+	function Start(self): nil
+end
+
 declare class SnippetService extends Instance
 end
 
@@ -8970,6 +8976,11 @@ declare class StudioPublishService extends Instance
 end
 
 declare class StudioScriptDebugEventListener extends Instance
+end
+
+declare class StudioSdkService extends Instance
+	function GetSdk(self): Instance
+	function SetSdk(self, sdk: Instance): nil
 end
 
 declare class StudioService extends Instance
@@ -9912,6 +9923,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "LanguageService"): LanguageService
 	function GetService(self, service: "LegacyStudioBridge"): LegacyStudioBridge
 	function GetService(self, service: "Lighting"): Lighting
+	function GetService(self, service: "LiveScriptingService"): LiveScriptingService
 	function GetService(self, service: "LocalStorageService"): LocalStorageService
 	function GetService(self, service: "LocalizationService"): LocalizationService
 	function GetService(self, service: "LodDataService"): LodDataService
@@ -9971,6 +9983,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ServerStorage"): ServerStorage
 	function GetService(self, service: "SessionService"): SessionService
 	function GetService(self, service: "ShorelineUpgraderService"): ShorelineUpgraderService
+	function GetService(self, service: "SmoothVoxelsUpgraderService"): SmoothVoxelsUpgraderService
 	function GetService(self, service: "SnippetService"): SnippetService
 	function GetService(self, service: "SocialService"): SocialService
 	function GetService(self, service: "SolidModelContentProvider"): SolidModelContentProvider
@@ -9987,6 +10000,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StudioHighDpiService"): StudioHighDpiService
 	function GetService(self, service: "StudioPublishService"): StudioPublishService
 	function GetService(self, service: "StudioScriptDebugEventListener"): StudioScriptDebugEventListener
+	function GetService(self, service: "StudioSdkService"): StudioSdkService
 	function GetService(self, service: "StudioService"): StudioService
 	function GetService(self, service: "TaskScheduler"): TaskScheduler
 	function GetService(self, service: "TeamCreateService"): TeamCreateService
