@@ -24,12 +24,14 @@ type Contents = {
 
 - Include documentation comments on functions and tables in autocompletion
 - Added configuration option `luau-lsp.require.mode` to configure how string requires are resolved. It can either be `relativeToWorkspaceRoot` (default) or `relativeToFile`
+- Added `luau-lsp.types.documentationFiles` to support adding extra documentation symbols to the database. These are used to support definition files, and should be in the same format as [shown here](https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json)
 
 ### Changed
 
 - Sync to upstream Luau 0.560
 - Class symbols with no documentation present in the docs file will no longer show anything on hover/autocomplete (i.e. won't show `@luau/global/require`)
 - `Instance.new()` now excepts variables which are of type string without erroring. It will instead error when Instance.new is called with a string literal which is an unknown class name
+- In the CLI, `luau-lsp lsp` now supports passing multiple `--docs=` parameters
 
 ## [1.15.0] - 2023-01-11
 

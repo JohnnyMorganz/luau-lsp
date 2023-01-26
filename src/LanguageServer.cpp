@@ -11,12 +11,12 @@
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
 
-LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile)
+LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles)
     : client(std::make_shared<Client>())
 {
     client->definitionsFiles = definitionsFiles;
-    client->documentationFile = documentationFile;
-    parseDocumentation(documentationFile, client->documentation, client);
+    client->documentationFiles = documentationFiles;
+    parseDocumentation(documentationFiles, client->documentation, client);
     nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
 }
 

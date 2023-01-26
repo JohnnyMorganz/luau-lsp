@@ -22,7 +22,7 @@ public:
     /// A registered definitions file passed by the client
     std::vector<std::filesystem::path> definitionsFiles;
     /// A registered documentation file passed by the client
-    std::optional<std::filesystem::path> documentationFile = std::nullopt;
+    std::vector<std::filesystem::path> documentationFiles;
     /// Parsed documentation database
     Luau::DocumentationDatabase documentation{""};
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore

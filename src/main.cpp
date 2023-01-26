@@ -125,7 +125,7 @@ int startLanguageServer(int argc, char** argv)
 #endif
 
     std::vector<std::filesystem::path> definitionsFiles;
-    std::optional<std::filesystem::path> documentationFile;
+    std::vector<std::filesystem::path> documentationFiles;
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "--definitions=", 14) == 0)
@@ -134,11 +134,11 @@ int startLanguageServer(int argc, char** argv)
         }
         else if (strncmp(argv[i], "--docs=", 7) == 0)
         {
-            documentationFile = std::filesystem::path(argv[i] + 7);
+            documentationFiles.emplace_back(argv[i] + 7);
         }
     }
 
-    LanguageServer server(definitionsFiles, documentationFile);
+    LanguageServer server(definitionsFiles, documentationFiles);
 
     // Begin input loop
     server.processInputLoop();

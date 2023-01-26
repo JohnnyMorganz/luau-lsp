@@ -36,79 +36,84 @@ std::string convertHtmlToMarkdown(const std::string& input)
 }
 
 
-void parseDocumentation(std::optional<std::filesystem::path> documentationFile, Luau::DocumentationDatabase& database, std::shared_ptr<Client> client)
+void parseDocumentation(std::vector<std::filesystem::path> documentationFiles, Luau::DocumentationDatabase& database, std::shared_ptr<Client> client)
 {
-    if (!documentationFile)
+    if (documentationFiles.empty())
     {
         client->sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
         return;
     };
 
-    if (auto contents = readFile(*documentationFile))
+    for (auto& documentationFile : documentationFiles)
     {
-        try
+        if (auto contents = readFile(documentationFile))
         {
-            auto docs = json::parse(*contents);
-            for (auto& [symbol, info] : docs.items())
+            try
             {
-                std::string documentation;
-                std::string learnMoreLink;
-                std::string codeSample;
-                if (info.contains("documentation"))
-                    info.at("documentation").get_to(documentation);
-                if (info.contains("learn_more_link"))
-                    info.at("learn_more_link").get_to(learnMoreLink);
-                if (info.contains("code_sample"))
-                    info.at("code_sample").get_to(codeSample);
+                auto docs = json::parse(*contents);
+                for (auto& [symbol, info] : docs.items())
+                {
+                    std::string documentation;
+                    std::string learnMoreLink;
+                    std::string codeSample;
+                    if (info.contains("documentation"))
+                        info.at("documentation").get_to(documentation);
+                    if (info.contains("learn_more_link"))
+                        info.at("learn_more_link").get_to(learnMoreLink);
+                    if (info.contains("code_sample"))
+                        info.at("code_sample").get_to(codeSample);
 
-                documentation = convertHtmlToMarkdown(documentation);
+                    documentation = convertHtmlToMarkdown(documentation);
 
-                if (info.contains("keys"))
-                {
-                    Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
-                    for (auto& [k, v] : info.at("keys").items())
+                    if (info.contains("keys"))
                     {
-                        keys[k] = v;
+                        Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
+                        for (auto& [k, v] : info.at("keys").items())
+                        {
+                            keys[k] = v;
+                        }
+                        database[symbol] = Luau::TableDocumentation{documentation, keys, learnMoreLink, codeSample};
                     }
-                    database[symbol] = Luau::TableDocumentation{documentation, keys, learnMoreLink, codeSample};
-                }
-                else if (info.contains("overloads"))
-                {
-                    Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> overloads{""};
-                    for (auto& [sig, sym] : info.at("overloads").items())
+                    else if (info.contains("overloads"))
                     {
-                        overloads[sig] = sym;
+                        Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> overloads{""};
+                        for (auto& [sig, sym] : info.at("overloads").items())
+                        {
+                            overloads[sig] = sym;
+                        }
+                        database[symbol] = Luau::OverloadedFunctionDocumentation{overloads};
                     }
-                    database[symbol] = Luau::OverloadedFunctionDocumentation{overloads};
-                }
-                else if (info.contains("params") || info.contains("returns"))
-                {
-                    std::vector<Luau::FunctionParameterDocumentation> parameters;
-                    std::vector<std::string> returns;
-                    for (auto& param : info.at("params"))
+                    else if (info.contains("params") || info.contains("returns"))
                     {
-                        parameters.push_back(parseDocumentationParameter(param));
+                        std::vector<Luau::FunctionParameterDocumentation> parameters;
+                        std::vector<std::string> returns;
+                        for (auto& param : info.at("params"))
+                        {
+                            parameters.push_back(parseDocumentationParameter(param));
+                        }
+                        if (info.contains("returns"))
+                            info.at("returns").get_to(returns);
+                        database[symbol] = Luau::FunctionDocumentation{documentation, parameters, returns, learnMoreLink, codeSample};
                     }
-                    if (info.contains("returns"))
-                        info.at("returns").get_to(returns);
-                    database[symbol] = Luau::FunctionDocumentation{documentation, parameters, returns, learnMoreLink, codeSample};
-                }
-                else
-                {
-                    database[symbol] = Luau::BasicDocumentation{documentation, learnMoreLink, codeSample};
+                    else
+                    {
+                        database[symbol] = Luau::BasicDocumentation{documentation, learnMoreLink, codeSample};
+                    }
                 }
             }
+            catch (const std::exception& e)
+            {
+                client->sendLogMessage(lsp::MessageType::Error,
+                    "Failed to load documentation database for " + documentationFile.generic_string() + ": " + std::string(e.what()));
+                client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
+            }
         }
-        catch (const std::exception& e)
+        else
         {
-            client->sendLogMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
-            client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
+            client->sendLogMessage(lsp::MessageType::Error,
+                "Failed to read documentation file for " + documentationFile.generic_string() + ". Documentation will not be provided");
+            client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
         }
-    }
-    else
-    {
-        client->sendLogMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
-        client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
     }
 }
 

@@ -32,7 +32,7 @@ public:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
 
-    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::optional<std::filesystem::path> documentationFile);
+    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles);
 
     lsp::ServerCapabilities getServerCapabilities();
 

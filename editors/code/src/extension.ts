@@ -303,6 +303,29 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
+  // Load extra documentation files
+  const documentationFiles = typesConfig.get<string[]>("documentationFiles");
+  if (documentationFiles) {
+    for (const documentationPath of documentationFiles) {
+      let uri;
+      if (vscode.workspace.workspaceFolders) {
+        uri = resolveUri(
+          vscode.workspace.workspaceFolders[0].uri,
+          documentationPath
+        );
+      } else {
+        uri = vscode.Uri.file(documentationPath);
+      }
+      if (await exists(uri)) {
+        args.push(`--docs=${uri.fsPath}`);
+      } else {
+        vscode.window.showWarningMessage(
+          `Documentations file at ${documentationPath} does not exist`
+        );
+      }
+    }
+  }
+
   // Handle FFlags
   const fflags: FFlags = {};
   const fflagsConfig = vscode.workspace.getConfiguration("luau-lsp.fflags");
