@@ -309,9 +309,27 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
 
     if (std::optional<std::string> contents = readFile(configPath))
     {
+        auto configUri = Uri::file(configPath);
         std::optional<std::string> error = Luau::parseConfig(*contents, result);
         if (error)
-            configErrors.push_back({configPath, *error});
+        {
+            if (client)
+            {
+                lsp::Diagnostic diagnostic{{0, 0, 0, 0}};
+                diagnostic.message = *error;
+                diagnostic.severity = lsp::DiagnosticSeverity::Error;
+                diagnostic.source = "Luau";
+                client->publishDiagnostics({configUri, std::nullopt, {diagnostic}});
+            }
+            else
+                configErrors.push_back({configPath, *error});
+        }
+        else
+        {
+            if (client)
+                // Clear errors presented for file
+                client->publishDiagnostics({configUri, std::nullopt, {}});
+        }
     }
 
     return configCache[path.generic_string()] = result;
@@ -320,6 +338,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
 void WorkspaceFileResolver::clearConfigCache()
 {
     configCache.clear();
+    configErrors.clear();
 }
 
 void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std::string& base)

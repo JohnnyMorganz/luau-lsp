@@ -35,6 +35,7 @@ type Contents = {
 - `Instance.new()` now excepts variables which are of type string without erroring. It will instead error when Instance.new is called with a string literal which is an unknown class name
 - In the CLI, `luau-lsp lsp` now supports passing multiple `--docs=` parameters
 - The CLI will now error when an unknown option is passed to it
+- Diagnostics will now be emitted on `.luaurc` files with parse errors
 
 ### Fixed
 

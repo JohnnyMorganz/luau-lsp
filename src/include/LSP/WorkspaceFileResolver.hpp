@@ -30,6 +30,7 @@ struct WorkspaceFileResolver
     // Currently opened files where content is managed by client
     mutable std::unordered_map<Luau::ModuleName, TextDocument> managedFiles;
     mutable std::unordered_map<std::string, Luau::Config> configCache;
+    // Errors found when loading .luaurc files - only used for the CLI
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
 
     WorkspaceFileResolver()
