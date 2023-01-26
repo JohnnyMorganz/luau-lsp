@@ -12,7 +12,7 @@ static const char* mainModuleName = "MainModule";
 
 Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri())
+    , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
 

@@ -138,6 +138,7 @@ int startAnalyze(int argc, char** argv)
     std::vector<std::filesystem::path> definitionsPaths;
     std::vector<std::filesystem::path> files;
     std::vector<std::string> ignoreGlobPatterns;
+    std::optional<std::filesystem::path> baseLuaurc;
 
     for (int i = 2; i < argc; ++i)
     {
@@ -156,6 +157,8 @@ int startAnalyze(int argc, char** argv)
                 sourcemapPath = std::string(argv[i] + 12);
             else if (strncmp(argv[i], "--definitions=", 14) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 14));
+            else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
+                baseLuaurc = std::filesystem::path(argv[i] + 14);
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.push_back(std::string(argv[i] + 7));
@@ -219,6 +222,26 @@ int startAnalyze(int argc, char** argv)
     frontendOptions.retainFullTypeGraphs = annotate;
 
     WorkspaceFileResolver fileResolver;
+    if (baseLuaurc)
+    {
+        Luau::Config result;
+        if (std::optional<std::string> contents = readFile(*baseLuaurc))
+        {
+            std::optional<std::string> error = Luau::parseConfig(*contents, result);
+            if (error)
+            {
+                fprintf(stderr, "%s: %s\n", baseLuaurc->generic_string().c_str(), error->c_str());
+                return 1;
+            }
+            fileResolver = WorkspaceFileResolver(result);
+        }
+        else
+        {
+            fprintf(stderr, "Failed to read base .luaurc configuration at '%s'\n", baseLuaurc->generic_string().c_str());
+            return 1;
+        }
+    }
+
     fileResolver.rootUri = Uri::file(std::filesystem::current_path());
     Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 

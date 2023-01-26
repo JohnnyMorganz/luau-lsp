@@ -31,8 +31,10 @@ public:
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
+    std::optional<Luau::Config> defaultConfig;
 
-    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles);
+    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles,
+        std::optional<Luau::Config> defaultConfig);
 
     lsp::ServerCapabilities getServerCapabilities();
 

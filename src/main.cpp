@@ -36,6 +36,8 @@ static bool validateFlag(char* str, int argIndex)
         return true;
     else if (strncmp(str, "--docs=", 7) == 0 && n > 8)
         return true;
+    else if (strncmp(str, "--base-luaurc=", 14) == 0 && n > 15)
+        return true;
     else if (strcmp(str, "--formatter=plain") == 0)
         return true;
     else if (strcmp(str, "--formatter=gnu") == 0)
@@ -45,8 +47,6 @@ static bool validateFlag(char* str, int argIndex)
     else if (strcmp(str, "--timetrace") == 0)
         return true;
     else if (strncmp(str, "--sourcemap=", 12) == 0 && n > 13)
-        return true;
-    else if (strncmp(str, "--definitions=", 14) == 0 && n > 15)
         return true;
     else if (strncmp(str, "--defs=", 7) == 0 && n > 8)
         return true;
@@ -90,6 +90,7 @@ static void displayHelp(const char* argv0)
     printf("LSP options:\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");
+    printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
 }
 
 static void displayFlags()
@@ -166,6 +167,8 @@ int startLanguageServer(int argc, char** argv)
 
     std::vector<std::filesystem::path> definitionsFiles;
     std::vector<std::filesystem::path> documentationFiles;
+    std::optional<std::filesystem::path> baseLuaurc;
+
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "--definitions=", 14) == 0)
@@ -176,9 +179,32 @@ int startLanguageServer(int argc, char** argv)
         {
             documentationFiles.emplace_back(argv[i] + 7);
         }
+        else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
+        {
+            baseLuaurc = std::filesystem::path(argv[i] + 14);
+        }
     }
 
-    LanguageServer server(definitionsFiles, documentationFiles);
+    std::optional<Luau::Config> defaultConfig;
+    if (baseLuaurc)
+    {
+        if (std::optional<std::string> contents = readFile(*baseLuaurc))
+        {
+            std::optional<std::string> error = Luau::parseConfig(*contents, *defaultConfig);
+            if (error)
+            {
+                std::cerr << baseLuaurc->generic_string() << ": " << *error << "\n";
+                return 1;
+            }
+        }
+        else
+        {
+            std::cerr << "Failed to read base .luaurc configuration at '" << baseLuaurc->generic_string() << "'\n";
+            return 1;
+        }
+    }
+
+    LanguageServer server(definitionsFiles, documentationFiles, defaultConfig);
 
     // Begin input loop
     server.processInputLoop();

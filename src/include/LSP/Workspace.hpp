@@ -31,11 +31,11 @@ public:
     Luau::TypeArena instanceTypes;
 
 public:
-    WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri)
+    WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
         , name(name)
         , rootUri(uri)
-        , fileResolver(WorkspaceFileResolver())
+        , fileResolver(defaultConfig ? WorkspaceFileResolver(*defaultConfig) : WorkspaceFileResolver())
         , frontend(Luau::Frontend(&fileResolver, &fileResolver, {true}))
     {
         fileResolver.client = client;

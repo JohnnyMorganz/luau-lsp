@@ -11,13 +11,15 @@
 #define REQUIRED_PARAMS(params, method) \
     !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
 
-LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles)
+LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles,
+    std::optional<Luau::Config> defaultConfig)
     : client(std::make_shared<Client>())
+    , defaultConfig(defaultConfig)
 {
     client->definitionsFiles = definitionsFiles;
     client->documentationFiles = documentationFiles;
     parseDocumentation(documentationFiles, client->documentation, client);
-    nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri());
+    nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig);
 }
 
 /// Finds the workspace which the file belongs to.
@@ -338,12 +340,12 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     {
         for (auto& folder : params.workspaceFolders.value())
         {
-            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         }
     }
     else if (params.rootUri.has_value())
     {
-        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value()));
+        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig));
     }
 
     isInitialized = true;
@@ -627,7 +629,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     std::vector<lsp::DocumentUri> configItems;
     for (auto& folder : params.event.added)
     {
-        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri));
+        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         configItems.emplace_back(folder.uri);
     }
     client->requestConfiguration(configItems);

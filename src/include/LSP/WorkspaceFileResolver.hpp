@@ -38,6 +38,10 @@ struct WorkspaceFileResolver
         defaultConfig.mode = Luau::Mode::Nonstrict;
     }
 
+    // Create a WorkspaceFileResolver with a specific default configuration
+    WorkspaceFileResolver(const Luau::Config defaultConfig)
+        : defaultConfig(defaultConfig){};
+
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const Luau::ModuleName& name) const;
 
