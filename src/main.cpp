@@ -22,7 +22,7 @@ static bool validateFlag(char* str, int argIndex)
     if (str[0] != '-')
         return true;
 
-    int n = strlen(str);
+    auto n = strlen(str);
 
     if (argIndex == 1 && strcmp(str, "--help") == 0)
         return true;
