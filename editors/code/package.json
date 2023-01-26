@@ -376,6 +376,6 @@
   "dependencies": {
     "express": "^4.18.1",
     "node-fetch": "^3.2.4",
-    "vscode-languageclient": "^8.1.0-next.2"
+    "vscode-languageclient": "^8.1.0-next.6"
   }
 }

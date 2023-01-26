@@ -39,6 +39,7 @@ type Contents = {
 ### Fixed
 
 - Fixed unknown require errors occurring in multi-root workspaces when in a folder which isn't the first one
+- Fixed diagnostics not clearing for files which were deleted unconventionally (i.e., outside of VSCode using File Explorer, or external commands such as `git stash`)
 
 ## [1.15.0] - 2023-01-11
 

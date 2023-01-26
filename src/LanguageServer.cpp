@@ -423,6 +423,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
         std::vector<lsp::FileSystemWatcher> watchers;
         watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
         watchers.push_back(lsp::FileSystemWatcher{"**/sourcemap.json"});
+        watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
         client->registerCapability(
             "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
     }
@@ -568,13 +569,6 @@ void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParam
     // Release managed in-memory file
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->closeTextDocument(params.textDocument.uri);
-
-    // If this was an ignored file then lets clear the diagnostics for it
-    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic) &&
-        workspace->isIgnoredFile(params.textDocument.uri.fsPath()))
-    {
-        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, std::nullopt, {}});
-    }
 }
 
 void LanguageServer::onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params)
@@ -646,6 +640,7 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
         auto workspace = findWorkspace(change.uri);
         auto config = client->getConfiguration(workspace->rootUri);
         auto filePath = change.uri.fsPath();
+
         // Flag sourcemap changes
         if (filePath.filename() == "sourcemap.json")
         {
@@ -663,6 +658,11 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
 
             // Recompute diagnostics
             this->recomputeDiagnostics(workspace, config);
+        }
+        else if ((filePath.extension() == ".lua" || filePath.extension() == ".luau") && change.type == lsp::FileChangeType::Deleted)
+        {
+            // Clear the diagnostics for the file in case it was not managed
+            workspace->clearDiagnosticsForFile(change.uri);
         }
     }
 }

@@ -61,19 +61,26 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 
     // Refresh workspace diagnostics to clear diagnostics on ignored files
     if (!config.diagnostics.workspace || isIgnoredFile(uri.fsPath()))
+        clearDiagnosticsForFile(uri);
+}
+
+void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
+{
+    if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
     {
-        if (client->workspaceDiagnosticsToken)
-        {
-            lsp::WorkspaceDocumentDiagnosticReport documentReport;
-            documentReport.uri = uri;
-            documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-            lsp::WorkspaceDiagnosticReportPartialResult report{{documentReport}};
-            client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
-        }
-        else
-        {
-            client->refreshWorkspaceDiagnostics();
-        }
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, {}});
+    }
+    else if (client->workspaceDiagnosticsToken)
+    {
+        lsp::WorkspaceDocumentDiagnosticReport documentReport;
+        documentReport.uri = uri;
+        documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
+        lsp::WorkspaceDiagnosticReportPartialResult report{{documentReport}};
+        client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
+    }
+    else
+    {
+        client->refreshWorkspaceDiagnostics();
     }
 }
 
