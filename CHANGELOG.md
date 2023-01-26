@@ -34,6 +34,10 @@ type Contents = {
 - In the CLI, `luau-lsp lsp` now supports passing multiple `--docs=` parameters
 - The CLI will now error when an unknown option is passed to it
 
+### Fixed
+
+- Fixed unknown require errors occurring in multi-root workspaces when in a folder which isn't the first one
+
 ## [1.15.0] - 2023-01-11
 
 ### Added

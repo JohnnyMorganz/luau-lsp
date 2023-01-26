@@ -102,7 +102,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
         auto sourceNode = getSourceNodeFromVirtualPath(name);
         if (!sourceNode)
             return std::nullopt;
-        auto filePath = sourceNode.value()->getScriptFilePath();
+        auto filePath = getRealPathFromSourceNode(sourceNode.value());
         if (!filePath)
             return std::nullopt;
         realFileName = filePath.value();

@@ -8,6 +8,9 @@ bool SourceNode::isScript()
     return className == "ModuleScript" || className == "Script" || className == "LocalScript";
 }
 
+
+/// NOTE: Use `WorkspaceFileResolver::getRealPathFromSourceNode()` instead of this function where
+/// possible, as that will ensure it is relative to the correct workspace root.
 std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
 {
     for (const auto& path : filePaths)
