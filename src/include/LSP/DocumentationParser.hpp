@@ -14,8 +14,7 @@
 using json = nlohmann::json;
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j);
-void parseDocumentation(
-    std::optional<std::filesystem::path> documentationFile, Luau::DocumentationDatabase& database, std::shared_ptr<Client> client);
+void parseDocumentation(std::vector<std::filesystem::path> documentationFiles, Luau::DocumentationDatabase& database, std::shared_ptr<Client> client);
 
 /// Returns a markdown string of the provided documentation
 /// If we can't find any documentation for the given symbol, then we return nullopt
