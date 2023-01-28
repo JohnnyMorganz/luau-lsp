@@ -3592,6 +3592,7 @@ declare class Vector3
 	X: number
 	Y: number
 	Z: number
+	function Angle(self, other: Vector3, axis: Vector3?): number
 	function Cross(self, other: Vector3): Vector3
 	function Dot(self, other: Vector3): number
 	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
