@@ -315,7 +315,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
         {
             if (client)
             {
-                lsp::Diagnostic diagnostic{{0, 0, 0, 0}};
+                lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
                 diagnostic.message = *error;
                 diagnostic.severity = lsp::DiagnosticSeverity::Error;
                 diagnostic.source = "Luau";
