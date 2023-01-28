@@ -28,6 +28,7 @@ type Contents = {
 - Added `luau-lsp.diagnostics.strictDatamodelTypes` (default: `false`) which configures whether we use expressive DataModel types to power diagnostics.
   When off, `game` / `script` / `workspace` (and all their members) are typed as `any`, which helps to prevent false positives, but may lead to false negatives.
 - Added CLI option `--base-luaurc=PATH` for both LSP and Analyze mode to provide a path to a `.luaurc` file which is used as the default configuration
+- Added support for Go To Definition / Type Definition on imported type references `module.Type` (gated behind FFlag `SupportTypeAliasGoToDeclaration`)
 
 ### Changed
 

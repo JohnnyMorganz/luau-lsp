@@ -746,6 +746,22 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
     return std::nullopt;
 }
 
+std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name)
+{
+    const Luau::Scope* scope = &deepScope;
+    while (true)
+    {
+        auto it = scope->importedModules.find(name);
+        if (it != scope->importedModules.end())
+            return it->second;
+
+        if (scope->parent)
+            scope = scope->parent.get();
+        else
+            return std::nullopt;
+    }
+}
+
 bool types::isMetamethod(const Luau::Name& name)
 {
     return name == "__index" || name == "__newindex" || name == "__call" || name == "__concat" || name == "__unm" || name == "__add" ||

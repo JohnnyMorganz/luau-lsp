@@ -119,6 +119,7 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type);
 
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
 std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
+std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name);
 
 // Converts a UTF-8 position to a UTF-16 position, using the provided text document if available
 // NOTE: if the text document doesn't exist, we perform no conversion, so the positioning may be

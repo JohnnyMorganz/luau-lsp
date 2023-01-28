@@ -4,6 +4,8 @@
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
+LUAU_FASTFLAG(SupportTypeAliasGoToDeclaration)
+
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
     lsp::DefinitionResult result;
@@ -114,20 +116,65 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     }
     else if (auto reference = node->as<Luau::AstTypeReference>())
     {
+        auto uri = params.textDocument.uri;
+        auto referenceTextDocument = textDocument;
+        bool tempDocument = false; // NOTE: need to be EXTREMELY CAREFUL on deleting the ptr
+
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)
             return result;
 
-        // TODO: we currently can't handle if its imported from a module
         if (reference->prefix)
-            return result;
+        {
+            if (FFlag::SupportTypeAliasGoToDeclaration)
+            {
+                if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
+                {
+                    auto fileName = fileResolver.resolveToRealPath(*importedName);
+                    if (!fileName)
+                        return result;
+                    uri = Uri::file(*fileName);
+
+                    // TODO: fix "forAutocomplete"
+                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
+                        importedModule && importedModule->hasModuleScope())
+                        scope = importedModule->getModuleScope();
+                    else
+                        return result;
+
+                    referenceTextDocument = fileResolver.getTextDocument(*importedName);
+                    if (!referenceTextDocument)
+                    {
+                        // Open a temporary text document so we can perform operations on it
+                        if (auto source = fileResolver.readSource(*importedName))
+                        {
+                            tempDocument = true;
+                            referenceTextDocument = new TextDocument{uri, "luau", 0, source->source};
+                        }
+                        else
+                            return result;
+                    }
+                }
+                else
+                    return result;
+            }
+            else
+                return result;
+        }
 
         auto location = lookupTypeLocation(*scope, reference->name.value);
         if (!location)
+        {
+            if (tempDocument)
+                delete referenceTextDocument;
             return result;
+        }
 
         result.emplace_back(lsp::Location{
-            params.textDocument.uri, lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+            uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
+
+        if (tempDocument)
+            delete referenceTextDocument;
     }
 
     return result;
@@ -162,7 +209,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     if (!node)
         return std::nullopt;
 
-    auto findTypeLocation = [textDocument, &module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
+    auto findTypeLocation = [this, textDocument, &module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
     {
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
@@ -173,7 +220,16 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
 
             // TODO: we currently can't handle if its imported from a module
             if (reference->prefix)
+            {
+                if (FFlag::SupportTypeAliasGoToDeclaration)
+                    if (auto importedName = scope->importedModules.find(reference->prefix.value().value);
+                        importedName != scope->importedModules.end())
+                        // TODO: fix "forAutocomplete"
+                        if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(importedName->second);
+                            importedModule && importedModule->hasModuleScope())
+                            scope = importedModule->getModuleScope();
                 return std::nullopt;
+            }
 
             auto location = lookupTypeLocation(*scope, reference->name.value);
             if (!location)
