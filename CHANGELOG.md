@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.16.0] - 2023-01-29
+
 ### Added
 
 - Support documentation comments attached to a table and table types, e.g. on `DATA` in the followign:
