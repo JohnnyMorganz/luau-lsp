@@ -212,6 +212,7 @@ IGNORED_MEMBERS = {
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
 EXTRA_MEMBERS = {
     "Vector3": [
+        "function Angle(self, other: Vector3, axis: Vector3?): number",
         "function __add(self, other: Vector3): Vector3",
         "function __sub(self, other: Vector3): Vector3",
         "function __mul(self, other: Vector3 | number): Vector3",
