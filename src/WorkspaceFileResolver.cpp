@@ -19,9 +19,20 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 const TextDocument* WorkspaceFileResolver::getTextDocument(const Luau::ModuleName& name) const
 {
     auto it = managedFiles.find(name);
-    if (it == managedFiles.end())
-        return nullptr;
-    return &it->second;
+    if (it != managedFiles.end())
+        return &it->second;
+
+    // HACK: attempting to solve "No managed text document"
+    // Check to see if we have the file stored using the URI instead
+    // https://github.com/JohnnyMorganz/luau-lsp/issues/26
+    if (auto fsPath = resolveToRealPath(name))
+    {
+        it = managedFiles.find(fsPath->generic_string());
+        if (it != managedFiles.end())
+            return &it->second;
+    }
+
+    return nullptr;
 }
 
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
