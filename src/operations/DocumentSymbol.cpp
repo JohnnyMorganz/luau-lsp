@@ -24,13 +24,13 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
             symbols.push_back(symbol);
     }
 
-    void createLocalSymbol(Luau::AstLocal* local)
+    void createLocalSymbol(Luau::AstLocal* local, Luau::Location enclosingRange)
     {
         lsp::DocumentSymbol symbol;
         symbol.name = local->name.value;
         symbol.kind = lsp::SymbolKind::Variable;
-        symbol.range = {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)};
-        symbol.selectionRange = symbol.range;
+        symbol.range = {textDocument->convertPosition(enclosingRange.begin), textDocument->convertPosition(enclosingRange.end)};
+        symbol.selectionRange = {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)};
         addSymbol(symbol);
     }
 
@@ -38,7 +38,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
     {
         for (size_t i = 0; i < local->vars.size; ++i)
         {
-            createLocalSymbol(local->vars.data[i]);
+            createLocalSymbol(local->vars.data[i], local->location);
             // TODO: if the value assigned is a table, should we include its properties?
         }
         return false;
@@ -76,7 +76,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         symbol.name = alias->name.value;
         symbol.kind = lsp::SymbolKind::Interface;
         symbol.range = {textDocument->convertPosition(alias->location.begin), textDocument->convertPosition(alias->location.end)};
-        symbol.selectionRange = symbol.range;
+        symbol.selectionRange = {textDocument->convertPosition(alias->nameLocation.begin), textDocument->convertPosition(alias->nameLocation.end)};
         addSymbol(symbol);
         return false;
     }
@@ -91,7 +91,8 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         bool comma = false;
         for (auto* arg : func->args)
         {
-            createLocalSymbol(arg);
+            LUAU_ASSERT(func->argLocation);
+            createLocalSymbol(arg, func->argLocation.value());
             if (comma)
                 detail += ", ";
             detail += arg->name.value;
@@ -99,10 +100,14 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         }
         if (func->vararg)
         {
+            LUAU_ASSERT(func->argLocation);
             lsp::DocumentSymbol symbol;
             symbol.name = "...";
             symbol.kind = lsp::SymbolKind::Variable;
-            symbol.range = {textDocument->convertPosition(func->varargLocation.begin), textDocument->convertPosition(func->varargLocation.end)};
+            symbol.range = {textDocument->convertPosition(func->argLocation->begin), textDocument->convertPosition(func->argLocation->end)};
+            symbol.selectionRange = {
+                textDocument->convertPosition(func->varargLocation.begin), textDocument->convertPosition(func->varargLocation.end)};
+
             addSymbol(symbol);
 
             if (comma)
