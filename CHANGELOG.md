@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.16.1] - 2023-01-30
+
 ### Fixed
 
 - Fixed error in document symbols not conforming to specification - `selectionRange` will now be fully enclosed by `range`
