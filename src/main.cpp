@@ -87,6 +87,7 @@ static void displayHelp(const char* argv0)
     printf("  --sourcemap=PATH: path to a Rojo-style sourcemap\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");
+    printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
     printf("LSP options:\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");
@@ -185,11 +186,12 @@ int startLanguageServer(int argc, char** argv)
         }
     }
 
-    std::optional<Luau::Config> defaultConfig;
+    std::optional<Luau::Config> defaultConfig = std::nullopt;
     if (baseLuaurc)
     {
         if (std::optional<std::string> contents = readFile(*baseLuaurc))
         {
+            defaultConfig = Luau::Config{};
             std::optional<std::string> error = Luau::parseConfig(*contents, *defaultConfig);
             if (error)
             {

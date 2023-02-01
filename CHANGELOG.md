@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed document symbol crash on incomplete functions
+- Fixed `--base-luaurc` not registering for an LSP server
 
 ## [1.16.1] - 2023-01-30
 
