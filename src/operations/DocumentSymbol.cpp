@@ -91,8 +91,7 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         bool comma = false;
         for (auto* arg : func->args)
         {
-            LUAU_ASSERT(func->argLocation);
-            createLocalSymbol(arg, func->argLocation.value());
+            createLocalSymbol(arg, func->argLocation.value_or(func->location));
             if (comma)
                 detail += ", ";
             detail += arg->name.value;
@@ -100,11 +99,11 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         }
         if (func->vararg)
         {
-            LUAU_ASSERT(func->argLocation);
+            auto enclosingPosition = func->argLocation.value_or(func->location);
             lsp::DocumentSymbol symbol;
             symbol.name = "...";
             symbol.kind = lsp::SymbolKind::Variable;
-            symbol.range = {textDocument->convertPosition(func->argLocation->begin), textDocument->convertPosition(func->argLocation->end)};
+            symbol.range = {textDocument->convertPosition(enclosingPosition.begin), textDocument->convertPosition(enclosingPosition.end)};
             symbol.selectionRange = {
                 textDocument->convertPosition(func->varargLocation.begin), textDocument->convertPosition(func->varargLocation.end)};
 
