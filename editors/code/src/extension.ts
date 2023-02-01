@@ -356,7 +356,10 @@ export async function activate(context: vscode.ExtensionContext) {
   const overridenFFlags = fflagsConfig.get<FFlags>("override");
   if (overridenFFlags) {
     for (const [name, value] of Object.entries(overridenFFlags)) {
-      fflags[name] = value;
+      // Validate that the name and value is valid
+      if (name.length > 0 && value.length > 0) {
+        fflags[name] = value;
+      }
     }
   }
 

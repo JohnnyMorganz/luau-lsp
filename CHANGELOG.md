@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed document symbol crash on incomplete functions
 - Fixed `--base-luaurc` not registering for an LSP server
+- Fixed crashing on invalid FFlags configuration - the VSCode client will now validate the flags
 
 ## [1.16.1] - 2023-01-30
 
