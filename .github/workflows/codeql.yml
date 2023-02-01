@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          submodules: true
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
@@ -46,15 +48,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        if: matrix.language != 'cpp'
         uses: github/codeql-action/autobuild@v2
-
-      - name: Autobuild
-        if: matrix.language == 'cpp'
-        run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-          cmake --build . --target Luau.LanguageServer.CLI -j 3
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
