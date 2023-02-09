@@ -3733,6 +3733,44 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
+type Hat = any
+type AnalyticsService = any
+type HopperBin = any
+type Flag = any
+type RocketPropulsion = any
+type Skin = any
+type Plane = any
+type CustomEvent = any
+type CustomEventReceiver = any
+type BevelMesh = any
+type CylinderMesh = any
+type Hole = any
+type MotorFeature = any
+type FunctionalTest = any
+type GuiMain = any
+type FloorWire = any
+type SelectionPartLasso = any
+type SelectionPointLasso = any
+type Hopper = any
+type RotateP = any
+type RotateV = any
+type Glue = any
+type ManualSurfaceJointInstance = any
+type ManualGlue = any
+type ManualWeld = any
+type Rotate = any
+type Snap = any
+type JointsService = any
+type Message = any
+type Hint = any
+type FlagStand = any
+type SkateboardPlatform = any
+type Status = any
+type PointsService = any
+type Speaker = any
+type DoubleConstrainedValue = any
+type IntConstrainedValue = any
+type VoiceSource = any
 declare class Instance
 	AncestryChanged: RBXScriptSignal<Instance, Instance?>
 	Archivable: boolean

@@ -780,17 +780,21 @@ def filterMember(klassName: str, member: ApiMember):
     return True
 
 
-def declareClass(klass: ApiClass) -> str:
-    if klass["Name"] in IGNORED_INSTANCES:
-        return ""
-
-    if (
+def shouldExcludeAsDeprecated(klass: ApiClass):
+    return (
         not INCLUDE_DEPRECATED_METHODS
         and "Tags" in klass
         and klass["Tags"] is not None
         and "Deprecated" in klass["Tags"]
         and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
-    ):
+    )
+
+
+def declareClass(klass: ApiClass) -> str:
+    if klass["Name"] in IGNORED_INSTANCES:
+        return ""
+
+    if shouldExcludeAsDeprecated(klass):
         return ""
 
     out = "declare class " + klass["Name"]
@@ -867,6 +871,11 @@ def printEnums(dump: ApiDump):
 
 
 def printClasses(dump: ApiDump):
+    # Forward declare "deprecated" classes in case they are still used
+    for klass in dump["Classes"]:
+        if shouldExcludeAsDeprecated(klass):
+            print(f"type {klass['Name']} = any")
+
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
