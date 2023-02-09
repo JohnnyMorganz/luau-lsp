@@ -9,54 +9,41 @@
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
-    auto moduleName = fileResolver.getModuleName(uri);
+    auto normalisedUri = fileResolver.normalisedUriString(uri);
+
     fileResolver.managedFiles.emplace(
-        std::make_pair(moduleName, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
+        std::make_pair(normalisedUri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
+
     // Mark the file as dirty as we don't know what changes were made to it
+    auto moduleName = fileResolver.getModuleName(uri);
     frontend.markDirty(moduleName);
 }
 
 void WorkspaceFolder::updateTextDocument(
     const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty)
 {
-    auto moduleName = fileResolver.getModuleName(uri);
+    auto normalisedUri = fileResolver.normalisedUriString(uri);
 
-    if (!contains(fileResolver.managedFiles, moduleName))
+    if (!contains(fileResolver.managedFiles, normalisedUri))
     {
-        // Check if we have the original file URI stored (https://github.com/JohnnyMorganz/luau-lsp/issues/26)
-        // TODO: can be potentially removed when server generates sourcemap
-        auto fsPath = uri.fsPath().generic_string();
-        if (fsPath != moduleName && contains(fileResolver.managedFiles, fsPath))
-        {
-            // Change the managed file key to use the new modulename
-            auto nh = fileResolver.managedFiles.extract(fsPath);
-            nh.key() = moduleName;
-            fileResolver.managedFiles.insert(std::move(nh));
-        }
-        else
-        {
-            client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
-            return;
-        }
+        client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
+        return;
     }
-    auto& textDocument = fileResolver.managedFiles.at(moduleName);
+    auto& textDocument = fileResolver.managedFiles.at(normalisedUri);
     textDocument.update(params.contentChanges, params.textDocument.version);
 
     // Mark the module dirty for the typechecker
+    auto moduleName = fileResolver.getModuleName(uri);
     frontend.markDirty(moduleName, markedDirty);
 }
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
-    auto config = client->getConfiguration(rootUri);
-    auto moduleName = fileResolver.getModuleName(uri);
-    fileResolver.managedFiles.erase(moduleName);
-
-    // Clear out base uri fsPath as well, in case we managed it like that
-    // TODO: can be potentially removed when server generates sourcemap
-    fileResolver.managedFiles.erase(uri.fsPath().generic_string());
+    fileResolver.managedFiles.erase(fileResolver.normalisedUriString(uri));
 
     // Mark the module as dirty as we no longer track its changes
+    auto config = client->getConfiguration(rootUri);
+    auto moduleName = fileResolver.getModuleName(uri);
     frontend.markDirty(moduleName);
 
     // Refresh workspace diagnostics to clear diagnostics on ignored files
@@ -136,29 +123,6 @@ bool WorkspaceFolder::updateSourceMap()
         types::registerInstanceTypes(
             frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
         types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
-
-        // Update managed file paths as they may be converted to virtual
-        // Check if we have the original file URIs stored (https://github.com/JohnnyMorganz/luau-lsp/issues/26)
-        std::vector<std::pair<Luau::ModuleName, TextDocument>> movedFiles;
-        for (auto it = fileResolver.managedFiles.begin(); it != fileResolver.managedFiles.end();)
-        {
-            if (!fileResolver.isVirtualPath(it->first))
-            {
-                if (auto virtualPath = fileResolver.resolveToVirtualPath(it->first); virtualPath && virtualPath != it->first)
-                {
-                    // Store the new ModuleName pairing into a vector and remove the old key
-                    movedFiles.emplace_back(std::make_pair(*virtualPath, it->second));
-                    it = fileResolver.managedFiles.erase(it);
-                    continue; // Ensure we continue so we don't increment iterator and skip next element
-                }
-            }
-
-            it++;
-        }
-
-        // Add any new pairings back into the map
-        for (auto& pair : movedFiles)
-            fileResolver.managedFiles.emplace(pair);
 
         return true;
     }

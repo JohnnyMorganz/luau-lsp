@@ -139,9 +139,9 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
 std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(const lsp::DocumentSymbolParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(moduleName);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     // Run the type checker to ensure we are up to date
     if (frontend.isDirty(moduleName))

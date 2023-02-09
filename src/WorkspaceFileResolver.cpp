@@ -16,21 +16,33 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 
     return fsPath;
 }
-const TextDocument* WorkspaceFileResolver::getTextDocument(const Luau::ModuleName& name) const
+
+const std::string WorkspaceFileResolver::normalisedUriString(const lsp::DocumentUri& uri) const
 {
-    auto it = managedFiles.find(name);
+    auto uriString = uri.toString();
+
+// As windows/macOS is case insensitive, we lowercase the URI string for simplicitly and to handle
+// normalisation issues
+#if defined(_WIN32) || defined(__APPLE__)
+    uriString = toLower(uriString);
+#endif
+
+    return uriString;
+}
+
+const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUri& uri) const
+{
+    auto it = managedFiles.find(normalisedUriString(uri));
     if (it != managedFiles.end())
         return &it->second;
 
-    // HACK: attempting to solve "No managed text document"
-    // Check to see if we have the file stored using the URI instead
-    // https://github.com/JohnnyMorganz/luau-lsp/issues/26
-    if (auto fsPath = resolveToRealPath(name))
-    {
-        it = managedFiles.find(fsPath->generic_string());
-        if (it != managedFiles.end())
-            return &it->second;
-    }
+    return nullptr;
+}
+
+const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const Luau::ModuleName& name) const
+{
+    if (auto filePath = resolveToRealPath(name))
+        return getTextDocument(Uri::file(*filePath));
 
     return nullptr;
 }
@@ -124,7 +136,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
         sourceType = sourceCodeTypeFromPath(realFileName);
     }
 
-    if (auto textDocument = getTextDocument(name))
+    if (auto textDocument = getTextDocumentFromModuleName(name))
     {
         source = textDocument->getText();
     }

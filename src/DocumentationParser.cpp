@@ -380,7 +380,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         return {};
 
     // Get relevant text document
-    auto textDocument = fileResolver.getTextDocument(moduleName);
+    auto textDocument = fileResolver.getTextDocumentFromModuleName(moduleName);
     bool tempDocument = false;
     if (!textDocument)
     {
