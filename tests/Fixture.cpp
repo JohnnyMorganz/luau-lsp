@@ -138,12 +138,8 @@ Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseO
 
 Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
-    Luau::ModuleName mm = fromString(mainModuleName);
-    workspace.fileResolver.defaultConfig.mode = mode;
-    workspace.fileResolver.managedFiles.emplace(std::make_pair(mm, TextDocument(Uri("file", "", mainModuleName), "luau", 0, std::move(source))));
-    workspace.frontend.markDirty(mm);
-
-    return workspace.frontend.check(mm);
+    newDocument(mainModuleName, source);
+    return workspace.frontend.check(mainModuleName);
 }
 
 Luau::CheckResult Fixture::check(const std::string& source)
