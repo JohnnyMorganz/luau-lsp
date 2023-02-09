@@ -23,6 +23,7 @@ jobs:
           style: file
           ignore: .github|extern|luau
           files-changed-only: false
+          tidy-checks: boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,clang-analyzer-*,cppcoreguidelines-*,-modernize-use-trailing-return-type
 
       - name: Verify
         if: steps.linter.outputs.checks-failed > 0
