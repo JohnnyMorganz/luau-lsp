@@ -969,6 +969,9 @@ declare class EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum
 	Skip8: EnumEnviromentalPhysicsThrottle
 	Skip16: EnumEnviromentalPhysicsThrottle
 end
+declare class EnumExperienceAuthScope extends EnumItem end
+declare class EnumExperienceAuthScope_INTERNAL extends Enum
+end
 declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
 	NoCraters: EnumExplosionType
@@ -2304,6 +2307,9 @@ declare class EnumScaleType_INTERNAL extends Enum
 	Fit: EnumScaleType
 	Crop: EnumScaleType
 end
+declare class EnumScopeCheckResult extends EnumItem end
+declare class EnumScopeCheckResult_INTERNAL extends Enum
+end
 declare class EnumScreenInsets extends EnumItem end
 declare class EnumScreenInsets_INTERNAL extends Enum
 	None: EnumScreenInsets
@@ -3162,6 +3168,7 @@ type ENUM_LIST = {
 	EasingStyle: EnumEasingStyle_INTERNAL,
 	ElasticBehavior: EnumElasticBehavior_INTERNAL,
 	EnviromentalPhysicsThrottle: EnumEnviromentalPhysicsThrottle_INTERNAL,
+	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
 	ExplosionType: EnumExplosionType_INTERNAL,
 	FacialAnimationFlags: EnumFacialAnimationFlags_INTERNAL,
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
@@ -3295,6 +3302,7 @@ type ENUM_LIST = {
 	SaveFilter: EnumSaveFilter_INTERNAL,
 	SavedQualitySetting: EnumSavedQualitySetting_INTERNAL,
 	ScaleType: EnumScaleType_INTERNAL,
+	ScopeCheckResult: EnumScopeCheckResult_INTERNAL,
 	ScreenInsets: EnumScreenInsets_INTERNAL,
 	ScreenOrientation: EnumScreenOrientation_INTERNAL,
 	ScrollBarInset: EnumScrollBarInset_INTERNAL,

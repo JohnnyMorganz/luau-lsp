@@ -838,8 +838,9 @@ def declareClass(klass: ApiClass) -> str:
 
 
 def printEnums(dump: ApiDump):
-    enums: defaultdict[str, List[str]] = defaultdict(list)
+    enums: dict[str, List[str]] = {}
     for enum in dump["Enums"]:
+        enums[enum["Name"]] = []
         for item in enum["Items"]:
             enums[enum["Name"]].append(item["Name"])
 
