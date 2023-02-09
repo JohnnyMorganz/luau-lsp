@@ -476,16 +476,8 @@ void LanguageServer::recomputeDiagnostics(WorkspaceFolderPtr& workspace, const C
         // Recompute diagnostics for all currently opened files
         else
         {
-            for (const auto& [file, document] : workspace->fileResolver.managedFiles)
-            {
-                auto filePath = workspace->fileResolver.resolveToRealPath(file);
-                if (filePath)
-                {
-
-                    auto uri = Uri::file(*filePath);
-                    this->pushDiagnostics(workspace, uri, document.version());
-                }
-            }
+            for (const auto& [_, document] : workspace->fileResolver.managedFiles)
+                this->pushDiagnostics(workspace, document.uri(), document.version());
         }
     }
     else

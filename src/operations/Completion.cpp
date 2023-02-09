@@ -24,7 +24,7 @@ static constexpr const char* Keywords = "7";
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto document = fileResolver.getTextDocument(moduleName);
+    auto document = fileResolver.getTextDocument(params.textDocument.uri);
     if (!document)
         return;
     auto position = document->convertPosition(params.position);
@@ -306,9 +306,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(moduleName);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,

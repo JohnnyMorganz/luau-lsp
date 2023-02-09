@@ -28,7 +28,7 @@ struct WorkspaceFileResolver
     PluginNodePtr pluginInfo;
 
     // Currently opened files where content is managed by client
-    mutable std::unordered_map<Luau::ModuleName, TextDocument> managedFiles;
+    mutable std::unordered_map</* DocumentUri */ std::string, TextDocument> managedFiles;
     mutable std::unordered_map<std::string, Luau::Config> configCache;
     // Errors found when loading .luaurc files - only used for the CLI
     mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors;
@@ -42,8 +42,12 @@ struct WorkspaceFileResolver
     WorkspaceFileResolver(const Luau::Config defaultConfig)
         : defaultConfig(defaultConfig){};
 
+    // Handle normalisation to simplify lookup
+    const std::string normalisedUriString(const lsp::DocumentUri& uri) const;
+
     /// The file is managed by the client, so FS will be out of date
-    const TextDocument* getTextDocument(const Luau::ModuleName& name) const;
+    const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
+    const TextDocument* getTextDocumentFromModuleName(const Luau::ModuleName& name) const;
 
     /// The name points to a virtual path (i.e., game/ or ProjectRoot/)
     bool isVirtualPath(const Luau::ModuleName& name) const

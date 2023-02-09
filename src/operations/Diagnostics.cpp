@@ -16,7 +16,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(moduleName);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
@@ -47,7 +47,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto fileName = fileResolver.resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
                 continue;
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, fileResolver.getTextDocument(error.moduleName));
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, fileResolver.getTextDocumentFromModuleName(error.moduleName));
             auto uri = Uri::file(*fileName);
             auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
             currentDiagnostics.emplace_back(diagnostic);
@@ -105,7 +105,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     for (auto uri : files)
     {
         auto moduleName = fileResolver.getModuleName(uri);
-        auto document = fileResolver.getTextDocument(moduleName);
+        auto document = fileResolver.getTextDocument(uri);
 
         lsp::WorkspaceDocumentDiagnosticReport documentReport;
         documentReport.uri = uri;

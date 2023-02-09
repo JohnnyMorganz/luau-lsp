@@ -13,9 +13,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         return std::nullopt;
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(moduleName);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + moduleName);
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
