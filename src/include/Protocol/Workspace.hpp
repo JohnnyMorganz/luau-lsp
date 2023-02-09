@@ -93,4 +93,39 @@ struct ApplyWorkspaceEditResult
     std::optional<size_t> failedChange;
 };
 NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditResult, applied, failureReason, failedChange);
+
+/**
+ * Represents information on a file/folder rename.
+ *
+ * @since 3.16.0
+ */
+struct FileRename
+{
+    /**
+     * A file:// URI for the original location of the file/folder being renamed.
+     */
+    DocumentUri oldUri;
+
+    /**
+     * A file:// URI for the new location of the file/folder being renamed.
+     */
+    DocumentUri newUri;
+};
+NLOHMANN_DEFINE_OPTIONAL(FileRename, oldUri, newUri);
+
+/**
+ * The parameters sent in notifications/requests for user-initiated renames
+ * of files.
+ *
+ * @since 3.16.0
+ */
+struct RenameFilesParams
+{
+    /**
+     * An array of all files/folders renamed in this operation. When a folder
+     * is renamed, only the folder will be included, and not its children.
+     */
+    std::vector<FileRename> files;
+};
+NLOHMANN_DEFINE_OPTIONAL(RenameFilesParams, files);
 } // namespace lsp
