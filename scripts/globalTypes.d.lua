@@ -6,7 +6,6 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
-type Instance = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -3726,622 +3725,6 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
-type Accoutrement = any
-type Accessory = any
-type Hat = any
-type AdPortal = any
-type AdService = any
-type AdvancedDragger = any
-type AnalyticsService = any
-type Animation = any
-type AnimationClip = any
-type CurveAnimation = any
-type KeyframeSequence = any
-type AnimationClipProvider = any
-type AnimationController = any
-type AnimationFromVideoCreatorService = any
-type AnimationFromVideoCreatorStudioService = any
-type AnimationRigData = any
-type AnimationStreamTrack = any
-type AnimationTrack = any
-type Animator = any
-type AppUpdateService = any
-type AssetCounterService = any
-type AssetDeliveryProxy = any
-type AssetImportService = any
-type AssetImportSession = any
-type AssetManagerService = any
-type AssetPatchSettings = any
-type AssetService = any
-type Atmosphere = any
-type Attachment = any
-type Bone = any
-type AvatarEditorService = any
-type AvatarImportService = any
-type Backpack = any
-type BackpackItem = any
-type HopperBin = any
-type Tool = any
-type Flag = any
-type BadgeService = any
-type BasePlayerGui = any
-type CoreGui = any
-type PlayerGui = any
-type StarterGui = any
-type BaseWrap = any
-type WrapLayer = any
-type WrapTarget = any
-type Beam = any
-type BindableEvent = any
-type BindableFunction = any
-type BodyMover = any
-type BodyAngularVelocity = any
-type BodyForce = any
-type BodyGyro = any
-type BodyPosition = any
-type BodyThrust = any
-type BodyVelocity = any
-type RocketPropulsion = any
-type Breakpoint = any
-type BrowserService = any
-type BulkImportService = any
-type CacheableContentProvider = any
-type HSRDataContentProvider = any
-type MeshContentProvider = any
-type SolidModelContentProvider = any
-type CalloutService = any
-type Camera = any
-type ChangeHistoryService = any
-type CharacterAppearance = any
-type BodyColors = any
-type CharacterMesh = any
-type Clothing = any
-type Pants = any
-type Shirt = any
-type ShirtGraphic = any
-type Skin = any
-type Chat = any
-type ClickDetector = any
-type Clouds = any
-type ClusterPacketCache = any
-type CollectionService = any
-type CommandInstance = any
-type CommandService = any
-type Configuration = any
-type ConfigureServerService = any
-type Constraint = any
-type AlignOrientation = any
-type AlignPosition = any
-type AngularVelocity = any
-type AnimationConstraint = any
-type BallSocketConstraint = any
-type HingeConstraint = any
-type LineForce = any
-type LinearVelocity = any
-type PlaneConstraint = any
-type Plane = any
-type RigidConstraint = any
-type RodConstraint = any
-type RopeConstraint = any
-type SlidingBallConstraint = any
-type CylindricalConstraint = any
-type PrismaticConstraint = any
-type SpringConstraint = any
-type Torque = any
-type TorsionSpringConstraint = any
-type UniversalConstraint = any
-type VectorForce = any
-type ContentProvider = any
-type ContextActionService = any
-type Controller = any
-type HumanoidController = any
-type SkateboardController = any
-type VehicleController = any
-type ControllerBase = any
-type AirController = any
-type ClimbController = any
-type GroundController = any
-type SwimController = any
-type ControllerManager = any
-type ControllerService = any
-type CookiesService = any
-type CorePackages = any
-type CoreScriptSyncService = any
-type CrossDMScriptChangeListener = any
-type CustomEvent = any
-type CustomEventReceiver = any
-type DataModelMesh = any
-type BevelMesh = any
-type CylinderMesh = any
-type FileMesh = any
-type SpecialMesh = any
-type DataModelPatchService = any
-type DataModelSession = any
-type DataStoreIncrementOptions = any
-type DataStoreInfo = any
-type DataStoreKey = any
-type DataStoreKeyInfo = any
-type DataStoreObjectVersionInfo = any
-type DataStoreOptions = any
-type DataStoreService = any
-type DataStoreSetOptions = any
-type Debris = any
-type DebugSettings = any
-type DebuggablePluginWatcher = any
-type DebuggerBreakpoint = any
-type DebuggerConnection = any
-type LocalDebuggerConnection = any
-type DebuggerConnectionManager = any
-type DebuggerLuaResponse = any
-type DebuggerManager = any
-type DebuggerUIService = any
-type DebuggerVariable = any
-type DebuggerWatch = any
-type DeviceIdService = any
-type Dialog = any
-type DialogChoice = any
-type DraftsService = any
-type Dragger = any
-type DraggerService = any
-type DynamicTextureAlpha = any
-type DynamicTextureLayerAlpha = any
-type EulerRotationCurve = any
-type EventIngestService = any
-type ExperienceAuthService = any
-type ExperienceInviteOptions = any
-type Explosion = any
-type FaceAnimatorService = any
-type FaceControls = any
-type FaceInstance = any
-type Decal = any
-type Texture = any
-type FacialAnimationRecordingService = any
-type FacialAnimationStreamingService = any
-type FacialAnimationStreamingServiceV2 = any
-type Feature = any
-type Hole = any
-type MotorFeature = any
-type File = any
-type Fire = any
-type FlagStandService = any
-type FloatCurve = any
-type FlyweightService = any
-type CSGDictionaryService = any
-type NonReplicatedCSGDictionaryService = any
-type Folder = any
-type ForceField = any
-type FriendService = any
-type FunctionalTest = any
-type GamePassService = any
-type GameSettings = any
-type GamepadService = any
-type Geometry = any
-type GetTextBoundsParams = any
-type GlobalDataStore = any
-type DataStore = any
-type OrderedDataStore = any
-type GoogleAnalyticsConfiguration = any
-type GroupService = any
-type GuiBase = any
-type GuiBase2d = any
-type GuiObject = any
-type CanvasGroup = any
-type Frame = any
-type GuiButton = any
-type ImageButton = any
-type TextButton = any
-type GuiLabel = any
-type ImageLabel = any
-type TextLabel = any
-type ScrollingFrame = any
-type TextBox = any
-type VideoFrame = any
-type ViewportFrame = any
-type LayerCollector = any
-type BillboardGui = any
-type PluginGui = any
-type DockWidgetPluginGui = any
-type QWidgetPluginGui = any
-type ScreenGui = any
-type GuiMain = any
-type SurfaceGuiBase = any
-type AdGui = any
-type SurfaceGui = any
-type GuiBase3d = any
-type FloorWire = any
-type InstanceAdornment = any
-type SelectionBox = any
-type PVAdornment = any
-type HandleAdornment = any
-type BoxHandleAdornment = any
-type ConeHandleAdornment = any
-type CylinderHandleAdornment = any
-type ImageHandleAdornment = any
-type LineHandleAdornment = any
-type SphereHandleAdornment = any
-type WireframeHandleAdornment = any
-type ParabolaAdornment = any
-type SelectionSphere = any
-type PartAdornment = any
-type HandlesBase = any
-type ArcHandles = any
-type Handles = any
-type SurfaceSelection = any
-type SelectionLasso = any
-type SelectionPartLasso = any
-type SelectionPointLasso = any
-type GuiService = any
-type GuidRegistryService = any
-type HapticService = any
-type HeightmapImporterService = any
-type HiddenSurfaceRemovalAsset = any
-type Highlight = any
-type Hopper = any
-type HttpRbxApiService = any
-type HttpRequest = any
-type HttpService = any
-type Humanoid = any
-type HumanoidDescription = any
-type IKControl = any
-type ILegacyStudioBridge = any
-type LegacyStudioBridge = any
-type IXPService = any
-type ImporterBaseSettings = any
-type ImporterAnimationSettings = any
-type ImporterFacsSettings = any
-type ImporterGroupSettings = any
-type ImporterJointSettings = any
-type ImporterMaterialSettings = any
-type ImporterMeshSettings = any
-type ImporterRootSettings = any
-type IncrementalPatchBuilder = any
-type InputObject = any
-type InsertService = any
-type JointInstance = any
-type DynamicRotate = any
-type RotateP = any
-type RotateV = any
-type Glue = any
-type ManualSurfaceJointInstance = any
-type ManualGlue = any
-type ManualWeld = any
-type Motor = any
-type Motor6D = any
-type Rotate = any
-type Snap = any
-type VelocityMotor = any
-type Weld = any
-type JointsService = any
-type KeyboardService = any
-type Keyframe = any
-type KeyframeMarker = any
-type KeyframeSequenceProvider = any
-type LSPFileSyncService = any
-type LanguageService = any
-type Light = any
-type PointLight = any
-type SpotLight = any
-type SurfaceLight = any
-type Lighting = any
-type LiveScriptingService = any
-type LocalStorageService = any
-type AppStorageService = any
-type UserStorageService = any
-type LocalizationService = any
-type LocalizationTable = any
-type CloudLocalizationTable = any
-type LodDataEntity = any
-type LodDataService = any
-type LogService = any
-type LoginService = any
-type LuaSettings = any
-type LuaSourceContainer = any
-type BaseScript = any
-type CoreScript = any
-type Script = any
-type LocalScript = any
-type ModuleScript = any
-type LuaWebService = any
-type LuauScriptAnalyzerService = any
-type MarkerCurve = any
-type MarketplaceService = any
-type MaterialService = any
-type MaterialVariant = any
-type MemStorageConnection = any
-type MemStorageService = any
-type MemoryStoreQueue = any
-type MemoryStoreService = any
-type MemoryStoreSortedMap = any
-type Message = any
-type Hint = any
-type MessageBusConnection = any
-type MessageBusService = any
-type MessagingService = any
-type MetaBreakpoint = any
-type MetaBreakpointContext = any
-type MetaBreakpointManager = any
-type Mouse = any
-type PlayerMouse = any
-type PluginMouse = any
-type MouseService = any
-type MultipleDocumentInterfaceInstance = any
-type NetworkMarker = any
-type NetworkPeer = any
-type NetworkClient = any
-type NetworkServer = any
-type NetworkReplicator = any
-type ClientReplicator = any
-type ServerReplicator = any
-type NetworkSettings = any
-type NoCollisionConstraint = any
-type NotificationService = any
-type PVInstance = any
-type BasePart = any
-type CornerWedgePart = any
-type FormFactorPart = any
-type Part = any
-type FlagStand = any
-type Platform = any
-type Seat = any
-type SkateboardPlatform = any
-type SpawnLocation = any
-type WedgePart = any
-type Terrain = any
-type TriangleMeshPart = any
-type MeshPart = any
-type PartOperation = any
-type NegateOperation = any
-type UnionOperation = any
-type TrussPart = any
-type VehicleSeat = any
-type Model = any
-type Actor = any
-type Status = any
-type WorldRoot = any
-type Workspace = any
-type WorldModel = any
-type PackageLink = any
-type PackageService = any
-type PackageUIService = any
-type Pages = any
-type CatalogPages = any
-type DataStoreKeyPages = any
-type DataStoreListingPages = any
-type DataStorePages = any
-type DataStoreVersionPages = any
-type FriendPages = any
-type InventoryPages = any
-type EmotesPages = any
-type OutfitPages = any
-type StandardPages = any
-type PartOperationAsset = any
-type ParticleEmitter = any
-type Path = any
-type PathfindingLink = any
-type PathfindingModifier = any
-type PathfindingService = any
-type PausedState = any
-type PausedStateBreakpoint = any
-type PausedStateException = any
-type PermissionsService = any
-type PhysicsService = any
-type PhysicsSettings = any
-type Player = any
-type PlayerEmulatorService = any
-type PlayerScripts = any
-type Players = any
-type Plugin = any
-type PluginAction = any
-type PluginDebugService = any
-type PluginDragEvent = any
-type PluginGuiService = any
-type PluginManagementService = any
-type PluginManager = any
-type PluginManagerInterface = any
-type PluginMenu = any
-type PluginPolicyService = any
-type PluginToolbar = any
-type PluginToolbarButton = any
-type PointsService = any
-type PolicyService = any
-type PoseBase = any
-type NumberPose = any
-type Pose = any
-type PostEffect = any
-type BloomEffect = any
-type BlurEffect = any
-type ColorCorrectionEffect = any
-type DepthOfFieldEffect = any
-type SunRaysEffect = any
-type ProcessInstancePhysicsService = any
-type ProximityPrompt = any
-type ProximityPromptService = any
-type PublishService = any
-type RbxAnalyticsService = any
-type ReflectionMetadata = any
-type ReflectionMetadataCallbacks = any
-type ReflectionMetadataClasses = any
-type ReflectionMetadataEnums = any
-type ReflectionMetadataEvents = any
-type ReflectionMetadataFunctions = any
-type ReflectionMetadataItem = any
-type ReflectionMetadataClass = any
-type ReflectionMetadataEnum = any
-type ReflectionMetadataEnumItem = any
-type ReflectionMetadataMember = any
-type ReflectionMetadataProperties = any
-type ReflectionMetadataYieldFunctions = any
-type RemoteDebuggerServer = any
-type RemoteEvent = any
-type RemoteFunction = any
-type RenderSettings = any
-type RenderingTest = any
-type ReplicatedFirst = any
-type ReplicatedStorage = any
-type RobloxPluginGuiService = any
-type RobloxReplicatedStorage = any
-type RotationCurve = any
-type RtMessagingService = any
-type RunService = any
-type RuntimeScriptService = any
-type ScreenshotHud = any
-type ScriptBuilder = any
-type CoreScriptBuilder = any
-type ScriptChangeService = any
-type ScriptCloneWatcher = any
-type ScriptCloneWatcherHelper = any
-type ScriptContext = any
-type ScriptDebugger = any
-type ScriptDocument = any
-type ScriptEditorService = any
-type ScriptRegistrationService = any
-type ScriptService = any
-type Selection = any
-type ServerScriptService = any
-type ServerStorage = any
-type ServiceProvider = any
-type DataModel = any
-type GenericSettings = any
-type AnalysticsSettings = any
-type UserSettings = any
-type SessionService = any
-type ShorelineUpgraderService = any
-type Sky = any
-type Smoke = any
-type SmoothVoxelsUpgraderService = any
-type SnippetService = any
-type SocialService = any
-type Sound = any
-type SoundEffect = any
-type AssetSoundEffect = any
-type ChorusSoundEffect = any
-type CompressorSoundEffect = any
-type CustomSoundEffect = any
-type ChannelSelectorSoundEffect = any
-type DistortionSoundEffect = any
-type EchoSoundEffect = any
-type EqualizerSoundEffect = any
-type FlangeSoundEffect = any
-type PitchShiftSoundEffect = any
-type ReverbSoundEffect = any
-type TremoloSoundEffect = any
-type SoundGroup = any
-type SoundService = any
-type Sparkles = any
-type SpawnerService = any
-type Speaker = any
-type StackFrame = any
-type StandalonePluginScripts = any
-type StarterGear = any
-type StarterPack = any
-type StarterPlayer = any
-type StarterPlayerScripts = any
-type StarterCharacterScripts = any
-type Stats = any
-type StatsItem = any
-type RunningAverageItemDouble = any
-type RunningAverageItemInt = any
-type RunningAverageTimeIntervalItem = any
-type TotalCountTimeIntervalItem = any
-type Studio = any
-type StudioAssetService = any
-type StudioData = any
-type StudioDeviceEmulatorService = any
-type StudioHighDpiService = any
-type StudioPublishService = any
-type StudioScriptDebugEventListener = any
-type StudioSdkService = any
-type StudioService = any
-type StudioTheme = any
-type SurfaceAppearance = any
-type TaskScheduler = any
-type Team = any
-type TeamCreateService = any
-type Teams = any
-type TeleportAsyncResult = any
-type TeleportOptions = any
-type TeleportService = any
-type TemporaryCageMeshProvider = any
-type TemporaryScriptService = any
-type TerrainDetail = any
-type TerrainRegion = any
-type TestService = any
-type TextBoxService = any
-type TextChannel = any
-type TextChatCommand = any
-type TextChatConfigurations = any
-type BubbleChatConfiguration = any
-type ChatInputBarConfiguration = any
-type ChatWindowConfiguration = any
-type TextChatMessage = any
-type TextChatMessageProperties = any
-type TextChatService = any
-type TextFilterResult = any
-type TextService = any
-type TextSource = any
-type ThirdPartyUserService = any
-type ThreadState = any
-type TimerService = any
-type ToastNotificationService = any
-type TouchInputService = any
-type TouchTransmitter = any
-type TracerService = any
-type TrackerLodController = any
-type TrackerStreamAnimation = any
-type Trail = any
-type Translator = any
-type TweenBase = any
-type Tween = any
-type TweenService = any
-type UGCValidationService = any
-type UIBase = any
-type UIComponent = any
-type UIConstraint = any
-type UIAspectRatioConstraint = any
-type UISizeConstraint = any
-type UITextSizeConstraint = any
-type UICorner = any
-type UIGradient = any
-type UILayout = any
-type UIGridStyleLayout = any
-type UIGridLayout = any
-type UIListLayout = any
-type UIPageLayout = any
-type UITableLayout = any
-type UIPadding = any
-type UIScale = any
-type UIStroke = any
-type UnvalidatedAssetService = any
-type UserGameSettings = any
-type UserInputService = any
-type UserService = any
-type VRService = any
-type ValueBase = any
-type BinaryStringValue = any
-type BoolValue = any
-type BrickColorValue = any
-type CFrameValue = any
-type Color3Value = any
-type DoubleConstrainedValue = any
-type IntConstrainedValue = any
-type IntValue = any
-type NumberValue = any
-type ObjectValue = any
-type RayValue = any
-type StringValue = any
-type Vector3Value = any
-type Vector3Curve = any
-type VersionControlService = any
-type VideoCaptureService = any
-type VirtualInputManager = any
-type VirtualUser = any
-type VisibilityCheckDispatcher = any
-type VisibilityService = any
-type Visit = any
-type VoiceChatInternal = any
-type VoiceChatService = any
-type VoiceSource = any
-type WeldConstraint = any
 declare class Instance
 	AncestryChanged: RBXScriptSignal<Instance, Instance?>
 	Archivable: boolean
@@ -4742,6 +4125,7 @@ end
 
 declare class CoreGui extends BasePlayerGui
 	SelectionImageObject: GuiObject
+	UserGuiRenderingChanged: RBXScriptSignal<boolean, Instance, EnumNormalId, number>
 	Version: number
 	function SetUserGuiRendering(self, enabled: boolean, guiAdornee: Instance, faceId: EnumNormalId, horizontalCurvature: number?): nil
 	function TakeScreenshot(self): nil
@@ -4962,6 +4346,7 @@ declare class Camera extends Instance
 	function WorldToScreenPoint(self, worldPoint: Vector3): (Vector3, boolean)
 	function WorldToViewportPoint(self, worldPoint: Vector3): (Vector3, boolean)
 	function Zoom(self, distance: number): boolean
+	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
 end
 
 declare class ChangeHistoryService extends Instance
@@ -5432,6 +4817,9 @@ end
 declare class CorePackages extends Instance
 end
 
+declare class CoreScriptDebuggingManagerHelper extends Instance
+end
+
 declare class CoreScriptSyncService extends Instance
 	function GetScriptFilePath(self, script: Instance): any
 end
@@ -5746,6 +5134,8 @@ declare class EventIngestService extends Instance
 end
 
 declare class ExperienceAuthService extends Instance
+	OpenAuthPrompt: RBXScriptSignal<string, { any }, { [any]: any }>
+	function scopeCheckUIComplete(self, guid: string, scopes: { any }, result: EnumScopeCheckResult, metadata: { [any]: any }): nil
 end
 
 declare class ExperienceInviteOptions extends Instance
@@ -6494,6 +5884,7 @@ declare class GuiService extends Instance
 	NativeClose: RBXScriptSignal<>
 	NetworkPausedEnabledChanged: RBXScriptSignal<boolean>
 	Open9SliceEditor: RBXScriptSignal<Instance>
+	PurchasePromptShown: RBXScriptSignal<>
 	SafeZoneOffsetsChanged: RBXScriptSignal<>
 	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject?
@@ -6542,6 +5933,7 @@ declare class GuiService extends Instance
 	function SetHardwareSafeAreaInsets(self, left: number, top: number, right: number, bottom: number): nil
 	function SetInspectMenuEnabled(self, enabled: boolean): nil
 	function SetMenuIsOpen(self, open: boolean, menuName: string?): nil
+	function SetPurchasePromptIsShown(self, isShown: boolean): nil
 	function SetSafeZoneOffsets(self, top: number, bottom: number, left: number, right: number): nil
 	function SetUiMessage(self, msgType: EnumUiMessageType, uiMessage: string?): nil
 	function ShowStatsBasedOnInputString(self, input: string): boolean
@@ -7426,7 +6818,7 @@ declare class ClientReplicator extends NetworkReplicator
 	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
 	StatsReceived: RBXScriptSignal<{ [any]: any }>
 	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
-	function RequestServerScriptProfiling(self, start: boolean): nil
+	function RequestServerScriptProfiling(self, start: boolean, frequency: number?): nil
 	function RequestServerStats(self, request: boolean): nil
 end
 
@@ -7673,14 +7065,17 @@ declare class Model extends PVInstance
 	LevelOfDetail: EnumModelLevelOfDetail
 	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
+	Scale: number
 	WorldPivot: CFrame
 	function AddPersistentPlayer(self, playerInstance: Player?): nil
 	function BreakJoints(self): nil
 	function GetBoundingBox(self): (CFrame, Vector3)
 	function GetExtentsSize(self): Vector3
+	function GetScale(self): number
 	function MakeJoints(self): nil
 	function MoveTo(self, position: Vector3): nil
 	function RemovePersistentPlayer(self, playerInstance: Player?): nil
+	function ScaleTo(self, newScaleFactor: number): nil
 	function TranslateBy(self, delta: Vector3): nil
 end
 
@@ -8093,6 +7488,57 @@ declare class Players extends Instance
 	function WhisperChat(self, message: string, player: Instance): nil
 end
 
+declare class Plugin extends Instance
+	CollisionEnabled: boolean
+	Deactivation: RBXScriptSignal<>
+	GridSize: number
+	HostDataModelType: EnumStudioDataModelType
+	HostDataModelTypeIsCurrent: boolean
+	MultipleDocumentInterfaceInstance: MultipleDocumentInterfaceInstance
+	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
+	ProcessAssetInsertionDrop: () -> nil
+	Ready: RBXScriptSignal<>
+	Unloading: RBXScriptSignal<>
+	UsesAssetInsertionDrag: boolean
+	function Activate(self, exclusiveMouse: boolean): nil
+	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
+	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
+	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
+	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
+	function CreateToolbar(self, name: string): PluginToolbar
+	function Deactivate(self): nil
+	function GetItem(self, key: string, defaultValue: any): any
+	function GetJoinMode(self): EnumJointCreationMode
+	function GetMouse(self): PluginMouse
+	function GetSelectedRibbonTool(self): EnumRibbonTool
+	function GetSetting(self, key: string): any
+	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
+	function ImportFbxRig(self, isR15: boolean?): Instance
+	function Invoke(self, key: string, arguments: any): nil
+	function IsActivated(self): boolean
+	function IsActivatedWithExclusiveMouse(self): boolean
+	function Negate(self, objects: { Instance }): { NegateOperation }
+	function OnInvoke(self, key: string, callback: ((...any) -> ...any)): Instance
+	function OnSetItem(self, key: string, callback: ((...any) -> ...any)): Instance
+	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
+	function OpenWikiPage(self, url: string): nil
+	function PauseSound(self, sound: Instance): nil
+	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
+	function PromptForExistingAssetId(self, assetType: string): number
+	function PromptSaveSelection(self, suggestedFileName: string?): boolean
+	function ResumeSound(self, sound: Instance): nil
+	function SaveSelectedToRoblox(self): nil
+	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
+	function Separate(self, objects: { Instance }): { UnionOperation }
+	function SetItem(self, key: string, value: any): nil
+	function SetReady(self): nil
+	function SetSetting(self, key: string, value: any): nil
+	function StartDecalDrag(self, decal: Instance): nil
+	function StartDrag(self, dragData: { [any]: any }): nil
+	function StopAllSounds(self): nil
+	function Union(self, objects: { Instance }): UnionOperation
+end
+
 declare class PluginAction extends Instance
 	ActionId: string
 	AllowBinding: boolean
@@ -8325,6 +7771,7 @@ declare class ReflectionMetadataClass extends ReflectionMetadataItem
 	ExplorerImageIndex: number
 	ExplorerOrder: number
 	Insertable: boolean
+	InsertableService: boolean
 	PreferredParent: string
 end
 
@@ -8498,8 +7945,8 @@ declare class ScriptContext extends Instance
 	function GetCoverageStats(self): { any }
 	function SaveScriptProfilingData(self, filename: string): nil
 	function SetTimeout(self, seconds: number): nil
-	function StartScriptProfiling(self): nil
-	function StopScriptProfiling(self): { [any]: any }
+	function StartScriptProfiling(self, frequency: number?): nil
+	function StopScriptProfiling(self): string
 end
 
 declare class ScriptDebugger extends Instance
@@ -8579,11 +8026,272 @@ declare class Selection extends Instance
 	function SetTerrainSelectionHack(self, center: Vector3, size: Vector3): nil
 end
 
+declare class SelectionHighlightManager extends Instance
+end
+
 declare class ServerScriptService extends Instance
 	LoadStringEnabled: boolean
 end
 
 declare class ServerStorage extends Instance
+end
+
+declare class ServiceProvider extends Instance
+	Close: RBXScriptSignal<>
+	CloseLate: RBXScriptSignal<>
+	ServiceAdded: RBXScriptSignal<Instance>
+	ServiceRemoving: RBXScriptSignal<Instance>
+	function FindService(self, className: string): Instance
+	function GetService(self, service: "AdService"): AdService
+	function GetService(self, service: "AnalyticsService"): AnalyticsService
+	function GetService(self, service: "AnimationClipProvider"): AnimationClipProvider
+	function GetService(self, service: "AnimationFromVideoCreatorService"): AnimationFromVideoCreatorService
+	function GetService(self, service: "AnimationFromVideoCreatorStudioService"): AnimationFromVideoCreatorStudioService
+	function GetService(self, service: "AppStorageService"): AppStorageService
+	function GetService(self, service: "AppUpdateService"): AppUpdateService
+	function GetService(self, service: "AssetCounterService"): AssetCounterService
+	function GetService(self, service: "AssetDeliveryProxy"): AssetDeliveryProxy
+	function GetService(self, service: "AssetImportService"): AssetImportService
+	function GetService(self, service: "AssetManagerService"): AssetManagerService
+	function GetService(self, service: "AssetService"): AssetService
+	function GetService(self, service: "AvatarEditorService"): AvatarEditorService
+	function GetService(self, service: "AvatarImportService"): AvatarImportService
+	function GetService(self, service: "BadgeService"): BadgeService
+	function GetService(self, service: "BrowserService"): BrowserService
+	function GetService(self, service: "BulkImportService"): BulkImportService
+	function GetService(self, service: "CSGDictionaryService"): CSGDictionaryService
+	function GetService(self, service: "CacheableContentProvider"): CacheableContentProvider
+	function GetService(self, service: "CalloutService"): CalloutService
+	function GetService(self, service: "ChangeHistoryService"): ChangeHistoryService
+	function GetService(self, service: "Chat"): Chat
+	function GetService(self, service: "ClusterPacketCache"): ClusterPacketCache
+	function GetService(self, service: "CollectionService"): CollectionService
+	function GetService(self, service: "CommandService"): CommandService
+	function GetService(self, service: "ConfigureServerService"): ConfigureServerService
+	function GetService(self, service: "ContentProvider"): ContentProvider
+	function GetService(self, service: "ContextActionService"): ContextActionService
+	function GetService(self, service: "ControllerService"): ControllerService
+	function GetService(self, service: "CookiesService"): CookiesService
+	function GetService(self, service: "CoreGui"): CoreGui
+	function GetService(self, service: "CorePackages"): CorePackages
+	function GetService(self, service: "CoreScriptDebuggingManagerHelper"): CoreScriptDebuggingManagerHelper
+	function GetService(self, service: "CoreScriptSyncService"): CoreScriptSyncService
+	function GetService(self, service: "CrossDMScriptChangeListener"): CrossDMScriptChangeListener
+	function GetService(self, service: "DataModelPatchService"): DataModelPatchService
+	function GetService(self, service: "DataStoreService"): DataStoreService
+	function GetService(self, service: "Debris"): Debris
+	function GetService(self, service: "DebuggablePluginWatcher"): DebuggablePluginWatcher
+	function GetService(self, service: "DebuggerConnectionManager"): DebuggerConnectionManager
+	function GetService(self, service: "DebuggerManager"): DebuggerManager
+	function GetService(self, service: "DebuggerUIService"): DebuggerUIService
+	function GetService(self, service: "DeviceIdService"): DeviceIdService
+	function GetService(self, service: "DraftsService"): DraftsService
+	function GetService(self, service: "DraggerService"): DraggerService
+	function GetService(self, service: "EventIngestService"): EventIngestService
+	function GetService(self, service: "ExperienceAuthService"): ExperienceAuthService
+	function GetService(self, service: "FaceAnimatorService"): FaceAnimatorService
+	function GetService(self, service: "FacialAnimationRecordingService"): FacialAnimationRecordingService
+	function GetService(self, service: "FacialAnimationStreamingService"): FacialAnimationStreamingService
+	function GetService(self, service: "FacialAnimationStreamingServiceV2"): FacialAnimationStreamingServiceV2
+	function GetService(self, service: "FlagStandService"): FlagStandService
+	function GetService(self, service: "FlyweightService"): FlyweightService
+	function GetService(self, service: "FriendService"): FriendService
+	function GetService(self, service: "GamePassService"): GamePassService
+	function GetService(self, service: "GamepadService"): GamepadService
+	function GetService(self, service: "Geometry"): Geometry
+	function GetService(self, service: "GoogleAnalyticsConfiguration"): GoogleAnalyticsConfiguration
+	function GetService(self, service: "GroupService"): GroupService
+	function GetService(self, service: "GuiService"): GuiService
+	function GetService(self, service: "GuidRegistryService"): GuidRegistryService
+	function GetService(self, service: "HSRDataContentProvider"): HSRDataContentProvider
+	function GetService(self, service: "HapticService"): HapticService
+	function GetService(self, service: "HeightmapImporterService"): HeightmapImporterService
+	function GetService(self, service: "Hopper"): Hopper
+	function GetService(self, service: "HttpRbxApiService"): HttpRbxApiService
+	function GetService(self, service: "HttpService"): HttpService
+	function GetService(self, service: "ILegacyStudioBridge"): ILegacyStudioBridge
+	function GetService(self, service: "IXPService"): IXPService
+	function GetService(self, service: "IncrementalPatchBuilder"): IncrementalPatchBuilder
+	function GetService(self, service: "InsertService"): InsertService
+	function GetService(self, service: "JointsService"): JointsService
+	function GetService(self, service: "KeyboardService"): KeyboardService
+	function GetService(self, service: "KeyframeSequenceProvider"): KeyframeSequenceProvider
+	function GetService(self, service: "LSPFileSyncService"): LSPFileSyncService
+	function GetService(self, service: "LanguageService"): LanguageService
+	function GetService(self, service: "LegacyStudioBridge"): LegacyStudioBridge
+	function GetService(self, service: "Lighting"): Lighting
+	function GetService(self, service: "LiveScriptingService"): LiveScriptingService
+	function GetService(self, service: "LocalStorageService"): LocalStorageService
+	function GetService(self, service: "LocalizationService"): LocalizationService
+	function GetService(self, service: "LodDataService"): LodDataService
+	function GetService(self, service: "LogService"): LogService
+	function GetService(self, service: "LoginService"): LoginService
+	function GetService(self, service: "LuaWebService"): LuaWebService
+	function GetService(self, service: "LuauScriptAnalyzerService"): LuauScriptAnalyzerService
+	function GetService(self, service: "MarketplaceService"): MarketplaceService
+	function GetService(self, service: "MaterialService"): MaterialService
+	function GetService(self, service: "MemStorageService"): MemStorageService
+	function GetService(self, service: "MemoryStoreService"): MemoryStoreService
+	function GetService(self, service: "MeshContentProvider"): MeshContentProvider
+	function GetService(self, service: "MessageBusService"): MessageBusService
+	function GetService(self, service: "MessagingService"): MessagingService
+	function GetService(self, service: "MetaBreakpointManager"): MetaBreakpointManager
+	function GetService(self, service: "MouseService"): MouseService
+	function GetService(self, service: "NetworkClient"): NetworkClient
+	function GetService(self, service: "NetworkServer"): NetworkServer
+	function GetService(self, service: "NetworkSettings"): NetworkSettings
+	function GetService(self, service: "NonReplicatedCSGDictionaryService"): NonReplicatedCSGDictionaryService
+	function GetService(self, service: "NotificationService"): NotificationService
+	function GetService(self, service: "PackageService"): PackageService
+	function GetService(self, service: "PackageUIService"): PackageUIService
+	function GetService(self, service: "PathfindingService"): PathfindingService
+	function GetService(self, service: "PermissionsService"): PermissionsService
+	function GetService(self, service: "PhysicsService"): PhysicsService
+	function GetService(self, service: "PlayerEmulatorService"): PlayerEmulatorService
+	function GetService(self, service: "Players"): Players
+	function GetService(self, service: "PluginDebugService"): PluginDebugService
+	function GetService(self, service: "PluginGuiService"): PluginGuiService
+	function GetService(self, service: "PluginManagementService"): PluginManagementService
+	function GetService(self, service: "PluginPolicyService"): PluginPolicyService
+	function GetService(self, service: "PointsService"): PointsService
+	function GetService(self, service: "PolicyService"): PolicyService
+	function GetService(self, service: "ProcessInstancePhysicsService"): ProcessInstancePhysicsService
+	function GetService(self, service: "ProximityPromptService"): ProximityPromptService
+	function GetService(self, service: "PublishService"): PublishService
+	function GetService(self, service: "RbxAnalyticsService"): RbxAnalyticsService
+	function GetService(self, service: "RemoteDebuggerServer"): RemoteDebuggerServer
+	function GetService(self, service: "RenderSettings"): RenderSettings
+	function GetService(self, service: "ReplicatedFirst"): ReplicatedFirst
+	function GetService(self, service: "ReplicatedStorage"): ReplicatedStorage
+	function GetService(self, service: "RobloxPluginGuiService"): RobloxPluginGuiService
+	function GetService(self, service: "RobloxReplicatedStorage"): RobloxReplicatedStorage
+	function GetService(self, service: "RtMessagingService"): RtMessagingService
+	function GetService(self, service: "RunService"): RunService
+	function GetService(self, service: "RuntimeScriptService"): RuntimeScriptService
+	function GetService(self, service: "ScriptChangeService"): ScriptChangeService
+	function GetService(self, service: "ScriptCloneWatcher"): ScriptCloneWatcher
+	function GetService(self, service: "ScriptCloneWatcherHelper"): ScriptCloneWatcherHelper
+	function GetService(self, service: "ScriptContext"): ScriptContext
+	function GetService(self, service: "ScriptEditorService"): ScriptEditorService
+	function GetService(self, service: "ScriptRegistrationService"): ScriptRegistrationService
+	function GetService(self, service: "ScriptService"): ScriptService
+	function GetService(self, service: "Selection"): Selection
+	function GetService(self, service: "SelectionHighlightManager"): SelectionHighlightManager
+	function GetService(self, service: "ServerScriptService"): ServerScriptService
+	function GetService(self, service: "ServerStorage"): ServerStorage
+	function GetService(self, service: "SessionService"): SessionService
+	function GetService(self, service: "ShorelineUpgraderService"): ShorelineUpgraderService
+	function GetService(self, service: "SmoothVoxelsUpgraderService"): SmoothVoxelsUpgraderService
+	function GetService(self, service: "SnippetService"): SnippetService
+	function GetService(self, service: "SocialService"): SocialService
+	function GetService(self, service: "SolidModelContentProvider"): SolidModelContentProvider
+	function GetService(self, service: "SoundService"): SoundService
+	function GetService(self, service: "SpawnerService"): SpawnerService
+	function GetService(self, service: "StarterGui"): StarterGui
+	function GetService(self, service: "StarterPack"): StarterPack
+	function GetService(self, service: "StarterPlayer"): StarterPlayer
+	function GetService(self, service: "Stats"): Stats
+	function GetService(self, service: "Studio"): Studio
+	function GetService(self, service: "StudioAssetService"): StudioAssetService
+	function GetService(self, service: "StudioData"): StudioData
+	function GetService(self, service: "StudioDeviceEmulatorService"): StudioDeviceEmulatorService
+	function GetService(self, service: "StudioHighDpiService"): StudioHighDpiService
+	function GetService(self, service: "StudioPublishService"): StudioPublishService
+	function GetService(self, service: "StudioScriptDebugEventListener"): StudioScriptDebugEventListener
+	function GetService(self, service: "StudioSdkService"): StudioSdkService
+	function GetService(self, service: "StudioService"): StudioService
+	function GetService(self, service: "TaskScheduler"): TaskScheduler
+	function GetService(self, service: "TeamCreateData"): TeamCreateData
+	function GetService(self, service: "TeamCreateService"): TeamCreateService
+	function GetService(self, service: "Teams"): Teams
+	function GetService(self, service: "TeleportService"): TeleportService
+	function GetService(self, service: "TemporaryCageMeshProvider"): TemporaryCageMeshProvider
+	function GetService(self, service: "TemporaryScriptService"): TemporaryScriptService
+	function GetService(self, service: "TestService"): TestService
+	function GetService(self, service: "TextBoxService"): TextBoxService
+	function GetService(self, service: "TextChatService"): TextChatService
+	function GetService(self, service: "TextService"): TextService
+	function GetService(self, service: "ThirdPartyUserService"): ThirdPartyUserService
+	function GetService(self, service: "TimerService"): TimerService
+	function GetService(self, service: "ToastNotificationService"): ToastNotificationService
+	function GetService(self, service: "TouchInputService"): TouchInputService
+	function GetService(self, service: "TracerService"): TracerService
+	function GetService(self, service: "TweenService"): TweenService
+	function GetService(self, service: "UGCValidationService"): UGCValidationService
+	function GetService(self, service: "UnvalidatedAssetService"): UnvalidatedAssetService
+	function GetService(self, service: "UserInputService"): UserInputService
+	function GetService(self, service: "UserService"): UserService
+	function GetService(self, service: "UserStorageService"): UserStorageService
+	function GetService(self, service: "VRService"): VRService
+	function GetService(self, service: "VersionControlService"): VersionControlService
+	function GetService(self, service: "VideoCaptureService"): VideoCaptureService
+	function GetService(self, service: "VirtualInputManager"): VirtualInputManager
+	function GetService(self, service: "VirtualUser"): VirtualUser
+	function GetService(self, service: "VisibilityCheckDispatcher"): VisibilityCheckDispatcher
+	function GetService(self, service: "VisibilityService"): VisibilityService
+	function GetService(self, service: "Visit"): Visit
+	function GetService(self, service: "VoiceChatInternal"): VoiceChatInternal
+	function GetService(self, service: "VoiceChatService"): VoiceChatService
+	function GetService(self, service: "Workspace"): Workspace
+end
+
+declare class DataModel extends ServiceProvider
+	CreatorId: number
+	CreatorType: EnumCreatorType
+	GameId: number
+	Genre: EnumGenre
+	GraphicsQualityChangeRequest: RBXScriptSignal<boolean>
+	IsSFFlagsLoaded: boolean
+	JobId: string
+	Loaded: RBXScriptSignal<>
+	PlaceId: number
+	PlaceVersion: number
+	PrivateServerId: string
+	PrivateServerOwnerId: number
+	ScreenshotReady: RBXScriptSignal<string>
+	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
+	Workspace: Workspace
+	function BindToClose(self, func: ((...any) -> ...any)): nil
+	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
+	function DefineFastInt(self, name: string, defaultValue: number): number
+	function DefineFastString(self, name: string, defaultValue: string): string
+	function GetEngineFeature(self, name: string): boolean
+	function GetFastFlag(self, name: string): boolean
+	function GetFastInt(self, name: string): number
+	function GetFastString(self, name: string): string
+	function GetJobsInfo(self): { any }
+	function GetObjects(self, url: Content): { Instance }
+	function GetObjectsAllOrNone(self, url: Content, binaryFormatOnly: boolean?): { Instance }
+	function GetObjectsAsync(self, url: Content): { Instance }
+	function GetObjectsList(self, urls: { any }): { any }
+	function GetPlaySessionId(self): string
+	function HttpGetAsync(self, url: string, httpRequestType: EnumHttpRequestType?): string
+	function HttpPostAsync(self, url: string, data: string, contentType: string?, httpRequestType: EnumHttpRequestType?): string
+	function InsertObjectsAndJoinIfLegacyAsync(self, url: Content): { Instance }
+	function IsLoaded(self): boolean
+	function Load(self, url: Content): nil
+	function OpenScreenshotsFolder(self): nil
+	function OpenVideosFolder(self): nil
+	function ReportInGoogleAnalytics(self, category: string, action: string?, label: string?, value: number?): nil
+	function SetFastFlagForTesting(self, name: string, newValue: boolean): boolean
+	function SetFastIntForTesting(self, name: string, newValue: number): number
+	function SetFastStringForTesting(self, name: string, newValue: string): string
+	function SetPlaceId(self, placeId: number): nil
+	function SetUniverseId(self, universeId: number): nil
+	function Shutdown(self): nil
+end
+
+declare class GenericSettings extends ServiceProvider
+end
+
+declare class AnalysticsSettings extends GenericSettings
+end
+
+declare class UserSettings extends GenericSettings
+	GameSettings: UserGameSettings
+	function GetService(self, service: "UserGameSettings"): UserGameSettings
+	function IsUserFeatureEnabled(self, name: string): boolean
+	function Reset(self): nil
 end
 
 declare class SessionService extends Instance
@@ -8654,6 +8362,7 @@ declare class Sound extends Instance
 	IsLoaded: boolean
 	IsPaused: boolean
 	IsPlaying: boolean
+	IsSpatial: boolean
 	Loaded: RBXScriptSignal<string>
 	LoopRegion: NumberRange
 	Looped: boolean
@@ -8666,6 +8375,7 @@ declare class Sound extends Instance
 	Played: RBXScriptSignal<string>
 	Playing: boolean
 	Resumed: RBXScriptSignal<string>
+	RollOffGain: number
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
@@ -9061,6 +8771,9 @@ declare class Team extends Instance
 	PlayerRemoved: RBXScriptSignal<Player>
 	TeamColor: BrickColor
 	function GetPlayers(self): { Player }
+end
+
+declare class TeamCreateData extends Instance
 end
 
 declare class TeamCreateService extends Instance
@@ -9839,312 +9552,6 @@ declare class WeldConstraint extends Instance
 	Enabled: boolean
 	Part0: BasePart
 	Part1: BasePart
-end
-
-declare class ServiceProvider extends Instance
-	Close: RBXScriptSignal<>
-	CloseLate: RBXScriptSignal<>
-	ServiceAdded: RBXScriptSignal<Instance>
-	ServiceRemoving: RBXScriptSignal<Instance>
-	function FindService(self, className: string): Instance
-	function GetService(self, service: "AdService"): AdService
-	function GetService(self, service: "AnalyticsService"): AnalyticsService
-	function GetService(self, service: "AnimationClipProvider"): AnimationClipProvider
-	function GetService(self, service: "AnimationFromVideoCreatorService"): AnimationFromVideoCreatorService
-	function GetService(self, service: "AnimationFromVideoCreatorStudioService"): AnimationFromVideoCreatorStudioService
-	function GetService(self, service: "AppStorageService"): AppStorageService
-	function GetService(self, service: "AppUpdateService"): AppUpdateService
-	function GetService(self, service: "AssetCounterService"): AssetCounterService
-	function GetService(self, service: "AssetDeliveryProxy"): AssetDeliveryProxy
-	function GetService(self, service: "AssetImportService"): AssetImportService
-	function GetService(self, service: "AssetManagerService"): AssetManagerService
-	function GetService(self, service: "AssetService"): AssetService
-	function GetService(self, service: "AvatarEditorService"): AvatarEditorService
-	function GetService(self, service: "AvatarImportService"): AvatarImportService
-	function GetService(self, service: "BadgeService"): BadgeService
-	function GetService(self, service: "BrowserService"): BrowserService
-	function GetService(self, service: "BulkImportService"): BulkImportService
-	function GetService(self, service: "CSGDictionaryService"): CSGDictionaryService
-	function GetService(self, service: "CacheableContentProvider"): CacheableContentProvider
-	function GetService(self, service: "CalloutService"): CalloutService
-	function GetService(self, service: "ChangeHistoryService"): ChangeHistoryService
-	function GetService(self, service: "Chat"): Chat
-	function GetService(self, service: "ClusterPacketCache"): ClusterPacketCache
-	function GetService(self, service: "CollectionService"): CollectionService
-	function GetService(self, service: "CommandService"): CommandService
-	function GetService(self, service: "ConfigureServerService"): ConfigureServerService
-	function GetService(self, service: "ContentProvider"): ContentProvider
-	function GetService(self, service: "ContextActionService"): ContextActionService
-	function GetService(self, service: "ControllerService"): ControllerService
-	function GetService(self, service: "CookiesService"): CookiesService
-	function GetService(self, service: "CoreGui"): CoreGui
-	function GetService(self, service: "CorePackages"): CorePackages
-	function GetService(self, service: "CoreScriptSyncService"): CoreScriptSyncService
-	function GetService(self, service: "CrossDMScriptChangeListener"): CrossDMScriptChangeListener
-	function GetService(self, service: "DataModelPatchService"): DataModelPatchService
-	function GetService(self, service: "DataStoreService"): DataStoreService
-	function GetService(self, service: "Debris"): Debris
-	function GetService(self, service: "DebuggablePluginWatcher"): DebuggablePluginWatcher
-	function GetService(self, service: "DebuggerConnectionManager"): DebuggerConnectionManager
-	function GetService(self, service: "DebuggerManager"): DebuggerManager
-	function GetService(self, service: "DebuggerUIService"): DebuggerUIService
-	function GetService(self, service: "DeviceIdService"): DeviceIdService
-	function GetService(self, service: "DraftsService"): DraftsService
-	function GetService(self, service: "DraggerService"): DraggerService
-	function GetService(self, service: "EventIngestService"): EventIngestService
-	function GetService(self, service: "ExperienceAuthService"): ExperienceAuthService
-	function GetService(self, service: "FaceAnimatorService"): FaceAnimatorService
-	function GetService(self, service: "FacialAnimationRecordingService"): FacialAnimationRecordingService
-	function GetService(self, service: "FacialAnimationStreamingService"): FacialAnimationStreamingService
-	function GetService(self, service: "FacialAnimationStreamingServiceV2"): FacialAnimationStreamingServiceV2
-	function GetService(self, service: "FlagStandService"): FlagStandService
-	function GetService(self, service: "FlyweightService"): FlyweightService
-	function GetService(self, service: "FriendService"): FriendService
-	function GetService(self, service: "GamePassService"): GamePassService
-	function GetService(self, service: "GamepadService"): GamepadService
-	function GetService(self, service: "Geometry"): Geometry
-	function GetService(self, service: "GoogleAnalyticsConfiguration"): GoogleAnalyticsConfiguration
-	function GetService(self, service: "GroupService"): GroupService
-	function GetService(self, service: "GuiService"): GuiService
-	function GetService(self, service: "GuidRegistryService"): GuidRegistryService
-	function GetService(self, service: "HSRDataContentProvider"): HSRDataContentProvider
-	function GetService(self, service: "HapticService"): HapticService
-	function GetService(self, service: "HeightmapImporterService"): HeightmapImporterService
-	function GetService(self, service: "Hopper"): Hopper
-	function GetService(self, service: "HttpRbxApiService"): HttpRbxApiService
-	function GetService(self, service: "HttpService"): HttpService
-	function GetService(self, service: "ILegacyStudioBridge"): ILegacyStudioBridge
-	function GetService(self, service: "IXPService"): IXPService
-	function GetService(self, service: "IncrementalPatchBuilder"): IncrementalPatchBuilder
-	function GetService(self, service: "InsertService"): InsertService
-	function GetService(self, service: "JointsService"): JointsService
-	function GetService(self, service: "KeyboardService"): KeyboardService
-	function GetService(self, service: "KeyframeSequenceProvider"): KeyframeSequenceProvider
-	function GetService(self, service: "LSPFileSyncService"): LSPFileSyncService
-	function GetService(self, service: "LanguageService"): LanguageService
-	function GetService(self, service: "LegacyStudioBridge"): LegacyStudioBridge
-	function GetService(self, service: "Lighting"): Lighting
-	function GetService(self, service: "LiveScriptingService"): LiveScriptingService
-	function GetService(self, service: "LocalStorageService"): LocalStorageService
-	function GetService(self, service: "LocalizationService"): LocalizationService
-	function GetService(self, service: "LodDataService"): LodDataService
-	function GetService(self, service: "LogService"): LogService
-	function GetService(self, service: "LoginService"): LoginService
-	function GetService(self, service: "LuaWebService"): LuaWebService
-	function GetService(self, service: "LuauScriptAnalyzerService"): LuauScriptAnalyzerService
-	function GetService(self, service: "MarketplaceService"): MarketplaceService
-	function GetService(self, service: "MaterialService"): MaterialService
-	function GetService(self, service: "MemStorageService"): MemStorageService
-	function GetService(self, service: "MemoryStoreService"): MemoryStoreService
-	function GetService(self, service: "MeshContentProvider"): MeshContentProvider
-	function GetService(self, service: "MessageBusService"): MessageBusService
-	function GetService(self, service: "MessagingService"): MessagingService
-	function GetService(self, service: "MetaBreakpointManager"): MetaBreakpointManager
-	function GetService(self, service: "MouseService"): MouseService
-	function GetService(self, service: "NetworkClient"): NetworkClient
-	function GetService(self, service: "NetworkServer"): NetworkServer
-	function GetService(self, service: "NetworkSettings"): NetworkSettings
-	function GetService(self, service: "NonReplicatedCSGDictionaryService"): NonReplicatedCSGDictionaryService
-	function GetService(self, service: "NotificationService"): NotificationService
-	function GetService(self, service: "PackageService"): PackageService
-	function GetService(self, service: "PackageUIService"): PackageUIService
-	function GetService(self, service: "PathfindingService"): PathfindingService
-	function GetService(self, service: "PermissionsService"): PermissionsService
-	function GetService(self, service: "PhysicsService"): PhysicsService
-	function GetService(self, service: "PlayerEmulatorService"): PlayerEmulatorService
-	function GetService(self, service: "Players"): Players
-	function GetService(self, service: "PluginDebugService"): PluginDebugService
-	function GetService(self, service: "PluginGuiService"): PluginGuiService
-	function GetService(self, service: "PluginManagementService"): PluginManagementService
-	function GetService(self, service: "PluginPolicyService"): PluginPolicyService
-	function GetService(self, service: "PointsService"): PointsService
-	function GetService(self, service: "PolicyService"): PolicyService
-	function GetService(self, service: "ProcessInstancePhysicsService"): ProcessInstancePhysicsService
-	function GetService(self, service: "ProximityPromptService"): ProximityPromptService
-	function GetService(self, service: "PublishService"): PublishService
-	function GetService(self, service: "RbxAnalyticsService"): RbxAnalyticsService
-	function GetService(self, service: "RemoteDebuggerServer"): RemoteDebuggerServer
-	function GetService(self, service: "RenderSettings"): RenderSettings
-	function GetService(self, service: "ReplicatedFirst"): ReplicatedFirst
-	function GetService(self, service: "ReplicatedStorage"): ReplicatedStorage
-	function GetService(self, service: "RobloxPluginGuiService"): RobloxPluginGuiService
-	function GetService(self, service: "RobloxReplicatedStorage"): RobloxReplicatedStorage
-	function GetService(self, service: "RtMessagingService"): RtMessagingService
-	function GetService(self, service: "RunService"): RunService
-	function GetService(self, service: "RuntimeScriptService"): RuntimeScriptService
-	function GetService(self, service: "ScriptChangeService"): ScriptChangeService
-	function GetService(self, service: "ScriptCloneWatcher"): ScriptCloneWatcher
-	function GetService(self, service: "ScriptCloneWatcherHelper"): ScriptCloneWatcherHelper
-	function GetService(self, service: "ScriptContext"): ScriptContext
-	function GetService(self, service: "ScriptEditorService"): ScriptEditorService
-	function GetService(self, service: "ScriptRegistrationService"): ScriptRegistrationService
-	function GetService(self, service: "ScriptService"): ScriptService
-	function GetService(self, service: "Selection"): Selection
-	function GetService(self, service: "ServerScriptService"): ServerScriptService
-	function GetService(self, service: "ServerStorage"): ServerStorage
-	function GetService(self, service: "SessionService"): SessionService
-	function GetService(self, service: "ShorelineUpgraderService"): ShorelineUpgraderService
-	function GetService(self, service: "SmoothVoxelsUpgraderService"): SmoothVoxelsUpgraderService
-	function GetService(self, service: "SnippetService"): SnippetService
-	function GetService(self, service: "SocialService"): SocialService
-	function GetService(self, service: "SolidModelContentProvider"): SolidModelContentProvider
-	function GetService(self, service: "SoundService"): SoundService
-	function GetService(self, service: "SpawnerService"): SpawnerService
-	function GetService(self, service: "StarterGui"): StarterGui
-	function GetService(self, service: "StarterPack"): StarterPack
-	function GetService(self, service: "StarterPlayer"): StarterPlayer
-	function GetService(self, service: "Stats"): Stats
-	function GetService(self, service: "Studio"): Studio
-	function GetService(self, service: "StudioAssetService"): StudioAssetService
-	function GetService(self, service: "StudioData"): StudioData
-	function GetService(self, service: "StudioDeviceEmulatorService"): StudioDeviceEmulatorService
-	function GetService(self, service: "StudioHighDpiService"): StudioHighDpiService
-	function GetService(self, service: "StudioPublishService"): StudioPublishService
-	function GetService(self, service: "StudioScriptDebugEventListener"): StudioScriptDebugEventListener
-	function GetService(self, service: "StudioSdkService"): StudioSdkService
-	function GetService(self, service: "StudioService"): StudioService
-	function GetService(self, service: "TaskScheduler"): TaskScheduler
-	function GetService(self, service: "TeamCreateService"): TeamCreateService
-	function GetService(self, service: "Teams"): Teams
-	function GetService(self, service: "TeleportService"): TeleportService
-	function GetService(self, service: "TemporaryCageMeshProvider"): TemporaryCageMeshProvider
-	function GetService(self, service: "TemporaryScriptService"): TemporaryScriptService
-	function GetService(self, service: "TestService"): TestService
-	function GetService(self, service: "TextBoxService"): TextBoxService
-	function GetService(self, service: "TextChatService"): TextChatService
-	function GetService(self, service: "TextService"): TextService
-	function GetService(self, service: "ThirdPartyUserService"): ThirdPartyUserService
-	function GetService(self, service: "TimerService"): TimerService
-	function GetService(self, service: "ToastNotificationService"): ToastNotificationService
-	function GetService(self, service: "TouchInputService"): TouchInputService
-	function GetService(self, service: "TracerService"): TracerService
-	function GetService(self, service: "TweenService"): TweenService
-	function GetService(self, service: "UGCValidationService"): UGCValidationService
-	function GetService(self, service: "UnvalidatedAssetService"): UnvalidatedAssetService
-	function GetService(self, service: "UserInputService"): UserInputService
-	function GetService(self, service: "UserService"): UserService
-	function GetService(self, service: "UserStorageService"): UserStorageService
-	function GetService(self, service: "VRService"): VRService
-	function GetService(self, service: "VersionControlService"): VersionControlService
-	function GetService(self, service: "VideoCaptureService"): VideoCaptureService
-	function GetService(self, service: "VirtualInputManager"): VirtualInputManager
-	function GetService(self, service: "VirtualUser"): VirtualUser
-	function GetService(self, service: "VisibilityCheckDispatcher"): VisibilityCheckDispatcher
-	function GetService(self, service: "VisibilityService"): VisibilityService
-	function GetService(self, service: "Visit"): Visit
-	function GetService(self, service: "VoiceChatInternal"): VoiceChatInternal
-	function GetService(self, service: "VoiceChatService"): VoiceChatService
-	function GetService(self, service: "Workspace"): Workspace
-end
-
-declare class DataModel extends ServiceProvider
-	CreatorId: number
-	CreatorType: EnumCreatorType
-	GameId: number
-	Genre: EnumGenre
-	GraphicsQualityChangeRequest: RBXScriptSignal<boolean>
-	IsSFFlagsLoaded: boolean
-	JobId: string
-	Loaded: RBXScriptSignal<>
-	PlaceId: number
-	PlaceVersion: number
-	PrivateServerId: string
-	PrivateServerOwnerId: number
-	ScreenshotReady: RBXScriptSignal<string>
-	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
-	Workspace: Workspace
-	function BindToClose(self, func: ((...any) -> ...any)): nil
-	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
-	function DefineFastInt(self, name: string, defaultValue: number): number
-	function DefineFastString(self, name: string, defaultValue: string): string
-	function GetEngineFeature(self, name: string): boolean
-	function GetFastFlag(self, name: string): boolean
-	function GetFastInt(self, name: string): number
-	function GetFastString(self, name: string): string
-	function GetJobsInfo(self): { any }
-	function GetObjects(self, url: Content): { Instance }
-	function GetObjectsAllOrNone(self, url: Content, binaryFormatOnly: boolean?): { Instance }
-	function GetObjectsAsync(self, url: Content): { Instance }
-	function GetObjectsList(self, urls: { any }): { any }
-	function GetPlaySessionId(self): string
-	function HttpGetAsync(self, url: string, httpRequestType: EnumHttpRequestType?): string
-	function HttpPostAsync(self, url: string, data: string, contentType: string?, httpRequestType: EnumHttpRequestType?): string
-	function InsertObjectsAndJoinIfLegacyAsync(self, url: Content): { Instance }
-	function IsLoaded(self): boolean
-	function Load(self, url: Content): nil
-	function OpenScreenshotsFolder(self): nil
-	function OpenVideosFolder(self): nil
-	function ReportInGoogleAnalytics(self, category: string, action: string?, label: string?, value: number?): nil
-	function SetFastFlagForTesting(self, name: string, newValue: boolean): boolean
-	function SetFastIntForTesting(self, name: string, newValue: number): number
-	function SetFastStringForTesting(self, name: string, newValue: string): string
-	function SetPlaceId(self, placeId: number): nil
-	function SetUniverseId(self, universeId: number): nil
-	function Shutdown(self): nil
-end
-
-declare class GenericSettings extends ServiceProvider
-end
-
-declare class AnalysticsSettings extends GenericSettings
-end
-
-declare class UserSettings extends GenericSettings
-	GameSettings: UserGameSettings
-	function GetService(self, service: "UserGameSettings"): UserGameSettings
-	function IsUserFeatureEnabled(self, name: string): boolean
-	function Reset(self): nil
-end
-
-declare class Plugin extends Instance
-	CollisionEnabled: boolean
-	Deactivation: RBXScriptSignal<>
-	GridSize: number
-	HostDataModelType: EnumStudioDataModelType
-	HostDataModelTypeIsCurrent: boolean
-	MultipleDocumentInterfaceInstance: MultipleDocumentInterfaceInstance
-	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
-	ProcessAssetInsertionDrop: () -> nil
-	Ready: RBXScriptSignal<>
-	Unloading: RBXScriptSignal<>
-	UsesAssetInsertionDrag: boolean
-	function Activate(self, exclusiveMouse: boolean): nil
-	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
-	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
-	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
-	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
-	function CreateToolbar(self, name: string): PluginToolbar
-	function Deactivate(self): nil
-	function GetItem(self, key: string, defaultValue: any): any
-	function GetJoinMode(self): EnumJointCreationMode
-	function GetMouse(self): PluginMouse
-	function GetSelectedRibbonTool(self): EnumRibbonTool
-	function GetSetting(self, key: string): any
-	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
-	function ImportFbxRig(self, isR15: boolean?): Instance
-	function Invoke(self, key: string, arguments: any): nil
-	function IsActivated(self): boolean
-	function IsActivatedWithExclusiveMouse(self): boolean
-	function Negate(self, objects: { Instance }): { NegateOperation }
-	function OnInvoke(self, key: string, callback: ((...any) -> ...any)): Instance
-	function OnSetItem(self, key: string, callback: ((...any) -> ...any)): Instance
-	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
-	function OpenWikiPage(self, url: string): nil
-	function PauseSound(self, sound: Instance): nil
-	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
-	function PromptForExistingAssetId(self, assetType: string): number
-	function PromptSaveSelection(self, suggestedFileName: string?): boolean
-	function ResumeSound(self, sound: Instance): nil
-	function SaveSelectedToRoblox(self): nil
-	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
-	function Separate(self, objects: { Instance }): { UnionOperation }
-	function SetItem(self, key: string, value: any): nil
-	function SetReady(self): nil
-	function SetSetting(self, key: string, value: any): nil
-	function StartDecalDrag(self, decal: Instance): nil
-	function StartDrag(self, dragData: { [any]: any }): nil
-	function StopAllSounds(self): nil
-	function Union(self, objects: { Instance }): UnionOperation
 end
 
 declare Instance: {

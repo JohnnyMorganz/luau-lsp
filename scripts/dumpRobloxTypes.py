@@ -53,18 +53,6 @@ IGNORED_INSTANCES: List[str] = [
     "GlobalSettings",  # redefined explicitly
 ]
 
-# These classes are deferred to the very end of the dump, so that they have access to all the types
-DEFERRED_CLASSES: List[str] = [
-    "ServiceProvider",
-    # The following must be deferred as they rely on ServiceProvider
-    "DataModel",
-    "GenericSettings",
-    "AnalysticsSettings",
-    "UserSettings",
-    # Plugin is deferred after its items are declared
-    "Plugin",
-]
-
 # Methods / Properties ignored in classes. Commonly used to add corrections
 IGNORED_MEMBERS = {
     "Instance": [
@@ -432,7 +420,6 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
-type Instance = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -759,7 +746,7 @@ def resolveParameterList(params: List[ApiParameter]):
     return ", ".join(map(resolveParameter, params))
 
 
-def resolveReturnType(member: Union[ApiFunction, ApiCallback]):
+def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
     return (
         "(" + ", ".join(map(resolveType, member["TupleReturns"])) + ")"
         if "TupleReturns" in member
@@ -769,7 +756,11 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]):
 
 def filterMember(klassName: str, member: ApiMember):
     if not INCLUDE_DEPRECATED_METHODS and (
-        ("Tags" in member and "Deprecated" in member["Tags"])
+        (
+            "Tags" in member
+            and member["Tags"] is not None
+            and "Deprecated" in member["Tags"]
+        )
         or ("Deprecated" in member and member["Deprecated"])
     ):
         return False
@@ -789,13 +780,14 @@ def filterMember(klassName: str, member: ApiMember):
     return True
 
 
-def declareClass(klass: ApiClass):
+def declareClass(klass: ApiClass) -> str:
     if klass["Name"] in IGNORED_INSTANCES:
         return ""
 
     if (
         not INCLUDE_DEPRECATED_METHODS
         and "Tags" in klass
+        and klass["Tags"] is not None
         and "Deprecated" in klass["Tags"]
         and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
     ):
@@ -840,7 +832,6 @@ def declareClass(klass: ApiClass):
         )
 
     out += "".join(sorted(memberDefinitions))
-
     out += "end"
 
     return out
@@ -875,22 +866,11 @@ def printEnums(dump: ApiDump):
 
 
 def printClasses(dump: ApiDump):
-    # Forward declare all the types
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
-        if klass["Name"] != "Instance":
-            print(f"type {klass['Name']} = any")
-
-    for klass in dump["Classes"]:
-        if klass["Name"] in DEFERRED_CLASSES or klass["Name"] in IGNORED_INSTANCES:
-            continue
 
         print(declareClass(klass))
-        print()
-
-    for klassName in DEFERRED_CLASSES:
-        print(declareClass(CLASSES[klassName]))
         print()
 
 
@@ -1064,7 +1044,7 @@ def loadClassesIntoStructures(dump: ApiDump):
             continue
 
         isCreatable = True
-        if "Tags" in klass:
+        if "Tags" in klass and klass["Tags"] is not None:
             if (
                 "Deprecated" in klass
                 and not INCLUDE_DEPRECATED_METHODS
@@ -1087,7 +1067,7 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
 
     dataTypeNames = {klass["Name"] for klass in dataTypes}
 
-    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]):
+    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]) -> Optional[str]:
         name = (
             type["Generic"]
             if "Generic" in type
