@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Changed internal representation of documents to reduce the likelihood of Request Failed for "No managed text document"
+
 ## [1.16.2] - 2023-02-01
 
 ### Fixed
