@@ -21,6 +21,9 @@ static constexpr const char* AutoImports = "6";
 static constexpr const char* Keywords = "7";
 } // namespace SortText
 
+static constexpr const char* COMMON_SERVICES[] = {
+    "Players", "ReplicatedStorage", "ServerStorage", "MessagingService", "TeleportService", "HttpService", "CollectionService", "DataStoreService"};
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -310,6 +313,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
+    bool isGetService = false;
+
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
         [&](std::string tag, std::optional<const Luau::ClassType*> ctx,
@@ -413,6 +418,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     return std::nullopt;
                 }
             }
+            else if (tag == "PrioritiseCommonServices")
+            {
+                // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
+                // highlight this so that we can prioritise common services first in the list
+                isGetService = true;
+            }
 
             return std::nullopt;
         });
@@ -450,6 +461,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.sortText = SortText::TableProperties;
         else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
             item.sortText = SortText::Keywords;
+
+        // If its a `game:GetSerivce("$1")` call, then prioritise common services
+        if (isGetService)
+        {
+            if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
+                // We use TableProperties as it has a high sort index,
+                // but maybe we should make a specific name for it
+                item.sortText = SortText::TableProperties;
+        }
 
         switch (entry.kind)
         {
