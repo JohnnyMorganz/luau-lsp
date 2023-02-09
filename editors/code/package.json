@@ -339,6 +339,22 @@
             "String requires are interpreted relative to the root of the workspace",
             "String requires are interpreted relative to the current file"
           ]
+        },
+        "luau-lsp.updateRequiresOnFileMove.enabled": {
+          "type": "string",
+          "enum": [
+            "prompt",
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Prompt on each rename",
+            "Always update paths automatically",
+            "Never rename paths and don't prompt"
+          ],
+          "default": "prompt",
+          "scope": "resource",
+          "markdownDescription": "Enable/disable automatic updating of require paths when you rename or move a file in VS Code."
         }
       }
     }
