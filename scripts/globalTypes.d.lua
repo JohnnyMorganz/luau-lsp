@@ -3846,6 +3846,7 @@ type ControllerManager = any
 type ControllerService = any
 type CookiesService = any
 type CorePackages = any
+type CoreScriptDebuggingManagerHelper = any
 type CoreScriptSyncService = any
 type CrossDMScriptChangeListener = any
 type CustomEvent = any
@@ -4197,6 +4198,7 @@ type ScriptEditorService = any
 type ScriptRegistrationService = any
 type ScriptService = any
 type Selection = any
+type SelectionHighlightManager = any
 type ServerScriptService = any
 type ServerStorage = any
 type ServiceProvider = any
@@ -4256,6 +4258,7 @@ type StudioTheme = any
 type SurfaceAppearance = any
 type TaskScheduler = any
 type Team = any
+type TeamCreateData = any
 type TeamCreateService = any
 type Teams = any
 type TeleportAsyncResult = any
@@ -4742,6 +4745,7 @@ end
 
 declare class CoreGui extends BasePlayerGui
 	SelectionImageObject: GuiObject
+	UserGuiRenderingChanged: RBXScriptSignal<boolean, Instance, EnumNormalId, number>
 	Version: number
 	function SetUserGuiRendering(self, enabled: boolean, guiAdornee: Instance, faceId: EnumNormalId, horizontalCurvature: number?): nil
 	function TakeScreenshot(self): nil
@@ -4962,6 +4966,7 @@ declare class Camera extends Instance
 	function WorldToScreenPoint(self, worldPoint: Vector3): (Vector3, boolean)
 	function WorldToViewportPoint(self, worldPoint: Vector3): (Vector3, boolean)
 	function Zoom(self, distance: number): boolean
+	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
 end
 
 declare class ChangeHistoryService extends Instance
@@ -5432,6 +5437,9 @@ end
 declare class CorePackages extends Instance
 end
 
+declare class CoreScriptDebuggingManagerHelper extends Instance
+end
+
 declare class CoreScriptSyncService extends Instance
 	function GetScriptFilePath(self, script: Instance): any
 end
@@ -5746,6 +5754,8 @@ declare class EventIngestService extends Instance
 end
 
 declare class ExperienceAuthService extends Instance
+	OpenAuthPrompt: RBXScriptSignal<string, { any }, { [any]: any }>
+	function scopeCheckUIComplete(self, guid: string, scopes: { any }, result: EnumScopeCheckResult, metadata: { [any]: any }): nil
 end
 
 declare class ExperienceInviteOptions extends Instance
@@ -6494,6 +6504,7 @@ declare class GuiService extends Instance
 	NativeClose: RBXScriptSignal<>
 	NetworkPausedEnabledChanged: RBXScriptSignal<boolean>
 	Open9SliceEditor: RBXScriptSignal<Instance>
+	PurchasePromptShown: RBXScriptSignal<>
 	SafeZoneOffsetsChanged: RBXScriptSignal<>
 	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject?
@@ -6542,6 +6553,7 @@ declare class GuiService extends Instance
 	function SetHardwareSafeAreaInsets(self, left: number, top: number, right: number, bottom: number): nil
 	function SetInspectMenuEnabled(self, enabled: boolean): nil
 	function SetMenuIsOpen(self, open: boolean, menuName: string?): nil
+	function SetPurchasePromptIsShown(self, isShown: boolean): nil
 	function SetSafeZoneOffsets(self, top: number, bottom: number, left: number, right: number): nil
 	function SetUiMessage(self, msgType: EnumUiMessageType, uiMessage: string?): nil
 	function ShowStatsBasedOnInputString(self, input: string): boolean
@@ -7426,7 +7438,7 @@ declare class ClientReplicator extends NetworkReplicator
 	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
 	StatsReceived: RBXScriptSignal<{ [any]: any }>
 	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
-	function RequestServerScriptProfiling(self, start: boolean): nil
+	function RequestServerScriptProfiling(self, start: boolean, frequency: number?): nil
 	function RequestServerStats(self, request: boolean): nil
 end
 
@@ -7673,14 +7685,17 @@ declare class Model extends PVInstance
 	LevelOfDetail: EnumModelLevelOfDetail
 	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
+	Scale: number
 	WorldPivot: CFrame
 	function AddPersistentPlayer(self, playerInstance: Player?): nil
 	function BreakJoints(self): nil
 	function GetBoundingBox(self): (CFrame, Vector3)
 	function GetExtentsSize(self): Vector3
+	function GetScale(self): number
 	function MakeJoints(self): nil
 	function MoveTo(self, position: Vector3): nil
 	function RemovePersistentPlayer(self, playerInstance: Player?): nil
+	function ScaleTo(self, newScaleFactor: number): nil
 	function TranslateBy(self, delta: Vector3): nil
 end
 
@@ -8325,6 +8340,7 @@ declare class ReflectionMetadataClass extends ReflectionMetadataItem
 	ExplorerImageIndex: number
 	ExplorerOrder: number
 	Insertable: boolean
+	InsertableService: boolean
 	PreferredParent: string
 end
 
@@ -8498,8 +8514,8 @@ declare class ScriptContext extends Instance
 	function GetCoverageStats(self): { any }
 	function SaveScriptProfilingData(self, filename: string): nil
 	function SetTimeout(self, seconds: number): nil
-	function StartScriptProfiling(self): nil
-	function StopScriptProfiling(self): { [any]: any }
+	function StartScriptProfiling(self, frequency: number?): nil
+	function StopScriptProfiling(self): string
 end
 
 declare class ScriptDebugger extends Instance
@@ -8579,6 +8595,9 @@ declare class Selection extends Instance
 	function SetTerrainSelectionHack(self, center: Vector3, size: Vector3): nil
 end
 
+declare class SelectionHighlightManager extends Instance
+end
+
 declare class ServerScriptService extends Instance
 	LoadStringEnabled: boolean
 end
@@ -8654,6 +8673,7 @@ declare class Sound extends Instance
 	IsLoaded: boolean
 	IsPaused: boolean
 	IsPlaying: boolean
+	IsSpatial: boolean
 	Loaded: RBXScriptSignal<string>
 	LoopRegion: NumberRange
 	Looped: boolean
@@ -8666,6 +8686,7 @@ declare class Sound extends Instance
 	Played: RBXScriptSignal<string>
 	Playing: boolean
 	Resumed: RBXScriptSignal<string>
+	RollOffGain: number
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
@@ -9061,6 +9082,9 @@ declare class Team extends Instance
 	PlayerRemoved: RBXScriptSignal<Player>
 	TeamColor: BrickColor
 	function GetPlayers(self): { Player }
+end
+
+declare class TeamCreateData extends Instance
 end
 
 declare class TeamCreateService extends Instance
@@ -9879,6 +9903,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "CookiesService"): CookiesService
 	function GetService(self, service: "CoreGui"): CoreGui
 	function GetService(self, service: "CorePackages"): CorePackages
+	function GetService(self, service: "CoreScriptDebuggingManagerHelper"): CoreScriptDebuggingManagerHelper
 	function GetService(self, service: "CoreScriptSyncService"): CoreScriptSyncService
 	function GetService(self, service: "CrossDMScriptChangeListener"): CrossDMScriptChangeListener
 	function GetService(self, service: "DataModelPatchService"): DataModelPatchService
@@ -9980,6 +10005,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ScriptRegistrationService"): ScriptRegistrationService
 	function GetService(self, service: "ScriptService"): ScriptService
 	function GetService(self, service: "Selection"): Selection
+	function GetService(self, service: "SelectionHighlightManager"): SelectionHighlightManager
 	function GetService(self, service: "ServerScriptService"): ServerScriptService
 	function GetService(self, service: "ServerStorage"): ServerStorage
 	function GetService(self, service: "SessionService"): SessionService
@@ -10004,6 +10030,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StudioSdkService"): StudioSdkService
 	function GetService(self, service: "StudioService"): StudioService
 	function GetService(self, service: "TaskScheduler"): TaskScheduler
+	function GetService(self, service: "TeamCreateData"): TeamCreateData
 	function GetService(self, service: "TeamCreateService"): TeamCreateService
 	function GetService(self, service: "Teams"): Teams
 	function GetService(self, service: "TeleportService"): TeleportService
