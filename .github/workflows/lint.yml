@@ -22,6 +22,7 @@ jobs:
         with:
           style: file
           ignore: .github|extern|luau
+          files-changed-only: false
 
       - name: Verify
         if: steps.linter.outputs.checks-failed > 0
