@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed document symbols crashing due to internal malformed data
+
 ## [1.16.3] - 2023-02-09
 
 ### Fixed

@@ -110,13 +110,13 @@ enum struct SymbolTag
 struct DocumentSymbol
 {
     std::string name;
-    std::optional<std::string> detail;
+    std::optional<std::string> detail = std::nullopt;
     SymbolKind kind = SymbolKind::Array;
-    std::vector<SymbolTag> tags;
+    std::vector<SymbolTag> tags{};
     bool deprecated = false;
     Range range;
     Range selectionRange;
-    std::vector<DocumentSymbol> children;
+    std::vector<DocumentSymbol> children{};
 };
 NLOHMANN_DEFINE_OPTIONAL(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
 
