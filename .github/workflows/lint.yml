@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE --build . --target Luau.LanguageServer.CLI -j 3
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE --build . --target Luau.LanguageServer.CLI
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
