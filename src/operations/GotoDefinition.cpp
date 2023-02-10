@@ -8,7 +8,7 @@ LUAU_FASTFLAG(SupportTypeAliasGoToDeclaration)
 
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
-    lsp::DefinitionResult result;
+    lsp::DefinitionResult result{};
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -54,7 +54,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         if (auto lvalue = Luau::tryGetLValue(*expr))
         {
             const Luau::LValue* current = &*lvalue;
-            std::vector<std::string> keys; // keys in reverse order
+            std::vector<std::string> keys{}; // keys in reverse order
             while (auto field = Luau::get<Luau::Field>(*current))
             {
                 keys.push_back(field->key);
@@ -71,7 +71,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 return result;
             baseType = Luau::follow(*baseType);
 
-            std::vector<Luau::Property> properties;
+            std::vector<Luau::Property> properties{};
             for (auto it = keys.rbegin(); it != keys.rend(); ++it)
             {
                 auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type);

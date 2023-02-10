@@ -3,14 +3,14 @@
 #include <filesystem>
 #include <regex>
 #include <optional>
-#include <ctype.h>
+#include <cctype>
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
 // implements a bit of https://tools.ietf.org/html/rfc3986#section-5
 static std::string _referenceResolution(const std::string& scheme, const std::string& path)
 {
-    auto res = path;
+    std::string res = path;
 
     // the slash-character is our 'default base' as we don't
     // support constructing URIs relative to other URIs. This
@@ -41,7 +41,7 @@ public:
     std::string fragment;
 
 public:
-    Uri() {}
+    Uri() = default;
 
     Uri(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query = "",
         const std::string& fragment = "")

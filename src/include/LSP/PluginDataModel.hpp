@@ -8,9 +8,9 @@ using PluginNodePtr = std::shared_ptr<struct PluginNode>;
 
 struct PluginNode
 {
-    std::string name;
-    std::string className;
-    std::vector<PluginNodePtr> children;
+    std::string name = "";
+    std::string className = "";
+    std::vector<PluginNodePtr> children{};
 };
 
 static void from_json(const json& j, PluginNode& p)

@@ -1,0 +1,39 @@
+name: cpp-linter
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Generate Compile Commands
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+          cmake --build . --target Luau.LanguageServer.CLI -j 3
+
+      - uses: cpp-linter/cpp-linter-action@v2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: file
+          ignore: .github|extern|luau|build|tests
+          files-changed-only: false
+          tidy-checks: ""
+          database: build/
+
+      - name: Verify
+        if: steps.linter.outputs.checks-failed > 0
+        run: exit 1

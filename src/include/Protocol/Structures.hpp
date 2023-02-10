@@ -117,7 +117,7 @@ struct Command
 {
     std::string title;
     std::string command;
-    std::vector<json> arguments;
+    std::vector<json> arguments{};
 };
 NLOHMANN_DEFINE_OPTIONAL(Command, title, command, arguments);
 
@@ -139,7 +139,7 @@ NLOHMANN_DEFINE_OPTIONAL(MarkupContent, kind, value);
 struct WorkspaceEdit
 {
     // TODO: this is optional and there are other options provided
-    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes;
+    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes{};
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes);
 
@@ -150,6 +150,6 @@ using PartialResponse = std::optional<T>;
 
 struct PartialResultParams
 {
-    std::optional<ProgressToken> partialResultToken;
+    std::optional<ProgressToken> partialResultToken = std::nullopt;
 };
 } // namespace lsp

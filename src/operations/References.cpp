@@ -34,7 +34,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         return std::nullopt;
 
     auto references = findSymbolReferences(*sourceModule, symbol);
-    std::vector<lsp::Location> result;
+    std::vector<lsp::Location> result{};
 
     for (auto& location : references)
     {

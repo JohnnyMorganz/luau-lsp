@@ -36,7 +36,7 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
     {
         // Note: luacheck's end column is inclusive but our end column is exclusive
         // In addition, luacheck doesn't support multi-line messages, so if the error is multiline we'll fake end column as 100 and hope for the best
-        int columnEnd = (loc.begin.line == loc.end.line) ? loc.end.column : 100;
+        unsigned int columnEnd = (loc.begin.line == loc.end.line) ? loc.end.column : 100;
 
         // Use stdout to match luacheck behavior
         fprintf(stdout, "%s:%d:%d-%d: (W0) %s: %s\n", name, loc.begin.line + 1, loc.begin.column + 1, columnEnd, type, message);
@@ -68,7 +68,7 @@ static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::f
 static bool reportError(
     const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
-    WorkspaceFileResolver* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
+    auto* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
     std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
     std::string humanReadableName = fileResolver->getHumanReadableModuleName(error.moduleName);
     auto path = fileResolver->resolveToRealPath(error.moduleName);
@@ -135,10 +135,10 @@ int startAnalyze(int argc, char** argv)
     ReportFormat format = ReportFormat::Default;
     bool annotate = false;
     std::optional<std::filesystem::path> sourcemapPath = std::nullopt;
-    std::vector<std::filesystem::path> definitionsPaths;
-    std::vector<std::filesystem::path> files;
-    std::vector<std::string> ignoreGlobPatterns;
-    std::optional<std::filesystem::path> baseLuaurc;
+    std::vector<std::filesystem::path> definitionsPaths{};
+    std::vector<std::filesystem::path> files{};
+    std::vector<std::string> ignoreGlobPatterns{};
+    std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
 
     for (int i = 2; i < argc; ++i)
     {

@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <regex>
 #include <optional>
-#include <ctype.h>
+#include <cctype>
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
 
@@ -202,7 +202,7 @@ static std::string encodeURIComponentMinimal(const std::string& path, bool = fal
 
 Uri Uri::parse(const std::string& value)
 {
-    const std::regex REGEX_EXPR("^(([^:\\/?#]+?):)?(\\/\\/([^\\/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
+    const std::regex REGEX_EXPR(R"(^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
     std::smatch match;
     if (std::regex_match(value, match, REGEX_EXPR))
     {

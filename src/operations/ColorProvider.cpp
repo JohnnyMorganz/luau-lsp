@@ -82,7 +82,7 @@ static RGB hexToRgb(std::string hex)
 struct DocumentColorVisitor : public Luau::AstVisitor
 {
     const TextDocument* textDocument;
-    std::vector<lsp::ColorInformation> colors;
+    std::vector<lsp::ColorInformation> colors{};
 
     explicit DocumentColorVisitor(const TextDocument* textDocument)
         : textDocument(textDocument)

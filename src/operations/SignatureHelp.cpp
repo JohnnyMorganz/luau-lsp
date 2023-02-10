@@ -62,7 +62,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
 
-    std::vector<lsp::SignatureInformation> signatures;
+    std::vector<lsp::SignatureInformation> signatures{};
 
     auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
     {
@@ -88,7 +88,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
 
         // Create each parameter label
-        std::vector<lsp::ParameterInformation> parameters;
+        std::vector<lsp::ParameterInformation> parameters{};
         auto it = Luau::begin(ftv->argTypes);
         size_t idx = 0;
         size_t previousParamPos = 0;
