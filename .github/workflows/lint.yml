@@ -29,9 +29,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: file
-          ignore: .github|extern|luau
+          ignore: .github|extern|luau|build|tests
           files-changed-only: false
           tidy-checks: ""
+          database: build/
 
       - name: Verify
         if: steps.linter.outputs.checks-failed > 0
