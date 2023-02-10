@@ -139,7 +139,7 @@ bool isGetService(const Luau::AstExpr* expr)
 struct ImportLocationVisitor : public Luau::AstVisitor
 {
     std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::unordered_map<std::string, size_t> serviceLineMap;
+    std::unordered_map<std::string, size_t> serviceLineMap{};
 
     bool visit(Luau::AstStatLocal* local) override
     {
@@ -178,7 +178,7 @@ struct ImportLocationVisitor : public Luau::AstVisitor
 /// Attempts to retrieve a list of service names by inspecting the global type definitions
 static std::vector<std::string> getServiceNames(const Luau::ScopePtr scope)
 {
-    std::vector<std::string> services;
+    std::vector<std::string> services{};
 
     if (auto dataModelType = scope->lookupType("ServiceProvider"))
     {
@@ -418,7 +418,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         });
 
 
-    std::vector<lsp::CompletionItem> items;
+    std::vector<lsp::CompletionItem> items{};
 
     for (auto& [name, entry] : result.entryMap)
     {

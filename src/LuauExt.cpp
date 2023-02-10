@@ -470,7 +470,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                                     Luau::attachMagicFunction(part, magicFunctionInstanceNew);
 
     // Move Enums over as imported type bindings
-    std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes;
+    std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes{};
     for (auto it = typeChecker.globalScope->exportedTypeBindings.begin(); it != typeChecker.globalScope->exportedTypeBindings.end();)
     {
         auto erase = false;
@@ -900,22 +900,22 @@ struct FindExprOrLocalClosed : public Luau::AstVisitor
         return true;
     }
 
-    virtual bool visit(Luau::AstExprFunction* fn) override
+    bool visit(Luau::AstExprFunction* fn) override
     {
         for (size_t i = 0; i < fn->args.size; ++i)
         {
             visitLocal(fn->args.data[i]);
         }
-        return visit((class Luau::AstExpr*)fn);
+        return visit((Luau::AstExpr*)fn);
     }
 
-    virtual bool visit(Luau::AstStatFor* forStat) override
+    bool visit(Luau::AstStatFor* forStat) override
     {
         visitLocal(forStat->var);
         return true;
     }
 
-    virtual bool visit(Luau::AstStatForIn* forIn) override
+    bool visit(Luau::AstStatForIn* forIn) override
     {
         for (Luau::AstLocal* var : forIn->vars)
         {
@@ -935,7 +935,7 @@ Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& sour
 struct FindSymbolReferences : public Luau::AstVisitor
 {
     const Luau::Symbol symbol;
-    std::vector<Luau::Location> result;
+    std::vector<Luau::Location> result{};
 
     explicit FindSymbolReferences(Luau::Symbol symbol)
         : symbol(symbol)
@@ -982,7 +982,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
-    virtual bool visit(Luau::AstExprLocal* local) override
+    bool visit(Luau::AstExprLocal* local) override
     {
         if (visitLocal(local->local))
         {
@@ -991,7 +991,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
-    virtual bool visit(Luau::AstExprFunction* fn) override
+    bool visit(Luau::AstExprFunction* fn) override
     {
         for (size_t i = 0; i < fn->args.size; ++i)
         {
@@ -1003,7 +1003,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
-    virtual bool visit(Luau::AstStatFor* forStat) override
+    bool visit(Luau::AstStatFor* forStat) override
     {
         if (visitLocal(forStat->var))
         {
@@ -1012,7 +1012,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
-    virtual bool visit(Luau::AstStatForIn* forIn) override
+    bool visit(Luau::AstStatForIn* forIn) override
     {
         for (auto var : forIn->vars)
         {

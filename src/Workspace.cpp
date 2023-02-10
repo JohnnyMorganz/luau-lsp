@@ -1,7 +1,7 @@
 #include "LSP/Workspace.hpp"
 
 #include <iostream>
-#include <limits.h>
+#include <climits>
 
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"

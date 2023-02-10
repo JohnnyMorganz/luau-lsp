@@ -47,7 +47,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Rename is currently only supported for local variable bindings in the current file");
 
     auto references = findSymbolReferences(*sourceModule, symbol);
-    std::vector<lsp::TextEdit> localChanges;
+    std::vector<lsp::TextEdit> localChanges{};
     for (auto& location : references)
     {
         localChanges.emplace_back(

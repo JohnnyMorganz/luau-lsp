@@ -8,7 +8,7 @@
 struct DocumentSymbolsVisitor : public Luau::AstVisitor
 {
     const TextDocument* textDocument;
-    std::vector<lsp::DocumentSymbol> symbols;
+    std::vector<lsp::DocumentSymbol> symbols{};
     lsp::DocumentSymbol* parent = nullptr;
 
     explicit DocumentSymbolsVisitor(const TextDocument* textDocument)

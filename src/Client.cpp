@@ -101,7 +101,7 @@ void Client::removeConfiguration(const lsp::DocumentUri& uri)
 
 void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
 {
-    std::vector<lsp::ConfigurationItem> items;
+    std::vector<lsp::ConfigurationItem> items{};
     for (auto& uri : uris)
     {
         if (uri == Uri()) // Handle null workspace (global config)

@@ -1,5 +1,6 @@
 #include "LSP/JsonRpc.hpp"
 
+#include <string>
 #include <exception>
 #include <variant>
 
@@ -72,7 +73,7 @@ JsonRpcMessage parse(const std::string& jsonString)
 bool readRawMessage(std::istream& input, std::string& output)
 {
     unsigned int contentLength = 0;
-    std::string line;
+    std::string line = "";
 
     // Read the headers
     while (true)

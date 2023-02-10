@@ -155,7 +155,7 @@ size_t lspLength(const std::string& Code)
 
 static std::vector<size_t> computeLineOffsets(const std::string& content, bool isAtLineStart, size_t textOffset = 0)
 {
-    std::vector<size_t> result;
+    std::vector<size_t> result{};
     if (isAtLineStart)
         result = {textOffset};
 
@@ -264,7 +264,7 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     auto nextLineOffset = position.line + 1 < lineOffsets.size() ? lineOffsets[position.line + 1] : _content.size();
 
     // position.character may be in UTF-16, so we need to convert as necessary
-    bool valid;
+    bool valid = true;
     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
     size_t byteInLine = measureUnits(line, static_cast<int>(position.character), positionEncoding(), valid);
 

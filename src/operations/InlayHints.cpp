@@ -35,7 +35,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     Luau::ModulePtr module;
     const ClientConfiguration& config;
     const TextDocument* textDocument;
-    std::vector<lsp::InlayHint> hints;
+    std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
     explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config, const TextDocument* textDocument)
@@ -291,7 +291,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    std::vector<lsp::DocumentLink> result;
+    std::vector<lsp::DocumentLink> result{};
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
     frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ config.hover.strictDatamodelTypes});

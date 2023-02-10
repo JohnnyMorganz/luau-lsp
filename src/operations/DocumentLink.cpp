@@ -4,13 +4,13 @@
 
 struct RequireInfo
 {
-    Luau::AstExpr* require;
+    Luau::AstExpr* require = nullptr;
     Luau::Location location;
 };
 
 struct FindRequireVisitor : public Luau::AstVisitor
 {
-    std::vector<RequireInfo> requireInfos;
+    std::vector<RequireInfo> requireInfos{};
 
     bool visit(Luau::AstExprCall* call) override
     {
@@ -33,7 +33,7 @@ struct FindRequireVisitor : public Luau::AstVisitor
 std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::DocumentLinkParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    std::vector<lsp::DocumentLink> result;
+    std::vector<lsp::DocumentLink> result{};
 
     // We need to parse the code, which is currently only done in the type checker
     frontend.check(moduleName);

@@ -422,7 +422,7 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     {
         client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
 
-        std::vector<lsp::FileSystemWatcher> watchers;
+        std::vector<lsp::FileSystemWatcher> watchers{};
         watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
         watchers.push_back(lsp::FileSystemWatcher{"**/sourcemap.json"});
         watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
@@ -505,7 +505,7 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
 void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
 {
     // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
-    std::vector<Luau::ModuleName> markedDirty;
+    std::vector<Luau::ModuleName> markedDirty{};
 
     // Update in-memory file with new contents
     auto workspace = findWorkspace(params.textDocument.uri);
@@ -526,7 +526,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
         auto config = client->getConfiguration(workspace->rootUri);
         if (config.diagnostics.includeDependents || config.diagnostics.workspace)
         {
-            std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics;
+            std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics{};
             for (auto& module : markedDirty)
             {
                 auto filePath = workspace->fileResolver.resolveToRealPath(module);
@@ -618,7 +618,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     }
 
     // Add new folders
-    std::vector<lsp::DocumentUri> configItems;
+    std::vector<lsp::DocumentUri> configItems{};
     for (auto& folder : params.event.added)
     {
         workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));

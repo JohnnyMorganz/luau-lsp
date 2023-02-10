@@ -172,9 +172,9 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
         return "";
 
     std::string result;
-    std::vector<std::string> params;
-    std::vector<std::string> returns;
-    std::vector<std::string> throws;
+    std::vector<std::string> params{};
+    std::vector<std::string> returns{};
+    std::vector<std::string> throws{};
 
     for (auto& comment : comments)
     {
@@ -266,7 +266,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 struct AttachCommentsVisitor : public Luau::AstVisitor
 {
     Luau::Position pos;
-    std::vector<Luau::Comment> moduleComments; // A list of all comments in the module
+    std::vector<Luau::Comment> moduleComments{}; // A list of all comments in the module
     Luau::Position closestPreviousNode{0, 0};
 
     explicit AttachCommentsVisitor(const Luau::Location node, const std::vector<Luau::Comment> moduleComments)
@@ -277,7 +277,7 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 
     std::vector<Luau::Comment> attachComments()
     {
-        std::vector<Luau::Comment> result;
+        std::vector<Luau::Comment> result{};
         for (auto& comment : moduleComments)
             // The comment needs to be present before the node for it to be attached
             if (comment.location.begin <= pos)
@@ -394,7 +394,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             return {};
     }
 
-    std::vector<std::string> comments;
+    std::vector<std::string> comments{};
     for (auto& comment : commentLocations)
     {
         if (comment.type == Luau::Lexeme::Type::BrokenComment)

@@ -68,12 +68,12 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
     Luau::ModulePtr module;
-    std::vector<SemanticToken> tokens;
-    std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap;
-    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals;
-    std::unordered_set<Luau::AstType*> syntheticTypes;
+    std::vector<SemanticToken> tokens{};
+    std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap{};
+    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals{};
+    std::unordered_set<Luau::AstType*> syntheticTypes{};
 
-    explicit SemanticTokensVisitor(Luau::ModulePtr module, std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals)
+    explicit SemanticTokensVisitor(Luau::ModulePtr module, const std::unordered_map<Luau::AstName, Luau::TypeId>& builtinGlobals)
         : module(module)
         , builtinGlobals(builtinGlobals)
     {
@@ -338,7 +338,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 
 std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr module, const Luau::SourceModule* sourceModule)
 {
-    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals;
+    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals{};
     fillBuiltinGlobals(builtinGlobals, *sourceModule->names, frontend.typeChecker.globalScope);
 
     SemanticTokensVisitor visitor{module, builtinGlobals};
@@ -361,7 +361,7 @@ std::vector<size_t> packTokens(const TextDocument* textDocument, std::vector<Sem
         });
 
     // Pack the tokens
-    std::vector<size_t> result;
+    std::vector<size_t> result{};
     result.reserve(tokens.size() * 5); // Each token will take up 5 slots in the result
 
     size_t lastLine = 0;
