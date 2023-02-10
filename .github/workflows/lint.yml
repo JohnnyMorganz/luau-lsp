@@ -16,7 +16,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Generate Compile Commands
-        run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE --build . --target Luau.LanguageServer.CLI -j 3
+        run: |
+        mkdir build && cd build
+        cmake ..
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE --build . --target Luau.LanguageServer.CLI -j 3
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
