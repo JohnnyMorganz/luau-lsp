@@ -40,13 +40,13 @@ NLOHMANN_DEFINE_OPTIONAL(CodeDescription, href);
 struct Diagnostic
 {
     Range range;
-    std::optional<DiagnosticSeverity> severity;
-    std::optional<std::variant<std::string, int>> code;
-    std::optional<CodeDescription> codeDescription;
-    std::optional<std::string> source;
+    std::optional<DiagnosticSeverity> severity = std::nullopt;
+    std::optional<std::variant<std::string, int>> code = std::nullopt;
+    std::optional<CodeDescription> codeDescription = std::nullopt;
+    std::optional<std::string> source = std::nullopt;
     std::string message;
-    std::vector<DiagnosticTag> tags;
-    std::vector<DiagnosticRelatedInformation> relatedInformation;
+    std::vector<DiagnosticTag> tags{};
+    std::vector<DiagnosticRelatedInformation> relatedInformation{};
     // data?
 };
 NLOHMANN_DEFINE_OPTIONAL(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);
@@ -54,16 +54,16 @@ NLOHMANN_DEFINE_OPTIONAL(Diagnostic, range, severity, code, codeDescription, sou
 struct PublishDiagnosticsParams
 {
     DocumentUri uri;
-    std::optional<size_t> version;
-    std::vector<Diagnostic> diagnostics;
+    std::optional<size_t> version = std::nullopt;
+    std::vector<Diagnostic> diagnostics{};
 };
 NLOHMANN_DEFINE_OPTIONAL(PublishDiagnosticsParams, uri, version, diagnostics);
 
 struct DocumentDiagnosticParams
 {
     TextDocumentIdentifier textDocument;
-    std::optional<std::string> identifier;
-    std::optional<std::string> previousResultId;
+    std::optional<std::string> identifier = std::nullopt;
+    std::optional<std::string> previousResultId = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(DocumentDiagnosticParams, textDocument, identifier, previousResultId);
 
@@ -80,14 +80,14 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 struct SingleDocumentDiagnosticReport
 {
     DocumentDiagnosticReportKind kind = DocumentDiagnosticReportKind::Full;
-    std::optional<std::string> resultId; // NB: this MUST be present if kind == Unchanged
-    std::vector<Diagnostic> items;       // NB: this MUST NOT be present if kind == Unchanged
+    std::optional<std::string> resultId = std::nullopt; // NB: this MUST be present if kind == Unchanged
+    std::vector<Diagnostic> items{};                    // NB: this MUST NOT be present if kind == Unchanged
 };
 NLOHMANN_DEFINE_OPTIONAL(SingleDocumentDiagnosticReport, kind, resultId, items);
 
 struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
-    std::unordered_map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments;
+    std::unordered_map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments{};
 };
 NLOHMANN_DEFINE_OPTIONAL(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
 
@@ -118,33 +118,33 @@ using DocumentDiagnosticReport = RelatedDocumentDiagnosticReport;
 struct PreviousResultId
 {
     DocumentUri uri;
-    std::optional<std::string> value;
+    std::optional<std::string> value = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(PreviousResultId, uri, value);
 
 struct WorkspaceDiagnosticParams : PartialResultParams
 {
-    std::optional<std::string> identifier;
-    std::vector<PreviousResultId> previousResultIds;
+    std::optional<std::string> identifier = std::nullopt;
+    std::vector<PreviousResultId> previousResultIds{};
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticParams, partialResultToken, identifier, previousResultIds);
 
 struct WorkspaceDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
     DocumentUri uri;
-    std::optional<size_t> version;
+    std::optional<size_t> version = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version);
 
 struct WorkspaceDiagnosticReport
 {
-    std::vector<WorkspaceDocumentDiagnosticReport> items;
+    std::vector<WorkspaceDocumentDiagnosticReport> items{};
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReport, items);
 
 struct WorkspaceDiagnosticReportPartialResult
 {
-    std::vector<WorkspaceDocumentDiagnosticReport> items;
+    std::vector<WorkspaceDocumentDiagnosticReport> items{};
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReportPartialResult, items);
 

@@ -197,11 +197,11 @@ struct ProgressParams
     /**
      * The progress token provided by the client or server.
      */
-    ProgressToken token;
+    ProgressToken token = "";
     /**
      * The progress data.
      */
-    LSPAny value;
+    LSPAny value = nullptr;
 };
 NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value);
 

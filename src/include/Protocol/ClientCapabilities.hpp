@@ -38,7 +38,7 @@ struct CompletionItemTagSupportClientCapabilities
     /**
      * The tags supported by the client.
      */
-    std::vector<CompletionItemTag> valueSet;
+    std::vector<CompletionItemTag> valueSet{};
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemTagSupportClientCapabilities, valueSet);
 
@@ -47,13 +47,13 @@ struct CompletionItemResolveSupportClientCapabilities
     /**
      * The properties that a client can resolve lazily.
      */
-    std::vector<std::string> properties;
+    std::vector<std::string> properties{};
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemResolveSupportClientCapabilities, properties);
 
 struct CompletionItemInsertTextModeSupportClientCapabilities
 {
-    std::vector<InsertTextMode> valueSet;
+    std::vector<InsertTextMode> valueSet{};
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemInsertTextModeSupportClientCapabilities, valueSet);
 
@@ -78,7 +78,7 @@ struct CompletionItemClientCapabilities
      * Client supports the follow content formats for the documentation
      * property. The order describes the preferred format of the client.
      */
-    std::vector<MarkupKind> documentationFormat;
+    std::vector<MarkupKind> documentationFormat{};
 
     /**
      * Client supports the deprecated property on a completion item.
@@ -98,7 +98,7 @@ struct CompletionItemClientCapabilities
      *
      * @since 3.15.0
      */
-    std::optional<CompletionItemTagSupportClientCapabilities> tagSupport;
+    std::optional<CompletionItemTagSupportClientCapabilities> tagSupport = std::nullopt;
 
     /**
      * Client supports insert replace edit to control different behavior if
@@ -115,7 +115,7 @@ struct CompletionItemClientCapabilities
      *
      * @since 3.16.0
      */
-    std::optional<CompletionItemResolveSupportClientCapabilities> resolveSupport;
+    std::optional<CompletionItemResolveSupportClientCapabilities> resolveSupport = std::nullopt;
 
     /**
      * The client supports the `insertTextMode` property on
@@ -124,7 +124,7 @@ struct CompletionItemClientCapabilities
      *
      * @since 3.16.0
      */
-    std::optional<CompletionItemInsertTextModeSupportClientCapabilities> insertTextModeSupport;
+    std::optional<CompletionItemInsertTextModeSupportClientCapabilities> insertTextModeSupport = std::nullopt;
 
     /**
      * The client has support for completion item label
@@ -149,7 +149,7 @@ struct CompletionItemKindClientCapabilities
      * the completion items kinds from `Text` to `Reference` as defined in
      * the initial version of the protocol.
      */
-    std::vector<CompletionItemKind> valueSet;
+    std::vector<CompletionItemKind> valueSet{};
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemKindClientCapabilities, valueSet);
 
@@ -165,7 +165,7 @@ struct CompletionListClientCapabilities
      *
      * @since 3.17.0
      */
-    std::vector<std::string> itemDefaults;
+    std::vector<std::string> itemDefaults{};
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionListClientCapabilities, itemDefaults);
 
@@ -180,8 +180,8 @@ struct CompletionClientCapabilities
      * The client supports the following `CompletionItem` specific
      * capabilities.
      */
-    std::optional<CompletionItemClientCapabilities> completionItem;
-    std::optional<CompletionItemKindClientCapabilities> completionItemKind;
+    std::optional<CompletionItemClientCapabilities> completionItem = std::nullopt;
+    std::optional<CompletionItemKindClientCapabilities> completionItemKind = std::nullopt;
 
     /**
      * The client supports to send additional context information for a
@@ -203,7 +203,7 @@ struct CompletionClientCapabilities
      *
      * @since 3.17.0
      */
-    std::optional<CompletionListClientCapabilities> completionList;
+    std::optional<CompletionListClientCapabilities> completionList = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(
     CompletionClientCapabilities, dynamicRegistration, completionItem, completionItemKind, contextSupport, insertTextMode, completionList);
@@ -213,9 +213,9 @@ struct TextDocumentClientCapabilities
     /**
      * Capabilities specific to the `textDocument/completion` request.
      */
-    std::optional<CompletionClientCapabilities> completion;
+    std::optional<CompletionClientCapabilities> completion = std::nullopt;
 
-    std::optional<DiagnosticClientCapabilities> diagnostic;
+    std::optional<DiagnosticClientCapabilities> diagnostic = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic);
 
@@ -289,13 +289,13 @@ struct ClientWorkspaceCapabilities
      * Capabilities specific to the `workspace/didChangeConfiguration`
      * notification.
      */
-    std::optional<DidChangeConfigurationClientCapabilities> didChangeConfiguration;
+    std::optional<DidChangeConfigurationClientCapabilities> didChangeConfiguration = std::nullopt;
 
     /**
      * Capabilities specific to the `workspace/didChangeWatchedFiles`
      * notification.
      */
-    std::optional<DidChangeWatchedFilesClientCapabilities> didChangeWatchedFiles;
+    std::optional<DidChangeWatchedFilesClientCapabilities> didChangeWatchedFiles = std::nullopt;
 
     /**
      * The client supports `workspace/configuration` requests.
@@ -309,14 +309,14 @@ struct ClientWorkspaceCapabilities
      *
      * @since 3.17.0
      */
-    std::optional<InlayHintWorkspaceClientCapabilities> inlayHint;
+    std::optional<InlayHintWorkspaceClientCapabilities> inlayHint = std::nullopt;
 
     /**
      * Client workspace capabilities specific to diagnostics.
      *
      * @since 3.17.0.
      */
-    std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics;
+    std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics);
 
@@ -342,7 +342,7 @@ struct ClientGeneralCapabilities
      *
      * @since 3.17.0
      */
-    std::optional<std::vector<PositionEncodingKind>> positionEncodings;
+    std::optional<std::vector<PositionEncodingKind>> positionEncodings = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ClientGeneralCapabilities, positionEncodings);
 
@@ -351,19 +351,19 @@ struct ClientCapabilities
     /**
      * Text document specific client capabilities.
      */
-    std::optional<TextDocumentClientCapabilities> textDocument;
+    std::optional<TextDocumentClientCapabilities> textDocument = std::nullopt;
 
     /**
      * Workspace specific client capabilities.
      */
-    std::optional<ClientWorkspaceCapabilities> workspace;
+    std::optional<ClientWorkspaceCapabilities> workspace = std::nullopt;
 
     /**
      * General client capabilities.
      *
      * @since 3.16.0
      */
-    std::optional<ClientGeneralCapabilities> general;
+    std::optional<ClientGeneralCapabilities> general = std::nullopt;
 
     // TODO
     // notebook

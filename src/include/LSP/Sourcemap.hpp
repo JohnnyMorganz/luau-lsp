@@ -14,12 +14,12 @@ struct SourceNode
     std::weak_ptr<struct SourceNode> parent; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
     std::string name;
     std::string className;
-    std::vector<std::filesystem::path> filePaths;
-    std::vector<SourceNodePtr> children;
+    std::vector<std::filesystem::path> filePaths{};
+    std::vector<SourceNodePtr> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
     // The corresponding TypeId for this sourcemap node
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
-    std::unordered_map<Luau::TypeChecker const*, Luau::TypeId> tys; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
+    std::unordered_map<Luau::TypeChecker const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
     bool isScript();
     std::optional<std::filesystem::path> getScriptFilePath();

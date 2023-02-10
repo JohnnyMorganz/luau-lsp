@@ -24,7 +24,7 @@ inline lsp::PositionEncodingKind& positionEncoding()
 
 class LanguageServer
 {
-public:
+private:
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
@@ -33,6 +33,7 @@ public:
     ClientPtr client;
     std::optional<Luau::Config> defaultConfig;
 
+public:
     explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles,
         std::optional<Luau::Config> defaultConfig);
 

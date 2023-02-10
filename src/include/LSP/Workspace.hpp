@@ -1,23 +1,13 @@
 #pragma once
 #include <iostream>
-#include <limits.h>
-// #include "glob/glob.hpp"
+#include <climits>
 #include "Luau/Frontend.h"
-// #include "Luau/ToString.h"
-// #include "Luau/AstQuery.h"
-// #include "Luau/TypeInfer.h"
-// #include "Luau/Transpiler.h"
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
 #include "Protocol/SignatureHelp.hpp"
 #include "Protocol/SemanticTokens.hpp"
 #include "LSP/Client.hpp"
-// #include "LSP/Sourcemap.hpp"
-// #include "LSP/TextDocument.hpp"
-// #include "LSP/DocumentationParser.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
-// #include "LSP/LuauExt.hpp"
-// #include "LSP/Utils.hpp"
 
 class WorkspaceFolder
 {

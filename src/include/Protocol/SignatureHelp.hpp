@@ -27,22 +27,22 @@ struct ParameterInformation
      * The human-readable doc-comment of this parameter. Will be shown
      * in the UI but can be omitted.
      */
-    std::optional<MarkupContent> documentation;
+    std::optional<MarkupContent> documentation = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ParameterInformation, label, documentation);
 
 struct SignatureInformation
 {
     std::string label;
-    std::optional<MarkupContent> documentation;
-    std::optional<std::vector<ParameterInformation>> parameters;
-    std::optional<size_t> activeParameter;
+    std::optional<MarkupContent> documentation = std::nullopt;
+    std::optional<std::vector<ParameterInformation>> parameters = std::nullopt;
+    std::optional<size_t> activeParameter = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(SignatureInformation, label, documentation, parameters, activeParameter);
 
 struct SignatureHelp
 {
-    std::vector<SignatureInformation> signatures;
+    std::vector<SignatureInformation> signatures{};
     size_t activeSignature = 0;
     size_t activeParameter = 0;
 };
@@ -58,14 +58,14 @@ enum struct SignatureHelpTriggerKind
 struct SignatureHelpContext
 {
     SignatureHelpTriggerKind triggerKind = SignatureHelpTriggerKind::Invoked;
-    std::optional<std::string> triggerCharacter;
+    std::optional<std::string> triggerCharacter = std::nullopt;
     bool isRetrigger = false;
-    std::optional<SignatureHelp> activeSignatureHelp;
+    std::optional<SignatureHelp> activeSignatureHelp = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
 
 struct SignatureHelpParams : TextDocumentPositionParams
 {
-    std::optional<SignatureHelpContext> context;
+    std::optional<SignatureHelpContext> context = std::nullopt;
 };
 } // namespace lsp
