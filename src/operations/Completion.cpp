@@ -11,14 +11,15 @@
 /// Note that sort text is lexicographically
 namespace SortText
 {
-static constexpr const char* TableProperties = "0";
-static constexpr const char* CorrectTypeKind = "1";
-static constexpr const char* CorrectFunctionResult = "2";
-static constexpr const char* Default = "3";
-static constexpr const char* WrongIndexType = "4";
-static constexpr const char* MetatableIndex = "5";
-static constexpr const char* AutoImports = "6";
-static constexpr const char* Keywords = "7";
+static constexpr const char* PrioritisedSuggestion = "0";
+static constexpr const char* TableProperties = "1";
+static constexpr const char* CorrectTypeKind = "2";
+static constexpr const char* CorrectFunctionResult = "3";
+static constexpr const char* Default = "4";
+static constexpr const char* WrongIndexType = "5";
+static constexpr const char* MetatableIndex = "6";
+static constexpr const char* AutoImports = "7";
+static constexpr const char* Keywords = "8";
 } // namespace SortText
 
 static constexpr const char* COMMON_SERVICES[] = {
@@ -480,14 +481,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (documentationString)
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
+        if (entry.wrongIndexType)
+            item.sortText = SortText::WrongIndexType;
         if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
             item.sortText = SortText::CorrectTypeKind;
         else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
             item.sortText = SortText::CorrectFunctionResult;
         else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
             item.sortText = SortText::MetatableIndex;
-        else if (entry.wrongIndexType)
-            item.sortText = SortText::WrongIndexType;
         else if (entry.kind == Luau::AutocompleteEntryKind::Property)
             item.sortText = SortText::TableProperties;
         else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
@@ -497,18 +498,16 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (isGetService)
         {
             if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
-                // We use TableProperties as it has a high sort index,
-                // but maybe we should make a specific name for it
-                item.sortText = SortText::TableProperties;
+                item.sortText = SortText::PrioritisedSuggestion;
         }
         // If calling a property on an Instance, then prioritise these properties
-        if (entry.containingClass && entry.containingClass.value()->name == "Instance" && !entry.wrongIndexType)
+        if (auto instanceType = frontend.typeCheckerForAutocomplete.globalScope->lookupType("Instance");
+            instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+            Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
         {
             if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
                 it != std::end(COMMON_INSTANCE_PROPERTIES))
-                // We use TableProperties as it has a high sort index,
-                // but maybe we should make a specific name for it
-                item.sortText = SortText::TableProperties;
+                item.sortText = SortText::PrioritisedSuggestion;
         }
 
         switch (entry.kind)
