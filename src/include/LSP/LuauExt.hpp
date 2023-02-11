@@ -114,3 +114,44 @@ lsp::Position toUTF16(const TextDocument* textDocument, const Luau::Position& po
 lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver, const TextDocument* textDocument = nullptr);
 lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDocument* textDocument = nullptr);
 lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const TextDocument* textDocument = nullptr);
+
+bool isGetService(const Luau::AstExpr* expr);
+
+struct FindServicesVisitor : public Luau::AstVisitor
+{
+    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
+    std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
+
+    bool visit(Luau::AstStatLocal* local) override
+    {
+        if (local->vars.size != 1 || local->values.size != 1)
+            return false;
+
+        auto localName = local->vars.data[0];
+        auto expr = local->values.data[0];
+
+        if (!localName || !expr)
+            return false;
+
+        auto line = localName->location.begin.line;
+
+        if (isGetService(expr))
+        {
+            firstServiceDefinitionLine =
+                !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
+            serviceLineMap.emplace(std::string(localName->name.value), local);
+        }
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};

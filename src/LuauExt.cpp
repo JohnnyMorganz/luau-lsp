@@ -1045,3 +1045,15 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
 
     return std::nullopt;
 }
+
+bool isGetService(const Luau::AstExpr* expr)
+{
+    if (auto call = expr->as<Luau::AstExprCall>())
+        if (auto index = call->func->as<Luau::AstExprIndexName>())
+            if (index->index == "GetService")
+                if (auto name = index->expr->as<Luau::AstExprGlobal>())
+                    if (name->name == "game")
+                        return true;
+
+    return false;
+}
