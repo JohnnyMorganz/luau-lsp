@@ -40,6 +40,21 @@ static constexpr const char* COMMON_SERVICES[] = {
     "VoiceChatService",
 };
 
+static constexpr const char* COMMON_INSTANCE_PROPERTIES[] = {
+    "Parent",
+    "Name",
+    // Methods
+    "FindFirstChild",
+    "IsA",
+    "Destroy",
+    "GetAttribute",
+    "GetChildren",
+    "GetDescendants",
+    "WaitForChild",
+    "Clone",
+    "SetAttribute",
+};
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -482,6 +497,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (isGetService)
         {
             if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
+                // We use TableProperties as it has a high sort index,
+                // but maybe we should make a specific name for it
+                item.sortText = SortText::TableProperties;
+        }
+        // If calling a property on an Instance, then prioritise these properties
+        if (entry.containingClass && entry.containingClass.value()->name == "Instance" && !entry.wrongIndexType)
+        {
+            if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
+                it != std::end(COMMON_INSTANCE_PROPERTIES))
                 // We use TableProperties as it has a high sort index,
                 // but maybe we should make a specific name for it
                 item.sortText = SortText::TableProperties;
