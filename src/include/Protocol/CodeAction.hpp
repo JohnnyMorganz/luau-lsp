@@ -153,6 +153,7 @@ struct CodeActionContext
      */
     std::optional<CodeActionTriggerKind> triggerKind = std::nullopt;
 };
+NLOHMANN_DEFINE_OPTIONAL(CodeActionContext, diagnostics, only, triggerKind);
 
 /**
  * A code action represents a change that can be performed in code, e.g. to fix
@@ -244,6 +245,9 @@ struct CodeAction
      */
     std::optional<LSPAny> data;
 };
+NLOHMANN_DEFINE_OPTIONAL(CodeAction::CodeActionDisabled, reason);
+NLOHMANN_DEFINE_OPTIONAL(CodeAction, title, kind, diagnostics, isPreferred, disabled, edit, command, data);
+
 
 struct CodeActionParams
 {
@@ -260,6 +264,7 @@ struct CodeActionParams
      */
     CodeActionContext context;
 };
+NLOHMANN_DEFINE_OPTIONAL(CodeActionParams, textDocument, range, context);
 
 using CodeActionResult = std::optional<std::vector<CodeAction>>;
 } // namespace lsp

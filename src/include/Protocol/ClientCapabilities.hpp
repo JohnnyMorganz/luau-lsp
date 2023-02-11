@@ -218,7 +218,7 @@ struct CodeActionClientCapabilities
 
     struct CodeActionLiteralSupport
     {
-        struct CodeActionKind
+        struct CodeActionKindLiteralSupport
         {
             /**
              * The code action kind values the client supports. When this
@@ -233,7 +233,7 @@ struct CodeActionClientCapabilities
          * The code action kind is supported with the following value
          * set.
          */
-        CodeActionKind codeActionKind;
+        CodeActionKindLiteralSupport codeActionKind;
     };
 
     /**
@@ -296,6 +296,11 @@ struct CodeActionClientCapabilities
      */
     bool honorsChangeAnnotations = false;
 };
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport::CodeActionKindLiteralSupport, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport, codeActionKind);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionResolveSupport, properties);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities, dynamicRegistration, codeActionLiteralSupport, isPreferredSupport, disabledSupport,
+    dataSupport, resolveSupport, honorsChangeAnnotations);
 
 struct TextDocumentClientCapabilities
 {
@@ -305,8 +310,13 @@ struct TextDocumentClientCapabilities
     std::optional<CompletionClientCapabilities> completion = std::nullopt;
 
     std::optional<DiagnosticClientCapabilities> diagnostic = std::nullopt;
+
+    /**
+     * Capabilities specific to the `textDocument/codeAction` request.
+     */
+    std::optional<CodeActionClientCapabilities> codeAction = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic);
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, codeAction);
 
 struct DidChangeConfigurationClientCapabilities
 {
