@@ -44,7 +44,7 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     return std::nullopt;
 }
 
-std::string codeBlock(std::string language, std::string code)
+std::string codeBlock(const std::string& language, const std::string& code)
 {
     return "```" + language + "\n" + code + "\n" + "```";
 }

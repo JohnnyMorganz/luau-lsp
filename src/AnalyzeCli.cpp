@@ -76,7 +76,7 @@ static bool reportError(
     if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns))
         return false;
 
-    if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+    if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         report(format, humanReadableName.c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
     else
         report(format, humanReadableName.c_str(), error.location, "TypeError",
@@ -156,14 +156,14 @@ int startAnalyze(int argc, char** argv)
             else if (strncmp(argv[i], "--sourcemap=", 12) == 0)
                 sourcemapPath = std::string(argv[i] + 12);
             else if (strncmp(argv[i], "--definitions=", 14) == 0)
-                definitionsPaths.push_back(std::string(argv[i] + 14));
+                definitionsPaths.emplace_back(std::string(argv[i] + 14));
             else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
                 baseLuaurc = std::filesystem::path(argv[i] + 14);
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
-                definitionsPaths.push_back(std::string(argv[i] + 7));
+                definitionsPaths.emplace_back(std::string(argv[i] + 7));
             else if (strncmp(argv[i], "--ignore=", 9) == 0)
-                ignoreGlobPatterns.push_back(std::string(argv[i] + 9));
+                ignoreGlobPatterns.emplace_back(std::string(argv[i] + 9));
         }
         else
         {
@@ -275,7 +275,7 @@ int startAnalyze(int argc, char** argv)
             if (loadResult.module)
             {
                 for (const auto& error : loadResult.module->errors)
-                    if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+                    if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
                         report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "SyntaxError",
                             syntaxError->message.c_str());
                     else

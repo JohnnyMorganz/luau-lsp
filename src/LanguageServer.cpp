@@ -9,10 +9,10 @@
 #include "LSP/DocumentationParser.hpp"
 
 #define REQUIRED_PARAMS(params, method) \
-    !params ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : params.value()
+    !(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value()
 
-LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles,
-    std::optional<Luau::Config> defaultConfig)
+LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
+    const std::vector<std::filesystem::path>& documentationFiles, const std::optional<Luau::Config>& defaultConfig)
     : client(std::make_shared<Client>())
     , defaultConfig(defaultConfig)
 {
@@ -24,7 +24,7 @@ LanguageServer::LanguageServer(std::vector<std::filesystem::path> definitionsFil
 
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
-WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri file)
+WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
 {
     if (file == nullWorkspace->rootUri)
         return nullWorkspace;
@@ -517,7 +517,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
     if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
-        auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{params.textDocument});
+        auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{params.textDocument.uri}});
         client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
 
         // Compute diagnostics for reverse dependencies

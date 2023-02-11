@@ -34,7 +34,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     if (ancestry.size() == 0)
         return std::nullopt;
 
-    Luau::AstExprCall* candidate = ancestry.back()->as<Luau::AstExprCall>();
+    auto* candidate = ancestry.back()->as<Luau::AstExprCall>();
     if (!candidate && ancestry.size() >= 2)
         candidate = ancestry.at(ancestry.size() - 2)->as<Luau::AstExprCall>();
 

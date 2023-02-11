@@ -280,7 +280,7 @@ int main(int argc, char** argv)
         {
             std::string flagSet = std::string(argv[i] + 7);
 
-            size_t eqIndex = flagSet.find("=");
+            size_t eqIndex = flagSet.find('=');
             if (eqIndex == std::string::npos)
             {
                 std::cerr << "Bad flag option, missing =: " << flagSet << "\n";

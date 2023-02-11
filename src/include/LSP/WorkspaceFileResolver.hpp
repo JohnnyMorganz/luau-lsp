@@ -39,7 +39,7 @@ struct WorkspaceFileResolver
     }
 
     // Create a WorkspaceFileResolver with a specific default configuration
-    WorkspaceFileResolver(const Luau::Config defaultConfig)
+    WorkspaceFileResolver(const Luau::Config& defaultConfig)
         : defaultConfig(defaultConfig){};
 
     // Handle normalisation to simplify lookup

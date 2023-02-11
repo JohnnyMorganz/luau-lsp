@@ -21,7 +21,8 @@ public:
     Luau::TypeArena instanceTypes;
 
 public:
-    WorkspaceFolder(std::shared_ptr<Client> client, const std::string& name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(
+        const std::shared_ptr<Client>& client, const std::string& name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
         , name(name)
         , rootUri(uri)

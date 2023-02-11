@@ -92,10 +92,8 @@ static std::string encodeURIComponent(const std::string& value)
     escaped.fill('0');
     escaped << std::hex;
 
-    for (auto i = value.begin(), n = value.end(); i != n; ++i)
+    for (char c : value)
     {
-        auto c = (*i);
-
         // Keep alphanumeric and other accepted characters intact
         if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
         {
@@ -207,12 +205,12 @@ Uri Uri::parse(const std::string& value)
     if (std::regex_match(value, match, REGEX_EXPR))
     {
         // match[0] is whole string
-        return Uri(match[2], percentDecode(match[4]), percentDecode(match[5]), percentDecode(match[7]), percentDecode(match[9]));
+        return {match[2], percentDecode(match[4]), percentDecode(match[5]), percentDecode(match[7]), percentDecode(match[9])};
     }
     else
     {
         // TODO: should we error?
-        return Uri("", "", "", "", "");
+        return {"", "", "", "", ""};
     }
 }
 

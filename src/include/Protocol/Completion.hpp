@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include "Protocol/Structures.hpp"
 
 namespace lsp
 {

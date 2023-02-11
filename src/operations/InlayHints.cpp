@@ -32,13 +32,13 @@ void makeInsertable(lsp::InlayHint& hint, Luau::TypePackId ty)
 }
 struct InlayHintVisitor : public Luau::AstVisitor
 {
-    Luau::ModulePtr module;
+    const Luau::ModulePtr& module;
     const ClientConfiguration& config;
     const TextDocument* textDocument;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(Luau::ModulePtr module, const ClientConfiguration& config, const TextDocument* textDocument)
+    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument)
         : module(module)
         , config(config)
         , textDocument(textDocument)

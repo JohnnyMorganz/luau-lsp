@@ -3,7 +3,8 @@
 #include <iostream>
 #include <optional>
 
-void Client::sendRequest(const id_type& id, const std::string& method, std::optional<json> params, std::optional<ResponseHandler> handler)
+void Client::sendRequest(
+    const id_type& id, const std::string& method, const std::optional<json>& params, const std::optional<ResponseHandler>& handler)
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -41,7 +42,7 @@ void Client::sendError(const std::optional<id_type>& id, const JsonRpcException&
     sendRawMessage(msg);
 }
 
-void Client::sendNotification(const std::string& method, std::optional<json> params)
+void Client::sendNotification(const std::string& method, const std::optional<json>& params)
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -52,7 +53,7 @@ void Client::sendNotification(const std::string& method, std::optional<json> par
     sendRawMessage(msg);
 }
 
-void Client::sendLogMessage(lsp::MessageType type, std::string message)
+void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message)
 {
     json params{
         {"type", type},
@@ -61,7 +62,7 @@ void Client::sendLogMessage(lsp::MessageType type, std::string message)
     sendNotification("window/logMessage", params);
 }
 
-void Client::sendTrace(std::string message, std::optional<std::string> verbose)
+void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose)
 {
     if (traceMode == lsp::TraceValue::Off)
         return;
@@ -71,13 +72,13 @@ void Client::sendTrace(std::string message, std::optional<std::string> verbose)
     sendNotification("$/logTrace", params);
 };
 
-void Client::sendWindowMessage(lsp::MessageType type, std::string message)
+void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
 {
     lsp::ShowMessageParams params{type, message};
     sendNotification("window/showMessage", params);
 }
 
-void Client::registerCapability(std::string registrationId, std::string method, json registerOptions)
+void Client::registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions)
 {
     lsp::Registration registration{registrationId, method, registerOptions};
     // TODO: handle responses?
@@ -153,7 +154,7 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
     sendRequest(nextRequestId++, "workspace/configuration", lsp::ConfigurationParams{items}, handler);
 }
 
-void Client::applyEdit(const lsp::ApplyWorkspaceEditParams& params, std::optional<ResponseHandler> handler)
+void Client::applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler)
 {
     sendRequest(nextRequestId++, "workspace/applyEdit", params, handler);
 }

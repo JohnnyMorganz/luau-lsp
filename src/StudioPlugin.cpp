@@ -27,10 +27,10 @@ void LanguageServer::onStudioPluginClear()
     workspace->updateSourceMap();
 }
 
-void SourceNode::mutateWithPluginInfo(const PluginNodePtr pluginInstance)
+void SourceNode::mutateWithPluginInfo(const PluginNodePtr& pluginInstance)
 {
     // We currently perform purely additive changes where we add in new children
-    for (auto dmChild : pluginInstance->children)
+    for (const auto& dmChild : pluginInstance->children)
     {
         auto childNode = findChild(dmChild->name);
         if (childNode)

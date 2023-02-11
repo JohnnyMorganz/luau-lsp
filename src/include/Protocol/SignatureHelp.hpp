@@ -1,4 +1,8 @@
 #pragma once
+#include <optional>
+#include <string>
+#include <vector>
+#include "Protocol/Structures.hpp"
 
 namespace lsp
 {
@@ -21,7 +25,7 @@ struct ParameterInformation
      * signature label. Its intended use case is to highlight the parameter
      * label part in the `SignatureInformation.label`.
      */
-    std::variant<std::string, std::vector<size_t>> label;
+    std::variant<std::string, std::vector<size_t>> label = "";
 
     /**
      * The human-readable doc-comment of this parameter. Will be shown

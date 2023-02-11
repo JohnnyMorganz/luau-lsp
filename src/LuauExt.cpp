@@ -75,11 +75,12 @@ Luau::TypeId getSourcemapType(
             return typeChecker.builtinTypes->anyType;
 
         // Look up the base class instance
-        Luau::TypeId baseTypeId;
+        Luau::TypeId baseTypeId = nullptr;
         if (auto foundId = getTypeIdForClass(globalScope, node->className))
             baseTypeId = *foundId;
         else
             return typeChecker.builtinTypes->anyType;
+        LUAU_ASSERT(baseTypeId);
 
         // Point the metatable to the metatable of "Instance" so that we allow equality
         std::optional<Luau::TypeId> instanceMetaIdentity;
@@ -93,7 +94,7 @@ Luau::TypeId getSourcemapType(
 
         // Attach Parent and Children info
         // Get the mutable version of the type var
-        if (Luau::ClassType* ctv = Luau::getMutable<Luau::ClassType>(typeId))
+        if (auto* ctv = Luau::getMutable<Luau::ClassType>(typeId))
         {
             if (auto parentNode = node->parent.lock())
                 ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(typeChecker, arena, globalScope, parentNode));
@@ -109,7 +110,7 @@ Luau::TypeId getSourcemapType(
 
                 Luau::attachMagicFunction(findFirstAncestorFunction,
                     [&arena, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
+                        const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
                             return std::nullopt;
@@ -131,7 +132,7 @@ Luau::TypeId getSourcemapType(
                 auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {typeChecker.builtinTypes->stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstChildFunction,
                     [node, &arena](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                        Luau::WithPredicate<Luau::TypePackId> withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
+                        const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
                             return std::nullopt;
@@ -158,8 +159,8 @@ Luau::TypeId getSourcemapType(
 }
 
 // Magic function for `Instance:IsA("ClassName")` predicate
-std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     if (expr.args.size != 1)
         return std::nullopt;
@@ -186,8 +187,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(
 }
 
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
-std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     auto index = expr.func->as<Luau::AstExprIndexName>();
     if (!index)
@@ -199,8 +200,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
 }
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
-std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     if (expr.args.size < 1)
         return std::nullopt;
@@ -218,8 +219,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhic
 }
 
 // Magic function for `EnumItem:IsA("EnumType")` predicate
-std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     if (expr.args.size != 1)
         return std::nullopt;
@@ -246,8 +247,8 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(
 }
 
 // Magic function for `instance:GetPropertyChangedSignal()`, so that we can perform type checking on the provided property
-static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetPropertyChangedSignal(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetPropertyChangedSignal(Luau::TypeChecker& typeChecker,
+    const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     if (expr.args.size != 1)
         return std::nullopt;
@@ -275,8 +276,8 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
 
 // Magic function attached to `Instance.new(string) -> Instance`, where if the argument given is a string literal
 // then we must error since we have hit the fallback value
-static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceNew(
-    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceNew(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
 {
     if (expr.args.size < 1)
         return std::nullopt;
@@ -290,7 +291,7 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanc
 
 void addChildrenToCTV(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
-    if (Luau::ClassType* ctv = Luau::getMutable<Luau::ClassType>(ty))
+    if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
     {
         // Clear out all the old registered children
         for (auto it = ctv->props.begin(); it != ctv->props.end();)
@@ -545,8 +546,8 @@ using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
 // Converts a FTV and function call to a nice string
 // In the format "function NAME(args): ret"
-std::string toStringNamedFunction(Luau::ModulePtr module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,
-    std::optional<Luau::ScopePtr> scope, ToStringNamedFunctionOpts stringOpts)
+std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,
+    std::optional<Luau::ScopePtr> scope, const ToStringNamedFunctionOpts& stringOpts)
 {
     Luau::ToStringOptions opts;
     opts.functionTypeArguments = true;
@@ -780,7 +781,7 @@ lsp::Position toUTF16(const TextDocument* textDocument, const Luau::Position& po
 lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::FileResolver* fileResolver, const TextDocument* textDocument)
 {
     std::string message;
-    if (const Luau::SyntaxError* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
+    if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
         message = "SyntaxError: " + syntaxError->message;
     else
         message = "TypeError: " + Luau::toString(error, Luau::TypeErrorToStringOptions{fileResolver});

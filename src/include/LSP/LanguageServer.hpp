@@ -31,17 +31,17 @@ private:
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
-    std::optional<Luau::Config> defaultConfig;
+    const std::optional<Luau::Config>& defaultConfig;
 
 public:
-    explicit LanguageServer(std::vector<std::filesystem::path> definitionsFiles, std::vector<std::filesystem::path> documentationFiles,
-        std::optional<Luau::Config> defaultConfig);
+    explicit LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles, const std::vector<std::filesystem::path>& documentationFiles,
+        const std::optional<Luau::Config>& defaultConfig);
 
     lsp::ServerCapabilities getServerCapabilities();
 
     /// Finds the workspace which the file belongs to.
     /// If no workspace is found, the file is attached to the null workspace
-    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri file);
+    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri& file);
 
     void onRequest(const id_type& id, const std::string& method, std::optional<json> params);
     void onNotification(const std::string& method, std::optional<json> params);

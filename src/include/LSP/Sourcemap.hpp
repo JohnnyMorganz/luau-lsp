@@ -29,7 +29,7 @@ struct SourceNode
     std::optional<SourceNodePtr> findAncestor(const std::string& name);
 
     // Studio Plugin
-    void mutateWithPluginInfo(const PluginNodePtr pluginInfo);
+    void mutateWithPluginInfo(const PluginNodePtr& pluginInfo);
 };
 
 static void from_json(const json& j, SourceNode& p)

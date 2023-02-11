@@ -61,7 +61,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 current = Luau::baseof(*current);
             }
 
-            const Luau::Symbol* symbol = Luau::get<Luau::Symbol>(*current);
+            const auto* symbol = Luau::get<Luau::Symbol>(*current);
             auto scope = Luau::findScopeAtPosition(*module, position);
             if (!scope)
                 return result;

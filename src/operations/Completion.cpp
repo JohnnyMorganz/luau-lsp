@@ -55,15 +55,15 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     auto unclosedBlock = false;
     for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
     {
-        if (Luau::AstStatForIn* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasEnd)
+        if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasEnd)
             unclosedBlock = true;
-        if (Luau::AstStatFor* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->hasEnd)
+        if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->hasEnd)
             unclosedBlock = true;
-        if (Luau::AstStatIf* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->hasEnd)
+        if (auto* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->hasEnd)
             unclosedBlock = true;
-        if (Luau::AstStatWhile* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasEnd)
+        if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasEnd)
             unclosedBlock = true;
-        if (Luau::AstExprFunction* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->hasEnd)
+        if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->hasEnd)
             unclosedBlock = true;
     }
 
@@ -176,7 +176,7 @@ struct ImportLocationVisitor : public Luau::AstVisitor
 };
 
 /// Attempts to retrieve a list of service names by inspecting the global type definitions
-static std::vector<std::string> getServiceNames(const Luau::ScopePtr scope)
+static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
 {
     std::vector<std::string> services{};
 
@@ -312,7 +312,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](std::string tag, std::optional<const Luau::ClassType*> ctx,
+        [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
             std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
         {
             if (tag == "ClassNames")

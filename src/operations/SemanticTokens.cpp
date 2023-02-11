@@ -33,7 +33,7 @@ enum struct AstLocalInfo
     Parameter,
 };
 
-static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTokenTypes base)
+static lsp::SemanticTokenTypes inferTokenType(const Luau::TypeId* ty, lsp::SemanticTokenTypes base)
 {
     if (!ty)
         return base;
@@ -67,13 +67,13 @@ static lsp::SemanticTokenTypes inferTokenType(Luau::TypeId* ty, lsp::SemanticTok
 
 struct SemanticTokensVisitor : public Luau::AstVisitor
 {
-    Luau::ModulePtr module;
+    const Luau::ModulePtr& module;
+    const std::unordered_map<Luau::AstName, Luau::TypeId>& builtinGlobals;
     std::vector<SemanticToken> tokens{};
     std::unordered_map<Luau::AstLocal*, AstLocalInfo> localMap{};
-    std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals{};
     std::unordered_set<Luau::AstType*> syntheticTypes{};
 
-    explicit SemanticTokensVisitor(Luau::ModulePtr module, const std::unordered_map<Luau::AstName, Luau::TypeId>& builtinGlobals)
+    explicit SemanticTokensVisitor(const Luau::ModulePtr& module, const std::unordered_map<Luau::AstName, Luau::TypeId>& builtinGlobals)
         : module(module)
         , builtinGlobals(builtinGlobals)
     {
@@ -336,7 +336,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     }
 };
 
-std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr module, const Luau::SourceModule* sourceModule)
+std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr& module, const Luau::SourceModule* sourceModule)
 {
     std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals{};
     fillBuiltinGlobals(builtinGlobals, *sourceModule->names, frontend.typeChecker.globalScope);
