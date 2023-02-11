@@ -19,11 +19,11 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_unknown_class")
 {
     auto result = check(R"(
         local x = Instance.new("Part")
-        local y = x:IsA("unknown")
+        local y = x:IsA("unknown_class")
     )");
 
     REQUIRE_EQ(1, result.errors.size());
-    CHECK(toString(result.errors[0]) == "Unknown type 'unknown'");
+    CHECK(toString(result.errors[0]) == "Unknown type 'unknown_class'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal")
