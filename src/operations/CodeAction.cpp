@@ -4,135 +4,45 @@
 #include "LSP/LuauExt.hpp"
 #include "Luau/Transpiler.h"
 
-struct RequireSorter : Luau::AstVisitor
+struct FindRequiresVisitor : public Luau::AstVisitor
 {
-    Luau::DenseHashMap<Luau::AstLocal*, Luau::AstExpr*> locals;
-    std::vector<Luau::AstExpr*> work;
-    std::vector<Luau::AstExprCall*> requireCalls;
+    std::optional<size_t> firstRequireDefinitionLine = std::nullopt;
+    std::map<std::string, Luau::AstStatLocal*> requiresMap{};
 
-    RequireSorter()
-        : locals(nullptr)
+    bool visit(Luau::AstStatLocal* local) override
     {
-    }
+        if (local->vars.size != 1 || local->values.size != 1)
+            return false;
 
-    bool visit(Luau::AstExprCall* expr) override
-    {
-        auto* global = expr->func->as<Luau::AstExprGlobal>();
+        auto localName = local->vars.data[0];
+        auto expr = local->values.data[0];
 
-        if (global && global->name == "require" && expr->args.size >= 1)
-            requireCalls.push_back(expr);
+        if (!localName || !expr)
+            return false;
 
-        return true;
-    }
+        auto line = localName->location.begin.line;
 
-    bool visit(Luau::AstStatLocal* stat) override
-    {
-        for (size_t i = 0; i < stat->vars.size && i < stat->values.size; ++i)
+        if (auto call = expr->as<Luau::AstExprCall>(); call && types::matchRequire(*call))
         {
-            Luau::AstLocal* local = stat->vars.data[i];
-            Luau::AstExpr* expr = stat->values.data[i];
+            // TODO: need to track dependents of the require
 
-            // track initializing expression to be able to trace modules through locals
-            locals[local] = expr;
+            firstRequireDefinitionLine =
+                !firstRequireDefinitionLine.has_value() || firstRequireDefinitionLine.value() >= line ? line : firstRequireDefinitionLine.value();
+            requiresMap.emplace(std::string(localName->name.value), local);
         }
 
-        return true;
+        return false;
     }
 
-    bool visit(Luau::AstStatAssign* stat) override
+    bool visit(Luau::AstStatBlock* block) override
     {
-        for (size_t i = 0; i < stat->vars.size; ++i)
+        for (Luau::AstStat* stat : block->body)
         {
-            // locals that are assigned don't have a known expression
-            if (auto* expr = stat->vars.data[i]->as<Luau::AstExprLocal>())
-                locals[expr->local] = nullptr;
+            stat->visit(this);
         }
 
-        return true;
+        return false;
     }
-
-    // // Called on the expression passed to a require call: require(expr)
-    // // We need to see if there exists any variable depedency on the expr (i.e., "Modules" in require(Modules.Roact))
-    // // If so, we must ensure that the sorting does not move the require to before this dependency
-    // Luau::AstExpr* findVariableDependency(Luau::AstExpr* node)
-    // {
-    //     if (auto* expr = node->as<Luau::AstExprLocal>())
-    //         return locals[expr->local];
-    //     else if (auto* expr = node->as<AstExprIndexName>())
-    //         return expr->expr;
-    //     else if (auto* expr = node->as<AstExprIndexExpr>())
-    //         return expr->expr;
-    //     else if (auto* expr = node->as<AstExprCall>(); expr && expr->self)
-    //         return expr->func->as<AstExprIndexName>()->expr;
-    //     else
-    //         return nullptr;
-    // }
-
-    // void process()
-    // {
-    //     ModuleInfo moduleContext{currentModuleName};
-
-    //     // seed worklist with require arguments
-    //     work.reserve(requireCalls.size());
-
-    //     for (AstExprCall* require : requireCalls)
-    //         work.push_back(require->args.data[0]);
-
-    //     // push all dependent expressions to the work stack; note that the vector is modified during traversal
-    //     for (size_t i = 0; i < work.size(); ++i)
-    //         if (AstExpr* dep = getDependent(work[i]))
-    //             work.push_back(dep);
-
-    //     // resolve all expressions to a module info
-    //     for (size_t i = work.size(); i > 0; --i)
-    //     {
-    //         AstExpr* expr = work[i - 1];
-
-    //         // when multiple expressions depend on the same one we push it to work queue multiple times
-    //         if (result.exprs.contains(expr))
-    //             continue;
-
-    //         std::optional<ModuleInfo> info;
-
-    //         if (AstExpr* dep = getDependent(expr))
-    //         {
-    //             const ModuleInfo* context = result.exprs.find(dep);
-
-    //             // locals just inherit their dependent context, no resolution required
-    //             if (expr->is<AstExprLocal>())
-    //                 info = context ? std::optional<ModuleInfo>(*context) : std::nullopt;
-    //             else
-    //                 info = fileResolver->resolveModule(context, expr);
-    //         }
-    //         else
-    //         {
-    //             info = fileResolver->resolveModule(&moduleContext, expr);
-    //         }
-
-    //         if (info)
-    //             result.exprs[expr] = std::move(*info);
-    //     }
-
-    //     // resolve all requires according to their argument
-    //     result.requireList.reserve(requireCalls.size());
-
-    //     for (AstExprCall* require : requireCalls)
-    //     {
-    //         AstExpr* arg = require->args.data[0];
-
-    //         if (const ModuleInfo* info = result.exprs.find(arg))
-    //         {
-    //             result.requireList.push_back({info->name, require->location});
-
-    //             ModuleInfo infoCopy = *info; // copy *info out since next line invalidates info!
-    //             result.exprs[require] = std::move(infoCopy);
-    //         }
-    //         else
-    //         {
-    //             result.exprs[require] = {}; // mark require as unresolved
-    //         }
-    //     }
-    // }
 };
 
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::DocumentUri& uri)
@@ -150,16 +60,31 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
     if (!sourceModule)
         return {};
 
+    // Find all the `local X = require(...)` calls
+    FindRequiresVisitor visitor;
+    visitor.visit(sourceModule->root);
 
-    // Get all the requires from the module
-    // DocumentSymbolsVisitor visitor{textDocument};
-    // visitor.visit(sourceModule->root);
-    // return visitor.symbols;
-    return {};
+    if (visitor.requiresMap.empty())
+        return {};
 
+    std::vector<lsp::TextEdit> edits;
+    // We firstly delete all the previous requires, as they will be added later
+    for (const auto& [_, stat] : visitor.requiresMap)
+        edits.emplace_back(lsp::TextEdit{{{stat->location.begin.line, 0}, {stat->location.begin.line + 1, 0}}, ""});
 
-    // Sort the requires appropriately
-    // Here: we need to special case for Roblox requires, as the ordering for these requires matter
+    // We find the first line to add these services to, and then add them in sorted order
+    // TODO: need to special case Roblox requires and handle dependent local variables
+    lsp::Range insertLocation{{visitor.firstRequireDefinitionLine.value(), 0}, {visitor.firstRequireDefinitionLine.value(), 0}};
+    for (const auto& [serviceName, stat] : visitor.requiresMap)
+    {
+        // We need to rewrite the statement as we expected it
+        auto importText = Luau::toString(stat) + "\n";
+        edits.emplace_back(lsp::TextEdit{insertLocation, importText});
+    }
+
+    lsp::WorkspaceEdit workspaceEdit;
+    workspaceEdit.changes.emplace(uri.toString(), edits);
+    return workspaceEdit;
 }
 
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
@@ -180,6 +105,9 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::Docum
     // Find all the `local X = game:GetService("Service")` calls
     FindServicesVisitor visitor;
     visitor.visit(sourceModule->root);
+
+    if (visitor.serviceLineMap.empty())
+        return {};
 
     std::vector<lsp::TextEdit> edits;
     // We firstly delete all the previous services, as they will be added later
