@@ -80,6 +80,7 @@ If you use Luau in a different environment and are interested in using the langu
 - [x] Semantic Tokens
 - [x] Inlay Hints
 - [x] Documentation Comments ([Moonwave Style](https://github.com/evaera/moonwave) - supporting both `--- comment` and `--[=[ comment ]=]`, but must be next to statement)
+- [x] Code Actions
 - [ ] Call Hierarchy
 - [ ] Workspace Symbols
 
@@ -88,7 +89,6 @@ They can be investigated at a later time:
 
 - [ ] Go To Declaration (do not apply)
 - [ ] Go To Implementation (do not apply)
-- [ ] Code Actions (not necessary - could potentially add "fixers" for lints)
 - [ ] Code Lens (not necessary)
 - [ ] Document Highlight (not necessary - editor highlighting is sufficient)
 - [ ] Folding Range (not necessary - editor folding is sufficient)
