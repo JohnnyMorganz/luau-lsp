@@ -184,21 +184,12 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         organiseImportsAction.title = "Sort requires";
         organiseImportsAction.kind = lsp::CodeActionKind::SourceOrganizeImports;
 
-        // // If we can resolve, defer computation till later
+        // TODO: support resolving and defer computation till later
         // if (client->capabilities.textDocument && client->capabilities.textDocument->codeAction &&
         //     client->capabilities.textDocument->codeAction->resolveSupport &&
         //     contains(client->capabilities.textDocument->codeAction->resolveSupport->properties, "edit"))
-        // {
-        //     // Store relevant information in the data field
-        // }
-        // else
-        // {
-        //     // Compute the workspace edit now
-        // }
         organiseImportsAction.edit = computeOrganiseRequiresEdit(params.textDocument.uri);
-
         result.emplace_back(organiseImportsAction);
-
 
         // If in Roblox mode, add a sort services code action
         if (config.types.roblox)
@@ -218,10 +209,4 @@ lsp::CodeActionResult LanguageServer::codeAction(const lsp::CodeActionParams& pa
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->codeAction(params);
-}
-
-lsp::CodeAction LanguageServer::codeActionResolve(const lsp::CodeAction& params)
-{
-    // TODO
-    return params;
 }
