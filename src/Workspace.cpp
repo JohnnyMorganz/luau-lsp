@@ -1,7 +1,7 @@
 #include "LSP/Workspace.hpp"
 
 #include <iostream>
-#include <limits.h>
+#include <climits>
 
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
@@ -144,7 +144,7 @@ void WorkspaceFolder::initialize()
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
     }
 
-    for (auto definitionsFile : client->definitionsFiles)
+    for (const auto& definitionsFile : client->definitionsFiles)
     {
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
         auto result = types::registerDefinitions(frontend.typeChecker, definitionsFile);

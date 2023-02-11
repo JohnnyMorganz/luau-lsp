@@ -166,9 +166,9 @@ int startLanguageServer(int argc, char** argv)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    std::vector<std::filesystem::path> definitionsFiles;
-    std::vector<std::filesystem::path> documentationFiles;
-    std::optional<std::filesystem::path> baseLuaurc;
+    std::vector<std::filesystem::path> definitionsFiles{};
+    std::vector<std::filesystem::path> documentationFiles{};
+    std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
 
     for (int i = 1; i < argc; i++)
     {
@@ -273,14 +273,14 @@ int main(int argc, char** argv)
 
     // Handle enabling FFlags
     bool enableAllFlags = true;
-    std::unordered_map<std::string, std::string> fastFlags;
+    std::unordered_map<std::string, std::string> fastFlags{};
     for (int i = 1; i < argc; i++)
     {
         if (strncmp(argv[i], "--flag:", 7) == 0)
         {
             std::string flagSet = std::string(argv[i] + 7);
 
-            size_t eqIndex = flagSet.find("=");
+            size_t eqIndex = flagSet.find('=');
             if (eqIndex == std::string::npos)
             {
                 std::cerr << "Bad flag option, missing =: " << flagSet << "\n";

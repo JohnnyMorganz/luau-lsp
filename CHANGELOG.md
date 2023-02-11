@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.563
+
+### Fixed
+
+- Further fixes to document symbols failing due to malformed ranges
+
+## [1.16.4] - 2023-02-10
+
+### Fixed
+
+- Fixed document symbols crashing due to internal malformed data
+
 ## [1.16.3] - 2023-02-09
 
 ### Fixed

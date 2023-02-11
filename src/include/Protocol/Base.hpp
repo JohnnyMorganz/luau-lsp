@@ -16,7 +16,7 @@ using json = nlohmann::json;
         json val = nlohmann_json_t.v1; \
         if (val != nullptr) \
             nlohmann_json_j[#v1] = val; \
-    };
+    }; // NOLINT(...)
 #define NLOHMANN_DEFINE_OPTIONAL(Type, ...) \
     inline void to_json(nlohmann::json& nlohmann_json_j, const Type& nlohmann_json_t) \
     { \
@@ -26,7 +26,7 @@ using json = nlohmann::json;
     { \
         Type nlohmann_json_default_obj; \
         NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_FROM_WITH_DEFAULT, __VA_ARGS__)) \
-    }
+    } // NOLINT(...)
 
 // Define serializer/deserializer for std::optional and std::variant
 namespace nlohmann
@@ -197,11 +197,11 @@ struct ProgressParams
     /**
      * The progress token provided by the client or server.
      */
-    ProgressToken token;
+    ProgressToken token = "";
     /**
      * The progress data.
      */
-    LSPAny value;
+    LSPAny value = nullptr;
 };
 NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value);
 

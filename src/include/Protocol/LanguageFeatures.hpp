@@ -14,7 +14,7 @@ struct HoverParams : TextDocumentPositionParams
 struct Hover
 {
     MarkupContent contents;
-    std::optional<Range> range;
+    std::optional<Range> range = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(Hover, contents, range);
 
@@ -61,7 +61,7 @@ struct DocumentLink
 {
     Range range;
     DocumentUri target; // TODO: potentially optional if we resolve later
-    std::optional<std::string> tooltip;
+    std::optional<std::string> tooltip = std::nullopt;
     // std::optional<json> data; // for resolver
 };
 NLOHMANN_DEFINE_OPTIONAL(DocumentLink, range, target, tooltip);
@@ -110,13 +110,13 @@ enum struct SymbolTag
 struct DocumentSymbol
 {
     std::string name;
-    std::optional<std::string> detail;
+    std::optional<std::string> detail = std::nullopt;
     SymbolKind kind = SymbolKind::Array;
-    std::vector<SymbolTag> tags;
+    std::vector<SymbolTag> tags{};
     bool deprecated = false;
     Range range;
     Range selectionRange;
-    std::vector<DocumentSymbol> children;
+    std::vector<DocumentSymbol> children{};
 };
 NLOHMANN_DEFINE_OPTIONAL(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
 
@@ -137,9 +137,9 @@ struct InlayHint
 {
     Position position;
     std::string label;
-    std::optional<InlayHintKind> kind;
-    std::vector<TextEdit> textEdits;
-    std::optional<std::string> tooltip;
+    std::optional<InlayHintKind> kind = std::nullopt;
+    std::vector<TextEdit> textEdits{};
+    std::optional<std::string> tooltip = std::nullopt;
     bool paddingLeft = false;
     bool paddingRight = false;
 };
@@ -230,13 +230,13 @@ struct ColorPresentation
      * this presentation for the color. When `falsy` the
      * [label](#ColorPresentation.label) is used.
      */
-    std::optional<TextEdit> textEdit;
+    std::optional<TextEdit> textEdit = std::nullopt;
     /**
      * An optional array of additional [text edits](#TextEdit) that are applied
      * when selecting this color presentation. Edits must not overlap with the
      * main [edit](#ColorPresentation.textEdit) nor with themselves.
      */
-    std::optional<std::vector<TextEdit>> additionalTextEdits;
+    std::optional<std::vector<TextEdit>> additionalTextEdits = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ColorPresentation, label, textEdit, additionalTextEdits);
 

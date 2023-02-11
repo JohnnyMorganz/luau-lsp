@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include "Protocol/Structures.hpp"
 
 namespace lsp
 {
@@ -62,43 +63,43 @@ enum struct CompletionTriggerKind
 struct CompletionContext
 {
     CompletionTriggerKind triggerKind = CompletionTriggerKind::Invoked;
-    std::optional<std::string> triggerCharacter;
+    std::optional<std::string> triggerCharacter = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionContext, triggerKind, triggerCharacter);
 
 struct CompletionParams : TextDocumentPositionParams
 {
-    std::optional<CompletionContext> context;
+    std::optional<CompletionContext> context = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionParams, textDocument, position, context);
 
 struct CompletionItemLabelDetails
 {
-    std::optional<std::string> detail;
-    std::optional<std::string> description;
+    std::optional<std::string> detail = std::nullopt;
+    std::optional<std::string> description = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemLabelDetails, detail, description);
 
 struct CompletionItem
 {
     std::string label;
-    std::optional<CompletionItemLabelDetails> labelDetails;
-    std::optional<CompletionItemKind> kind;
-    std::optional<std::vector<CompletionItemTag>> tags;
-    std::optional<std::string> detail;
-    std::optional<MarkupContent> documentation;
+    std::optional<CompletionItemLabelDetails> labelDetails = std::nullopt;
+    std::optional<CompletionItemKind> kind = std::nullopt;
+    std::optional<std::vector<CompletionItemTag>> tags = std::nullopt;
+    std::optional<std::string> detail = std::nullopt;
+    std::optional<MarkupContent> documentation = std::nullopt;
     bool deprecated = false;
     bool preselect = false;
-    std::optional<std::string> sortText;
-    std::optional<std::string> filterText;
-    std::optional<std::string> insertText;
+    std::optional<std::string> sortText = std::nullopt;
+    std::optional<std::string> filterText = std::nullopt;
+    std::optional<std::string> insertText = std::nullopt;
     InsertTextFormat insertTextFormat = InsertTextFormat::PlainText;
-    std::optional<InsertTextMode> insertTextMode;
-    std::optional<TextEdit> textEdit;
-    std::optional<std::string> textEditString;
-    std::vector<TextEdit> additionalTextEdits;
-    std::optional<std::vector<std::string>> commitCharacters;
-    std::optional<Command> command;
+    std::optional<InsertTextMode> insertTextMode = std::nullopt;
+    std::optional<TextEdit> textEdit = std::nullopt;
+    std::optional<std::string> textEditString = std::nullopt;
+    std::vector<TextEdit> additionalTextEdits{};
+    std::optional<std::vector<std::string>> commitCharacters = std::nullopt;
+    std::optional<Command> command = std::nullopt;
     // TODO: data?
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItem, label, labelDetails, kind, tags, detail, documentation, deprecated, preselect, sortText, filterText,

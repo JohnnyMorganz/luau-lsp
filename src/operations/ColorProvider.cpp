@@ -27,7 +27,7 @@ static RGB hsvToRgb(double h, double s, double v)
     else
         h = h / 60.0;
 
-    size_t i = (size_t)std::floor(h);
+    auto i = (size_t)std::floor(h);
     double f = h - i;
     double p = v * (1.0 - s);
     double q = v * (1.0 - f * s);
@@ -82,7 +82,7 @@ static RGB hexToRgb(std::string hex)
 struct DocumentColorVisitor : public Luau::AstVisitor
 {
     const TextDocument* textDocument;
-    std::vector<lsp::ColorInformation> colors;
+    std::vector<lsp::ColorInformation> colors{};
 
     explicit DocumentColorVisitor(const TextDocument* textDocument)
         : textDocument(textDocument)
@@ -99,7 +99,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                 {
                     if (index->index == "new" || index->index == "fromRGB" || index->index == "fromHSV" || index->index == "fromHex")
                     {
-                        double color[3]{0.0, 0.0, 0.0};
+                        std::array<double, 3> color = {0.0, 0.0, 0.0};
 
                         if (index->index == "new")
                         {
@@ -109,7 +109,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                 if (index >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color[index] = number->value;
+                                    color.at(index) = number->value;
                                 else
                                     return true; // Don't create as we can't parse the full colour
                                 index++;
@@ -123,7 +123,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                 if (index >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color[index] = number->value / 255.0;
+                                    color.at(index) = number->value / 255.0;
                                 else
                                     return true; // Don't create as we can't parse the full colour
                                 index++;
@@ -137,7 +137,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                 if (index >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color[index] = number->value;
+                                    color.at(index) = number->value;
                                 else
                                     return true; // Don't create as we can't parse the full colour
                                 index++;

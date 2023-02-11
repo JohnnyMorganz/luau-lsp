@@ -211,7 +211,7 @@ std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Lu
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
-    if (Luau::AstExprConstantString* expr = node->as<Luau::AstExprConstantString>())
+    if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
         std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
         std::string requiredString(expr->value.data, expr->value.size);
@@ -227,7 +227,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         // URI-ify the file path so that its normalised (in particular, the drive letter)
         return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
     }
-    else if (Luau::AstExprGlobal* g = node->as<Luau::AstExprGlobal>())
+    else if (auto* g = node->as<Luau::AstExprGlobal>())
     {
         if (g->name == "game")
             return Luau::ModuleInfo{"game"};
@@ -240,7 +240,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             }
         }
     }
-    else if (Luau::AstExprIndexName* i = node->as<Luau::AstExprIndexName>())
+    else if (auto* i = node->as<Luau::AstExprIndexName>())
     {
         if (context)
         {
@@ -255,17 +255,17 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             return Luau::ModuleInfo{mapContext(context->name) + '/' + i->index.value, context->optional};
         }
     }
-    else if (Luau::AstExprIndexExpr* i_expr = node->as<Luau::AstExprIndexExpr>())
+    else if (auto* i_expr = node->as<Luau::AstExprIndexExpr>())
     {
-        if (Luau::AstExprConstantString* index = i_expr->index->as<Luau::AstExprConstantString>())
+        if (auto* index = i_expr->index->as<Luau::AstExprConstantString>())
         {
             if (context)
                 return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
         }
     }
-    else if (Luau::AstExprCall* call = node->as<Luau::AstExprCall>(); call && call->self && call->args.size >= 1 && context)
+    else if (auto* call = node->as<Luau::AstExprCall>(); call && call->self && call->args.size >= 1 && context)
     {
-        if (Luau::AstExprConstantString* index = call->args.data[0]->as<Luau::AstExprConstantString>())
+        if (auto* index = call->args.data[0]->as<Luau::AstExprConstantString>())
         {
             Luau::AstName func = call->func->as<Luau::AstExprIndexName>()->index;
 
@@ -345,7 +345,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
                 client->publishDiagnostics({configUri, std::nullopt, {diagnostic}});
             }
             else
-                configErrors.push_back({configPath, *error});
+                configErrors.emplace_back(std::pair{configPath, *error});
         }
         else
         {

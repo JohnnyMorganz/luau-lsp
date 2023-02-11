@@ -34,7 +34,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     if (ancestry.size() == 0)
         return std::nullopt;
 
-    Luau::AstExprCall* candidate = ancestry.back()->as<Luau::AstExprCall>();
+    auto* candidate = ancestry.back()->as<Luau::AstExprCall>();
     if (!candidate && ancestry.size() >= 2)
         candidate = ancestry.at(ancestry.size() - 2)->as<Luau::AstExprCall>();
 
@@ -62,7 +62,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
 
-    std::vector<lsp::SignatureInformation> signatures;
+    std::vector<lsp::SignatureInformation> signatures{};
 
     auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
     {
@@ -88,7 +88,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
                 printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
 
         // Create each parameter label
-        std::vector<lsp::ParameterInformation> parameters;
+        std::vector<lsp::ParameterInformation> parameters{};
         auto it = Luau::begin(ftv->argTypes);
         size_t idx = 0;
         size_t previousParamPos = 0;

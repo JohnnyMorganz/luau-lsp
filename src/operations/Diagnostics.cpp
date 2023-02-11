@@ -13,7 +13,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
     // TODO: should we apply a resultId and return an unchanged report if unchanged?
     lsp::DocumentDiagnosticReport report;
-    std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics;
+    std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics{};
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -91,7 +91,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     auto config = client->getConfiguration(rootUri);
 
     // Find a list of files to compute diagnostics for
-    std::vector<Uri> files;
+    std::vector<Uri> files{};
     for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath()), end; next != end; ++next)
     {
         if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))

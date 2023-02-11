@@ -11,4 +11,4 @@ struct SemanticToken
     lsp::SemanticTokenModifiers tokenModifiers;
 };
 
-std::vector<SemanticToken> getSemanticTokens(Luau::ModulePtr module, Luau::SourceModule* sourceModule);
+std::vector<SemanticToken> getSemanticTokens(const Luau::ModulePtr& module, Luau::SourceModule* sourceModule);

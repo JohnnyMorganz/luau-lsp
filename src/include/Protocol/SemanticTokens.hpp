@@ -134,8 +134,8 @@ constexpr SemanticTokenModifiers operator|(SemanticTokenModifiers a, SemanticTok
 
 struct SemanticTokensLegend
 {
-    std::vector<SemanticTokenTypes> tokenTypes;
-    std::vector<SemanticTokenModifiers> tokenModifiers;
+    std::vector<SemanticTokenTypes> tokenTypes{};
+    std::vector<SemanticTokenModifiers> tokenModifiers{};
 };
 NLOHMANN_DEFINE_OPTIONAL(SemanticTokensLegend, tokenTypes, tokenModifiers);
 
@@ -156,8 +156,8 @@ NLOHMANN_DEFINE_OPTIONAL(SemanticTokensParams, textDocument);
 
 struct SemanticTokens
 {
-    std::optional<std::string> resultId;
-    std::vector<size_t> data;
+    std::optional<std::string> resultId = std::nullopt;
+    std::vector<size_t> data{};
 };
 NLOHMANN_DEFINE_OPTIONAL(SemanticTokens, resultId, data);
 } // namespace lsp

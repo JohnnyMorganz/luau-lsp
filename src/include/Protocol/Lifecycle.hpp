@@ -44,7 +44,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Registration, id, method, regist
 
 struct RegistrationParams
 {
-    std::vector<Registration> registrations;
+    std::vector<Registration> registrations{};
 };
 NLOHMANN_DEFINE_OPTIONAL(RegistrationParams, registrations);
 
@@ -59,7 +59,7 @@ struct InitializeParams
         /**
          * The client's version as defined by the client.
          */
-        std::optional<std::string> version;
+        std::optional<std::string> version = std::nullopt;
     };
 
     /**
@@ -68,14 +68,14 @@ struct InitializeParams
      * process is not alive then the server should exit (see exit notification)
      * its process.
      */
-    std::optional<int> processId;
+    std::optional<int> processId = std::nullopt;
 
     /**
      * Information about the client
      *
      * @since 3.15.0
      */
-    std::optional<ClientInfo> clientInfo;
+    std::optional<ClientInfo> clientInfo = std::nullopt;
 
     /**
      * The locale the client is currently showing the user interface
@@ -87,7 +87,7 @@ struct InitializeParams
      *
      * @since 3.16.0
      */
-    std::optional<std::string> locale;
+    std::optional<std::string> locale = std::nullopt;
 
     // TODO: rootPath (deprecated?)
 
@@ -98,12 +98,12 @@ struct InitializeParams
      *
      * @deprecated in favour of `workspaceFolders`
      */
-    std::optional<DocumentUri> rootUri;
+    std::optional<DocumentUri> rootUri = std::nullopt;
 
     /**
      * User provided initialization options.
      */
-    std::optional<LSPAny> initializationOptions;
+    std::optional<LSPAny> initializationOptions = std::nullopt;
 
     /**
      * The capabilities provided by the client (editor or tool)
@@ -123,7 +123,7 @@ struct InitializeParams
      *
      * @since 3.6.0
      */
-    std::optional<std::vector<WorkspaceFolder>> workspaceFolders;
+    std::optional<std::vector<WorkspaceFolder>> workspaceFolders = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(InitializeParams::ClientInfo, name, version);
 NLOHMANN_DEFINE_OPTIONAL(InitializeParams, processId, clientInfo, locale, rootUri, initializationOptions, capabilities, trace, workspaceFolders);
@@ -134,11 +134,11 @@ struct InitializeResult
     struct ServerInfo
     {
         std::string name;
-        std::optional<std::string> version;
+        std::optional<std::string> version = std::nullopt;
     };
 
     ServerCapabilities capabilities;
-    std::optional<ServerInfo> serverInfo;
+    std::optional<ServerInfo> serverInfo = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(InitializeResult::ServerInfo, name, version);
 NLOHMANN_DEFINE_OPTIONAL(InitializeResult, capabilities, serverInfo);

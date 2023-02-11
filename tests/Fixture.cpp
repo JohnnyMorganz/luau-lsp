@@ -175,6 +175,7 @@ std::optional<Luau::TypeId> Fixture::getType(const std::string& name)
 {
     Luau::ModulePtr module = getMainModule();
     REQUIRE(module);
+    REQUIRE(module->hasModuleScope());
 
     return lookupName(module->getModuleScope(), name);
 }

@@ -9,7 +9,7 @@
 static size_t countLeadingZeros(unsigned char n)
 {
 #ifdef _MSC_VER
-    unsigned long rl;
+    unsigned long rl = 0;
     return _BitScanReverse(&rl, n) ? 31 - int(rl) - 24 : 8;
 #else
     return n == 0 ? 8 : __builtin_clz(n) - 24;
@@ -38,7 +38,7 @@ static bool iterateCodepoints(const std::string& U8, const CodepointsCallback& C
     // Astral codepoints are encoded as 4 bytes in UTF-8, starting with 11110xxx.
     for (size_t I = 0; I < U8.size();)
     {
-        unsigned char C = static_cast<unsigned char>(U8[I]);
+        auto C = static_cast<unsigned char>(U8[I]);
         if (LUAU_LIKELY(!(C & 0x80)))
         { // ASCII character.
             if (CB(1, 1))
@@ -155,7 +155,7 @@ size_t lspLength(const std::string& Code)
 
 static std::vector<size_t> computeLineOffsets(const std::string& content, bool isAtLineStart, size_t textOffset = 0)
 {
-    std::vector<size_t> result;
+    std::vector<size_t> result{};
     if (isAtLineStart)
         result = {textOffset};
 
@@ -264,7 +264,7 @@ Luau::Position TextDocument::convertPosition(const lsp::Position& position) cons
     auto nextLineOffset = position.line + 1 < lineOffsets.size() ? lineOffsets[position.line + 1] : _content.size();
 
     // position.character may be in UTF-16, so we need to convert as necessary
-    bool valid;
+    bool valid = true;
     std::string line = _content.substr(lineOffset, nextLineOffset - lineOffset);
     size_t byteInLine = measureUnits(line, static_cast<int>(position.character), positionEncoding(), valid);
 
