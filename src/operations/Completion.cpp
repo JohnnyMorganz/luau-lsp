@@ -22,7 +22,23 @@ static constexpr const char* Keywords = "7";
 } // namespace SortText
 
 static constexpr const char* COMMON_SERVICES[] = {
-    "Players", "ReplicatedStorage", "ServerStorage", "MessagingService", "TeleportService", "HttpService", "CollectionService", "DataStoreService"};
+    "Players",
+    "ReplicatedStorage",
+    "ServerStorage",
+    "MessagingService",
+    "TeleportService",
+    "HttpService",
+    "CollectionService",
+    "DataStoreService",
+    "ContextActionService",
+    "UserInputService",
+    "Teams",
+    "Chat",
+    "TextService",
+    "TextChatService",
+    "GamepadService",
+    "VoiceChatService",
+};
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
