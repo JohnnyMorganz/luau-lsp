@@ -70,6 +70,8 @@ private:
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
+    lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params);
+    lsp::CodeAction codeActionResolve(const lsp::CodeAction& codeAction);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
     std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
