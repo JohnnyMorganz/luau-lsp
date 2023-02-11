@@ -6,8 +6,8 @@
 
 struct FindRequiresVisitor : public Luau::AstVisitor
 {
-    std::optional<size_t> firstRequireDefinitionLine = std::nullopt;
-    std::map<std::string, Luau::AstStatLocal*> requiresMap{};
+    std::optional<size_t> previousRequireLine = std::nullopt;
+    std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
 
     bool visit(Luau::AstStatLocal* local) override
     {
@@ -22,13 +22,14 @@ struct FindRequiresVisitor : public Luau::AstVisitor
 
         auto line = localName->location.begin.line;
 
-        if (auto call = expr->as<Luau::AstExprCall>(); call && types::matchRequire(*call))
+        if (isRequire(expr))
         {
-            // TODO: need to track dependents of the require
+            // If the requires are too many lines away, treat it as a new group
+            if (previousRequireLine && line - previousRequireLine.value() > 1)
+                requiresMap.push_back({}); // Construct a new group
 
-            firstRequireDefinitionLine =
-                !firstRequireDefinitionLine.has_value() || firstRequireDefinitionLine.value() >= line ? line : firstRequireDefinitionLine.value();
-            requiresMap.emplace(std::string(localName->name.value), local);
+            requiresMap.back().emplace(std::string(localName->name.value), local);
+            previousRequireLine = line;
         }
 
         return false;
@@ -64,22 +65,46 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
     FindRequiresVisitor visitor;
     visitor.visit(sourceModule->root);
 
-    if (visitor.requiresMap.empty())
+    // Check if there are any requires
+    if (visitor.requiresMap.size() == 1 && visitor.requiresMap.back().empty())
         return {};
 
+    // Treat each require group individually
     std::vector<lsp::TextEdit> edits;
-    // We firstly delete all the previous requires, as they will be added later
-    for (const auto& [_, stat] : visitor.requiresMap)
-        edits.emplace_back(lsp::TextEdit{{{stat->location.begin.line, 0}, {stat->location.begin.line + 1, 0}}, ""});
-
-    // We find the first line to add these services to, and then add them in sorted order
-    // TODO: need to special case Roblox requires and handle dependent local variables
-    lsp::Range insertLocation{{visitor.firstRequireDefinitionLine.value(), 0}, {visitor.firstRequireDefinitionLine.value(), 0}};
-    for (const auto& [serviceName, stat] : visitor.requiresMap)
+    for (const auto& requireGroup : visitor.requiresMap)
     {
-        // We need to rewrite the statement as we expected it
-        auto importText = Luau::toString(stat) + "\n";
-        edits.emplace_back(lsp::TextEdit{insertLocation, importText});
+        if (requireGroup.empty())
+            continue;
+
+        // Find the first line of the group
+        size_t firstRequireLine = requireGroup.begin()->second->location.begin.line;
+        Luau::Location previousRequireLocation{{0, 0}, {0, 0}};
+        bool isSorted = true;
+        for (const auto& [_, stat] : requireGroup)
+        {
+            if (stat->location.begin < previousRequireLocation.begin)
+                isSorted = false;
+            previousRequireLocation = stat->location;
+            firstRequireLine = stat->location.begin.line < firstRequireLine ? stat->location.begin.line : firstRequireLine;
+        }
+
+        // Test to see that if all the requires are already sorted -> if they are, then just leave alone
+        // to prevent clogging the undo history stack
+        if (isSorted)
+            continue;
+
+        // We firstly delete all the previous requires, as they will be added later
+        for (const auto& [_, stat] : requireGroup)
+            edits.emplace_back(lsp::TextEdit{{{stat->location.begin.line, 0}, {stat->location.begin.line + 1, 0}}, ""});
+
+        // We find the first line to add these services to, and then add them in sorted order
+        lsp::Range insertLocation{{firstRequireLine, 0}, {firstRequireLine, 0}};
+        for (const auto& [serviceName, stat] : requireGroup)
+        {
+            // We need to rewrite the statement as we expected it
+            auto importText = Luau::toString(stat) + "\n";
+            edits.emplace_back(lsp::TextEdit{insertLocation, importText});
+        }
     }
 
     lsp::WorkspaceEdit workspaceEdit;
@@ -107,6 +132,22 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::Docum
     visitor.visit(sourceModule->root);
 
     if (visitor.serviceLineMap.empty())
+        return {};
+
+    // Test to see that if all the services are already sorted -> if they are, then just leave alone
+    // to prevent clogging the undo history stack
+    Luau::Location previousServiceLocation{{0, 0}, {0, 0}};
+    bool isSorted = true;
+    for (const auto& [_, stat] : visitor.serviceLineMap)
+    {
+        if (stat->location.begin < previousServiceLocation.begin)
+        {
+            isSorted = false;
+            break;
+        }
+        previousServiceLocation = stat->location;
+    }
+    if (isSorted)
         return {};
 
     std::vector<lsp::TextEdit> edits;

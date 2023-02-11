@@ -1057,3 +1057,18 @@ bool isGetService(const Luau::AstExpr* expr)
 
     return false;
 }
+
+bool isRequire(const Luau::AstExpr* expr)
+{
+    if (auto call = expr->as<Luau::AstExprCall>())
+    {
+        if (auto funcAsGlobal = call->func->as<Luau::AstExprGlobal>(); funcAsGlobal && funcAsGlobal->name == "require")
+            return true;
+    }
+    else if (auto assertion = expr->as<Luau::AstExprTypeAssertion>())
+    {
+        return isRequire(assertion->expr);
+    }
+
+    return false;
+}

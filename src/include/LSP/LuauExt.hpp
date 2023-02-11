@@ -116,6 +116,7 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDo
 lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const TextDocument* textDocument = nullptr);
 
 bool isGetService(const Luau::AstExpr* expr);
+bool isRequire(const Luau::AstExpr* expr);
 
 struct FindServicesVisitor : public Luau::AstVisitor
 {
