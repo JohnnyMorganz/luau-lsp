@@ -29,6 +29,13 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
         lsp::DocumentSymbol symbol;
         symbol.name = local->name.value;
         symbol.kind = lsp::SymbolKind::Variable;
+
+        // If selection range falls outside of enclosing range, then expand the enclosing range
+        if (local->location.begin < enclosingRange.begin)
+            enclosingRange.begin = local->location.begin;
+        if (local->location.end > enclosingRange.end)
+            enclosingRange.end = local->location.end;
+
         symbol.range = {textDocument->convertPosition(enclosingRange.begin), textDocument->convertPosition(enclosingRange.end)};
         symbol.selectionRange = {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)};
         addSymbol(symbol);
