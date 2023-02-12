@@ -11,15 +11,50 @@
 /// Note that sort text is lexicographically
 namespace SortText
 {
-static constexpr const char* TableProperties = "0";
-static constexpr const char* CorrectTypeKind = "1";
-static constexpr const char* CorrectFunctionResult = "2";
-static constexpr const char* Default = "3";
-static constexpr const char* WrongIndexType = "4";
-static constexpr const char* MetatableIndex = "5";
-static constexpr const char* AutoImports = "6";
-static constexpr const char* Keywords = "7";
+static constexpr const char* PrioritisedSuggestion = "0";
+static constexpr const char* TableProperties = "1";
+static constexpr const char* CorrectTypeKind = "2";
+static constexpr const char* CorrectFunctionResult = "3";
+static constexpr const char* Default = "4";
+static constexpr const char* WrongIndexType = "5";
+static constexpr const char* MetatableIndex = "6";
+static constexpr const char* AutoImports = "7";
+static constexpr const char* Keywords = "8";
 } // namespace SortText
+
+static constexpr const char* COMMON_SERVICES[] = {
+    "Players",
+    "ReplicatedStorage",
+    "ServerStorage",
+    "MessagingService",
+    "TeleportService",
+    "HttpService",
+    "CollectionService",
+    "DataStoreService",
+    "ContextActionService",
+    "UserInputService",
+    "Teams",
+    "Chat",
+    "TextService",
+    "TextChatService",
+    "GamepadService",
+    "VoiceChatService",
+};
+
+static constexpr const char* COMMON_INSTANCE_PROPERTIES[] = {
+    "Parent",
+    "Name",
+    // Methods
+    "FindFirstChild",
+    "IsA",
+    "Destroy",
+    "GetAttribute",
+    "GetChildren",
+    "GetDescendants",
+    "WaitForChild",
+    "Clone",
+    "SetAttribute",
+};
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
@@ -310,6 +345,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
+    bool isGetService = false;
+
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
         [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
@@ -413,6 +450,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     return std::nullopt;
                 }
             }
+            else if (tag == "PrioritiseCommonServices")
+            {
+                // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
+                // highlight this so that we can prioritise common services first in the list
+                isGetService = true;
+            }
 
             return std::nullopt;
         });
@@ -438,18 +481,34 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (documentationString)
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
+        if (entry.wrongIndexType)
+            item.sortText = SortText::WrongIndexType;
         if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
             item.sortText = SortText::CorrectTypeKind;
         else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
             item.sortText = SortText::CorrectFunctionResult;
         else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
             item.sortText = SortText::MetatableIndex;
-        else if (entry.wrongIndexType)
-            item.sortText = SortText::WrongIndexType;
         else if (entry.kind == Luau::AutocompleteEntryKind::Property)
             item.sortText = SortText::TableProperties;
         else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
             item.sortText = SortText::Keywords;
+
+        // If its a `game:GetSerivce("$1")` call, then prioritise common services
+        if (isGetService)
+        {
+            if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
+                item.sortText = SortText::PrioritisedSuggestion;
+        }
+        // If calling a property on an Instance, then prioritise these properties
+        if (auto instanceType = frontend.typeCheckerForAutocomplete.globalScope->lookupType("Instance");
+            instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+            Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+        {
+            if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
+                it != std::end(COMMON_INSTANCE_PROPERTIES))
+                item.sortText = SortText::PrioritisedSuggestion;
+        }
 
         switch (entry.kind)
         {

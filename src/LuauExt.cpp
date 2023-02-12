@@ -470,6 +470,13 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecke
                                 if (Luau::isPrim(*it, Luau::PrimitiveType::String))
                                     Luau::attachMagicFunction(part, magicFunctionInstanceNew);
 
+    // Mark `game:GetService()` with a tag so we can prioritise services when autocompleting
+    if (auto serviceProviderType = typeChecker.globalScope->lookupType("ServiceProvider"))
+        if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type))
+            // :GetService is an intersection of function types, so we assign a tag on the first intersection
+            if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type); itv && itv->parts.size() > 0)
+                Luau::attachTag(itv->parts[0], "PrioritiseCommonServices");
+
     // Move Enums over as imported type bindings
     std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes{};
     for (auto it = typeChecker.globalScope->exportedTypeBindings.begin(); it != typeChecker.globalScope->exportedTypeBindings.end();)
