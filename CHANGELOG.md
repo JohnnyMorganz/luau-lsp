@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.17.0] - 2023-02-12
+
 ### Added
 
 - Added two code actions: `Sort requires` and `Sort services` (services only enabled if `luau-lsp.types.roblox` == true).
