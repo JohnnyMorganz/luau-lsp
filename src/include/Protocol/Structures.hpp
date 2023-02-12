@@ -69,6 +69,14 @@ inline bool operator==(const Position& lhs, const Position& rhs)
 {
     return lhs.line == rhs.line && lhs.character == rhs.character;
 }
+inline bool operator<(const Position& lhs, const Position& rhs)
+{
+    return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.character < rhs.character);
+}
+inline bool operator>(const Position& lhs, const Position& rhs)
+{
+    return lhs.line > rhs.line || (lhs.line == rhs.line && lhs.character > rhs.character);
+}
 
 struct Range
 {
