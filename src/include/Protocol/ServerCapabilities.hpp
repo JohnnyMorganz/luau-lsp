@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Protocol/SemanticTokens.hpp"
+#include "Protocol/CodeAction.hpp"
 
 namespace lsp
 {
@@ -74,6 +75,25 @@ struct SemanticTokensOptions
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SemanticTokensOptions, legend, range, full);
 
+struct CodeActionOptions
+{
+    /**
+     * CodeActionKinds that this server may return.
+     *
+     * The list of kinds may be generic, such as `CodeActionKind.Refactor`,
+     * or the server may list out every specific kind they provide.
+     */
+    std::optional<std::vector<CodeActionKind>> codeActionKinds = std::nullopt;
+    /**
+     * The server provides support to resolve additional
+     * information for a code action.
+     *
+     * @since 3.16.0
+     */
+    bool resolveProvider = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(CodeActionOptions, codeActionKinds, resolveProvider);
+
 struct ServerCapabilities
 {
     PositionEncodingKind positionEncoding = PositionEncodingKind::UTF16;
@@ -87,6 +107,12 @@ struct ServerCapabilities
     bool implementationProvider = false;
     bool referencesProvider = false;
     bool documentSymbolProvider = false;
+    /**
+     * The server provides code actions. The `CodeActionOptions` return type is
+     * only valid if the client signals code action literal support via the
+     * property `textDocument.codeAction.codeActionLiteralSupport`.
+     */
+    std::optional<CodeActionOptions> codeActionProvider = std::nullopt;
     std::optional<DocumentLinkOptions> documentLinkProvider = std::nullopt;
     bool colorProvider = false;
     bool renameProvider = false;
@@ -97,5 +123,6 @@ struct ServerCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, semanticTokensProvider, workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, semanticTokensProvider,
+    workspace);
 } // namespace lsp

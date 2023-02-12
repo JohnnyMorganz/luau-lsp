@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added two code actions: `Sort requires` and `Sort services` (services only enabled if `luau-lsp.types.roblox` == true).
+  These actions will sort their respective groups alphabetically based on a variable name set.
+  You can also set these actions to automatically run on save by configuring:
+
+```json
+"editor.codeActionsOnSave": {
+    "source.organizeImports": true
+}
+```
+
 ### Changed
 
 - Sync to upstream Luau 0.563

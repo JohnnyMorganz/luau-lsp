@@ -6,6 +6,7 @@
 
 #include "nlohmann/json.hpp"
 #include "Protocol/Completion.hpp"
+#include "Protocol/CodeAction.hpp"
 
 namespace lsp
 {
@@ -208,6 +209,99 @@ struct CompletionClientCapabilities
 NLOHMANN_DEFINE_OPTIONAL(
     CompletionClientCapabilities, dynamicRegistration, completionItem, completionItemKind, contextSupport, insertTextMode, completionList);
 
+struct CodeActionClientCapabilities
+{
+    /**
+     * Whether code action supports dynamic registration.
+     */
+    bool dynamicRegistration = false;
+
+    struct CodeActionLiteralSupport
+    {
+        struct CodeActionKindLiteralSupport
+        {
+            /**
+             * The code action kind values the client supports. When this
+             * property exists the client also guarantees that it will
+             * handle values outside its set gracefully and falls back
+             * to a default value when unknown.
+             */
+            std::vector<CodeActionKind> valueSet;
+        };
+
+        /**
+         * The code action kind is supported with the following value
+         * set.
+         */
+        CodeActionKindLiteralSupport codeActionKind;
+    };
+
+    /**
+     * The client supports code action literals as a valid
+     * response of the `textDocument/codeAction` request.
+     *
+     * @since 3.8.0
+     */
+    std::optional<CodeActionLiteralSupport> codeActionLiteralSupport;
+
+
+    /**
+     * Whether code action supports the `isPreferred` property.
+     *
+     * @since 3.15.0
+     */
+    bool isPreferredSupport = false;
+
+    /**
+     * Whether code action supports the `disabled` property.
+     *
+     * @since 3.16.0
+     */
+    bool disabledSupport = false;
+
+    /**
+     * Whether code action supports the `data` property which is
+     * preserved between a `textDocument/codeAction` and a
+     * `codeAction/resolve` request.
+     *
+     * @since 3.16.0
+     */
+    bool dataSupport = false;
+
+
+    struct CodeActionResolveSupport
+    {
+        /**
+         * The properties that a client can resolve lazily.
+         */
+        std::vector<std::string> properties;
+    };
+
+    /**
+     * Whether the client supports resolving additional code action
+     * properties via a separate `codeAction/resolve` request.
+     *
+     * @since 3.16.0
+     */
+    std::optional<CodeActionResolveSupport> resolveSupport = std::nullopt;
+
+    /**
+     * Whether the client honors the change annotations in
+     * text edits and resource operations returned via the
+     * `CodeAction#edit` property by for example presenting
+     * the workspace edit in the user interface and asking
+     * for confirmation.
+     *
+     * @since 3.16.0
+     */
+    bool honorsChangeAnnotations = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport::CodeActionKindLiteralSupport, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport, codeActionKind);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionResolveSupport, properties);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities, dynamicRegistration, codeActionLiteralSupport, isPreferredSupport, disabledSupport,
+    dataSupport, resolveSupport, honorsChangeAnnotations);
+
 struct TextDocumentClientCapabilities
 {
     /**
@@ -216,8 +310,13 @@ struct TextDocumentClientCapabilities
     std::optional<CompletionClientCapabilities> completion = std::nullopt;
 
     std::optional<DiagnosticClientCapabilities> diagnostic = std::nullopt;
+
+    /**
+     * Capabilities specific to the `textDocument/codeAction` request.
+     */
+    std::optional<CodeActionClientCapabilities> codeAction = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic);
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, codeAction);
 
 struct DidChangeConfigurationClientCapabilities
 {

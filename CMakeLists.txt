@@ -33,6 +33,7 @@ target_sources(Luau.LanguageServer PRIVATE
     src/operations/Rename.cpp
     src/operations/InlayHints.cpp
     src/operations/SemanticTokens.cpp
+    src/operations/CodeAction.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE

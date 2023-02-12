@@ -87,6 +87,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.colorProvider = true;
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
+    // Code Action Provider
+    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
     // Inlay Hint Provider
@@ -164,6 +166,14 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     {
         response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
     }
+    else if (method == "textDocument/codeAction")
+    {
+        response = codeAction(REQUIRED_PARAMS(params, "textDocument/codeAction"));
+    }
+    // else if (method == "codeAction/resolve")
+    // {
+    //     response = codeActionResolve(REQUIRED_PARAMS(params, "codeAction/resolve"));
+    // }
     else if (method == "textDocument/semanticTokens/full")
     {
         response = semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));

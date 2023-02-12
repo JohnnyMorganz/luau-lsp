@@ -58,6 +58,8 @@ private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         std::vector<lsp::CompletionItem>& result);
+    lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
+    lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
@@ -68,6 +70,7 @@ public:
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
+    lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
 

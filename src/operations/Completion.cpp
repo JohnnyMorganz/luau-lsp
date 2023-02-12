@@ -159,57 +159,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     }
 }
 
-bool isGetService(const Luau::AstExpr* expr)
-{
-    if (auto call = expr->as<Luau::AstExprCall>())
-        if (auto index = call->func->as<Luau::AstExprIndexName>())
-            if (index->index == "GetService")
-                if (auto name = index->expr->as<Luau::AstExprGlobal>())
-                    if (name->name == "game")
-                        return true;
-
-    return false;
-}
-
-struct ImportLocationVisitor : public Luau::AstVisitor
-{
-    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::unordered_map<std::string, size_t> serviceLineMap{};
-
-    bool visit(Luau::AstStatLocal* local) override
-    {
-        if (local->vars.size != 1 || local->values.size != 1)
-            return false;
-
-        auto localName = local->vars.data[0];
-        auto expr = local->values.data[0];
-
-        if (!localName || !expr)
-            return false;
-
-        auto line = localName->location.begin.line;
-
-        if (isGetService(expr))
-        {
-            firstServiceDefinitionLine =
-                !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
-            serviceLineMap.emplace(std::string(localName->name.value), line);
-        }
-
-        return false;
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        for (Luau::AstStat* stat : block->body)
-        {
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
-
 /// Attempts to retrieve a list of service names by inspecting the global type definitions
 static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
 {
@@ -275,7 +224,7 @@ void WorkspaceFolder::suggestImports(
                 minimumLineNumber = hotComment.location.begin.line + 1U;
         }
 
-        ImportLocationVisitor visitor;
+        FindServicesVisitor visitor;
         visitor.visit(sourceModule->root);
 
         if (visitor.firstServiceDefinitionLine)
@@ -287,8 +236,9 @@ void WorkspaceFolder::suggestImports(
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
             bool isAlreadyDefined = false;
             size_t lineNumber = minimumLineNumber;
-            for (auto& [definedService, location] : visitor.serviceLineMap)
+            for (auto& [definedService, stat] : visitor.serviceLineMap)
             {
+                auto location = stat->location.begin.line;
                 if (definedService == service)
                 {
                     isAlreadyDefined = true;
