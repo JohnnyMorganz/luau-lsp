@@ -617,7 +617,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.labelDetails = {detail};
 
                 // If we had CursorAfter, then the function call would not have any arguments
-                if (canUseSnippets(client->capabilities) && config.completion.addParentheses && config.completion.fillCallArguments)
+                if (canUseSnippets(client->capabilities) && config.completion.addParentheses && config.completion.fillCallArguments &&
+                    entry.parens != Luau::ParenthesesRecommendation::None)
                 {
                     if (config.completion.addTabstopAfterParentheses)
                         parenthesesSnippet += "$0";

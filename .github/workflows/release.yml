@@ -64,6 +64,9 @@ jobs:
           - os: ubuntu-latest
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
+          - os: ubuntu-latest
+            artifact-name: luau-lsp-linux-arm64
+            code-target: [linux-arm64]
           - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
