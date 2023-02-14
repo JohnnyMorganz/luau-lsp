@@ -311,10 +311,10 @@ void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>
             else
             {
                 // Copy all unchanged lines after endline to the end of addedLineOffsets
-                if (offsets.size() >= endLine)
+                if (offsets.size() > endLine)
                     addedLineOffsets.insert(addedLineOffsets.end(), offsets.begin() + endLine + 1, offsets.end());
                 // Erase all points from offsets after startline
-                if (offsets.size() >= startLine)
+                if (offsets.size() > startLine)
                     offsets.erase(offsets.begin() + startLine + 1, offsets.end());
                 // Append addedLineOffsets to offsets
                 offsets.insert(offsets.end(), addedLineOffsets.begin(), addedLineOffsets.end());

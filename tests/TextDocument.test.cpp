@@ -647,4 +647,12 @@ TEST_CASE("Invalid update ranges")
     // assertValidLineNumbers(document);
 };
 
+TEST_CASE("Insert at the end of the file")
+{
+    auto lm = newDocument("foo\nbar");
+    lm.update({{lsp::Range{{2, 0}, {2, 0}}, "\nbaz"}}, 1);
+    CHECK_EQ(lm.getText(), "foo\nbar\nbaz");
+    assertValidLineNumbers(lm);
+};
+
 TEST_SUITE_END();
