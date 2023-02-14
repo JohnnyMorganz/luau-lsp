@@ -151,7 +151,8 @@ struct CodeActionContext
      *
      * @since 3.17.0
      */
-    std::optional<CodeActionTriggerKind> triggerKind = std::nullopt;
+    // TODO: this is technicall optional, but it causes build issues
+    CodeActionTriggerKind triggerKind = CodeActionTriggerKind::Invoked;
 };
 NLOHMANN_DEFINE_OPTIONAL(CodeActionContext, diagnostics, only, triggerKind);
 
