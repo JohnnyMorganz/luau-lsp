@@ -223,19 +223,19 @@ struct CodeAction
      *
      * @since 3.16.0
      */
-    std::optional<CodeActionDisabled> disabled;
+    std::optional<CodeActionDisabled> disabled = std::nullopt;
 
     /**
      * The workspace edit this code action performs.
      */
-    std::optional<WorkspaceEdit> edit;
+    std::optional<WorkspaceEdit> edit = std::nullopt;
 
     /**
      * A command this code action executes. If a code action
      * provides an edit and a command, first the edit is
      * executed and then the command.
      */
-    std::optional<Command> command;
+    std::optional<Command> command = std::nullopt;
 
     /**
      * A data entry field that is preserved on a code action between
@@ -243,7 +243,7 @@ struct CodeAction
      *
      * @since 3.16.0
      */
-    std::optional<LSPAny> data;
+    std::optional<LSPAny> data = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(CodeAction::CodeActionDisabled, reason);
 NLOHMANN_DEFINE_OPTIONAL(CodeAction, title, kind, diagnostics, isPreferred, disabled, edit, command, data);
