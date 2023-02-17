@@ -487,6 +487,15 @@ declare class EnumCatalogCategoryFilter_INTERNAL extends Enum
 	Premium: EnumCatalogCategoryFilter
 	Recommended: EnumCatalogCategoryFilter
 end
+declare class EnumCatalogSortAggregation extends EnumItem end
+declare class EnumCatalogSortAggregation_INTERNAL extends Enum
+	Past12Hours: EnumCatalogSortAggregation
+	PastDay: EnumCatalogSortAggregation
+	Past3Days: EnumCatalogSortAggregation
+	PastWeek: EnumCatalogSortAggregation
+	PastMonth: EnumCatalogSortAggregation
+	AllTime: EnumCatalogSortAggregation
+end
 declare class EnumCatalogSortType extends EnumItem end
 declare class EnumCatalogSortType_INTERNAL extends Enum
 	Relevance: EnumCatalogSortType
@@ -494,6 +503,7 @@ declare class EnumCatalogSortType_INTERNAL extends Enum
 	PriceLowToHigh: EnumCatalogSortType
 	MostFavorited: EnumCatalogSortType
 	RecentlyCreated: EnumCatalogSortType
+	Bestselling: EnumCatalogSortType
 end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
@@ -971,6 +981,8 @@ declare class EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum
 end
 declare class EnumExperienceAuthScope extends EnumItem end
 declare class EnumExperienceAuthScope_INTERNAL extends Enum
+	DefaultScope: EnumExperienceAuthScope
+	CreatorAssetsCreate: EnumExperienceAuthScope
 end
 declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
@@ -2129,8 +2141,8 @@ declare class EnumR15CollisionType_INTERNAL extends Enum
 end
 declare class EnumRaycastFilterType extends EnumItem end
 declare class EnumRaycastFilterType_INTERNAL extends Enum
-	Blacklist: EnumRaycastFilterType
-	Whitelist: EnumRaycastFilterType
+	Exclude: EnumRaycastFilterType
+	Include: EnumRaycastFilterType
 end
 declare class EnumRejectCharacterDeletions extends EnumItem end
 declare class EnumRejectCharacterDeletions_INTERNAL extends Enum
@@ -2271,6 +2283,12 @@ declare class EnumSafeAreaCompatibility_INTERNAL extends Enum
 	None: EnumSafeAreaCompatibility
 	FullscreenExtension: EnumSafeAreaCompatibility
 end
+declare class EnumSalesTypeFilter extends EnumItem end
+declare class EnumSalesTypeFilter_INTERNAL extends Enum
+	All: EnumSalesTypeFilter
+	Collectibles: EnumSalesTypeFilter
+	Premium: EnumSalesTypeFilter
+end
 declare class EnumSaveAvatarThumbnailCustomizationFailure extends EnumItem end
 declare class EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends Enum
 	BadThumbnailType: EnumSaveAvatarThumbnailCustomizationFailure
@@ -2309,6 +2327,13 @@ declare class EnumScaleType_INTERNAL extends Enum
 end
 declare class EnumScopeCheckResult extends EnumItem end
 declare class EnumScopeCheckResult_INTERNAL extends Enum
+	ConsentAccepted: EnumScopeCheckResult
+	InvalidScopes: EnumScopeCheckResult
+	Timeout: EnumScopeCheckResult
+	NoUserInput: EnumScopeCheckResult
+	BackendError: EnumScopeCheckResult
+	UnexpectedError: EnumScopeCheckResult
+	InvalidArgument: EnumScopeCheckResult
 end
 declare class EnumScreenInsets extends EnumItem end
 declare class EnumScreenInsets_INTERNAL extends Enum
@@ -3115,6 +3140,7 @@ type ENUM_LIST = {
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
 	CameraType: EnumCameraType_INTERNAL,
 	CatalogCategoryFilter: EnumCatalogCategoryFilter_INTERNAL,
+	CatalogSortAggregation: EnumCatalogSortAggregation_INTERNAL,
 	CatalogSortType: EnumCatalogSortType_INTERNAL,
 	CellBlock: EnumCellBlock_INTERNAL,
 	CellMaterial: EnumCellMaterial_INTERNAL,
@@ -3298,6 +3324,7 @@ type ENUM_LIST = {
 	RunContext: EnumRunContext_INTERNAL,
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior_INTERNAL,
 	SafeAreaCompatibility: EnumSafeAreaCompatibility_INTERNAL,
+	SalesTypeFilter: EnumSalesTypeFilter_INTERNAL,
 	SaveAvatarThumbnailCustomizationFailure: EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL,
 	SaveFilter: EnumSaveFilter_INTERNAL,
 	SavedQualitySetting: EnumSavedQualitySetting_INTERNAL,
@@ -3958,6 +3985,8 @@ end
 
 declare class AssetImportService extends Instance
 	function PickFileWithPrompt(self): string
+	function PickMultipleFilesWithPrompt(self): { any }
+	function StartSessionWithPath(self, filePath: string): AssetImportSession
 	function StartSessionWithPrompt(self): AssetImportSession
 end
 
@@ -7291,6 +7320,12 @@ declare class ParticleEmitter extends Instance
 	function FastForward(self, numFrames: number): nil
 end
 
+declare class PatchMapping extends Instance
+	FlattenTree: boolean
+	PatchId: string
+	TargetPath: string
+end
+
 declare class Path extends Instance
 	Blocked: RBXScriptSignal<number>
 	Status: EnumPathStatus
@@ -7817,7 +7852,6 @@ declare class ReflectionMetadataClass extends ReflectionMetadataItem
 	ExplorerImageIndex: number
 	ExplorerOrder: number
 	Insertable: boolean
-	InsertableService: boolean
 	PreferredParent: string
 end
 
@@ -7948,6 +7982,11 @@ declare class RunService extends Instance
 end
 
 declare class RuntimeScriptService extends Instance
+end
+
+declare class SafetyService extends Instance
+	ScreenshotContentReady: RBXScriptSignal<number, Content>
+	function TakeScreenshot(self, screenshotOptions: { [any]: any }): number
 end
 
 declare class ScreenshotHud extends Instance
@@ -8214,6 +8253,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "RtMessagingService"): RtMessagingService
 	function GetService(self, service: "RunService"): RunService
 	function GetService(self, service: "RuntimeScriptService"): RuntimeScriptService
+	function GetService(self, service: "SafetyService"): SafetyService
 	function GetService(self, service: "ScriptChangeService"): ScriptChangeService
 	function GetService(self, service: "ScriptCloneWatcher"): ScriptCloneWatcher
 	function GetService(self, service: "ScriptCloneWatcherHelper"): ScriptCloneWatcherHelper
@@ -8248,6 +8288,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StudioService"): StudioService
 	function GetService(self, service: "TaskScheduler"): TaskScheduler
 	function GetService(self, service: "TeamCreateData"): TeamCreateData
+	function GetService(self, service: "TeamCreatePublishService"): TeamCreatePublishService
 	function GetService(self, service: "TeamCreateService"): TeamCreateService
 	function GetService(self, service: "Teams"): Teams
 	function GetService(self, service: "TeleportService"): TeleportService
@@ -8443,9 +8484,6 @@ declare class SoundEffect extends Instance
 	Priority: number
 end
 
-declare class AssetSoundEffect extends SoundEffect
-end
-
 declare class ChorusSoundEffect extends SoundEffect
 	Depth: number
 	Mix: number
@@ -8462,6 +8500,9 @@ declare class CompressorSoundEffect extends SoundEffect
 end
 
 declare class CustomSoundEffect extends SoundEffect
+end
+
+declare class AssetSoundEffect extends CustomSoundEffect
 end
 
 declare class ChannelSelectorSoundEffect extends CustomSoundEffect
@@ -8820,6 +8861,9 @@ declare class Team extends Instance
 end
 
 declare class TeamCreateData extends Instance
+end
+
+declare class TeamCreatePublishService extends Instance
 end
 
 declare class TeamCreateService extends Instance
@@ -9351,6 +9395,7 @@ declare class UserInputService extends Instance
 	MouseBehavior: EnumMouseBehavior
 	MouseDeltaSensitivity: number
 	MouseEnabled: boolean
+	MouseIcon: Content
 	MouseIconEnabled: boolean
 	NavBarSize: Vector2
 	OnScreenKeyboardAnimationDuration: number
