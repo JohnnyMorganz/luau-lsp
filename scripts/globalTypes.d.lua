@@ -5902,14 +5902,13 @@ declare class SelectionSphere extends PVAdornment
 end
 
 declare class PartAdornment extends GuiBase3d
-	Adornee: BasePart
+	Adornee: BasePart?
 end
 
 declare class HandlesBase extends PartAdornment
 end
 
 declare class ArcHandles extends HandlesBase
-	Adornee: BasePart?
 	Axes: Axes
 	MouseButton1Down: RBXScriptSignal<EnumAxis>
 	MouseButton1Up: RBXScriptSignal<EnumAxis>
@@ -5919,7 +5918,6 @@ declare class ArcHandles extends HandlesBase
 end
 
 declare class Handles extends HandlesBase
-	Adornee: BasePart?
 	Faces: Faces
 	MouseButton1Down: RBXScriptSignal<EnumNormalId>
 	MouseButton1Up: RBXScriptSignal<EnumNormalId>
