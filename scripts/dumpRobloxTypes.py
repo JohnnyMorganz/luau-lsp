@@ -195,8 +195,7 @@ IGNORED_MEMBERS = {
         "UpdateAsync",
     ],
     "Highlight": ["Adornee"],
-    "Handles": ["Adornee"],
-    "ArcHandles": ["Adornee"]
+    "PartAdornment": ["Adornee"]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -410,8 +409,7 @@ EXTRA_MEMBERS = {
     ],
     # The Adornee property is optional
     "Highlight": ["Adornee: BasePart?"],
-    "Handles": ["Adornee: BasePart?"],
-    "ArcHandles": ["Adornee: BasePart?"]
+    "PartAdornment": ["Adornee: BasePart?"]
 }
 
 # Hardcoded types
