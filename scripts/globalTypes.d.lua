@@ -5909,6 +5909,7 @@ declare class HandlesBase extends PartAdornment
 end
 
 declare class ArcHandles extends HandlesBase
+	Adornee: BasePart?
 	Axes: Axes
 	MouseButton1Down: RBXScriptSignal<EnumAxis>
 	MouseButton1Up: RBXScriptSignal<EnumAxis>
