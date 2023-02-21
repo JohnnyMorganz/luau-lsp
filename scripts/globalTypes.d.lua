@@ -5918,6 +5918,7 @@ declare class ArcHandles extends HandlesBase
 end
 
 declare class Handles extends HandlesBase
+	Adornee: BasePart?
 	Faces: Faces
 	MouseButton1Down: RBXScriptSignal<EnumNormalId>
 	MouseButton1Up: RBXScriptSignal<EnumNormalId>
@@ -6041,7 +6042,7 @@ declare class HiddenSurfaceRemovalAsset extends Instance
 end
 
 declare class Highlight extends Instance
-	Adornee: Instance?
+	Adornee: BasePart?
 	DepthMode: EnumHighlightDepthMode
 	Enabled: boolean
 	FillColor: Color3
