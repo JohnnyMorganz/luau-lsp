@@ -5902,7 +5902,7 @@ declare class SelectionSphere extends PVAdornment
 end
 
 declare class PartAdornment extends GuiBase3d
-	Adornee: BasePart
+	Adornee: BasePart?
 end
 
 declare class HandlesBase extends PartAdornment
@@ -6041,7 +6041,7 @@ declare class HiddenSurfaceRemovalAsset extends Instance
 end
 
 declare class Highlight extends Instance
-	Adornee: Instance?
+	Adornee: BasePart?
 	DepthMode: EnumHighlightDepthMode
 	Enabled: boolean
 	FillColor: Color3

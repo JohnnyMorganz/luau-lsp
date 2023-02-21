@@ -195,6 +195,7 @@ IGNORED_MEMBERS = {
         "UpdateAsync",
     ],
     "Highlight": ["Adornee"],
+    "PartAdornment": ["Adornee"]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -407,7 +408,8 @@ EXTRA_MEMBERS = {
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
     ],
     # The Adornee property is optional
-    "Highlight": ["Adornee: Instance?"],
+    "Highlight": ["Adornee: BasePart?"],
+    "PartAdornment": ["Adornee: BasePart?"]
 }
 
 # Hardcoded types
