@@ -408,7 +408,7 @@ EXTRA_MEMBERS = {
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
     ],
     # The Adornee property is optional
-    "Highlight": ["Adornee: BasePart?"],
+    "Highlight": ["Adornee: Instance?"],
     "PartAdornment": ["Adornee: BasePart?"]
 }
 
@@ -422,6 +422,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type SharedTable = any
 
 declare class Enum
     function GetEnumItems(self): { any }
