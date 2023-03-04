@@ -70,8 +70,14 @@ static bool reportError(
 {
     auto* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
     std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
-    std::string humanReadableName = fileResolver->getHumanReadableModuleName(error.moduleName);
     auto path = fileResolver->resolveToRealPath(error.moduleName);
+
+    // For consistency, we want to map the error.moduleName to a relative path (if it is a real path)
+    Luau::ModuleName errorFriendlyName = error.moduleName;
+    if (!fileResolver->isVirtualPath(error.moduleName))
+        errorFriendlyName = std::filesystem::proximate(*path, rootUriPath).generic_string();
+
+    std::string humanReadableName = fileResolver->getHumanReadableModuleName(errorFriendlyName);
 
     if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns))
         return false;
@@ -90,16 +96,18 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat format, bool annotate, std::vector<std::string>& ignoreGlobPatterns)
+static bool analyzeFile(
+    Luau::Frontend& frontend, const std::filesystem::path& path, ReportFormat format, bool annotate, std::vector<std::string>& ignoreGlobPatterns)
 {
     Luau::CheckResult cr;
+    Luau::ModuleName name = path.generic_string();
 
     if (frontend.isDirty(name))
         cr = frontend.check(name);
 
     if (!frontend.getSourceModule(name))
     {
-        fprintf(stderr, "Error opening %s\n", name);
+        std::cerr << "Error opening " << name << "\n";
         return false;
     }
 
@@ -109,7 +117,9 @@ static bool analyzeFile(Luau::Frontend& frontend, const char* name, ReportFormat
 
     Luau::LintResult lr = frontend.lint(name);
 
-    std::string humanReadableName = frontend.fileResolver->getHumanReadableModuleName(name);
+    // For the human readable module name, we use a relative version
+    auto errorFriendlyName = std::filesystem::proximate(path).generic_string();
+    std::string humanReadableName = frontend.fileResolver->getHumanReadableModuleName(errorFriendlyName);
     for (auto& error : lr.errors)
         reportWarning(format, humanReadableName.c_str(), error);
     for (auto& warning : lr.warnings)
@@ -168,6 +178,11 @@ int startAnalyze(int argc, char** argv)
         else
         {
             auto path = std::filesystem::path(argv[i]);
+
+            // If the path is not absolute, then we want to construct it into an absolute path
+            // by appending it to the current working directory
+            path = std::filesystem::absolute(path);
+
             if (path != "-" && !std::filesystem::exists(path))
             {
                 std::cerr << "Cannot get " << path << ": path does not exist\n";
@@ -293,7 +308,7 @@ int startAnalyze(int argc, char** argv)
     int failed = 0;
 
     for (const std::filesystem::path& path : files)
-        failed += !analyzeFile(frontend, path.relative_path().generic_string().c_str(), format, annotate, ignoreGlobPatterns);
+        failed += !analyzeFile(frontend, path, format, annotate, ignoreGlobPatterns);
 
     if (!fileResolver.configErrors.empty())
     {

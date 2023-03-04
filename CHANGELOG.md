@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Don't autocomplete another set of parentheses on a function call if they already exist
+- Fix `.luaurc` in current working directory not taken into account when calling `luau-lsp analyze`
 
 ## [1.17.0] - 2023-02-12
 
