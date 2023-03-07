@@ -57,7 +57,7 @@ public:
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-        std::vector<lsp::CompletionItem>& result);
+        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
 

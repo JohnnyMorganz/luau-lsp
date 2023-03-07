@@ -10,6 +10,8 @@
 
 std::optional<std::string> getParentPath(const std::string& path);
 std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName);
+size_t pathDistance(const std::string& path1, const std::string& path2);
+std::string convertToScriptPath(const std::string& path);
 std::string codeBlock(const std::string& language, const std::string& code);
 std::optional<std::string> readFile(const std::filesystem::path& filePath);
 void trim_start(std::string& str);

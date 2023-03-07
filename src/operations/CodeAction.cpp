@@ -4,48 +4,6 @@
 #include "LSP/LuauExt.hpp"
 #include "Luau/Transpiler.h"
 
-struct FindRequiresVisitor : public Luau::AstVisitor
-{
-    std::optional<size_t> previousRequireLine = std::nullopt;
-    std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
-
-    bool visit(Luau::AstStatLocal* local) override
-    {
-        if (local->vars.size != 1 || local->values.size != 1)
-            return false;
-
-        auto localName = local->vars.data[0];
-        auto expr = local->values.data[0];
-
-        if (!localName || !expr)
-            return false;
-
-        auto line = localName->location.begin.line;
-
-        if (isRequire(expr))
-        {
-            // If the requires are too many lines away, treat it as a new group
-            if (previousRequireLine && line - previousRequireLine.value() > 1)
-                requiresMap.push_back({}); // Construct a new group
-
-            requiresMap.back().emplace(std::string(localName->name.value), local);
-            previousRequireLine = line;
-        }
-
-        return false;
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        for (Luau::AstStat* stat : block->body)
-        {
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
-
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::DocumentUri& uri)
 {
     auto moduleName = fileResolver.getModuleName(uri);

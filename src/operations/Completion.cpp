@@ -199,73 +199,169 @@ static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
     return services;
 }
 
+static lsp::CompletionItem createSuggestService(const std::string& service, size_t lineNumber)
+{
+    auto importText = "local " + service + " = game:GetService(\"" + service + "\")\n";
+
+    lsp::CompletionItem item;
+    item.label = service;
+    item.kind = lsp::CompletionItemKind::Class;
+    item.detail = "Auto-import";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", importText)};
+    item.insertText = service;
+    item.sortText = SortText::AutoImports;
+
+    lsp::Position placement{lineNumber, 0};
+    item.additionalTextEdits.emplace_back(lsp::TextEdit{{placement, placement}, importText});
+
+    return item;
+}
+
+static lsp::CompletionItem createSuggestRequire(const std::string& name, const std::string& require, size_t lineNumber, size_t distance)
+{
+    auto importText = "local " + name + " = require(" + require + ")\n";
+
+    lsp::CompletionItem item;
+    item.label = name;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = require + " Auto-import";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", importText)};
+    item.insertText = name;
+    item.sortText = SortText::AutoImports + std::to_string(distance);
+
+    lsp::Position placement{lineNumber, 0};
+    item.additionalTextEdits.emplace_back(lsp::TextEdit{{placement, placement}, importText});
+
+    return item;
+}
+
+static size_t getLengthEqual(const std::string& a, const std::string& b)
+{
+    size_t i = 0;
+    for (; i < a.size() && i < b.size(); ++i)
+    {
+        if (a[i] != b[i])
+            break;
+    }
+    return i;
+}
+
+static std::string optimiseAbsoluteRequire(const std::string& path, const FindServicesVisitor& visitor) {
+    // If the path starts with game/ReplicatedStorage/... and we have the ReplicatedStorage service
+    // then we can optimise the require to be ReplicatedStorage/...
+
+    if (Luau::startsWith(path, "game/")) {
+        auto parts = Luau::split(path, '/');
+        if (parts.size() > 2) {
+            auto service = std::string(parts[1]);
+            if (visitor.serviceLineMap.find(std::string(service)) != visitor.serviceLineMap.end()) {
+                return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
+            }
+        }
+    }
+    
+    return path;
+}
+
 void WorkspaceFolder::suggestImports(
-    const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config, std::vector<lsp::CompletionItem>& result)
+    const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config, const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
         return;
 
+    auto scope = Luau::findScopeAtPosition(*module, position);
+    if (!scope)
+        return;
+
+    // Place after any hot comments
+    size_t minimumLineNumber = 0;
+    for (const auto& hotComment : sourceModule->hotcomments)
+    {
+        if (!hotComment.header)
+            continue;
+        if (hotComment.location.begin.line >= minimumLineNumber)
+            minimumLineNumber = hotComment.location.begin.line + 1U;
+    }
+
+
+    FindServicesVisitor serviceVisitor;
+    serviceVisitor.visit(sourceModule->root);
+
     // If in roblox mode - suggest services
     if (config.types.roblox)
     {
-        auto scope = Luau::findScopeAtPosition(*module, position);
-        if (!scope)
-            return;
-
-        // Place after any hot comments and TODO: already imported services
-        size_t minimumLineNumber = 0;
-        for (const auto& hotComment : sourceModule->hotcomments)
-        {
-            if (!hotComment.header)
-                continue;
-            if (hotComment.location.begin.line >= minimumLineNumber)
-                minimumLineNumber = hotComment.location.begin.line + 1U;
-        }
-
-        FindServicesVisitor visitor;
-        visitor.visit(sourceModule->root);
-
-        if (visitor.firstServiceDefinitionLine)
-            minimumLineNumber = *visitor.firstServiceDefinitionLine > minimumLineNumber ? *visitor.firstServiceDefinitionLine : minimumLineNumber;
+        if (serviceVisitor.firstServiceDefinitionLine)
+            minimumLineNumber = *serviceVisitor.firstServiceDefinitionLine > minimumLineNumber ? *serviceVisitor.firstServiceDefinitionLine : minimumLineNumber;
 
         auto services = getServiceNames(frontend.typeCheckerForAutocomplete.globalScope);
+        size_t lineNumber = minimumLineNumber;
         for (auto& service : services)
         {
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
-            bool isAlreadyDefined = false;
-            size_t lineNumber = minimumLineNumber;
-            for (auto& [definedService, stat] : visitor.serviceLineMap)
+            if (serviceVisitor.serviceLineMap.find(service) != serviceVisitor.serviceLineMap.end())
+                continue;
+
+            lineNumber = minimumLineNumber;
+            for (auto& [definedService, stat] : serviceVisitor.serviceLineMap)
             {
                 auto location = stat->location.begin.line;
-                if (definedService == service)
-                {
-                    isAlreadyDefined = true;
-                    break;
-                }
-
                 if (definedService < service && location >= lineNumber)
                     lineNumber = location + 1;
             }
 
-            if (isAlreadyDefined)
+            result.emplace_back(createSuggestService(service, lineNumber));
+        }
+
+        minimumLineNumber = lineNumber;
+    }
+
+    {
+        FindRequiresVisitor visitor;
+        visitor.visit(sourceModule->root);
+
+        for (auto& [path, node] : fileResolver.virtualPathsToSourceNodes)
+        {
+            auto name = node->name;
+            replaceAll(name, " ", "_");
+
+            if (path == moduleName || node->className != "ModuleScript" || visitor.contains(name))
+                continue;
+            auto scriptFilePath = node->getScriptFilePath();
+            if (auto scriptFilePath = fileResolver.getRealPathFromSourceNode(node); scriptFilePath && isIgnoredFile(*scriptFilePath, config))
                 continue;
 
-            auto importText = "local " + service + " = game:GetService(\"" + service + "\")\n";
+            std::string requirePath;
+            auto distance = pathDistance(path, moduleName);
+            if (distance == 0)
+                requirePath = "./" + name;
+            else if (distance <= config.completion.maxRequirePathDistance)
+                requirePath = std::filesystem::relative(path, moduleName).string();
+            else
+                requirePath = optimiseAbsoluteRequire(path, serviceVisitor);
+            
+            requirePath = convertToScriptPath(requirePath);
 
-            lsp::CompletionItem item;
-            item.label = service;
-            item.kind = lsp::CompletionItemKind::Class;
-            item.detail = "Auto-import";
-            item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", importText)};
-            item.insertText = service;
-            item.sortText = SortText::AutoImports;
+            size_t lineNumber = minimumLineNumber;
+            size_t bestLength = 0;
+            for (auto& group : visitor.requiresMap) {
+                for (auto& [require, stat] : group)
+                {
+                    auto line = stat->location.begin.line;
 
-            lsp::Position placement{lineNumber, 0};
-            item.additionalTextEdits.emplace_back(lsp::TextEdit{{placement, placement}, importText});
+                    // HACK: We read the text of the require argument to sort the lines
+                    auto location = stat->values.data[0]->as<Luau::AstExprCall>()->args.data[0]->location;
+                    auto range = lsp::Range{ { location.begin.line, location.begin.column }, { location.end.line, location.end.column } };
+                    auto argText = textDocument.getText(range);
+                    auto length = getLengthEqual(argText, requirePath);
+                    
+                    if (length > bestLength && line >= lineNumber)
+                        lineNumber = line + 1;
+                }
+            }
 
-            result.emplace_back(item);
+            result.emplace_back(createSuggestRequire(name, requirePath, lineNumber, distance));
         }
     }
 }
@@ -661,7 +757,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (config.completion.suggestImports &&
         (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
     {
-        suggestImports(moduleName, position, config, items);
+        suggestImports(moduleName, position, config, *textDocument, items);
     }
 
     return items;

@@ -90,10 +90,12 @@ struct ClientCompletionConfiguration
     bool addTabstopAfterParentheses = true;
     /// If parentheses are added, fill call arguments with parameter names
     bool fillCallArguments = true;
+    /// The max 'path distance' before an auto-import require is relative
+    size_t maxRequirePathDistance = 4;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionConfiguration, enabled, suggestImports, addParentheses, addTabstopAfterParentheses, fillCallArguments);
+    ClientCompletionConfiguration, enabled, suggestImports, addParentheses, addTabstopAfterParentheses, fillCallArguments, maxRequirePathDistance);
 
 struct ClientSignatureHelpConfiguration
 {
