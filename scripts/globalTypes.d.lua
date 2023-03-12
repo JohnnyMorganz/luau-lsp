@@ -3599,6 +3599,7 @@ declare class OverlapParams
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
 	MaxParts: number
+	RespectCanCollide: boolean
 end
 
 declare class PhysicalProperties
