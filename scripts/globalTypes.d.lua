@@ -6426,8 +6426,8 @@ declare class JointInstance extends Instance
 	C0: CFrame
 	C1: CFrame
 	Enabled: boolean
-	Part0: BasePart
-	Part1: BasePart
+	Part0: BasePart?
+	Part1: BasePart?
 end
 
 declare class DynamicRotate extends JointInstance
