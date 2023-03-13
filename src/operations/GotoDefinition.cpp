@@ -4,8 +4,6 @@
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
-LUAU_FASTFLAG(SupportTypeAliasGoToDeclaration)
-
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
     lsp::DefinitionResult result{};
@@ -126,37 +124,32 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
         if (reference->prefix)
         {
-            if (FFlag::SupportTypeAliasGoToDeclaration)
+            if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
             {
-                if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
-                {
-                    auto fileName = fileResolver.resolveToRealPath(*importedName);
-                    if (!fileName)
-                        return result;
-                    uri = Uri::file(*fileName);
+                auto fileName = fileResolver.resolveToRealPath(*importedName);
+                if (!fileName)
+                    return result;
+                uri = Uri::file(*fileName);
 
-                    // TODO: fix "forAutocomplete"
-                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
-                        importedModule && importedModule->hasModuleScope())
-                        scope = importedModule->getModuleScope();
-                    else
-                        return result;
-
-                    referenceTextDocument = fileResolver.getTextDocumentFromModuleName(*importedName);
-                    if (!referenceTextDocument)
-                    {
-                        // Open a temporary text document so we can perform operations on it
-                        if (auto source = fileResolver.readSource(*importedName))
-                        {
-                            tempDocument = true;
-                            referenceTextDocument = new TextDocument{uri, "luau", 0, source->source};
-                        }
-                        else
-                            return result;
-                    }
-                }
+                // TODO: fix "forAutocomplete"
+                if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
+                    importedModule && importedModule->hasModuleScope())
+                    scope = importedModule->getModuleScope();
                 else
                     return result;
+
+                referenceTextDocument = fileResolver.getTextDocumentFromModuleName(*importedName);
+                if (!referenceTextDocument)
+                {
+                    // Open a temporary text document so we can perform operations on it
+                    if (auto source = fileResolver.readSource(*importedName))
+                    {
+                        tempDocument = true;
+                        referenceTextDocument = new TextDocument{uri, "luau", 0, source->source};
+                    }
+                    else
+                        return result;
+                }
             }
             else
                 return result;
@@ -221,13 +214,11 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             // TODO: we currently can't handle if its imported from a module
             if (reference->prefix)
             {
-                if (FFlag::SupportTypeAliasGoToDeclaration)
-                    if (auto importedName = scope->importedModules.find(reference->prefix.value().value);
-                        importedName != scope->importedModules.end())
-                        // TODO: fix "forAutocomplete"
-                        if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(importedName->second);
-                            importedModule && importedModule->hasModuleScope())
-                            scope = importedModule->getModuleScope();
+                if (auto importedName = scope->importedModules.find(reference->prefix.value().value); importedName != scope->importedModules.end())
+                    // TODO: fix "forAutocomplete"
+                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(importedName->second);
+                        importedModule && importedModule->hasModuleScope())
+                        scope = importedModule->getModuleScope();
                 return std::nullopt;
             }
 

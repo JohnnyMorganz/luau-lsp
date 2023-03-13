@@ -268,8 +268,8 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    Luau::registerBuiltinGlobals(frontend.typeChecker);
-    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend);
+    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete);
 
     for (auto& definitionsPath : definitionsPaths)
     {
@@ -279,7 +279,14 @@ int startAnalyze(int argc, char** argv)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend.typeChecker, definitionsPath);
+        auto definitionsContents = readFile(definitionsPath);
+        if (!definitionsContents)
+        {
+            fprintf(stderr, "Cannot load definitions file %s: failed to read\n", definitionsPath.generic_string().c_str());
+            return 1;
+        }
+
+        auto loadResult = types::registerDefinitions(frontend.typeChecker, frontend.globals, *definitionsContents);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");
@@ -301,9 +308,11 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    types::registerInstanceTypes(frontend.typeChecker, frontend.typeChecker.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
+    types::registerInstanceTypes(
+        frontend.typeChecker, frontend.globals, frontend.globals.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
-    Luau::freeze(frontend.typeChecker.globalTypes);
+    Luau::freeze(frontend.globals.globalTypes);
+    Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 
     int failed = 0;
 
