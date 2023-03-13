@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added support for changing `Color3` colors using the color picker
 
+### Changed
+
+- Sync to upstream Luau 0.567
+
 ## [1.17.1] - 2023-03-04
 
 ### Changed
