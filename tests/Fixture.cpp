@@ -189,9 +189,9 @@ Luau::TypeId Fixture::requireType(const std::string& name)
 
 Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source)
 {
-    Luau::unfreeze(workspace.frontend.typeChecker.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend.typeChecker, source);
-    Luau::freeze(workspace.frontend.typeChecker.globalTypes);
+    Luau::unfreeze(workspace.frontend.globals.globalTypes);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend.typeChecker, workspace.frontend.globals, source);
+    Luau::freeze(workspace.frontend.globals.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");
     return result;
