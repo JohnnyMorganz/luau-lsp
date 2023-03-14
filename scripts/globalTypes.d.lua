@@ -1869,6 +1869,11 @@ declare class EnumMoveState_INTERNAL extends Enum
 	Stopping: EnumMoveState
 	AirFree: EnumMoveState
 end
+declare class EnumMuteState extends EnumItem end
+declare class EnumMuteState_INTERNAL extends Enum
+	Unmuted: EnumMuteState
+	Muted: EnumMuteState
+end
 declare class EnumNameOcclusion extends EnumItem end
 declare class EnumNameOcclusion_INTERNAL extends Enum
 	OccludeAll: EnumNameOcclusion
@@ -2357,6 +2362,7 @@ declare class EnumScopeCheckResult_INTERNAL extends Enum
 	BackendError: EnumScopeCheckResult
 	UnexpectedError: EnumScopeCheckResult
 	InvalidArgument: EnumScopeCheckResult
+	ConsentDenied: EnumScopeCheckResult
 end
 declare class EnumScreenInsets extends EnumItem end
 declare class EnumScreenInsets_INTERNAL extends Enum
@@ -2938,6 +2944,10 @@ declare class EnumTrackerMode_INTERNAL extends Enum
 	Video: EnumTrackerMode
 	AudioVideo: EnumTrackerMode
 end
+declare class EnumTrackerPromptEvent extends EnumItem end
+declare class EnumTrackerPromptEvent_INTERNAL extends Enum
+	LODCameraRecommendDisable: EnumTrackerPromptEvent
+end
 declare class EnumTriStateBoolean extends EnumItem end
 declare class EnumTriStateBoolean_INTERNAL extends Enum
 	Unknown: EnumTriStateBoolean
@@ -3314,6 +3324,7 @@ type ENUM_LIST = {
 	ModifierKey: EnumModifierKey_INTERNAL,
 	MouseBehavior: EnumMouseBehavior_INTERNAL,
 	MoveState: EnumMoveState_INTERNAL,
+	MuteState: EnumMuteState_INTERNAL,
 	NameOcclusion: EnumNameOcclusion_INTERNAL,
 	NetworkOwnership: EnumNetworkOwnership_INTERNAL,
 	NormalId: EnumNormalId_INTERNAL,
@@ -3438,6 +3449,7 @@ type ENUM_LIST = {
 	TrackerLodFlagMode: EnumTrackerLodFlagMode_INTERNAL,
 	TrackerLodValueMode: EnumTrackerLodValueMode_INTERNAL,
 	TrackerMode: EnumTrackerMode_INTERNAL,
+	TrackerPromptEvent: EnumTrackerPromptEvent_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
@@ -3587,6 +3599,7 @@ declare class OverlapParams
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
 	MaxParts: number
+	RespectCanCollide: boolean
 end
 
 declare class PhysicalProperties
@@ -4012,6 +4025,7 @@ declare class Animator extends Instance
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
 	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
 	AnimationStreamTrackPlayed: RBXScriptSignal<AnimationStreamTrack>
+	EvaluationThrottled: boolean
 	PreferLodEnabled: boolean
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { AnimationTrack }
@@ -4046,7 +4060,8 @@ declare class AssetImportService extends Instance
 end
 
 declare class AssetImportSession extends Instance
-	UploadComplete: RBXScriptSignal<boolean, { [any]: any }>
+	UploadComplete: RBXScriptSignal<{ [any]: any }>
+	UploadCompleteDeprecated: RBXScriptSignal<boolean, { [any]: any }>
 	UploadProgress: RBXScriptSignal<number>
 	function Cancel(self): nil
 	function GetCurrentStatusTable(self): { [any]: any }
@@ -5260,6 +5275,7 @@ declare class FaceAnimatorService extends Instance
 	AudioAnimationEnabled: boolean
 	FlipHeadOrientation: boolean
 	TrackerError: RBXScriptSignal<EnumTrackerError>
+	TrackerPrompt: RBXScriptSignal<EnumTrackerPromptEvent>
 	VideoAnimationEnabled: boolean
 	function GetTrackerLodController(self): TrackerLodController
 	function Init(self, videoEnabled: boolean, audioEnabled: boolean): nil
@@ -5352,8 +5368,14 @@ declare class FacialAnimationStreamingService extends Instance
 	Enabled: boolean
 end
 
+declare class FacialAnimationStreamingServiceStats extends Instance
+	function Get(self, label: string): number
+	function GetWithPlayerId(self, label: string, playerId: number): number
+end
+
 declare class FacialAnimationStreamingServiceV2 extends Instance
 	ServiceState: number
+	function GetStats(self): FacialAnimationStreamingServiceStats
 	function IsAudioEnabled(self, mask: number): boolean
 	function IsPlaceEnabled(self, mask: number): boolean
 	function IsServerEnabled(self, mask: number): boolean
@@ -6349,8 +6371,10 @@ end
 declare class ImporterRootSettings extends ImporterBaseSettings
 	AddModelToInventory: boolean
 	Anchored: boolean
+	ExistingPackageId: string
 	FileDimensions: Vector3
 	ImportAsModelAsset: boolean
+	ImportAsPackage: boolean
 	InsertInWorkspace: boolean
 	InsertWithScenePosition: boolean
 	InvertNegativeFaces: boolean
@@ -6402,8 +6426,8 @@ declare class JointInstance extends Instance
 	C0: CFrame
 	C1: CFrame
 	Enabled: boolean
-	Part0: BasePart
-	Part1: BasePart
+	Part0: BasePart?
+	Part1: BasePart?
 end
 
 declare class DynamicRotate extends JointInstance
@@ -6721,6 +6745,15 @@ declare class MarketplaceService extends Instance
 	function SignalPromptSubscriptionPurchaseFinished(self, player: Instance, subscriptionId: number, wasPurchased: boolean): nil
 	function SignalServerLuaDialogClosed(self, value: boolean): nil
 	function UserOwnsGamePassAsync(self, userId: number, gamePassId: number): boolean
+end
+
+declare class MaterialGenerationService extends Instance
+	function StartSession(self): MaterialGenerationSession
+end
+
+declare class MaterialGenerationSession extends Instance
+	function GenerateImagesAsync(self, prompt: string, options: { [any]: any }): { any }
+	function GenerateMaterialAsync(self, imageId: string): { [any]: any }
 end
 
 declare class MaterialService extends Instance
@@ -7118,7 +7151,9 @@ declare class Terrain extends BasePart
 	function PasteRegion(self, region: TerrainRegion, corner: Vector3int16, pasteEmptyCells: boolean): nil
 	function ReadVoxels(self, region: Region3, resolution: number): any
 	function ReplaceMaterial(self, region: Region3, resolution: number, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
+	function ReplaceMaterialInTransform(self, cframe: CFrame, size: Vector3, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
 	function SetMaterialColor(self, material: EnumMaterial, value: Color3): nil
+	function SetMaterialInTransform(self, cframe: CFrame, size: Vector3, targetMaterial: EnumMaterial): nil
 	function WorldToCell(self, position: Vector3): Vector3
 	function WorldToCellPreferEmpty(self, position: Vector3): Vector3
 	function WorldToCellPreferSolid(self, position: Vector3): Vector3
@@ -7860,6 +7895,7 @@ declare class RbxAnalyticsService extends Instance
 	function DEPRECATED_TrackEvent(self, category: string, action: string, label: string, value: number?): nil
 	function DEPRECATED_TrackEventWithArgs(self, category: string, action: string, label: string, args: { [any]: any }, value: number?): nil
 	function GetClientId(self): string
+	function GetPlaySessionId(self): string
 	function GetSessionId(self): string
 	function ReleaseRBXEventStream(self, target: string): nil
 	function RemoveGlobalPointsField(self, key: string): nil
@@ -8178,6 +8214,7 @@ declare class Selection extends Instance
 	SelectionChanged: RBXScriptSignal<>
 	SelectionLineThickness: number
 	SelectionThickness: number
+	ShowBoundingBox: boolean
 	function Add(self, instancesToAdd: { Instance }): nil
 	function ClearTerrainSelectionHack(self): nil
 	function Get(self): { Instance }
@@ -8311,6 +8348,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "LuaWebService"): LuaWebService
 	function GetService(self, service: "LuauScriptAnalyzerService"): LuauScriptAnalyzerService
 	function GetService(self, service: "MarketplaceService"): MarketplaceService
+	function GetService(self, service: "MaterialGenerationService"): MaterialGenerationService
 	function GetService(self, service: "MaterialService"): MaterialService
 	function GetService(self, service: "MemStorageService"): MemStorageService
 	function GetService(self, service: "MemoryStoreService"): MemoryStoreService

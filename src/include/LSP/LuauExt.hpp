@@ -15,9 +15,9 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
 bool isMetamethod(const Luau::Name& name);
 
-void registerInstanceTypes(Luau::TypeChecker& typeChecker, Luau::TypeArena& arena, const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::string& definitions);
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, const std::filesystem::path& definitionsFile);
+void registerInstanceTypes(Luau::TypeChecker& typeChecker, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
+    const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, Luau::GlobalTypes& globals, const std::string& definitions);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 

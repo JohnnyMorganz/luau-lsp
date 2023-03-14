@@ -339,7 +339,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
 std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr& module, const Luau::SourceModule* sourceModule)
 {
     std::unordered_map<Luau::AstName, Luau::TypeId> builtinGlobals{};
-    fillBuiltinGlobals(builtinGlobals, *sourceModule->names, frontend.typeChecker.globalScope);
+    fillBuiltinGlobals(builtinGlobals, *sourceModule->names, frontend.globals.globalScope);
 
     SemanticTokensVisitor visitor{module, builtinGlobals};
     visitor.visit(sourceModule->root);

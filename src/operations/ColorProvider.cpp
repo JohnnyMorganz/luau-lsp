@@ -8,11 +8,19 @@
 
 #include <cmath>
 
+// https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
 struct RGB
 {
     unsigned char r = 0;
     unsigned char g = 0;
     unsigned char b = 0;
+};
+
+struct HSV
+{
+    double h = 0;
+    double s = 0;
+    double v = 0;
 };
 
 static RGB hsvToRgb(double h, double s, double v)
@@ -68,6 +76,52 @@ static RGB hsvToRgb(double h, double s, double v)
     }
 
     return {(unsigned char)(r * 255), (unsigned char)(g * 255), (unsigned char)(b * 255)};
+}
+
+static HSV rgbToHsv(RGB in)
+{
+    HSV out;
+    double min, max, delta;
+
+    min = in.r < in.g ? in.r : in.g;
+    min = min < in.b ? min : in.b;
+
+    max = in.r > in.g ? in.r : in.g;
+    max = max > in.b ? max : in.b;
+
+    out.v = max; // v
+    delta = max - min;
+    if (delta < 0.00001)
+    {
+        out.s = 0;
+        out.h = 0; // undefined, maybe nan?
+        return out;
+    }
+    if (max > 0.0)
+    {                          // NOTE: if Max is == 0, this divide would cause a crash
+        out.s = (delta / max); // s
+    }
+    else
+    {
+        // if max is 0, then r = g = b = 0
+        // s = 0, h is undefined
+        out.s = 0.0;
+        out.h = NAN; // its now undefined
+        return out;
+    }
+    if (in.r >= max)                   // > is bogus, just keeps compilor happy
+        out.h = (in.g - in.b) / delta; // between yellow & magenta
+    else if (in.g >= max)
+        out.h = 2.0 + (in.b - in.r) / delta; // between cyan & yellow
+    else
+        out.h = 4.0 + (in.r - in.g) / delta; // between magenta & cyan
+
+    out.h *= 60.0; // degrees
+
+    if (out.h < 0.0)
+        out.h += 360.0;
+
+    return out;
 }
 
 static RGB hexToRgb(std::string hex)
@@ -224,9 +278,33 @@ lsp::DocumentColorResult LanguageServer::documentColor(const lsp::DocumentColorP
 
 lsp::ColorPresentationResult WorkspaceFolder::colorPresentation(const lsp::ColorPresentationParams& params)
 {
-    // TODO: for now, we do not bother with color presentation (unsure on use cases)
-    // it may be worked on in future
-    return {};
+    // Create color presentations
+    lsp::ColorPresentationResult presentations;
+
+    // Add Color3.new
+    presentations.emplace_back(lsp::ColorPresentation{"Color3.new(" + std::to_string(params.color.red) + ", " + std::to_string(params.color.green) +
+                                                      ", " + std::to_string(params.color.blue) + ")"});
+
+    // Convert to RGB values
+    RGB rgb{(unsigned char)std::floor(params.color.red * 255), (unsigned char)std::floor(params.color.green * 255),
+        (unsigned char)std::floor(params.color.blue * 255)};
+
+    // Add Color3.fromRGB
+    presentations.emplace_back(
+        lsp::ColorPresentation{"Color3.fromRGB(" + std::to_string(rgb.r) + ", " + std::to_string(rgb.g) + ", " + std::to_string(rgb.b) + ")"});
+
+    // Add Color3.fromHSV
+    HSV hsv = rgbToHsv(rgb);
+    presentations.emplace_back(
+        lsp::ColorPresentation{"Color3.fromHSV(" + std::to_string(hsv.h) + ", " + std::to_string(hsv.s) + ", " + std::to_string(hsv.v) + ")"});
+
+    // Add Color3.fromHex
+    std::stringstream hexString;
+    hexString << "#";
+    hexString << std::hex << (rgb.r << 16 | rgb.g << 8 | rgb.b);
+    presentations.emplace_back(lsp::ColorPresentation{"Color3.fromHex(\"" + hexString.str() + "\")"});
+
+    return presentations;
 }
 
 lsp::ColorPresentationResult LanguageServer::colorPresentation(const lsp::ColorPresentationParams& params)

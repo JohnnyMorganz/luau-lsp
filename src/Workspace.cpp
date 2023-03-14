@@ -120,9 +120,10 @@ bool WorkspaceFolder::updateSourceMap()
         // Recreate instance types
         auto config = client->getConfiguration(rootUri);
         instanceTypes.clear();
+        types::registerInstanceTypes(frontend.typeChecker, frontend.globals, instanceTypes, fileResolver,
+            /* TODO - expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
         types::registerInstanceTypes(
-            frontend.typeChecker, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
-        types::registerInstanceTypes(frontend.typeCheckerForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
+            frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
         return true;
     }
@@ -134,10 +135,10 @@ bool WorkspaceFolder::updateSourceMap()
 
 void WorkspaceFolder::initialize()
 {
-    Luau::registerBuiltinGlobals(frontend.typeChecker);
-    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend);
+    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete);
 
-    Luau::attachTag(Luau::getGlobalBinding(frontend.typeCheckerForAutocomplete, "require"), "Require");
+    Luau::attachTag(Luau::getGlobalBinding(frontend.globalsForAutocomplete, "require"), "Require");
 
     if (client->definitionsFiles.empty())
     {
@@ -147,8 +148,17 @@ void WorkspaceFolder::initialize()
     for (const auto& definitionsFile : client->definitionsFiles)
     {
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
-        auto result = types::registerDefinitions(frontend.typeChecker, definitionsFile);
-        types::registerDefinitions(frontend.typeCheckerForAutocomplete, definitionsFile);
+
+        auto definitionsContents = readFile(definitionsFile);
+        if (!definitionsContents)
+        {
+            client->sendWindowMessage(lsp::MessageType::Error,
+                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+            continue;
+        }
+
+        auto result = types::registerDefinitions(frontend.typeChecker, frontend.globals, *definitionsContents);
+        types::registerDefinitions(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete, *definitionsContents);
 
         auto uri = Uri::file(definitionsFile);
 
@@ -174,8 +184,8 @@ void WorkspaceFolder::initialize()
             client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }
     }
-    Luau::freeze(frontend.typeChecker.globalTypes);
-    Luau::freeze(frontend.typeCheckerForAutocomplete.globalTypes);
+    Luau::freeze(frontend.globals.globalTypes);
+    Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 }
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)

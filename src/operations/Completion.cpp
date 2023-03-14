@@ -295,7 +295,7 @@ void WorkspaceFolder::suggestImports(
         if (serviceVisitor.firstServiceDefinitionLine)
             minimumLineNumber = *serviceVisitor.firstServiceDefinitionLine > minimumLineNumber ? *serviceVisitor.firstServiceDefinitionLine : minimumLineNumber;
 
-        auto services = getServiceNames(frontend.typeCheckerForAutocomplete.globalScope);
+        auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
         size_t lineNumber = minimumLineNumber;
         for (auto& service : services)
         {
@@ -400,12 +400,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         {
             if (tag == "ClassNames")
             {
-                if (auto instanceType = frontend.typeChecker.globalScope->lookupType("Instance"))
+                if (auto instanceType = frontend.globals.globalScope->lookupType("Instance"))
                 {
                     if (auto* ctv = Luau::get<Luau::ClassType>(instanceType->type))
                     {
                         Luau::AutocompleteEntryMap result;
-                        for (auto& [_, ty] : frontend.typeChecker.globalScope->exportedTypeBindings)
+                        for (auto& [_, ty] : frontend.globals.globalScope->exportedTypeBindings)
                         {
                             if (auto* c = Luau::get<Luau::ClassType>(ty.type))
                             {
@@ -445,8 +445,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             }
             else if (tag == "Enums")
             {
-                auto it = frontend.typeChecker.globalScope->importedTypeBindings.find("Enum");
-                if (it == frontend.typeChecker.globalScope->importedTypeBindings.end())
+                auto it = frontend.globals.globalScope->importedTypeBindings.find("Enum");
+                if (it == frontend.globals.globalScope->importedTypeBindings.end())
                     return std::nullopt;
 
                 Luau::AutocompleteEntryMap result;
@@ -547,7 +547,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.sortText = SortText::PrioritisedSuggestion;
         }
         // If calling a property on an Instance, then prioritise these properties
-        if (auto instanceType = frontend.typeCheckerForAutocomplete.globalScope->lookupType("Instance");
+        if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
         {
