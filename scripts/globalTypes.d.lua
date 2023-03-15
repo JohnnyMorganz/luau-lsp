@@ -2102,6 +2102,14 @@ declare class EnumProductPurchaseDecision_INTERNAL extends Enum
 	NotProcessedYet: EnumProductPurchaseDecision
 	PurchaseGranted: EnumProductPurchaseDecision
 end
+declare class EnumPromptPublishAssetResult extends EnumItem end
+declare class EnumPromptPublishAssetResult_INTERNAL extends Enum
+	Success: EnumPromptPublishAssetResult
+	PermissionDenied: EnumPromptPublishAssetResult
+	Timeout: EnumPromptPublishAssetResult
+	UploadFailed: EnumPromptPublishAssetResult
+	NoUserInput: EnumPromptPublishAssetResult
+end
 declare class EnumPropertyStatus extends EnumItem end
 declare class EnumPropertyStatus_INTERNAL extends Enum
 	Ok: EnumPropertyStatus
@@ -2416,6 +2424,11 @@ declare class EnumServiceVisibility_INTERNAL extends Enum
 	Always: EnumServiceVisibility
 	Off: EnumServiceVisibility
 	WithChildren: EnumServiceVisibility
+end
+declare class EnumSeverity extends EnumItem end
+declare class EnumSeverity_INTERNAL extends Enum
+	Error: EnumSeverity
+	Warning: EnumSeverity
 end
 declare class EnumSignalBehavior extends EnumItem end
 declare class EnumSignalBehavior_INTERNAL extends Enum
@@ -3357,6 +3370,7 @@ type ENUM_LIST = {
 	PrivilegeType: EnumPrivilegeType_INTERNAL,
 	ProductLocationRestriction: EnumProductLocationRestriction_INTERNAL,
 	ProductPurchaseDecision: EnumProductPurchaseDecision_INTERNAL,
+	PromptPublishAssetResult: EnumPromptPublishAssetResult_INTERNAL,
 	PropertyStatus: EnumPropertyStatus_INTERNAL,
 	ProximityPromptExclusivity: EnumProximityPromptExclusivity_INTERNAL,
 	ProximityPromptInputType: EnumProximityPromptInputType_INTERNAL,
@@ -3398,6 +3412,7 @@ type ENUM_LIST = {
 	SensorUpdateType: EnumSensorUpdateType_INTERNAL,
 	ServerAudioBehavior: EnumServerAudioBehavior_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
+	Severity: EnumSeverity_INTERNAL,
 	SignalBehavior: EnumSignalBehavior_INTERNAL,
 	SizeConstraint: EnumSizeConstraint_INTERNAL,
 	SortDirection: EnumSortDirection_INTERNAL,
@@ -3922,7 +3937,6 @@ end
 declare class AdPortal extends Instance
 	PortalInvalidReason: string
 	PortalStatus: EnumAdPortalStatus
-	PortalType: EnumAdPortalType
 	PortalVersion: number
 end
 
@@ -4117,12 +4131,14 @@ declare class AssetPatchSettings extends Instance
 end
 
 declare class AssetService extends Instance
+	OpenPublishResultModal: RBXScriptSignal<EnumPromptPublishAssetResult>
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
 	function GetBundleDetailsSync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
+	function PromptPublishAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
 	function SavePlaceAsync(self): nil
 end
 
@@ -4840,6 +4856,7 @@ declare class ContextActionService extends Instance
 	function BindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodesForActivation: any): nil
 	function BindCoreAction(self, actionName: string, functionToBind: ((...any) -> ...any), createTouchButton: boolean, inputTypes: any): nil
 	function BindCoreActionAtPriority(self, actionName: string, functionToBind: ((...any) -> ...any), createTouchButton: boolean, priorityLevel: number, inputTypes: any): nil
+	function BindCoreActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodesForActivation: any): nil
 	function CallFunction(self, actionName: string, state: EnumUserInputState, inputObject: Instance): any
 	function FireActionButtonFoundSignal(self, actionName: string, actionButton: Instance): nil
 	function GetAllBoundActionInfo(self): { [any]: any }
@@ -4856,6 +4873,7 @@ declare class ContextActionService extends Instance
 	function UnbindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodeForActivation: EnumKeyCode?): nil
 	function UnbindAllActions(self): nil
 	function UnbindCoreAction(self, actionName: string): nil
+	function UnbindCoreActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodeForActivation: EnumKeyCode?): nil
 end
 
 declare class Controller extends Instance
@@ -5882,6 +5900,7 @@ end
 
 declare class SelectionBox extends InstanceAdornment
 	LineThickness: number
+	StudioSelectionBox: boolean
 	SurfaceColor3: Color3
 	SurfaceTransparency: number
 end
@@ -6312,7 +6331,11 @@ end
 declare class ImageDataExperimental extends Instance
 	Size: Vector2
 	TemporaryId: Content
+	function Clear(self): nil
+	function DrawCircle(self, center: Vector2, radius: number, color: Color3, alpha: number): nil
 	function PopulateFromImageAsync(self, textureId: Content): nil
+	function Resize(self, newSize: Vector2): nil
+	function Rotate(self, degrees: number, resizeCanvas: boolean?): nil
 end
 
 declare class ImporterBaseSettings extends Instance
@@ -6393,6 +6416,7 @@ end
 declare class IncrementalPatchBuilder extends Instance
 	AddPathsToBundle: boolean
 	HighCompression: boolean
+	SerializePatch: boolean
 	ZstdCompression: boolean
 end
 
@@ -6413,6 +6437,7 @@ declare class InsertService extends Instance
 	function GetFreeDecals(self, searchText: string, pageNum: number): { any }
 	function GetFreeModels(self, searchText: string, pageNum: number): { any }
 	function GetLatestAssetVersionAsync(self, assetId: number): number
+	function GetLocalFileContents(self, contentId: string): string
 	function GetUserSets(self, userId: number): { any }
 	function LoadAsset(self, assetId: number): Instance
 	function LoadAssetVersion(self, assetVersionId: number): Instance
@@ -6748,12 +6773,15 @@ declare class MarketplaceService extends Instance
 end
 
 declare class MaterialGenerationService extends Instance
+	function GetAccountingBalanceAsync(self): number
+	function RefillAccountingBalanceAsync(self): number
 	function StartSession(self): MaterialGenerationSession
 end
 
 declare class MaterialGenerationSession extends Instance
-	function GenerateImagesAsync(self, prompt: string, options: { [any]: any }): { any }
-	function GenerateMaterialAsync(self, imageId: string): { [any]: any }
+	function GenerateImagesAsync(self, prompt: string, options: { [any]: any }): any
+	function GenerateMaterialMapsAsync(self, imageId: string): { [any]: any }
+	function UploadMaterialAsync(self, imageId: string): { [any]: any }
 end
 
 declare class MaterialService extends Instance
@@ -6841,6 +6869,11 @@ declare class MemoryStoreSortedMap extends Instance
 	function RemoveAsync(self, key: string): nil
 	function SetAsync(self, key: string, value: any, expiration: number): boolean
 	function UpdateAsync(self, key: string, transformFunction: ((...any) -> ...any), expiration: number): any
+end
+
+declare class MeshDataExperimental extends Instance
+	Size: Vector3
+	function PopulateFromMeshAsync(self, meshId: Content): nil
 end
 
 
@@ -8196,10 +8229,12 @@ declare class ScriptEditorService extends Instance
 	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
 	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
 	function DeregisterAutocompleteCallback(self, name: string): nil
+	function DeregisterScriptAnalysisCallback(self, name: string): nil
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
 	function GetScriptDocuments(self): { Instance }
 	function OpenScriptDocumentAsync(self, script: LuaSourceContainer): any
 	function RegisterAutocompleteCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
+	function RegisterScriptAnalysisCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
 end
 
 declare class ScriptRegistrationService extends Instance
@@ -8211,6 +8246,7 @@ end
 
 declare class Selection extends Instance
 	ActiveInstance: Instance
+	SelectionBoxThickness: number
 	SelectionChanged: RBXScriptSignal<>
 	SelectionLineThickness: number
 	SelectionThickness: number
@@ -9324,6 +9360,7 @@ declare class TweenService extends Instance
 end
 
 declare class UGCValidationService extends Instance
+	function CanLoadAsset(self, assetId: string): boolean
 	function FetchAssetWithFormat(self, url: Content, assetFormat: string): { Instance }
 	function GetMeshTriCount(self, meshId: string): number
 	function GetMeshTriCountSync(self, meshId: string): number
