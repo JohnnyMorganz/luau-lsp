@@ -44,15 +44,6 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     return std::nullopt;
 }
 
-size_t pathDistance(const std::string& path1, const std::string& path2)
-{
-    std::filesystem::path p1(path1);
-    std::filesystem::path p2(path2);
-
-    auto distance = std::filesystem::relative(p1, p2);
-    return std::distance(distance.begin(), distance.end()) - 1;
-}
-
 std::string convertToScriptPath(const std::string& path)
 {
     std::filesystem::path p(path);

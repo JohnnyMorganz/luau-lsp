@@ -309,12 +309,6 @@
           "default": true,
           "scope": "resource"
         },
-        "luau-lsp.completion.maxRequirePathDistance": {
-          "markdownDescription": "The max 'path distance' before an auto-import require is to be inserted relative",
-          "type": "number",
-          "default": 4,
-          "scope": "resource"
-        },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",
           "type": "boolean",
