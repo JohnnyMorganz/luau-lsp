@@ -3,6 +3,8 @@
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
 
+LUAU_FASTFLAG(LuauLintInTypecheck)
+
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
     if (!isConfigured)
@@ -67,7 +69,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
     // Report Lint Warnings
     // Lints only apply to the current file
-    Luau::LintResult lr = frontend.lint(moduleName);
+    Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(moduleName);
     for (auto& error : lr.errors)
     {
         auto diagnostic = createLintDiagnostic(error, textDocument);
@@ -141,7 +143,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         }
 
         // Report Lint Warnings
-        Luau::LintResult lr = frontend.lint(moduleName);
+        Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(moduleName);
         for (auto& error : lr.errors)
         {
             auto diagnostic = createLintDiagnostic(error, document);

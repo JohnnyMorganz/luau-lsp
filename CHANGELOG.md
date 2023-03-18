@@ -12,7 +12,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.567
+- Sync to upstream Luau 0.568.
+  In particular, this provide improvements to control flow analysis refinements. This allows the type checker to recognise type
+  options that are unreachable after a conditional/unconditional code block. e.g.:
+
+```lua
+local function x(x: string?)
+    if not x then return end
+
+    -- x is 'string' here
+end
+```
+
+To enable this feature, the FFlag `LuauTinyControlFlowAnalysis` must currently be enabled.
 
 ## [1.17.1] - 2023-03-04
 

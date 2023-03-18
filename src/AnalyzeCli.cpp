@@ -16,6 +16,7 @@
 #include <vector>
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
+LUAU_FASTFLAG(LuauLintInTypecheck)
 
 enum class ReportFormat
 {
@@ -115,7 +116,7 @@ static bool analyzeFile(
     for (auto& error : cr.errors)
         reportedErrors += reportError(frontend, format, error, ignoreGlobPatterns);
 
-    Luau::LintResult lr = frontend.lint(name);
+    Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(name);
 
     // For the human readable module name, we use a relative version
     auto errorFriendlyName = std::filesystem::proximate(path).generic_string();
@@ -235,6 +236,7 @@ int startAnalyze(int argc, char** argv)
     // Setup Frontend
     Luau::FrontendOptions frontendOptions;
     frontendOptions.retainFullTypeGraphs = annotate;
+    frontendOptions.runLintChecks = FFlag::LuauLintInTypecheck;
 
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
