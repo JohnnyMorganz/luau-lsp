@@ -26,6 +26,9 @@ end
 
 To enable this feature, the FFlag `LuauTinyControlFlowAnalysis` must currently be enabled.
 
+- The language server will only be enabled on "file" and "untitled" schemes. This means it will be disabled in diff mode
+  and live share. This is because we cannot yet provide sufficient information in these contexts.
+
 ## [1.17.1] - 2023-03-04
 
 ### Changed
