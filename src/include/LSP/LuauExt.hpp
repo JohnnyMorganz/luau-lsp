@@ -121,7 +121,20 @@ bool isRequire(const Luau::AstExpr* expr);
 struct FindServicesVisitor : public Luau::AstVisitor
 {
     std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
+    std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
     std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
+
+    size_t findBestLine(const std::string& serviceName, std::optional<size_t> minimumLineNumber = std::nullopt)
+    {
+        size_t lineNumber = minimumLineNumber.value_or(firstServiceDefinitionLine.value_or(0));
+        for (auto& [definedService, stat] : serviceLineMap)
+        {
+            auto location = stat->location.begin.line;
+            if (definedService < serviceName && location >= lineNumber)
+                lineNumber = location + 1;
+        }
+        return lineNumber;
+    }
 
     bool visit(Luau::AstStatLocal* local) override
     {
@@ -140,7 +153,65 @@ struct FindServicesVisitor : public Luau::AstVisitor
         {
             firstServiceDefinitionLine =
                 !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
+            lastServiceDefinitionLine =
+                !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= line ? line : lastServiceDefinitionLine.value();
             serviceLineMap.emplace(std::string(localName->name.value), local);
+        }
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
+struct FindRequiresVisitor : public Luau::AstVisitor
+{
+    std::optional<size_t> firstRequireLine = std::nullopt;
+    std::optional<size_t> previousRequireLine = std::nullopt;
+    std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
+
+    bool contains(const std::string& module)
+    {
+        for (auto& map : requiresMap) {
+            if (map.find(module) != map.end())
+                return true;
+        }
+        return false;
+    }
+
+    bool visit(Luau::AstStatLocal* local) override
+    {
+        if (local->vars.size != 1 || local->values.size != 1)
+            return false;
+
+        auto localName = local->vars.data[0];
+        auto expr = local->values.data[0];
+
+        if (!localName || !expr)
+            return false;
+
+        auto line = localName->location.begin.line;
+
+        if (isRequire(expr))
+        {
+            firstRequireLine =
+                !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
+
+
+            // If the requires are too many lines away, treat it as a new group
+            if (previousRequireLine && line - previousRequireLine.value() > 1)
+                requiresMap.push_back({}); // Construct a new group
+
+            requiresMap.back().emplace(std::string(localName->name.value), local);
+            previousRequireLine = line;
         }
 
         return false;

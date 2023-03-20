@@ -44,6 +44,34 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     return std::nullopt;
 }
 
+std::string convertToScriptPath(const std::string& path)
+{
+    std::filesystem::path p(path);
+    std::string output = "";
+    for (auto it = p.begin(); it != p.end(); ++it)
+    {
+        auto str = it->string();
+        if (str.find(" ") != std::string::npos)
+            output += "[\"" + str + "\"]";
+        else if (str == ".") {
+            if (it == p.begin())
+                output += "script";
+        }
+        else if (str == "..") {
+            if (it == p.begin())
+                output += "script.Parent";
+            else
+                output += ".Parent";
+        }
+        else {
+            if (it != p.begin()) output += ".";
+            output += str;
+        }
+    }
+    return output;
+}
+
+
 std::string codeBlock(const std::string& language, const std::string& code)
 {
     return "```" + language + "\n" + code + "\n" + "```";
