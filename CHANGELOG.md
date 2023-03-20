@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.18.0] - 2023-03-20
+
 ### Added
 
 - Added support for changing `Color3` colors using the color picker
