@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added support for changing `Color3` colors using the color picker
+- Added support for automatic require imports (currently only for Roblox mode). If you start typing the name of a module in your code, you can autocomplete the require statement automatically. This feature is enabled by setting `luau-lsp.completion.suggestImports`.
 
 ### Changed
 
