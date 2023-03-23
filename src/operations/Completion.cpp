@@ -207,7 +207,8 @@ static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::s
     return {range, importText};
 }
 
-static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber) {
+static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber)
+{
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
     auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
     return {range, importText};
@@ -256,12 +257,14 @@ static size_t getLengthEqual(const std::string& a, const std::string& b)
     return i;
 }
 
-static std::string optimiseAbsoluteRequire(const std::string& path) {
+static std::string optimiseAbsoluteRequire(const std::string& path)
+{
     if (!Luau::startsWith(path, "game/"))
         return path;
-    
+
     auto parts = Luau::split(path, '/');
-    if (parts.size() > 2) {
+    if (parts.size() > 2)
+    {
         auto service = std::string(parts[1]);
         return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
     }
@@ -269,8 +272,8 @@ static std::string optimiseAbsoluteRequire(const std::string& path) {
     return path;
 }
 
-void WorkspaceFolder::suggestImports(
-    const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config, const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result)
+void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
+    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -299,7 +302,8 @@ void WorkspaceFolder::suggestImports(
     if (config.types.roblox)
     {
         if (serviceVisitor.firstServiceDefinitionLine)
-            minimumLineNumber = *serviceVisitor.firstServiceDefinitionLine > minimumLineNumber ? *serviceVisitor.firstServiceDefinitionLine : minimumLineNumber;
+            minimumLineNumber =
+                *serviceVisitor.firstServiceDefinitionLine > minimumLineNumber ? *serviceVisitor.firstServiceDefinitionLine : minimumLineNumber;
 
         auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
         for (auto& service : services)
@@ -318,7 +322,8 @@ void WorkspaceFolder::suggestImports(
         visitor.visit(sourceModule->root);
 
         if (serviceVisitor.lastServiceDefinitionLine)
-            minimumLineNumber = *serviceVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*serviceVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
+            minimumLineNumber =
+                *serviceVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*serviceVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
 
         if (visitor.firstRequireLine)
             minimumLineNumber = *visitor.firstRequireLine >= minimumLineNumber ? (*visitor.firstRequireLine) : minimumLineNumber;
@@ -339,18 +344,20 @@ void WorkspaceFolder::suggestImports(
             bool isRelative = false;
 
             auto parent1 = getParentPath(moduleName), parent2 = getParentPath(path);
-            if (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2) {
+            if (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2)
+            {
                 requirePath = "./" + std::filesystem::relative(path, moduleName).string();
                 isRelative = true;
             }
             else
                 requirePath = optimiseAbsoluteRequire(path);
-            
+
             auto require = convertToScriptPath(requirePath);
 
             size_t lineNumber = minimumLineNumber;
             size_t bestLength = 0;
-            for (auto& group : visitor.requiresMap) {
+            for (auto& group : visitor.requiresMap)
+            {
                 for (auto& [_, stat] : group)
                 {
                     auto line = stat->location.begin.line;
@@ -367,16 +374,18 @@ void WorkspaceFolder::suggestImports(
                     auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
                     auto argText = textDocument.getText(range);
                     auto length = getLengthEqual(argText, require);
-                    
+
                     if (length > bestLength && argText < require && line >= lineNumber)
                         lineNumber = line + 1;
                 }
             }
 
-            if (!isRelative) {
+            if (!isRelative)
+            {
                 // Service will be the first part of the path
                 auto service = requirePath.substr(0, requirePath.find('/'));
-                if (serviceVisitor.serviceLineMap.find(service) == serviceVisitor.serviceLineMap.end()) {
+                if (serviceVisitor.serviceLineMap.find(service) == serviceVisitor.serviceLineMap.end())
+                {
                     // If we haven't imported the service, then we auto-import it
                     textEdits.emplace_back(createServiceTextEdit(service, serviceVisitor.findBestLine(service)));
 
