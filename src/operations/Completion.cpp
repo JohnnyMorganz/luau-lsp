@@ -356,8 +356,15 @@ void WorkspaceFolder::suggestImports(
                     auto line = stat->location.begin.line;
 
                     // HACK: We read the text of the require argument to sort the lines
-                    auto location = stat->values.data[0]->as<Luau::AstExprCall>()->args.data[0]->location;
-                    auto range = lsp::Range{ { location.begin.line, location.begin.column }, { location.end.line, location.end.column } };
+                    // Note: requires may be in the form `require(path) :: any`, so we need to handle that too
+                    Luau::AstExprCall* call = stat->values.data[0]->as<Luau::AstExprCall>();
+                    if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
+                        call = assertion->expr->as<Luau::AstExprCall>();
+                    if (!call)
+                        continue;
+
+                    auto location = call->args.data[0]->location;
+                    auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
                     auto argText = textDocument.getText(range);
                     auto length = getLengthEqual(argText, require);
                     
