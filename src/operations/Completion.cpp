@@ -379,15 +379,10 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             if (!isRelative)
             {
                 // Service will be the first part of the path
+                // If we haven't imported the service already, then we auto-import it
                 auto service = requirePath.substr(0, requirePath.find('/'));
                 if (serviceVisitor.serviceLineMap.find(service) == serviceVisitor.serviceLineMap.end())
-                {
-                    // If we haven't imported the service, then we auto-import it
                     textEdits.emplace_back(createServiceTextEdit(service, serviceVisitor.findBestLine(service, hotCommentsLineNumber)));
-
-                    // Increment the require line number to account for the new service import
-                    lineNumber += 1;
-                }
             }
 
             textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber));

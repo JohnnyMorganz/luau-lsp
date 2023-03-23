@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed server crash when auto require imports is enabled and there is a type-asserted require present in the file (`require(location) :: any`)
 - Fixed additional automatic service imports when completing an automatic require import being placed before a hot comment (such as `--!strict`)
+- Fixed automatic require import being placed incorrectly we also autocomplete a service. This can be shown when there is a multiline comment, and the service is imported above that comment, but the require gets imported inside of the comment incorrectly.
 
 ## [1.18.0] - 2023-03-20
 
