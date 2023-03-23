@@ -285,15 +285,14 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
         return;
 
     // Place after any hot comments
-    size_t minimumLineNumber = 0;
+    size_t hotCommentsLineNumber = 0;
     for (const auto& hotComment : sourceModule->hotcomments)
     {
         if (!hotComment.header)
             continue;
-        if (hotComment.location.begin.line >= minimumLineNumber)
-            minimumLineNumber = hotComment.location.begin.line + 1U;
+        if (hotComment.location.begin.line >= hotCommentsLineNumber)
+            hotCommentsLineNumber = hotComment.location.begin.line + 1U;
     }
-
 
     FindServicesVisitor serviceVisitor;
     serviceVisitor.visit(sourceModule->root);
@@ -301,10 +300,6 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     // If in roblox mode - suggest services
     if (config.types.roblox)
     {
-        if (serviceVisitor.firstServiceDefinitionLine)
-            minimumLineNumber =
-                *serviceVisitor.firstServiceDefinitionLine > minimumLineNumber ? *serviceVisitor.firstServiceDefinitionLine : minimumLineNumber;
-
         auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
         for (auto& service : services)
         {
@@ -312,7 +307,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             if (serviceVisitor.serviceLineMap.find(service) != serviceVisitor.serviceLineMap.end())
                 continue;
 
-            size_t lineNumber = serviceVisitor.findBestLine(service, minimumLineNumber);
+            size_t lineNumber = serviceVisitor.findBestLine(service, hotCommentsLineNumber);
             result.emplace_back(createSuggestService(service, lineNumber));
         }
     }
@@ -321,6 +316,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
         FindRequiresVisitor visitor;
         visitor.visit(sourceModule->root);
 
+        size_t minimumLineNumber = hotCommentsLineNumber;
         if (serviceVisitor.lastServiceDefinitionLine)
             minimumLineNumber =
                 *serviceVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*serviceVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
@@ -387,7 +383,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
                 if (serviceVisitor.serviceLineMap.find(service) == serviceVisitor.serviceLineMap.end())
                 {
                     // If we haven't imported the service, then we auto-import it
-                    textEdits.emplace_back(createServiceTextEdit(service, serviceVisitor.findBestLine(service)));
+                    textEdits.emplace_back(createServiceTextEdit(service, serviceVisitor.findBestLine(service, hotCommentsLineNumber)));
 
                     // Increment the require line number to account for the new service import
                     lineNumber += 1;

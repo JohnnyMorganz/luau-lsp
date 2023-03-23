@@ -124,9 +124,12 @@ struct FindServicesVisitor : public Luau::AstVisitor
     std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
     std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
 
-    size_t findBestLine(const std::string& serviceName, std::optional<size_t> minimumLineNumber = std::nullopt)
+    size_t findBestLine(const std::string& serviceName, size_t minimumLineNumber)
     {
-        size_t lineNumber = minimumLineNumber.value_or(firstServiceDefinitionLine.value_or(0));
+        if (firstServiceDefinitionLine)
+            minimumLineNumber = *firstServiceDefinitionLine > minimumLineNumber ? *firstServiceDefinitionLine : minimumLineNumber;
+
+        size_t lineNumber = minimumLineNumber;
         for (auto& [definedService, stat] : serviceLineMap)
         {
             auto location = stat->location.begin.line;
@@ -180,7 +183,8 @@ struct FindRequiresVisitor : public Luau::AstVisitor
 
     bool contains(const std::string& module)
     {
-        for (auto& map : requiresMap) {
+        for (auto& map : requiresMap)
+        {
             if (map.find(module) != map.end())
                 return true;
         }
@@ -202,8 +206,7 @@ struct FindRequiresVisitor : public Luau::AstVisitor
 
         if (isRequire(expr))
         {
-            firstRequireLine =
-                !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
+            firstRequireLine = !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
 
 
             // If the requires are too many lines away, treat it as a new group
