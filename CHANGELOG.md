@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.18.1] - 2023-03-23
+
 ### Fixed
 
 - Fixed server crash when auto require imports is enabled and there is a type-asserted require present in the file (`require(location) :: any`)
