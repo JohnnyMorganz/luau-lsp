@@ -2943,6 +2943,7 @@ declare class EnumTrackerError_INTERNAL extends Enum
 	NoVideo: EnumTrackerError
 	VideoError: EnumTrackerError
 	VideoNoPermission: EnumTrackerError
+	VideoUnsupported: EnumTrackerError
 	NoAudio: EnumTrackerError
 	AudioError: EnumTrackerError
 	AudioNoPermission: EnumTrackerError
@@ -4037,6 +4038,7 @@ declare class AnimationStreamTrack extends Instance
 	function GetTrackerData(self): any
 	function Play(self, fadeTime: number?, weight: number?): nil
 	function Stop(self, fadeTime: number?): nil
+	function TogglePause(self, paused: boolean): nil
 end
 
 declare class AnimationTrack extends Instance
@@ -4073,6 +4075,7 @@ declare class Animator extends Instance
 	function LoadAnimation(self, animation: Animation): AnimationTrack
 	function LoadAnimationCoreScript(self, animation: Animation): AnimationTrack
 	function LoadStreamAnimation(self, animation: TrackerStreamAnimation): AnimationStreamTrack
+	function LoadStreamAnimationForSelfieView_deprecated(self, animation: TrackerStreamAnimation, player: Player): AnimationStreamTrack
 	function StepAnimations(self, deltaTime: number): nil
 end
 
@@ -4696,6 +4699,7 @@ declare class AngularVelocity extends Constraint
 end
 
 declare class AnimationConstraint extends Constraint
+	IsKinematic: boolean
 	MaxForce: number
 	MaxTorque: number
 	Transform: CFrame
@@ -5427,6 +5431,7 @@ end
 declare class FacialAnimationStreamingServiceStats extends Instance
 	function Get(self, label: string): number
 	function GetWithPlayerId(self, label: string, playerId: number): number
+	isStreamingFacsUpdated: RBXScriptSignal<boolean, number>
 end
 
 declare class FacialAnimationStreamingServiceV2 extends Instance
@@ -6458,6 +6463,7 @@ end
 
 declare class IncrementalPatchBuilder extends Instance
 	AddPathsToBundle: boolean
+	BuildDebouncePeriod: number
 	HighCompression: boolean
 	SerializePatch: boolean
 	ZstdCompression: boolean
@@ -7230,6 +7236,7 @@ declare class Terrain extends BasePart
 	function ReplaceMaterialInTransform(self, cframe: CFrame, size: Vector3, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
 	function SetMaterialColor(self, material: EnumMaterial, value: Color3): nil
 	function SetMaterialInTransform(self, cframe: CFrame, size: Vector3, targetMaterial: EnumMaterial): nil
+	function SmoothRegion(self, region: Region3, resolution: number, strength: number): any
 	function WorldToCell(self, position: Vector3): Vector3
 	function WorldToCellPreferEmpty(self, position: Vector3): Vector3
 	function WorldToCellPreferSolid(self, position: Vector3): Vector3
@@ -7340,6 +7347,7 @@ end
 
 declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
+	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
 	function CacheCurrentTerrain(self, id: string, center: Vector3, radius: number): string
 	function ClearCachedTerrain(self, id: string): boolean
@@ -7350,6 +7358,7 @@ declare class WorldRoot extends Model
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function RaycastCachedTerrain(self, id: string, origin: Vector3, direction: Vector3, ignoreWater: boolean): RaycastResult
 	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil
+	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult
 end
 
 declare class Workspace extends WorldRoot
@@ -7575,9 +7584,13 @@ declare class PhysicsSettings extends Instance
 	AreAssembliesShown: boolean
 	AreAwakePartsHighlighted: boolean
 	AreBodyTypesShown: boolean
+	AreConstraintForcesShownForSelectedOrHoveredInstances: boolean
+	AreConstraintTorquesShownForSelectedOrHoveredInstances: boolean
+	AreContactForcesShownForSelectedOrHoveredAssemblies: boolean
 	AreContactIslandsShown: boolean
 	AreContactPointsShown: boolean
 	AreJointCoordinatesShown: boolean
+	AreMagnitudesShownForDrawnForcesAndTorques: boolean
 	AreMechanismsShown: boolean
 	AreModelCoordsShown: boolean
 	AreOwnersShown: boolean
@@ -7590,6 +7603,7 @@ declare class PhysicsSettings extends Instance
 	AreWorldCoordsShown: boolean
 	DisableCSGv2: boolean
 	ForceCSGv2: boolean
+	ForceDrawScale: number
 	IsInterpolationThrottleShown: boolean
 	IsReceiveAgeShown: boolean
 	IsTreeShown: boolean
@@ -8283,6 +8297,7 @@ declare class ScriptEditorService extends Instance
 	function DeregisterAutocompleteCallback(self, name: string): nil
 	function DeregisterScriptAnalysisCallback(self, name: string): nil
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
+	function ForceReloadSource(self, uri: string, newsrc: string): nil
 	function GetScriptDocuments(self): { Instance }
 	function OpenScriptDocumentAsync(self, script: LuaSourceContainer): any
 	function RegisterAutocompleteCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
@@ -8291,6 +8306,9 @@ end
 
 declare class ScriptRegistrationService extends Instance
 	function GetSourceContainerByScriptGuid(self, guid: string): LuaSourceContainer
+end
+
+declare class ScriptRuntime extends Instance
 end
 
 declare class ScriptService extends Instance
@@ -8561,6 +8579,7 @@ declare class DataModel extends ServiceProvider
 	PrivateServerOwnerId: number
 	ScreenshotReady: RBXScriptSignal<string>
 	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
+	UniverseMetadataLoaded: RBXScriptSignal<>
 	Workspace: Workspace
 	function BindToClose(self, func: ((...any) -> ...any)): nil
 	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
@@ -8581,6 +8600,7 @@ declare class DataModel extends ServiceProvider
 	function InsertObjectsAndJoinIfLegacyAsync(self, url: Content): { Instance }
 	function IsContentLoaded(self): boolean
 	function IsLoaded(self): boolean
+	function IsUniverseMetadataLoaded(self): boolean
 	function Load(self, url: Content): nil
 	function OpenScreenshotsFolder(self): nil
 	function OpenVideosFolder(self): nil
@@ -9157,6 +9177,7 @@ end
 declare class TerrainRegion extends Instance
 	SizeInCells: Vector3
 	function ApplyTransform(self, rotation: CFrame, size: Vector3): nil
+	function GetRegionWireframe(self): { any }
 end
 
 declare class TestService extends Instance
