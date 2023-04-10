@@ -108,7 +108,7 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
                 auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
 
                 Luau::attachMagicFunction(findFirstAncestorFunction,
-                    [&arena, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                    [&arena, &globals, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                         const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
@@ -121,8 +121,7 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
                         // This is a O(n) search, not great!
                         if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
                         {
-                            return Luau::WithPredicate<Luau::TypePackId>{
-                                arena.addTypePack({getSourcemapType(typeChecker.globals, arena, *ancestor)})};
+                            return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *ancestor)})};
                         }
 
                         return std::nullopt;
@@ -131,7 +130,7 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
 
                 auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
                 Luau::attachMagicFunction(findFirstChildFunction,
-                    [node, &arena](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                    [node, &arena, &globals](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                         const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
                     {
                         if (expr.args.size < 1)
@@ -142,7 +141,7 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
                             return std::nullopt;
 
                         if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
-                            return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(typeChecker.globals, arena, *child)})};
+                            return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
 
                         return std::nullopt;
                     });
@@ -414,9 +413,12 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const Luau::GlobalTyp
     };
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, Luau::GlobalTypes& globals, const std::string& definitions)
+Luau::LoadDefinitionFileResult registerDefinitions(
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
 {
-    auto loadResult = Luau::loadDefinitionFile(typeChecker, globals, globals.globalScope, definitions, "@roblox", /* captureComments */ false);
+    // TODO: packageName shouldn't just be "@roblox"
+    auto loadResult =
+        frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
     if (!loadResult.success)
         return loadResult;
 

@@ -3,8 +3,6 @@
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
 
-LUAU_FASTFLAG(LuauLintInTypecheck)
-
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
     if (!isConfigured)
@@ -69,14 +67,13 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
     // Report Lint Warnings
     // Lints only apply to the current file
-    Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(moduleName);
-    for (auto& error : lr.errors)
+    for (auto& error : cr.lintResult.errors)
     {
         auto diagnostic = createLintDiagnostic(error, textDocument);
         diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
         report.items.emplace_back(diagnostic);
     }
-    for (auto& error : lr.warnings)
+    for (auto& error : cr.lintResult.warnings)
         report.items.emplace_back(createLintDiagnostic(error, textDocument));
 
     return report;
@@ -143,14 +140,13 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         }
 
         // Report Lint Warnings
-        Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(moduleName);
-        for (auto& error : lr.errors)
+        for (auto& error : cr.lintResult.errors)
         {
             auto diagnostic = createLintDiagnostic(error, document);
             diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
             documentReport.items.emplace_back(diagnostic);
         }
-        for (auto& error : lr.warnings)
+        for (auto& error : cr.lintResult.warnings)
             documentReport.items.emplace_back(createLintDiagnostic(error, document));
 
         workspaceReport.items.emplace_back(documentReport);

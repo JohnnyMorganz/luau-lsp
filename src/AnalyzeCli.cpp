@@ -16,7 +16,6 @@
 #include <vector>
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
-LUAU_FASTFLAG(LuauLintInTypecheck)
 
 enum class ReportFormat
 {
@@ -116,14 +115,12 @@ static bool analyzeFile(
     for (auto& error : cr.errors)
         reportedErrors += reportError(frontend, format, error, ignoreGlobPatterns);
 
-    Luau::LintResult lr = FFlag::LuauLintInTypecheck ? cr.lintResult : frontend.lint_DEPRECATED(name);
-
     // For the human readable module name, we use a relative version
     auto errorFriendlyName = std::filesystem::proximate(path).generic_string();
     std::string humanReadableName = frontend.fileResolver->getHumanReadableModuleName(errorFriendlyName);
-    for (auto& error : lr.errors)
+    for (auto& error : cr.lintResult.errors)
         reportWarning(format, humanReadableName.c_str(), error);
-    for (auto& warning : lr.warnings)
+    for (auto& warning : cr.lintResult.warnings)
         reportWarning(format, humanReadableName.c_str(), warning);
 
     if (annotate)
@@ -138,7 +135,7 @@ static bool analyzeFile(
         printf("%s", annotated.c_str());
     }
 
-    return reportedErrors == 0 && lr.errors.empty();
+    return reportedErrors == 0 && cr.lintResult.errors.empty();
 }
 
 int startAnalyze(int argc, char** argv)
@@ -236,7 +233,7 @@ int startAnalyze(int argc, char** argv)
     // Setup Frontend
     Luau::FrontendOptions frontendOptions;
     frontendOptions.retainFullTypeGraphs = annotate;
-    frontendOptions.runLintChecks = FFlag::LuauLintInTypecheck;
+    frontendOptions.runLintChecks = true;
 
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
@@ -270,8 +267,8 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    Luau::registerBuiltinGlobals(frontend);
-    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
+    Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
 
     for (auto& definitionsPath : definitionsPaths)
     {
@@ -288,7 +285,7 @@ int startAnalyze(int argc, char** argv)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend.typeChecker, frontend.globals, *definitionsContents);
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

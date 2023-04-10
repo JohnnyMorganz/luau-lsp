@@ -9,8 +9,6 @@
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
-LUAU_FASTFLAG(LuauLintInTypecheck)
-
 class WorkspaceFolder
 {
 public:
@@ -29,8 +27,8 @@ public:
         , name(name)
         , rootUri(uri)
         , fileResolver(defaultConfig ? WorkspaceFileResolver(*defaultConfig) : WorkspaceFileResolver())
-        , frontend(Luau::Frontend(&fileResolver, &fileResolver,
-              {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ FFlag::LuauLintInTypecheck}))
+        , frontend(Luau::Frontend(
+              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
     {
         fileResolver.client = client;
         fileResolver.rootUri = uri;

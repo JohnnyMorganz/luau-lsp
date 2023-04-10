@@ -135,8 +135,8 @@ bool WorkspaceFolder::updateSourceMap()
 
 void WorkspaceFolder::initialize()
 {
-    Luau::registerBuiltinGlobals(frontend);
-    Luau::registerBuiltinGlobals(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete);
+    Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
+    Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
 
     Luau::attachTag(Luau::getGlobalBinding(frontend.globalsForAutocomplete, "require"), "Require");
 
@@ -157,8 +157,8 @@ void WorkspaceFolder::initialize()
             continue;
         }
 
-        auto result = types::registerDefinitions(frontend.typeChecker, frontend.globals, *definitionsContents);
-        types::registerDefinitions(frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete, *definitionsContents);
+        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
 
         auto uri = Uri::file(definitionsFile);
 

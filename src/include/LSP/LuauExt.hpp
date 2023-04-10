@@ -17,7 +17,8 @@ bool isMetamethod(const Luau::Name& name);
 
 void registerInstanceTypes(Luau::TypeChecker& typeChecker, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
     const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::TypeChecker& typeChecker, Luau::GlobalTypes& globals, const std::string& definitions);
+Luau::LoadDefinitionFileResult registerDefinitions(
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
