@@ -723,10 +723,8 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectBlockedIP: EnumConnectionError
 	DisconnectClientFailure: EnumConnectionError
 	DisconnectClientRequest: EnumConnectionError
-	DisconnectOutOfMemory: EnumConnectionError
 	DisconnectModeratedGame: EnumConnectionError
-	DisconnectOutOfMemoryExitContinue: EnumConnectionError
-	DisconnectOutOfMemoryKeepPlayingExit: EnumConnectionError
+	DisconnectRomarkEndOfTest: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
 	PlayerRemoved: EnumConnectionError
 	DisconnectOutOfMemoryKeepPlayingLeave: EnumConnectionError
@@ -3054,6 +3052,11 @@ declare class EnumVRSafetyBubbleMode_INTERNAL extends Enum
 	OnlyFriends: EnumVRSafetyBubbleMode
 	Anyone: EnumVRSafetyBubbleMode
 end
+declare class EnumVRScaling extends EnumItem end
+declare class EnumVRScaling_INTERNAL extends Enum
+	World: EnumVRScaling
+	Off: EnumVRScaling
+end
 declare class EnumVRSessionState extends EnumItem end
 declare class EnumVRSessionState_INTERNAL extends Enum
 	Idle: EnumVRSessionState
@@ -3501,6 +3504,7 @@ type ENUM_LIST = {
 	UserInputType: EnumUserInputType_INTERNAL,
 	VRPlayMode: EnumVRPlayMode_INTERNAL,
 	VRSafetyBubbleMode: EnumVRSafetyBubbleMode_INTERNAL,
+	VRScaling: EnumVRScaling_INTERNAL,
 	VRSessionState: EnumVRSessionState_INTERNAL,
 	VRTouchpad: EnumVRTouchpad_INTERNAL,
 	VRTouchpadMode: EnumVRTouchpadMode_INTERNAL,
@@ -4204,7 +4208,7 @@ end
 declare class AudioSearchParams extends Instance
 	Album: string
 	Artist: string
-	AudioSubtype: EnumAudioSubType
+	AudioSubType: EnumAudioSubType
 	MaxDuration: number
 	MinDuration: number
 	SearchKeyword: string
@@ -4943,16 +4947,24 @@ declare class ControllerBase extends Instance
 end
 
 declare class AirController extends ControllerBase
+	BalanceMaxTorque: number
+	BalanceRigidityEnabled: boolean
+	BalanceSpeed: number
 	MaintainAngularMomentum: boolean
 	MaintainLinearMomentum: boolean
 	MoveMaxForce: number
 	OrientationMaxTorque: number
 	OrientationSpeedFactor: number
+	TurningMaxTorque: number
+	TurningSpeedFactor: number
 	VectorForce: Vector3
 end
 
 declare class ClimbController extends ControllerBase
 	AccelerationTime: number
+	BalanceMaxTorque: number
+	BalanceRigidityEnabled: boolean
+	BalanceSpeed: number
 	MoveMaxForce: number
 	OrientationMaxTorque: number
 	OrientationSpeedFactor: number
@@ -4963,6 +4975,9 @@ declare class GroundController extends ControllerBase
 	AccelerationTime: number
 	AlignSpeed: number
 	AlignTorque: number
+	BalanceMaxTorque: number
+	BalanceRigidityEnabled: boolean
+	BalanceSpeed: number
 	DecelerationTime: number
 	Friction: number
 	FrictionWeight: number
@@ -6724,6 +6739,7 @@ end
 
 declare class LuaSourceContainer extends Instance
 	CurrentEditor: Instance
+	RuntimeSource: string
 end
 
 declare class BaseScript extends LuaSourceContainer
@@ -6790,7 +6806,7 @@ declare class MarketplaceService extends Instance
 	function GetProductInfo(self, assetId: number, infoType: EnumInfoType?): { [any]: any }
 	function GetRobuxBalance(self): number
 	function IsPlayerSubscribed(self, player: Player, subscriptionId: number): boolean
-	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean): { [any]: any }
+	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?): { [any]: any }
 	function PlayerCanMakePurchases(self, player: Instance): boolean
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
@@ -6939,7 +6955,7 @@ declare class MessageBusService extends Instance
 	function GetMessageId(self, domainName: string, messageName: string): string
 	function GetProtocolMethodRequestMessageId(self, protocolName: string, methodName: string): string
 	function GetProtocolMethodResponseMessageId(self, protocolName: string, methodName: string): string
-	function MakeRequest(self, protocolName: string, methodName: string, message: any, callback: ((...any) -> ...any)): nil
+	function MakeRequest(self, protocolName: string, methodName: string, message: any, callback: ((...any) -> ...any), customTelemetryData: any): nil
 	function Publish(self, mid: string, params: any): nil
 	function PublishProtocolMethodRequest(self, protocolName: string, methodName: string, message: any, customTelemetryData: any): nil
 	function PublishProtocolMethodResponse(self, protocolName: string, methodName: string, message: any, responseCode: number, customTelemetryData: any): nil
@@ -7311,9 +7327,9 @@ declare class Model extends PVInstance
 end
 
 declare class Actor extends Model
-	function BindToMessage(self, name: string, func: ((...any) -> ...any)): RBXScriptConnection
-	function BindToMessageParallel(self, name: string, func: ((...any) -> ...any)): RBXScriptConnection
-	function SendMessage(self, name: string, message: any): nil
+	function BindToMessage(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
+	function BindToMessageParallel(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
+	function SendMessage(self, topic: string, message: any): nil
 end
 
 declare class BackpackItem extends Model
@@ -8072,6 +8088,9 @@ end
 declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
+declare class RemoteCursorService extends Instance
+end
+
 declare class RemoteDebuggerServer extends Instance
 end
 
@@ -8204,9 +8223,6 @@ declare class ScreenshotHud extends Instance
 end
 
 declare class ScriptBuilder extends Instance
-end
-
-declare class CoreScriptBuilder extends ScriptBuilder
 end
 
 declare class SyncScriptBuilder extends ScriptBuilder
@@ -8486,6 +8502,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ProximityPromptService"): ProximityPromptService
 	function GetService(self, service: "PublishService"): PublishService
 	function GetService(self, service: "RbxAnalyticsService"): RbxAnalyticsService
+	function GetService(self, service: "RemoteCursorService"): RemoteCursorService
 	function GetService(self, service: "RemoteDebuggerServer"): RemoteDebuggerServer
 	function GetService(self, service: "RenderSettings"): RenderSettings
 	function GetService(self, service: "ReplicatedFirst"): ReplicatedFirst
@@ -8507,6 +8524,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "SelectionHighlightManager"): SelectionHighlightManager
 	function GetService(self, service: "ServerScriptService"): ServerScriptService
 	function GetService(self, service: "ServerStorage"): ServerStorage
+	function GetService(self, service: "ServiceVisibilityService"): ServiceVisibilityService
 	function GetService(self, service: "SessionService"): SessionService
 	function GetService(self, service: "SharedTableRegistry"): SharedTableRegistry
 	function GetService(self, service: "ShorelineUpgraderService"): ShorelineUpgraderService
@@ -8608,6 +8626,7 @@ declare class DataModel extends ServiceProvider
 	function SetFastFlagForTesting(self, name: string, newValue: boolean): boolean
 	function SetFastIntForTesting(self, name: string, newValue: number): number
 	function SetFastStringForTesting(self, name: string, newValue: string): string
+	function SetFlagVersion(self, name: string, version: number): nil
 	function SetIsLoaded(self, value: boolean, placeSizeInBytes: number?): nil
 	function SetPlaceId(self, placeId: number): nil
 	function SetUniverseId(self, universeId: number): nil
@@ -8625,6 +8644,10 @@ declare class UserSettings extends GenericSettings
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
 	function IsUserFeatureEnabled(self, name: string): boolean
 	function Reset(self): nil
+end
+
+declare class ServiceVisibilityService extends Instance
+	VisibleServices: BinaryString
 end
 
 declare class SessionService extends Instance
@@ -9710,6 +9733,7 @@ declare class UserService extends Instance
 end
 
 declare class VRService extends Instance
+	AutomaticScaling: EnumVRScaling
 	DidPointerHit: boolean
 	FadeOutViewOnCollision: boolean
 	GuiInputUserCFrame: EnumUserCFrame
