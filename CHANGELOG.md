@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.571
+- Improved find all references system for tables. We can now track all references to table and its properties across files. This requires `luau-lsp.index.enabled` to be enabled for full support.
 
 ### Fixed
 
