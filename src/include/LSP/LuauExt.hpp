@@ -42,62 +42,8 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);
 } // namespace types
 
 // TODO: should upstream this
-struct FindNodeType : public Luau::AstVisitor
-{
-    const Luau::Position pos;
-    const Luau::Position documentEnd;
-    Luau::AstNode* best = nullptr;
-
-    explicit FindNodeType(Luau::Position pos, Luau::Position documentEnd)
-        : pos(pos)
-        , documentEnd(documentEnd)
-    {
-    }
-
-    bool visit(Luau::AstNode* node) override
-    {
-        if (node->location.contains(pos))
-        {
-            best = node;
-            return true;
-        }
-
-        // Edge case: If we ask for the node at the position that is the very end of the document
-        // return the innermost AST element that ends at that position.
-
-        if (node->location.end == documentEnd && pos >= documentEnd)
-        {
-            best = node;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool visit(class Luau::AstType* node) override
-    {
-        return visit(static_cast<Luau::AstNode*>(node));
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        visit(static_cast<Luau::AstNode*>(block));
-
-        for (Luau::AstStat* stat : block->body)
-        {
-            if (stat->location.end < pos)
-                continue;
-            if (stat->location.begin > pos)
-                break;
-
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
-
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos);
+Luau::AstNode* findNodeOrTypeAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos);
 Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos);
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol);
 std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source, const Luau::Name& typeName, std::optional<const Luau::Name> prefix);
