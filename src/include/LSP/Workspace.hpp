@@ -55,6 +55,8 @@ public:
 
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
+    void indexFiles(const ClientConfiguration& config);
+
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,

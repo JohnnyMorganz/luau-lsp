@@ -105,6 +105,31 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
     return false;
 }
 
+void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
+{
+    if (!config.index.enabled)
+        return;
+
+    if (isNullWorkspace())
+        return;
+
+    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath()), end; next != end; ++next)
+    {
+        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+        {
+            auto ext = next->path().extension();
+            if (ext == ".lua" || ext == ".luau")
+            {
+                auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
+                // We use autocomplete because its in strict mode, and this is useful for Find All References
+                frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ true});
+                // TODO: do we need indexing for non-autocomplete?
+                // frontend.check(moduleName);
+            }
+        }
+    }
+}
+
 bool WorkspaceFolder::updateSourceMap()
 {
     auto sourcemapPath = rootUri.fsPath() / "sourcemap.json";
@@ -199,4 +224,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
                 lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
         }
     }
+
+    if (configuration.index.enabled)
+        indexFiles(configuration);
 }
