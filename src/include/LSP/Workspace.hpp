@@ -13,8 +13,6 @@ struct Reference
 {
     const Luau::ModuleName moduleName;
     const Luau::Location location;
-    // NOTE: DO NOT STORE THIS EXPR, it will be freed if the module becomes dirty
-    const Luau::AstExpr* expr = nullptr;
 };
 
 class WorkspaceFolder

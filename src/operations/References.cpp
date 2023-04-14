@@ -85,7 +85,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(Luau::T
                 {
                     auto possibleParentTy = module->astTypes.find(indexName->expr);
                     if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
-                        references.push_back(Reference{moduleName, indexName->indexLocation, expr});
+                        references.push_back(Reference{moduleName, indexName->indexLocation});
                 }
                 else if (auto table = expr->as<Luau::AstExprTable>(); table && isSameTable(ty, Luau::follow(referencedTy)))
                 {
@@ -96,7 +96,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(Luau::T
                             if (auto propName = item.key->as<Luau::AstExprConstantString>())
                             {
                                 if (propName->value.data == property.value())
-                                    references.push_back(Reference{moduleName, item.key->location, item.key});
+                                    references.push_back(Reference{moduleName, item.key->location});
                             }
                         }
                     }
@@ -105,7 +105,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(Luau::T
             else
             {
                 if (isSameTable(ty, Luau::follow(referencedTy)))
-                    references.push_back(Reference{moduleName, expr->location, expr});
+                    references.push_back(Reference{moduleName, expr->location});
             }
         }
     }
@@ -126,7 +126,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(con
     auto references = findTypeReferences(*sourceModule, typeName, std::nullopt);
     result.reserve(references.size() + 1);
     for (auto& location : references)
-        result.emplace_back(Reference{moduleName, location, nullptr});
+        result.emplace_back(Reference{moduleName, location});
 
     // Find the actual declaration location
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -135,7 +135,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(con
 
     if (auto location = module->getModuleScope()->typeAliasNameLocations.find(typeName);
         location != module->getModuleScope()->typeAliasNameLocations.end())
-        result.emplace_back(Reference{moduleName, location->second, nullptr});
+        result.emplace_back(Reference{moduleName, location->second});
 
     // Find all cross-module references
     auto reverseDependencies = findReverseDependencies(frontend, moduleName);
@@ -166,7 +166,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(con
             auto references = findTypeReferences(*sourceModule, typeName, importName);
             result.reserve(result.size() + references.size());
             for (auto& location : references)
-                result.emplace_back(Reference{dependencyModuleName, location, nullptr});
+                result.emplace_back(Reference{dependencyModuleName, location});
         }
     }
 
