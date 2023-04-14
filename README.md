@@ -9,6 +9,9 @@ Install the extension from the VSCode Marketplace or OpenVSX Registry:
 - VSCode Marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
 - OpenVSX Registry: https://open-vsx.org/extension/JohnnyMorganz/luau-lsp
 
+Alternatively, checkout [Getting Started for Language Server Clients](https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md)
+to setup your own client for a different editor
+
 ### For General Users
 
 The language server should be immediately usable for general Luau code after installation.
@@ -20,7 +23,8 @@ or `relativeToFile`.
 Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`, with corresponding
 documentation added using `luau-lsp.types.documentationFiles`.
 
-If there are specific features you require in the language server for your use case, feel free to open an issue.
+If you use Luau in a different environment and are interested in using the language server, or
+looking for any specific features, please get in touch!
 
 ### For Rojo Users
 
@@ -53,16 +57,6 @@ The tool can run standalone, similar to [`luau-analyze`](https://github.com/John
 The entry point for the analysis tool is `luau-lsp analyze`.
 
 Install the binary and run `luau-lsp --help` for more information.
-
-## Design Goals
-
-The initial goal is to develop a language server supporting all common LSP functions.
-Module resolution and typing will initially revolve around [Rojo](https://github.com/JohnnyMorganz/luau-analyze-rojo).
-
-The idea is to ensure module resolution is customisable, allowing the server to later be easily extended to support other environments where Luau may be used.
-We could also potentially take it a step forward, allowing the server to be used on an Lua 5.1 codebase through a translation layer (such as type comments through EmmyLua), allowing the language server to support general purpose Lua development powered by the Luau type inference engine.
-
-If you use Luau in a different environment and are interested in using the language server, please get in touch!
 
 ## Supported Features
 
