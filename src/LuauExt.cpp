@@ -674,9 +674,14 @@ struct FindNodeType : public Luau::AstVisitor
     {
     }
 
+    bool isCloserMatch(Luau::Location& newLocation)
+    {
+        return (closed ? newLocation.containsClosed(pos) : newLocation.contains(pos)) && (!best || best->location.encloses(newLocation));
+    }
+
     bool visit(Luau::AstNode* node) override
     {
-        if (closed ? node->location.containsClosed(pos) : node->location.contains(pos))
+        if (isCloserMatch(node->location))
         {
             best = node;
             return true;
