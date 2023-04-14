@@ -168,7 +168,7 @@ void Client::refreshWorkspaceDiagnostics()
 {
     if (capabilities.workspace && capabilities.workspace->diagnostics && capabilities.workspace->diagnostics->refreshSupport)
     {
-        sendRequest(nextRequestId++, "workspace/diagnostics/refresh", nullptr);
+        sendRequest(nextRequestId++, "workspace/diagnostic/refresh", nullptr);
     }
 }
 

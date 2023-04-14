@@ -134,7 +134,7 @@ struct WorkspaceDocumentDiagnosticReport : SingleDocumentDiagnosticReport
     DocumentUri uri;
     std::optional<size_t> version = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version);
 
 struct WorkspaceDiagnosticReport
 {

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.571
 
+### Fixed
+
+- Fixed pull diagnostics result not following spec
+
 ## [1.18.1] - 2023-03-23
 
 ### Fixed
