@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed pull diagnostics result not following spec
+- Fixed errors when file has shebang `#!` present at top of file
 
 ## [1.18.1] - 2023-03-23
 
