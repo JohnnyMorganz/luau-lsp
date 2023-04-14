@@ -1032,6 +1032,39 @@ std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& sourc
     return std::move(finder.result);
 }
 
+struct FindTypeReferences : public Luau::AstVisitor
+{
+    const Luau::Name& typeName;
+    std::optional<const Luau::Name> prefix;
+    std::vector<Luau::Location> result{};
+
+    explicit FindTypeReferences(const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
+        : typeName(typeName)
+        , prefix(prefix)
+    {
+    }
+
+    bool visit(class Luau::AstType* node)
+    {
+        return true;
+    }
+
+    bool visit(class Luau::AstTypeReference* node)
+    {
+        if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
+            result.push_back(node->location); // TODO: only do the node's name location
+
+        return true;
+    }
+};
+
+std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source, const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
+{
+    FindTypeReferences finder(typeName, prefix);
+    source.root->visit(&finder);
+    return std::move(finder.result);
+}
+
 std::optional<Luau::Location> getLocation(Luau::TypeId type)
 {
     type = follow(type);

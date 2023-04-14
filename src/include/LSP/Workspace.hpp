@@ -73,6 +73,7 @@ private:
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(
         const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
+    std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);

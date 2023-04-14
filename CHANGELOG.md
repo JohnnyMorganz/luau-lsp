@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 - Added setting `luau-lsp.index.enabled` which will index the whole workspace into memory. If disabled, only limited support for Find All References and rename is possible
+- Added support for finding all references of both local and exported types. For exported types, `luau-lsp.index.enabled` must be enabled for full support.
 ### Changed
 
 - Sync to upstream Luau 0.571
