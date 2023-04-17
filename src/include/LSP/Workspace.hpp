@@ -69,12 +69,12 @@ private:
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
-    std::optional<std::vector<Reference>> findAllReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
-    std::optional<std::vector<Reference>> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
     std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
+    std::vector<Reference> findAllReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
+    std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
 

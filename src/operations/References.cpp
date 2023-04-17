@@ -54,16 +54,16 @@ static std::vector<Luau::ModuleName> findReverseDependencies(const Luau::Fronten
 }
 
 // Find all references across all files for the usage of TableType, or a property on a TableType
-std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
+std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
 {
     ty = Luau::follow(ty);
     auto ttv = Luau::get<Luau::TableType>(ty);
 
     if (!ttv)
-        return std::nullopt;
+        return {};
 
     if (ttv->definitionModuleName.empty())
-        return std::nullopt;
+        return {};
 
     std::vector<Reference> references;
     std::vector<Luau::ModuleName> dependents = findReverseDependencies(frontend, ttv->definitionModuleName);
@@ -110,18 +110,23 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllReferences(Luau::T
         }
     }
 
+    // If its a property, include its original declaration location
+    if (property)
+        if (auto prop = lookupProp(ty, *property); prop && prop->location)
+            references.push_back(Reference{ttv->definitionModuleName, prop->location.value()});
+
     return references;
 }
 
 // Find all references of an exported type
-std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName)
+std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName)
 {
     std::vector<Reference> result;
 
     // Handle the module the type is declared in
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
-        return std::nullopt;
+        return {};
 
     auto references = findTypeReferences(*sourceModule, typeName, std::nullopt);
     result.reserve(references.size() + 1);
@@ -131,7 +136,7 @@ std::optional<std::vector<Reference>> WorkspaceFolder::findAllTypeReferences(con
     // Find the actual declaration location
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!module)
-        return std::nullopt;
+        return {};
 
     if (auto location = module->getModuleScope()->typeAliasNameLocations.find(typeName);
         location != module->getModuleScope()->typeAliasNameLocations.end())
@@ -258,8 +263,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
                 auto references = findAllReferences(parentTy, indexName->index.value);
-                if (references)
-                    return processReferences(fileResolver, *references);
+                return processReferences(fileResolver, references);
             }
         }
     }
@@ -277,8 +281,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                 importedModuleName != module->getModuleScope()->importedModules.end())
             {
                 auto references = findAllTypeReferences(importedModuleName->second, reference->name.value);
-                if (references)
-                    return processReferences(fileResolver, *references);
+                return processReferences(fileResolver, references);
             }
 
             return std::nullopt;

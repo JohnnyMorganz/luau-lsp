@@ -105,11 +105,8 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
                 auto references = findAllReferences(parentTy, indexName->index.value);
-                if (references)
-                {
-                    processReferences(fileResolver, params.newName, *references, result);
-                    return result;
-                }
+                processReferences(fileResolver, params.newName, references, result);
+                return result;
             }
         }
     }
@@ -127,11 +124,8 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
                 importedModuleName != module->getModuleScope()->importedModules.end())
             {
                 auto references = findAllTypeReferences(importedModuleName->second, reference->name.value);
-                if (references)
-                {
-                    processReferences(fileResolver, params.newName, *references, result);
-                    return result;
-                }
+                processReferences(fileResolver, params.newName, references, result);
+                return result;
             }
 
             return std::nullopt;
