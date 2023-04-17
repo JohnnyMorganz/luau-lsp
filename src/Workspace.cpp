@@ -145,10 +145,8 @@ bool WorkspaceFolder::updateSourceMap()
         // Recreate instance types
         auto config = client->getConfiguration(rootUri);
         instanceTypes.clear();
-        types::registerInstanceTypes(frontend.typeChecker, frontend.globals, instanceTypes, fileResolver,
-            /* TODO - expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
-        types::registerInstanceTypes(
-            frontend.typeCheckerForAutocomplete, frontend.globalsForAutocomplete, instanceTypes, fileResolver, /* TODO - expressiveTypes: */ true);
+        types::registerInstanceTypes(frontend, frontend.globals, instanceTypes, fileResolver,
+            /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
 
         return true;
     }

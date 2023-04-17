@@ -194,6 +194,14 @@ std::string TextDocument::getText(std::optional<lsp::Range> range) const
         auto end = offsetAt(range->end);
         return _content.substr(start, end - start);
     }
+    // Handle shebang
+    if (_content.size() > 2 && _content[0] == '#' && _content[1] == '!')
+    {
+        if (auto pos = _content.find('\n'); pos != std::string::npos)
+            return _content.substr(pos);
+        else
+            return "\n";
+    }
     return _content;
 }
 

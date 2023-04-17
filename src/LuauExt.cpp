@@ -323,7 +323,7 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
 // to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
 // Remove this once Luau has improved
-void registerInstanceTypes(Luau::TypeChecker& typeChecker, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
+void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
     const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
 {
     if (!fileResolver.rootSourceNode)
@@ -394,10 +394,10 @@ void registerInstanceTypes(Luau::TypeChecker& typeChecker, const Luau::GlobalTyp
     }
 
     // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-    typeChecker.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope)
+    frontend.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
     {
         // TODO: we hope to remove these in future!
-        if (!expressiveTypes)
+        if (!expressiveTypes && !forAutocomplete)
         {
             scope->bindings[Luau::AstName("script")] = Luau::Binding{globals.builtinTypes->anyType};
             scope->bindings[Luau::AstName("workspace")] = Luau::Binding{globals.builtinTypes->anyType};

@@ -307,8 +307,7 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    types::registerInstanceTypes(
-        frontend.typeChecker, frontend.globals, frontend.globals.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
+    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
 
     Luau::freeze(frontend.globals.globalTypes);
     Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
