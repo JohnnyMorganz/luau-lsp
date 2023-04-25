@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed pull diagnostics result not following spec
 - Fixed errors when file has shebang `#!` present at top of file
+- Fixed string require autocompletion failing when autocomplete triggered on an incomplete string, e.g. `require("Constants/Te|")`.
+  Originally, nothing would autocomplete. Now, everything inside of the Constants folder will still autocomplete as usual (filtered for "Te").
 
 ## [1.18.1] - 2023-03-23
 
