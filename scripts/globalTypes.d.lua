@@ -390,6 +390,12 @@ declare class EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum
 	Closeup: EnumAvatarThumbnailCustomizationType
 	FullBody: EnumAvatarThumbnailCustomizationType
 end
+declare class EnumAvatarUnificationMode extends EnumItem end
+declare class EnumAvatarUnificationMode_INTERNAL extends Enum
+	Default: EnumAvatarUnificationMode
+	Disabled: EnumAvatarUnificationMode
+	Enabled: EnumAvatarUnificationMode
+end
 declare class EnumAxis extends EnumItem end
 declare class EnumAxis_INTERNAL extends Enum
 	X: EnumAxis
@@ -3062,6 +3068,7 @@ declare class EnumVRSessionState_INTERNAL extends Enum
 	Idle: EnumVRSessionState
 	Visible: EnumVRSessionState
 	Focused: EnumVRSessionState
+	Stopping: EnumVRSessionState
 	Undefined: EnumVRSessionState
 end
 declare class EnumVRTouchpad extends EnumItem end
@@ -3222,6 +3229,7 @@ type ENUM_LIST = {
 	AvatarItemType: EnumAvatarItemType_INTERNAL,
 	AvatarPromptResult: EnumAvatarPromptResult_INTERNAL,
 	AvatarThumbnailCustomizationType: EnumAvatarThumbnailCustomizationType_INTERNAL,
+	AvatarUnificationMode: EnumAvatarUnificationMode_INTERNAL,
 	Axis: EnumAxis_INTERNAL,
 	BinType: EnumBinType_INTERNAL,
 	BodyPart: EnumBodyPart_INTERNAL,
@@ -5003,7 +5011,6 @@ declare class ControllerManager extends Instance
 	FacingDirection: Vector3
 	GroundSensor: ControllerSensor
 	MovingDirection: Vector3
-	function GetControllers(self): { Instance }
 end
 
 declare class ControllerService extends Instance
@@ -7379,6 +7386,7 @@ end
 
 declare class Workspace extends WorldRoot
 	AllowThirdPartySales: boolean
+	AvatarUnificationMode: EnumAvatarUnificationMode
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
@@ -9659,7 +9667,6 @@ declare class UserInputService extends Instance
 	GamepadConnected: RBXScriptSignal<EnumUserInputType>
 	GamepadDisconnected: RBXScriptSignal<EnumUserInputType>
 	GamepadEnabled: boolean
-	GazeSelectionEnabled: boolean
 	GyroscopeEnabled: boolean
 	InputBegan: RBXScriptSignal<InputObject, boolean>
 	InputChanged: RBXScriptSignal<InputObject, boolean>
@@ -9738,6 +9745,7 @@ declare class VRService extends Instance
 	FadeOutViewOnCollision: boolean
 	GuiInputUserCFrame: EnumUserCFrame
 	LaserDistance: number
+	LaserPointerTriggered: RBXScriptSignal<InputObject>
 	NavigationRequested: RBXScriptSignal<CFrame, EnumUserCFrame>
 	PointerHitCFrame: CFrame
 	TouchpadModeChanged: RBXScriptSignal<EnumVRTouchpad, EnumVRTouchpadMode>
