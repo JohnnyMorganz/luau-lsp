@@ -747,6 +747,68 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 }
 } // namespace types
 
+struct FindNodeType : public Luau::AstVisitor
+{
+    const Luau::Position pos;
+    const Luau::Position documentEnd;
+    Luau::AstNode* best = nullptr;
+    bool closed = false;
+
+    explicit FindNodeType(Luau::Position pos, Luau::Position documentEnd, bool closed)
+        : pos(pos)
+        , documentEnd(documentEnd)
+        , closed(closed)
+    {
+    }
+
+    bool isCloserMatch(Luau::Location& newLocation)
+    {
+        return (closed ? newLocation.containsClosed(pos) : newLocation.contains(pos)) && (!best || best->location.encloses(newLocation));
+    }
+
+    bool visit(Luau::AstNode* node) override
+    {
+        if (isCloserMatch(node->location))
+        {
+            best = node;
+            return true;
+        }
+
+        // Edge case: If we ask for the node at the position that is the very end of the document
+        // return the innermost AST element that ends at that position.
+
+        if (node->location.end == documentEnd && pos >= documentEnd)
+        {
+            best = node;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool visit(class Luau::AstType* node) override
+    {
+        return visit(static_cast<Luau::AstNode*>(node));
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        visit(static_cast<Luau::AstNode*>(block));
+
+        for (Luau::AstStat* stat : block->body)
+        {
+            if (stat->location.end < pos)
+                continue;
+            if (stat->location.begin > pos)
+                break;
+
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
 Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::Position pos)
 {
     const Luau::Position end = source.root->location.end;
@@ -756,7 +818,21 @@ Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::
     if (pos > end)
         pos = end;
 
-    FindNodeType findNode{pos, end};
+    FindNodeType findNode{pos, end, /* closed: */ false};
+    findNode.visit(source.root);
+    return findNode.best;
+}
+
+Luau::AstNode* findNodeOrTypeAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos)
+{
+    const Luau::Position end = source.root->location.end;
+    if (pos < source.root->location.begin)
+        return source.root;
+
+    if (pos > end)
+        pos = end;
+
+    FindNodeType findNode{pos, end, /* closed: */ true};
     findNode.visit(source.root);
     return findNode.best;
 }
@@ -1115,6 +1191,39 @@ struct FindSymbolReferences : public Luau::AstVisitor
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol)
 {
     FindSymbolReferences finder(symbol);
+    source.root->visit(&finder);
+    return std::move(finder.result);
+}
+
+struct FindTypeReferences : public Luau::AstVisitor
+{
+    const Luau::Name& typeName;
+    std::optional<const Luau::Name> prefix;
+    std::vector<Luau::Location> result{};
+
+    explicit FindTypeReferences(const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
+        : typeName(typeName)
+        , prefix(prefix)
+    {
+    }
+
+    bool visit(class Luau::AstType* node)
+    {
+        return true;
+    }
+
+    bool visit(class Luau::AstTypeReference* node)
+    {
+        if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
+            result.push_back(node->nameLocation);
+
+        return true;
+    }
+};
+
+std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source, const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
+{
+    FindTypeReferences finder(typeName, prefix);
     source.root->visit(&finder);
     return std::move(finder.result);
 }

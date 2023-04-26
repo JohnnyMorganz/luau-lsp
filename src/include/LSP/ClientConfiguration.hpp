@@ -150,6 +150,15 @@ struct ClientRequireConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode);
 
+struct ClientIndexConfiguration
+{
+    /// Whether the whole workspace should be indexed. If disabled, only limited support is
+    // available for features such as "Find All References" and "Rename"
+    bool enabled = true;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled);
+
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -166,6 +175,7 @@ struct ClientConfiguration
     ClientCompletionConfiguration completion{};
     ClientSignatureHelpConfiguration signatureHelp{};
     ClientRequireConfiguration require{};
+    ClientIndexConfiguration index{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp, require);
+    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp, require, index);

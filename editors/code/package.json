@@ -378,6 +378,12 @@
             "String requires are interpreted relative to the root of the workspace",
             "String requires are interpreted relative to the current file"
           ]
+        },
+        "luau-lsp.index.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Whether all files in a workspace should be indexed into memory. If disabled, only limited support is available for features such as 'Find All References' and 'Rename'"
         }
       }
     }

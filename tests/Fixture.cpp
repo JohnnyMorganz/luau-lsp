@@ -101,6 +101,7 @@ Fixture::Fixture()
 
     ClientConfiguration config;
     config.sourcemap.enabled = false;
+    config.index.enabled = false;
     workspace.setupWithConfiguration(config);
 
     Luau::setPrintLine([](auto s) {});
