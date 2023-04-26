@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.19.0] - 2023-04-26
+
 ### Deprecated
 
 - Deprecated config `luau-lsp.completion.suggestImports`: use `luau-lsp.completion.imports.enabled` instead
