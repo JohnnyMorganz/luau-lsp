@@ -1215,7 +1215,7 @@ struct FindTypeReferences : public Luau::AstVisitor
     bool visit(class Luau::AstTypeReference* node)
     {
         if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
-            result.push_back(node->location); // TODO: only do the node's name location
+            result.push_back(node->nameLocation);
 
         return true;
     }
