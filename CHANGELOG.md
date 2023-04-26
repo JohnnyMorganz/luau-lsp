@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated config `luau-lsp.completion.suggestImports`: use `luau-lsp.completion.imports.enabled` instead
+
+### Added
+
+- Added more settings to auto-importing:
+  - `luau-lsp.completion.imports.enabled`: replaces `luau-lsp.completion.suggestImports` (default: false)
+  - `luau-lsp.completion.imports.suggestServices`: whether GetService imports are included in suggestions (default: true)
+  - `luau-lsp.completion.imports.suggestRequires`: whether auto-requires are included in suggestions (default: true)
+  - `luau-lsp.completion.imports.requireStyle`: the style of require format (default: "auto")
+
 ### Changed
 
 - Sync to upstream Luau 0.573

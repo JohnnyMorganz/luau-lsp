@@ -298,7 +298,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     serviceVisitor.visit(sourceModule->root);
 
     // If in roblox mode - suggest services
-    if (config.types.roblox)
+    if (config.types.roblox && config.completion.imports.suggestServices)
     {
         auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
         for (auto& service : services)
@@ -312,6 +312,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
         }
     }
 
+    if (config.completion.imports.suggestRequires)
     {
         FindRequiresVisitor visitor;
         visitor.visit(sourceModule->root);
@@ -337,10 +338,13 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
 
             std::string requirePath;
             std::vector<lsp::TextEdit> textEdits;
-            bool isRelative = false;
 
+            // Compute the style of require
+            bool isRelative = false;
             auto parent1 = getParentPath(moduleName), parent2 = getParentPath(path);
-            if (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2)
+            if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
+                (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
+                    (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2)))
             {
                 requirePath = "./" + std::filesystem::relative(path, moduleName).string();
                 isRelative = true;
@@ -792,7 +796,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         items.emplace_back(item);
     }
 
-    if (config.completion.suggestImports &&
+    if ((config.completion.suggestImports || config.completion.imports.enabled) &&
         (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
     {
         suggestImports(moduleName, position, config, *textDocument, items);

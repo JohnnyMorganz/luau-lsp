@@ -106,12 +106,6 @@
           "default": false,
           "scope": "resource"
         },
-        "luau-lsp.completion.suggestImports": {
-          "markdownDescription": "Suggest automatic imports in completion items",
-          "type": "boolean",
-          "default": false,
-          "scope": "resource"
-        },
         "luau-lsp.ignoreGlobs": {
           "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
           "type": "array",
@@ -304,6 +298,48 @@
           "markdownDescription": "Fill parameter names in an autocompleted function call, which can be tabbed through. Requires `#luau-lsp.completion.addParentheses#` to be enabled",
           "type": "boolean",
           "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.suggestImports": {
+          "markdownDescription": "Suggest automatic imports in completion items",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.completion.imports.enabled#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.completion.imports.enabled instead."
+        },
+        "luau-lsp.completion.imports.enabled": {
+          "markdownDescription": "Suggest automatic imports in completion items",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.imports.suggestServices": {
+          "markdownDescription": "Whether GetService completions are suggested in autocomplete",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.imports.suggestRequires": {
+          "markdownDescription": "Whether module requires are suggested in autocomplete",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.imports.requireStyle": {
+          "markdownDescription": "The style of requires when autocompleted",
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "alwaysRelative",
+            "alwaysAbsolute"
+          ],
+          "enumDescriptions": [
+            "Automatically compute the style of require to use based on heuristics",
+            "Always require the module relative to the current file",
+            "Always require the module absolute based on root"
+          ],
           "scope": "resource"
         },
         "luau-lsp.signatureHelp.enabled": {
