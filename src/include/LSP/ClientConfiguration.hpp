@@ -101,8 +101,11 @@ struct ClientCompletionImportsConfiguration
     bool suggestRequires = true;
     /// The style of the auto-imported require
     ImportRequireStyle requireStyle = ImportRequireStyle::Auto;
+    /// Whether services and requires should be separated by an empty line
+    bool separateGroupsWithLine = false;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle, separateGroupsWithLine);
 
 struct ClientCompletionConfiguration
 {

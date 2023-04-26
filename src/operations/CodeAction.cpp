@@ -20,7 +20,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
         return {};
 
     // Find all the `local X = require(...)` calls
-    FindRequiresVisitor visitor;
+    FindImportsVisitor visitor;
     visitor.visit(sourceModule->root);
 
     // Check if there are any requires
@@ -85,8 +85,8 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::Docum
     if (!sourceModule)
         return {};
 
-    // Find all the `local X = game:GetService("Service")` calls
-    FindServicesVisitor visitor;
+    // Find all `local X = game:GetService("Service")`
+    FindImportsVisitor visitor;
     visitor.visit(sourceModule->root);
 
     if (visitor.serviceLineMap.empty())

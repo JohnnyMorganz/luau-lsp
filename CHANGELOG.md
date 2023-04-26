@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `luau-lsp.completion.imports.suggestServices`: whether GetService imports are included in suggestions (default: true)
   - `luau-lsp.completion.imports.suggestRequires`: whether auto-requires are included in suggestions (default: true)
   - `luau-lsp.completion.imports.requireStyle`: the style of require format (default: "auto")
+  - `luau-lsp.completion.imports.separateGroupsWithLine`: whether an empty line should be added in between services and requires (default: false)
 
 ### Changed
 

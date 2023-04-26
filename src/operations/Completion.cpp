@@ -200,23 +200,27 @@ static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
     return services;
 }
 
-static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber)
+static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
     auto importText = "local " + name + " = require(" + path + ")\n";
+    if (prependNewline)
+        importText = "\n" + importText;
     return {range, importText};
 }
 
-static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber)
+static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
     auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
+    if (appendNewline)
+        importText += "\n";
     return {range, importText};
 }
 
-static lsp::CompletionItem createSuggestService(const std::string& service, size_t lineNumber)
+static lsp::CompletionItem createSuggestService(const std::string& service, size_t lineNumber, bool appendNewline = false)
 {
-    auto textEdit = createServiceTextEdit(service, lineNumber);
+    auto textEdit = createServiceTextEdit(service, lineNumber, appendNewline);
 
     lsp::CompletionItem item;
     item.label = service;
@@ -294,8 +298,9 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             hotCommentsLineNumber = hotComment.location.begin.line + 1U;
     }
 
-    FindServicesVisitor serviceVisitor;
-    serviceVisitor.visit(sourceModule->root);
+    // Find all GetService and require calls
+    FindImportsVisitor importsVisitor;
+    importsVisitor.visit(sourceModule->root);
 
     // If in roblox mode - suggest services
     if (config.types.roblox && config.completion.imports.suggestServices)
@@ -304,34 +309,36 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
         for (auto& service : services)
         {
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
-            if (serviceVisitor.serviceLineMap.find(service) != serviceVisitor.serviceLineMap.end())
+            if (contains(importsVisitor.serviceLineMap, service))
                 continue;
 
-            size_t lineNumber = serviceVisitor.findBestLine(service, hotCommentsLineNumber);
-            result.emplace_back(createSuggestService(service, lineNumber));
+            size_t lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
+
+            bool appendNewline = false;
+            if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
+                importsVisitor.firstRequireLine.value() - lineNumber == 0)
+                appendNewline = true;
+
+            result.emplace_back(createSuggestService(service, lineNumber, appendNewline));
         }
     }
 
     if (config.completion.imports.suggestRequires)
     {
-        FindRequiresVisitor visitor;
-        visitor.visit(sourceModule->root);
-
         size_t minimumLineNumber = hotCommentsLineNumber;
-        if (serviceVisitor.lastServiceDefinitionLine)
+        if (importsVisitor.lastServiceDefinitionLine)
             minimumLineNumber =
-                *serviceVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*serviceVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
+                *importsVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*importsVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
 
-        if (visitor.firstRequireLine)
-            minimumLineNumber = *visitor.firstRequireLine >= minimumLineNumber ? (*visitor.firstRequireLine) : minimumLineNumber;
-
+        if (importsVisitor.firstRequireLine)
+            minimumLineNumber = *importsVisitor.firstRequireLine >= minimumLineNumber ? (*importsVisitor.firstRequireLine) : minimumLineNumber;
 
         for (auto& [path, node] : fileResolver.virtualPathsToSourceNodes)
         {
             auto name = node->name;
             replaceAll(name, " ", "_");
 
-            if (path == moduleName || node->className != "ModuleScript" || visitor.contains(name))
+            if (path == moduleName || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                 continue;
             if (auto scriptFilePath = fileResolver.getRealPathFromSourceNode(node); scriptFilePath && isIgnoredFile(*scriptFilePath, config))
                 continue;
@@ -356,7 +363,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
 
             size_t lineNumber = minimumLineNumber;
             size_t bestLength = 0;
-            for (auto& group : visitor.requiresMap)
+            for (auto& group : importsVisitor.requiresMap)
             {
                 for (auto& [_, stat] : group)
                 {
@@ -385,11 +392,24 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
                 // Service will be the first part of the path
                 // If we haven't imported the service already, then we auto-import it
                 auto service = requirePath.substr(0, requirePath.find('/'));
-                if (serviceVisitor.serviceLineMap.find(service) == serviceVisitor.serviceLineMap.end())
-                    textEdits.emplace_back(createServiceTextEdit(service, serviceVisitor.findBestLine(service, hotCommentsLineNumber)));
+                if (!contains(importsVisitor.serviceLineMap, service))
+                {
+                    auto lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
+                    bool appendNewline = false;
+                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
+                        importsVisitor.firstRequireLine.value() - lineNumber == 0)
+                        appendNewline = true;
+                    textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
+                }
             }
 
-            textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber));
+            // Whether we need to add a newline before the require to separate it from the services
+            bool prependNewline = false;
+            if (config.completion.imports.separateGroupsWithLine && importsVisitor.lastServiceDefinitionLine &&
+                lineNumber - importsVisitor.lastServiceDefinitionLine.value() == 1)
+                prependNewline = true;
+
+            textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
 
             result.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute));
         }
