@@ -6,10 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated config `luau-lsp.completion.suggestImports`: use `luau-lsp.completion.imports.enabled` instead
+
+### Added
+
 - Added setting `luau-lsp.index.enabled` which will index the whole workspace into memory. If disabled, only limited support for Find All References and rename is possible
 - Added support for finding all references of both local and exported types. For exported types, `luau-lsp.index.enabled` must be enabled for full support.
 - Added support for renaming table properties across files. If `luau-lsp.index.enabled` is disabled, this feature is disabled for correctness reasons.
 - Added support for renaming types (both local and exported). If `luau-lsp.index.enabled` is disabled, this exported types renaming is disabled for correctness reasons.
+- Added more settings to auto-importing:
+  - `luau-lsp.completion.imports.enabled`: replaces `luau-lsp.completion.suggestImports` (default: false)
+  - `luau-lsp.completion.imports.suggestServices`: whether GetService imports are included in suggestions (default: true)
+  - `luau-lsp.completion.imports.suggestRequires`: whether auto-requires are included in suggestions (default: true)
+  - `luau-lsp.completion.imports.requireStyle`: the style of require format (default: "auto")
+  - `luau-lsp.completion.imports.separateGroupsWithLine`: whether an empty line should be added in between services and requires (default: false)
 
 ### Changed
 

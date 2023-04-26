@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <algorithm>
 
 std::optional<std::string> getParentPath(const std::string& path);
@@ -29,6 +30,12 @@ inline bool contains(const std::vector<V>& vec, const V& value)
 
 template<class K, class V>
 inline bool contains(const std::unordered_map<K, V>& map, const K& value)
+{
+    return map.find(value) != map.end();
+}
+
+template<class K, class V>
+inline bool contains(const std::map<K, V>& map, const K& value)
 {
     return map.find(value) != map.end();
 }
