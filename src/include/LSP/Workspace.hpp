@@ -9,6 +9,12 @@
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
+struct Reference
+{
+    const Luau::ModuleName moduleName;
+    const Luau::Location location;
+};
+
 class WorkspaceFolder
 {
 public:
@@ -55,6 +61,8 @@ public:
 
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
+    void indexFiles(const ClientConfiguration& config);
+
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
@@ -65,6 +73,8 @@ private:
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
     std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
+    std::vector<Reference> findAllReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
+    std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
 

@@ -663,10 +663,27 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             // Recompute diagnostics
             this->recomputeDiagnostics(workspace, config);
         }
-        else if ((filePath.extension() == ".lua" || filePath.extension() == ".luau") && change.type == lsp::FileChangeType::Deleted)
+        else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
         {
+            // Index the workspace on changes
+            if (config.index.enabled && workspace->isConfigured)
+            {
+                auto moduleName = workspace->fileResolver.getModuleName(change.uri);
+
+                std::vector<Luau::ModuleName> markedDirty{};
+                workspace->frontend.markDirty(moduleName, &markedDirty);
+
+                if (change.type == lsp::FileChangeType::Created)
+                    workspace->frontend.check(moduleName);
+
+                // Re-check the reverse dependencies
+                for (const auto& moduleName : markedDirty)
+                    workspace->frontend.check(moduleName);
+            }
+
             // Clear the diagnostics for the file in case it was not managed
-            workspace->clearDiagnosticsForFile(change.uri);
+            if (change.type == lsp::FileChangeType::Deleted)
+                workspace->clearDiagnosticsForFile(change.uri);
         }
     }
 }
