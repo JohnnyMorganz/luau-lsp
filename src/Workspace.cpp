@@ -147,6 +147,8 @@ bool WorkspaceFolder::updateSourceMap()
         instanceTypes.clear();
         types::registerInstanceTypes(frontend, frontend.globals, instanceTypes, fileResolver,
             /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
+        types::registerInstanceTypes(frontend, frontend.globalsForAutocomplete, instanceTypes, fileResolver,
+            /* expressiveTypes: */ true);
 
         return true;
     }

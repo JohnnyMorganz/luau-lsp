@@ -481,8 +481,11 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
     }
 
     // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-    frontend.prepareModuleScope = [&, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
+    frontend.prepareModuleScope = [&frontend, &fileResolver, &arena, expressiveTypes](
+                                      const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
     {
+        Luau::GlobalTypes& globals = forAutocomplete ? frontend.globalsForAutocomplete : frontend.globals;
+
         // TODO: we hope to remove these in future!
         if (!expressiveTypes && !forAutocomplete)
         {
@@ -491,12 +494,10 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
             scope->bindings[Luau::AstName("game")] = Luau::Binding{globals.builtinTypes->anyType};
         }
 
-        if (auto node =
-                fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
-        {
-            if (expressiveTypes)
+        if (expressiveTypes)
+            if (auto node =
+                    fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
                 scope->bindings[Luau::AstName("script")] = Luau::Binding{getSourcemapType(globals, arena, node.value())};
-        }
     };
 }
 
