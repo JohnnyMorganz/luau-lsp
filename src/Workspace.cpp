@@ -145,10 +145,13 @@ bool WorkspaceFolder::updateSourceMap()
         // Recreate instance types
         auto config = client->getConfiguration(rootUri);
         instanceTypes.clear();
+        // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
+        // We pass the same setting even when we are registering autocomplete globals since
+        // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
         types::registerInstanceTypes(frontend, frontend.globals, instanceTypes, fileResolver,
             /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
         types::registerInstanceTypes(frontend, frontend.globalsForAutocomplete, instanceTypes, fileResolver,
-            /* expressiveTypes: */ true);
+            /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
 
         return true;
     }

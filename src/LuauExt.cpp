@@ -494,7 +494,7 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
             scope->bindings[Luau::AstName("game")] = Luau::Binding{globals.builtinTypes->anyType};
         }
 
-        if (expressiveTypes)
+        if (expressiveTypes || forAutocomplete)
             if (auto node =
                     fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
                 scope->bindings[Luau::AstName("script")] = Luau::Binding{getSourcemapType(globals, arena, node.value())};
