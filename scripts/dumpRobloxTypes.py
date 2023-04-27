@@ -37,6 +37,7 @@ TYPE_INDEX = {
     "double": "number",
     "float": "number",
     "void": "nil",
+    "null": "nil",
     "Objects": "{ Instance }",
     "Dictionary": "{ [any]: any }",
     "Map": "{ [any]: any }",
