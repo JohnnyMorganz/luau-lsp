@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed forced expressive types in diagnostics
+
 ## [1.19.1] - 2023-04-27
 
 ### Fixed
