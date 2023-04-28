@@ -46,6 +46,8 @@ static bool validateFlag(char* str, int argIndex)
         return true;
     else if (strcmp(str, "--timetrace") == 0)
         return true;
+    else if (strcmp(str, "--no-strict-dm-types") == 0)
+        return true;
     else if (strncmp(str, "--sourcemap=", 12) == 0 && n > 13)
         return true;
     else if (strncmp(str, "--defs=", 7) == 0 && n > 8)
@@ -84,6 +86,7 @@ static void displayHelp(const char* argv0)
     printf("  --formatter=plain: report analysis errors in Luacheck-compatible format\n");
     printf("  --formatter=gnu: report analysis errors in GNU-compatible format\n");
     printf("  --timetrace: record compiler time tracing information into trace.json\n");
+    printf("  --no-strict-dm-types: disable strict DataModel types in type-checking\n");
     printf("  --sourcemap=PATH: path to a Rojo-style sourcemap\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");

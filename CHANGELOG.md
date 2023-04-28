@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed forced expressive types in diagnostics
+- Added option `--no-strict-dm-types` for analyze CLI to disable strict datamodel types and its associated false positives
 
 ## [1.19.1] - 2023-04-27
 

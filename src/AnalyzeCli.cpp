@@ -147,6 +147,7 @@ int startAnalyze(int argc, char** argv)
     std::vector<std::filesystem::path> files{};
     std::vector<std::string> ignoreGlobPatterns{};
     std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
+    bool expressiveTypes = true;
 
     for (int i = 2; i < argc; ++i)
     {
@@ -161,6 +162,8 @@ int startAnalyze(int argc, char** argv)
                 annotate = true;
             else if (strcmp(argv[i], "--timetrace") == 0)
                 FFlag::DebugLuauTimeTracing.value = true;
+            else if (strcmp(argv[i], "--no-strict-dm-types") == 0)
+                expressiveTypes = false;
             else if (strncmp(argv[i], "--sourcemap=", 12) == 0)
                 sourcemapPath = std::string(argv[i] + 12);
             else if (strncmp(argv[i], "--definitions=", 14) == 0)
@@ -307,7 +310,7 @@ int startAnalyze(int argc, char** argv)
         }
     }
 
-    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver, /* TODO - expressiveTypes: */ true);
+    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver, expressiveTypes);
 
     Luau::freeze(frontend.globals.globalTypes);
     Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
