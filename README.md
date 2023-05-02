@@ -75,8 +75,8 @@ Install the binary and run `luau-lsp --help` for more information.
 - [x] Inlay Hints
 - [x] Documentation Comments ([Moonwave Style](https://github.com/evaera/moonwave) - supporting both `--- comment` and `--[=[ comment ]=]`, but must be next to statement)
 - [x] Code Actions
+- [x] Workspace Symbols
 - [ ] Call Hierarchy
-- [ ] Workspace Symbols
 
 The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
 They can be investigated at a later time:
