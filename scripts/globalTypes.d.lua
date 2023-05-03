@@ -734,6 +734,8 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	ReplicatorTimeout: EnumConnectionError
 	PlayerRemoved: EnumConnectionError
 	DisconnectOutOfMemoryKeepPlayingLeave: EnumConnectionError
+	DisconnectCollaboratorPermissionRevoked: EnumConnectionError
+	DisconnectCollaboratorUnderage: EnumConnectionError
 	PlacelaunchErrors: EnumConnectionError
 	PlacelaunchDisabled: EnumConnectionError
 	PlacelaunchError: EnumConnectionError
@@ -2577,6 +2579,10 @@ declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
 	MenuScrollbarHandle: EnumStudioScriptEditorColorCategories
 	MenuBorder: EnumStudioScriptEditorColorCategories
 	DocViewCodeBackground: EnumStudioScriptEditorColorCategories
+	AICOOverlayText: EnumStudioScriptEditorColorCategories
+	AICOOverlayButtonBackground: EnumStudioScriptEditorColorCategories
+	AICOOverlayButtonBackgroundHover: EnumStudioScriptEditorColorCategories
+	AICOOverlayButtonBackgroundPressed: EnumStudioScriptEditorColorCategories
 end
 declare class EnumStudioScriptEditorColorPresets extends EnumItem end
 declare class EnumStudioScriptEditorColorPresets_INTERNAL extends Enum
@@ -2706,6 +2712,10 @@ declare class EnumStudioStyleGuideColor_INTERNAL extends Enum
 	ScriptFunctionName: EnumStudioStyleGuideColor
 	ScriptTodo: EnumStudioStyleGuideColor
 	ScriptBracket: EnumStudioStyleGuideColor
+	AICOOverlayText: EnumStudioStyleGuideColor
+	AICOOverlayButtonBackground: EnumStudioStyleGuideColor
+	AICOOverlayButtonBackgroundHover: EnumStudioStyleGuideColor
+	AICOOverlayButtonBackgroundPressed: EnumStudioStyleGuideColor
 	AttributeCog: EnumStudioStyleGuideColor
 end
 declare class EnumStudioStyleGuideModifier extends EnumItem end
@@ -4131,10 +4141,11 @@ declare class AssetImportSession extends Instance
 	function Cancel(self): nil
 	function GetCurrentStatusTable(self): { [any]: any }
 	function GetFilename(self): string
+	function GetImportTree(self): Instance
 	function GetInstance(self, nodeId: number): Instance
-	function GetSettingsRoot(self): Instance
 	function HasAnimation(self): boolean
 	function IsAvatar(self): boolean
+	function IsGltf(self): boolean
 	function IsR15(self): boolean
 	function Upload(self): nil
 	function usesCustomRestPoseLua(self): boolean
@@ -5056,8 +5067,8 @@ declare class AirController extends ControllerBase
 	MoveMaxForce: number
 	OrientationMaxTorque: number
 	OrientationSpeedFactor: number
-	TurningMaxTorque: number
-	TurningSpeedFactor: number
+	TurnMaxTorque: number
+	TurnSpeedFactor: number
 end
 
 declare class ClimbController extends ControllerBase
@@ -6023,6 +6034,7 @@ end
 
 declare class AdGui extends SurfaceGuiBase
 	AdShape: EnumAdShape
+	FallbackImage: Content
 	Status: EnumAdUnitStatus
 end
 
@@ -7057,6 +7069,8 @@ declare class PluginMouse extends Mouse
 end
 
 declare class MouseService extends Instance
+	MouseEnterStudioViewport: RBXScriptSignal<>
+	MouseLeaveStudioViewport: RBXScriptSignal<>
 end
 
 declare class MultipleDocumentInterfaceInstance extends Instance
@@ -7158,7 +7172,6 @@ declare class BasePart extends PVInstance
 	CastShadow: boolean
 	CenterOfMass: Vector3
 	CollisionGroup: string
-	CollisionGroupId: number
 	Color: Color3
 	CurrentPhysicalProperties: PhysicalProperties
 	CustomPhysicalProperties: PhysicalProperties
@@ -8363,6 +8376,7 @@ declare class Selection extends Instance
 	SelectionChanged: RBXScriptSignal<>
 	SelectionLineThickness: number
 	SelectionThickness: number
+	ShowActiveInstanceHighlight: boolean
 	ShowBoundingBox: boolean
 	function Add(self, instancesToAdd: { Instance }): nil
 	function ClearTerrainSelectionHack(self): nil
@@ -8378,7 +8392,6 @@ end
 declare class SensorBase extends Instance
 	OnSensorOutputChanged: RBXScriptSignal<>
 	UpdateType: EnumSensorUpdateType
-	function Sense(self): nil
 end
 
 declare class BuoyancySensor extends SensorBase
@@ -9083,6 +9096,7 @@ end
 declare class StudioService extends Instance
 	ActiveScript: Instance
 	AlignDraggedObjects: boolean
+	DEPRECATED_ShowActiveInstanceHighlight: boolean
 	DraggerSolveConstraints: boolean
 	DrawConstraintsOnTop: boolean
 	GridSize: number
@@ -9099,7 +9113,6 @@ declare class StudioService extends Instance
 	PromptTransformPluginCheckEnable: RBXScriptSignal<>
 	RotateIncrement: number
 	SaveLocallyAsComplete: RBXScriptSignal<boolean>
-	ShowActiveInstanceHighlight: boolean
 	ShowConstraintDetails: boolean
 	StudioLocaleId: string
 	UseLocalSpace: boolean
@@ -9308,6 +9321,9 @@ declare class ChatInputBarConfiguration extends TextChatConfigurations
 	BackgroundTransparency: number
 	Enabled: boolean
 	FontFace: Font
+	IsFocused: boolean
+	IsFocusedWrite: boolean
+	KeyboardKeyCode: EnumKeyCode
 	PlaceholderColor3: Color3
 	TargetTextChannel: TextChannel
 	TextBox: TextBox
