@@ -242,4 +242,58 @@ NLOHMANN_DEFINE_OPTIONAL(ColorPresentation, label, textEdit, additionalTextEdits
 
 using ColorPresentationResult = std::vector<ColorPresentation>;
 
+
+/**
+ * The parameters of a Workspace Symbol Request.
+ */
+struct WorkspaceSymbolParams
+{
+    /**
+     * A query string to filter symbols by. Clients may send an empty
+     * string here to request all symbols.
+     */
+    std::string query;
+};
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbolParams, query);
+
+/**
+ * A special workspace symbol that supports locations without a range
+ *
+ * @since 3.17.0
+ */
+struct WorkspaceSymbol
+{
+    /**
+     * The name of this symbol.
+     */
+    std::string name;
+
+    /**
+     * The kind of this symbol.
+     */
+    SymbolKind kind;
+
+    /**
+     * Tags for this completion item.
+     */
+    std::vector<SymbolTag> tags;
+
+    /**
+     * The name of the symbol containing this symbol. This information is for
+     * user interface purposes (e.g. to render a qualifier in the user interface
+     * if necessary). It can't be used to re-infer a hierarchy for the document
+     * symbols.
+     */
+    std::optional<std::string> containerName;
+
+    /**
+     * The location of this symbol. Whether a server is allowed to
+     * return a location without a range depends on the client
+     * capability `workspace.symbol.resolveSupport`.
+     *
+     * See also `SymbolInformation.location`.
+     */
+    Location location;
+};
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbol, name, kind, tags, containerName, location);
 } // namespace lsp

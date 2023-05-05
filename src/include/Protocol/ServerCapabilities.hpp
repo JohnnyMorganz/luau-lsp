@@ -118,11 +118,15 @@ struct ServerCapabilities
     bool renameProvider = false;
     bool inlayHintProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider = std::nullopt;
+    /**
+     * The server provides workspace symbol support.
+     */
+    bool workspaceSymbolProvider = false;
     std::optional<SemanticTokensOptions> semanticTokensProvider = std::nullopt;
     std::optional<WorkspaceCapabilities> workspace = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, semanticTokensProvider,
-    workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, workspaceSymbolProvider,
+    semanticTokensProvider, workspace);
 } // namespace lsp
