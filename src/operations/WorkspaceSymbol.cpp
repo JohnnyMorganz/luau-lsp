@@ -8,18 +8,18 @@
 struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 {
     const TextDocument* textDocument;
-    const std::string& query;
+    const std::string query;
     std::vector<lsp::WorkspaceSymbol> symbols{};
 
-    explicit WorkspaceSymbolsVisitor(const TextDocument* textDocument, const std::string& query)
+    explicit WorkspaceSymbolsVisitor(const TextDocument* textDocument, std::string query)
         : textDocument(textDocument)
-        , query(toLower(std::string(query)))
+        , query(std::move(toLower(query)))
     {
     }
 
-    bool matchesQuery(const std::string& symbolName)
+    bool matchesQuery(std::string symbolName)
     {
-        return query.empty() || toLower(std::string(symbolName)).find(query);
+        return query.empty() || toLower(symbolName).find(query);
     }
 
     void createLocalSymbol(Luau::AstLocal* local, std::optional<std::string> containerName)
