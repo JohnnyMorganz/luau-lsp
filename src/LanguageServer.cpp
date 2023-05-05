@@ -8,8 +8,12 @@
 #include "LSP/Uri.hpp"
 #include "LSP/DocumentationParser.hpp"
 
+#define ASSERT_PARAMS(params, method) \
+    if (!params) \
+        throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
+
 #define REQUIRED_PARAMS(params, method) \
-    !(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value()
+    (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
 
 LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
     const std::vector<std::filesystem::path>& documentationFiles, const std::optional<Luau::Config>& defaultConfig)
@@ -95,6 +99,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.inlayHintProvider = true;
     // Diagnostics Provider
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
+    // Workspace Symbols Provider
+    capabilities.workspaceSymbolProvider = true;
     // Semantic Tokens Provider
     capabilities.semanticTokensProvider = {
         {
@@ -110,7 +116,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     return capabilities;
 }
 
-void LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> params)
+void LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> baseParams)
 {
     // Handle request
     // If a request has been sent before the server is initialized, we should error
@@ -124,7 +130,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
 
     if (method == "initialize")
     {
-        response = onInitialize(REQUIRED_PARAMS(params, "initialize"));
+        response = onInitialize(REQUIRED_PARAMS(baseParams, "initialize"));
     }
     else if (method == "shutdown")
     {
@@ -132,43 +138,43 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/completion")
     {
-        response = completion(REQUIRED_PARAMS(params, "textDocument/completion"));
+        response = completion(REQUIRED_PARAMS(baseParams, "textDocument/completion"));
     }
     else if (method == "textDocument/documentLink")
     {
-        response = documentLink(REQUIRED_PARAMS(params, "textDocument/documentLink"));
+        response = documentLink(REQUIRED_PARAMS(baseParams, "textDocument/documentLink"));
     }
     else if (method == "textDocument/hover")
     {
-        response = hover(REQUIRED_PARAMS(params, "textDocument/hover"));
+        response = hover(REQUIRED_PARAMS(baseParams, "textDocument/hover"));
     }
     else if (method == "textDocument/signatureHelp")
     {
-        response = signatureHelp(REQUIRED_PARAMS(params, "textDocument/signatureHelp"));
+        response = signatureHelp(REQUIRED_PARAMS(baseParams, "textDocument/signatureHelp"));
     }
     else if (method == "textDocument/definition")
     {
-        response = gotoDefinition(REQUIRED_PARAMS(params, "textDocument/definition"));
+        response = gotoDefinition(REQUIRED_PARAMS(baseParams, "textDocument/definition"));
     }
     else if (method == "textDocument/typeDefinition")
     {
-        response = gotoTypeDefinition(REQUIRED_PARAMS(params, "textDocument/typeDefinition"));
+        response = gotoTypeDefinition(REQUIRED_PARAMS(baseParams, "textDocument/typeDefinition"));
     }
     else if (method == "textDocument/references")
     {
-        response = references(REQUIRED_PARAMS(params, "textDocument/references"));
+        response = references(REQUIRED_PARAMS(baseParams, "textDocument/references"));
     }
     else if (method == "textDocument/rename")
     {
-        response = rename(REQUIRED_PARAMS(params, "textDocument/rename"));
+        response = rename(REQUIRED_PARAMS(baseParams, "textDocument/rename"));
     }
     else if (method == "textDocument/documentSymbol")
     {
-        response = documentSymbol(REQUIRED_PARAMS(params, "textDocument/documentSymbol"));
+        response = documentSymbol(REQUIRED_PARAMS(baseParams, "textDocument/documentSymbol"));
     }
     else if (method == "textDocument/codeAction")
     {
-        response = codeAction(REQUIRED_PARAMS(params, "textDocument/codeAction"));
+        response = codeAction(REQUIRED_PARAMS(baseParams, "textDocument/codeAction"));
     }
     // else if (method == "codeAction/resolve")
     // {
@@ -176,29 +182,29 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     // }
     else if (method == "textDocument/semanticTokens/full")
     {
-        response = semanticTokens(REQUIRED_PARAMS(params, "textDocument/semanticTokns/full"));
+        response = semanticTokens(REQUIRED_PARAMS(baseParams, "textDocument/semanticTokns/full"));
     }
     else if (method == "textDocument/inlayHint")
     {
-        response = inlayHint(REQUIRED_PARAMS(params, "textDocument/inlayHint"));
+        response = inlayHint(REQUIRED_PARAMS(baseParams, "textDocument/inlayHint"));
     }
     else if (method == "textDocument/documentColor")
     {
-        response = documentColor(REQUIRED_PARAMS(params, "textDocument/documentColor"));
+        response = documentColor(REQUIRED_PARAMS(baseParams, "textDocument/documentColor"));
     }
     else if (method == "textDocument/colorPresentation")
     {
-        response = colorPresentation(REQUIRED_PARAMS(params, "textDocument/colorPresentation"));
+        response = colorPresentation(REQUIRED_PARAMS(baseParams, "textDocument/colorPresentation"));
     }
     else if (method == "textDocument/diagnostic")
     {
-        response = documentDiagnostic(REQUIRED_PARAMS(params, "textDocument/diagnostic"));
+        response = documentDiagnostic(REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"));
     }
     else if (method == "workspace/diagnostic")
     {
         // This request has partial request support.
         // If workspaceDiagnostic returns nothing, then we don't signal a response (as data will be sent as progress notifications)
-        if (auto report = workspaceDiagnostic(REQUIRED_PARAMS(params, "workspace/diagnostic")))
+        if (auto report = workspaceDiagnostic(REQUIRED_PARAMS(baseParams, "workspace/diagnostic")))
         {
             response = report;
         }
@@ -207,6 +213,20 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
             client->workspaceDiagnosticsRequestId = id;
             return;
         }
+    }
+    else if (method == "workspace/symbol")
+    {
+        ASSERT_PARAMS(baseParams, "workspace/symbol");
+        auto params = baseParams->get<lsp::WorkspaceSymbolParams>();
+
+        std::vector<lsp::WorkspaceSymbol> result;
+        for (auto& workspace : workspaceFolders)
+        {
+            auto report = workspace->workspaceSymbol(params);
+            if (report)
+                result.insert(result.end(), std::make_move_iterator(report->begin()), std::make_move_iterator(report->end()));
+        }
+        response = result;
     }
     else
     {
