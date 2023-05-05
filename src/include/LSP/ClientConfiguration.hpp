@@ -146,9 +146,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(RequireModeConfig, {
 struct ClientRequireConfiguration
 {
     RequireModeConfig mode = RequireModeConfig::RelativeToWorkspaceRoot;
+    // A mapping of custom require strings to file paths
+    std::unordered_map<std::string, std::string> map;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode, map);
 
 struct ClientIndexConfiguration
 {

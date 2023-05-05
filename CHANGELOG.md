@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added configuration option `luau-lsp.require.map` to statically provide custom mappings from string requires to a file path.
+  For example, adding `@example/constants` mapping to `C:/fakepath/constants.luau` will automatically resolve `require("@example/constants")`
+
 ## [1.19.2]
 
 ### Fixed

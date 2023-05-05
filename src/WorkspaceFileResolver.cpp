@@ -213,8 +213,20 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
     // Handle require("path") for compatibility
     if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
-        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
         std::string requiredString(expr->value.data, expr->value.size);
+
+        // Check for custom require overrides
+        if (client)
+        {
+            auto config = client->getConfiguration(rootUri);
+            if (auto it = config.require.map.find(requiredString); it != config.require.map.end())
+            {
+                auto filePath = it->second;
+                return Luau::ModuleInfo{filePath};
+            }
+        }
+
+        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
 
         std::error_code ec;
         auto filePath = std::filesystem::weakly_canonical(basePath / (requiredString + ".luau"), ec);
