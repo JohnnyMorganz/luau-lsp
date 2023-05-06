@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for workspace symbols to resolve symbols across the whole workspace. In VSCode, you can open this using `Ctrl + T`
 - Added configuration option `luau-lsp.require.map` to statically provide custom mappings from string requires to a file path.
   For example, adding `@example/constants` mapping to `C:/fakepath/constants.luau` will automatically resolve `require("@example/constants")`
+- Added support for Folding Ranges. The language server now signals the following foldable ranges in a document:
+  - Whole blocks, such as `do .. end`, `for - do .. end` `function() .. end` etc.
+  - Tables, and type tables `x = { .. }`
+  - Multiline function calls `foo(..)`
+  - Block comments `--[[ .. ]]`
+  - Custom comment regions denoted using `--#region` and `--#endregion`
 
 ## [1.19.2]
 

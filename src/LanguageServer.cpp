@@ -95,6 +95,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
+    // Folding Range Provider
+    capabilities.foldingRangeProvider = true;
     // Inlay Hint Provider
     capabilities.inlayHintProvider = true;
     // Diagnostics Provider
@@ -195,6 +197,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/colorPresentation")
     {
         response = colorPresentation(REQUIRED_PARAMS(baseParams, "textDocument/colorPresentation"));
+    }
+    else if (method == "textDocument/foldingRange")
+    {
+        ASSERT_PARAMS(baseParams, "textDocument/foldingRange");
+        auto params = baseParams->get<lsp::FoldingRangeParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->foldingRange(params);
     }
     else if (method == "textDocument/diagnostic")
     {
