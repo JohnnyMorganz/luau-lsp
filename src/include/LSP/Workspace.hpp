@@ -94,6 +94,7 @@ public:
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
+    std::vector<lsp::FoldingRange> foldingRange(const lsp::FoldingRangeParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);

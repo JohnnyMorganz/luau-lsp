@@ -296,4 +296,5 @@ struct WorkspaceSymbol
     Location location;
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbol, name, kind, tags, containerName, location);
+
 } // namespace lsp

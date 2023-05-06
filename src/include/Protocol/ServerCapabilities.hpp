@@ -116,6 +116,12 @@ struct ServerCapabilities
     std::optional<DocumentLinkOptions> documentLinkProvider = std::nullopt;
     bool colorProvider = false;
     bool renameProvider = false;
+    /**
+     * The server provides folding provider support.
+     *
+     * @since 3.10.0
+     */
+    bool foldingRangeProvider = false;
     bool inlayHintProvider = false;
     std::optional<DiagnosticOptions> diagnosticProvider = std::nullopt;
     /**
@@ -127,6 +133,6 @@ struct ServerCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, inlayHintProvider, diagnosticProvider, workspaceSymbolProvider,
-    semanticTokensProvider, workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider,
+    workspaceSymbolProvider, semanticTokensProvider, workspace);
 } // namespace lsp

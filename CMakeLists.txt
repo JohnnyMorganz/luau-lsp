@@ -35,6 +35,7 @@ target_sources(Luau.LanguageServer PRIVATE
     src/operations/SemanticTokens.cpp
     src/operations/CodeAction.cpp
     src/operations/WorkspaceSymbol.cpp
+    src/operations/FoldingRange.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE

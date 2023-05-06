@@ -76,6 +76,7 @@ Install the binary and run `luau-lsp --help` for more information.
 - [x] Documentation Comments ([Moonwave Style](https://github.com/evaera/moonwave) - supporting both `--- comment` and `--[=[ comment ]=]`, but must be next to statement)
 - [x] Code Actions
 - [x] Workspace Symbols
+- [x] Folding Range
 - [ ] Call Hierarchy
 
 The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
@@ -85,7 +86,6 @@ They can be investigated at a later time:
 - [ ] Go To Implementation (do not apply)
 - [ ] Code Lens (not necessary)
 - [ ] Document Highlight (not necessary - editor highlighting is sufficient)
-- [ ] Folding Range (not necessary - editor folding is sufficient)
 - [ ] Selection Range (not necessary - editor selection is sufficient)
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker
