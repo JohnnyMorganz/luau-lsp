@@ -95,6 +95,10 @@ public:
     lsp::RenameResult rename(const lsp::RenameParams& params);
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
 
+    std::vector<lsp::CallHierarchyItem> prepareCallHierarchy(const lsp::CallHierarchyPrepareParams& params);
+    std::vector<lsp::CallHierarchyIncomingCall> callHierarchyIncomingCalls(const lsp::CallHierarchyIncomingCallsParams& params);
+    std::vector<lsp::CallHierarchyOutgoingCall> callHierarchyOutgoingCalls(const lsp::CallHierarchyOutgoingCallsParams& params);
+
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
