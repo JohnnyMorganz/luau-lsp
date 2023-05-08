@@ -23,7 +23,7 @@ static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
 // Find all reverse dependencies of the top-level module
 // NOTE: this function is quite expensive as it requires a BFS
 // TODO: this comes from `markDirty`
-static std::vector<Luau::ModuleName> findReverseDependencies(const Luau::Frontend& frontend, const Luau::ModuleName moduleName)
+std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Luau::ModuleName& moduleName)
 {
     std::vector<Luau::ModuleName> dependents{};
     std::unordered_map<Luau::ModuleName, std::vector<Luau::ModuleName>> reverseDeps;
@@ -66,7 +66,7 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
         return {};
 
     std::vector<Reference> references;
-    std::vector<Luau::ModuleName> dependents = findReverseDependencies(frontend, ttv->definitionModuleName);
+    std::vector<Luau::ModuleName> dependents = findReverseDependencies(ttv->definitionModuleName);
 
     // For every module, search for its referencing
     for (const auto& moduleName : dependents)
@@ -143,7 +143,7 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         result.emplace_back(Reference{moduleName, location->second});
 
     // Find all cross-module references
-    auto reverseDependencies = findReverseDependencies(frontend, moduleName);
+    auto reverseDependencies = findReverseDependencies(moduleName);
     for (const auto& dependencyModuleName : reverseDependencies)
     {
         // Handle the imported module separately
