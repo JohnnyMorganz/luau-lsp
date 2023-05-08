@@ -11,6 +11,42 @@
 #include "LSP/PluginDataModel.hpp"
 #include "LSP/TextDocument.hpp"
 
+
+// A wrapper around a text document pointer
+// A text document might be temporarily created for the purposes of this function
+// in which case it should be deleted once the ptr goes out of scope.
+// I don't think we can use a unique_ptr here, because a managed text document is not owned
+// NOTE: document may still be nil!
+struct TextDocumentPtr
+{
+private:
+    const TextDocument* document = nullptr;
+    bool isTemporary = false;
+
+public:
+    TextDocumentPtr(const TextDocument* document, bool isTemporary)
+        : document(document)
+        , isTemporary(isTemporary)
+    {
+    }
+
+    explicit operator bool() const
+    {
+        return document != nullptr;
+    }
+
+    const TextDocument* operator->()
+    {
+        return document;
+    }
+
+    ~TextDocumentPtr()
+    {
+        if (isTemporary)
+            delete document;
+    }
+};
+
 struct WorkspaceFileResolver
     : Luau::FileResolver
     , Luau::ConfigResolver
@@ -48,6 +84,8 @@ struct WorkspaceFileResolver
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
     const TextDocument* getTextDocumentFromModuleName(const Luau::ModuleName& name) const;
+
+    TextDocumentPtr getOrCreateTextDocumentFromModuleName(const Luau::ModuleName& name);
 
     /// The name points to a virtual path (i.e., game/ or ProjectRoot/)
     bool isVirtualPath(const Luau::ModuleName& name) const
