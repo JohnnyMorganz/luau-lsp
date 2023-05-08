@@ -147,10 +147,10 @@ struct ClientRequireConfiguration
 {
     RequireModeConfig mode = RequireModeConfig::RelativeToWorkspaceRoot;
     // A mapping of custom require strings to file paths
-    std::unordered_map<std::string, std::string> map;
+    std::unordered_map<std::string, std::string> fileAliases;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode, map);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode, fileAliases);
 
 struct ClientIndexConfiguration
 {

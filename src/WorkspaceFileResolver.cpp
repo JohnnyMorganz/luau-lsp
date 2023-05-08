@@ -232,7 +232,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         if (client)
         {
             auto config = client->getConfiguration(rootUri);
-            if (auto it = config.require.map.find(requiredString); it != config.require.map.end())
+            if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
             {
                 auto filePath = it->second;
                 return Luau::ModuleInfo{filePath};

@@ -379,8 +379,8 @@
             "String requires are interpreted relative to the current file"
           ]
         },
-        "luau-lsp.require.map": {
-          "markdownDescription": "A mapping of custom require strings to file paths",
+        "luau-lsp.require.fileAliases": {
+          "markdownDescription": "A mapping of custom require string aliases to file paths",
           "type": "object",
           "default": {},
           "additionalProperties": {

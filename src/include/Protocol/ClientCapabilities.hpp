@@ -7,6 +7,7 @@
 #include "nlohmann/json.hpp"
 #include "Protocol/Completion.hpp"
 #include "Protocol/CodeAction.hpp"
+#include "Protocol/FoldingRange.hpp"
 
 namespace lsp
 {
@@ -302,6 +303,67 @@ NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionResolveSupport,
 NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities, dynamicRegistration, codeActionLiteralSupport, isPreferredSupport, disabledSupport,
     dataSupport, resolveSupport, honorsChangeAnnotations);
 
+struct FoldingRangeClientCapabilities
+{
+    /**
+     * Whether implementation supports dynamic registration for folding range
+     * providers. If this is set to `true` the client supports the new
+     * `FoldingRangeRegistrationOptions` return value for the corresponding
+     * server capability as well.
+     */
+    bool dynamicRegistration = false;
+    /**
+     * The maximum number of folding ranges that the client prefers to receive
+     * per document. The value serves as a hint, servers are free to follow the
+     * limit.
+     */
+    std::optional<size_t> rangeLimit = std::nullopt;
+    /**
+     * If set, the client signals that it only supports folding complete lines.
+     * If set, client will ignore specified `startCharacter` and `endCharacter`
+     * properties in a FoldingRange.
+     */
+    bool lineFoldingOnly = false;
+
+    struct FoldingRangeKindCapabilities
+    {
+        /**
+         * The folding range kind values the client supports. When this
+         * property exists the client also guarantees that it will
+         * handle values outside its set gracefully and falls back
+         * to a default value when unknown.
+         */
+        std::vector<FoldingRangeKind> valueSet;
+    };
+
+    /**
+     * Specific options for the folding range kind.
+     *
+     * @since 3.17.0
+     */
+    std::optional<FoldingRangeKindCapabilities> foldingRangeKind = std::nullopt;
+
+    struct FoldingRangeCapabilities
+    {
+        /**
+         * If set, the client signals that it supports setting collapsedText on
+         * folding ranges to display custom labels instead of the default text.
+         *
+         * @since 3.17.0
+         */
+        bool collapsedText = false;
+    };
+
+    /**
+     * Specific options for the folding range.
+     * @since 3.17.0
+     */
+    std::optional<FoldingRangeCapabilities> foldingRange = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeKindCapabilities, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeCapabilities, collapsedText);
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities, dynamicRegistration, rangeLimit, lineFoldingOnly, foldingRangeKind, foldingRange);
+
 struct TextDocumentClientCapabilities
 {
     /**
@@ -312,11 +374,18 @@ struct TextDocumentClientCapabilities
     std::optional<DiagnosticClientCapabilities> diagnostic = std::nullopt;
 
     /**
+     * Capabilities specific to the `textDocument/foldingRange` request.
+     *
+     * @since 3.10.0
+     */
+    std::optional<FoldingRangeClientCapabilities> foldingRange = std::nullopt;
+
+    /**
      * Capabilities specific to the `textDocument/codeAction` request.
      */
     std::optional<CodeActionClientCapabilities> codeAction = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, codeAction);
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, foldingRange, codeAction);
 
 struct DidChangeConfigurationClientCapabilities
 {
