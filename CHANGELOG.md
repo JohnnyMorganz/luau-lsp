@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Multiline function calls `foo(..)`
   - Block comments `--[[ .. ]]`
   - Custom comment regions denoted using `--#region` and `--#endregion`
+- Added support for Call Hierarchies. Call Hierarchies allow you to view all incoming and outgoing calls of a function:
+  i.e., all functions that call the current function, as well as all functions that the current function calls.
+  This works at multiple levels, displaying ancestor and descendant functions.
 
 ## [1.19.2]
 
