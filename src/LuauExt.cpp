@@ -261,16 +261,18 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(Lu
         return std::nullopt;
 
     std::string className(str->value.data, str->value.size);
-    std::optional<Luau::TypeFun> tfun = scope->lookupType(className);
-    if (!tfun)
+    std::optional<Luau::TypeFun> tfun = typeChecker.globalScope->lookupType(className);
+    if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
     {
         typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
         return std::nullopt;
     }
 
+    auto type = Luau::follow(tfun->type);
+
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
     Luau::TypePackId booleanPack = arena.addTypePack({typeChecker.booleanType});
-    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
 
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
@@ -298,11 +300,13 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhic
         return std::nullopt;
 
     std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
-    if (!tfun)
+    if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
         return std::nullopt;
 
+    auto type = Luau::follow(tfun->type);
+
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
-    Luau::TypeId nillableClass = Luau::makeOption(typeChecker.builtinTypes, arena, tfun->type);
+    Luau::TypeId nillableClass = Luau::makeOption(typeChecker.builtinTypes, arena, type);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({nillableClass})};
 }
 
@@ -324,15 +328,17 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(Lu
 
     std::string enumItem(str->value.data, str->value.size);
     std::optional<Luau::TypeFun> tfun = scope->lookupImportedType("Enum", enumItem);
-    if (!tfun)
+    if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
     {
         typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{enumItem, Luau::UnknownSymbol::Type}});
         return std::nullopt;
     }
 
+    auto type = Luau::follow(tfun->type);
+
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
     Luau::TypePackId booleanPack = arena.addTypePack({typeChecker.booleanType});
-    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, tfun->type}}};
+    return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
 
 // Magic function for `instance:GetPropertyChangedSignal()`, so that we can perform type checking on the provided property
