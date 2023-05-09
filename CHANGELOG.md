@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   i.e., all functions that call the current function, as well as all functions that the current function calls.
   This works at multiple levels, displaying ancestor and descendant functions.
 
+### Changed
+
+- Sync to upstream Luau 0.575
+
 ## [1.19.2]
 
 ### Fixed

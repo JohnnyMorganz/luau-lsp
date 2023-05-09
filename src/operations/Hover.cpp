@@ -118,7 +118,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                 auto prop = lookupProp(parentType, indexName);
                 if (prop)
                 {
-                    type = prop->type;
+                    type = prop->type();
                     if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType); definitionModuleName && prop->location)
                         documentationLocation = {definitionModuleName.value(), prop->location.value()};
                 }

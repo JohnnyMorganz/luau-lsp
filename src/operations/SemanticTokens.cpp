@@ -33,12 +33,12 @@ enum struct AstLocalInfo
     Parameter,
 };
 
-static lsp::SemanticTokenTypes inferTokenType(const Luau::TypeId* ty, lsp::SemanticTokenTypes base)
+static lsp::SemanticTokenTypes inferTokenType(const Luau::TypeId ty, lsp::SemanticTokenTypes base)
 {
     if (!ty)
         return base;
 
-    auto followedTy = Luau::follow(*ty);
+    auto followedTy = Luau::follow(ty);
 
     if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
     {
@@ -164,8 +164,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             auto ty = scope->lookup(var);
             if (ty)
             {
-                auto followedTy = Luau::follow(*ty);
-                auto type = inferTokenType(&followedTy, lsp::SemanticTokenTypes::Variable);
+                auto type = inferTokenType(*ty, lsp::SemanticTokenTypes::Variable);
                 if (type == lsp::SemanticTokenTypes::Variable)
                     return true; // No special semantic token needed, fall back to syntax highlighting
                 tokens.emplace_back(SemanticToken{var->location.begin, var->location.end, type, lsp::SemanticTokenModifiers::None});
@@ -222,7 +221,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             }
         }
 
-        auto type = inferTokenType(module->astTypes.find(local), defaultType);
+        auto type = inferTokenType(*module->astTypes.find(local), defaultType);
         if (type == lsp::SemanticTokenTypes::Variable)
             return true;
 
@@ -250,7 +249,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             }
             else
             {
-                auto type = inferTokenType(&it->second, lsp::SemanticTokenTypes::Variable);
+                auto type = inferTokenType(it->second, lsp::SemanticTokenTypes::Variable);
                 tokens.emplace_back(SemanticToken{global->location.begin, global->location.end, type,
                     lsp::SemanticTokenModifiers::DefaultLibrary | lsp::SemanticTokenModifiers::Readonly});
             }
@@ -261,7 +260,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             if (!ty)
                 return true;
 
-            auto type = inferTokenType(ty, lsp::SemanticTokenTypes::Variable);
+            auto type = inferTokenType(*ty, lsp::SemanticTokenTypes::Variable);
             if (type == lsp::SemanticTokenTypes::Variable)
                 return true;
 
@@ -295,7 +294,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             else if (Luau::hasTag(prop->tags, "EnumItem"))
                 defaultType = lsp::SemanticTokenTypes::EnumMember;
 
-            auto type = inferTokenType(&prop->type, defaultType);
+            auto type = inferTokenType(prop->type(), defaultType);
             auto modifiers = lsp::SemanticTokenModifiers::None;
             if (parentIsBuiltin)
             {
@@ -317,7 +316,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         {
             if (item.kind == Luau::AstExprTable::Item::Kind::Record)
             {
-                auto type = inferTokenType(module->astTypes.find(item.value), lsp::SemanticTokenTypes::Property);
+                auto type = inferTokenType(*module->astTypes.find(item.value), lsp::SemanticTokenTypes::Property);
                 tokens.emplace_back(SemanticToken{item.key->location.begin, item.key->location.end, type, lsp::SemanticTokenModifiers::None});
             }
         }

@@ -72,7 +72,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             std::vector<Luau::Property> properties{};
             for (auto it = keys.rbegin(); it != keys.rend(); ++it)
             {
-                auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type);
+                auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
                 auto prop = lookupProp(base, *it);
                 if (!prop)
                     return result;
@@ -84,7 +84,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 if (!location && it->location)
                     location = it->location;
                 if (!definitionModuleName)
-                    definitionModuleName = Luau::getDefinitionModuleName(Luau::follow(it->type));
+                    definitionModuleName = Luau::getDefinitionModuleName(Luau::follow(it->type()));
             }
 
             if (!definitionModuleName)

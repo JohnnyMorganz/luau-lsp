@@ -53,7 +53,7 @@ static Luau::TypeId lookupFunctionCallType(Luau::ModulePtr module, const Luau::A
             auto parentType = Luau::follow(*parentIt);
             auto prop = lookupProp(parentType, index->index.value);
             if (prop)
-                return Luau::follow(prop->type);
+                return Luau::follow(prop->type());
         }
     }
 
@@ -167,7 +167,7 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
             auto prop = lookupProp(ty, *it);
             if (!prop)
                 return {};
-            ty = Luau::follow(prop->type);
+            ty = Luau::follow(prop->type());
         }
     }
 

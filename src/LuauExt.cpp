@@ -521,23 +521,23 @@ Luau::LoadDefinitionFileResult registerDefinitions(
     {
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
         {
-            Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionInstanceIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type, types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["Clone"].type, types::magicFunctionInstanceClone);
-            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type, magicFunctionGetPropertyChangedSignal);
+            Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionInstanceIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
+            Luau::attachMagicFunction(ctv->props["Clone"].type(), types::magicFunctionInstanceClone);
+            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
 
             // Autocomplete ClassNames for :IsA("") and counterparts
-            Luau::attachTag(ctv->props["IsA"].type, "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type, "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type, "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type, "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type, "ClassNames");
+            Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type(), "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type(), "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type(), "ClassNames");
+            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type(), "ClassNames");
 
             // Autocomplete Properties for :GetPropertyChangedSignal("")
-            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type, "Properties");
+            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
@@ -561,7 +561,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
     if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
         if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
             if (auto newFunction = ttv->props.find("new"); newFunction != ttv->props.end())
-                if (auto itv = Luau::get<Luau::IntersectionType>(newFunction->second.type))
+                if (auto itv = Luau::get<Luau::IntersectionType>(newFunction->second.type()))
                     for (auto& part : itv->parts)
                         if (auto ftv = Luau::get<Luau::FunctionType>(part))
                             if (auto it = Luau::begin(ftv->argTypes); it != Luau::end(ftv->argTypes))
@@ -572,7 +572,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
     if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type))
             // :GetService is an intersection of function types, so we assign a tag on the first intersection
-            if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type); itv && itv->parts.size() > 0)
+            if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type()); itv && itv->parts.size() > 0)
                 Luau::attachTag(itv->parts[0], "PrioritiseCommonServices");
 
     // Move Enums over as imported type bindings
@@ -587,8 +587,8 @@ Luau::LoadDefinitionFileResult registerDefinitions(
             {
                 if (ctv->name == "EnumItem")
                 {
-                    Luau::attachMagicFunction(ctv->props["IsA"].type, types::magicFunctionEnumItemIsA);
-                    Luau::attachTag(ctv->props["IsA"].type, "Enums");
+                    Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionEnumItemIsA);
+                    Luau::attachTag(ctv->props["IsA"].type(), "Enums");
                 }
                 else if (ctv->name != "Enum" && ctv->name != "Enums")
                 {
@@ -881,7 +881,7 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             auto indexIt = mtable->props.find("__index");
             if (indexIt != mtable->props.end())
             {
-                Luau::TypeId followed = Luau::follow(indexIt->second.type);
+                Luau::TypeId followed = Luau::follow(indexIt->second.type());
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
                     return lookupProp(followed, name);

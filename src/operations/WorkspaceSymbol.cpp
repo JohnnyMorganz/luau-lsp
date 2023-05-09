@@ -115,7 +115,7 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
         if (auto textDocument = fileResolver.getTextDocumentFromModuleName(moduleName))
         {
             WorkspaceSymbolsVisitor visitor{textDocument, params.query};
-            visitor.visit(sourceModule.root);
+            visitor.visit(sourceModule->root);
             result.insert(result.end(), std::make_move_iterator(visitor.symbols.begin()), std::make_move_iterator(visitor.symbols.end()));
         }
         else
@@ -126,7 +126,7 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
                 {
                     auto textDocument = TextDocument{Uri::file(*filePath), "luau", 0, source->source};
                     WorkspaceSymbolsVisitor visitor{&textDocument, params.query};
-                    visitor.visit(sourceModule.root);
+                    visitor.visit(sourceModule->root);
                     result.insert(result.end(), std::make_move_iterator(visitor.symbols.begin()), std::make_move_iterator(visitor.symbols.end()));
                 }
             }

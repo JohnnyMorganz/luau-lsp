@@ -29,7 +29,7 @@ std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Lua
     std::unordered_map<Luau::ModuleName, std::vector<Luau::ModuleName>> reverseDeps;
     for (const auto& module : frontend.sourceNodes)
     {
-        for (const auto& dep : module.second.requireSet)
+        for (const auto& dep : module.second->requireSet)
             reverseDeps[dep].push_back(module.first);
     }
     std::vector<Luau::ModuleName> queue{moduleName};

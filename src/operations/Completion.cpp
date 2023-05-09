@@ -171,7 +171,7 @@ static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
         {
             if (auto getService = Luau::lookupClassProp(ctv, "GetService"))
             {
-                if (auto itv = Luau::get<Luau::IntersectionType>(getService->type))
+                if (auto itv = Luau::get<Luau::IntersectionType>(getService->type()))
                 {
                     for (auto part : itv->parts)
                     {
