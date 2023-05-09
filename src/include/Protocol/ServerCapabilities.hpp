@@ -128,11 +128,17 @@ struct ServerCapabilities
      * The server provides workspace symbol support.
      */
     bool workspaceSymbolProvider = false;
+    /**
+	 * The server provides call hierarchy support.
+	 *
+	 * @since 3.16.0
+	 */
+    bool callHierarchyProvider = false;
     std::optional<SemanticTokensOptions> semanticTokensProvider = std::nullopt;
     std::optional<WorkspaceCapabilities> workspace = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider,
-    workspaceSymbolProvider, semanticTokensProvider, workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider, workspaceSymbolProvider,
+    callHierarchyProvider, semanticTokensProvider, workspace);
 } // namespace lsp

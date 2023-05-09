@@ -103,6 +103,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspace Symbols Provider
     capabilities.workspaceSymbolProvider = true;
+    // Call Hierarchy Provider
+    capabilities.callHierarchyProvider = true;
     // Semantic Tokens Provider
     capabilities.semanticTokensProvider = {
         {
@@ -197,6 +199,27 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/colorPresentation")
     {
         response = colorPresentation(REQUIRED_PARAMS(baseParams, "textDocument/colorPresentation"));
+    }
+    else if (method == "textDocument/prepareCallHierarchy")
+    {
+        ASSERT_PARAMS(baseParams, "textDocument/prepareCallHierarchy");
+        auto params = baseParams->get<lsp::CallHierarchyPrepareParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->prepareCallHierarchy(params);
+    }
+    else if (method == "callHierarchy/incomingCalls")
+    {
+        ASSERT_PARAMS(baseParams, "callHierarchy/incomingCalls");
+        auto params = baseParams->get<lsp::CallHierarchyIncomingCallsParams>();
+        auto workspace = findWorkspace(params.item.uri);
+        response = workspace->callHierarchyIncomingCalls(params);
+    }
+    else if (method == "callHierarchy/outgoingCalls")
+    {
+        ASSERT_PARAMS(baseParams, "callHierarchy/outgoingCalls");
+        auto params = baseParams->get<lsp::CallHierarchyOutgoingCallsParams>();
+        auto workspace = findWorkspace(params.item.uri);
+        response = workspace->callHierarchyOutgoingCalls(params);
     }
     else if (method == "textDocument/foldingRange")
     {

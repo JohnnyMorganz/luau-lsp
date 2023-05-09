@@ -77,7 +77,7 @@ Install the binary and run `luau-lsp --help` for more information.
 - [x] Code Actions
 - [x] Workspace Symbols
 - [x] Folding Range
-- [ ] Call Hierarchy
+- [x] Call Hierarchy
 
 The following are extra features defined in the LSP specification, but most likely do not apply to Luau or are not necessary.
 They can be investigated at a later time:
