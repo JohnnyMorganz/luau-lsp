@@ -221,7 +221,10 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             }
         }
 
-        auto type = inferTokenType(*module->astTypes.find(local), defaultType);
+        auto type = defaultType;
+        if (auto ty = module->astTypes.find(local))
+            type = inferTokenType(*ty, defaultType);
+
         if (type == lsp::SemanticTokenTypes::Variable)
             return true;
 
