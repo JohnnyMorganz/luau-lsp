@@ -151,23 +151,33 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
             }
             return typeId;
         },
-        [&globals, &arena, node](Luau::LazyType&)
+        [&globals, &arena, node](Luau::LazyType& ltv) -> void
         {
+            // Check if the LTV already has an unwrapped type
+            if (ltv.unwrapped.load())
+                return;
+
             // Handle if the node is no longer valid
             if (!node)
-                return globals.builtinTypes->anyType;
+            {
+                ltv.unwrapped = globals.builtinTypes->anyType;
+                return;
+            }
 
             auto instanceTy = globals.globalScope->lookupType("Instance");
             if (!instanceTy)
-                return globals.builtinTypes->anyType;
+            {
+                ltv.unwrapped = globals.builtinTypes->anyType;
+                return;
+            }
 
             // Look up the base class instance
-            Luau::TypeId baseTypeId = nullptr;
-            if (auto foundId = getTypeIdForClass(globals.globalScope, node->className))
-                baseTypeId = *foundId;
-            else
-                return globals.builtinTypes->anyType;
-            LUAU_ASSERT(baseTypeId);
+            Luau::TypeId baseTypeId = getTypeIdForClass(globals.globalScope, node->className).value_or(nullptr);
+            if (!baseTypeId)
+            {
+                ltv.unwrapped = globals.builtinTypes->anyType;
+                return;
+            }
 
             // Point the metatable to the metatable of "Instance" so that we allow equality
             std::optional<Luau::TypeId> instanceMetaIdentity;
@@ -236,7 +246,9 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
                     ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
                 }
             }
-            return typeId;
+
+            ltv.unwrapped = typeId;
+            return;
         });
     auto ty = arena.addType(std::move(ltv));
     node->tys.insert_or_assign(&globals, ty);

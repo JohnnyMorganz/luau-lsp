@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed internal error for LazyType unwrapping
+
 ## [1.20.1] - 2023-05-09
 
 ### Fixed
