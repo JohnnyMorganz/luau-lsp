@@ -1953,6 +1953,8 @@ declare class EnumPartType_INTERNAL extends Enum
 	Ball: EnumPartType
 	Block: EnumPartType
 	Cylinder: EnumPartType
+	Wedge: EnumPartType
+	CornerWedge: EnumPartType
 end
 declare class EnumParticleEmitterShape extends EnumItem end
 declare class EnumParticleEmitterShape_INTERNAL extends Enum
@@ -3173,6 +3175,12 @@ declare class EnumWaterForce_INTERNAL extends Enum
 	Strong: EnumWaterForce
 	Max: EnumWaterForce
 end
+declare class EnumWeldConstraintPreserve extends EnumItem end
+declare class EnumWeldConstraintPreserve_INTERNAL extends Enum
+	All: EnumWeldConstraintPreserve
+	None: EnumWeldConstraintPreserve
+	Touching: EnumWeldConstraintPreserve
+end
 declare class EnumWrapLayerAutoSkin extends EnumItem end
 declare class EnumWrapLayerAutoSkin_INTERNAL extends Enum
 	Disabled: EnumWrapLayerAutoSkin
@@ -3547,6 +3555,7 @@ type ENUM_LIST = {
 	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
 	WaterForce: EnumWaterForce_INTERNAL,
+	WeldConstraintPreserve: EnumWeldConstraintPreserve_INTERNAL,
 	WrapLayerAutoSkin: EnumWrapLayerAutoSkin_INTERNAL,
 	WrapLayerDebugMode: EnumWrapLayerDebugMode_INTERNAL,
 	WrapTargetDebugMode: EnumWrapTargetDebugMode_INTERNAL,
@@ -3934,7 +3943,6 @@ type HopperBin = any
 type Flag = any
 type Status = any
 type PointsService = any
-type Speaker = any
 type DoubleConstrainedValue = any
 type IntConstrainedValue = any
 declare class Instance
@@ -8174,6 +8182,7 @@ declare class RenderingTest extends Instance
 	Description: string
 	FieldOfView: number
 	Orientation: Vector3
+	PerfTest: boolean
 	Position: Vector3
 	QualityLevel: number
 	ShouldSkip: boolean
@@ -8354,6 +8363,7 @@ declare class ScriptEditorService extends Instance
 	function DeregisterScriptAnalysisCallback(self, name: string): nil
 	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
 	function ForceReloadSource(self, uri: string, newsrc: string): nil
+	function GetEditorSource(self, script: LuaSourceContainer): string
 	function GetScriptDocuments(self): { Instance }
 	function OpenScriptDocumentAsync(self, script: LuaSourceContainer): any
 	function RegisterAutocompleteCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
@@ -8903,8 +8913,6 @@ end
 declare class SpawnerService extends Instance
 end
 
-
-
 declare class StackFrame extends Instance
 	FrameId: number
 	FrameName: string
@@ -9098,7 +9106,6 @@ declare class StudioService extends Instance
 	AlignDraggedObjects: boolean
 	DEPRECATED_ShowActiveInstanceHighlight: boolean
 	DraggerSolveConstraints: boolean
-	DrawConstraintsOnTop: boolean
 	GridSize: number
 	HoverInstance: Instance
 	InstalledPluginData: string
