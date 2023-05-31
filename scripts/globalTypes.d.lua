@@ -4760,10 +4760,10 @@ end
 declare class DragDetector extends ClickDetector
 	ApplyAtCenterOfMass: boolean
 	Axis: Vector3
-	DragContinue: RBXScriptSignal<Player, Ray, CFrame, OptionalCoordinateFrame, boolean>
+	DragContinue: RBXScriptSignal<Player, Ray, CFrame, CFrame?, boolean>
 	DragEnd: RBXScriptSignal<Player>
 	DragFrame: CFrame
-	DragStart: RBXScriptSignal<Player, Ray, CFrame, CFrame, BasePart, OptionalCoordinateFrame, boolean>
+	DragStart: RBXScriptSignal<Player, Ray, CFrame, CFrame, BasePart, CFrame?, boolean>
 	DragStyle: EnumDragDetectorDragStyle
 	Enabled: boolean
 	GamepadModeSwitchKeyCode: EnumKeyCode
