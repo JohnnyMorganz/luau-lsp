@@ -44,6 +44,7 @@ TYPE_INDEX = {
     "Array": "{ any }",
     "table": "{ any }",
     "CoordinateFrame": "CFrame",
+    "OptionalCoordinateFrame": "CFrame?",
 }
 
 IGNORED_INSTANCES: List[str] = [
