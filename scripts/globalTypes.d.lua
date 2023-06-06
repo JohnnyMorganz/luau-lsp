@@ -361,6 +361,18 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	EyelashAccessory: EnumAvatarAssetType
 	DynamicHead: EnumAvatarAssetType
 end
+declare class EnumAvatarChatServiceFeature extends EnumItem end
+declare class EnumAvatarChatServiceFeature_INTERNAL extends Enum
+	None: EnumAvatarChatServiceFeature
+	UniverseAudio: EnumAvatarChatServiceFeature
+	UniverseVideo: EnumAvatarChatServiceFeature
+	PlaceAudio: EnumAvatarChatServiceFeature
+	PlaceVideo: EnumAvatarChatServiceFeature
+	UserAudioEligible: EnumAvatarChatServiceFeature
+	UserAudio: EnumAvatarChatServiceFeature
+	UserVideoEligible: EnumAvatarChatServiceFeature
+	UserVideo: EnumAvatarChatServiceFeature
+end
 declare class EnumAvatarContextMenuOption extends EnumItem end
 declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
 	Friend: EnumAvatarContextMenuOption
@@ -730,6 +742,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectBlockedIP: EnumConnectionError
 	DisconnectClientFailure: EnumConnectionError
 	DisconnectClientRequest: EnumConnectionError
+	DisconnectPrivateServerKickout: EnumConnectionError
 	DisconnectModeratedGame: EnumConnectionError
 	DisconnectRomarkEndOfTest: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
@@ -1162,6 +1175,11 @@ declare class EnumFontWeight_INTERNAL extends Enum
 	Bold: EnumFontWeight
 	ExtraBold: EnumFontWeight
 	Heavy: EnumFontWeight
+end
+declare class EnumForceLimitMode extends EnumItem end
+declare class EnumForceLimitMode_INTERNAL extends Enum
+	Magnitude: EnumForceLimitMode
+	PerAxis: EnumForceLimitMode
 end
 declare class EnumFormFactor extends EnumItem end
 declare class EnumFormFactor_INTERNAL extends Enum
@@ -2444,6 +2462,12 @@ declare class EnumSelectionBehavior_INTERNAL extends Enum
 	Escape: EnumSelectionBehavior
 	Stop: EnumSelectionBehavior
 end
+declare class EnumSelectionRenderMode extends EnumItem end
+declare class EnumSelectionRenderMode_INTERNAL extends Enum
+	Outlines: EnumSelectionRenderMode
+	BoundingBoxes: EnumSelectionRenderMode
+	Both: EnumSelectionRenderMode
+end
 declare class EnumSensorMode extends EnumItem end
 declare class EnumSensorMode_INTERNAL extends Enum
 	Floor: EnumSensorMode
@@ -3272,6 +3296,7 @@ type ENUM_LIST = {
 	AutoIndentRule: EnumAutoIndentRule_INTERNAL,
 	AutomaticSize: EnumAutomaticSize_INTERNAL,
 	AvatarAssetType: EnumAvatarAssetType_INTERNAL,
+	AvatarChatServiceFeature: EnumAvatarChatServiceFeature_INTERNAL,
 	AvatarContextMenuOption: EnumAvatarContextMenuOption_INTERNAL,
 	AvatarItemType: EnumAvatarItemType_INTERNAL,
 	AvatarPromptResult: EnumAvatarPromptResult_INTERNAL,
@@ -3362,6 +3387,7 @@ type ENUM_LIST = {
 	FontSize: EnumFontSize_INTERNAL,
 	FontStyle: EnumFontStyle_INTERNAL,
 	FontWeight: EnumFontWeight_INTERNAL,
+	ForceLimitMode: EnumForceLimitMode_INTERNAL,
 	FormFactor: EnumFormFactor_INTERNAL,
 	FrameStyle: EnumFrameStyle_INTERNAL,
 	FramerateManagerMode: EnumFramerateManagerMode_INTERNAL,
@@ -3495,6 +3521,7 @@ type ENUM_LIST = {
 	ScrollBarInset: EnumScrollBarInset_INTERNAL,
 	ScrollingDirection: EnumScrollingDirection_INTERNAL,
 	SelectionBehavior: EnumSelectionBehavior_INTERNAL,
+	SelectionRenderMode: EnumSelectionRenderMode_INTERNAL,
 	SensorMode: EnumSensorMode_INTERNAL,
 	SensorUpdateType: EnumSensorUpdateType_INTERNAL,
 	ServerAudioBehavior: EnumServerAudioBehavior_INTERNAL,
@@ -4162,8 +4189,12 @@ declare class AssetDeliveryProxy extends Instance
 end
 
 declare class AssetImportService extends Instance
+	function GetAllTemplates(self): { [any]: any }
+	function GetTemplate(self, name: string): { [any]: any }
 	function PickFileWithPrompt(self): string
 	function PickMultipleFilesWithPrompt(self): { any }
+	function RemoveTemplate(self, name: string): nil
+	function SaveTemplate(self, name: string, importTemplate: { [any]: any }): nil
 	function StartSessionWithPath(self, filePath: string): AssetImportSession
 	function StartSessionWithPrompt(self): AssetImportSession
 end
@@ -4283,6 +4314,19 @@ declare class AudioSearchParams extends Instance
 	Title: string
 end
 
+declare class AvatarChatService extends Instance
+	ClientFeatures: number
+	ClientFeaturesInitialized: number
+	ServerFeatures: number
+	function GetClientFeaturesAsync(self): number
+	function GetServerFeaturesAsync(self): number
+	function IsEnabled(self, mask: number, feature: EnumAvatarChatServiceFeature): boolean
+	function IsPlaceEnabled(self): boolean
+	function IsUniverseEnabled(self): boolean
+	function PollClientFeatures(self): number
+	function PollServerFeatures(self): number
+end
+
 declare class AvatarEditorService extends Instance
 	OpenAllowInventoryReadAccess: RBXScriptSignal<>
 	OpenPromptCreateOufit: RBXScriptSignal<HumanoidDescription, EnumHumanoidRigType>
@@ -4307,6 +4351,7 @@ declare class AvatarEditorService extends Instance
 	function GetFavorite(self, itemId: number, itemType: EnumAvatarItemType): boolean
 	function GetInventory(self, assetTypes: { any }): InventoryPages
 	function GetItemDetails(self, itemId: number, itemType: EnumAvatarItemType): { [any]: any }
+	function GetOutfitDetails(self, outfitId: number): { [any]: any }
 	function GetOutfits(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
 	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
 	function GetRecommendedBundles(self, bundleId: number): { any }
@@ -4866,6 +4911,9 @@ end
 
 declare class AlignPosition extends Constraint
 	ApplyAtCenterOfMass: boolean
+	ForceLimitMode: EnumForceLimitMode
+	ForceRelativeTo: EnumActuatorRelativeTo
+	MaxAxesForce: Vector3
 	MaxForce: number
 	MaxVelocity: number
 	Mode: EnumPositionAlignmentMode
@@ -5637,6 +5685,9 @@ declare class FacialAnimationStreamingServiceV2 extends Instance
 	function IsServerEnabled(self, mask: number): boolean
 	function IsVideoEnabled(self, mask: number): boolean
 	function ResolveStateForUser(self, userId: number): number
+end
+
+declare class FacialAnimationStreamingSubsessionStats extends Instance
 end
 
 declare class Feature extends Instance
@@ -7760,6 +7811,7 @@ declare class Player extends Instance
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
+	DevEnableMouseLock: boolean
 	DevTouchCameraMode: EnumDevTouchCameraMovementMode
 	DevTouchMovementMode: EnumDevTouchMovementMode
 	DisplayName: string
@@ -8452,12 +8504,13 @@ end
 
 declare class Selection extends Instance
 	ActiveInstance: Instance
+	DEPRECATED_ShowBoundingBox: boolean
+	RenderMode: EnumSelectionRenderMode
 	SelectionBoxThickness: number
 	SelectionChanged: RBXScriptSignal<>
 	SelectionLineThickness: number
 	SelectionThickness: number
 	ShowActiveInstanceHighlight: boolean
-	ShowBoundingBox: boolean
 	function Add(self, instancesToAdd: { Instance }): nil
 	function ClearTerrainSelectionHack(self): nil
 	function Get(self): { Instance }
@@ -8515,6 +8568,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "AssetImportService"): AssetImportService
 	function GetService(self, service: "AssetManagerService"): AssetManagerService
 	function GetService(self, service: "AssetService"): AssetService
+	function GetService(self, service: "AvatarChatService"): AvatarChatService
 	function GetService(self, service: "AvatarEditorService"): AvatarEditorService
 	function GetService(self, service: "AvatarImportService"): AvatarImportService
 	function GetService(self, service: "BadgeService"): BadgeService
@@ -9030,6 +9084,7 @@ declare class StarterPlayer extends Instance
 	DevTouchCameraMovementMode: EnumDevTouchCameraMovementMode
 	DevTouchMovementMode: EnumDevTouchMovementMode
 	EnableDynamicHeads: EnumLoadDynamicHeads
+	EnableMouseLockOption: boolean
 	GameSettingsAssetIDFace: number
 	GameSettingsAssetIDHead: number
 	GameSettingsAssetIDLeftArm: number
@@ -9233,23 +9288,40 @@ declare class StudioTheme extends Instance
 end
 
 declare class StyleBase extends Instance
+	function GetStyleRules(self): { Instance }
+	function InsertStyleRule(self, rule: StyleRule, index: number?): nil
+	function SetStyleRules(self, rules: { Instance }): nil
 end
 
 declare class StyleRule extends StyleBase
 	Selector: string
 	SelectorError: string
+	function GetProperties(self): { [any]: any }
+	function GetPropertiesResolved(self): { [any]: any }
+	function GetProperty(self, name: string): any
+	function GetPropertyResolved(self, name: string): any
+	function SetProperties(self, table: { [any]: any }): nil
+	function SetProperty(self, name: string, value: any): nil
 end
 
 declare class StyleSheet extends StyleBase
+	function GetDerives(self): { Instance }
+	function SetDerives(self, derives: { Instance }): nil
 end
 
 declare class StyleDerive extends Instance
+	StyleSheet: StyleSheet
 end
 
 declare class StyleLink extends Instance
+	StyleSheet: StyleSheet
 end
 
 declare class StylingService extends Instance
+	function GetAppliedStyles(self, instance: Instance): { any }
+	function GetStyleInfo(self, style: StyleRule): { [any]: any }
+	function GetStyleSheetDerivesChain(self, styleSheet: StyleSheet): { Instance }
+	function GetStyleSheetInfo(self, styleSheet: StyleSheet): { [any]: any }
 end
 
 declare class SurfaceAppearance extends Instance
@@ -9489,6 +9561,7 @@ end
 declare class TextFilterTranslatedResult extends Instance
 	SourceLanguage: string
 	SourceText: TextFilterResult
+	function GetTranslationForLocale(self, locale: string): TextFilterResult
 	function GetTranslations(self): { [any]: any }
 end
 
@@ -9751,6 +9824,7 @@ declare class UserGameSettings extends Instance
 	ChatVisible: boolean
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode
 	ComputerMovementMode: EnumComputerMovementMode
+	ControlMode: EnumControlMode
 	DefaultCameraID: string
 	Fullscreen: boolean
 	FullscreenChanged: RBXScriptSignal<boolean>
