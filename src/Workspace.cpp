@@ -118,7 +118,11 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath()), end; next != end; ++next)
     {
         if (indexCount >= config.index.maxFiles)
+        {
+            client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                                     ") has been hit. If necessary, consider increasing the limit");
             break;
+        }
 
         if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
             !isIgnoredFile(next->path(), config))
