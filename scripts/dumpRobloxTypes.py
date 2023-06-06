@@ -432,7 +432,6 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
-type SharedTable = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -492,6 +491,9 @@ declare function printidentity(prefix: string?)
 
 # Hardcoded types after data types have been defined
 POST_DATATYPES_BASE = """
+declare class SharedTable
+end
+
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
@@ -537,6 +539,18 @@ declare class GlobalSettings extends GenericSettings
     function GetFFlag(self, name: string): boolean
     function GetFVariable(self, name: string): string
 end
+
+declare SharedTable: {
+    new: () -> SharedTable,
+    new: (t: { [any]: any }) -> SharedTable,
+    clear: (st: SharedTable) -> (),
+    clone: (st: SharedTable, deep: boolean?) -> SharedTable,
+    cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
+    increment: (st: SharedTable, key: string | number, delta: number): number,
+    isFrozen: (st: SharedTable): boolean,
+    size: (st: SharedTable): number,
+    update: (st: SharedTable, key: string | number, f: (any) -> any): (),
+}
 
 declare game: DataModel
 declare workspace: Workspace
