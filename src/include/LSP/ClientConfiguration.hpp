@@ -157,9 +157,11 @@ struct ClientIndexConfiguration
     /// Whether the whole workspace should be indexed. If disabled, only limited support is
     // available for features such as "Find All References" and "Rename"
     bool enabled = true;
+    /// The maximum amount of files that can be indexed
+    size_t maxFiles = 10000;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled, maxFiles);
 
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`

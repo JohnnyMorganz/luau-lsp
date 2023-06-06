@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.579
+- Updated workspace indexing strategy to minimise memory usage. We no longer index ignored files (`luau-lsp.ignoreGlobs`),
+  and there is a setting `luau-lsp.index.maxFiles` (default: 10,000) to configure the amount of files indexed before backing off.
 
 ### Fixed
 
