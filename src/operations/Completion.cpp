@@ -350,6 +350,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             bool isRelative = false;
             auto parent1 = getParentPath(moduleName), parent2 = getParentPath(path);
             if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
+                Luau::startsWith(path, "ProjectRoot/") || // All model projects should always require relatively
                 (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
                     (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2)))
             {
