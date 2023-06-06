@@ -57,6 +57,14 @@ struct FoldingRangeVisitor : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstExprFunction* func) override
+    {
+        // Add folding range for parameters
+        if (func->argLocation)
+            addFoldingRange(func->argLocation->begin, func->argLocation->end);
+        return true;
+    }
+
     bool visit(class Luau::AstType* node) override
     {
         return true;
