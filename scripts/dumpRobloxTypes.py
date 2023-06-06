@@ -546,10 +546,10 @@ declare SharedTable: {
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
-    increment: (st: SharedTable, key: string | number, delta: number): number,
-    isFrozen: (st: SharedTable): boolean,
-    size: (st: SharedTable): number,
-    update: (st: SharedTable, key: string | number, f: (any) -> any): (),
+    increment: (st: SharedTable, key: string | number, delta: number) -> number,
+    isFrozen: (st: SharedTable) -> boolean,
+    size: (st: SharedTable) -> number,
+    update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
 }
 
 declare game: DataModel
