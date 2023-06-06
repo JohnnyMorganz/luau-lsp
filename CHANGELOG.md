@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.579
 
+### Fixed
+
+- When editing in model projects, we now force relative requires, instead of incorrect absolute requires using a "ProjectRoot"
+
 ## [1.20.2] - 2023-05-10
 
 ### Fixed
