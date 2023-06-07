@@ -120,7 +120,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         if (indexCount >= config.index.maxFiles)
         {
             client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
-                                                                     ") has been hit. If necessary, consider increasing the limit");
+                                                                     ") has been hit. This may cause some language features to only work partially "
+                                                                     "(Find All References, Rename). If necessary, consider increasing the limit");
             break;
         }
 
