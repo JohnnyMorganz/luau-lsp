@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added folding ranges for multi-line function definitions, so long parameter lists can be collapsed
+- Added notification when we detect definitions file changes
 
 ### Changed
 

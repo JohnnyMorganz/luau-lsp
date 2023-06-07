@@ -717,6 +717,14 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
         }
         else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
         {
+            // Notify if it was a definitions file
+            if (workspace->isDefinitionFile(filePath, config))
+            {
+                client->sendWindowMessage(
+                    lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
+                continue;
+            }
+
             // Index the workspace on changes
             if (config.index.enabled && workspace->isConfigured)
             {
