@@ -66,7 +66,7 @@ public:
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result);
+        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool includeServices = true);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
