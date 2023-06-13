@@ -6,9 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added folding ranges for multi-line function definitions, so long parameter lists can be collapsed
+- Added notification when we detect definitions file changes
+
 ### Changed
 
-- Sync to upstream Luau 0.579
+- Sync to upstream Luau 0.580
+- Updated workspace indexing strategy to minimise memory usage. We no longer index ignored files (`luau-lsp.ignoreGlobs`),
+  and there is a setting `luau-lsp.index.maxFiles` (default: 10,000) to configure the amount of files indexed before backing off.
+
+### Fixed
+
+- When editing in model projects, we now force relative requires, instead of incorrect absolute requires using a "ProjectRoot"
 
 ## [1.20.2] - 2023-05-10
 

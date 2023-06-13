@@ -393,6 +393,12 @@
           "default": true,
           "scope": "window",
           "markdownDescription": "Whether all files in a workspace should be indexed into memory. If disabled, only limited support is available for features such as 'Find All References' and 'Rename'"
+        },
+        "luau-lsp.index.maxFiles": {
+          "type": "number",
+          "default": 10000,
+          "scope": "window",
+          "markdownDescription": "The maximum amount of files that can be indexed. If more files are indexed, more memory is needed"
         }
       }
     }

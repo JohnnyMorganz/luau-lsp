@@ -113,9 +113,20 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     if (isNullWorkspace())
         return;
 
+    size_t indexCount = 0;
+
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath()), end; next != end; ++next)
     {
-        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+        if (indexCount >= config.index.maxFiles)
+        {
+            client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                                     ") has been hit. This may cause some language features to only work partially "
+                                                                     "(Find All References, Rename). If necessary, consider increasing the limit");
+            break;
+        }
+
+        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
+            !isIgnoredFile(next->path(), config))
         {
             auto ext = next->path().extension();
             if (ext == ".lua" || ext == ".luau")
@@ -125,6 +136,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
                 frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ true});
                 // TODO: do we need indexing for non-autocomplete?
                 // frontend.check(moduleName);
+                indexCount += 1;
             }
         }
     }
