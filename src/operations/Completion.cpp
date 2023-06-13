@@ -277,7 +277,7 @@ static std::string optimiseAbsoluteRequire(const std::string& path)
 }
 
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result)
+    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool includeServices)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -303,7 +303,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     importsVisitor.visit(sourceModule->root);
 
     // If in roblox mode - suggest services
-    if (config.types.roblox && config.completion.imports.suggestServices)
+    if (config.types.roblox && config.completion.imports.suggestServices && includeServices)
     {
         auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
         for (auto& service : services)
@@ -823,10 +823,20 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         items.emplace_back(item);
     }
 
-    if ((config.completion.suggestImports || config.completion.imports.enabled) &&
-        (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement))
+    if (config.completion.suggestImports || config.completion.imports.enabled)
     {
-        suggestImports(moduleName, position, config, *textDocument, items);
+        if (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement)
+        {
+            suggestImports(moduleName, position, config, *textDocument, items, /* includeServices: */ true);
+        }
+        else if (result.context == Luau::AutocompleteContext::Type)
+        {
+            // Make sure we are in the context of completing a prefix in an AstTypeReference
+            if (auto node = result.ancestry.back())
+                if (auto typeReference = node->as<Luau::AstTypeReference>())
+                    if (!typeReference->prefix)
+                        suggestImports(moduleName, position, config, *textDocument, items, /* includeServices: */ false);
+        }
     }
 
     return items;
