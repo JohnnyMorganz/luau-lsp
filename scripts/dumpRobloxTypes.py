@@ -492,6 +492,7 @@ declare function printidentity(prefix: string?)
 # Hardcoded types after data types have been defined
 POST_DATATYPES_BASE = """
 declare class SharedTable
+    [string | number]: any
 end
 
 export type RBXScriptSignal<T... = ...any> = {

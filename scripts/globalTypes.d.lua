@@ -3928,6 +3928,7 @@ end
 
 
 declare class SharedTable
+    [string | number]: any
 end
 
 export type RBXScriptSignal<T... = ...any> = {
