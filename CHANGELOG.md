@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated `luau-lsp.autocompleteEnd` setting in favour of `luau-lsp.completion.autocompleteEnd`
+
 ### Added
 
 - Added folding ranges for multi-line function definitions, so long parameter lists can be collapsed

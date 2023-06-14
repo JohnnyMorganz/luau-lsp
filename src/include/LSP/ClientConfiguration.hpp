@@ -110,6 +110,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
 struct ClientCompletionConfiguration
 {
     bool enabled = true;
+    /// Whether to automatically autocomplete end
+    bool autocompleteEnd = false;
     /// Whether we should suggest automatic imports in completions
     /// DEPRECATED: USE `completion.imports.enabled` INSTEAD
     bool suggestImports = false;
@@ -124,7 +126,7 @@ struct ClientCompletionConfiguration
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionConfiguration, enabled, suggestImports, imports, addParentheses, addTabstopAfterParentheses, fillCallArguments);
+    ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses, addTabstopAfterParentheses, fillCallArguments);
 
 struct ClientSignatureHelpConfiguration
 {
@@ -169,6 +171,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enable
 struct ClientConfiguration
 {
     /// Whether to automatically autocomplete end
+    /// DEPRECATED: Use completion.autocompleteEnd instead
     bool autocompleteEnd = false;
     std::vector<std::string> ignoreGlobs{};
     ClientSourcemapConfiguration sourcemap{};

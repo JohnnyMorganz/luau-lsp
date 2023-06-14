@@ -455,7 +455,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     if (params.context && params.context->triggerCharacter == "\n")
     {
-        if (config.autocompleteEnd)
+        if (config.autocompleteEnd || config.completion.autocompleteEnd)
             endAutocompletion(params);
         return {};
     }
