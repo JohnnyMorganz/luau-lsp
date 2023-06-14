@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added folding ranges for multi-line function definitions, so long parameter lists can be collapsed
 - Added notification when we detect definitions file changes
 - Added support for auto-requiring modules when autocompleteing a type reference, to allow indexed types: i.e. autocompleting `Module` in `type Foo = Module.Bar`
+- End autocompletion will now work for defined anonymous functions inside of function calls
 
 ### Changed
 

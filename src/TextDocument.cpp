@@ -210,8 +210,11 @@ std::string TextDocument::getLine(size_t index) const
     LUAU_ASSERT(index < lineCount());
     auto lineOffsets = getLineOffsets();
     auto startOffset = lineOffsets[index];
-    auto nextLineOffset = index + 1 < lineCount() ? lineOffsets[index + 1] : _content.size();
-    return _content.substr(startOffset, nextLineOffset - startOffset - 1);
+
+    if (index + 1 < lineCount())
+        return _content.substr(startOffset, lineOffsets[index + 1] - startOffset - 1);
+    else
+        return _content.substr(startOffset, std::string::npos); // Return remaining content
 }
 
 lsp::Position TextDocument::positionAt(size_t offset) const
