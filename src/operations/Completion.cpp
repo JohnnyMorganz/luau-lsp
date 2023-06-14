@@ -546,22 +546,35 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     result.insert_or_assign(aliasName, entry);
                 }
 
+                // Populate with custom directory aliases
+                for (const auto& [aliasName, _] : config.require.directoryAliases)
+                {
+                    Luau::AutocompleteEntry entry{
+                        Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
+                    entry.tags.push_back("Directory");
+                    result.insert_or_assign(aliasName, entry);
+                }
+
+                // Include any files in the directory
+                auto contentsString = contents.value();
+
+                // We should strip any trailing values until a `/` is found in case autocomplete
+                // is triggered half-way through.
+                // E.g., for "Contents/Test|", we should only consider up to "Contents/" to find all files
+                // For "Mod|", we should only consider an empty string ""
+                auto separator = contentsString.find_last_of("/\\");
+                if (separator == std::string::npos)
+                    contentsString = "";
+                else
+                    contentsString = contentsString.substr(0, separator + 1);
+
+                // Check if it starts with a directory alias, otherwise resolve with require base path
+                std::filesystem::path currentDirectory =
+                    resolveDirectoryAlias(config.require.directoryAliases, contentsString, /* includeExtension = */ false)
+                        .value_or(fileResolver.getRequireBasePath(moduleName).append(contentsString));
+
                 try
                 {
-                    auto contentsString = contents.value();
-
-                    // We should strip any trailing values until a `/` is found in case autocomplete
-                    // is triggered half-way through.
-                    // E.g., for "Contents/Test|", we should only consider up to "Contents/" to find all files
-                    // For "Mod|", we should only consider an empty string ""
-                    auto separator = contentsString.find_last_of("/\\");
-                    if (separator == std::string::npos)
-                        contentsString = "";
-                    else
-                        contentsString = contentsString.substr(0, separator);
-
-                    auto currentDirectory = fileResolver.getRequireBasePath(moduleName).append(contentsString);
-
                     for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))
                     {
                         if (dir_entry.is_regular_file() || dir_entry.is_directory())

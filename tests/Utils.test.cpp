@@ -53,4 +53,21 @@ TEST_CASE("convertToScriptPath handles relative paths")
     CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent.Child.Foo");
 };
 
+TEST_CASE("getHomeDirectory finds a home directory")
+{
+    // we cannot confirm *what* the home directory is
+    // since it varies per test runner
+    CHECK(getHomeDirectory());
+};
+
+TEST_CASE("resolvePath resolves paths including tilde expansions")
+{
+    CHECK_EQ(resolvePath("C:/Users/test/foo.lua"), "C:/Users/test/foo.lua");
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    CHECK_EQ(resolvePath("~/foo.lua"), home.value() / "foo.lua");
+};
+
 TEST_SUITE_END();

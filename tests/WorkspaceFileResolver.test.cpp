@@ -85,4 +85,23 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive
     CHECK_FALSE(resolved.has_value());
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
+{
+    std::unordered_map<std::string, std::string> directoryAliases{
+        {"@test1/", "C:/Users/test/test1"},
+        {"@test2/", "~/test2"},
+    };
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test1/foo"), "C:/Users/test/test1/foo.lua");
+    CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test1/foo.luau"), "C:/Users/test/test1/foo.luau");
+    CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test1/", /* includeExtension = */ false), "C:/Users/test/test1");
+
+    CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test2/bar"), home.value() / "test2" / "bar.lua");
+
+    CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test3/bar"), std::nullopt);
+}
+
 TEST_SUITE_END();
