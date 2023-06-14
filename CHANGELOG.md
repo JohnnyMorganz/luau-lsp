@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated `luau-lsp.autocompleteEnd` setting in favour of `luau-lsp.completion.autocompleteEnd`
+
 ### Added
 
 - Added folding ranges for multi-line function definitions, so long parameter lists can be collapsed
@@ -13,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for auto-requiring modules when autocompleteing a type reference, to allow indexed types: i.e. autocompleting `Module` in `type Foo = Module.Bar`
 - Added `luau-lsp.require.directoryAliases` to map require string _prefixes_ to directories
 - Added tilde expansion to `luau-lsp.require.fileAliases` (and `directoryAliases`), mapping `~/foo.lua` to a file in your home directory
+- End autocompletion will now work for defined anonymous functions inside of function calls
 
 ### Changed
 

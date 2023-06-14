@@ -76,7 +76,16 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (ancestry.size() < 2)
         return;
 
-    Luau::AstNode* parent = ancestry.at(ancestry.size() - 2);
+    // Search backwards for the first node that is not an Error node
+    size_t currentNodeIndex = ancestry.size() - 1;
+    while (ancestry.at(currentNodeIndex)->is<Luau::AstStatError>() || ancestry.at(currentNodeIndex)->is<Luau::AstExprError>())
+    {
+        currentNodeIndex--;
+        if (currentNodeIndex < 1)
+            return;
+    }
+
+    Luau::AstNode* parent = ancestry.at(currentNodeIndex - 1);
     if (!parent)
         return;
 
@@ -108,14 +117,26 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     if (unclosedBlock)
     {
+        // Take into account the current line content when inserting end
+        // in case we are e.g. inside of a function call
+        auto currentLineContent = document->getLine(params.position.line);
+        trim(currentLineContent);
+
+        // TODO: it would be nicer if we had snippet support, and could insert text *after* the cursor
+        // and leave the cursor in the same spot. Right now we can only insert text *at* the cursor,
+        // then have to manually send a command to move the cursor
+        // If we have content already on the current line, we cannot "replace" it whilst also
+        // putting the end on the line afterwards, so we fallback to the manual movement method
+
         // If the position marker is at the very end of the file, if we insert one line further then vscode will
         // not be happy and will insert at the position marker.
         // If its in the middle of the file, vscode won't change the marker
-        if (params.position.line == document->lineCount() - 1)
+        if (params.position.line == document->lineCount() - 1 || !currentLineContent.empty())
         {
             // Insert an end at the current position, with a newline before it
-            // We replace all the current contents of the line since it will just be whitespace
-            lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line, params.position.character}}, "\nend\n"};
+            auto insertText = "\nend" + currentLineContent + "\n";
+
+            lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText};
             std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
             client->applyEdit({"insert end", {changes}},
                 [this](auto) -> void
@@ -130,6 +151,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         }
         else
         {
+            LUAU_ASSERT(currentLineContent.empty());
+
             // Find the indentation level to stick the end on
             std::string indent = "";
             if (document->lineCount() > 1)
@@ -432,7 +455,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     if (params.context && params.context->triggerCharacter == "\n")
     {
-        if (config.autocompleteEnd)
+        if (config.autocompleteEnd || config.completion.autocompleteEnd)
             endAutocompletion(params);
         return {};
     }
