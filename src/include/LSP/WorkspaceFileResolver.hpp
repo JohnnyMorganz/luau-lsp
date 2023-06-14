@@ -47,6 +47,9 @@ public:
     }
 };
 
+std::optional<std::filesystem::path> resolveDirectoryAlias(
+    const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str, bool includeExtension = true);
+
 struct WorkspaceFileResolver
     : Luau::FileResolver
     , Luau::ConfigResolver

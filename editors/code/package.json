@@ -388,6 +388,15 @@
           },
           "scope": "resource"
         },
+        "luau-lsp.require.directoryAliases": {
+          "markdownDescription": "A mapping of custom require string prefixes to directory paths. The aliases should include trailing slashes",
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          },
+          "scope": "resource"
+        },
         "luau-lsp.index.enabled": {
           "type": "boolean",
           "default": true,

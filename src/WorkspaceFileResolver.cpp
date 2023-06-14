@@ -221,6 +221,29 @@ std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Lu
     return rootUri.fsPath();
 }
 
+// Resolve the string using a directory alias if present
+std::optional<std::filesystem::path> resolveDirectoryAlias(
+    const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str, bool includeExtension)
+{
+    for (const auto& [alias, path] : directoryAliases)
+    {
+        if (Luau::startsWith(str, alias))
+        {
+            auto filePath = resolvePath(std::filesystem::path(path) / str.substr(alias.length()));
+            if (includeExtension && !filePath.has_extension())
+            {
+                if (std::filesystem::exists(filePath.replace_extension(".luau")))
+                    return filePath.replace_extension(".luau");
+                else
+                    return filePath.replace_extension(".lua");
+            }
+            return filePath;
+        }
+    }
+
+    return std::nullopt;
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
@@ -232,10 +255,18 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         if (client)
         {
             auto config = client->getConfiguration(rootUri);
+
+            // Check file aliases
             if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
             {
                 auto filePath = resolvePath(it->second);
                 return Luau::ModuleInfo{filePath.generic_string()};
+            }
+
+            // Check directory aliases
+            if (auto filePath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
+            {
+                return Luau::ModuleInfo{filePath->generic_string()};
             }
         }
 
