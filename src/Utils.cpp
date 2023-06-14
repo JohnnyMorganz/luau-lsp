@@ -124,7 +124,7 @@ std::filesystem::path resolvePath(const std::filesystem::path& path)
     if (Luau::startsWith(path.generic_string(), "~/"))
     {
         if (auto home = getHomeDirectory())
-            return home.value() / path.generic_string().substr(2);
+            return home.value() / path.string().substr(2);
         else
             // TODO: should we error / return an optional here instead?
             return path;

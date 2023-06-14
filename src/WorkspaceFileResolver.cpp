@@ -229,7 +229,10 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     {
         if (Luau::startsWith(str, alias))
         {
-            auto filePath = resolvePath(std::filesystem::path(path) / str.substr(alias.length()));
+            std::filesystem::path directoryPath = path;
+            std::string remainder = str.substr(alias.length());
+
+            auto filePath = resolvePath(remainder.empty() ? directoryPath : directoryPath / remainder);
             if (includeExtension && !filePath.has_extension())
             {
                 if (std::filesystem::exists(filePath.replace_extension(".luau")))
