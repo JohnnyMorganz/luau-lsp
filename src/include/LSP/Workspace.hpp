@@ -33,8 +33,11 @@ public:
         , name(name)
         , rootUri(uri)
         , fileResolver(defaultConfig ? WorkspaceFileResolver(*defaultConfig) : WorkspaceFileResolver())
+        // TODO: we don't really need to retainFullTypeGraphs by default
+        // but it seems that the option specified here is the one used
+        // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
-              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
+              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ false}))
     {
         fileResolver.client = client;
         fileResolver.rootUri = uri;
@@ -62,6 +65,9 @@ public:
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
     void indexFiles(const ClientConfiguration& config);
+
+    Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks = false);
+    void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
 
 private:
     void endAutocompletion(const lsp::CompletionParams& params);

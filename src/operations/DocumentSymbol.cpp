@@ -150,9 +150,8 @@ std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    // Run the type checker to ensure we are up to date
-    if (frontend.isDirty(moduleName))
-        frontend.check(moduleName);
+    // TODO: we only need parsing and no type checking
+    checkSimple(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

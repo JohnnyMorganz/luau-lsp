@@ -61,7 +61,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 
     // Run the type checker to ensure we are up to date
     // We check for autocomplete here since autocomplete has stricter types
-    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ true});
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
