@@ -53,4 +53,11 @@ TEST_CASE("convertToScriptPath handles relative paths")
     CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent.Child.Foo");
 };
 
+TEST_CASE("getHomeDirectory finds a home directory")
+{
+    // we cannot confirm *what* the home directory is
+    // since it varies per test runner
+    CHECK(getHomeDirectory());
+};
+
 TEST_SUITE_END();

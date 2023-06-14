@@ -53,18 +53,22 @@ std::string convertToScriptPath(const std::string& path)
         auto str = it->string();
         if (str.find(" ") != std::string::npos)
             output += "[\"" + str + "\"]";
-        else if (str == ".") {
+        else if (str == ".")
+        {
             if (it == p.begin())
                 output += "script";
         }
-        else if (str == "..") {
+        else if (str == "..")
+        {
             if (it == p.begin())
                 output += "script.Parent";
             else
                 output += ".Parent";
         }
-        else {
-            if (it != p.begin()) output += ".";
+        else
+        {
+            if (it != p.begin())
+                output += ".";
             output += str;
         }
     }
@@ -96,6 +100,23 @@ std::optional<std::string> readFile(const std::filesystem::path& filePath)
         return std::nullopt;
     }
 }
+
+std::optional<std::filesystem::path> getHomeDirectory()
+{
+    if (const char* home = getenv("HOME"))
+    {
+        return home;
+    }
+    else if (const char* userProfile = getenv("USERPROFILE"))
+    {
+        return userProfile;
+    }
+    else
+    {
+        return std::nullopt;
+    }
+}
+
 
 void trim_start(std::string& str)
 {
