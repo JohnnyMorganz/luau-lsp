@@ -1,4 +1,5 @@
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
 #include <algorithm>
 
 std::optional<std::string> getParentPath(const std::string& path)
@@ -115,6 +116,21 @@ std::optional<std::filesystem::path> getHomeDirectory()
     {
         return std::nullopt;
     }
+}
+
+// Resolves a filesystem path, including any tilde expansion
+std::filesystem::path resolvePath(const std::filesystem::path& path)
+{
+    if (Luau::startsWith(path.generic_string(), "~/"))
+    {
+        if (auto home = getHomeDirectory())
+            return home.value() / path.generic_string().substr(2);
+        else
+            // TODO: should we error / return an optional here instead?
+            return path;
+    }
+    else
+        return path;
 }
 
 

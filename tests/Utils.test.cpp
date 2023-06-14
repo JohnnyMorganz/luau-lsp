@@ -60,4 +60,14 @@ TEST_CASE("getHomeDirectory finds a home directory")
     CHECK(getHomeDirectory());
 };
 
+TEST_CASE("resolvePath resolves paths including tilde expansions")
+{
+    CHECK_EQ(resolvePath("C:/Users/test/foo.lua"), "C:/Users/test/foo.lua");
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    CHECK_EQ(resolvePath("~/foo.lua"), home.value() / "foo.lua");
+};
+
 TEST_SUITE_END();
