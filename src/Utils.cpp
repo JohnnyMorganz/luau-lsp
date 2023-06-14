@@ -1,4 +1,5 @@
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
 #include <algorithm>
 
 std::optional<std::string> getParentPath(const std::string& path)
@@ -53,18 +54,22 @@ std::string convertToScriptPath(const std::string& path)
         auto str = it->string();
         if (str.find(" ") != std::string::npos)
             output += "[\"" + str + "\"]";
-        else if (str == ".") {
+        else if (str == ".")
+        {
             if (it == p.begin())
                 output += "script";
         }
-        else if (str == "..") {
+        else if (str == "..")
+        {
             if (it == p.begin())
                 output += "script.Parent";
             else
                 output += ".Parent";
         }
-        else {
-            if (it != p.begin()) output += ".";
+        else
+        {
+            if (it != p.begin())
+                output += ".";
             output += str;
         }
     }
@@ -96,6 +101,38 @@ std::optional<std::string> readFile(const std::filesystem::path& filePath)
         return std::nullopt;
     }
 }
+
+std::optional<std::filesystem::path> getHomeDirectory()
+{
+    if (const char* home = getenv("HOME"))
+    {
+        return home;
+    }
+    else if (const char* userProfile = getenv("USERPROFILE"))
+    {
+        return userProfile;
+    }
+    else
+    {
+        return std::nullopt;
+    }
+}
+
+// Resolves a filesystem path, including any tilde expansion
+std::filesystem::path resolvePath(const std::filesystem::path& path)
+{
+    if (Luau::startsWith(path.generic_string(), "~/"))
+    {
+        if (auto home = getHomeDirectory())
+            return home.value() / path.string().substr(2);
+        else
+            // TODO: should we error / return an optional here instead?
+            return path;
+    }
+    else
+        return path;
+}
+
 
 void trim_start(std::string& str)
 {

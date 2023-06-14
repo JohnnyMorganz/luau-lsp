@@ -14,6 +14,8 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
 std::string convertToScriptPath(const std::string& path);
 std::string codeBlock(const std::string& language, const std::string& code);
 std::optional<std::string> readFile(const std::filesystem::path& filePath);
+std::optional<std::filesystem::path> getHomeDirectory();
+std::filesystem::path resolvePath(const std::filesystem::path& path);
 void trim_start(std::string& str);
 void trim_end(std::string& str);
 void trim(std::string& str);
