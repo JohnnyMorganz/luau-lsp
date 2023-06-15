@@ -13,6 +13,11 @@ struct Reference
 {
     const Luau::ModuleName moduleName;
     const Luau::Location location;
+
+    bool operator==(const Reference& other) const
+    {
+        return moduleName == other.moduleName && location == other.location;
+    }
 };
 
 class WorkspaceFolder
