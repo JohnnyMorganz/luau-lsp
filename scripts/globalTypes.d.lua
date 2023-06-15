@@ -372,6 +372,7 @@ declare class EnumAvatarChatServiceFeature_INTERNAL extends Enum
 	UserAudio: EnumAvatarChatServiceFeature
 	UserVideoEligible: EnumAvatarChatServiceFeature
 	UserVideo: EnumAvatarChatServiceFeature
+	UserBanned: EnumAvatarChatServiceFeature
 end
 declare class EnumAvatarContextMenuOption extends EnumItem end
 declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
@@ -1059,13 +1060,6 @@ declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
 	NoCraters: EnumExplosionType
 	Craters: EnumExplosionType
-end
-declare class EnumFacialAnimationFlags extends EnumItem end
-declare class EnumFacialAnimationFlags_INTERNAL extends Enum
-	None: EnumFacialAnimationFlags
-	Place: EnumFacialAnimationFlags
-	Server: EnumFacialAnimationFlags
-	PlaceServer: EnumFacialAnimationFlags
 end
 declare class EnumFacialAnimationStreamingState extends EnumItem end
 declare class EnumFacialAnimationStreamingState_INTERNAL extends Enum
@@ -1893,6 +1887,12 @@ declare class EnumModelLevelOfDetail_INTERNAL extends Enum
 	StreamingMesh: EnumModelLevelOfDetail
 	Disabled: EnumModelLevelOfDetail
 end
+declare class EnumModelStreamingBehavior extends EnumItem end
+declare class EnumModelStreamingBehavior_INTERNAL extends Enum
+	Default: EnumModelStreamingBehavior
+	Legacy: EnumModelStreamingBehavior
+	Improved: EnumModelStreamingBehavior
+end
 declare class EnumModelStreamingMode extends EnumItem end
 declare class EnumModelStreamingMode_INTERNAL extends Enum
 	Default: EnumModelStreamingMode
@@ -2164,6 +2164,7 @@ declare class EnumPromptPublishAssetResult_INTERNAL extends Enum
 	Timeout: EnumPromptPublishAssetResult
 	UploadFailed: EnumPromptPublishAssetResult
 	NoUserInput: EnumPromptPublishAssetResult
+	UnknownFailure: EnumPromptPublishAssetResult
 end
 declare class EnumPropertyStatus extends EnumItem end
 declare class EnumPropertyStatus_INTERNAL extends Enum
@@ -2628,6 +2629,7 @@ declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
 	AICOOverlayButtonBackground: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackgroundHover: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackgroundPressed: EnumStudioScriptEditorColorCategories
+	IndentationRuler: EnumStudioScriptEditorColorCategories
 end
 declare class EnumStudioScriptEditorColorPresets extends EnumItem end
 declare class EnumStudioScriptEditorColorPresets_INTERNAL extends Enum
@@ -3378,7 +3380,6 @@ type ENUM_LIST = {
 	EnviromentalPhysicsThrottle: EnumEnviromentalPhysicsThrottle_INTERNAL,
 	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
 	ExplosionType: EnumExplosionType_INTERNAL,
-	FacialAnimationFlags: EnumFacialAnimationFlags_INTERNAL,
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
@@ -3445,6 +3446,7 @@ type ENUM_LIST = {
 	MeshType: EnumMeshType_INTERNAL,
 	MessageType: EnumMessageType_INTERNAL,
 	ModelLevelOfDetail: EnumModelLevelOfDetail_INTERNAL,
+	ModelStreamingBehavior: EnumModelStreamingBehavior_INTERNAL,
 	ModelStreamingMode: EnumModelStreamingMode_INTERNAL,
 	ModifierKey: EnumModifierKey_INTERNAL,
 	MouseBehavior: EnumMouseBehavior_INTERNAL,
@@ -4034,7 +4036,9 @@ declare class Instance
 	function IsA(self, className: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
+	function IsPropertyModified(self, name: string): boolean
 	function RemoveTag(self, tag: string): nil
+	function ResetPropertyToDefault(self, name: string): nil
 	function SetAttribute(self, attribute: string, value: any): nil
 	function WaitForChild(self, name: string): Instance
 	function WaitForChild(self, name: string, timeout: number): Instance?
@@ -4064,6 +4068,7 @@ declare class AdService extends Instance
 	AdTeleportEnded: RBXScriptSignal<>
 	AdTeleportInitiated: RBXScriptSignal<>
 	function GetAdTeleportInfo(self): any
+	function GetReportAdInfo(self): { any }
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 end
 
@@ -4316,7 +4321,7 @@ end
 
 declare class AvatarChatService extends Instance
 	ClientFeatures: number
-	ClientFeaturesInitialized: number
+	ClientFeaturesInitialized: boolean
 	ServerFeatures: number
 	function GetClientFeaturesAsync(self): number
 	function GetServerFeaturesAsync(self): number
@@ -4720,6 +4725,11 @@ declare class Camera extends Instance
 	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
 end
 
+declare class CaptureService extends Instance
+	function RetreiveCaptures(self): { any }
+	function SaveScreenshotCapture(self): nil
+end
+
 declare class ChangeHistoryService extends Instance
 	OnRedo: RBXScriptSignal<string>
 	OnUndo: RBXScriptSignal<string>
@@ -4803,6 +4813,7 @@ declare class ClickDetector extends Instance
 end
 
 declare class DragDetector extends ClickDetector
+	ActivatedCursorIcon: Content
 	ApplyAtCenterOfMass: boolean
 	Axis: Vector3
 	DragContinue: RBXScriptSignal<Player, Ray, CFrame, CFrame?, boolean>
@@ -5232,6 +5243,7 @@ declare class ControllerManager extends Instance
 	FacingDirection: Vector3
 	GroundSensor: ControllerSensor
 	MovingDirection: Vector3
+	RootPart: BasePart
 end
 
 declare class ControllerService extends Instance
@@ -5436,6 +5448,7 @@ end
 
 declare class DebuggerUIService extends Instance
 	ExpressionAdded: RBXScriptSignal<string>
+	ExpressionsCleared: RBXScriptSignal<>
 	function EditBreakpoint(self, metaBreakpointId: number): nil
 	function EditWatch(self, expression: string): nil
 	function IsConnectionForPlayDataModel(self, debuggerConnectionId: number): boolean
@@ -5445,6 +5458,7 @@ declare class DebuggerUIService extends Instance
 	function Resume(self): nil
 	function SetCurrentThreadId(self, debuggerThreadId: number): nil
 	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
+	function SetWatchExpressions(self, expressions: { any }): nil
 end
 
 declare class DebuggerVariable extends Instance
@@ -5666,15 +5680,9 @@ declare class FacialAnimationRecordingService extends Instance
 	function IsAgeRestricted(self): boolean
 end
 
-declare class FacialAnimationStreamingService extends Instance
-	EnableFlags: EnumFacialAnimationFlags
-	Enabled: boolean
-end
-
 declare class FacialAnimationStreamingServiceStats extends Instance
 	function Get(self, label: string): number
 	function GetWithPlayerId(self, label: string, playerId: number): number
-	isStreamingFacsUpdated: RBXScriptSignal<boolean, number>
 end
 
 declare class FacialAnimationStreamingServiceV2 extends Instance
@@ -5773,6 +5781,10 @@ declare class GamepadService extends Instance
 end
 
 declare class Geometry extends Instance
+	function CalculateConstraintsToPreserve(self, source: Instance, destination: { Instance }, tolerance: number, weldConstraintPreserve: EnumWeldConstraintPreserve): { [any]: any }
+	function IntersectAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
+	function SubtractAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
+	function UnionAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
 end
 
 declare class GetTextBoundsParams extends Instance
@@ -6954,6 +6966,7 @@ declare class MarketplaceService extends Instance
 	PromptProductPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
 	PromptPurchaseFinished: RBXScriptSignal<Player, number, boolean>
 	PromptPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
+	PromptPurchaseRequestedV2: RBXScriptSignal<Instance, number, boolean, EnumCurrencyType, string, string>
 	PromptRobloxPurchaseRequested: RBXScriptSignal<number, boolean>
 	PromptSubscriptionCancellationFinished: RBXScriptSignal<Player, number, boolean>
 	PromptSubscriptionCancellationRequested: RBXScriptSignal<Instance, number>
@@ -6965,7 +6978,7 @@ declare class MarketplaceService extends Instance
 	function GetProductInfo(self, assetId: number, infoType: EnumInfoType?): { [any]: any }
 	function GetRobuxBalance(self): number
 	function IsPlayerSubscribed(self, player: Player, subscriptionId: number): boolean
-	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?): { [any]: any }
+	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?, purchaseAuthToken: string?): { [any]: any }
 	function PlayerCanMakePurchases(self, player: Instance): boolean
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
@@ -7271,6 +7284,12 @@ declare class NotificationService extends Instance
 	function SwitchedToAppShellFeature(self, appShellFeature: EnumAppShellFeature): nil
 end
 
+declare class OmniRecommendationsService extends Instance
+	function ClearSessionId(self): nil
+	function GetSessionId(self): string
+	function MakeRequest(self, nextPageToken: string): HttpRequest
+end
+
 declare class PVInstance extends Instance
 	Origin: CFrame
 	function GetPivot(self): CFrame
@@ -7441,6 +7460,7 @@ declare class PartOperation extends TriangleMeshPart
 	SmoothingAngle: number
 	TriangleCount: number
 	UsePartColor: boolean
+	function SubstituteGeometry(self, source: Instance): nil
 end
 
 declare class IntersectOperation extends PartOperation
@@ -7551,6 +7571,7 @@ declare class Workspace extends WorldRoot
 	HumanoidOnlySetCollisionsOnStateChange: EnumHumanoidOnlySetCollisionsOnStateChange
 	InterpolationThrottling: EnumInterpolationThrottlingMode
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
+	ModelStreamingBehavior: EnumModelStreamingBehavior
 	PersistentLoaded: RBXScriptSignal<Player>
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
@@ -8577,6 +8598,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "CSGDictionaryService"): CSGDictionaryService
 	function GetService(self, service: "CacheableContentProvider"): CacheableContentProvider
 	function GetService(self, service: "CalloutService"): CalloutService
+	function GetService(self, service: "CaptureService"): CaptureService
 	function GetService(self, service: "ChangeHistoryService"): ChangeHistoryService
 	function GetService(self, service: "Chat"): Chat
 	function GetService(self, service: "ClusterPacketCache"): ClusterPacketCache
@@ -8606,7 +8628,6 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ExperienceAuthService"): ExperienceAuthService
 	function GetService(self, service: "FaceAnimatorService"): FaceAnimatorService
 	function GetService(self, service: "FacialAnimationRecordingService"): FacialAnimationRecordingService
-	function GetService(self, service: "FacialAnimationStreamingService"): FacialAnimationStreamingService
 	function GetService(self, service: "FacialAnimationStreamingServiceV2"): FacialAnimationStreamingServiceV2
 	function GetService(self, service: "FlagStandService"): FlagStandService
 	function GetService(self, service: "FlyweightService"): FlyweightService
@@ -8658,6 +8679,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "NetworkSettings"): NetworkSettings
 	function GetService(self, service: "NonReplicatedCSGDictionaryService"): NonReplicatedCSGDictionaryService
 	function GetService(self, service: "NotificationService"): NotificationService
+	function GetService(self, service: "OmniRecommendationsService"): OmniRecommendationsService
 	function GetService(self, service: "PackageService"): PackageService
 	function GetService(self, service: "PackageUIService"): PackageUIService
 	function GetService(self, service: "PatchBundlerFileWatch"): PatchBundlerFileWatch
@@ -9156,10 +9178,12 @@ declare class Studio extends Instance
 	DefaultScriptFileDir: QDir
 	DeprecatedObjectsShown: boolean
 	DisplayLanguage: string
+	EnableIndentationRulers: boolean
 	EnableOnTypeAutocomplete: boolean
 	Font: QFont
 	HintColor: Color3
 	IconOverrideDir: QDir
+	IndentationRulerColor: Color3
 	InformationColor: Color3
 	LocalAssetsFolder: QDir
 	LuaDebuggerEnabled: boolean
@@ -9237,7 +9261,6 @@ end
 declare class StudioService extends Instance
 	ActiveScript: Instance
 	AlignDraggedObjects: boolean
-	DEPRECATED_ShowActiveInstanceHighlight: boolean
 	DraggerSolveConstraints: boolean
 	GridSize: number
 	HoverInstance: Instance
@@ -9288,6 +9311,7 @@ declare class StudioTheme extends Instance
 end
 
 declare class StyleBase extends Instance
+	StyleRulesChanged: RBXScriptSignal<>
 	function GetStyleRules(self): { Instance }
 	function InsertStyleRule(self, rule: StyleRule, index: number?): nil
 	function SetStyleRules(self, rules: { Instance }): nil
@@ -9480,8 +9504,10 @@ declare class BubbleChatConfiguration extends TextChatConfigurations
 	Font: EnumFont
 	FontFace: Font
 	LocalPlayerStudsOffset: Vector3
+	MaxBubbles: number
 	MaxDistance: number
 	MinimizeDistance: number
+	TailVisible: boolean
 	TextColor3: Color3
 	TextSize: number
 	VerticalStudsOffset: number
@@ -9544,12 +9570,16 @@ declare class TextChatMessageProperties extends Instance
 end
 
 declare class TextChatService extends Instance
+	BubbleDisplayed: RBXScriptSignal<Instance, string>
 	ChatVersion: EnumChatVersion
 	CreateDefaultCommands: boolean
 	CreateDefaultTextChannels: boolean
 	MessageReceived: RBXScriptSignal<TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> any
 	SendingMessage: RBXScriptSignal<TextChatMessage>
+	function CanUserChatAsync(self, userId: number): boolean
+	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
+	function DisplayBubble(self, partOrCharacter: Instance, message: string): nil
 end
 
 declare class TextFilterResult extends Instance
@@ -9845,8 +9875,10 @@ declare class UserGameSettings extends Instance
 	PerformanceStatsVisible: boolean
 	PerformanceStatsVisibleChanged: RBXScriptSignal<boolean>
 	PlayerHeight: number
+	PreferredTransparency: number
 	RCCProfilerRecordFrameRate: number
 	RCCProfilerRecordTimeFrame: number
+	ReducedMotion: boolean
 	RotationType: EnumRotationType
 	SavedQualityLevel: EnumSavedQualitySetting
 	StartMaximized: boolean
@@ -9855,6 +9887,7 @@ declare class UserGameSettings extends Instance
 	StudioModeChanged: RBXScriptSignal<boolean>
 	TouchCameraMovementMode: EnumTouchCameraMovementMode
 	TouchMovementMode: EnumTouchMovementMode
+	UiNavigationKeyBindEnabled: boolean
 	UsedCoreGuiIsVisibleToggle: boolean
 	UsedCustomGuiIsVisibleToggle: boolean
 	UsedHideHudShortcut: boolean
