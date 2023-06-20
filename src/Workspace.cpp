@@ -105,6 +105,31 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
     return false;
 }
 
+// Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.
+// Uses the diagnostic type checker, so strictness and DM awareness is not enforced
+// NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
+Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
+{
+    return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
+}
+
+// Runs `Frontend::check` on the module whilst retaining the type graph.
+// Uses the autocomplete typechecker to enforce strictness and DM awareness.
+// NOTE: a disadvantage of the autocomplete typechecker is that it has a timeout restriction that
+// can often be hit
+void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete)
+{
+    // HACK: note that a previous call to `Frontend::check(moduleName, { retainTypeGraphs: false })`
+    // and then a call `Frontend::check(moduleName, { retainTypeGraphs: true })` will NOT actually
+    // retain the type graph if the module is not marked dirty.
+    // We do a manual check and dirty marking to fix this
+    auto module = forAutocomplete ? frontend.moduleResolverForAutocomplete.getModule(moduleName) : frontend.moduleResolver.getModule(moduleName);
+    if (module && module->internalTypes.types.empty()) // If we didn't retain type graphs, then the internalTypes arena is empty
+        frontend.markDirty(moduleName);
+
+    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ false});
+}
+
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
     if (!config.index.enabled)
@@ -132,10 +157,12 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             if (ext == ".lua" || ext == ".luau")
             {
                 auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
-                // We use autocomplete because its in strict mode, and this is useful for Find All References
-                frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ true});
-                // TODO: do we need indexing for non-autocomplete?
-                // frontend.check(moduleName);
+
+                // Check the module, discard the type graph
+                // Since we don't care about types, we don't need to do it for autocomplete
+                // TODO: can we get rid of the check, and only parse the require graph?
+                checkSimple(moduleName);
+
                 indexCount += 1;
             }
         }

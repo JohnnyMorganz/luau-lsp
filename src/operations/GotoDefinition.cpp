@@ -15,12 +15,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    if (frontend.isDirty(moduleName))
-    {
-        // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-        Luau::FrontendOptions frontendOpts{true, true};
-        frontend.check(moduleName, frontendOpts);
-    }
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
@@ -185,12 +180,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    if (frontend.isDirty(moduleName))
-    {
-        // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-        Luau::FrontendOptions frontendOpts{true, true};
-        frontend.check(moduleName, frontendOpts);
-    }
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"

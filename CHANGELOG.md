@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+#### Changed
+
+- Significant improvements to memory usage in large workspaces when workspace indexing or diagnostics are enabled
+
 ## [1.21.0] - 2023-06-14
 
 ### Deprecated

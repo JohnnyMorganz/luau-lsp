@@ -399,11 +399,11 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     // Run the type checker to ensure we are up to date
-    if (frontend.isDirty(moduleName))
-        frontend.check(moduleName);
+    // TODO: this relies on the autocomplete typechecker, which we don't really need for semantic tokens
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolver.getModule(moduleName);
+    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
         return std::nullopt;
 

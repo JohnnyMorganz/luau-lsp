@@ -119,11 +119,7 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    if (frontend.isDirty(moduleName))
-    {
-        Luau::FrontendOptions frontendOpts{true, true};
-        frontend.check(moduleName, frontendOpts);
-    }
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);

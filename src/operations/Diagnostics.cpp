@@ -20,7 +20,8 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
-    Luau::CheckResult cr = frontend.check(moduleName);
+    // Check the module. We do not need to store the type graphs
+    Luau::CheckResult cr = checkSimple(moduleName, /* runLintChecks: */ true);
 
     // If there was an error retrieving the source module
     // Bail early with an empty report - it is likely that the file was closed
@@ -121,7 +122,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         }
 
         // Compute new check result
-        Luau::CheckResult cr = frontend.check(moduleName);
+        Luau::CheckResult cr = checkSimple(moduleName, /* runLintChecks: */ true);
 
         // If there was an error retrieving the source module, disregard this file
         // TODO: should we file a diagnostic?

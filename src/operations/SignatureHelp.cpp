@@ -20,8 +20,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    Luau::FrontendOptions frontendOpts{true, true};
-    frontend.check(moduleName, frontendOpts);
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

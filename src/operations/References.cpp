@@ -71,6 +71,8 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     // For every module, search for its referencing
     for (const auto& moduleName : dependents)
     {
+        // Run the typechecker over the dependency modules
+        checkStrict(moduleName);
         auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
         if (!module)
             continue;
@@ -110,10 +112,16 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
         }
     }
 
-    // If its a property, include its original declaration location
+    // If its a property, include its original declaration location if not yet found
     if (property)
+    {
         if (auto prop = lookupProp(ty, *property); prop && prop->location)
-            references.push_back(Reference{ttv->definitionModuleName, prop->location.value()});
+        {
+            auto reference = Reference{ttv->definitionModuleName, prop->location.value()};
+            if (!contains(references, reference))
+                references.push_back(reference);
+        }
+    }
 
     return references;
 }
@@ -134,6 +142,7 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         result.emplace_back(Reference{moduleName, location});
 
     // Find the actual declaration location
+    checkStrict(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!module)
         return {};
@@ -150,6 +159,8 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         if (dependencyModuleName == moduleName)
             continue;
 
+        // Run the typechecker over the dependency module
+        checkStrict(dependencyModuleName);
         auto sourceModule = frontend.getSourceModule(dependencyModuleName);
         auto module = frontend.moduleResolverForAutocomplete.getModule(dependencyModuleName);
         if (sourceModule)
@@ -217,7 +228,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     // Run the type checker to ensure we are up to date
     // We check for autocomplete here since autocomplete has stricter types
-    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ true});
+    checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
