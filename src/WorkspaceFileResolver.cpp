@@ -8,6 +8,10 @@
 
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
 {
+    // Handle non-file schemes
+    if (name.scheme != "file")
+        return name.toString();
+
     auto fsPath = name.fsPath().generic_string();
     if (auto virtualPath = resolveToVirtualPath(fsPath))
     {
@@ -41,6 +45,10 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
 
 const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const Luau::ModuleName& name) const
 {
+    // Handle untitled: files
+    if (Luau::startsWith(name, "untitled:"))
+        return getTextDocument(Uri::parse(name));
+
     if (auto filePath = resolveToRealPath(name))
         return getTextDocument(Uri::file(*filePath));
 

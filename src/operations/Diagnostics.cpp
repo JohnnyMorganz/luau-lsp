@@ -48,8 +48,9 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto fileName = fileResolver.resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
                 continue;
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, fileResolver.getTextDocumentFromModuleName(error.moduleName));
-            auto uri = Uri::file(*fileName);
+            auto textDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
+            auto uri = textDocument ? textDocument->uri() : Uri::file(*fileName);
             auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
             currentDiagnostics.emplace_back(diagnostic);
         }

@@ -96,7 +96,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
                 {
                     auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
-                    auto uri = Uri::file(*file);
+                    auto uri = document ? document->uri() : Uri::file(*file);
                     result.emplace_back(lsp::Location{uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
                 }
             }
@@ -110,8 +110,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     else if (auto reference = node->as<Luau::AstTypeReference>())
     {
         auto uri = params.textDocument.uri;
-        auto referenceTextDocument = textDocument;
-        bool tempDocument = false; // NOTE: need to be EXTREMELY CAREFUL on deleting the ptr
+        TextDocumentPtr referenceTextDocument = {textDocument, false};
 
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)
@@ -133,18 +132,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 else
                     return result;
 
-                referenceTextDocument = fileResolver.getTextDocumentFromModuleName(*importedName);
+                referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
                 if (!referenceTextDocument)
-                {
-                    // Open a temporary text document so we can perform operations on it
-                    if (auto source = fileResolver.readSource(*importedName))
-                    {
-                        tempDocument = true;
-                        referenceTextDocument = new TextDocument{uri, "luau", 0, source->source};
-                    }
-                    else
-                        return result;
-                }
+                    return result;
             }
             else
                 return result;
@@ -152,17 +142,10 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
         auto location = lookupTypeLocation(*scope, reference->name.value);
         if (!location)
-        {
-            if (tempDocument)
-                delete referenceTextDocument;
             return result;
-        }
 
         result.emplace_back(lsp::Location{
             uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
-
-        if (tempDocument)
-            delete referenceTextDocument;
     }
 
     return result;
