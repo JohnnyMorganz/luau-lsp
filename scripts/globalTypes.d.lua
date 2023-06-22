@@ -1402,6 +1402,12 @@ declare class EnumIKCollisionsMode_INTERNAL extends Enum
 	OtherMechanismsAnchored: EnumIKCollisionsMode
 	IncludeContactedMechanisms: EnumIKCollisionsMode
 end
+declare class EnumIKControlConstraintSupport extends EnumItem end
+declare class EnumIKControlConstraintSupport_INTERNAL extends Enum
+	Default: EnumIKControlConstraintSupport
+	Disabled: EnumIKControlConstraintSupport
+	Enabled: EnumIKControlConstraintSupport
+end
 declare class EnumIKControlType extends EnumItem end
 declare class EnumIKControlType_INTERNAL extends Enum
 	Transform: EnumIKControlType
@@ -2895,6 +2901,12 @@ declare class EnumTextChatMessageStatus_INTERNAL extends Enum
 	InvalidTextChannelPermissions: EnumTextChatMessageStatus
 	MessageTooLong: EnumTextChatMessageStatus
 end
+declare class EnumTextDirection extends EnumItem end
+declare class EnumTextDirection_INTERNAL extends Enum
+	Auto: EnumTextDirection
+	LeftToRight: EnumTextDirection
+	RightToLeft: EnumTextDirection
+end
 declare class EnumTextFilterContext extends EnumItem end
 declare class EnumTextFilterContext_INTERNAL extends Enum
 	PublicChat: EnumTextFilterContext
@@ -3114,11 +3126,6 @@ declare class EnumUserInputType_INTERNAL extends Enum
 	TextInput: EnumUserInputType
 	InputMethod: EnumUserInputType
 	None: EnumUserInputType
-end
-declare class EnumVRPlayMode extends EnumItem end
-declare class EnumVRPlayMode_INTERNAL extends Enum
-	Seated: EnumVRPlayMode
-	Standing: EnumVRPlayMode
 end
 declare class EnumVRSafetyBubbleMode extends EnumItem end
 declare class EnumVRSafetyBubbleMode_INTERNAL extends Enum
@@ -3417,6 +3424,7 @@ type ENUM_LIST = {
 	HumanoidStateMachineMode: EnumHumanoidStateMachineMode_INTERNAL,
 	HumanoidStateType: EnumHumanoidStateType_INTERNAL,
 	IKCollisionsMode: EnumIKCollisionsMode_INTERNAL,
+	IKControlConstraintSupport: EnumIKControlConstraintSupport_INTERNAL,
 	IKControlType: EnumIKControlType_INTERNAL,
 	IXPLoadingStatus: EnumIXPLoadingStatus_INTERNAL,
 	InOut: EnumInOut_INTERNAL,
@@ -3561,6 +3569,7 @@ type ENUM_LIST = {
 	TerrainAcquisitionMethod: EnumTerrainAcquisitionMethod_INTERNAL,
 	TerrainFace: EnumTerrainFace_INTERNAL,
 	TextChatMessageStatus: EnumTextChatMessageStatus_INTERNAL,
+	TextDirection: EnumTextDirection_INTERNAL,
 	TextFilterContext: EnumTextFilterContext_INTERNAL,
 	TextInputType: EnumTextInputType_INTERNAL,
 	TextTruncate: EnumTextTruncate_INTERNAL,
@@ -3590,7 +3599,6 @@ type ENUM_LIST = {
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
 	UserInputType: EnumUserInputType_INTERNAL,
-	VRPlayMode: EnumVRPlayMode_INTERNAL,
 	VRSafetyBubbleMode: EnumVRSafetyBubbleMode_INTERNAL,
 	VRScaling: EnumVRScaling_INTERNAL,
 	VRSessionState: EnumVRSessionState_INTERNAL,
@@ -4645,6 +4653,7 @@ declare class Breakpoint extends Instance
 	Line: number
 	LogMessage: string
 	MetaBreakpointId: number
+	RemoveOnHit: boolean
 	Script: string
 	Valid: boolean
 	Verified: boolean
@@ -5181,20 +5190,17 @@ declare class VehicleController extends Controller
 end
 
 declare class ControllerBase extends Instance
+	BalanceRigidityEnabled: boolean
 	MoveSpeedFactor: number
-	RigidityEnabled: boolean
 end
 
 declare class AirController extends ControllerBase
 	BalanceMaxTorque: number
-	BalanceRigidityEnabled: boolean
 	BalanceSpeed: number
 	LinearImpulse: Vector3
 	MaintainAngularMomentum: boolean
 	MaintainLinearMomentum: boolean
 	MoveMaxForce: number
-	OrientationMaxTorque: number
-	OrientationSpeedFactor: number
 	TurnMaxTorque: number
 	TurnSpeedFactor: number
 end
@@ -5202,20 +5208,14 @@ end
 declare class ClimbController extends ControllerBase
 	AccelerationTime: number
 	BalanceMaxTorque: number
-	BalanceRigidityEnabled: boolean
 	BalanceSpeed: number
 	MoveMaxForce: number
-	OrientationMaxTorque: number
-	OrientationSpeedFactor: number
 end
 
 declare class GroundController extends ControllerBase
 	AccelerationLean: number
 	AccelerationTime: number
-	AlignSpeed: number
-	AlignTorque: number
 	BalanceMaxTorque: number
-	BalanceRigidityEnabled: boolean
 	BalanceSpeed: number
 	DecelerationTime: number
 	Friction: number
@@ -5224,7 +5224,6 @@ declare class GroundController extends ControllerBase
 	StandForce: number
 	StandSpeed: number
 	TurnSpeedFactor: number
-	TurningFactor: number
 end
 
 declare class SwimController extends ControllerBase
@@ -5781,7 +5780,10 @@ declare class GamepadService extends Instance
 end
 
 declare class Geometry extends Instance
-	function CalculateConstraintsToPreserve(self, source: Instance, destination: { Instance }, tolerance: number, weldConstraintPreserve: EnumWeldConstraintPreserve): { [any]: any }
+end
+
+declare class GeometryService extends Instance
+	function CalculateConstraintsToPreserve(self, source: Instance, destination: { Instance }, options: any): { [any]: any }
 	function IntersectAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
 	function SubtractAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
 	function UnionAsync(self, part: Instance, parts: { Instance }, options: any): { Instance }
@@ -5946,6 +5948,7 @@ declare class TextButton extends GuiButton
 	Text: string
 	TextBounds: Vector2
 	TextColor3: Color3
+	TextDirection: EnumTextDirection
 	TextFits: boolean
 	TextScaled: boolean
 	TextSize: number
@@ -5989,6 +5992,7 @@ declare class TextLabel extends GuiLabel
 	Text: string
 	TextBounds: Vector2
 	TextColor3: Color3
+	TextDirection: EnumTextDirection
 	TextFits: boolean
 	TextScaled: boolean
 	TextSize: number
@@ -6052,6 +6056,7 @@ declare class TextBox extends GuiObject
 	Text: string
 	TextBounds: Vector2
 	TextColor3: Color3
+	TextDirection: EnumTextDirection
 	TextEditable: boolean
 	TextFits: boolean
 	TextInputType: EnumTextInputType
@@ -7150,6 +7155,7 @@ declare class MetaBreakpoint extends Instance
 	IsLogpoint: boolean
 	Line: number
 	LogMessage: string
+	RemoveOnHit: boolean
 	Script: string
 	Valid: boolean
 	function GetContextBreakpoints(self): { [any]: any }
@@ -7290,6 +7296,9 @@ declare class OmniRecommendationsService extends Instance
 	function MakeRequest(self, nextPageToken: string): HttpRequest
 end
 
+declare class OpenCloudService extends Instance
+end
+
 declare class PVInstance extends Instance
 	Origin: CFrame
 	function GetPivot(self): CFrame
@@ -7316,6 +7325,7 @@ declare class BasePart extends PVInstance
 	Color: Color3
 	CurrentPhysicalProperties: PhysicalProperties
 	CustomPhysicalProperties: PhysicalProperties
+	EnableFluidForces: boolean
 	ExtentsCFrame: CFrame
 	ExtentsSize: Vector3
 	FrontSurface: EnumSurfaceType
@@ -7560,15 +7570,18 @@ declare class WorldRoot extends Model
 end
 
 declare class Workspace extends WorldRoot
+	AirDensity: number
 	AllowThirdPartySales: boolean
 	AvatarUnificationMode: EnumAvatarUnificationMode
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
+	EnableFluidForces: boolean
 	FallenPartsDestroyHeight: number
 	GlobalWind: Vector3
 	Gravity: number
 	HumanoidOnlySetCollisionsOnStateChange: EnumHumanoidOnlySetCollisionsOnStateChange
+	IKControlConstraintSupport: EnumIKControlConstraintSupport
 	InterpolationThrottling: EnumInterpolationThrottlingMode
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
 	ModelStreamingBehavior: EnumModelStreamingBehavior
@@ -7785,6 +7798,7 @@ declare class PhysicsSettings extends Instance
 	AreAssembliesShown: boolean
 	AreAwakePartsHighlighted: boolean
 	AreBodyTypesShown: boolean
+	AreCollisionCostsShown: boolean
 	AreConstraintForcesShownForSelectedOrHoveredInstances: boolean
 	AreConstraintTorquesShownForSelectedOrHoveredInstances: boolean
 	AreContactForcesShownForSelectedOrHoveredAssemblies: boolean
@@ -8187,6 +8201,7 @@ declare class ProximityPromptService extends Instance
 end
 
 declare class PublishService extends Instance
+	function CreateAssetAndWaitForAssetId(self, instance: Instance, operationId: string, creatorId: number, assetType: string, name: string, description: string): number
 	function PublishCageMeshAsync(self, wrap: Instance, cageType: EnumCageType): Content
 	function PublishDescendantAssets(self, instance: Instance): boolean
 end
@@ -8347,6 +8362,10 @@ declare class RobloxPluginGuiService extends Instance
 end
 
 declare class RobloxReplicatedStorage extends Instance
+end
+
+declare class RomarkService extends Instance
+	function EndRemoteRomarkTest(self): nil
 end
 
 declare class RotationCurve extends Instance
@@ -8635,6 +8654,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "GamePassService"): GamePassService
 	function GetService(self, service: "GamepadService"): GamepadService
 	function GetService(self, service: "Geometry"): Geometry
+	function GetService(self, service: "GeometryService"): GeometryService
 	function GetService(self, service: "GoogleAnalyticsConfiguration"): GoogleAnalyticsConfiguration
 	function GetService(self, service: "GroupService"): GroupService
 	function GetService(self, service: "GuiService"): GuiService
@@ -8680,6 +8700,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "NonReplicatedCSGDictionaryService"): NonReplicatedCSGDictionaryService
 	function GetService(self, service: "NotificationService"): NotificationService
 	function GetService(self, service: "OmniRecommendationsService"): OmniRecommendationsService
+	function GetService(self, service: "OpenCloudService"): OpenCloudService
 	function GetService(self, service: "PackageService"): PackageService
 	function GetService(self, service: "PackageUIService"): PackageUIService
 	function GetService(self, service: "PatchBundlerFileWatch"): PatchBundlerFileWatch
@@ -8705,6 +8726,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "ReplicatedStorage"): ReplicatedStorage
 	function GetService(self, service: "RobloxPluginGuiService"): RobloxPluginGuiService
 	function GetService(self, service: "RobloxReplicatedStorage"): RobloxReplicatedStorage
+	function GetService(self, service: "RomarkService"): RomarkService
 	function GetService(self, service: "RtMessagingService"): RtMessagingService
 	function GetService(self, service: "RunService"): RunService
 	function GetService(self, service: "RuntimeScriptService"): RuntimeScriptService
@@ -9722,6 +9744,7 @@ declare class UGCValidationService extends Instance
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
 	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
 	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
+	function ValidateDynamicHeadMesh(self, meshId: string): boolean
 	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
 	function ValidateMeshBounds(self, meshId: string, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
 	function ValidateMeshTriangles(self, meshId: string): boolean
@@ -9729,6 +9752,7 @@ declare class UGCValidationService extends Instance
 	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
 	function ValidateNumTextureChannels(self, textureId: string, numChannelsRequired: number): boolean
 	function ValidateOverlappingVertices(self, meshId: string): boolean
+	function ValidateSkinnedMesh(self, meshId: string): boolean
 	function ValidateTextureSize(self, textureId: string): boolean
 	function ValidateUVSpace(self, meshId: string): boolean
 end
@@ -9892,7 +9916,6 @@ declare class UserGameSettings extends Instance
 	UsedCustomGuiIsVisibleToggle: boolean
 	UsedHideHudShortcut: boolean
 	VREnabled: boolean
-	VRPlayMode: EnumVRPlayMode
 	VRRotationIntensity: number
 	VRSafetyBubbleMode: EnumVRSafetyBubbleMode
 	VRSmoothRotationEnabled: boolean
