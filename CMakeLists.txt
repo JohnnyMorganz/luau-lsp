@@ -56,6 +56,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
     tests/SemanticTokens.test.cpp
     tests/Sourcemap.test.cpp
     tests/References.test.cpp
+    tests/ColorProvider.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging

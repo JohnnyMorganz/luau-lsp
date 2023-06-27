@@ -1,5 +1,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
+#include "LSP/ColorProvider.hpp"
 
 #include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
@@ -8,38 +9,19 @@
 
 #include <cmath>
 
-// https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
-struct RGB
+// https://github.com/EmmanuelOga/columns/blob/master/utils/color.lua
+RGB hsvToRgb(HSV in)
 {
-    unsigned char r = 0;
-    unsigned char g = 0;
-    unsigned char b = 0;
-};
+    auto h = in.h, s = in.s, v = in.v;
+    double r, g, b;
 
-struct HSV
-{
-    double h = 0;
-    double s = 0;
-    double v = 0;
-};
+    auto i = (int)std::floor(h * 6);
+    auto f = h * 6 - i;
+    auto p = v * (1 - s);
+    auto q = v * (1 - f * s);
+    auto t = v * (1 - (1 - f) * s);
 
-static RGB hsvToRgb(double h, double s, double v)
-{
-    if (s == 0.0)
-        return {0, 0, 0};
-
-    double r = 0, g = 0, b = 0;
-
-    if (h == 360)
-        h = 0;
-    else
-        h = h / 60.0;
-
-    auto i = (size_t)std::floor(h);
-    double f = h - i;
-    double p = v * (1.0 - s);
-    double q = v * (1.0 - f * s);
-    double t = v * (1.0 - (1.0 - f) * s);
+    i = i % 6;
 
     switch (i)
     {
@@ -75,62 +57,60 @@ static RGB hsvToRgb(double h, double s, double v)
         break;
     }
 
-    return {(unsigned char)(r * 255), (unsigned char)(g * 255), (unsigned char)(b * 255)};
+    return {(int)(r * 255), (int)(g * 255), (int)(b * 255)};
 }
 
-static HSV rgbToHsv(RGB in)
+HSV rgbToHsv(RGB in)
 {
-    HSV out;
-    double min, max, delta;
+    double r = in.r / 255.0, g = in.g / 255.0, b = in.b / 255.0;
+    auto max = std::max(std::max(r, g), b);
+    auto min = std::min(std::min(r, g), b);
 
-    min = in.r < in.g ? in.r : in.g;
-    min = min < in.b ? min : in.b;
+    double h;
+    double s;
+    double v = max;
 
-    max = in.r > in.g ? in.r : in.g;
-    max = max > in.b ? max : in.b;
+    auto d = max - min;
+    if (max == 0)
+        s = 0.0;
+    else
+        s = d / max;
 
-    out.v = max; // v
-    delta = max - min;
-    if (delta < 0.00001)
-    {
-        out.s = 0;
-        out.h = 0; // undefined, maybe nan?
-        return out;
-    }
-    if (max > 0.0)
-    {                          // NOTE: if Max is == 0, this divide would cause a crash
-        out.s = (delta / max); // s
-    }
+    if (max == min)
+        h = 0.0;
     else
     {
-        // if max is 0, then r = g = b = 0
-        // s = 0, h is undefined
-        out.s = 0.0;
-        out.h = NAN; // its now undefined
-        return out;
+        if (max == r)
+        {
+            h = (g - b) / d;
+            if (g < b)
+                h += 6.0;
+        }
+        else if (max == g)
+            h = (b - r) / d + 2.0;
+        else if (max == b)
+            h = (r - g) / d + 4.0;
+        h = h / 6.0;
     }
-    if (in.r >= max)                   // > is bogus, just keeps compilor happy
-        out.h = (in.g - in.b) / delta; // between yellow & magenta
-    else if (in.g >= max)
-        out.h = 2.0 + (in.b - in.r) / delta; // between cyan & yellow
-    else
-        out.h = 4.0 + (in.r - in.g) / delta; // between magenta & cyan
 
-    out.h *= 60.0; // degrees
-
-    if (out.h < 0.0)
-        out.h += 360.0;
-
-    return out;
+    return {h, s, v};
 }
 
-static RGB hexToRgb(std::string hex)
+RGB hexToRgb(std::string hex)
 {
     replace(hex, "#", "");
     unsigned int val = std::stoul(hex, nullptr, 16);
     if (val > 16777215)
         throw std::out_of_range("hex string is larger than #ffffff");
-    return {(unsigned char)((val >> 16) & 0xFF), (unsigned char)((val >> 8) & 0xFF), (unsigned char)(val & 0xFF)};
+    return {(val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF};
+}
+
+std::string rgbToHex(RGB in)
+{
+    std::stringstream hexString;
+    hexString << "#";
+    hexString << std::setfill('0') << std::setw(6) << std::hex << (in.r << 16 | in.g << 8 | in.b);
+    return hexString.str();
 }
 
 struct DocumentColorVisitor : public Luau::AstVisitor
@@ -196,7 +176,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
                                     return true; // Don't create as we can't parse the full colour
                                 index++;
                             }
-                            RGB data = hsvToRgb(color[0], color[1], color[2]);
+                            RGB data = hsvToRgb({color[0], color[1], color[2]});
                             color[0] = data.r / 255.0;
                             color[1] = data.g / 255.0;
                             color[2] = data.b / 255.0;
@@ -285,8 +265,11 @@ lsp::ColorPresentationResult WorkspaceFolder::colorPresentation(const lsp::Color
                                                       ", " + std::to_string(params.color.blue) + ")"});
 
     // Convert to RGB values
-    RGB rgb{(unsigned char)std::floor(params.color.red * 255), (unsigned char)std::floor(params.color.green * 255),
-        (unsigned char)std::floor(params.color.blue * 255)};
+    RGB rgb{
+        (int)std::floor(params.color.red * 255.0),
+        (int)std::floor(params.color.green * 255.0),
+        (int)std::floor(params.color.blue * 255.0),
+    };
 
     // Add Color3.fromRGB
     presentations.emplace_back(
@@ -298,10 +281,7 @@ lsp::ColorPresentationResult WorkspaceFolder::colorPresentation(const lsp::Color
         lsp::ColorPresentation{"Color3.fromHSV(" + std::to_string(hsv.h) + ", " + std::to_string(hsv.s) + ", " + std::to_string(hsv.v) + ")"});
 
     // Add Color3.fromHex
-    std::stringstream hexString;
-    hexString << "#";
-    hexString << std::hex << (rgb.r << 16 | rgb.g << 8 | rgb.b);
-    presentations.emplace_back(lsp::ColorPresentation{"Color3.fromHex(\"" + hexString.str() + "\")"});
+    presentations.emplace_back(lsp::ColorPresentation{"Color3.fromHex(\"" + rgbToHex(rgb) + "\")"});
 
     return presentations;
 }
