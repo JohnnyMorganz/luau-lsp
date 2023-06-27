@@ -542,6 +542,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     Luau::AutocompleteEntry entry{
                         Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
                     entry.tags.push_back("File");
+                    entry.tags.push_back("Alias");
                     result.insert_or_assign(aliasName, entry);
                 }
 
@@ -551,6 +552,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     Luau::AutocompleteEntry entry{
                         Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
                     entry.tags.push_back("Directory");
+                    entry.tags.push_back("Alias");
                     result.insert_or_assign(aliasName, entry);
                 }
 
@@ -693,6 +695,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         }
         else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
             item.kind = lsp::CompletionItemKind::Folder;
+
+        // If its a file or directory alias, de-prioritise it compared to normal paths
+        if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+            item.sortText = SortText::AutoImports;
 
         // Handle if name is not an identifier
         if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
