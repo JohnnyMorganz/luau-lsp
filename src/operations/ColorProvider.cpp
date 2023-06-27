@@ -88,7 +88,7 @@ HSV rgbToHsv(RGB in)
         }
         else if (max == g)
             h = (b - r) / d + 2.0;
-        else if (max == b)
+        else // if (max == b) - this condition always holds. we comment it out for compiler to be happy
             h = (r - g) / d + 4.0;
         h = h / 6.0;
     }
