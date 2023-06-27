@@ -431,6 +431,27 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
     };
 }
 
+// Since in Roblox land, debug is extended to introduce more methods, but the api-docs
+// mark the package name as `@luau` instead of `@roblox`
+static void fixDebugDocumentationSymbol(Luau::TypeId ty)
+{
+    auto mutableTy = Luau::asMutable(ty);
+    auto newDocumentationSymbol = mutableTy->documentationSymbol.value();
+    replace(newDocumentationSymbol, "@roblox", "@luau");
+    mutableTy->documentationSymbol = newDocumentationSymbol;
+
+    if (Luau::TableType* ttv = Luau::getMutable<Luau::TableType>(ty))
+    {
+        ttv->name = "typeof(debug)";
+        for (auto& [name, prop] : ttv->props)
+        {
+            newDocumentationSymbol = prop.documentationSymbol.value();
+            replace(newDocumentationSymbol, "@roblox", "@luau");
+            prop.documentationSymbol = newDocumentationSymbol;
+        }
+    }
+}
+
 Luau::LoadDefinitionFileResult registerDefinitions(
     Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
 {
@@ -439,6 +460,15 @@ Luau::LoadDefinitionFileResult registerDefinitions(
         frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
     if (!loadResult.success)
         return loadResult;
+
+    // HACK: Mark "debug" using `@luau` symbol instead
+    if (auto it = globals.globalScope->bindings.find(Luau::AstName("debug")); it != globals.globalScope->bindings.end())
+    {
+        auto newDocumentationSymbol = it->second.documentationSymbol.value();
+        replace(newDocumentationSymbol, "@roblox", "@luau");
+        it->second.documentationSymbol = newDocumentationSymbol;
+        fixDebugDocumentationSymbol(it->second.typeId);
+    }
 
     // Extend Instance types
     if (auto instanceType = globals.globalScope->lookupType("Instance"))
