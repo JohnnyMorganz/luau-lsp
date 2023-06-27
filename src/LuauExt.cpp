@@ -32,25 +32,32 @@ std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope,
 
 std::optional<std::string> getTypeName(Luau::TypeId typeId)
 {
+    std::optional<std::string> name = std::nullopt;
     auto ty = Luau::follow(typeId);
+
     if (auto typeName = Luau::getName(ty))
     {
-        return *typeName;
+        name = *typeName;
     }
     else if (auto mtv = Luau::get<Luau::MetatableType>(ty))
     {
         if (auto mtvName = Luau::getName(mtv->metatable))
-            return *mtvName;
+            name = *mtvName;
     }
     else if (auto parentClass = Luau::get<Luau::ClassType>(ty))
     {
-        return parentClass->name;
+        name = parentClass->name;
     }
     // if (auto parentUnion = Luau::get<UnionType>(ty))
     // {
     //     return returnFirstNonnullOptionOfType<ClassType>(parentUnion);
     // }
-    return std::nullopt;
+
+    // strip synthetic typeof() for builtin tables
+    if (name && name->compare(0, 7, "typeof(") == 0 && name->back() == ')')
+        return name->substr(7, name->length() - 8);
+    else
+        return name;
 }
 
 // Retrieves the corresponding Luau type for a Sourcemap node
