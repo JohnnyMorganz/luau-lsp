@@ -116,7 +116,36 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     if (!node)
         return std::nullopt;
 
-    if (auto reference = node->as<Luau::AstTypeReference>())
+    if (auto typeDefinition = node->as<Luau::AstStatTypeAlias>())
+    {
+        if (typeDefinition->exported)
+        {
+            // Type may potentially be used in other files, so we need to handle this globally
+            auto references = findAllTypeReferences(moduleName, typeDefinition->name.value);
+            processReferences(fileResolver, params.newName, references, result);
+            return result;
+        }
+        else
+        {
+            std::vector<lsp::TextEdit> localChanges{};
+
+            // Update the type definition
+            localChanges.emplace_back(lsp::TextEdit{
+                {textDocument->convertPosition(typeDefinition->nameLocation.begin), textDocument->convertPosition(typeDefinition->nameLocation.end)},
+                params.newName});
+
+            // Update all usages of the type
+            auto references = findTypeReferences(*sourceModule, typeDefinition->name.value, std::nullopt);
+            localChanges.reserve(references.size() + 1);
+            for (auto& location : references)
+                localChanges.emplace_back(
+                    lsp::TextEdit{{textDocument->convertPosition(location.begin), textDocument->convertPosition(location.end)}, params.newName});
+
+            result.changes.insert_or_assign(params.textDocument.uri.toString(), localChanges);
+            return result;
+        }
+    }
+    else if (auto reference = node->as<Luau::AstTypeReference>())
     {
         if (auto prefix = reference->prefix)
         {

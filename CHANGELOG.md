@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed documentation for `debug` library
 - Fixed synthetic `typeof()` showing up in signature help for builtin tables (e.g. `function typeof(string).byte(...)`)
 - Fixed signature help highlighting for `string` library
+- Fixed rename symbol on a type definition `type NAME = ...`
 
 ## [1.21.0] - 2023-06-14
 
