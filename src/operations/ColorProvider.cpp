@@ -102,7 +102,7 @@ RGB hexToRgb(std::string hex)
     unsigned int val = std::stoul(hex, nullptr, 16);
     if (val > 16777215)
         throw std::out_of_range("hex string is larger than #ffffff");
-    return {(val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF};
+    return {(int)((val >> 16) & 0xFF), (int)((val >> 8) & 0xFF), (int)(val & 0xFF)};
 }
 
 std::string rgbToHex(RGB in)
