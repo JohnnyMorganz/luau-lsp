@@ -282,13 +282,22 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         }
 
         std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+        auto filePath = basePath / requiredString;
 
         std::error_code ec;
-        auto filePath = std::filesystem::weakly_canonical(basePath / (requiredString + ".luau"), ec);
+
+        // Handle "init.luau" files in a directory
+        if (std::filesystem::is_directory(filePath, ec))
+        {
+            filePath /= "init.luau";
+        }
+
+        // Add file endings
+        auto fullFilePath = std::filesystem::weakly_canonical(filePath.replace_extension(".luau"), ec);
         if (ec.value() != 0 || !std::filesystem::exists(filePath))
         {
             // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(basePath / (requiredString + ".lua"), ec);
+            filePath = std::filesystem::weakly_canonical(filePath.replace_extension(".lua"), ec);
         }
 
         // URI-ify the file path so that its normalised (in particular, the drive letter)

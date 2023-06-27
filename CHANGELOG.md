@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Support requiring directories with `init.luau` (or `init.lua`) files inside of them. i.e. `require("../Directory")` resolves to `../Directory/init.luau`.
+
 #### Changed
 
 - Significant improvements to memory usage in large workspaces when workspace indexing or diagnostics are enabled
