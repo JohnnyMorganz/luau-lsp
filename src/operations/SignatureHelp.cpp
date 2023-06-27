@@ -90,7 +90,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         std::vector<lsp::ParameterInformation> parameters{};
         auto it = Luau::begin(ftv->argTypes);
         size_t idx = 0;
-        size_t previousParamPos = 0;
+        size_t previousParamPos = label.find("("); // start search at start of parameter list, not earlier
 
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
