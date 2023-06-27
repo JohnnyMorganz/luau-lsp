@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed language features not working in new untitled files
 - Fixed incorrect color conversions in the color picker between RGB/HSV/Hex
+- Fixed autoimporting modules not respecting multiline requires
 
 ## [1.21.0] - 2023-06-14
 

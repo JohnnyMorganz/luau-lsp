@@ -390,7 +390,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             {
                 for (auto& [_, stat] : group)
                 {
-                    auto line = stat->location.begin.line;
+                    auto line = stat->location.end.line;
 
                     // HACK: We read the text of the require argument to sort the lines
                     // Note: requires may be in the form `require(path) :: any`, so we need to handle that too

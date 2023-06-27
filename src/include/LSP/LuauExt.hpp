@@ -86,7 +86,7 @@ public:
         size_t lineNumber = minimumLineNumber;
         for (auto& [definedService, stat] : serviceLineMap)
         {
-            auto location = stat->location.begin.line;
+            auto location = stat->location.end.line;
             if (definedService < serviceName && location >= lineNumber)
                 lineNumber = location + 1;
         }
@@ -112,7 +112,7 @@ public:
         if (!localName || !expr)
             return false;
 
-        auto line = localName->location.begin.line;
+        auto line = expr->location.end.line;
 
         if (isGetService(expr))
         {
