@@ -262,6 +262,9 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
     {
         std::string requiredString(expr->value.data, expr->value.size);
 
+        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+        auto filePath = basePath / requiredString;
+
         // Check for custom require overrides
         if (client)
         {
@@ -270,19 +273,14 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             // Check file aliases
             if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
             {
-                auto filePath = resolvePath(it->second);
-                return Luau::ModuleInfo{filePath.generic_string()};
+                filePath = resolvePath(it->second);
             }
-
             // Check directory aliases
-            if (auto filePath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
+            else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
             {
-                return Luau::ModuleInfo{filePath->generic_string()};
+                filePath = aliasedPath.value();
             }
         }
-
-        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
-        auto filePath = basePath / requiredString;
 
         std::error_code ec;
 

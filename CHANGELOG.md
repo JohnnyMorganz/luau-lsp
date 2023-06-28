@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed synthetic `typeof()` showing up in signature help for builtin tables (e.g. `function typeof(string).byte(...)`)
 - Fixed signature help highlighting for `string` library
 - Fixed rename symbol on a type definition `type NAME = ...`
+- Fixed file and directory aliases not being canonicalised to absolute paths causing "Follow Link" to fail when using relative alias paths
 
 ## [1.21.0] - 2023-06-14
 
