@@ -536,26 +536,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 Luau::AutocompleteEntryMap result;
 
-                // Populate with custom file aliases
-                for (const auto& [aliasName, _] : config.require.fileAliases)
-                {
-                    Luau::AutocompleteEntry entry{
-                        Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                    entry.tags.push_back("File");
-                    entry.tags.push_back("Alias");
-                    result.insert_or_assign(aliasName, entry);
-                }
-
-                // Populate with custom directory aliases
-                for (const auto& [aliasName, _] : config.require.directoryAliases)
-                {
-                    Luau::AutocompleteEntry entry{
-                        Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                    entry.tags.push_back("Directory");
-                    entry.tags.push_back("Alias");
-                    result.insert_or_assign(aliasName, entry);
-                }
-
                 // Include any files in the directory
                 auto contentsString = contents.value();
 
@@ -568,6 +548,29 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     contentsString = "";
                 else
                     contentsString = contentsString.substr(0, separator + 1);
+
+                // Populate with custom file aliases
+                for (const auto& [aliasName, _] : config.require.fileAliases)
+                {
+                    Luau::AutocompleteEntry entry{
+                        Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
+                    entry.tags.push_back("File");
+                    entry.tags.push_back("Alias");
+                    result.insert_or_assign(aliasName, entry);
+                }
+
+                // Populate with custom directory aliases, if we are at the start of a string require
+                if (contentsString == "")
+                {
+                    for (const auto& [aliasName, _] : config.require.directoryAliases)
+                    {
+                        Luau::AutocompleteEntry entry{
+                            Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
+                        entry.tags.push_back("Directory");
+                        entry.tags.push_back("Alias");
+                        result.insert_or_assign(aliasName, entry);
+                    }
+                }
 
                 // Check if it starts with a directory alias, otherwise resolve with require base path
                 std::filesystem::path currentDirectory =
