@@ -985,7 +985,7 @@ struct FindExprOrLocalClosed : public Luau::AstVisitor
     {
         for (Luau::AstStat* stat : block->body)
         {
-            if (stat->location.end <= pos)
+            if (stat->location.end < pos)
                 continue;
             if (stat->location.begin > pos)
                 break;

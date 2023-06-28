@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed rename symbol on a type definition `type NAME = ...`
 - Fixed file and directory aliases not being canonicalised to absolute paths causing "Follow Link" to fail when using relative alias paths
 - Don't show directory aliases after the first path segment has been typed
+- Fixed rename symbol not working when triggered at the end of a symbol
 
 ## [1.21.0] - 2023-06-14
 
