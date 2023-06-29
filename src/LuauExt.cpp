@@ -440,7 +440,7 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
 
 // Since in Roblox land, debug is extended to introduce more methods, but the api-docs
 // mark the package name as `@luau` instead of `@roblox`
-static void fixDebugDocumentationSymbol(Luau::TypeId ty)
+static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libraryName)
 {
     auto mutableTy = Luau::asMutable(ty);
     auto newDocumentationSymbol = mutableTy->documentationSymbol.value();
@@ -449,7 +449,7 @@ static void fixDebugDocumentationSymbol(Luau::TypeId ty)
 
     if (Luau::TableType* ttv = Luau::getMutable<Luau::TableType>(ty))
     {
-        ttv->name = "typeof(debug)";
+        ttv->name = "typeof(" + libraryName + ")";
         for (auto& [name, prop] : ttv->props)
         {
             newDocumentationSymbol = prop.documentationSymbol.value();
@@ -474,7 +474,16 @@ Luau::LoadDefinitionFileResult registerDefinitions(
         auto newDocumentationSymbol = it->second.documentationSymbol.value();
         replace(newDocumentationSymbol, "@roblox", "@luau");
         it->second.documentationSymbol = newDocumentationSymbol;
-        fixDebugDocumentationSymbol(it->second.typeId);
+        fixDebugDocumentationSymbol(it->second.typeId, "debug");
+    }
+
+    // HACK: Mark "utf8" using `@luau` symbol instead
+    if (auto it = globals.globalScope->bindings.find(Luau::AstName("utf8")); it != globals.globalScope->bindings.end())
+    {
+        auto newDocumentationSymbol = it->second.documentationSymbol.value();
+        replace(newDocumentationSymbol, "@roblox", "@luau");
+        it->second.documentationSymbol = newDocumentationSymbol;
+        fixDebugDocumentationSymbol(it->second.typeId, "utf8");
     }
 
     // Extend Instance types
