@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Significant improvements to memory usage in large workspaces when workspace indexing or diagnostics are enabled
 - Sync to upstream Luau 0.582
 - Deprioritise file or directory aliases over exact paths in autocomplete, since typically aliases start with a prefix (e.g. `@`)
+- Signature Help is more intelligent about providing information about the best function overload which matches
 
 ### Fixed
 

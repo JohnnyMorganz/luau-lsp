@@ -5,6 +5,25 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
+/// Computes a score about how much a provided overload matches
+/// `superTp` is the overload function type's argTypes
+/// `subTp` is a type pack built from the actual argument types (taken from astTypes) with an attached free type pack tail
+/// A "score" is built on the number of matching arguments
+static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp, Luau::NotNull<Luau::Scope> scope, Luau::TypeArena* typeArena,
+    Luau::NotNull<Luau::BuiltinTypes> builtinTypes)
+{
+    Luau::InternalErrorReporter iceReporter;
+    Luau::UnifierSharedState unifierState(&iceReporter);
+    Luau::Normalizer normalizer{typeArena, builtinTypes, Luau::NotNull{&unifierState}};
+    Luau::Unifier unifier(Luau::NotNull<Luau::Normalizer>{&normalizer}, scope, Luau::Location(), Luau::Variance::Covariant);
+
+    // Cost of normalization can be too high for autocomplete response time requirements
+    unifier.normalize = false;
+    unifier.checkInhabited = false;
+
+    return unifier.canUnify(subTp, superTp, /* isFunctionCall = */ true).empty();
+}
+
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
     auto config = client->getConfiguration(rootUri);
@@ -30,7 +49,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);
 
-    if (ancestry.size() == 0)
+    if (ancestry.size() == 0 || !scope)
         return std::nullopt;
 
     auto* candidate = ancestry.back()->as<Luau::AstExprCall>();
@@ -58,9 +77,20 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         return std::nullopt;
     auto followedId = Luau::follow(*it);
 
+    // Construct a type pack from the current list of arguments for overload matching
+    Luau::TypeArena typeArena;
+    std::vector<Luau::TypeId> argumentTys;
+    if (candidate->self)
+        argumentTys.push_back(followedId);
+    for (auto&& arg : candidate->args)
+        if (auto ty = module->astTypes.find(arg))
+            argumentTys.push_back(Luau::follow(*ty));
+    Luau::TypePackId subTp = typeArena.addTypePack(argumentTys, typeArena.freshTypePack(&*scope));
+
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
 
+    std::optional<size_t> activeSignature = std::nullopt;
     std::vector<lsp::SignatureInformation> signatures{};
 
     auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
@@ -167,6 +197,10 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             }
         }
 
+        // If this overload matches, and we haven't yet found a match, mark it as the active signature
+        if (!activeSignature && checkOverloadMatch(subTp, ftv->argTypes, Luau::NotNull{&*scope}, &typeArena, frontend.builtinTypes))
+            activeSignature = signatures.size();
+
         signatures.push_back(lsp::SignatureInformation{
             label, documentation, parameters, std::min(activeParameter, parameters.size() == 0 ? 0 : parameters.size() - 1)});
     };
@@ -181,7 +215,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             if (auto candidateFunctionType = Luau::get<Luau::FunctionType>(part))
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
-    return lsp::SignatureHelp{signatures, 0, activeParameter};
+    return lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
 }
 
 std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
