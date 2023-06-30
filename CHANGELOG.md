@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Support requiring directories with `init.luau` (or `init.lua`) files inside of them. i.e. `require("../Directory")` resolves to `../Directory/init.luau`.
+- The CLI analyze now accepts a parameter `--settings=path/to/settings.json` which takes in LSP-style settings to configure features such as require settings. Note: this is separate to `.luaurc`
 
 #### Changed
 

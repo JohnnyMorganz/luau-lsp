@@ -419,7 +419,8 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
                 client->publishDiagnostics({configUri, std::nullopt, {diagnostic}});
             }
             else
-                configErrors.emplace_back(std::pair{configPath, *error});
+                // TODO: this should never be reached anymore
+                std::cerr << configUri.toString() << ": " << *error;
         }
         else
         {
@@ -435,7 +436,6 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
 void WorkspaceFileResolver::clearConfigCache()
 {
     configCache.clear();
-    configErrors.clear();
 }
 
 void WorkspaceFileResolver::writePathsToMap(const SourceNodePtr& node, const std::string& base)

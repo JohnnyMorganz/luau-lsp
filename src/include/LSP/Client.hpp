@@ -14,7 +14,17 @@ using namespace json_rpc;
 using ResponseHandler = std::function<void(const JsonRpcMessage&)>;
 using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const ClientConfiguration&, /* oldConfig: */ const ClientConfiguration*)>;
 
-class Client
+struct BaseClient
+{
+    virtual ~BaseClient() {}
+
+    virtual const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
+
+    virtual void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) = 0;
+};
+
+
+class Client : public BaseClient
 {
 public:
     lsp::ClientCapabilities capabilities;
@@ -60,12 +70,12 @@ public:
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
 
-    const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri);
+    const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override;
     void removeConfiguration(const lsp::DocumentUri& uri);
     // TODO: this function only supports getting requests for workspaces
     void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);
     void applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler = std::nullopt);
-    void publishDiagnostics(const lsp::PublishDiagnosticsParams& params);
+    void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) override;
     void refreshWorkspaceDiagnostics();
     void terminateWorkspaceDiagnostics(bool retriggerRequest = true);
     void refreshInlayHints();

@@ -55,7 +55,7 @@ struct WorkspaceFileResolver
     , Luau::ConfigResolver
 {
     Luau::Config defaultConfig;
-    std::shared_ptr<Client> client;
+    std::shared_ptr<BaseClient> client;
 
     // The root source node from a parsed Rojo source map
     Uri rootUri;
@@ -69,8 +69,6 @@ struct WorkspaceFileResolver
     // Currently opened files where content is managed by client
     mutable std::unordered_map</* DocumentUri */ std::string, TextDocument> managedFiles{};
     mutable std::unordered_map<std::string, Luau::Config> configCache{};
-    // Errors found when loading .luaurc files - only used for the CLI
-    mutable std::vector<std::pair<std::filesystem::path, std::string>> configErrors{};
 
     WorkspaceFileResolver()
     {
