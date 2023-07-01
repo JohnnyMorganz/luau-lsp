@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed diagnostics not showing when working in a new file with no workspace open
+- Fixed race condition where sometimes the server does not receive user configuration on initial load, falling back to defaults
+
 ## [1.22.0] - 2023-06-30
 
 ### Added

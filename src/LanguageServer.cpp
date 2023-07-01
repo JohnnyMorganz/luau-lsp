@@ -435,17 +435,13 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
     client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
 
-    // Initialise loaded workspaces
-    nullWorkspace->initialize();
-    for (auto& folder : workspaceFolders)
-    {
-        folder->initialize();
-    }
-
     // Dynamically register for configuration changed notifications
+    bool requestedConfiguration = false;
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
+        requestedConfiguration = true;
+
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
         client->configChangedCallback =
             [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
@@ -469,14 +465,6 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
             items.emplace_back(workspace->rootUri);
         client->requestConfiguration(items);
     }
-    else
-    {
-        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
-        for (auto& folder : workspaceFolders)
-        {
-            folder->setupWithConfiguration(client->globalConfig);
-        }
-    }
 
     // Dynamically register file watchers
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
@@ -495,6 +483,23 @@ void LanguageServer::onInitialized(const lsp::InitializedParams& params)
     {
         client->sendLogMessage(lsp::MessageType::Warning,
             "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes will not be provided");
+    }
+
+    // Initialise loaded workspaces
+    // NOTE: we delay initialisation until AFTER we have sent of requests to the client to retrieve
+    // configuration and register watchers. This is because initialisation can take a long time
+    // for the Roblox types. If we don't send the request for configuration beforehand, we hit
+    // a race condition where the first LSP events are executed before receiving the user configuration,
+    // causing us to fall back to the global configuration. Sending the request for configuration
+    // first means we receive the user config before processing the first LSP events
+    nullWorkspace->initialize();
+    nullWorkspace->setupWithConfiguration(client->globalConfig);
+    for (auto& folder : workspaceFolders)
+    {
+        folder->initialize();
+        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+        if (!requestedConfiguration)
+            folder->setupWithConfiguration(client->globalConfig);
     }
 }
 
