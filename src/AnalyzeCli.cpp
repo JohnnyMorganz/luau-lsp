@@ -256,6 +256,15 @@ int startAnalyze(int argc, char** argv)
         if (std::optional<std::string> contents = readFile(*settingsPath))
         {
             client.configuration = dottedToClientConfiguration(contents.value());
+
+            // Process any fflags
+            registerFastFlags(client.configuration.fflags.override);
+            if (!client.configuration.fflags.enableByDefault)
+                std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "
+                             "`--no-flags-enabled` to configure this.\n";
+            if (client.configuration.fflags.sync)
+                std::cerr << "warning: `luau-lsp.fflags.sync` is not supported in CLI Analyze mode. Instead, all FFlags are enabled by default. "
+                             "Please manually configure necessary FFlags\n";
         }
         else
         {
