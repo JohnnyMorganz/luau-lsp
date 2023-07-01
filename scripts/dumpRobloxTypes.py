@@ -250,6 +250,12 @@ EXTRA_MEMBERS = {
         "function __sub(self, other: Vector3): CFrame",
         "function __mul(self, other: CFrame): CFrame",
         "function __mul(self, other: Vector3): Vector3",
+        "function PointToObjectSpace(self, ...: Vector3): ...Vector3",
+        "function PointToWorldSpace(self, ...: Vector3): ...Vector3",
+        "function ToObjectSpace(self, ...: CFrame): ...CFrame",
+        "function ToWorldSpace(self, ...: CFrame): ...CFrame",
+        "function VectorToObjectSpace(self, ...: Vector3): ...Vector3",
+        "function VectorToWorldSpace(self, ...: Vector3): ...Vector3",
     ],
     "UserSettings": [
         "GameSettings: UserGameSettings",
