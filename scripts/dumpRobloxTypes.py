@@ -202,6 +202,14 @@ IGNORED_MEMBERS = {
         "Part0",
         "Part1",
     ],
+    "CFrame": [
+        "PointToObjectSpace",
+        "PointToWorldSpace",
+        "ToObjectSpace",
+        "ToWorldSpace",
+        "VectorToObjectSpace",
+        "VectorToWorldSpace",
+    ]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
