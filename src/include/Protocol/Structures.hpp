@@ -82,6 +82,11 @@ struct Range
 {
     Position start;
     Position end;
+
+    bool operator==(const Range& other)
+    {
+        return start == other.start && end == other.end;
+    }
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Range, start, end);
 
@@ -118,6 +123,11 @@ struct Location
 {
     DocumentUri uri;
     Range range;
+
+    bool operator==(const Location& other)
+    {
+        return uri == other.uri && range == other.range;
+    }
 };
 NLOHMANN_DEFINE_OPTIONAL(Location, uri, range);
 

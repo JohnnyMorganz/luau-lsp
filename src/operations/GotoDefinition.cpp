@@ -4,6 +4,8 @@
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
+#include <algorithm>
+
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
     lsp::DefinitionResult result{};
@@ -147,6 +149,15 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         result.emplace_back(lsp::Location{
             uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
     }
+
+    // Remove duplicate elements within the result
+    // TODO: This is O(n^2). It shouldn't matter too much, since right now there will only be at most 2 elements.
+    // But maybe we can remove the need for this in the first place?
+    auto end = result.end();
+    for (auto it = result.begin(); it != end; ++it)
+        end = std::remove(it + 1, end, *it);
+
+    result.erase(end, result.end());
 
     return result;
 }
