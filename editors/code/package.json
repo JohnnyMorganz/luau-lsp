@@ -51,8 +51,8 @@
     "grammars": [
       {
         "language": "lua",
-        "scopeName": "source.lua",
-        "path": "./syntaxes/lua.tmLanguage.json",
+        "scopeName": "source.luau",
+        "path": "./syntaxes/Luau.tmLanguage.json",
         "tokenTypes": {
           "meta.template.expression": "other",
           "meta.template.expression string": "string",

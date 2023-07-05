@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `luau-lsp.fflags.override` will now be parsed when using CLI analyze settings. Note that the other `fflags` options are not supported in CLI analyze mode
 - Fixed semantic tokens segfault crash on some tables
 - Fixed duplicate definitions showing in the Go To Definition page
+- Fixed some syntax highlighting inconsistencies
 
 ## [1.22.0] - 2023-06-30
 
