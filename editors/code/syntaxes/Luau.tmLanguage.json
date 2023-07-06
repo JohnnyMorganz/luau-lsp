@@ -623,7 +623,7 @@
             },
             {
               "name": "variable.property.luau",
-              "match": "(?<!:\\s*|->\\s*)\\b([a-zA-Z_]\\w*)\\b"
+              "match": "(?<!:\\s*|->\\s*)\\b([a-zA-Z_]\\w*)\\b(?=:)"
             },
             {
               "include": "#type_literal"
