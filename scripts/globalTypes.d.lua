@@ -10136,8 +10136,8 @@ declare class NumberValue extends ValueBase
 end
 
 declare class ObjectValue extends ValueBase
-	Changed: RBXScriptSignal<Instance>
-	Value: Instance
+	Changed: RBXScriptSignal<Instance?>
+	Value: Instance?
 end
 
 declare class RayValue extends ValueBase
