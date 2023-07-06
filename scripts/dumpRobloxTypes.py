@@ -202,6 +202,14 @@ IGNORED_MEMBERS = {
         "Part0",
         "Part1",
     ],
+    "CFrame": [
+        "PointToObjectSpace",
+        "PointToWorldSpace",
+        "ToObjectSpace",
+        "ToWorldSpace",
+        "VectorToObjectSpace",
+        "VectorToWorldSpace",
+    ]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -250,6 +258,12 @@ EXTRA_MEMBERS = {
         "function __sub(self, other: Vector3): CFrame",
         "function __mul(self, other: CFrame): CFrame",
         "function __mul(self, other: Vector3): Vector3",
+        "function PointToObjectSpace(self, ...: Vector3): ...Vector3",
+        "function PointToWorldSpace(self, ...: Vector3): ...Vector3",
+        "function ToObjectSpace(self, ...: CFrame): ...CFrame",
+        "function ToWorldSpace(self, ...: CFrame): ...CFrame",
+        "function VectorToObjectSpace(self, ...: Vector3): ...Vector3",
+        "function VectorToWorldSpace(self, ...: Vector3): ...Vector3",
     ],
     "UserSettings": [
         "GameSettings: UserGameSettings",

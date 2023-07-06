@@ -3890,16 +3890,16 @@ declare class CFrame
 	function Inverse(self): CFrame
 	function Lerp(self, goal: CFrame, alpha: number): CFrame
 	function Orthonormalize(self): CFrame
-	function PointToObjectSpace(self, v3: Vector3): Vector3
-	function PointToWorldSpace(self, v3: Vector3): Vector3
+	function PointToObjectSpace(self, ...: Vector3): ...Vector3
+	function PointToWorldSpace(self, ...: Vector3): ...Vector3
 	function ToAxisAngle(self): (Vector3, number)
 	function ToEulerAnglesXYZ(self): (number, number, number)
 	function ToEulerAnglesYXZ(self): (number, number, number)
-	function ToObjectSpace(self, cf: CFrame): CFrame
+	function ToObjectSpace(self, ...: CFrame): ...CFrame
 	function ToOrientation(self): (number, number, number)
-	function ToWorldSpace(self, cf: CFrame): CFrame
-	function VectorToObjectSpace(self, v3: Vector3): Vector3
-	function VectorToWorldSpace(self, v3: Vector3): Vector3
+	function ToWorldSpace(self, ...: CFrame): ...CFrame
+	function VectorToObjectSpace(self, ...: Vector3): ...Vector3
+	function VectorToWorldSpace(self, ...: Vector3): ...Vector3
 	function __add(self, other: Vector3): CFrame
 	function __mul(self, other: CFrame): CFrame
 	function __mul(self, other: Vector3): Vector3
