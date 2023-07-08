@@ -167,6 +167,21 @@ struct ClientIndexConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled, maxFiles);
 
+struct ClientFFlagsConfiguration
+{
+    // NOTE: THE ENABLEBYDEFAULT AND SYNC FLAGS ARE INVERTED IN THE VSCODE DEFAULTS
+    // WE USE THIS SO THAT THE DEFAULTS ARE REASONABLE FOR THE CLI
+
+    /// Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`
+    bool enableByDefault = true;
+    // Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'
+    bool sync = false;
+    // Override FFlags passed to Luau
+    std::unordered_map<std::string, std::string> override;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
+
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -185,6 +200,7 @@ struct ClientConfiguration
     ClientSignatureHelpConfiguration signatureHelp{};
     ClientRequireConfiguration require{};
     ClientIndexConfiguration index{};
+    ClientFFlagsConfiguration fflags{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover, completion, signatureHelp, require, index);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover,
+    completion, signatureHelp, require, index, fflags);

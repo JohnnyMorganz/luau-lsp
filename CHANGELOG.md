@@ -6,9 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed diagnostics not showing when working in a new file with no workspace open
+- Fixed race condition where sometimes the server does not receive user configuration on initial load, falling back to defaults
+- `luau-lsp.fflags.override` will now be parsed when using CLI analyze settings. Note that the other `fflags` options are not supported in CLI analyze mode
+- Fixed semantic tokens segfault crash on some tables
+- Fixed duplicate definitions showing in the Go To Definition page
+- Fixed some syntax highlighting inconsistencies
+
+## [1.22.0] - 2023-06-30
+
 ### Added
 
 - Support requiring directories with `init.luau` (or `init.lua`) files inside of them. i.e. `require("../Directory")` resolves to `../Directory/init.luau`.
+- The CLI analyze now accepts a parameter `--settings=path/to/settings.json` which takes in LSP-style settings to configure features such as require settings. Note: this is separate to `.luaurc`
 
 #### Changed
 
@@ -29,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed file and directory aliases not being canonicalised to absolute paths causing "Follow Link" to fail when using relative alias paths
 - Don't show directory aliases after the first path segment has been typed
 - Fixed rename symbol not working when triggered at the end of a symbol
+- Fix indentation of autocomplete end when autocompleting inside of a function call
 
 ## [1.21.0] - 2023-06-14
 

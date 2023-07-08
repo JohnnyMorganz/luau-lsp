@@ -1,0 +1,30 @@
+name: Pull Latest Syntax File
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 0 * * *" # Runs at 00:10 UTC every day
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull latest syntax file
+        run: |
+          curl https://raw.githubusercontent.com/JohnnyMorganz/Luau.tmLanguage/main/Luau.tmLanguage.json > editors/code/syntaxes/Luau.tmLanguage.json
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: Update to latest syntax file
+          body: |
+            Pulls in latest TextMate syntax file from https://github.com/JohnnyMorganz/Luau.tmLanguage
+            - This pull request is **auto-generated**
+          branch: auto/update-syntax-file
+          commit-message: Update syntax file
+          base: main

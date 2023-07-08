@@ -1,5 +1,7 @@
 // Source: https://github.com/Roblox/luau/blob/master/CLI/Analyze.cpp; licensed under MIT License
 #include "Analyze/AnalyzeCli.hpp"
+#include "Analyze/CliConfigurationParser.hpp"
+#include "Analyze/CliClient.hpp"
 
 #include "Luau/ModuleResolver.h"
 #include "Luau/TypeInfer.h"
@@ -147,6 +149,7 @@ int startAnalyze(int argc, char** argv)
     std::vector<std::filesystem::path> files{};
     std::vector<std::string> ignoreGlobPatterns{};
     std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
+    std::optional<std::filesystem::path> settingsPath = std::nullopt;
     bool expressiveTypes = true;
 
     for (int i = 2; i < argc; ++i)
@@ -170,6 +173,8 @@ int startAnalyze(int argc, char** argv)
                 definitionsPaths.emplace_back(std::string(argv[i] + 14));
             else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
                 baseLuaurc = std::filesystem::path(argv[i] + 14);
+            else if (strncmp(argv[i], "--settings=", 11) == 0)
+                settingsPath = std::filesystem::path(argv[i] + 11);
             // Backwards compatibility
             else if (strncmp(argv[i], "--defs=", 7) == 0)
                 definitionsPaths.emplace_back(std::string(argv[i] + 7));
@@ -227,6 +232,12 @@ int startAnalyze(int argc, char** argv)
         return 1;
     }
 
+    if (settingsPath.has_value() && !std::filesystem::exists(settingsPath.value()))
+    {
+        fprintf(stderr, "Cannot load settings path %s: path does not exist\n", settingsPath->generic_string().c_str());
+        return 1;
+    }
+
     if (files.empty())
     {
         fprintf(stderr, "error: no files provided\n");
@@ -237,6 +248,31 @@ int startAnalyze(int argc, char** argv)
     Luau::FrontendOptions frontendOptions;
     frontendOptions.retainFullTypeGraphs = annotate;
     frontendOptions.runLintChecks = true;
+
+    CliClient client;
+
+    if (settingsPath)
+    {
+        if (std::optional<std::string> contents = readFile(*settingsPath))
+        {
+            client.configuration = dottedToClientConfiguration(contents.value());
+
+            // Process any fflags
+            registerFastFlags(client.configuration.fflags.override);
+            if (!client.configuration.fflags.enableByDefault)
+                std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "
+                             "`--no-flags-enabled` to configure this.\n";
+            if (client.configuration.fflags.sync)
+                std::cerr << "warning: `luau-lsp.fflags.sync` is not supported in CLI Analyze mode. Instead, all FFlags are enabled by default. "
+                             "Please manually configure necessary FFlags\n";
+        }
+        else
+        {
+            fprintf(stderr, "Failed to read settings at '%s'\n", settingsPath->generic_string().c_str());
+            return 1;
+        }
+    }
+
 
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
@@ -260,6 +296,7 @@ int startAnalyze(int argc, char** argv)
     }
 
     fileResolver.rootUri = Uri::file(std::filesystem::current_path());
+    fileResolver.client = std::make_shared<CliClient>(client);
     Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 
     if (sourcemapPath)
@@ -320,11 +357,11 @@ int startAnalyze(int argc, char** argv)
     for (const std::filesystem::path& path : files)
         failed += !analyzeFile(frontend, path, format, annotate, ignoreGlobPatterns);
 
-    if (!fileResolver.configErrors.empty())
+    if (!client.diagnostics.empty())
     {
-        failed += int(fileResolver.configErrors.size());
+        failed += int(client.diagnostics.size());
 
-        for (const auto& [path, err] : fileResolver.configErrors)
+        for (const auto& [path, err] : client.diagnostics)
             fprintf(stderr, "%s: %s\n", path.generic_string().c_str(), err.c_str());
     }
 

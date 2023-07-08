@@ -319,8 +319,11 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         {
             if (item.kind == Luau::AstExprTable::Item::Kind::Record)
             {
-                auto type = inferTokenType(*module->astTypes.find(item.value), lsp::SemanticTokenTypes::Property);
-                tokens.emplace_back(SemanticToken{item.key->location.begin, item.key->location.end, type, lsp::SemanticTokenModifiers::None});
+                if (auto ty = module->astTypes.find(item.value))
+                {
+                    auto type = inferTokenType(*ty, lsp::SemanticTokenTypes::Property);
+                    tokens.emplace_back(SemanticToken{item.key->location.begin, item.key->location.end, type, lsp::SemanticTokenModifiers::None});
+                }
             }
         }
 

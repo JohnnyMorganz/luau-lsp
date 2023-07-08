@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.21.0",
+  "version": "1.22.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -51,8 +51,8 @@
     "grammars": [
       {
         "language": "lua",
-        "scopeName": "source.lua",
-        "path": "./syntaxes/lua.tmLanguage.json",
+        "scopeName": "source.luau",
+        "path": "./syntaxes/Luau.tmLanguage.json",
         "tokenTypes": {
           "meta.template.expression": "other",
           "meta.template.expression string": "string",

@@ -13,7 +13,7 @@
 RGB hsvToRgb(HSV in)
 {
     auto h = in.h, s = in.s, v = in.v;
-    double r, g, b;
+    double r = 0.0, g = 0.0, b = 0.0;
 
     auto i = (int)std::floor(h * 6);
     auto f = h * 6 - i;

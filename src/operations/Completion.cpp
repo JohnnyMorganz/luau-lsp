@@ -121,6 +121,27 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         auto currentLineContent = document->getLine(params.position.line);
         trim(currentLineContent);
 
+        // Compute the current indentation level
+        std::string indent = "";
+        if (document->lineCount() > 1)
+        {
+            // Use the indentation of the previous line, as thats where the stat begins
+            auto prevLine = document->getLine(params.position.line - 1);
+            if (prevLine.size() > 0)
+            {
+                auto ch = prevLine.at(0);
+                if (ch == ' ' || ch == '\t')
+                {
+                    for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
+                    {
+                        if (*it != ch)
+                            break;
+                        indent += *it;
+                    }
+                }
+            }
+        }
+
         // TODO: it would be nicer if we had snippet support, and could insert text *after* the cursor
         // and leave the cursor in the same spot. Right now we can only insert text *at* the cursor,
         // then have to manually send a command to move the cursor
@@ -133,7 +154,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         if (params.position.line == document->lineCount() - 1 || !currentLineContent.empty())
         {
             // Insert an end at the current position, with a newline before it
-            auto insertText = "\nend" + currentLineContent + "\n";
+            auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
 
             lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText};
             std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
@@ -151,27 +172,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         else
         {
             LUAU_ASSERT(currentLineContent.empty());
-
-            // Find the indentation level to stick the end on
-            std::string indent = "";
-            if (document->lineCount() > 1)
-            {
-                // Use the indentation of the previous line, as thats where the stat begins
-                auto prevLine = document->getLine(params.position.line - 1);
-                if (prevLine.size() > 0)
-                {
-                    auto ch = prevLine.at(0);
-                    if (ch == ' ' || ch == '\t')
-                    {
-                        for (auto it = prevLine.begin(); it != prevLine.end(); ++it)
-                        {
-                            if (*it != ch)
-                                break;
-                            indent += *it;
-                        }
-                    }
-                }
-            }
 
             // Insert the end onto the next line
             lsp::Position position{params.position.line + 1, 0};

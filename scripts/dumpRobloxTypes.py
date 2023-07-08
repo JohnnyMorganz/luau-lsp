@@ -202,6 +202,10 @@ IGNORED_MEMBERS = {
         "Part0",
         "Part1",
     ],
+    "ObjectValue": [
+        "Value",
+        "Changed",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -420,6 +424,10 @@ EXTRA_MEMBERS = {
         "Part0: BasePart?",
         "Part1: BasePart?",
     ],
+    "ObjectValue": [
+        "Value: Instance?",
+        "Changed: RBXScriptSignal<Instance?>",
+    ]
 }
 
 # Hardcoded types

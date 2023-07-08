@@ -38,6 +38,8 @@ static bool validateFlag(char* str, int argIndex)
         return true;
     else if (strncmp(str, "--base-luaurc=", 14) == 0 && n > 15)
         return true;
+    else if (strncmp(str, "--settings=", 11) == 0 && n > 12)
+        return true;
     else if (strcmp(str, "--formatter=plain") == 0)
         return true;
     else if (strcmp(str, "--formatter=gnu") == 0)
@@ -91,6 +93,7 @@ static void displayHelp(const char* argv0)
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");
     printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
+    printf("  --settings=PATH: path to LSP-style settings\n");
     printf("LSP options:\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");

@@ -21,6 +21,7 @@ target_sources(Luau.LanguageServer PRIVATE
     src/IostreamHelpers.cpp
     src/Utils.cpp
     src/StudioPlugin.cpp
+    src/CliConfigurationParser.cpp
     src/operations/Diagnostics.cpp
     src/operations/Completion.cpp
     src/operations/DocumentSymbol.cpp
@@ -58,6 +59,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
     tests/References.test.cpp
     tests/ColorProvider.test.cpp
     tests/LuauExt.test.cpp
+    tests/CliConfigurationParser.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
