@@ -12,8 +12,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + uri.toString());
 
-    // TODO: we only need parsing and no type checking
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
@@ -78,8 +77,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::Docum
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + uri.toString());
 
-    // TODO: we only need parsing and no type checking
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

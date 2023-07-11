@@ -108,7 +108,7 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
 
     for (const auto& [moduleName, sourceModule] : frontend.sourceModules)
     {
-        checkSimple(moduleName);
+        frontend.parse(moduleName);
 
         // Find relevant text document
         if (auto textDocument = fileResolver.getTextDocumentFromModuleName(moduleName))

@@ -65,7 +65,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
     auto position = document->convertPosition(params.position);
 
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

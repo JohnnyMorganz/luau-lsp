@@ -731,7 +731,7 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             }
 
             // Index the workspace on changes
-            // NOTE: we aren't indexing for types, only for the require graph right now
+            // We only update the require graph. We do not perform type checking
             if (config.index.enabled && workspace->isConfigured)
             {
                 auto moduleName = workspace->fileResolver.getModuleName(change.uri);
@@ -740,11 +740,11 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
                 workspace->frontend.markDirty(moduleName, &markedDirty);
 
                 if (change.type == lsp::FileChangeType::Created)
-                    workspace->checkSimple(moduleName);
+                    workspace->frontend.parse(moduleName);
 
                 // Re-check the reverse dependencies
                 for (const auto& moduleName : markedDirty)
-                    workspace->checkSimple(moduleName);
+                    workspace->frontend.parse(moduleName);
             }
 
             // Clear the diagnostics for the file in case it was not managed

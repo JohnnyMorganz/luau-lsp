@@ -108,6 +108,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 // Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
+// NOTE: use `frontend.parse` if you do not care about typechecking
 Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
 {
     return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
@@ -158,10 +159,9 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             {
                 auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
 
-                // Check the module, discard the type graph
-                // Since we don't care about types, we don't need to do it for autocomplete
-                // TODO: can we get rid of the check, and only parse the require graph?
-                checkSimple(moduleName);
+                // Parse the module to infer require data
+                // We do not perform any type checking here
+                frontend.parse(moduleName);
 
                 indexCount += 1;
             }

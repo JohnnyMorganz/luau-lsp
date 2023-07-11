@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.583
+- Removed need for typechecking for operations that don't require the type information (e.g., document link / color)
+
 ### Fixed
 
 - Fixed diagnostics not showing when working in a new file with no workspace open
