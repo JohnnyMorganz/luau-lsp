@@ -7590,7 +7590,7 @@ end
 declare class Actor extends Model
 	function BindToMessage(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
 	function BindToMessageParallel(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
-	function SendMessage(self, topic: string, ...any): ()
+	function SendMessage(self, topic: string, ...: any): ()
 end
 
 declare class BackpackItem extends Model

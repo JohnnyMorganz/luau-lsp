@@ -432,7 +432,7 @@ EXTRA_MEMBERS = {
         "Changed: RBXScriptSignal<Instance?>",
     ],
     "Actor": [
-        "function SendMessage(self, topic: string, ...any): ()",
+        "function SendMessage(self, topic: string, ...: any): ()",
     ],
 }
 
