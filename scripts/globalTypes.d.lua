@@ -1084,6 +1084,12 @@ declare class EnumFilterResult_INTERNAL extends Enum
 	Rejected: EnumFilterResult
 	Accepted: EnumFilterResult
 end
+declare class EnumFinishRecordingOperation extends EnumItem end
+declare class EnumFinishRecordingOperation_INTERNAL extends Enum
+	Cancel: EnumFinishRecordingOperation
+	Commit: EnumFinishRecordingOperation
+	Append: EnumFinishRecordingOperation
+end
 declare class EnumFont extends EnumItem end
 declare class EnumFont_INTERNAL extends Enum
 	Legacy: EnumFont
@@ -2474,6 +2480,14 @@ declare class EnumSelectionRenderMode_INTERNAL extends Enum
 	BoundingBoxes: EnumSelectionRenderMode
 	Both: EnumSelectionRenderMode
 end
+declare class EnumSelfViewPosition extends EnumItem end
+declare class EnumSelfViewPosition_INTERNAL extends Enum
+	LastPosition: EnumSelfViewPosition
+	TopLeft: EnumSelfViewPosition
+	TopRight: EnumSelfViewPosition
+	BottomLeft: EnumSelfViewPosition
+	BottomRight: EnumSelfViewPosition
+end
 declare class EnumSensorMode extends EnumItem end
 declare class EnumSensorMode_INTERNAL extends Enum
 	Floor: EnumSensorMode
@@ -3390,6 +3404,7 @@ type ENUM_LIST = {
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
 	FilterResult: EnumFilterResult_INTERNAL,
+	FinishRecordingOperation: EnumFinishRecordingOperation_INTERNAL,
 	Font: EnumFont_INTERNAL,
 	FontSize: EnumFontSize_INTERNAL,
 	FontStyle: EnumFontStyle_INTERNAL,
@@ -3531,6 +3546,7 @@ type ENUM_LIST = {
 	ScrollingDirection: EnumScrollingDirection_INTERNAL,
 	SelectionBehavior: EnumSelectionBehavior_INTERNAL,
 	SelectionRenderMode: EnumSelectionRenderMode_INTERNAL,
+	SelfViewPosition: EnumSelfViewPosition_INTERNAL,
 	SensorMode: EnumSensorMode_INTERNAL,
 	SensorUpdateType: EnumSensorUpdateType_INTERNAL,
 	ServerAudioBehavior: EnumServerAudioBehavior_INTERNAL,
@@ -4073,11 +4089,14 @@ declare class AdPortal extends Instance
 	PortalInvalidReason: string
 	PortalVersion: number
 	Status: EnumAdUnitStatus
+	function TeleportConfirmed(self, placeId: number, player: Player): nil
+	function TeleportRejected(self, shouldCooldown: boolean, rejectedByDistance: boolean): nil
 end
 
 declare class AdService extends Instance
 	AdTeleportEnded: RBXScriptSignal<>
 	AdTeleportInitiated: RBXScriptSignal<>
+	PortalPrompt: RBXScriptSignal<number, Player, Instance>
 	function GetAdTeleportInfo(self): any
 	function GetReportAdInfo(self): { any }
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
@@ -4282,10 +4301,12 @@ declare class AssetService extends Instance
 	OpenPublishResultModal: RBXScriptSignal<EnumPromptPublishAssetResult>
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
+	function DeserializeInstance(self, serializedInstance: string): Instance
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
 	function GetBundleDetailsSync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
+	function LoadImageAsync(self, textureId: Content): DynamicImage
 	function PromptPublishAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
 	function SavePlaceAsync(self): nil
 	function SearchAudio(self, searchParameters: AudioSearchParams): AudioPages
@@ -4747,19 +4768,24 @@ declare class Camera extends Instance
 end
 
 declare class CaptureService extends Instance
-	function RetreiveCaptures(self): { any }
+	function RetrieveCaptures(self): { any }
 	function SaveScreenshotCapture(self): nil
 end
 
 declare class ChangeHistoryService extends Instance
+	OnRecordingFinished: RBXScriptSignal<string, string?, string?, EnumFinishRecordingOperation, { [any]: any }?>
+	OnRecordingStarted: RBXScriptSignal<string, string?>
 	OnRedo: RBXScriptSignal<string>
 	OnUndo: RBXScriptSignal<string>
+	function FinishRecording(self, identifier: string, operation: EnumFinishRecordingOperation, finalOptions: { [any]: any }?): nil
 	function GetCanRedo(self): any
 	function GetCanUndo(self): any
+	function IsRecordingInProgress(self, identifier: string?): boolean
 	function Redo(self): nil
 	function ResetWaypoints(self): nil
 	function SetEnabled(self, state: boolean): nil
 	function SetWaypoint(self, name: string): nil
+	function TryBeginRecording(self, name: string, displayName: string?): string?
 	function Undo(self): nil
 end
 
@@ -4862,9 +4888,8 @@ declare class DragDetector extends ClickDetector
 	VRSwitchKeyCode: EnumKeyCode
 	WorldAxis: Vector3
 	WorldSecondaryAxis: Vector3
-	function AddConstraintFunction(self, name: string, priority: number, func: ((...any) -> ...any)): nil
+	function AddConstraintFunction(self, priority: number, func: ((...any) -> ...any)): RBXScriptConnection
 	function GetReferenceFrame(self): CFrame
-	function RemoveConstraintFunction(self, name: string): nil
 	function RestartDrag(self): nil
 	function SetDragStyleFunction(self, func: ((...any) -> ...any)): nil
 end
@@ -5205,6 +5230,7 @@ declare class VehicleController extends Controller
 end
 
 declare class ControllerBase extends Instance
+	Active: boolean
 	BalanceRigidityEnabled: boolean
 	MoveSpeedFactor: number
 end
@@ -5584,6 +5610,15 @@ declare class DraggerService extends Instance
 	PivotSnapToGeometry: boolean
 	ShowHover: boolean
 	ShowPivotIndicator: boolean
+end
+
+declare class DynamicImage extends Instance
+	Size: Vector2
+	function Clear(self): nil
+	function DrawCircle(self, center: Vector2, radius: number, color: Color3, alpha: number): nil
+	function ReadPixels(self, position: Vector2, size: Vector2): { any }
+	function Resize(self, newSize: Vector2): nil
+	function Rotate(self, degrees: number, resizeCanvas: boolean?): nil
 end
 
 declare class EulerRotationCurve extends Instance
@@ -6229,7 +6264,6 @@ end
 
 declare class TextureGuiExperimental extends LayerCollector
 	Size: Vector2
-	TemporaryId: Content
 end
 
 declare class GuiBase3d extends GuiBase
@@ -6377,7 +6411,9 @@ declare class GuiService extends Instance
 	NativeClose: RBXScriptSignal<>
 	NetworkPausedEnabledChanged: RBXScriptSignal<boolean>
 	Open9SliceEditor: RBXScriptSignal<Instance>
+	PreferredTransparency: number
 	PurchasePromptShown: RBXScriptSignal<>
+	ReducedMotionEnabled: boolean
 	SafeZoneOffsetsChanged: RBXScriptSignal<>
 	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject?
@@ -6569,6 +6605,7 @@ declare class Humanoid extends Instance
 	function GetAppliedDescription(self): HumanoidDescription
 	function GetBodyPartR15(self, part: BasePart): EnumBodyPartR15
 	function GetLimb(self, part: BasePart): EnumLimb
+	function GetMoveVelocity(self): Vector3
 	function GetState(self): EnumHumanoidStateType
 	function GetStateEnabled(self, state: EnumHumanoidStateType): boolean
 	function Move(self, moveDirection: Vector3, relativeToCamera: boolean?): nil
@@ -6677,16 +6714,6 @@ declare class IXPService extends Instance
 	function LogBrowserTrackerLayerExposure(self, layerName: string): nil
 	function LogUserLayerExposure(self, layerName: string): nil
 	function RegisterUserLayers(self, userLayers: any): nil
-end
-
-declare class ImageDataExperimental extends Instance
-	Size: Vector2
-	TemporaryId: Content
-	function Clear(self): nil
-	function DrawCircle(self, center: Vector2, radius: number, color: Color3, alpha: number): nil
-	function PopulateFromImageAsync(self, textureId: Content): nil
-	function Resize(self, newSize: Vector2): nil
-	function Rotate(self, degrees: number, resizeCanvas: boolean?): nil
 end
 
 declare class IncrementalPatchBuilder extends Instance
@@ -7152,11 +7179,6 @@ declare class MemoryStoreSortedMap extends Instance
 	function UpdateAsync(self, key: string, transformFunction: ((...any) -> ...any), expiration: number): any
 end
 
-declare class MeshDataExperimental extends Instance
-	Size: Vector3
-	function PopulateFromMeshAsync(self, meshId: Content): nil
-end
-
 
 
 
@@ -7336,7 +7358,11 @@ declare class OmniRecommendationsService extends Instance
 	function MakeRequest(self, nextPageToken: string): HttpRequest
 end
 
+declare class OpenCloudApiV1 extends Instance
+end
+
 declare class OpenCloudService extends Instance
+	function GetApiV1(self): OpenCloudApiV1
 end
 
 declare class PVInstance extends Instance
@@ -7402,6 +7428,7 @@ declare class BasePart extends PVInstance
 	function GetMass(self): number
 	function GetNetworkOwner(self): Player?
 	function GetNetworkOwnershipAuto(self): boolean
+	function GetNoCollisionConstraints(self): { Instance }
 	function GetRootPart(self): BasePart
 	function GetTouchingParts(self): { BasePart }
 	function GetVelocityAtPosition(self, position: Vector3): Vector3
@@ -7563,7 +7590,7 @@ end
 declare class Actor extends Model
 	function BindToMessage(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
 	function BindToMessageParallel(self, topic: string, func: ((...any) -> ...any)): RBXScriptConnection
-	function SendMessage(self, topic: string, message: any): nil
+	function SendMessage(self, topic: string, ...any): ()
 end
 
 declare class BackpackItem extends Model
@@ -7869,6 +7896,13 @@ declare class PhysicsSettings extends Instance
 	SolverConvergenceVisualizationMode: EnumSolverConvergenceVisualizationMode
 	ThrottleAdjustTime: number
 	UseCSGv2: boolean
+end
+
+declare class PlaceStatsService extends Instance
+end
+
+declare class PlacesService extends Instance
+	function StartPlaySolo(self): nil
 end
 
 declare class Player extends Instance
@@ -8586,7 +8620,6 @@ end
 
 declare class Selection extends Instance
 	ActiveInstance: Instance
-	DEPRECATED_ShowBoundingBox: boolean
 	RenderMode: EnumSelectionRenderMode
 	SelectionBoxThickness: number
 	SelectionChanged: RBXScriptSignal<>
@@ -8749,6 +8782,8 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "PathfindingService"): PathfindingService
 	function GetService(self, service: "PermissionsService"): PermissionsService
 	function GetService(self, service: "PhysicsService"): PhysicsService
+	function GetService(self, service: "PlaceStatsService"): PlaceStatsService
+	function GetService(self, service: "PlacesService"): PlacesService
 	function GetService(self, service: "PlayerEmulatorService"): PlayerEmulatorService
 	function GetService(self, service: "Players"): Players
 	function GetService(self, service: "PluginDebugService"): PluginDebugService
@@ -8799,6 +8834,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "StarterPack"): StarterPack
 	function GetService(self, service: "StarterPlayer"): StarterPlayer
 	function GetService(self, service: "Stats"): Stats
+	function GetService(self, service: "StopWatchReporter"): StopWatchReporter
 	function GetService(self, service: "Studio"): Studio
 	function GetService(self, service: "StudioAssetService"): StudioAssetService
 	function GetService(self, service: "StudioData"): StudioData
@@ -8836,6 +8872,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "VRService"): VRService
 	function GetService(self, service: "VersionControlService"): VersionControlService
 	function GetService(self, service: "VideoCaptureService"): VideoCaptureService
+	function GetService(self, service: "VideoService"): VideoService
 	function GetService(self, service: "VirtualInputManager"): VirtualInputManager
 	function GetService(self, service: "VirtualUser"): VirtualUser
 	function GetService(self, service: "VisibilityCheckDispatcher"): VisibilityCheckDispatcher
@@ -8908,6 +8945,7 @@ declare class UserSettings extends GenericSettings
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
 	function IsUserFeatureEnabled(self, name: string): boolean
 	function Reset(self): nil
+	function SaveState(self): nil
 end
 
 declare class ServiceVisibilityService extends Instance
@@ -8978,13 +9016,17 @@ declare class SocialService extends Instance
 	OnIrisInviteInvoked: (tag: string, irisParticipantIds: { any }) -> Instance
 	PromptInviteRequested: RBXScriptSignal<Instance, Instance>
 	PromptIrisInviteRequested: RBXScriptSignal<Instance, string>
+	SelfViewHidden: RBXScriptSignal<>
+	SelfViewVisible: RBXScriptSignal<EnumSelfViewPosition>
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
 	function CanSendIrisInviteAsync(self, player: Instance): boolean
+	function HideSelfView(self): nil
 	function InvokeGameInvitePromptClosed(self, player: Instance, recipientIds: { any }): nil
 	function InvokeIrisInvite(self, player: Instance, tag: string, irisParticipantIds: { any }): nil
 	function InvokeIrisInvitePromptClosed(self, player: Instance): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
 	function PromptIrisInvite(self, player: Instance, tag: string): nil
+	function ShowSelfView(self, selfViewPosition: EnumSelfViewPosition?): nil
 end
 
 declare class Sound extends Instance
@@ -9239,6 +9281,12 @@ end
 declare class TotalCountTimeIntervalItem extends StatsItem
 end
 
+declare class StopWatchReporter extends Instance
+	function FinishTask(self, taskId: number): nil
+	function SendReport(self, reportName: string): nil
+	function StartTask(self, reportName: string, taskName: string): number
+end
+
 declare class Studio extends Instance
 	CommandBarLocalState: boolean
 	DefaultScriptFileDir: QDir
@@ -9273,10 +9321,21 @@ end
 declare class StudioAssetService extends Instance
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
 	OnPublishPackageResult: RBXScriptSignal<{ [any]: any }, string>
-	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
+	OnSaveToRoblox: RBXScriptSignal<{ Instance }, any>
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function PublishPackage(self, instance: Instance, publishInfo: { [any]: any }): nil
 	function SerializeInstances(self, instances: { Instance }): string
+	function ShowSaveToRoblox(self, instances: { Instance }, assetType: any): nil
+end
+
+declare class StudioCallout extends Instance
+	AnchorPoint: Vector2
+	IsArrowVisible: boolean
+	IsNextVisible: boolean
+	RowName: string
+	Text: string
+	Title: string
+	function SetOnNextClicked(self, onClick: ((...any) -> ...any)): nil
 end
 
 declare class StudioData extends Instance
@@ -9301,6 +9360,12 @@ declare class StudioDeviceEmulatorService extends Instance
 	function HasDeviceWithId(self, deviceId: string): boolean
 	function SetCurrentDeviceId(self, deviceId: string): nil
 	function SetCurrentOrientation(self, orientation: EnumScreenOrientation): nil
+end
+
+declare class StudioObjectBase extends Instance
+end
+
+declare class StudioWidget extends StudioObjectBase
 end
 
 declare class StudioPublishService extends Instance
@@ -9449,6 +9514,7 @@ end
 
 declare class TeamCreateService extends Instance
 	ToggleManageCollaborators: RBXScriptSignal<>
+	function CloseGameIfUserDoesntHavePerms(self): nil
 end
 
 declare class Teams extends Instance
@@ -9762,7 +9828,11 @@ declare class Translator extends Instance
 end
 
 declare class TutorialService extends Instance
-	function PromptCloseStudio(self): nil
+	function GetMainViewSessionId(self): string
+	function GetStudioWidgetFromLabel(self, label: string): StudioWidget
+	function HasUserCompletedTutorial(self): boolean
+	function PromptClosePlace(self): nil
+	function SetTutorialCompletionStatus(self, completed: boolean): nil
 	function ShouldLaunchTutorial(self): boolean
 end
 
@@ -9803,7 +9873,7 @@ declare class UGCValidationService extends Instance
 	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
 	function ValidateMeshBounds(self, meshId: string, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
 	function ValidateMeshTriangles(self, meshId: string): boolean
-	function ValidateMeshVertColors(self, meshId: string): boolean
+	function ValidateMeshVertColors(self, meshId: string, includeAlpha: boolean?): boolean
 	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
 	function ValidateNumTextureChannels(self, textureId: string, numChannelsRequired: number): boolean
 	function ValidateOverlappingVertices(self, meshId: string): boolean
@@ -10176,6 +10246,9 @@ declare class VideoCaptureService extends Instance
 	function GetCameraDevices(self): { [any]: any }
 end
 
+declare class VideoService extends Instance
+end
+
 declare class VirtualInputManager extends Instance
 	AdditionalLuaState: string
 	PlaybackCompleted: RBXScriptSignal<string>
@@ -10259,7 +10332,7 @@ declare class WeldConstraint extends Instance
 end
 
 declare Instance: {
-	new: ((className: "Accoutrement", parent: Instance?) -> Accoutrement) & ((className: "Accessory", parent: Instance?) -> Accessory) & ((className: "Hat", parent: Instance?) -> Hat) & ((className: "AdPortal", parent: Instance?) -> AdPortal) & ((className: "AdvancedDragger", parent: Instance?) -> AdvancedDragger) & ((className: "AnalyticsService", parent: Instance?) -> AnalyticsService) & ((className: "Animation", parent: Instance?) -> Animation) & ((className: "CurveAnimation", parent: Instance?) -> CurveAnimation) & ((className: "KeyframeSequence", parent: Instance?) -> KeyframeSequence) & ((className: "AnimationController", parent: Instance?) -> AnimationController) & ((className: "AnimationRigData", parent: Instance?) -> AnimationRigData) & ((className: "Animator", parent: Instance?) -> Animator) & ((className: "Atmosphere", parent: Instance?) -> Atmosphere) & ((className: "Attachment", parent: Instance?) -> Attachment) & ((className: "Bone", parent: Instance?) -> Bone) & ((className: "AudioSearchParams", parent: Instance?) -> AudioSearchParams) & ((className: "Backpack", parent: Instance?) -> Backpack) & ((className: "WrapLayer", parent: Instance?) -> WrapLayer) & ((className: "WrapTarget", parent: Instance?) -> WrapTarget) & ((className: "Beam", parent: Instance?) -> Beam) & ((className: "BindableEvent", parent: Instance?) -> BindableEvent) & ((className: "BindableFunction", parent: Instance?) -> BindableFunction) & ((className: "BodyAngularVelocity", parent: Instance?) -> BodyAngularVelocity) & ((className: "BodyForce", parent: Instance?) -> BodyForce) & ((className: "BodyGyro", parent: Instance?) -> BodyGyro) & ((className: "BodyPosition", parent: Instance?) -> BodyPosition) & ((className: "BodyThrust", parent: Instance?) -> BodyThrust) & ((className: "BodyVelocity", parent: Instance?) -> BodyVelocity) & ((className: "RocketPropulsion", parent: Instance?) -> RocketPropulsion) & ((className: "Breakpoint", parent: Instance?) -> Breakpoint) & ((className: "BubbleChatMessageProperties", parent: Instance?) -> BubbleChatMessageProperties) & ((className: "Camera", parent: Instance?) -> Camera) & ((className: "BodyColors", parent: Instance?) -> BodyColors) & ((className: "CharacterMesh", parent: Instance?) -> CharacterMesh) & ((className: "Pants", parent: Instance?) -> Pants) & ((className: "Shirt", parent: Instance?) -> Shirt) & ((className: "ShirtGraphic", parent: Instance?) -> ShirtGraphic) & ((className: "Skin", parent: Instance?) -> Skin) & ((className: "ClickDetector", parent: Instance?) -> ClickDetector) & ((className: "DragDetector", parent: Instance?) -> DragDetector) & ((className: "Clouds", parent: Instance?) -> Clouds) & ((className: "Configuration", parent: Instance?) -> Configuration) & ((className: "AlignOrientation", parent: Instance?) -> AlignOrientation) & ((className: "AlignPosition", parent: Instance?) -> AlignPosition) & ((className: "AngularVelocity", parent: Instance?) -> AngularVelocity) & ((className: "AnimationConstraint", parent: Instance?) -> AnimationConstraint) & ((className: "BallSocketConstraint", parent: Instance?) -> BallSocketConstraint) & ((className: "HingeConstraint", parent: Instance?) -> HingeConstraint) & ((className: "LineForce", parent: Instance?) -> LineForce) & ((className: "LinearVelocity", parent: Instance?) -> LinearVelocity) & ((className: "PlaneConstraint", parent: Instance?) -> PlaneConstraint) & ((className: "Plane", parent: Instance?) -> Plane) & ((className: "RigidConstraint", parent: Instance?) -> RigidConstraint) & ((className: "RodConstraint", parent: Instance?) -> RodConstraint) & ((className: "RopeConstraint", parent: Instance?) -> RopeConstraint) & ((className: "CylindricalConstraint", parent: Instance?) -> CylindricalConstraint) & ((className: "PrismaticConstraint", parent: Instance?) -> PrismaticConstraint) & ((className: "SpringConstraint", parent: Instance?) -> SpringConstraint) & ((className: "Torque", parent: Instance?) -> Torque) & ((className: "TorsionSpringConstraint", parent: Instance?) -> TorsionSpringConstraint) & ((className: "UniversalConstraint", parent: Instance?) -> UniversalConstraint) & ((className: "VectorForce", parent: Instance?) -> VectorForce) & ((className: "HumanoidController", parent: Instance?) -> HumanoidController) & ((className: "SkateboardController", parent: Instance?) -> SkateboardController) & ((className: "VehicleController", parent: Instance?) -> VehicleController) & ((className: "AirController", parent: Instance?) -> AirController) & ((className: "ClimbController", parent: Instance?) -> ClimbController) & ((className: "GroundController", parent: Instance?) -> GroundController) & ((className: "SwimController", parent: Instance?) -> SwimController) & ((className: "ControllerManager", parent: Instance?) -> ControllerManager) & ((className: "CustomEvent", parent: Instance?) -> CustomEvent) & ((className: "CustomEventReceiver", parent: Instance?) -> CustomEventReceiver) & ((className: "CylinderMesh", parent: Instance?) -> CylinderMesh) & ((className: "FileMesh", parent: Instance?) -> FileMesh) & ((className: "DynamicMesh", parent: Instance?) -> DynamicMesh) & ((className: "SpecialMesh", parent: Instance?) -> SpecialMesh) & ((className: "DataStoreIncrementOptions", parent: Instance?) -> DataStoreIncrementOptions) & ((className: "DataStoreOptions", parent: Instance?) -> DataStoreOptions) & ((className: "DataStoreSetOptions", parent: Instance?) -> DataStoreSetOptions) & ((className: "DebuggerWatch", parent: Instance?) -> DebuggerWatch) & ((className: "Dialog", parent: Instance?) -> Dialog) & ((className: "DialogChoice", parent: Instance?) -> DialogChoice) & ((className: "Dragger", parent: Instance?) -> Dragger) & ((className: "EulerRotationCurve", parent: Instance?) -> EulerRotationCurve) & ((className: "ExperienceInviteOptions", parent: Instance?) -> ExperienceInviteOptions) & ((className: "Explosion", parent: Instance?) -> Explosion) & ((className: "FaceControls", parent: Instance?) -> FaceControls) & ((className: "Decal", parent: Instance?) -> Decal) & ((className: "Texture", parent: Instance?) -> Texture) & ((className: "Hole", parent: Instance?) -> Hole) & ((className: "MotorFeature", parent: Instance?) -> MotorFeature) & ((className: "Fire", parent: Instance?) -> Fire) & ((className: "FloatCurve", parent: Instance?) -> FloatCurve) & ((className: "FlyweightService", parent: Instance?) -> FlyweightService) & ((className: "CSGDictionaryService", parent: Instance?) -> CSGDictionaryService) & ((className: "NonReplicatedCSGDictionaryService", parent: Instance?) -> NonReplicatedCSGDictionaryService) & ((className: "Folder", parent: Instance?) -> Folder) & ((className: "ForceField", parent: Instance?) -> ForceField) & ((className: "FunctionalTest", parent: Instance?) -> FunctionalTest) & ((className: "GetTextBoundsParams", parent: Instance?) -> GetTextBoundsParams) & ((className: "CanvasGroup", parent: Instance?) -> CanvasGroup) & ((className: "Frame", parent: Instance?) -> Frame) & ((className: "ImageButton", parent: Instance?) -> ImageButton) & ((className: "TextButton", parent: Instance?) -> TextButton) & ((className: "ImageLabel", parent: Instance?) -> ImageLabel) & ((className: "TextLabel", parent: Instance?) -> TextLabel) & ((className: "ScrollingFrame", parent: Instance?) -> ScrollingFrame) & ((className: "TextBox", parent: Instance?) -> TextBox) & ((className: "VideoFrame", parent: Instance?) -> VideoFrame) & ((className: "ViewportFrame", parent: Instance?) -> ViewportFrame) & ((className: "BillboardGui", parent: Instance?) -> BillboardGui) & ((className: "ScreenGui", parent: Instance?) -> ScreenGui) & ((className: "GuiMain", parent: Instance?) -> GuiMain) & ((className: "AdGui", parent: Instance?) -> AdGui) & ((className: "SurfaceGui", parent: Instance?) -> SurfaceGui) & ((className: "FloorWire", parent: Instance?) -> FloorWire) & ((className: "SelectionBox", parent: Instance?) -> SelectionBox) & ((className: "BoxHandleAdornment", parent: Instance?) -> BoxHandleAdornment) & ((className: "ConeHandleAdornment", parent: Instance?) -> ConeHandleAdornment) & ((className: "CylinderHandleAdornment", parent: Instance?) -> CylinderHandleAdornment) & ((className: "ImageHandleAdornment", parent: Instance?) -> ImageHandleAdornment) & ((className: "LineHandleAdornment", parent: Instance?) -> LineHandleAdornment) & ((className: "SphereHandleAdornment", parent: Instance?) -> SphereHandleAdornment) & ((className: "WireframeHandleAdornment", parent: Instance?) -> WireframeHandleAdornment) & ((className: "ParabolaAdornment", parent: Instance?) -> ParabolaAdornment) & ((className: "SelectionSphere", parent: Instance?) -> SelectionSphere) & ((className: "ArcHandles", parent: Instance?) -> ArcHandles) & ((className: "Handles", parent: Instance?) -> Handles) & ((className: "SurfaceSelection", parent: Instance?) -> SurfaceSelection) & ((className: "SelectionPartLasso", parent: Instance?) -> SelectionPartLasso) & ((className: "SelectionPointLasso", parent: Instance?) -> SelectionPointLasso) & ((className: "HeightmapImporterService", parent: Instance?) -> HeightmapImporterService) & ((className: "HiddenSurfaceRemovalAsset", parent: Instance?) -> HiddenSurfaceRemovalAsset) & ((className: "Highlight", parent: Instance?) -> Highlight) & ((className: "Humanoid", parent: Instance?) -> Humanoid) & ((className: "HumanoidDescription", parent: Instance?) -> HumanoidDescription) & ((className: "IKControl", parent: Instance?) -> IKControl) & ((className: "RotateP", parent: Instance?) -> RotateP) & ((className: "RotateV", parent: Instance?) -> RotateV) & ((className: "Glue", parent: Instance?) -> Glue) & ((className: "ManualGlue", parent: Instance?) -> ManualGlue) & ((className: "ManualWeld", parent: Instance?) -> ManualWeld) & ((className: "Motor", parent: Instance?) -> Motor) & ((className: "Motor6D", parent: Instance?) -> Motor6D) & ((className: "Rotate", parent: Instance?) -> Rotate) & ((className: "Snap", parent: Instance?) -> Snap) & ((className: "VelocityMotor", parent: Instance?) -> VelocityMotor) & ((className: "Weld", parent: Instance?) -> Weld) & ((className: "Keyframe", parent: Instance?) -> Keyframe) & ((className: "KeyframeMarker", parent: Instance?) -> KeyframeMarker) & ((className: "PointLight", parent: Instance?) -> PointLight) & ((className: "SpotLight", parent: Instance?) -> SpotLight) & ((className: "SurfaceLight", parent: Instance?) -> SurfaceLight) & ((className: "LocalizationTable", parent: Instance?) -> LocalizationTable) & ((className: "Script", parent: Instance?) -> Script) & ((className: "LocalScript", parent: Instance?) -> LocalScript) & ((className: "ModuleScript", parent: Instance?) -> ModuleScript) & ((className: "MarkerCurve", parent: Instance?) -> MarkerCurve) & ((className: "MaterialVariant", parent: Instance?) -> MaterialVariant) & ((className: "MemoryStoreService", parent: Instance?) -> MemoryStoreService) & ((className: "Message", parent: Instance?) -> Message) & ((className: "Hint", parent: Instance?) -> Hint) & ((className: "NoCollisionConstraint", parent: Instance?) -> NoCollisionConstraint) & ((className: "CornerWedgePart", parent: Instance?) -> CornerWedgePart) & ((className: "Part", parent: Instance?) -> Part) & ((className: "FlagStand", parent: Instance?) -> FlagStand) & ((className: "Seat", parent: Instance?) -> Seat) & ((className: "SkateboardPlatform", parent: Instance?) -> SkateboardPlatform) & ((className: "SpawnLocation", parent: Instance?) -> SpawnLocation) & ((className: "WedgePart", parent: Instance?) -> WedgePart) & ((className: "MeshPart", parent: Instance?) -> MeshPart) & ((className: "PartOperation", parent: Instance?) -> PartOperation) & ((className: "IntersectOperation", parent: Instance?) -> IntersectOperation) & ((className: "NegateOperation", parent: Instance?) -> NegateOperation) & ((className: "UnionOperation", parent: Instance?) -> UnionOperation) & ((className: "TrussPart", parent: Instance?) -> TrussPart) & ((className: "VehicleSeat", parent: Instance?) -> VehicleSeat) & ((className: "Model", parent: Instance?) -> Model) & ((className: "Actor", parent: Instance?) -> Actor) & ((className: "HopperBin", parent: Instance?) -> HopperBin) & ((className: "Tool", parent: Instance?) -> Tool) & ((className: "Flag", parent: Instance?) -> Flag) & ((className: "WorldModel", parent: Instance?) -> WorldModel) & ((className: "PartOperationAsset", parent: Instance?) -> PartOperationAsset) & ((className: "ParticleEmitter", parent: Instance?) -> ParticleEmitter) & ((className: "PathfindingLink", parent: Instance?) -> PathfindingLink) & ((className: "PathfindingModifier", parent: Instance?) -> PathfindingModifier) & ((className: "Player", parent: Instance?) -> Player) & ((className: "PluginAction", parent: Instance?) -> PluginAction) & ((className: "NumberPose", parent: Instance?) -> NumberPose) & ((className: "Pose", parent: Instance?) -> Pose) & ((className: "BloomEffect", parent: Instance?) -> BloomEffect) & ((className: "BlurEffect", parent: Instance?) -> BlurEffect) & ((className: "ColorCorrectionEffect", parent: Instance?) -> ColorCorrectionEffect) & ((className: "DepthOfFieldEffect", parent: Instance?) -> DepthOfFieldEffect) & ((className: "SunRaysEffect", parent: Instance?) -> SunRaysEffect) & ((className: "ProximityPrompt", parent: Instance?) -> ProximityPrompt) & ((className: "ProximityPromptService", parent: Instance?) -> ProximityPromptService) & ((className: "ReflectionMetadata", parent: Instance?) -> ReflectionMetadata) & ((className: "ReflectionMetadataCallbacks", parent: Instance?) -> ReflectionMetadataCallbacks) & ((className: "ReflectionMetadataClasses", parent: Instance?) -> ReflectionMetadataClasses) & ((className: "ReflectionMetadataEnums", parent: Instance?) -> ReflectionMetadataEnums) & ((className: "ReflectionMetadataEvents", parent: Instance?) -> ReflectionMetadataEvents) & ((className: "ReflectionMetadataFunctions", parent: Instance?) -> ReflectionMetadataFunctions) & ((className: "ReflectionMetadataClass", parent: Instance?) -> ReflectionMetadataClass) & ((className: "ReflectionMetadataEnum", parent: Instance?) -> ReflectionMetadataEnum) & ((className: "ReflectionMetadataEnumItem", parent: Instance?) -> ReflectionMetadataEnumItem) & ((className: "ReflectionMetadataMember", parent: Instance?) -> ReflectionMetadataMember) & ((className: "ReflectionMetadataProperties", parent: Instance?) -> ReflectionMetadataProperties) & ((className: "ReflectionMetadataYieldFunctions", parent: Instance?) -> ReflectionMetadataYieldFunctions) & ((className: "RemoteEvent", parent: Instance?) -> RemoteEvent) & ((className: "RemoteFunction", parent: Instance?) -> RemoteFunction) & ((className: "RenderingTest", parent: Instance?) -> RenderingTest) & ((className: "RotationCurve", parent: Instance?) -> RotationCurve) & ((className: "BuoyancySensor", parent: Instance?) -> BuoyancySensor) & ((className: "ControllerPartSensor", parent: Instance?) -> ControllerPartSensor) & ((className: "Sky", parent: Instance?) -> Sky) & ((className: "Smoke", parent: Instance?) -> Smoke) & ((className: "Sound", parent: Instance?) -> Sound) & ((className: "ChorusSoundEffect", parent: Instance?) -> ChorusSoundEffect) & ((className: "CompressorSoundEffect", parent: Instance?) -> CompressorSoundEffect) & ((className: "DistortionSoundEffect", parent: Instance?) -> DistortionSoundEffect) & ((className: "EchoSoundEffect", parent: Instance?) -> EchoSoundEffect) & ((className: "EqualizerSoundEffect", parent: Instance?) -> EqualizerSoundEffect) & ((className: "FlangeSoundEffect", parent: Instance?) -> FlangeSoundEffect) & ((className: "PitchShiftSoundEffect", parent: Instance?) -> PitchShiftSoundEffect) & ((className: "ReverbSoundEffect", parent: Instance?) -> ReverbSoundEffect) & ((className: "TremoloSoundEffect", parent: Instance?) -> TremoloSoundEffect) & ((className: "SoundGroup", parent: Instance?) -> SoundGroup) & ((className: "Sparkles", parent: Instance?) -> Sparkles) & ((className: "StandalonePluginScripts", parent: Instance?) -> StandalonePluginScripts) & ((className: "StarterGear", parent: Instance?) -> StarterGear) & ((className: "StyleRule", parent: Instance?) -> StyleRule) & ((className: "StyleSheet", parent: Instance?) -> StyleSheet) & ((className: "StyleDerive", parent: Instance?) -> StyleDerive) & ((className: "StyleLink", parent: Instance?) -> StyleLink) & ((className: "SurfaceAppearance", parent: Instance?) -> SurfaceAppearance) & ((className: "Team", parent: Instance?) -> Team) & ((className: "TeleportOptions", parent: Instance?) -> TeleportOptions) & ((className: "TerrainDetail", parent: Instance?) -> TerrainDetail) & ((className: "TerrainRegion", parent: Instance?) -> TerrainRegion) & ((className: "TestService", parent: Instance?) -> TestService) & ((className: "TextChannel", parent: Instance?) -> TextChannel) & ((className: "TextChatCommand", parent: Instance?) -> TextChatCommand) & ((className: "TextChatMessageProperties", parent: Instance?) -> TextChatMessageProperties) & ((className: "TrackerStreamAnimation", parent: Instance?) -> TrackerStreamAnimation) & ((className: "Trail", parent: Instance?) -> Trail) & ((className: "Tween", parent: Instance?) -> Tween) & ((className: "UIAspectRatioConstraint", parent: Instance?) -> UIAspectRatioConstraint) & ((className: "UISizeConstraint", parent: Instance?) -> UISizeConstraint) & ((className: "UITextSizeConstraint", parent: Instance?) -> UITextSizeConstraint) & ((className: "UICorner", parent: Instance?) -> UICorner) & ((className: "UIGradient", parent: Instance?) -> UIGradient) & ((className: "UIGridLayout", parent: Instance?) -> UIGridLayout) & ((className: "UIListLayout", parent: Instance?) -> UIListLayout) & ((className: "UIPageLayout", parent: Instance?) -> UIPageLayout) & ((className: "UITableLayout", parent: Instance?) -> UITableLayout) & ((className: "UIPadding", parent: Instance?) -> UIPadding) & ((className: "UIScale", parent: Instance?) -> UIScale) & ((className: "UIStroke", parent: Instance?) -> UIStroke) & ((className: "BinaryStringValue", parent: Instance?) -> BinaryStringValue) & ((className: "BoolValue", parent: Instance?) -> BoolValue) & ((className: "BrickColorValue", parent: Instance?) -> BrickColorValue) & ((className: "CFrameValue", parent: Instance?) -> CFrameValue) & ((className: "Color3Value", parent: Instance?) -> Color3Value) & ((className: "DoubleConstrainedValue", parent: Instance?) -> DoubleConstrainedValue) & ((className: "IntConstrainedValue", parent: Instance?) -> IntConstrainedValue) & ((className: "IntValue", parent: Instance?) -> IntValue) & ((className: "NumberValue", parent: Instance?) -> NumberValue) & ((className: "ObjectValue", parent: Instance?) -> ObjectValue) & ((className: "RayValue", parent: Instance?) -> RayValue) & ((className: "StringValue", parent: Instance?) -> StringValue) & ((className: "Vector3Value", parent: Instance?) -> Vector3Value) & ((className: "Vector3Curve", parent: Instance?) -> Vector3Curve) & ((className: "VirtualInputManager", parent: Instance?) -> VirtualInputManager) & ((className: "WeldConstraint", parent: Instance?) -> WeldConstraint) & ((className: string, parent: Instance?) -> Instance),
+	new: ((className: "Accoutrement", parent: Instance?) -> Accoutrement) & ((className: "Accessory", parent: Instance?) -> Accessory) & ((className: "Hat", parent: Instance?) -> Hat) & ((className: "AdPortal", parent: Instance?) -> AdPortal) & ((className: "AdvancedDragger", parent: Instance?) -> AdvancedDragger) & ((className: "AnalyticsService", parent: Instance?) -> AnalyticsService) & ((className: "Animation", parent: Instance?) -> Animation) & ((className: "CurveAnimation", parent: Instance?) -> CurveAnimation) & ((className: "KeyframeSequence", parent: Instance?) -> KeyframeSequence) & ((className: "AnimationController", parent: Instance?) -> AnimationController) & ((className: "AnimationRigData", parent: Instance?) -> AnimationRigData) & ((className: "Animator", parent: Instance?) -> Animator) & ((className: "Atmosphere", parent: Instance?) -> Atmosphere) & ((className: "Attachment", parent: Instance?) -> Attachment) & ((className: "Bone", parent: Instance?) -> Bone) & ((className: "AudioSearchParams", parent: Instance?) -> AudioSearchParams) & ((className: "Backpack", parent: Instance?) -> Backpack) & ((className: "WrapLayer", parent: Instance?) -> WrapLayer) & ((className: "WrapTarget", parent: Instance?) -> WrapTarget) & ((className: "Beam", parent: Instance?) -> Beam) & ((className: "BindableEvent", parent: Instance?) -> BindableEvent) & ((className: "BindableFunction", parent: Instance?) -> BindableFunction) & ((className: "BodyAngularVelocity", parent: Instance?) -> BodyAngularVelocity) & ((className: "BodyForce", parent: Instance?) -> BodyForce) & ((className: "BodyGyro", parent: Instance?) -> BodyGyro) & ((className: "BodyPosition", parent: Instance?) -> BodyPosition) & ((className: "BodyThrust", parent: Instance?) -> BodyThrust) & ((className: "BodyVelocity", parent: Instance?) -> BodyVelocity) & ((className: "RocketPropulsion", parent: Instance?) -> RocketPropulsion) & ((className: "Breakpoint", parent: Instance?) -> Breakpoint) & ((className: "BubbleChatMessageProperties", parent: Instance?) -> BubbleChatMessageProperties) & ((className: "Camera", parent: Instance?) -> Camera) & ((className: "BodyColors", parent: Instance?) -> BodyColors) & ((className: "CharacterMesh", parent: Instance?) -> CharacterMesh) & ((className: "Pants", parent: Instance?) -> Pants) & ((className: "Shirt", parent: Instance?) -> Shirt) & ((className: "ShirtGraphic", parent: Instance?) -> ShirtGraphic) & ((className: "Skin", parent: Instance?) -> Skin) & ((className: "ClickDetector", parent: Instance?) -> ClickDetector) & ((className: "DragDetector", parent: Instance?) -> DragDetector) & ((className: "Clouds", parent: Instance?) -> Clouds) & ((className: "Configuration", parent: Instance?) -> Configuration) & ((className: "AlignOrientation", parent: Instance?) -> AlignOrientation) & ((className: "AlignPosition", parent: Instance?) -> AlignPosition) & ((className: "AngularVelocity", parent: Instance?) -> AngularVelocity) & ((className: "AnimationConstraint", parent: Instance?) -> AnimationConstraint) & ((className: "BallSocketConstraint", parent: Instance?) -> BallSocketConstraint) & ((className: "HingeConstraint", parent: Instance?) -> HingeConstraint) & ((className: "LineForce", parent: Instance?) -> LineForce) & ((className: "LinearVelocity", parent: Instance?) -> LinearVelocity) & ((className: "PlaneConstraint", parent: Instance?) -> PlaneConstraint) & ((className: "Plane", parent: Instance?) -> Plane) & ((className: "RigidConstraint", parent: Instance?) -> RigidConstraint) & ((className: "RodConstraint", parent: Instance?) -> RodConstraint) & ((className: "RopeConstraint", parent: Instance?) -> RopeConstraint) & ((className: "CylindricalConstraint", parent: Instance?) -> CylindricalConstraint) & ((className: "PrismaticConstraint", parent: Instance?) -> PrismaticConstraint) & ((className: "SpringConstraint", parent: Instance?) -> SpringConstraint) & ((className: "Torque", parent: Instance?) -> Torque) & ((className: "TorsionSpringConstraint", parent: Instance?) -> TorsionSpringConstraint) & ((className: "UniversalConstraint", parent: Instance?) -> UniversalConstraint) & ((className: "VectorForce", parent: Instance?) -> VectorForce) & ((className: "HumanoidController", parent: Instance?) -> HumanoidController) & ((className: "SkateboardController", parent: Instance?) -> SkateboardController) & ((className: "VehicleController", parent: Instance?) -> VehicleController) & ((className: "AirController", parent: Instance?) -> AirController) & ((className: "ClimbController", parent: Instance?) -> ClimbController) & ((className: "GroundController", parent: Instance?) -> GroundController) & ((className: "SwimController", parent: Instance?) -> SwimController) & ((className: "ControllerManager", parent: Instance?) -> ControllerManager) & ((className: "CustomEvent", parent: Instance?) -> CustomEvent) & ((className: "CustomEventReceiver", parent: Instance?) -> CustomEventReceiver) & ((className: "CylinderMesh", parent: Instance?) -> CylinderMesh) & ((className: "FileMesh", parent: Instance?) -> FileMesh) & ((className: "DynamicMesh", parent: Instance?) -> DynamicMesh) & ((className: "SpecialMesh", parent: Instance?) -> SpecialMesh) & ((className: "DataStoreIncrementOptions", parent: Instance?) -> DataStoreIncrementOptions) & ((className: "DataStoreOptions", parent: Instance?) -> DataStoreOptions) & ((className: "DataStoreSetOptions", parent: Instance?) -> DataStoreSetOptions) & ((className: "DebuggerWatch", parent: Instance?) -> DebuggerWatch) & ((className: "Dialog", parent: Instance?) -> Dialog) & ((className: "DialogChoice", parent: Instance?) -> DialogChoice) & ((className: "Dragger", parent: Instance?) -> Dragger) & ((className: "EulerRotationCurve", parent: Instance?) -> EulerRotationCurve) & ((className: "ExperienceInviteOptions", parent: Instance?) -> ExperienceInviteOptions) & ((className: "Explosion", parent: Instance?) -> Explosion) & ((className: "FaceControls", parent: Instance?) -> FaceControls) & ((className: "Decal", parent: Instance?) -> Decal) & ((className: "Texture", parent: Instance?) -> Texture) & ((className: "Hole", parent: Instance?) -> Hole) & ((className: "MotorFeature", parent: Instance?) -> MotorFeature) & ((className: "Fire", parent: Instance?) -> Fire) & ((className: "FloatCurve", parent: Instance?) -> FloatCurve) & ((className: "FlyweightService", parent: Instance?) -> FlyweightService) & ((className: "CSGDictionaryService", parent: Instance?) -> CSGDictionaryService) & ((className: "NonReplicatedCSGDictionaryService", parent: Instance?) -> NonReplicatedCSGDictionaryService) & ((className: "Folder", parent: Instance?) -> Folder) & ((className: "ForceField", parent: Instance?) -> ForceField) & ((className: "FunctionalTest", parent: Instance?) -> FunctionalTest) & ((className: "GetTextBoundsParams", parent: Instance?) -> GetTextBoundsParams) & ((className: "CanvasGroup", parent: Instance?) -> CanvasGroup) & ((className: "Frame", parent: Instance?) -> Frame) & ((className: "ImageButton", parent: Instance?) -> ImageButton) & ((className: "TextButton", parent: Instance?) -> TextButton) & ((className: "ImageLabel", parent: Instance?) -> ImageLabel) & ((className: "TextLabel", parent: Instance?) -> TextLabel) & ((className: "ScrollingFrame", parent: Instance?) -> ScrollingFrame) & ((className: "TextBox", parent: Instance?) -> TextBox) & ((className: "VideoFrame", parent: Instance?) -> VideoFrame) & ((className: "ViewportFrame", parent: Instance?) -> ViewportFrame) & ((className: "BillboardGui", parent: Instance?) -> BillboardGui) & ((className: "ScreenGui", parent: Instance?) -> ScreenGui) & ((className: "GuiMain", parent: Instance?) -> GuiMain) & ((className: "AdGui", parent: Instance?) -> AdGui) & ((className: "SurfaceGui", parent: Instance?) -> SurfaceGui) & ((className: "FloorWire", parent: Instance?) -> FloorWire) & ((className: "SelectionBox", parent: Instance?) -> SelectionBox) & ((className: "BoxHandleAdornment", parent: Instance?) -> BoxHandleAdornment) & ((className: "ConeHandleAdornment", parent: Instance?) -> ConeHandleAdornment) & ((className: "CylinderHandleAdornment", parent: Instance?) -> CylinderHandleAdornment) & ((className: "ImageHandleAdornment", parent: Instance?) -> ImageHandleAdornment) & ((className: "LineHandleAdornment", parent: Instance?) -> LineHandleAdornment) & ((className: "SphereHandleAdornment", parent: Instance?) -> SphereHandleAdornment) & ((className: "WireframeHandleAdornment", parent: Instance?) -> WireframeHandleAdornment) & ((className: "ParabolaAdornment", parent: Instance?) -> ParabolaAdornment) & ((className: "SelectionSphere", parent: Instance?) -> SelectionSphere) & ((className: "ArcHandles", parent: Instance?) -> ArcHandles) & ((className: "Handles", parent: Instance?) -> Handles) & ((className: "SurfaceSelection", parent: Instance?) -> SurfaceSelection) & ((className: "SelectionPartLasso", parent: Instance?) -> SelectionPartLasso) & ((className: "SelectionPointLasso", parent: Instance?) -> SelectionPointLasso) & ((className: "HeightmapImporterService", parent: Instance?) -> HeightmapImporterService) & ((className: "HiddenSurfaceRemovalAsset", parent: Instance?) -> HiddenSurfaceRemovalAsset) & ((className: "Highlight", parent: Instance?) -> Highlight) & ((className: "Humanoid", parent: Instance?) -> Humanoid) & ((className: "HumanoidDescription", parent: Instance?) -> HumanoidDescription) & ((className: "IKControl", parent: Instance?) -> IKControl) & ((className: "RotateP", parent: Instance?) -> RotateP) & ((className: "RotateV", parent: Instance?) -> RotateV) & ((className: "Glue", parent: Instance?) -> Glue) & ((className: "ManualGlue", parent: Instance?) -> ManualGlue) & ((className: "ManualWeld", parent: Instance?) -> ManualWeld) & ((className: "Motor", parent: Instance?) -> Motor) & ((className: "Motor6D", parent: Instance?) -> Motor6D) & ((className: "Rotate", parent: Instance?) -> Rotate) & ((className: "Snap", parent: Instance?) -> Snap) & ((className: "VelocityMotor", parent: Instance?) -> VelocityMotor) & ((className: "Weld", parent: Instance?) -> Weld) & ((className: "Keyframe", parent: Instance?) -> Keyframe) & ((className: "KeyframeMarker", parent: Instance?) -> KeyframeMarker) & ((className: "PointLight", parent: Instance?) -> PointLight) & ((className: "SpotLight", parent: Instance?) -> SpotLight) & ((className: "SurfaceLight", parent: Instance?) -> SurfaceLight) & ((className: "LocalizationTable", parent: Instance?) -> LocalizationTable) & ((className: "Script", parent: Instance?) -> Script) & ((className: "LocalScript", parent: Instance?) -> LocalScript) & ((className: "ModuleScript", parent: Instance?) -> ModuleScript) & ((className: "MarkerCurve", parent: Instance?) -> MarkerCurve) & ((className: "MaterialVariant", parent: Instance?) -> MaterialVariant) & ((className: "MemoryStoreService", parent: Instance?) -> MemoryStoreService) & ((className: "Message", parent: Instance?) -> Message) & ((className: "Hint", parent: Instance?) -> Hint) & ((className: "NoCollisionConstraint", parent: Instance?) -> NoCollisionConstraint) & ((className: "CornerWedgePart", parent: Instance?) -> CornerWedgePart) & ((className: "Part", parent: Instance?) -> Part) & ((className: "FlagStand", parent: Instance?) -> FlagStand) & ((className: "Seat", parent: Instance?) -> Seat) & ((className: "SkateboardPlatform", parent: Instance?) -> SkateboardPlatform) & ((className: "SpawnLocation", parent: Instance?) -> SpawnLocation) & ((className: "WedgePart", parent: Instance?) -> WedgePart) & ((className: "MeshPart", parent: Instance?) -> MeshPart) & ((className: "PartOperation", parent: Instance?) -> PartOperation) & ((className: "IntersectOperation", parent: Instance?) -> IntersectOperation) & ((className: "NegateOperation", parent: Instance?) -> NegateOperation) & ((className: "UnionOperation", parent: Instance?) -> UnionOperation) & ((className: "TrussPart", parent: Instance?) -> TrussPart) & ((className: "VehicleSeat", parent: Instance?) -> VehicleSeat) & ((className: "Model", parent: Instance?) -> Model) & ((className: "Actor", parent: Instance?) -> Actor) & ((className: "HopperBin", parent: Instance?) -> HopperBin) & ((className: "Tool", parent: Instance?) -> Tool) & ((className: "Flag", parent: Instance?) -> Flag) & ((className: "WorldModel", parent: Instance?) -> WorldModel) & ((className: "PartOperationAsset", parent: Instance?) -> PartOperationAsset) & ((className: "ParticleEmitter", parent: Instance?) -> ParticleEmitter) & ((className: "PathfindingLink", parent: Instance?) -> PathfindingLink) & ((className: "PathfindingModifier", parent: Instance?) -> PathfindingModifier) & ((className: "Player", parent: Instance?) -> Player) & ((className: "PluginAction", parent: Instance?) -> PluginAction) & ((className: "NumberPose", parent: Instance?) -> NumberPose) & ((className: "Pose", parent: Instance?) -> Pose) & ((className: "BloomEffect", parent: Instance?) -> BloomEffect) & ((className: "BlurEffect", parent: Instance?) -> BlurEffect) & ((className: "ColorCorrectionEffect", parent: Instance?) -> ColorCorrectionEffect) & ((className: "DepthOfFieldEffect", parent: Instance?) -> DepthOfFieldEffect) & ((className: "SunRaysEffect", parent: Instance?) -> SunRaysEffect) & ((className: "ProximityPrompt", parent: Instance?) -> ProximityPrompt) & ((className: "ProximityPromptService", parent: Instance?) -> ProximityPromptService) & ((className: "ReflectionMetadata", parent: Instance?) -> ReflectionMetadata) & ((className: "ReflectionMetadataCallbacks", parent: Instance?) -> ReflectionMetadataCallbacks) & ((className: "ReflectionMetadataClasses", parent: Instance?) -> ReflectionMetadataClasses) & ((className: "ReflectionMetadataEnums", parent: Instance?) -> ReflectionMetadataEnums) & ((className: "ReflectionMetadataEvents", parent: Instance?) -> ReflectionMetadataEvents) & ((className: "ReflectionMetadataFunctions", parent: Instance?) -> ReflectionMetadataFunctions) & ((className: "ReflectionMetadataClass", parent: Instance?) -> ReflectionMetadataClass) & ((className: "ReflectionMetadataEnum", parent: Instance?) -> ReflectionMetadataEnum) & ((className: "ReflectionMetadataEnumItem", parent: Instance?) -> ReflectionMetadataEnumItem) & ((className: "ReflectionMetadataMember", parent: Instance?) -> ReflectionMetadataMember) & ((className: "ReflectionMetadataProperties", parent: Instance?) -> ReflectionMetadataProperties) & ((className: "ReflectionMetadataYieldFunctions", parent: Instance?) -> ReflectionMetadataYieldFunctions) & ((className: "RemoteEvent", parent: Instance?) -> RemoteEvent) & ((className: "RemoteFunction", parent: Instance?) -> RemoteFunction) & ((className: "RenderingTest", parent: Instance?) -> RenderingTest) & ((className: "RotationCurve", parent: Instance?) -> RotationCurve) & ((className: "BuoyancySensor", parent: Instance?) -> BuoyancySensor) & ((className: "ControllerPartSensor", parent: Instance?) -> ControllerPartSensor) & ((className: "Sky", parent: Instance?) -> Sky) & ((className: "Smoke", parent: Instance?) -> Smoke) & ((className: "Sound", parent: Instance?) -> Sound) & ((className: "ChorusSoundEffect", parent: Instance?) -> ChorusSoundEffect) & ((className: "CompressorSoundEffect", parent: Instance?) -> CompressorSoundEffect) & ((className: "DistortionSoundEffect", parent: Instance?) -> DistortionSoundEffect) & ((className: "EchoSoundEffect", parent: Instance?) -> EchoSoundEffect) & ((className: "EqualizerSoundEffect", parent: Instance?) -> EqualizerSoundEffect) & ((className: "FlangeSoundEffect", parent: Instance?) -> FlangeSoundEffect) & ((className: "PitchShiftSoundEffect", parent: Instance?) -> PitchShiftSoundEffect) & ((className: "ReverbSoundEffect", parent: Instance?) -> ReverbSoundEffect) & ((className: "TremoloSoundEffect", parent: Instance?) -> TremoloSoundEffect) & ((className: "SoundGroup", parent: Instance?) -> SoundGroup) & ((className: "Sparkles", parent: Instance?) -> Sparkles) & ((className: "StandalonePluginScripts", parent: Instance?) -> StandalonePluginScripts) & ((className: "StarterGear", parent: Instance?) -> StarterGear) & ((className: "StudioCallout", parent: Instance?) -> StudioCallout) & ((className: "StudioObjectBase", parent: Instance?) -> StudioObjectBase) & ((className: "StudioWidget", parent: Instance?) -> StudioWidget) & ((className: "StyleRule", parent: Instance?) -> StyleRule) & ((className: "StyleSheet", parent: Instance?) -> StyleSheet) & ((className: "StyleDerive", parent: Instance?) -> StyleDerive) & ((className: "StyleLink", parent: Instance?) -> StyleLink) & ((className: "SurfaceAppearance", parent: Instance?) -> SurfaceAppearance) & ((className: "Team", parent: Instance?) -> Team) & ((className: "TeleportOptions", parent: Instance?) -> TeleportOptions) & ((className: "TerrainDetail", parent: Instance?) -> TerrainDetail) & ((className: "TerrainRegion", parent: Instance?) -> TerrainRegion) & ((className: "TestService", parent: Instance?) -> TestService) & ((className: "TextChannel", parent: Instance?) -> TextChannel) & ((className: "TextChatCommand", parent: Instance?) -> TextChatCommand) & ((className: "TextChatMessageProperties", parent: Instance?) -> TextChatMessageProperties) & ((className: "TrackerStreamAnimation", parent: Instance?) -> TrackerStreamAnimation) & ((className: "Trail", parent: Instance?) -> Trail) & ((className: "Tween", parent: Instance?) -> Tween) & ((className: "UIAspectRatioConstraint", parent: Instance?) -> UIAspectRatioConstraint) & ((className: "UISizeConstraint", parent: Instance?) -> UISizeConstraint) & ((className: "UITextSizeConstraint", parent: Instance?) -> UITextSizeConstraint) & ((className: "UICorner", parent: Instance?) -> UICorner) & ((className: "UIGradient", parent: Instance?) -> UIGradient) & ((className: "UIGridLayout", parent: Instance?) -> UIGridLayout) & ((className: "UIListLayout", parent: Instance?) -> UIListLayout) & ((className: "UIPageLayout", parent: Instance?) -> UIPageLayout) & ((className: "UITableLayout", parent: Instance?) -> UITableLayout) & ((className: "UIPadding", parent: Instance?) -> UIPadding) & ((className: "UIScale", parent: Instance?) -> UIScale) & ((className: "UIStroke", parent: Instance?) -> UIStroke) & ((className: "BinaryStringValue", parent: Instance?) -> BinaryStringValue) & ((className: "BoolValue", parent: Instance?) -> BoolValue) & ((className: "BrickColorValue", parent: Instance?) -> BrickColorValue) & ((className: "CFrameValue", parent: Instance?) -> CFrameValue) & ((className: "Color3Value", parent: Instance?) -> Color3Value) & ((className: "DoubleConstrainedValue", parent: Instance?) -> DoubleConstrainedValue) & ((className: "IntConstrainedValue", parent: Instance?) -> IntConstrainedValue) & ((className: "IntValue", parent: Instance?) -> IntValue) & ((className: "NumberValue", parent: Instance?) -> NumberValue) & ((className: "ObjectValue", parent: Instance?) -> ObjectValue) & ((className: "RayValue", parent: Instance?) -> RayValue) & ((className: "StringValue", parent: Instance?) -> StringValue) & ((className: "Vector3Value", parent: Instance?) -> Vector3Value) & ((className: "Vector3Curve", parent: Instance?) -> Vector3Curve) & ((className: "VirtualInputManager", parent: Instance?) -> VirtualInputManager) & ((className: "WeldConstraint", parent: Instance?) -> WeldConstraint) & ((className: string, parent: Instance?) -> Instance),
 }
 
 declare Ray: {
