@@ -206,6 +206,9 @@ IGNORED_MEMBERS = {
         "Value",
         "Changed",
     ],
+    "Actor": [
+        "SendMessage",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -427,7 +430,10 @@ EXTRA_MEMBERS = {
     "ObjectValue": [
         "Value: Instance?",
         "Changed: RBXScriptSignal<Instance?>",
-    ]
+    ],
+    "Actor": [
+        "function SendMessage(self, topic: string, ...: any): ()",
+    ],
 }
 
 # Hardcoded types
