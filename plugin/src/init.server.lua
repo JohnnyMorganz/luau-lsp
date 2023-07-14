@@ -4,10 +4,17 @@ assert(plugin, "This code must run inside of a plugin")
 
 local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
 
---#region Settings
+local ConnectButton = toolbar:CreateButton(
+	"Luau Language Server Setup",
+	"Toggle Menu",
+	"rbxassetid://11115506617",
+	"Luau Language Server"
+) :: PluginToolbarButton
 
 local SettingsButton =
 	toolbar:CreateButton("Settings", "Open Settings", "rbxassetid://13997395868") :: PluginToolbarButton
+
+--#region Settings
 
 local AnalyticsService = game:GetService("AnalyticsService")
 
@@ -50,13 +57,6 @@ end)
 --#endregion
 
 --#region Connect
-
-local ConnectButton = toolbar:CreateButton(
-	"Luau Language Server Setup",
-	"Toggle Menu",
-	"rbxassetid://11115506617",
-	"Luau Language Server"
-) :: PluginToolbarButton
 
 local ConnectAction = plugin:CreatePluginAction(
 	"Luau Language Server Connect",
