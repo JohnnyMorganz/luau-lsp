@@ -2,6 +2,10 @@
 local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
+if game:GetService("RunService"):IsRunning() then
+	return
+end
+
 local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
 
 local ConnectButton = toolbar:CreateButton(
