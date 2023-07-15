@@ -41,14 +41,18 @@ local function LoadSettings()
 	pcall(function()
 		Settings = result()
 	end)
-	if
-		type(Settings) ~= "table"
-		or type(Settings.port) ~= "number"
-		or type(Settings.startAutomatically) ~= "boolean"
-		or type(Settings.include) ~= "table"
-	then
+	if type(Settings) ~= "table" then
 		Settings = nil
 		warn("[Luau Language Server] Could not load settings: invalid settings")
+	elseif type(Settings.port) ~= "number" then
+		Settings = nil
+		warn("[Luau Language Server] Could not load settings: invalid port")
+	elseif type(Settings.startAutomatically) ~= "boolean" then
+		Settings = nil
+		warn("[Luau Language Server] Could not load settings: invalid startAutomatically value")
+	elseif type(Settings.include) ~= "table" then
+		Settings = nil
+		warn("[Luau Language Server] Could not load settings: invalid include list")
 	end
 end
 
@@ -134,7 +138,8 @@ local function sendFullDMInfo()
 end
 
 local function watchChanges()
-	if connected.Value or Settings.port == nil then
+	if connected.Value or Settings == nil then
+		warn("[Luau Language Server] Connecting to server failed: invalid settings")
 		return
 	end
 	cleanup()
