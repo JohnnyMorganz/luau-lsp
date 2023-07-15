@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed semantic tokens segfault crash on some tables
 - Fixed duplicate definitions showing in the Go To Definition page
 - Fixed some syntax highlighting inconsistencies
+- Added a temporary fix to "RecursionLimitException" exceptions leaking to the public interface.
 
 ## [1.22.0] - 2023-06-30
 

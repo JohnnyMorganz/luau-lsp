@@ -111,7 +111,18 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 // NOTE: use `frontend.parse` if you do not care about typechecking
 Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
 {
-    return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
+    try
+    {
+        return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
+    }
+    catch (Luau::InternalCompilerError& err)
+    {
+        // TODO: RecursionLimitException is leaking out of frontend.check
+        // https://github.com/Roblox/luau/issues/975
+        // Remove this try-catch block once the above issue is fixed
+        client->sendLogMessage(lsp::MessageType::Warning, "Luau InternalCompilerError caught in " + moduleName + ": " + err.what());
+        return Luau::CheckResult{};
+    }
 }
 
 // Runs `Frontend::check` on the module whilst retaining the type graph.
