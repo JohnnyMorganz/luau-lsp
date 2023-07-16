@@ -399,9 +399,9 @@ TEST_CASE_FIXTURE(Fixture, "print_moonwave_documentation")
     auto documentation = printMoonwaveDocumentation(comments);
 
     CHECK_EQ(documentation, "Adds 5 to the input number\n"
-                            "\n\n**Parameters**"
+                            "\n\n**Parameters**\n"
                             "\n- `x` number -- Input number"
-                            "\n\n**Returns**"
+                            "\n\n**Returns**\n"
                             "\n- number");
 }
 
@@ -430,11 +430,11 @@ TEST_CASE_FIXTURE(Fixture, "print_throws_info")
     auto documentation = printMoonwaveDocumentation(comments);
 
     CHECK_EQ(documentation, "Adds 5 to the input number\n"
-                            "\n\n**Parameters**"
+                            "\n\n**Parameters**\n"
                             "\n- `x` number -- Input number"
-                            "\n\n**Returns**"
+                            "\n\n**Returns**\n"
                             "\n- number"
-                            "\n\n**Throws**"
+                            "\n\n**Throws**\n"
                             "\n- `NotANumber` -- Input is not a number");
 }
 
@@ -463,7 +463,7 @@ TEST_CASE_FIXTURE(Fixture, "ignored_tags")
     auto documentation = printMoonwaveDocumentation(comments);
 
     CHECK_EQ(documentation, "Adds 5 to the input number\n"
-                            "\n\n**Parameters**"
+                            "\n\n**Parameters**\n"
                             "\n- `x` number -- Testing");
 }
 
