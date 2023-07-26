@@ -209,6 +209,12 @@ IGNORED_MEMBERS = {
     "Actor": [
         "SendMessage",
     ],
+    "Seat": [
+        "Occupant",
+    ],
+    "VehicleSeat": [
+        "Occupant",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -433,6 +439,12 @@ EXTRA_MEMBERS = {
     ],
     "Actor": [
         "function SendMessage(self, topic: string, ...: any): ()",
+    ],
+    "Seat": [
+        "Occupant: Humanoid?",
+    ],
+    "VehicleSeat": [
+        "Occupant: Humanoid?",
     ],
 }
 
