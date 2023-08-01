@@ -291,11 +291,14 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
         }
 
         // Add file endings
-        auto fullFilePath = std::filesystem::weakly_canonical(filePath.replace_extension(".luau"), ec);
-        if (ec.value() != 0 || !std::filesystem::exists(filePath))
+        if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
         {
-            // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(filePath.replace_extension(".lua"), ec);
+            auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
+            if (ec.value() != 0 || !std::filesystem::exists(filePath))
+            {
+                // fall back to .lua if a module with .luau doesn't exist
+                filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
+            }
         }
 
         // URI-ify the file path so that its normalised (in particular, the drive letter)
