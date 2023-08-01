@@ -3985,8 +3985,8 @@ declare class Region3int16
 end
 
 
-declare SharedTable: any
-declare OpenCloudModel: any
+export type SharedTable = any
+export type OpenCloudModel = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
