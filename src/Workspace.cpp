@@ -109,6 +109,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
 // NOTE: use `frontend.parse` if you do not care about typechecking
+// TODO: THIS IS CURRENTLY UNUSED DUE TO RETAINFULLTYPEGRAPHS=FALSE BUG - EITHER CLIP OR USE IT
 Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
 {
     try
