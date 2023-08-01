@@ -513,6 +513,7 @@ declare function printidentity(prefix: string?)
 
 POST_DATATYPES_BASE = """
 export type SharedTable = any
+export type OpenCloudModel = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
