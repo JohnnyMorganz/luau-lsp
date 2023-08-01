@@ -3953,9 +3953,7 @@ declare class Region3int16
 end
 
 
-declare class SharedTable
-    [string | number]: any
-end
+declare SharedTable: any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
