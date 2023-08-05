@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.589
+
 ### Fixed
 
 - Reverted change to type checking in 1.22.0 that reduced memory footprint. This should resolve the problems where diagnostics aren't showing with an InternalCompilerError, at the cost of increased memory use if `luau-lsp.diagnostics.workspace` is enabled.
