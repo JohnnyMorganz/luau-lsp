@@ -28,10 +28,7 @@
     "roblox"
   ],
   "activationEvents": [
-    "onLanguage:lua",
-    "onLanguage:luau",
-    "onCommand:luau-lsp.updateApi",
-    "onCommand:luau-lsp.regenerateSourcemap"
+    "onLanguage:luau"
   ],
   "main": "./dist/extension.js",
   "contributes": {
