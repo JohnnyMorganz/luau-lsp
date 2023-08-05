@@ -28,7 +28,10 @@
         "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
       ],
       "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-      "preLaunchTask": "npm: compile"
+      "preLaunchTask": "npm: compile",
+      "env": {
+        "SERVER_PATH": "${input:binaryPath}"
+      }
     },
     {
       "name": "Extension Tests",
@@ -49,6 +52,22 @@
       "type": "cppvsdbg",
       "processId": "${command:pickProcess}",
       "request": "attach"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "binaryPath",
+      "type": "pickString",
+      "description": "Path to server binary",
+      "default": "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
+      "options": [
+        "cmake-build-debug-visual-studio/luau-lsp.exe",
+        "cmake-build-release-visual-studio/luau-lsp.exe",
+        "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
+        "cmake-build-debug/luau-lsp.exe",
+        "cmake-build-release/luau-lsp.exe",
+        "cmake-build-relwithdebinfo/luau-lsp.exe"
+      ]
     }
   ]
 }
