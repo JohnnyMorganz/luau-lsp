@@ -267,8 +267,12 @@ const stopPluginServer = async (isDeactivating = false) => {
   }
 };
 
-export async function activate(context: vscode.ExtensionContext) {
-  console.log("Luau LSP activated");
+const startLanguageServer = async (context: vscode.ExtensionContext) => {
+  if (client) {
+    await client.stop();
+  }
+
+  console.log("Starting Luau Language Server");
 
   const args = ["lsp"];
 
@@ -415,6 +419,13 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand(params.command, params.data);
   });
 
+  console.log("LSP Setup");
+  await client.start();
+};
+
+export async function activate(context: vscode.ExtensionContext) {
+  console.log("Luau LSP activated");
+
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
       await downloadApiDefinitions(context);
@@ -428,6 +439,13 @@ export async function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
           }
         });
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("luau-lsp.reloadServer", async () => {
+      vscode.window.showInformationMessage("Reloading Language Server");
+      await startLanguageServer(context);
     })
   );
 
@@ -529,8 +547,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   updateSourcemapForAllFolders();
 
-  console.log("LSP Setup");
-  await client.start();
+  await startLanguageServer(context);
 
   if (
     vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")
