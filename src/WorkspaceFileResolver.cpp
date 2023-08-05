@@ -173,7 +173,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
             catch (const std::exception& e)
             {
                 // TODO: display diagnostic?
-                std::cerr << "Failed to load JSON module: " << realFileName.generic_string() << " - " << e.what() << std::endl;
+                std::cerr << "Failed to load JSON module: " << realFileName.generic_string() << " - " << e.what() << '\n';
                 return std::nullopt;
             }
         }
@@ -488,7 +488,7 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
             }
             else
             {
-                std::cerr << "Attempted to update plugin information for a non-DM instance" << std::endl;
+                std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
             }
         }
 
@@ -499,6 +499,6 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
     catch (const std::exception& e)
     {
         // TODO: log message?
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << '\n';
     }
 }

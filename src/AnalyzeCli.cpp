@@ -4,7 +4,6 @@
 #include "Analyze/CliClient.hpp"
 
 #include "Luau/ModuleResolver.h"
-#include "Luau/TypeInfer.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
 #include "Luau/TypeAttach.h"

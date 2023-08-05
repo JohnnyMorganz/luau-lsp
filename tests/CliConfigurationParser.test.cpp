@@ -21,6 +21,6 @@ TEST_CASE("convert dotted dictionary")
     CHECK_EQ(output["foo"]["bar"], true);
     CHECK_EQ(output["foo"]["baz"], 1);
     CHECK_EQ(output["bar"], "testing");
-};
+}
 
 TEST_SUITE_END();

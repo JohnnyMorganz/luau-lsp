@@ -112,10 +112,10 @@ std::string jsonValueToLuau(const json& val)
     {
         std::string out = "{";
 
-        for (auto& [key, val] : val.items())
+        for (auto& [key, value] : val.items())
         {
             out += "[\"" + key + "\"] = ";
-            out += jsonValueToLuau(val);
+            out += jsonValueToLuau(value);
             out += ";";
         }
 

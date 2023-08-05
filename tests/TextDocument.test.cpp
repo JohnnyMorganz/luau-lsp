@@ -20,7 +20,7 @@ TEST_CASE("Empty content")
     CHECK_EQ(document.lineCount(), 1);
     CHECK_EQ(document.offsetAt(lsp::Position{0, 0}), 0);
     CHECK_EQ(document.positionAt(0), lsp::Position{0, 0});
-};
+}
 
 TEST_CASE("Single line")
 {
@@ -33,7 +33,7 @@ TEST_CASE("Single line")
         CHECK_EQ(document.offsetAt(lsp::Position{0, i}), i);
         CHECK_EQ(document.positionAt(i), lsp::Position{0, i});
     }
-};
+}
 
 TEST_CASE("Multiple lines")
 {
@@ -53,7 +53,7 @@ TEST_CASE("Multiple lines")
     CHECK_EQ(document.offsetAt(lsp::Position{3, 1}), 18);
     CHECK_EQ(document.positionAt(18), lsp::Position{3, 0});
     CHECK_EQ(document.positionAt(19), lsp::Position{3, 0});
-};
+}
 
 TEST_CASE("Starts with new-line")
 {
@@ -64,7 +64,7 @@ TEST_CASE("Starts with new-line")
     CHECK_EQ(document.positionAt(0), lsp::Position{0, 0});
     CHECK_EQ(document.positionAt(1), lsp::Position{1, 0});
     CHECK_EQ(document.positionAt(6), lsp::Position{1, 5});
-};
+}
 
 TEST_CASE("New line characters")
 {
@@ -85,7 +85,7 @@ TEST_CASE("New line characters")
 
     str = "ABCDE\n\rFGHIJ";
     CHECK_EQ(newDocument(str).lineCount(), 3);
-};
+}
 
 TEST_CASE("getText(Range)")
 {
@@ -98,7 +98,7 @@ TEST_CASE("getText(Range)")
     CHECK_EQ(document.getText(lsp::Range{{0, 4}, {2, 1}}), "5\n12345\n1");
     CHECK_EQ(document.getText(lsp::Range{{0, 4}, {3, 1}}), "5\n12345\n12345");
     CHECK_EQ(document.getText(lsp::Range{{0, 0}, {3, 5}}), str);
-};
+}
 
 TEST_CASE("Invalid inputs")
 {
@@ -118,7 +118,7 @@ TEST_CASE("Invalid inputs")
     // CHECK_EQ(document.positionAt(-1), lsp::Position{0, 0});
     CHECK_EQ(document.positionAt(str.length()), lsp::Position{0, str.length()});
     CHECK_EQ(document.positionAt(str.length() + 3), lsp::Position{0, str.length()});
-};
+}
 
 // https://github.com/llvm/llvm-project/blob/main/clang-tools-extra/clangd/unittests/SourceCodeTests.cpp
 TEST_CASE("lspLength")
@@ -233,7 +233,7 @@ TEST_CASE("PositionToOffset")
         for (unsigned I = 0; I < line.length(); ++I)
             CHECK_EQ(document.offsetAt(lsp::Position{i, I}), offset + I);
     }
-};
+}
 
 TEST_CASE("OffsetToPosition")
 {
@@ -302,7 +302,7 @@ TEST_CASE("One full update")
     document.update({{std::nullopt, "efg456"}}, 1);
     CHECK_EQ(document.version(), 1);
     CHECK_EQ(document.getText(), "efg456");
-};
+}
 
 TEST_CASE("Several full content updates")
 {
@@ -310,7 +310,7 @@ TEST_CASE("Several full content updates")
     document.update({{std::nullopt, "hello"}, {std::nullopt, "world"}}, 2);
     CHECK_EQ(document.version(), 2);
     CHECK_EQ(document.getText(), "world");
-};
+}
 
 TEST_SUITE_END();
 
@@ -358,7 +358,7 @@ TEST_CASE("Incrementally removing content")
     CHECK_EQ(document.getText(), "function abc() {\n  console.log(\"\");\n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally removing multi-line content")
 {
@@ -370,7 +370,7 @@ TEST_CASE("Incrementally removing multi-line content")
     CHECK_EQ(document.getText(), "function abc() {\n  \n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally removing multi-line content 2")
 {
@@ -382,7 +382,7 @@ TEST_CASE("Incrementally removing multi-line content 2")
     CHECK_EQ(document.getText(), "function abc() {\n  \n  \n}");
     CHECK_EQ(document.lineCount(), 4);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally adding content")
 {
@@ -394,7 +394,7 @@ TEST_CASE("Incrementally adding content")
     CHECK_EQ(document.getText(), "function abc() {\n  console.log(\"hello, world!\");\n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally adding multi-line content")
 {
@@ -406,7 +406,7 @@ TEST_CASE("Incrementally adding multi-line content")
     CHECK_EQ(document.getText(), "function abc() {\n  while (true) {\n    foo();\n    bar();\n  };\n}");
     CHECK_EQ(document.lineCount(), 6);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing single-line content, more chars")
 {
@@ -418,7 +418,7 @@ TEST_CASE("Incrementally replacing single-line content, more chars")
     CHECK_EQ(document.getText(), "function abc() {\n  console.log(\"hello, test case!!!\");\n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing single-line content, less chars")
 {
@@ -430,7 +430,7 @@ TEST_CASE("Incrementally replacing single-line content, less chars")
     CHECK_EQ(document.getText(), "function abc() {\n  console.log(\"hey\");\n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing single-line content, same num of chars")
 {
@@ -442,7 +442,7 @@ TEST_CASE("Incrementally replacing single-line content, same num of chars")
     CHECK_EQ(document.getText(), "function abc() {\n  console.log(\"world, hello!\");\n}");
     CHECK_EQ(document.lineCount(), 3);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing multi-line content, more lines")
 {
@@ -454,7 +454,7 @@ TEST_CASE("Incrementally replacing multi-line content, more lines")
     CHECK_EQ(document.getText(), "\n//hello\nfunction d(){\n  console.log(\"hello, world!\");\n}");
     CHECK_EQ(document.lineCount(), 5);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing multi-line content, less lines")
 {
@@ -466,7 +466,7 @@ TEST_CASE("Incrementally replacing multi-line content, less lines")
     CHECK_EQ(document.getText(), "a1\nb1\na2\nb2xx\nyy");
     CHECK_EQ(document.lineCount(), 5);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing multi-line content, same num of lines and chars")
 {
@@ -478,7 +478,7 @@ TEST_CASE("Incrementally replacing multi-line content, same num of lines and cha
     CHECK_EQ(document.getText(), "a1\nb1\n\nxx1\nxx2\nb3\na4\nb4\n");
     CHECK_EQ(document.lineCount(), 9);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing multi-line content, same num of lines but diff chars")
 {
@@ -490,7 +490,7 @@ TEST_CASE("Incrementally replacing multi-line content, same num of lines but dif
     CHECK_EQ(document.getText(), "a1\nb1\n\ny\n\nb3\na4\nb4\n");
     CHECK_EQ(document.lineCount(), 9);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Incrementally replacing multi-line content, huge number of lines")
 {
@@ -507,7 +507,7 @@ TEST_CASE("Incrementally replacing multi-line content, huge number of lines")
     CHECK_EQ(document.getText(), "a1" + text + "\nb1");
     CHECK_EQ(document.lineCount(), 20001);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Several incremental content changes")
 {
@@ -522,7 +522,7 @@ TEST_CASE("Several incremental content changes")
     CHECK_EQ(document.version(), 1);
     CHECK_EQ(document.getText(), "function abcdefghij() {\n  console.log(\"hello, test case!!!\");\n}");
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Basic append")
 {
@@ -535,7 +535,7 @@ TEST_CASE("Basic append")
     CHECK_EQ(document.version(), 1);
     CHECK_EQ(document.offsetAt(lsp::Position{2, 0}), 29);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Multi-line append")
 {
@@ -549,7 +549,7 @@ TEST_CASE("Multi-line append")
     CHECK_EQ(document.offsetAt(lsp::Position{3, 0}), 29);
     CHECK_EQ(document.lineCount(), 4);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Basic delete")
 {
@@ -562,7 +562,7 @@ TEST_CASE("Basic delete")
     CHECK_EQ(document.version(), 1);
     CHECK_EQ(document.offsetAt(lsp::Position{2, 0}), 7);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Multi-line delete")
 {
@@ -575,7 +575,7 @@ TEST_CASE("Multi-line delete")
     CHECK_EQ(lm.version(), 1);
     CHECK_EQ(lm.offsetAt(lsp::Position{1, 0}), 6);
     assertValidLineNumbers(lm);
-};
+}
 
 TEST_CASE("Single character replace")
 {
@@ -588,7 +588,7 @@ TEST_CASE("Single character replace")
     CHECK_EQ(document.version(), 2);
     CHECK_EQ(document.offsetAt(lsp::Position{2, 0}), 10);
     assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Multi-character replace")
 {
@@ -601,7 +601,7 @@ TEST_CASE("Multi-character replace")
     CHECK_EQ(lm.version(), 1);
     CHECK_EQ(lm.offsetAt(lsp::Position{1, 0}), 4);
     assertValidLineNumbers(lm);
-};
+}
 
 TEST_CASE("Invalid update ranges")
 {
@@ -645,7 +645,7 @@ TEST_CASE("Invalid update ranges")
     // CHECK_EQ(document.version(), 2);
     // CHECK_EQ(document.lineCount(), 1);
     // assertValidLineNumbers(document);
-};
+}
 
 TEST_CASE("Insert at the end of the file")
 {
@@ -653,6 +653,6 @@ TEST_CASE("Insert at the end of the file")
     lm.update({{lsp::Range{{2, 0}, {2, 0}}, "\nbaz"}}, 1);
     CHECK_EQ(lm.getText(), "foo\nbar\nbaz");
     assertValidLineNumbers(lm);
-};
+}
 
 TEST_SUITE_END();

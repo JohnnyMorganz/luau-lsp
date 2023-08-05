@@ -145,7 +145,7 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                 // See if we have some remainders
                 if (workspaceIt != uris.end() || configIt != configs.end())
                 {
-                    sendLogMessage(lsp::MessageType::Warning, "erroneuous config provided");
+                    sendLogMessage(lsp::MessageType::Warning, "erroneous config provided");
                 }
             }
         }

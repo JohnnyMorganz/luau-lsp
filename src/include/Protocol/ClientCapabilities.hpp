@@ -32,7 +32,7 @@ struct DiagnosticClientCapabilities
      */
     bool relatedDocumentSupport = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport);
+NLOHMANN_DEFINE_OPTIONAL(DiagnosticClientCapabilities, dynamicRegistration, relatedDocumentSupport)
 
 
 struct CompletionItemTagSupportClientCapabilities
@@ -42,7 +42,7 @@ struct CompletionItemTagSupportClientCapabilities
      */
     std::vector<CompletionItemTag> valueSet{};
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionItemTagSupportClientCapabilities, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(CompletionItemTagSupportClientCapabilities, valueSet)
 
 struct CompletionItemResolveSupportClientCapabilities
 {
@@ -51,13 +51,13 @@ struct CompletionItemResolveSupportClientCapabilities
      */
     std::vector<std::string> properties{};
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionItemResolveSupportClientCapabilities, properties);
+NLOHMANN_DEFINE_OPTIONAL(CompletionItemResolveSupportClientCapabilities, properties)
 
 struct CompletionItemInsertTextModeSupportClientCapabilities
 {
     std::vector<InsertTextMode> valueSet{};
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionItemInsertTextModeSupportClientCapabilities, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(CompletionItemInsertTextModeSupportClientCapabilities, valueSet)
 
 struct CompletionItemClientCapabilities
 {
@@ -137,7 +137,7 @@ struct CompletionItemClientCapabilities
     bool labelDetailsSupport = false;
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItemClientCapabilities, snippetSupport, commitCharactersSupport, documentationFormat, deprecatedSupport,
-    preselectSupport, tagSupport, insertReplaceSupport, resolveSupport, insertTextModeSupport, labelDetailsSupport);
+    preselectSupport, tagSupport, insertReplaceSupport, resolveSupport, insertTextModeSupport, labelDetailsSupport)
 
 struct CompletionItemKindClientCapabilities
 {
@@ -153,7 +153,7 @@ struct CompletionItemKindClientCapabilities
      */
     std::vector<CompletionItemKind> valueSet{};
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionItemKindClientCapabilities, valueSet);
+NLOHMANN_DEFINE_OPTIONAL(CompletionItemKindClientCapabilities, valueSet)
 
 struct CompletionListClientCapabilities
 {
@@ -169,7 +169,7 @@ struct CompletionListClientCapabilities
      */
     std::vector<std::string> itemDefaults{};
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionListClientCapabilities, itemDefaults);
+NLOHMANN_DEFINE_OPTIONAL(CompletionListClientCapabilities, itemDefaults)
 
 struct CompletionClientCapabilities
 {
@@ -208,7 +208,7 @@ struct CompletionClientCapabilities
     std::optional<CompletionListClientCapabilities> completionList = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(
-    CompletionClientCapabilities, dynamicRegistration, completionItem, completionItemKind, contextSupport, insertTextMode, completionList);
+    CompletionClientCapabilities, dynamicRegistration, completionItem, completionItemKind, contextSupport, insertTextMode, completionList)
 
 struct CodeActionClientCapabilities
 {
@@ -297,11 +297,11 @@ struct CodeActionClientCapabilities
      */
     bool honorsChangeAnnotations = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport::CodeActionKindLiteralSupport, valueSet);
-NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport, codeActionKind);
-NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionResolveSupport, properties);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport::CodeActionKindLiteralSupport, valueSet)
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionLiteralSupport, codeActionKind)
+NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities::CodeActionResolveSupport, properties)
 NLOHMANN_DEFINE_OPTIONAL(CodeActionClientCapabilities, dynamicRegistration, codeActionLiteralSupport, isPreferredSupport, disabledSupport,
-    dataSupport, resolveSupport, honorsChangeAnnotations);
+    dataSupport, resolveSupport, honorsChangeAnnotations)
 
 struct FoldingRangeClientCapabilities
 {
@@ -360,9 +360,9 @@ struct FoldingRangeClientCapabilities
      */
     std::optional<FoldingRangeCapabilities> foldingRange = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeKindCapabilities, valueSet);
-NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeCapabilities, collapsedText);
-NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities, dynamicRegistration, rangeLimit, lineFoldingOnly, foldingRangeKind, foldingRange);
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeKindCapabilities, valueSet)
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities::FoldingRangeCapabilities, collapsedText)
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeClientCapabilities, dynamicRegistration, rangeLimit, lineFoldingOnly, foldingRangeKind, foldingRange)
 
 struct TextDocumentClientCapabilities
 {
@@ -385,7 +385,7 @@ struct TextDocumentClientCapabilities
      */
     std::optional<CodeActionClientCapabilities> codeAction = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, foldingRange, codeAction);
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentClientCapabilities, completion, diagnostic, foldingRange, codeAction)
 
 struct DidChangeConfigurationClientCapabilities
 {
@@ -394,7 +394,7 @@ struct DidChangeConfigurationClientCapabilities
      */
     bool dynamicRegistration = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeConfigurationClientCapabilities, dynamicRegistration);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeConfigurationClientCapabilities, dynamicRegistration)
 
 struct DidChangeWatchedFilesClientCapabilities
 {
@@ -413,7 +413,7 @@ struct DidChangeWatchedFilesClientCapabilities
      */
     bool relativePatternSupport = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesClientCapabilities, dynamicRegistration, relativePatternSupport);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesClientCapabilities, dynamicRegistration, relativePatternSupport)
 
 
 /**
@@ -434,7 +434,7 @@ struct InlayHintWorkspaceClientCapabilities
      */
     bool refreshSupport = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(InlayHintWorkspaceClientCapabilities, refreshSupport);
+NLOHMANN_DEFINE_OPTIONAL(InlayHintWorkspaceClientCapabilities, refreshSupport)
 
 struct DiagnosticWorkspaceClientCapabilities
 {
@@ -449,7 +449,7 @@ struct DiagnosticWorkspaceClientCapabilities
      */
     bool refreshSupport = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(DiagnosticWorkspaceClientCapabilities, refreshSupport);
+NLOHMANN_DEFINE_OPTIONAL(DiagnosticWorkspaceClientCapabilities, refreshSupport)
 
 struct ClientWorkspaceCapabilities
 {
@@ -486,7 +486,7 @@ struct ClientWorkspaceCapabilities
      */
     std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics);
+NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics)
 
 struct ClientGeneralCapabilities
 {
@@ -512,7 +512,7 @@ struct ClientGeneralCapabilities
      */
     std::optional<std::vector<PositionEncodingKind>> positionEncodings = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientGeneralCapabilities, positionEncodings);
+NLOHMANN_DEFINE_OPTIONAL(ClientGeneralCapabilities, positionEncodings)
 
 struct ClientCapabilities
 {
@@ -537,5 +537,5 @@ struct ClientCapabilities
     // notebook
     // window
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientCapabilities, textDocument, workspace, general);
+NLOHMANN_DEFINE_OPTIONAL(ClientCapabilities, textDocument, workspace, general)
 } // namespace lsp
