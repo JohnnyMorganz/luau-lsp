@@ -6,15 +6,6 @@
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
-Luau::AstArray<char> writeAstArray(const std::string& ss)
-{
-    Luau::AstArray<char> value;
-    value.data = const_cast<char*>(ss.c_str());
-    value.size = strlen(value.data);
-    return value;
-}
-
-
 TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 {
     WorkspaceFileResolver fileResolver;
@@ -118,8 +109,7 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
     WorkspaceFileResolver fileResolver;
 
     Luau::ModuleInfo baseContext{};
-    auto expr = Luau::AstExprConstantString(Luau::Location(), writeAstArray("Module.luau"));
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.luau");
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "/Module.luau");
@@ -130,8 +120,7 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extens
     WorkspaceFileResolver fileResolver;
 
     Luau::ModuleInfo baseContext{};
-    auto expr = Luau::AstExprConstantString(Luau::Location(), writeAstArray("Module.mod"));
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.mod");
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "/Module.mod.lua");

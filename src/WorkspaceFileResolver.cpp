@@ -255,54 +255,58 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
+{
+    std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+    auto filePath = basePath / requiredString;
+
+    // Check for custom require overrides
+    if (client)
+    {
+        auto config = client->getConfiguration(rootUri);
+
+        // Check file aliases
+        if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
+        {
+            filePath = resolvePath(it->second);
+        }
+        // Check directory aliases
+        else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
+        {
+            filePath = aliasedPath.value();
+        }
+    }
+
+    std::error_code ec;
+
+    // Handle "init.luau" files in a directory
+    if (std::filesystem::is_directory(filePath, ec))
+    {
+        filePath /= "init.luau";
+    }
+
+    // Add file endings
+    if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
+    {
+        auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
+        if (ec.value() != 0 || !std::filesystem::exists(fullFilePath))
+            // fall back to .lua if a module with .luau doesn't exist
+            filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
+        else
+            filePath = fullFilePath;
+    }
+
+    // URI-ify the file path so that its normalised (in particular, the drive letter)
+    return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
     if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
         std::string requiredString(expr->value.data, expr->value.size);
-
-        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
-        auto filePath = basePath / requiredString;
-
-        // Check for custom require overrides
-        if (client)
-        {
-            auto config = client->getConfiguration(rootUri);
-
-            // Check file aliases
-            if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
-            {
-                filePath = resolvePath(it->second);
-            }
-            // Check directory aliases
-            else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
-            {
-                filePath = aliasedPath.value();
-            }
-        }
-
-        std::error_code ec;
-
-        // Handle "init.luau" files in a directory
-        if (std::filesystem::is_directory(filePath, ec))
-        {
-            filePath /= "init.luau";
-        }
-
-        // Add file endings
-        if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
-        {
-            auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
-            if (ec.value() != 0 || !std::filesystem::exists(fullFilePath))
-                // fall back to .lua if a module with .luau doesn't exist
-                filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
-            else
-                filePath = fullFilePath;
-        }
-
-        // URI-ify the file path so that its normalised (in particular, the drive letter)
-        return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+        return resolveStringRequire(context, requiredString);
     }
     else if (auto* g = node->as<Luau::AstExprGlobal>())
     {

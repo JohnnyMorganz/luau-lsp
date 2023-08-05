@@ -113,6 +113,7 @@ struct WorkspaceFileResolver
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
 
+    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString);
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
 
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;
