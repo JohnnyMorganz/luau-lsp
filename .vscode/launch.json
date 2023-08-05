@@ -6,20 +6,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
-      ],
-      "env": {
-        "CMAKE_BUILD_TYPE": "${command:cmake.buildType}"
-      },
-      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-      "preLaunchTask": "Build Server and Extension"
-    },
-    {
       "name": "Run Extension Standalone",
       "type": "extensionHost",
       "request": "launch",
@@ -34,17 +20,29 @@
       }
     },
     {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
+      ],
+      "env": {
+        "CMAKE_BUILD_TYPE": "${command:cmake.buildType}"
+      },
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
+      "preLaunchTask": "Build Server and Extension"
+    },
+    {
       "name": "Extension Tests",
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code",
+        "--extensionTestsPath=${workspaceFolder}/editors/code/dist/test/suite/index",
+        "${workspaceFolder}/editors/code/testFixture"
       ],
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "${workspaceFolder}/dist/**/*.js"
-      ],
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
       "preLaunchTask": "tasks: watch-tests"
     },
     {
