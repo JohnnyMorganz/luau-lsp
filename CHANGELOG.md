@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.589
+- Changes to settings which require server restart will now reload the server instead of having to reload the whole VSCode workspace
 
 ### Fixed
 

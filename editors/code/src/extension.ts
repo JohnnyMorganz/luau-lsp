@@ -431,12 +431,12 @@ export async function activate(context: vscode.ExtensionContext) {
       await downloadApiDefinitions(context);
       vscode.window
         .showInformationMessage(
-          "API Types have been updated, reload workspace to take effect.",
-          "Reload Workspace"
+          "API Types have been updated, reload server to take effect.",
+          "Reload Language Server"
         )
         .then((command) => {
-          if (command === "Reload Workspace") {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
+          if (command === "Reload Language Server") {
+            vscode.commands.executeCommand("luau-lsp.reloadServer");
           }
         });
     })
@@ -511,23 +511,23 @@ export async function activate(context: vscode.ExtensionContext) {
       } else if (e.affectsConfiguration("luau-lsp.fflags")) {
         vscode.window
           .showInformationMessage(
-            "Luau FFlags have been changed, reload your workspace for this to take effect.",
-            "Reload Workspace"
+            "Luau FFlags have been changed, reload server for this to take effect.",
+            "Reload Language Server"
           )
           .then((command) => {
-            if (command === "Reload Workspace") {
-              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            if (command === "Reload Language Server") {
+              vscode.commands.executeCommand("luau-lsp.reloadServer");
             }
           });
       } else if (e.affectsConfiguration("luau-lsp.types")) {
         vscode.window
           .showInformationMessage(
-            "Luau type definitions have been changed, reload your workspace for this to take effect.",
-            "Reload Workspace"
+            "Luau type definitions have been changed, reload server for this to take effect.",
+            "Reload Language Server"
           )
           .then((command) => {
-            if (command === "Reload Workspace") {
-              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            if (command === "Reload Language Server") {
+              vscode.commands.executeCommand("luau-lsp.reloadServer");
             }
           });
       } else if (e.affectsConfiguration("luau-lsp.plugin")) {
