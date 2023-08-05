@@ -108,6 +108,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseServicesEdit(const lsp::Docum
 
     std::vector<lsp::TextEdit> edits;
     // We firstly delete all the previous services, as they will be added later
+    edits.reserve(visitor.serviceLineMap.size());
     for (const auto& [_, stat] : visitor.serviceLineMap)
         edits.emplace_back(lsp::TextEdit{{{stat->location.begin.line, 0}, {stat->location.begin.line + 1, 0}}, ""});
 

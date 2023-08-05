@@ -137,7 +137,7 @@ std::optional<std::filesystem::path> WorkspaceFileResolver::resolveToRealPath(co
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
-    Luau::SourceCode::Type sourceType = Luau::SourceCode::Module;
+    Luau::SourceCode::Type sourceType;
     std::optional<std::string> source;
 
     std::filesystem::path realFileName = name;
@@ -352,17 +352,13 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             }
             else if (func == "WaitForChild" || (func == "FindFirstChild" && call->args.size == 1)) // Don't allow recursive FFC
             {
-                if (context)
-                    return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
+                return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
             }
             else if (func == "FindFirstAncestor")
             {
-                if (context)
-                {
-                    auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
-                    if (ancestorName)
-                        return Luau::ModuleInfo{*ancestorName, context->optional};
-                }
+                auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
+                if (ancestorName)
+                    return Luau::ModuleInfo{*ancestorName, context->optional};
             }
         }
     }

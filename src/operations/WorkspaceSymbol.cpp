@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
@@ -32,7 +34,7 @@ struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
         symbol.kind = lsp::SymbolKind::Variable;
         symbol.location = {
             textDocument->uri(), {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)}};
-        symbol.containerName = containerName;
+        symbol.containerName = std::move(containerName);
         symbols.push_back(symbol);
     }
 
