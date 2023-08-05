@@ -25,7 +25,7 @@ const std::string WorkspaceFileResolver::normalisedUriString(const lsp::Document
 {
     auto uriString = uri.toString();
 
-// As windows/macOS is case insensitive, we lowercase the URI string for simplicitly and to handle
+// As windows/macOS is case-insensitive, we lowercase the URI string for simplicity and to handle
 // normalisation issues
 #if defined(_WIN32) || defined(__APPLE__)
     uriString = toLower(uriString);
@@ -230,7 +230,7 @@ std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Lu
 }
 
 // Resolve the string using a directory alias if present
-std::optional<std::filesystem::path> resolveDirectoryAlias(
+std::optional<std::filesystem::path> resolveDirectoryAlias(const std::filesystem::path& rootPath,
     const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str, bool includeExtension)
 {
     for (const auto& [alias, path] : directoryAliases)
@@ -240,7 +240,14 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
             std::filesystem::path directoryPath = path;
             std::string remainder = str.substr(alias.length());
 
+            // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
+            // absolute path
+            remainder.erase(0, remainder.find_first_not_of("/\\"));
+
             auto filePath = resolvePath(remainder.empty() ? directoryPath : directoryPath / remainder);
+            if (!filePath.is_absolute())
+                filePath = rootPath / filePath;
+
             if (includeExtension && !filePath.has_extension())
             {
                 if (std::filesystem::exists(filePath.replace_extension(".luau")))
@@ -271,7 +278,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(cons
             filePath = resolvePath(it->second);
         }
         // Check directory aliases
-        else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
+        else if (auto aliasedPath = resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, requiredString))
         {
             filePath = aliasedPath.value();
         }

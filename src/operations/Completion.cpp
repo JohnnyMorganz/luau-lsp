@@ -577,7 +577,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 // Check if it starts with a directory alias, otherwise resolve with require base path
                 std::filesystem::path currentDirectory =
-                    resolveDirectoryAlias(config.require.directoryAliases, contentsString, /* includeExtension = */ false)
+                    resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, contentsString, /* includeExtension = */ false)
                         .value_or(fileResolver.getRequireBasePath(moduleName).append(contentsString));
 
                 try
