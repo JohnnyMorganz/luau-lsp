@@ -516,10 +516,16 @@ declare function printidentity(prefix: string?)
 """
 
 # Hardcoded types after data types have been defined
+# TODO: we wanted to declare SharedTable as the following:
+# declare class SharedTable
+#   [string | number]: any
+# end
+# but it bumps the minimum version required for luau-lsp.
+# We will leave it defined as any for now, and improve it later when stability improves
+
 POST_DATATYPES_BASE = """
-declare class SharedTable
-    [string | number]: any
-end
+export type SharedTable = any
+export type OpenCloudModel = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,

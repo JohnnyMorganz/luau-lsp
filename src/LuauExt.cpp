@@ -593,7 +593,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
                 // Erase the metatable from the type to allow comparison
                 ctv->metatable = std::nullopt;
             }
-        };
+        }
 
         if (erase)
             it = globals.globalScope->exportedTypeBindings.erase(it);

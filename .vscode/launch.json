@@ -6,6 +6,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Run Extension Standalone",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
+      ],
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
+      "preLaunchTask": "npm: compile",
+      "env": {
+        "SERVER_PATH": "${input:binaryPath}"
+      }
+    },
+    {
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
@@ -20,28 +34,15 @@
       "preLaunchTask": "Build Server and Extension"
     },
     {
-      "name": "Run Extension Standalone",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
-      ],
-      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-      "preLaunchTask": "npm: compile"
-    },
-    {
       "name": "Extension Tests",
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code",
+        "--extensionTestsPath=${workspaceFolder}/editors/code/dist/test/suite/index",
+        "${workspaceFolder}/editors/code/testFixture"
       ],
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "${workspaceFolder}/dist/**/*.js"
-      ],
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
       "preLaunchTask": "tasks: watch-tests"
     },
     {
@@ -49,6 +50,22 @@
       "type": "cppvsdbg",
       "processId": "${command:pickProcess}",
       "request": "attach"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "binaryPath",
+      "type": "pickString",
+      "description": "Path to server binary",
+      "default": "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
+      "options": [
+        "cmake-build-debug-visual-studio/luau-lsp.exe",
+        "cmake-build-release-visual-studio/luau-lsp.exe",
+        "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
+        "cmake-build-debug/luau-lsp.exe",
+        "cmake-build-release/luau-lsp.exe",
+        "cmake-build-relwithdebinfo/luau-lsp.exe"
+      ]
     }
   ]
 }

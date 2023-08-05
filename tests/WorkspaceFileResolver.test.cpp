@@ -104,4 +104,26 @@ TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
     CHECK_EQ(resolveDirectoryAlias(directoryAliases, "@test3/bar"), std::nullopt);
 }
 
+TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
+{
+    WorkspaceFileResolver fileResolver;
+
+    Luau::ModuleInfo baseContext{};
+    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.luau");
+
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(resolved->name, "/Module.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
+{
+    WorkspaceFileResolver fileResolver;
+
+    Luau::ModuleInfo baseContext{};
+    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.mod");
+
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(resolved->name, "/Module.mod.lua");
+}
+
 TEST_SUITE_END();

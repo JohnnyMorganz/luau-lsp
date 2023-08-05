@@ -558,7 +558,7 @@
         },
         {
           "begin": "\\b(typeof)\\b\\s*\\(",
-          "end": "\\)(?![.,:\\)])",
+          "end": "\\)(?![.:\\)])",
           "beginCaptures": {
             "1": {
               "name": "support.function.luau"

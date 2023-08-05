@@ -11,7 +11,7 @@ struct ClientDiagnosticsConfiguration
     /// Whether to use expressive DM types in the diagnostics typechecker
     bool strictDatamodelTypes = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes)
 
 struct ClientSourcemapConfiguration
 {

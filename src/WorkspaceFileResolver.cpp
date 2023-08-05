@@ -137,7 +137,7 @@ std::optional<std::filesystem::path> WorkspaceFileResolver::resolveToRealPath(co
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
-    Luau::SourceCode::Type sourceType = Luau::SourceCode::Module;
+    Luau::SourceCode::Type sourceType;
     std::optional<std::string> source;
 
     std::filesystem::path realFileName = name;
@@ -255,51 +255,58 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
+{
+    std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+    auto filePath = basePath / requiredString;
+
+    // Check for custom require overrides
+    if (client)
+    {
+        auto config = client->getConfiguration(rootUri);
+
+        // Check file aliases
+        if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
+        {
+            filePath = resolvePath(it->second);
+        }
+        // Check directory aliases
+        else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
+        {
+            filePath = aliasedPath.value();
+        }
+    }
+
+    std::error_code ec;
+
+    // Handle "init.luau" files in a directory
+    if (std::filesystem::is_directory(filePath, ec))
+    {
+        filePath /= "init.luau";
+    }
+
+    // Add file endings
+    if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
+    {
+        auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
+        if (ec.value() != 0 || !std::filesystem::exists(fullFilePath))
+            // fall back to .lua if a module with .luau doesn't exist
+            filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
+        else
+            filePath = fullFilePath;
+    }
+
+    // URI-ify the file path so that its normalised (in particular, the drive letter)
+    return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
     if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
         std::string requiredString(expr->value.data, expr->value.size);
-
-        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
-        auto filePath = basePath / requiredString;
-
-        // Check for custom require overrides
-        if (client)
-        {
-            auto config = client->getConfiguration(rootUri);
-
-            // Check file aliases
-            if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
-            {
-                filePath = resolvePath(it->second);
-            }
-            // Check directory aliases
-            else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
-            {
-                filePath = aliasedPath.value();
-            }
-        }
-
-        std::error_code ec;
-
-        // Handle "init.luau" files in a directory
-        if (std::filesystem::is_directory(filePath, ec))
-        {
-            filePath /= "init.luau";
-        }
-
-        // Add file endings
-        auto fullFilePath = std::filesystem::weakly_canonical(filePath.replace_extension(".luau"), ec);
-        if (ec.value() != 0 || !std::filesystem::exists(filePath))
-        {
-            // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(filePath.replace_extension(".lua"), ec);
-        }
-
-        // URI-ify the file path so that its normalised (in particular, the drive letter)
-        return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+        return resolveStringRequire(context, requiredString);
     }
     else if (auto* g = node->as<Luau::AstExprGlobal>())
     {
@@ -349,17 +356,13 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             }
             else if (func == "WaitForChild" || (func == "FindFirstChild" && call->args.size == 1)) // Don't allow recursive FFC
             {
-                if (context)
-                    return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
+                return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
             }
             else if (func == "FindFirstAncestor")
             {
-                if (context)
-                {
-                    auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
-                    if (ancestorName)
-                        return Luau::ModuleInfo{*ancestorName, context->optional};
-                }
+                auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
+                if (ancestorName)
+                    return Luau::ModuleInfo{*ancestorName, context->optional};
             }
         }
     }

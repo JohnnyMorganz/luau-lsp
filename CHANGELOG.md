@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added command `luau-lsp.reloadServer` to restart the language server without having to reload the workspace
+
+### Changed
+
+- Sync to upstream Luau 0.589
+- Changes to settings which require server restart will now reload the server instead of having to reload the whole VSCode workspace
+
+### Fixed
+
+- Reverted change to type checking in 1.22.0 that reduced memory footprint. This should resolve the problems where diagnostics aren't showing with an InternalCompilerError, at the cost of increased memory use if `luau-lsp.diagnostics.workspace` is enabled.
+- Fixed string require resolution when the string had a secondary extension: `Module.mod` will be resolved as `Module.mod.luau`
+
 ## [1.22.1] - 2023-07-15
 
 ### Changed

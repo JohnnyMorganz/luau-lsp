@@ -70,7 +70,7 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     if (verbose && traceMode == lsp::TraceValue::Verbose)
         params["verbose"] = verbose.value();
     sendNotification("$/logTrace", params);
-};
+}
 
 void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
 {
