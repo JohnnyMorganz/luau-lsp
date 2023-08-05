@@ -7641,7 +7641,7 @@ end
 
 declare class Seat extends Part
 	Disabled: boolean
-	Occupant: Humanoid
+	Occupant: Humanoid?
 	function Sit(self, humanoid: Humanoid): nil
 end
 
@@ -7741,7 +7741,7 @@ declare class VehicleSeat extends BasePart
 	Disabled: boolean
 	HeadsUpDisplay: boolean
 	MaxSpeed: number
-	Occupant: Humanoid
+	Occupant: Humanoid?
 	Steer: number
 	SteerFloat: number
 	Throttle: number
