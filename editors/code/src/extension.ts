@@ -13,7 +13,7 @@ import { Server } from "http";
 import express from "express";
 import { spawn, ChildProcess } from "child_process";
 
-let client: LanguageClient;
+let client: LanguageClient | undefined = undefined;
 let pluginServer: Server | undefined = undefined;
 
 const CURRENT_VERSION_TXT =
@@ -213,7 +213,8 @@ const startSourcemapGeneration = async (
     return;
   }
 
-  client.info(
+  const loggingFunc = client ? client.info : console.log;
+  loggingFunc(
     `Starting sourcemap generation for ${
       workspaceFolder.name
     } (${workspaceFolder.uri.toString(true)})`
@@ -251,9 +252,7 @@ const startSourcemapGeneration = async (
       return;
     }
     if (code !== 0) {
-      let output = `Failed to update sourcemap for ${
-        workspaceFolder.name
-      } (${workspaceFolder.uri.toString(true)}): `;
+      let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
 
       if (stderr.includes("Found argument 'sourcemap' which wasn't expected")) {
         output +=
@@ -262,12 +261,11 @@ const startSourcemapGeneration = async (
         stderr.includes("Found argument '--watch' which wasn't expected")
       ) {
         output +=
-          "Your Rojo version doesn't have sourcemap wathcing support. Upgrade to Rojo v7.3.0+";
+          "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
       } else {
         output += stderr;
       }
 
-      // TODO: restart process?
       vscode.window.showWarningMessage(output, "Retry").then((value) => {
         if (value === "Retry") {
           startSourcemapGeneration(workspaceFolder);
@@ -290,6 +288,10 @@ const startPluginServer = async () => {
   );
 
   app.post("/full", (req, res) => {
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
     if (req.body.tree) {
       client.sendNotification("$/plugin/full", req.body.tree);
       res.sendStatus(200);
@@ -299,6 +301,10 @@ const startPluginServer = async () => {
   });
 
   app.post("/clear", (_req, res) => {
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
     client.sendNotification("$/plugin/clear");
     res.sendStatus(200);
   });
