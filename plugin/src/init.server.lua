@@ -58,10 +58,6 @@ end
 
 LoadSettings()
 
-SettingsButton.Click:Connect(function()
-	plugin:OpenScript(SettingsModule)
-end)
-
 --#endregion
 
 --#region Connect
@@ -82,6 +78,12 @@ type EncodedInstance = {
 	ClassName: string,
 	Children: { EncodedInstance },
 }
+
+local wasConnected
+SettingsButton.Click:Connect(function()
+	plugin:OpenScript(SettingsModule)
+	wasConnected = connected.Value
+end)
 
 local function filterServices(child: Instance): boolean
 	return not not table.find(Settings.include, child)
@@ -110,8 +112,7 @@ local function cleanup()
 	end
 	connected.Value = false
 end
-
-local function sendFullDMInfo()
+local function sendFullDMInfo(isSilent: boolean?)
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
@@ -132,14 +133,18 @@ local function sendFullDMInfo()
 		warn("[Luau Language Server] Sending full DM info failed: " .. result.StatusCode .. ": " .. result.Body)
 		connected.Value = false
 	else
-		print("[Luau Language Server] Listening for DataModel changes")
+		if not isSilent then
+			print("[Luau Language Server] Listening for DataModel changes")
+		end
 		connected.Value = true
 	end
 end
 
-local function watchChanges()
+local function watchChanges(isSilent)
 	if connected.Value or Settings == nil then
-		warn("[Luau Language Server] Connecting to server failed: invalid settings")
+		if not isSilent then
+			warn("[Luau Language Server] Connecting to server failed: invalid settings")
+		end
 		return
 	end
 	cleanup()
@@ -156,16 +161,20 @@ local function watchChanges()
 	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
 
-	sendFullDMInfo()
+	sendFullDMInfo(isSilent)
 end
 
-function connectServer()
+function connectServer(isSilent: boolean?)
 	if connected.Value then
-		print("[Luau Language Server] Disconnecting from DataModel changes")
+		if not isSilent then
+			print("[Luau Language Server] Disconnecting from DataModel changes")
+		end
 		cleanup()
 	else
-		print("[Luau Language Server] Connecting to server")
-		watchChanges()
+		if not isSilent then
+			print("[Luau Language Server] Connecting to server")
+		end
+		watchChanges(isSilent)
 	end
 end
 
@@ -183,10 +192,12 @@ end
 
 SettingsModule.Changed:Connect(function()
 	if connected.Value then
-		print("[Luau Language Server] Disconnecting from DataModel changes")
 		cleanup()
 	end
 	LoadSettings()
+	if wasConnected then
+		connectServer(true) --isSilent mode
+	end
 end)
 
 --#endregion
