@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.22.0",
+  "version": "1.23.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -28,10 +28,7 @@
     "roblox"
   ],
   "activationEvents": [
-    "onLanguage:lua",
-    "onLanguage:luau",
-    "onCommand:luau-lsp.updateApi",
-    "onCommand:luau-lsp.regenerateSourcemap"
+    "onLanguage:luau"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -84,6 +81,10 @@
       {
         "command": "luau-lsp.regenerateSourcemap",
         "title": "Luau: Regenerate Rojo Sourcemap"
+      },
+      {
+        "command": "luau-lsp.reloadServer",
+        "title": "Luau: Reload Language Server"
       }
     ],
     "configuration": {

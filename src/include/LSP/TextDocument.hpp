@@ -48,8 +48,6 @@ public:
     Luau::Position convertPosition(const lsp::Position& position) const;
     lsp::Position convertPosition(const Luau::Position& position) const;
 
-    bool applyChange(const lsp::TextDocumentContentChangeEvent& change);
-
     void update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version);
 
     const std::vector<size_t>& getLineOffsets() const;

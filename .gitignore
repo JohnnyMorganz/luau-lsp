@@ -2,6 +2,14 @@
 .vscode/settings.json
 /.vs
 .cache
+.idea
+cmake-build-debug/
+cmake-build-release/
+cmake-build-relwithdebinfo/
+cmake-build-debug-visual-studio/
+cmake-build-release-visual-studio/
+cmake-build-relwithdebinfo-visual-studio/
+CMakeFiles
 
 # Prerequisites
 *.d

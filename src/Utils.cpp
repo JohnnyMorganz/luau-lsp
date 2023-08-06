@@ -52,7 +52,7 @@ std::string convertToScriptPath(const std::string& path)
     for (auto it = p.begin(); it != p.end(); ++it)
     {
         auto str = it->string();
-        if (str.find(" ") != std::string::npos)
+        if (str.find(' ') != std::string::npos)
             output += "[\"" + str + "\"]";
         else if (str == ".")
         {

@@ -65,7 +65,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
     auto position = document->convertPosition(params.position);
 
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
@@ -466,6 +466,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     bool isGetService = false;
 
+    // We must perform check before autocompletion
+    checkStrict(moduleName, /* forAutocomplete: */ true);
+
     auto position = textDocument->convertPosition(params.position);
     auto result = Luau::autocomplete(frontend, moduleName, position,
         [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
@@ -574,7 +577,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 // Check if it starts with a directory alias, otherwise resolve with require base path
                 std::filesystem::path currentDirectory =
-                    resolveDirectoryAlias(config.require.directoryAliases, contentsString, /* includeExtension = */ false)
+                    resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, contentsString, /* includeExtension = */ false)
                         .value_or(fileResolver.getRequireBasePath(moduleName).append(contentsString));
 
                 try
@@ -686,6 +689,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         case Luau::AutocompleteEntryKind::Module:
             item.kind = lsp::CompletionItemKind::Module;
             break;
+        case Luau::AutocompleteEntryKind::GeneratedFunction:
+            item.kind = lsp::CompletionItemKind::Function;
+            item.insertText = entry.insertText;
         }
 
         // Special cases: Files and directory
@@ -768,7 +774,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.kind = lsp::CompletionItemKind::Function;
 
             // Try to infer more type info about the entry to provide better suggestion info
-            if (auto ftv = Luau::get<Luau::FunctionType>(id))
+            if (auto ftv = Luau::get<Luau::FunctionType>(id); ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction)
             {
                 item.kind = lsp::CompletionItemKind::Function;
 
@@ -790,8 +796,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
                         argName = ftv->argNames.at(argIndex)->name;
 
-                    // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                    if (argIndex == 0 && (ftv->hasSelf || argName == "self"))
+                    if (argIndex == 0 && entry.indexedWithSelf)
                         continue;
 
                     // If the rest of the arguments are optional, don't include in filled call arguments

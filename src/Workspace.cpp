@@ -1,7 +1,6 @@
 #include "LSP/Workspace.hpp"
 
 #include <iostream>
-#include <climits>
 
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
@@ -74,7 +73,7 @@ void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
 bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
-    // We want to test globs against a relative path to workspace, since thats what makes most sense
+    // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePath = path.lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
@@ -108,9 +107,22 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 // Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
+// NOTE: use `frontend.parse` if you do not care about typechecking
+// TODO: THIS IS CURRENTLY UNUSED DUE TO RETAINFULLTYPEGRAPHS=FALSE BUG - EITHER CLIP OR USE IT
 Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
 {
-    return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
+    try
+    {
+        return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
+    }
+    catch (Luau::InternalCompilerError& err)
+    {
+        // TODO: RecursionLimitException is leaking out of frontend.check
+        // https://github.com/Roblox/luau/issues/975
+        // Remove this try-catch block once the above issue is fixed
+        client->sendLogMessage(lsp::MessageType::Warning, "Luau InternalCompilerError caught in " + moduleName + ": " + err.what());
+        return Luau::CheckResult{};
+    }
 }
 
 // Runs `Frontend::check` on the module whilst retaining the type graph.
@@ -158,10 +170,9 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             {
                 auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
 
-                // Check the module, discard the type graph
-                // Since we don't care about types, we don't need to do it for autocomplete
-                // TODO: can we get rid of the check, and only parse the require graph?
-                checkSimple(moduleName);
+                // Parse the module to infer require data
+                // We do not perform any type checking here
+                frontend.parse(moduleName);
 
                 indexCount += 1;
             }

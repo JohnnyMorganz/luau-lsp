@@ -25,7 +25,7 @@ const std::string WorkspaceFileResolver::normalisedUriString(const lsp::Document
 {
     auto uriString = uri.toString();
 
-// As windows/macOS is case insensitive, we lowercase the URI string for simplicitly and to handle
+// As windows/macOS is case-insensitive, we lowercase the URI string for simplicity and to handle
 // normalisation issues
 #if defined(_WIN32) || defined(__APPLE__)
     uriString = toLower(uriString);
@@ -137,7 +137,7 @@ std::optional<std::filesystem::path> WorkspaceFileResolver::resolveToRealPath(co
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
-    Luau::SourceCode::Type sourceType = Luau::SourceCode::Module;
+    Luau::SourceCode::Type sourceType;
     std::optional<std::string> source;
 
     std::filesystem::path realFileName = name;
@@ -173,7 +173,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
             catch (const std::exception& e)
             {
                 // TODO: display diagnostic?
-                std::cerr << "Failed to load JSON module: " << realFileName.generic_string() << " - " << e.what() << std::endl;
+                std::cerr << "Failed to load JSON module: " << realFileName.generic_string() << " - " << e.what() << '\n';
                 return std::nullopt;
             }
         }
@@ -230,7 +230,7 @@ std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Lu
 }
 
 // Resolve the string using a directory alias if present
-std::optional<std::filesystem::path> resolveDirectoryAlias(
+std::optional<std::filesystem::path> resolveDirectoryAlias(const std::filesystem::path& rootPath,
     const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str, bool includeExtension)
 {
     for (const auto& [alias, path] : directoryAliases)
@@ -240,7 +240,14 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
             std::filesystem::path directoryPath = path;
             std::string remainder = str.substr(alias.length());
 
+            // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
+            // absolute path
+            remainder.erase(0, remainder.find_first_not_of("/\\"));
+
             auto filePath = resolvePath(remainder.empty() ? directoryPath : directoryPath / remainder);
+            if (!filePath.is_absolute())
+                filePath = rootPath / filePath;
+
             if (includeExtension && !filePath.has_extension())
             {
                 if (std::filesystem::exists(filePath.replace_extension(".luau")))
@@ -255,51 +262,58 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
+{
+    std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+    auto filePath = basePath / requiredString;
+
+    // Check for custom require overrides
+    if (client)
+    {
+        auto config = client->getConfiguration(rootUri);
+
+        // Check file aliases
+        if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
+        {
+            filePath = resolvePath(it->second);
+        }
+        // Check directory aliases
+        else if (auto aliasedPath = resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, requiredString))
+        {
+            filePath = aliasedPath.value();
+        }
+    }
+
+    std::error_code ec;
+
+    // Handle "init.luau" files in a directory
+    if (std::filesystem::is_directory(filePath, ec))
+    {
+        filePath /= "init.luau";
+    }
+
+    // Add file endings
+    if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
+    {
+        auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
+        if (ec.value() != 0 || !std::filesystem::exists(fullFilePath))
+            // fall back to .lua if a module with .luau doesn't exist
+            filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
+        else
+            filePath = fullFilePath;
+    }
+
+    // URI-ify the file path so that its normalised (in particular, the drive letter)
+    return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+}
+
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
 {
     // Handle require("path") for compatibility
     if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
         std::string requiredString(expr->value.data, expr->value.size);
-
-        std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
-        auto filePath = basePath / requiredString;
-
-        // Check for custom require overrides
-        if (client)
-        {
-            auto config = client->getConfiguration(rootUri);
-
-            // Check file aliases
-            if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
-            {
-                filePath = resolvePath(it->second);
-            }
-            // Check directory aliases
-            else if (auto aliasedPath = resolveDirectoryAlias(config.require.directoryAliases, requiredString))
-            {
-                filePath = aliasedPath.value();
-            }
-        }
-
-        std::error_code ec;
-
-        // Handle "init.luau" files in a directory
-        if (std::filesystem::is_directory(filePath, ec))
-        {
-            filePath /= "init.luau";
-        }
-
-        // Add file endings
-        auto fullFilePath = std::filesystem::weakly_canonical(filePath.replace_extension(".luau"), ec);
-        if (ec.value() != 0 || !std::filesystem::exists(filePath))
-        {
-            // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(filePath.replace_extension(".lua"), ec);
-        }
-
-        // URI-ify the file path so that its normalised (in particular, the drive letter)
-        return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+        return resolveStringRequire(context, requiredString);
     }
     else if (auto* g = node->as<Luau::AstExprGlobal>())
     {
@@ -349,17 +363,13 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau:
             }
             else if (func == "WaitForChild" || (func == "FindFirstChild" && call->args.size == 1)) // Don't allow recursive FFC
             {
-                if (context)
-                    return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
+                return Luau::ModuleInfo{mapContext(context->name) + '/' + std::string(index->value.data, index->value.size), context->optional};
             }
             else if (func == "FindFirstAncestor")
             {
-                if (context)
-                {
-                    auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
-                    if (ancestorName)
-                        return Luau::ModuleInfo{*ancestorName, context->optional};
-                }
+                auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
+                if (ancestorName)
+                    return Luau::ModuleInfo{*ancestorName, context->optional};
             }
         }
     }
@@ -478,7 +488,7 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
             }
             else
             {
-                std::cerr << "Attempted to update plugin information for a non-DM instance" << std::endl;
+                std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
             }
         }
 
@@ -489,6 +499,6 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
     catch (const std::exception& e)
     {
         // TODO: log message?
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << '\n';
     }
 }

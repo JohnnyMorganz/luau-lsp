@@ -2,10 +2,8 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/ColorProvider.hpp"
 
-#include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
 #include "LSP/LuauExt.hpp"
-#include "LSP/Utils.hpp"
 
 #include <cmath>
 
@@ -237,8 +235,7 @@ lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColor
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    // TODO: we only need parsing and no type checking
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

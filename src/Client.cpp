@@ -70,7 +70,7 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     if (verbose && traceMode == lsp::TraceValue::Verbose)
         params["verbose"] = verbose.value();
     sendNotification("$/logTrace", params);
-};
+}
 
 void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
 {
@@ -145,7 +145,7 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                 // See if we have some remainders
                 if (workspaceIt != uris.end() || configIt != configs.end())
                 {
-                    sendLogMessage(lsp::MessageType::Warning, "erroneuous config provided");
+                    sendLogMessage(lsp::MessageType::Warning, "erroneous config provided");
                 }
             }
         }

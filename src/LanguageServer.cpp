@@ -186,7 +186,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     // }
     else if (method == "textDocument/semanticTokens/full")
     {
-        response = semanticTokens(REQUIRED_PARAMS(baseParams, "textDocument/semanticTokns/full"));
+        response = semanticTokens(REQUIRED_PARAMS(baseParams, "textDocument/semanticTokens/full"));
     }
     else if (method == "textDocument/inlayHint")
     {
@@ -202,28 +202,28 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/prepareCallHierarchy")
     {
-        ASSERT_PARAMS(baseParams, "textDocument/prepareCallHierarchy");
+        ASSERT_PARAMS(baseParams, "textDocument/prepareCallHierarchy")
         auto params = baseParams->get<lsp::CallHierarchyPrepareParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->prepareCallHierarchy(params);
     }
     else if (method == "callHierarchy/incomingCalls")
     {
-        ASSERT_PARAMS(baseParams, "callHierarchy/incomingCalls");
+        ASSERT_PARAMS(baseParams, "callHierarchy/incomingCalls")
         auto params = baseParams->get<lsp::CallHierarchyIncomingCallsParams>();
         auto workspace = findWorkspace(params.item.uri);
         response = workspace->callHierarchyIncomingCalls(params);
     }
     else if (method == "callHierarchy/outgoingCalls")
     {
-        ASSERT_PARAMS(baseParams, "callHierarchy/outgoingCalls");
+        ASSERT_PARAMS(baseParams, "callHierarchy/outgoingCalls")
         auto params = baseParams->get<lsp::CallHierarchyOutgoingCallsParams>();
         auto workspace = findWorkspace(params.item.uri);
         response = workspace->callHierarchyOutgoingCalls(params);
     }
     else if (method == "textDocument/foldingRange")
     {
-        ASSERT_PARAMS(baseParams, "textDocument/foldingRange");
+        ASSERT_PARAMS(baseParams, "textDocument/foldingRange")
         auto params = baseParams->get<lsp::FoldingRangeParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->foldingRange(params);
@@ -248,7 +248,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "workspace/symbol")
     {
-        ASSERT_PARAMS(baseParams, "workspace/symbol");
+        ASSERT_PARAMS(baseParams, "workspace/symbol")
         auto params = baseParams->get<lsp::WorkspaceSymbolParams>();
 
         std::vector<lsp::WorkspaceSymbol> result;
@@ -271,7 +271,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
 void LanguageServer::onNotification(const std::string& method, std::optional<json> params)
 {
     // Handle notification
-    // If a notification is sent before the server is initilized or after a shutdown is requested (unless its exit), we should
+    // If a notification is sent before the server is initialized or after a shutdown is requested (unless its exit), we should
     // drop it
     if ((!isInitialized || shutdownRequested) && method != "exit")
         return;
@@ -731,7 +731,7 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
             }
 
             // Index the workspace on changes
-            // NOTE: we aren't indexing for types, only for the require graph right now
+            // We only update the require graph. We do not perform type checking
             if (config.index.enabled && workspace->isConfigured)
             {
                 auto moduleName = workspace->fileResolver.getModuleName(change.uri);
@@ -740,11 +740,11 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
                 workspace->frontend.markDirty(moduleName, &markedDirty);
 
                 if (change.type == lsp::FileChangeType::Created)
-                    workspace->checkSimple(moduleName);
+                    workspace->frontend.parse(moduleName);
 
                 // Re-check the reverse dependencies
                 for (const auto& moduleName : markedDirty)
-                    workspace->checkSimple(moduleName);
+                    workspace->frontend.parse(moduleName);
             }
 
             // Clear the diagnostics for the file in case it was not managed

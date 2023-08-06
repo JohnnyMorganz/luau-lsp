@@ -9,11 +9,11 @@ import {
   LanguageClientOptions,
 } from "vscode-languageclient/node";
 
-import spawn from "./spawn";
 import { Server } from "http";
 import express from "express";
+import { spawn, ChildProcess } from "child_process";
 
-let client: LanguageClient;
+let client: LanguageClient | undefined = undefined;
 let pluginServer: Server | undefined = undefined;
 
 const CURRENT_VERSION_TXT =
@@ -124,100 +124,155 @@ const getFFlags = async () => {
   );
 };
 
-const updateSourceMap = async (workspaceFolder: vscode.WorkspaceFolder) => {
+const getRojoProjectFile = async (
+  workspaceFolder: vscode.WorkspaceFolder,
+  config: vscode.WorkspaceConfiguration
+) => {
+  let projectFile =
+    config.get<string>("rojoProjectFile") ?? "default.project.json";
+  const projectFileUri = resolveUri(workspaceFolder.uri, projectFile);
+
+  if (await exists(projectFileUri)) {
+    return projectFile;
+  }
+
+  // Search if there is a *.project.json file present in this workspace.
+  const foundProjectFiles = await vscode.workspace.findFiles(
+    new vscode.RelativePattern(workspaceFolder.uri, "*.project.json")
+  );
+
+  if (foundProjectFiles.length === 0) {
+    vscode.window.showWarningMessage(
+      `Unable to find project file ${projectFile}. Please configure a file in settings`
+    );
+    return undefined;
+  } else if (foundProjectFiles.length === 1) {
+    const fileName = basenameUri(foundProjectFiles[0]);
+    const option = await vscode.window.showWarningMessage(
+      `Unable to find project file ${projectFile}. We found ${fileName} available`,
+      `Set project file to ${fileName}`,
+      "Cancel"
+    );
+
+    if (option === `Set project file to ${fileName}`) {
+      config.update("rojoProjectFile", fileName);
+      return fileName;
+    } else {
+      return undefined;
+    }
+  } else {
+    const option = await vscode.window.showWarningMessage(
+      `Unable to find project file ${projectFile}. We found ${foundProjectFiles.length} files available`,
+      "Select project file",
+      "Cancel"
+    );
+    if (option === "Select project file") {
+      const files = foundProjectFiles.map((file) => basenameUri(file));
+      const selectedFile = await vscode.window.showQuickPick(files);
+      if (selectedFile) {
+        config.update("rojoProjectFile", selectedFile);
+        selectedFile;
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }
+
+  return undefined;
+};
+
+const sourcemapGeneratorProcesses: Map<vscode.WorkspaceFolder, ChildProcess> =
+  new Map();
+
+const stopSourcemapGeneration = async (
+  workspaceFolder: vscode.WorkspaceFolder
+) => {
+  const process = sourcemapGeneratorProcesses.get(workspaceFolder);
+  if (process) {
+    process.kill();
+  }
+  sourcemapGeneratorProcesses.delete(workspaceFolder);
+};
+
+const startSourcemapGeneration = async (
+  workspaceFolder: vscode.WorkspaceFolder
+) => {
   const config = vscode.workspace.getConfiguration(
     "luau-lsp.sourcemap",
     workspaceFolder
   );
   if (!config.get<boolean>("enabled") || !config.get<boolean>("autogenerate")) {
-    // TODO: maybe we should disconnect the event instead of early returning? Bit more messy
     return;
   }
 
   // Check if the project file exists
-  let projectFile =
-    config.get<string>("rojoProjectFile") ?? "default.project.json";
-  const projectFileUri = resolveUri(workspaceFolder.uri, projectFile);
-
-  if (!(await exists(projectFileUri))) {
-    // Search if there is a *.project.json file present in this workspace.
-    const foundProjectFiles = await vscode.workspace.findFiles(
-      new vscode.RelativePattern(workspaceFolder.uri, "*.project.json")
-    );
-
-    if (foundProjectFiles.length === 0) {
-      vscode.window.showWarningMessage(
-        `Unable to find project file ${projectFile}. Please configure a file in settings`
-      );
-      return;
-    } else if (foundProjectFiles.length === 1) {
-      const fileName = basenameUri(foundProjectFiles[0]);
-      const option = await vscode.window.showWarningMessage(
-        `Unable to find project file ${projectFile}. We found ${fileName} available`,
-        `Set project file to ${fileName}`,
-        "Cancel"
-      );
-
-      if (option === `Set project file to ${fileName}`) {
-        config.update("rojoProjectFile", fileName);
-        projectFile = fileName;
-      } else {
-        return;
-      }
-    } else {
-      const option = await vscode.window.showWarningMessage(
-        `Unable to find project file ${projectFile}. We found ${foundProjectFiles.length} files available`,
-        "Select project file",
-        "Cancel"
-      );
-      if (option === "Select project file") {
-        const files = foundProjectFiles.map((file) => basenameUri(file));
-        const selectedFile = await vscode.window.showQuickPick(files);
-        if (selectedFile) {
-          config.update("rojoProjectFile", selectedFile);
-          projectFile = selectedFile;
-        } else {
-          return;
-        }
-      } else {
-        return;
-      }
-    }
+  const projectFile = await getRojoProjectFile(workspaceFolder, config);
+  if (!projectFile) {
+    return;
   }
 
-  client.info(
-    `Regenerating sourcemap for ${
+  const loggingFunc = client ? client.info : console.log;
+  loggingFunc(
+    `Starting sourcemap generation for ${
       workspaceFolder.name
     } (${workspaceFolder.uri.toString(true)})`
   );
-  const args = ["sourcemap", projectFile, "--output", "sourcemap.json"];
+
+  const workspacePath = workspaceFolder.uri.fsPath;
+  const rojoPath = config.get<string>("rojoPath") ?? "rojo";
+  const args = [
+    "sourcemap",
+    projectFile,
+    "--watch",
+    "--output",
+    "sourcemap.json",
+  ];
   if (config.get<boolean>("includeNonScripts")) {
     args.push("--include-non-scripts");
   }
 
-  await spawn(config.get<string>("rojoPath") ?? "rojo", args, {
-    cwd: workspaceFolder.uri.fsPath,
-  }).catch((err) => {
-    let output = `Failed to update sourcemap for ${
-      workspaceFolder.name
-    } (${workspaceFolder.uri.toString(true)}): `;
-
-    if (
-      err.reason.includes("Found argument 'sourcemap' which wasn't expected")
-    ) {
-      output += `Your Rojo version doesn't have sourcemap support. Upgrade to Rojo v7.1.0+`;
-    } else {
-      output += err.reason;
-    }
-
-    vscode.window.showWarningMessage(output);
+  const childProcess = spawn(rojoPath, args, {
+    cwd: workspacePath,
+    env: process.env,
+    shell: true,
   });
 
-  client.info(
-    `Sourcemap regenerated for ${
-      workspaceFolder.name
-    } (${workspaceFolder.uri.toString(true)})`
-  );
+  sourcemapGeneratorProcesses.set(workspaceFolder, childProcess);
+
+  let stderr = "";
+  childProcess.stderr.on("data", (data) => {
+    stderr += data;
+  });
+
+  childProcess.on("close", (code, signal) => {
+    sourcemapGeneratorProcesses.delete(workspaceFolder);
+    if (childProcess.killed) {
+      return;
+    }
+    if (code !== 0) {
+      let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
+
+      if (stderr.includes("Found argument 'sourcemap' which wasn't expected")) {
+        output +=
+          "Your Rojo version doesn't have sourcemap support. Upgrade to Rojo v7.3.0+";
+      } else if (
+        stderr.includes("Found argument '--watch' which wasn't expected")
+      ) {
+        output +=
+          "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
+      } else {
+        output += stderr;
+      }
+
+      vscode.window.showWarningMessage(output, "Retry").then((value) => {
+        if (value === "Retry") {
+          startSourcemapGeneration(workspaceFolder);
+        }
+      });
+    }
+  });
 };
 
 const startPluginServer = async () => {
@@ -233,6 +288,10 @@ const startPluginServer = async () => {
   );
 
   app.post("/full", (req, res) => {
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
     if (req.body.tree) {
       client.sendNotification("$/plugin/full", req.body.tree);
       res.sendStatus(200);
@@ -242,6 +301,10 @@ const startPluginServer = async () => {
   });
 
   app.post("/clear", (_req, res) => {
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
     client.sendNotification("$/plugin/clear");
     res.sendStatus(200);
   });
@@ -267,8 +330,12 @@ const stopPluginServer = async (isDeactivating = false) => {
   }
 };
 
-export async function activate(context: vscode.ExtensionContext) {
-  console.log("Luau LSP activated");
+const startLanguageServer = async (context: vscode.ExtensionContext) => {
+  if (client) {
+    await client.stop();
+  }
+
+  console.log("Starting Luau Language Server");
 
   const args = ["lsp"];
 
@@ -383,9 +450,7 @@ export async function activate(context: vscode.ExtensionContext) {
       context.extensionUri,
       "..",
       "..",
-      "build",
-      //   process.env["CMAKE_BUILD_TYPE"] ?? "Debug",
-      "luau-lsp.exe"
+      process.env["SERVER_PATH"] ?? "unknown.exe"
     ).fsPath,
     args,
   };
@@ -417,26 +482,40 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand(params.command, params.data);
   });
 
+  console.log("LSP Setup");
+  await client.start();
+};
+
+export async function activate(context: vscode.ExtensionContext) {
+  console.log("Luau LSP activated");
+
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
       await downloadApiDefinitions(context);
       vscode.window
         .showInformationMessage(
-          "API Types have been updated, reload workspace to take effect.",
-          "Reload Workspace"
+          "API Types have been updated, reload server to take effect.",
+          "Reload Language Server"
         )
         .then((command) => {
-          if (command === "Reload Workspace") {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
+          if (command === "Reload Language Server") {
+            vscode.commands.executeCommand("luau-lsp.reloadServer");
           }
         });
     })
   );
 
-  const updateSourcemapForAllFolders = () => {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("luau-lsp.reloadServer", async () => {
+      vscode.window.showInformationMessage("Reloading Language Server");
+      await startLanguageServer(context);
+    })
+  );
+
+  const startSourcemapGenerationForAllFolders = () => {
     if (vscode.workspace.workspaceFolders) {
       for (const folder of vscode.workspace.workspaceFolders) {
-        updateSourceMap(folder);
+        startSourcemapGeneration(folder);
       }
     }
   };
@@ -444,74 +523,49 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "luau-lsp.regenerateSourcemap",
-      updateSourcemapForAllFolders
+      startSourcemapGenerationForAllFolders
     )
   );
 
-  // Register automatic sourcemap regenerate
-  // TODO: maybe we should move this to the server in future
-  const listener = (e: vscode.FileCreateEvent | vscode.FileDeleteEvent) => {
-    if (e.files.length === 0) {
-      return;
-    }
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(e.files[0]);
-    if (!workspaceFolder) {
-      return;
-    }
-    return updateSourceMap(workspaceFolder);
-  };
-
-  context.subscriptions.push(vscode.workspace.onDidCreateFiles(listener));
-  context.subscriptions.push(vscode.workspace.onDidDeleteFiles(listener));
-  context.subscriptions.push(
-    vscode.workspace.onDidRenameFiles((e) => {
-      if (e.files.length === 0) {
-        return;
-      }
-      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
-        e.files[0].oldUri
-      );
-      if (!workspaceFolder) {
-        return;
-      }
-      return updateSourceMap(workspaceFolder);
-    })
-  );
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeWorkspaceFolders((e) => {
-      for (const folder of e.added) {
-        updateSourceMap(folder);
-      }
-    })
-  );
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("luau-lsp.sourcemap")) {
         if (vscode.workspace.workspaceFolders) {
           for (const folder of vscode.workspace.workspaceFolders) {
-            updateSourceMap(folder);
+            const config = vscode.workspace.getConfiguration(
+              "luau-lsp.sourcemap",
+              folder
+            );
+            if (
+              !config.get<boolean>("enabled") ||
+              !config.get<boolean>("autogenerate")
+            ) {
+              stopSourcemapGeneration(folder);
+            } else {
+              startSourcemapGeneration(folder);
+            }
           }
         }
       } else if (e.affectsConfiguration("luau-lsp.fflags")) {
         vscode.window
           .showInformationMessage(
-            "Luau FFlags have been changed, reload your workspace for this to take effect.",
-            "Reload Workspace"
+            "Luau FFlags have been changed, reload server for this to take effect.",
+            "Reload Language Server"
           )
           .then((command) => {
-            if (command === "Reload Workspace") {
-              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            if (command === "Reload Language Server") {
+              vscode.commands.executeCommand("luau-lsp.reloadServer");
             }
           });
       } else if (e.affectsConfiguration("luau-lsp.types")) {
         vscode.window
           .showInformationMessage(
-            "Luau type definitions have been changed, reload your workspace for this to take effect.",
-            "Reload Workspace"
+            "Luau type definitions have been changed, reload server for this to take effect.",
+            "Reload Language Server"
           )
           .then((command) => {
-            if (command === "Reload Workspace") {
-              vscode.commands.executeCommand("workbench.action.reloadWindow");
+            if (command === "Reload Language Server") {
+              vscode.commands.executeCommand("luau-lsp.reloadServer");
             }
           });
       } else if (e.affectsConfiguration("luau-lsp.plugin")) {
@@ -529,10 +583,8 @@ export async function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  updateSourcemapForAllFolders();
-
-  console.log("LSP Setup");
-  await client.start();
+  startSourcemapGenerationForAllFolders();
+  await startLanguageServer(context);
 
   if (
     vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")

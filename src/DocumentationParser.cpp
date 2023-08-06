@@ -43,7 +43,7 @@ void parseDocumentation(
     {
         client->sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
         return;
-    };
+    }
 
     for (auto& documentationFile : documentationFiles)
     {
@@ -197,7 +197,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 
     if (!params.empty())
     {
-        result += "\n\n**Parameters**";
+        result += "\n\n**Parameters**\n";
         for (auto& param : params)
         {
             auto paramText = param.substr(7);
@@ -219,7 +219,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 
     if (!returns.empty())
     {
-        result += "\n\n**Returns**";
+        result += "\n\n**Returns**\n";
         for (auto& ret : returns)
         {
             auto returnText = ret.substr(8);
@@ -241,7 +241,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 
     if (!throws.empty())
     {
-        result += "\n\n**Throws**";
+        result += "\n\n**Throws**\n";
         for (auto& thr : throws)
         {
             auto throwText = thr.substr(7);

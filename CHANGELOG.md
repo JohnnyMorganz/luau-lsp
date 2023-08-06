@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.23.0] - 2023-08-06
+
+### Added
+
+- Added command `luau-lsp.reloadServer` to restart the language server without having to reload the workspace
+
+### Changed
+
+- Sync to upstream Luau 0.589
+- Changes to settings which require server restart will now reload the server instead of having to reload the whole VSCode workspace
+- Switch to Rojo `rojo sourcemap --watch` command for sourcemap autogeneration. Note that on rojo error, you must manually restart sourcemap regeneration. **Requires Rojo v7.3.0+**
+
+### Fixed
+
+- Reverted change to type checking in 1.22.0 that reduced memory footprint. This should resolve the problems where diagnostics aren't showing with an InternalCompilerError, at the cost of increased memory use if `luau-lsp.diagnostics.workspace` is enabled.
+- Fixed string require resolution when the string had a secondary extension: `Module.mod` will be resolved as `Module.mod.luau`
+- Fixed resolution of directory aliases pointing to relative paths
+
+## [1.22.1] - 2023-07-15
+
+### Changed
+
+- Sync to upstream Luau 0.584
+- Removed need for typechecking for operations that don't require the type information (e.g., document link / color)
+
 ### Fixed
 
 - Fixed diagnostics not showing when working in a new file with no workspace open
@@ -14,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed semantic tokens segfault crash on some tables
 - Fixed duplicate definitions showing in the Go To Definition page
 - Fixed some syntax highlighting inconsistencies
+- Added a temporary fix to "RecursionLimitException" exceptions leaking to the public interface.
 
 ## [1.22.0] - 2023-06-30
 

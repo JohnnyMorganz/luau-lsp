@@ -1,7 +1,6 @@
 #include "LSP/JsonRpc.hpp"
 
 #include <string>
-#include <exception>
 #include <variant>
 
 #include "nlohmann/json.hpp"
