@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.589
 - Changes to settings which require server restart will now reload the server instead of having to reload the whole VSCode workspace
+- Switch to Rojo `rojo sourcemap --watch` command for sourcemap autogeneration. Note that on rojo error, you must manually restart sourcemap regeneration. **Requires Rojo v7.3.0+**
 
 ### Fixed
 
