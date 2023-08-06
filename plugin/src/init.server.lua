@@ -6,7 +6,7 @@ if game:GetService("RunService"):IsRunning() then
 	return
 end
 
-local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
+local toolbar = plugin:CreateToolbar("Luau")
 
 local ConnectButton = toolbar:CreateButton(
 	"Luau Language Server Setup",
@@ -38,6 +38,7 @@ local function LoadSettings()
 		Settings = nil
 		return
 	end
+	assert(result,"")
 	local _, err = pcall(function()
 		Settings = result()
 	end)
@@ -73,7 +74,7 @@ local ConnectAction = plugin:CreatePluginAction(
 	true
 )
 
-local connected: BoolValue = Instance.new("BoolValue")
+local connected = Instance.new("BoolValue")
 local connections = {}
 
 type EncodedInstance = {
@@ -119,7 +120,7 @@ local function sendFullDMInfo(isSilent: boolean?)
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
-		Method = "POST",
+		Method = "POST" :: "POST",
 		Url = string.format("http://localhost:%s/full", Settings.port),
 		Headers = {
 			["Content-Type"] = "application/json",
@@ -130,10 +131,10 @@ local function sendFullDMInfo(isSilent: boolean?)
 	})
 
 	if not success then
-		warn("[Luau Language Server] Connecting to server failed: " .. result)
+		warn(`[Luau Language Server] Connecting to server failed: {result}`)
 		connected.Value = false
 	elseif not result.Success then
-		warn("[Luau Language Server] Sending full DM info failed: " .. result.StatusCode .. ": " .. result.Body)
+		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
 		connected.Value = false
 	else
 		if not isSilent then
