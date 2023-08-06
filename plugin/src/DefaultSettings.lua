@@ -16,5 +16,5 @@ return {
 		game:GetService("Chat"),
 		game:GetService("LocalizationService"),
 		game:GetService("TestService"),
-	}
+	},
 }
