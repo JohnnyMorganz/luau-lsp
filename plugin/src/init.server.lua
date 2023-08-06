@@ -2,13 +2,13 @@
 local HttpService = game:GetService("HttpService")
 assert(plugin, "This code must run inside of a plugin")
 
-local toolbar = plugin:CreateToolbar("Luau") :: PluginToolbar
+local toolbar = plugin:CreateToolbar("Luau")
 local button = toolbar:CreateButton(
 	"Luau Language Server Setup",
 	"Toggle Menu",
 	"rbxassetid://11115506617",
 	"Luau Language Server"
-) :: PluginToolbarButton
+)
 
 local widgetInfo = DockWidgetPluginGuiInfo.new(
 	-- widget info
@@ -34,10 +34,10 @@ widget.Title = "Luau Language Server"
 button.ClickableWhenViewportHidden = true
 
 local port = plugin:GetSetting("Port") or 3667
-local connected: BoolValue = Instance.new("BoolValue")
+local connected = Instance.new("BoolValue")
 local connections = {}
 
-local INCLUDED_SERVICES = {
+local INCLUDED_SERVICES: { Instance } = {
 	game:GetService("Workspace"),
 	game:GetService("Players"),
 	game:GetService("Lighting"),
@@ -92,7 +92,7 @@ local function sendFullDMInfo()
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
-		Method = "POST",
+		Method = "POST" :: "POST",
 		Url = string.format("http://localhost:%s/full", port),
 		Headers = {
 			["Content-Type"] = "application/json",
@@ -103,10 +103,10 @@ local function sendFullDMInfo()
 	})
 
 	if not success then
-		warn("[Luau Language Server] Connecting to server failed: " .. result)
+		warn(`[Luau Language Server] Connecting to server failed: {result}`)
 		connected.Value = false
 	elseif not result.Success then
-		warn("[Luau Language Server] Sending full DM info failed: " .. result.StatusCode .. ": " .. result.Body)
+		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
 		connected.Value = false
 	else
 		print("[Luau Language Server] Listening for DataModel changes")
@@ -146,7 +146,7 @@ function connectServer()
 end
 
 -- Interface
-local theme = settings().Studio.Theme :: StudioTheme
+local theme = settings().Studio.Theme
 local frame = Instance.new("Frame")
 frame.BackgroundColor3 = theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
 frame.Size = UDim2.fromScale(1, 1)
