@@ -38,7 +38,7 @@ local function LoadSettings()
 		Settings = nil
 		return
 	end
-	assert(result,"")
+	assert(result, "")
 	local _, err = pcall(function()
 		Settings = result()
 	end)
