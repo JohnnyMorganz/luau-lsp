@@ -2,10 +2,8 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/ColorProvider.hpp"
 
-#include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
 #include "LSP/LuauExt.hpp"
-#include "LSP/Utils.hpp"
 
 #include <cmath>
 

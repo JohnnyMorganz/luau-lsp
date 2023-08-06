@@ -73,7 +73,7 @@ void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
 bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
-    // We want to test globs against a relative path to workspace, since thats what makes most sense
+    // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePath = path.lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);

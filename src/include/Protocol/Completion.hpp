@@ -65,20 +65,20 @@ struct CompletionContext
     CompletionTriggerKind triggerKind = CompletionTriggerKind::Invoked;
     std::optional<std::string> triggerCharacter = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionContext, triggerKind, triggerCharacter);
+NLOHMANN_DEFINE_OPTIONAL(CompletionContext, triggerKind, triggerCharacter)
 
 struct CompletionParams : TextDocumentPositionParams
 {
     std::optional<CompletionContext> context = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionParams, textDocument, position, context);
+NLOHMANN_DEFINE_OPTIONAL(CompletionParams, textDocument, position, context)
 
 struct CompletionItemLabelDetails
 {
     std::optional<std::string> detail = std::nullopt;
     std::optional<std::string> description = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(CompletionItemLabelDetails, detail, description);
+NLOHMANN_DEFINE_OPTIONAL(CompletionItemLabelDetails, detail, description)
 
 struct CompletionItem
 {
@@ -103,5 +103,5 @@ struct CompletionItem
     // TODO: data?
 };
 NLOHMANN_DEFINE_OPTIONAL(CompletionItem, label, labelDetails, kind, tags, detail, documentation, deprecated, preselect, sortText, filterText,
-    insertText, insertTextFormat, insertTextMode, textEdit, textEditString, additionalTextEdits, commitCharacters, command);
+    insertText, insertTextFormat, insertTextMode, textEdit, textEditString, additionalTextEdits, commitCharacters, command)
 } // namespace lsp

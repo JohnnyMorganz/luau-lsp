@@ -43,7 +43,7 @@ void parseDocumentation(
     {
         client->sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
         return;
-    };
+    }
 
     for (auto& documentationFile : documentationFiles)
     {

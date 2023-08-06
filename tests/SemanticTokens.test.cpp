@@ -1,7 +1,5 @@
 #include "doctest.h"
-#include "Fixture.h"
 #include "LSP/SemanticTokens.hpp"
-
 TEST_SUITE_BEGIN("SemanticTokens");
 
 // TEST_CASE_FIXTURE(Fixture, "function_definition_name")

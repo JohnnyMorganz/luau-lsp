@@ -16,6 +16,6 @@ struct CliClient : public BaseClient
     void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) override
     {
         for (const auto& diagnostic : params.diagnostics)
-            diagnostics.push_back(std::pair{params.uri, diagnostic.message});
+            diagnostics.emplace_back(std::pair{params.uri, diagnostic.message});
     }
 };

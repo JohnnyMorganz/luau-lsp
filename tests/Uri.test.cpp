@@ -18,7 +18,7 @@ TEST_CASE("file#toString")
     CHECK_EQ(Uri::file("C:/win/path").toString(), "file:///c%3A/win/path");
     CHECK_EQ(Uri::file("c:/win/path/").toString(), "file:///c%3A/win/path/");
     CHECK_EQ(Uri::file("/c:/win/path").toString(), "file:///c%3A/win/path");
-};
+}
 
 TEST_CASE("Uri::file (win-special)")
 {
@@ -31,7 +31,7 @@ TEST_CASE("Uri::file (win-special)")
     CHECK_EQ(Uri::file("c:\\win\\path").toString(), "file:///c%3A%5Cwin%5Cpath");
     CHECK_EQ(Uri::file("c:\\win/path").toString(), "file:///c%3A%5Cwin/path");
 #endif
-};
+}
 
 TEST_CASE("file#fsPath (win-special)")
 {
@@ -54,7 +54,7 @@ TEST_CASE("file#fsPath (win-special)")
     CHECK_EQ(Uri::file("/c:/win/path").fsPath(), "c:/win/path");
     CHECK_EQ(Uri::file("./c/win/path").fsPath(), "/./c/win/path");
 #endif
-};
+}
 
 TEST_CASE("URI#fsPath - no `fsPath` when no `path`")
 {
@@ -67,7 +67,7 @@ TEST_CASE("URI#fsPath - no `fsPath` when no `path`")
 #ifndef _WIN32
     CHECK_EQ(value.fsPath(), "/");
 #endif
-};
+}
 
 TEST_CASE("http#toString")
 {
@@ -79,7 +79,7 @@ TEST_CASE("http#toString")
     // http://a-test-site.com/#test=true
     CHECK_EQ(Uri("http", "a-test-site.com", "/", "test=true").toString(), "http://a-test-site.com/?test%3Dtrue");
     CHECK_EQ(Uri("http", "a-test-site.com", "/", "", "test=true").toString(), "http://a-test-site.com/#test%3Dtrue");
-};
+}
 
 TEST_CASE("http#toString, encode=FALSE")
 {
@@ -101,7 +101,7 @@ TEST_CASE("http#toString, encode=FALSE")
     // CHECK_EQ(uri2.path, uri3.path);
     // CHECK_EQ(uri2.query, uri3.query);
     // CHECK_EQ(uri2.fragment, uri3.fragment);
-};
+}
 
 // DEVIATION: with testcases removed - NOT REQUIRED
 
@@ -207,7 +207,7 @@ TEST_CASE("parse")
     CHECK_EQ(value.path, "path");
     CHECK_EQ(value.query, "");
     CHECK_EQ(value.fragment, "");
-};
+}
 
 // DEVIATION: No validation
 // TEST_CASE("parse, disallow //path when no authority")
@@ -261,13 +261,13 @@ TEST_CASE("URI#file, win-speciale")
     CHECK_EQ(value.authority, "shares");
     CHECK_EQ(value.path, "/");
 #endif
-};
+}
 
 TEST_CASE("VSCode URI module\'s driveLetterPath regex is incorrect, #32961'")
 {
     auto uri = Uri::parse("file:///_:/path");
     CHECK_EQ(uri.fsPath(), IF_WINDOWS("\\_:\\path", "/_:/path"));
-};
+}
 
 TEST_CASE("URI#file, no path-is-uri check")
 {
@@ -276,7 +276,7 @@ TEST_CASE("URI#file, no path-is-uri check")
     CHECK_EQ(value.scheme, "file");
     CHECK_EQ(value.authority, "");
     CHECK_EQ(value.path, "/file://path/to/file");
-};
+}
 
 TEST_CASE("URI#file, always slash")
 {
@@ -291,7 +291,7 @@ TEST_CASE("URI#file, always slash")
     CHECK_EQ(value.authority, "");
     CHECK_EQ(value.path, "/a.file");
     CHECK_EQ(value.toString(), "file:///a.file");
-};
+}
 
 // DEVIATION: currently no unicode support
 // TEST_CASE("URI.toString, only scheme and query")
@@ -311,7 +311,7 @@ TEST_CASE("URI#toString, lower-case windows drive letter")
 {
     CHECK_EQ(Uri::parse("untitled:c:/Users/jrieken/Code/abc.txt").toString(), "untitled:c%3A/Users/jrieken/Code/abc.txt");
     CHECK_EQ(Uri::parse("untitled:C:/Users/jrieken/Code/abc.txt").toString(), "untitled:c%3A/Users/jrieken/Code/abc.txt");
-};
+}
 
 // DEVIATION: currently no unicode support
 // TEST_CASE("URI#toString, escape all the bits")
@@ -328,7 +328,7 @@ TEST_CASE("URI#toString, don\'t encode port")
     // DEVIATION: currently no unicode support
     // value = Uri("http", "löcalhost:8080", "/far");
     // CHECK_EQ(value.toString(), "http://l%C3%B6calhost:8080/far");
-};
+}
 
 TEST_CASE("URI#toString, user information in authority")
 {
@@ -347,7 +347,7 @@ TEST_CASE("URI#toString, user information in authority")
     // DEVIATION: currently no unicode support
     // value = Uri("http", "föö:bör@löcalhost:8080", "/far");
     // CHECK_EQ(value.toString(), "http://f%C3%B6%C3%B6:b%C3%B6r@l%C3%B6calhost:8080/far");
-};
+}
 
 TEST_CASE("correctFileUriToFilePath2")
 {
@@ -369,7 +369,7 @@ TEST_CASE("correctFileUriToFilePath2")
         "//monacotools/folder/isi.txt"); // DEVIATION: IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt")
     test("file://monacotools1/certificates/SSL/",
         "//monacotools1/certificates/SSL/"); // DEVIATION: IF_WINDOWS("\\\\monacotools1\\certificates\\SSL\\", "//monacotools1/certificates/SSL/")
-};
+}
 
 TEST_CASE("URI - http, query & toString'")
 {
@@ -395,7 +395,7 @@ TEST_CASE("URI - http, query & toString'")
     // #24849
     uri = Uri::parse("https://twitter.com/search?src=typd&q=%23tag");
     CHECK_EQ(uri.toString(true), "https://twitter.com/search?src=typd&q=%23tag");
-};
+}
 
 TEST_CASE("class URI cannot represent relative file paths #34449'")
 {
@@ -414,7 +414,7 @@ TEST_CASE("class URI cannot represent relative file paths #34449'")
     auto fileUri2 = Uri::parse(uri);
     CHECK_EQ(fileUri2.path, "/foo/bar");
     CHECK_EQ(fileUri2.authority, "");
-};
+}
 
 TEST_CASE("Ctrl click to follow hash query param url gets urlencoded #49628'")
 {
@@ -425,7 +425,7 @@ TEST_CASE("Ctrl click to follow hash query param url gets urlencoded #49628'")
     input = "http://localhost:3000/foo?bar=baz";
     uri = Uri::parse(input);
     CHECK_EQ(uri.toString(true), input);
-};
+}
 
 TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
 {
@@ -438,7 +438,7 @@ TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
     uri2 = Uri::parse(uri.toString());
     CHECK_EQ(uri.scheme, uri2.scheme);
     CHECK_EQ(uri.path, uri2.path);
-};
+}
 
 // TODO: fix
 // TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
@@ -505,6 +505,6 @@ TEST_CASE("URI - (de)serialize'")
         CHECK_EQ(clone.fsPath(), value.fsPath());
         CHECK_EQ(clone.toString(), value.toString());
     }
-};
+}
 
 TEST_SUITE_END();

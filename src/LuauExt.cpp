@@ -363,7 +363,7 @@ void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& gl
         if (auto dataModelType = globals.globalScope->lookupType("DataModel"))
             addChildrenToCTV(globals, arena, dataModelType->type, fileResolver.rootSourceNode);
 
-        // Mutate globally-registered Services to include children information (so its available through :GetService)
+        // Mutate globally-registered Services to include children information (so it's available through :GetService)
         for (const auto& service : fileResolver.rootSourceNode->children)
         {
             auto serviceName = service->className; // We know it must be a service of the same class name
@@ -573,7 +573,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
                     else
                     {
                         enumTypes.emplace(ctv->name, it->second);
-                        // Erase the metatable for the type so it can be used in comparison
+                        // Erase the metatable for the type, so it can be used in comparison
                     }
 
                     // Update the documentation symbol
@@ -584,7 +584,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
                         Luau::attachTag(prop, "EnumItem");
                     }
 
-                    // Prefix the name (after its been placed into enumTypes) with "Enum."
+                    // Prefix the name (after it has been placed into enumTypes) with "Enum."
                     ctv->name = "Enum." + ctv->name;
 
                     erase = true;
@@ -607,7 +607,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
-// Converts a FTV and function call to a nice string
+// Converts an FTV and function call to a nice string
 // In the format "function NAME(args): ret"
 std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,
     std::optional<Luau::ScopePtr> scope, const ToStringNamedFunctionOpts& stringOpts)
@@ -637,7 +637,7 @@ std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::Fun
         return "function" + functionString;
     auto funcExpr = *funcExprPtr;
 
-    // See if its just in the form `func(args)`
+    // See if it's just in the form `func(args)`
     if (auto local = funcExpr->as<Luau::AstExprLocal>())
     {
         return "function " + std::string(local->local->name.value) + functionString;
@@ -648,7 +648,7 @@ std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::Fun
     }
     else if (funcExpr->as<Luau::AstExprGroup>() || funcExpr->as<Luau::AstExprFunction>())
     {
-        // In the form (expr)(args), which implies thats its probably a IIFE
+        // In the form (expr)(args), which implies that it's probably a IIFE
         return "function" + functionString;
     }
 

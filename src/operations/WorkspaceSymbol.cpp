@@ -5,7 +5,6 @@
 
 #include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
-#include "LSP/LuauExt.hpp"
 
 struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 {

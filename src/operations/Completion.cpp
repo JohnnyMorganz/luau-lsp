@@ -577,7 +577,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 // Check if it starts with a directory alias, otherwise resolve with require base path
                 std::filesystem::path currentDirectory =
-                    resolveDirectoryAlias(config.require.directoryAliases, contentsString, /* includeExtension = */ false)
+                    resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, contentsString, /* includeExtension = */ false)
                         .value_or(fileResolver.getRequireBasePath(moduleName).append(contentsString));
 
                 try
@@ -689,6 +689,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         case Luau::AutocompleteEntryKind::Module:
             item.kind = lsp::CompletionItemKind::Module;
             break;
+        case Luau::AutocompleteEntryKind::GeneratedFunction:
+            item.kind = lsp::CompletionItemKind::Function;
+            item.insertText = entry.insertText;
         }
 
         // Special cases: Files and directory
@@ -771,7 +774,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.kind = lsp::CompletionItemKind::Function;
 
             // Try to infer more type info about the entry to provide better suggestion info
-            if (auto ftv = Luau::get<Luau::FunctionType>(id))
+            if (auto ftv = Luau::get<Luau::FunctionType>(id); ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction)
             {
                 item.kind = lsp::CompletionItemKind::Function;
 
