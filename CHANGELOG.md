@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.23.0] - 2023-08-06
+
 ### Added
 
 - Added command `luau-lsp.reloadServer` to restart the language server without having to reload the workspace
