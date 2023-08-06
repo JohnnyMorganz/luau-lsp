@@ -38,9 +38,12 @@ local function LoadSettings()
 		Settings = nil
 		return
 	end
-	pcall(function()
+	local _,err = pcall(function()
 		Settings = result()
 	end)
+	if err then
+		warn(err)
+	end
 	if type(Settings) ~= "table" then
 		Settings = nil
 		warn("[Luau Language Server] Could not load settings: invalid settings")
@@ -196,7 +199,7 @@ SettingsModule.Changed:Connect(function()
 	end
 	LoadSettings()
 	if wasConnected then
-		connectServer(true) --isSilent mode
+		connectServer(true) -- Silent mode
 	end
 end)
 
