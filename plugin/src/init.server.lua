@@ -38,7 +38,7 @@ local function LoadSettings()
 		Settings = nil
 		return
 	end
-	local _,err = pcall(function()
+	local _, err = pcall(function()
 		Settings = result()
 	end)
 	if err then
