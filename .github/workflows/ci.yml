@@ -145,7 +145,7 @@ jobs:
         working-directory: plugin
 
       - name: Run Luau Analyze
-        run: luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.luau src
+        run: luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.lua src
         working-directory: plugin
 
       - name: Build Plugin
