@@ -699,6 +699,8 @@ declare class EnumCompletionItemTag_INTERNAL extends Enum
 	PutCursorInParens: EnumCompletionItemTag
 	TypeCorrect: EnumCompletionItemTag
 	ClientServerBoundaryViolation: EnumCompletionItemTag
+	Invalidated: EnumCompletionItemTag
+	PutCursorBeforeEnd: EnumCompletionItemTag
 end
 declare class EnumCompletionTriggerKind extends EnumItem end
 declare class EnumCompletionTriggerKind_INTERNAL extends Enum
@@ -1301,6 +1303,7 @@ declare class EnumGuiState_INTERNAL extends Enum
 	Idle: EnumGuiState
 	Hover: EnumGuiState
 	Press: EnumGuiState
+	NonInteractable: EnumGuiState
 end
 declare class EnumGuiType extends EnumItem end
 declare class EnumGuiType_INTERNAL extends Enum
@@ -4304,6 +4307,7 @@ declare class AssetImportSession extends Instance
 	function GetFilename(self): string
 	function GetImportTree(self): Instance
 	function GetInstance(self, nodeId: number): Instance
+	function GetRigVisualization(self): Instance
 	function HasAnimation(self): boolean
 	function IsAvatar(self): boolean
 	function IsGltf(self): boolean
@@ -4368,6 +4372,7 @@ declare class AssetService extends Instance
 	function GetGamePlacesAsync(self): Instance
 	function LoadImageAsync(self, textureId: Content): DynamicImage
 	function PromptCreateAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
+	function RegisterUGCValidationFunction(self, func: ((...any) -> ...any)): nil
 	function SavePlaceAsync(self): nil
 	function SearchAudio(self, searchParameters: AudioSearchParams): AudioPages
 end
@@ -4405,6 +4410,7 @@ end
 declare class AudioAnalyzer extends Instance
 	PeakLevel: number
 	RmsLevel: number
+	function GetSpectrum(self): { any }
 end
 
 declare class AudioChorus extends Instance
@@ -5016,6 +5022,9 @@ declare class Chat extends Instance
 	function SetBubbleChatSettings(self, settings: any): nil
 end
 
+declare class ChatbotUIService extends Instance
+end
+
 declare class ClickDetector extends Instance
 	CursorIcon: Content
 	MaxActivationDistance: number
@@ -5068,6 +5077,15 @@ declare class Clouds extends Instance
 end
 
 declare class ClusterPacketCache extends Instance
+end
+
+declare class Collaborator extends Instance
+	CFrame: CFrame
+	UserId: number
+	Username: string
+end
+
+declare class CollaboratorsService extends Instance
 end
 
 declare class CollectionService extends Instance
@@ -6112,6 +6130,7 @@ declare class GuiObject extends GuiBase2d
 	InputBegan: RBXScriptSignal<InputObject>
 	InputChanged: RBXScriptSignal<InputObject>
 	InputEnded: RBXScriptSignal<InputObject>
+	Interactable: boolean
 	LayoutOrder: number
 	MouseEnter: RBXScriptSignal<number, number>
 	MouseLeave: RBXScriptSignal<number, number>
@@ -7214,13 +7233,13 @@ declare class MarketplaceService extends Instance
 	PromptPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
 	PromptPurchaseRequestedV2: RBXScriptSignal<Instance, number, boolean, EnumCurrencyType, string, string>
 	PromptRobloxPurchaseRequested: RBXScriptSignal<number, boolean>
-	PromptSubscriptionCancellationRequested: RBXScriptSignal<Instance, number>
-	PromptSubscriptionPurchaseRequested: RBXScriptSignal<Player, number>
+	PromptSubscriptionPurchaseRequested: RBXScriptSignal<Instance, string>
 	ServerPurchaseVerification: RBXScriptSignal<{ [any]: any }>
 	ThirdPartyPurchaseFinished: RBXScriptSignal<Instance, string, string, boolean>
 	function GetDeveloperProductsAsync(self): Pages
 	function GetProductInfo(self, assetId: number, infoType: EnumInfoType?): { [any]: any }
 	function GetRobuxBalance(self): number
+	function GetSubscriptionPurchaseInfoAsync(self, subscriptionId: string): { [any]: any }
 	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?, purchaseAuthToken: string?): { [any]: any }
 	function PerformPurchaseV2(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectiblesProductDetails: { [any]: any }): { [any]: any }
 	function PlayerCanMakePurchases(self, player: Instance): boolean
@@ -7236,6 +7255,7 @@ declare class MarketplaceService extends Instance
 	function PromptProductPurchase(self, player: Player, productId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
 	function PromptPurchase(self, player: Player, assetId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
 	function PromptRobloxPurchase(self, assetId: number, equipIfPurchased: boolean): nil
+	function PromptSubscriptionPurchaseFinished(self, subscriptionId: string, didTryPurchasing: boolean): nil
 	function PromptThirdPartyPurchase(self, player: Instance, productId: string): nil
 	function ReportAssetSale(self, assetId: string, robuxAmount: number): nil
 	function ReportRobuxUpsellStarted(self): nil
@@ -7247,8 +7267,6 @@ declare class MarketplaceService extends Instance
 	function SignalPromptPremiumPurchaseFinished(self, didTryPurchasing: boolean): nil
 	function SignalPromptProductPurchaseFinished(self, userId: number, productId: number, success: boolean): nil
 	function SignalPromptPurchaseFinished(self, player: Instance, assetId: number, success: boolean): nil
-	function SignalPromptSubscriptionCancellationFinished(self, player: Instance, subscriptionId: number, wasCanceled: boolean): nil
-	function SignalPromptSubscriptionPurchaseFinished(self, player: Instance, subscriptionId: number, wasPurchased: boolean): nil
 	function SignalServerLuaDialogClosed(self, value: boolean): nil
 	function UserOwnsGamePassAsync(self, userId: number, gamePassId: number): boolean
 end
@@ -8088,6 +8106,11 @@ declare class PlacesService extends Instance
 	function StartPlaySolo(self): nil
 end
 
+declare class PlatformFriendsService extends Instance
+	function IsInviteFriendsEnabled(self): boolean
+	function ShowInviteFriendsUI(self): nil
+end
+
 declare class Player extends Instance
 	AccountAge: number
 	AutoJumpEnabled: boolean
@@ -8355,11 +8378,13 @@ end
 
 declare class PluginToolbar extends Instance
 	function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton
+	function CreatePopupButton(self, buttonId: string, tooltip: string, iconname: string, text: string?): Instance
 end
 
 declare class PluginToolbarButton extends Instance
 	Click: RBXScriptSignal<>
 	ClickableWhenViewportHidden: boolean
+	DropdownClick: RBXScriptSignal<>
 	Enabled: boolean
 	Icon: Content
 	function SetActive(self, active: boolean): nil
@@ -8886,7 +8911,9 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "CaptureService"): CaptureService
 	function GetService(self, service: "ChangeHistoryService"): ChangeHistoryService
 	function GetService(self, service: "Chat"): Chat
+	function GetService(self, service: "ChatbotUIService"): ChatbotUIService
 	function GetService(self, service: "ClusterPacketCache"): ClusterPacketCache
+	function GetService(self, service: "CollaboratorsService"): CollaboratorsService
 	function GetService(self, service: "CollectionService"): CollectionService
 	function GetService(self, service: "CommandService"): CommandService
 	function GetService(self, service: "ConfigureServerService"): ConfigureServerService
@@ -8975,6 +9002,7 @@ declare class ServiceProvider extends Instance
 	function GetService(self, service: "PhysicsService"): PhysicsService
 	function GetService(self, service: "PlaceStatsService"): PlaceStatsService
 	function GetService(self, service: "PlacesService"): PlacesService
+	function GetService(self, service: "PlatformFriendsService"): PlatformFriendsService
 	function GetService(self, service: "PlayerEmulatorService"): PlayerEmulatorService
 	function GetService(self, service: "Players"): Players
 	function GetService(self, service: "PluginDebugService"): PluginDebugService
@@ -10513,6 +10541,8 @@ declare class VoiceChatInternal extends Instance
 	function GetVoiceExperienceId(self): string
 	function IsContextVoiceEnabled(self): boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
+	function LogPublisherWebRTCStats(self): boolean
+	function LogSubscriptionWebRTCStats(self): boolean
 	function SubscribeBlock(self, userId: number): boolean
 	function SubscribeRetry(self, userId: number): boolean
 	function SubscribeUnblock(self, userId: number): boolean
