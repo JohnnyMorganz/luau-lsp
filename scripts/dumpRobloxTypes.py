@@ -218,6 +218,22 @@ IGNORED_MEMBERS = {
     "VehicleSeat": [
         "Occupant",
     ],
+    "Beam": [
+        "Attachment0",
+        "Attachment1",
+    ],
+    "Trail": [
+        "Attachment0",
+        "Attachment1",
+    ],
+    "Constraint": [
+        "Attachment0",
+        "Attachment1",
+    ],
+    "PathfindingLink": [
+        "Attachment0",
+        "Attachment1",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -448,6 +464,22 @@ EXTRA_MEMBERS = {
     ],
     "VehicleSeat": [
         "Occupant: Humanoid?",
+    ],
+    "Beam": [
+        "Attachment0: Attachment?",
+        "Attachment1: Attachment?",
+    ],
+    "Trail": [
+        "Attachment0: Attachment?",
+        "Attachment1: Attachment?",
+    ],
+    "Constraint": [
+        "Attachment0: Attachment?",
+        "Attachment1: Attachment?",
+    ],
+    "PathfindingLink": [
+        "Attachment0: Attachment?",
+        "Attachment1: Attachment?",
     ],
 }
 
