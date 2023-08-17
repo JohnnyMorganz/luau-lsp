@@ -15,7 +15,8 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      }
+      },
+      "path": "editors/code/"
     },
     {
       "label": "Build Server",
@@ -51,7 +52,8 @@
         "reveal": "never",
         "group": "watchers"
       },
-      "group": "build"
+      "group": "build",
+      "path": "editors/code/"
     },
     {
       "label": "tasks: watch-tests",
@@ -65,7 +67,6 @@
       "problemMatcher": [],
       "label": "npm: compile",
       "detail": "webpack",
-
       "path": "editors/code/"
     },
     {

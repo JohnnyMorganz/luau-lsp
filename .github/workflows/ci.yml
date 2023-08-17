@@ -122,3 +122,31 @@ jobs:
       - run: npm test
         working-directory: editors/code
         if: runner.os != 'Linux'
+
+  build_plugin:
+    name: Verify and Build Roblox Studio Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Roblox/setup-foreman@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run selene
+        run: selene src
+        working-directory: plugin
+
+      - name: Run stylua
+        run: stylua --check src
+        working-directory: plugin
+
+      - name: Generate sourcemap
+        run: rojo sourcemap default.project.json --output sourcemap.json
+        working-directory: plugin
+
+      - name: Run Luau Analyze
+        run: luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.lua src
+        working-directory: plugin
+
+      - name: Build Plugin
+        run: rojo build plugin --output Luau.rbxm

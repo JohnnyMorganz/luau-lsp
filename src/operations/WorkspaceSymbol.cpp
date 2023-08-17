@@ -1,9 +1,10 @@
+#include <utility>
+
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
 #include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
-#include "LSP/LuauExt.hpp"
 
 struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 {
@@ -32,7 +33,7 @@ struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
         symbol.kind = lsp::SymbolKind::Variable;
         symbol.location = {
             textDocument->uri(), {textDocument->convertPosition(local->location.begin), textDocument->convertPosition(local->location.end)}};
-        symbol.containerName = containerName;
+        symbol.containerName = std::move(containerName);
         symbols.push_back(symbol);
     }
 
@@ -108,7 +109,7 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
 
     for (const auto& [moduleName, sourceModule] : frontend.sourceModules)
     {
-        checkSimple(moduleName);
+        frontend.parse(moduleName);
 
         // Find relevant text document
         if (auto textDocument = fileResolver.getTextDocumentFromModuleName(moduleName))

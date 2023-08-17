@@ -35,8 +35,7 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     std::vector<lsp::DocumentLink> result{};
 
-    // TODO: we only need parsing and no type checking
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule || !sourceModule->root)

@@ -2,10 +2,7 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/ColorProvider.hpp"
 
-#include "Luau/Transpiler.h"
 #include "Protocol/LanguageFeatures.hpp"
-#include "LSP/LuauExt.hpp"
-#include "LSP/Utils.hpp"
 
 #include <cmath>
 
@@ -55,6 +52,8 @@ RGB hsvToRgb(HSV in)
         g = p;
         b = q;
         break;
+    default:
+        LUAU_ASSERT(false);
     }
 
     return {(int)(r * 255), (int)(g * 255), (int)(b * 255)};
@@ -137,44 +136,44 @@ struct DocumentColorVisitor : public Luau::AstVisitor
 
                         if (index->index == "new")
                         {
-                            size_t index = 0;
+                            size_t argIndex = 0;
                             for (auto arg : call->args)
                             {
-                                if (index >= 3)
+                                if (argIndex >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(index) = number->value;
+                                    color.at(argIndex) = number->value;
                                 else
                                     return true; // Don't create as we can't parse the full colour
-                                index++;
+                                argIndex++;
                             }
                         }
                         else if (index->index == "fromRGB")
                         {
-                            size_t index = 0;
+                            size_t argIndex = 0;
                             for (auto arg : call->args)
                             {
-                                if (index >= 3)
+                                if (argIndex >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(index) = number->value / 255.0;
+                                    color.at(argIndex) = number->value / 255.0;
                                 else
                                     return true; // Don't create as we can't parse the full colour
-                                index++;
+                                argIndex++;
                             }
                         }
                         else if (index->index == "fromHSV")
                         {
-                            size_t index = 0;
+                            size_t argIndex = 0;
                             for (auto arg : call->args)
                             {
-                                if (index >= 3)
+                                if (argIndex >= 3)
                                     return true; // Don't create as the colour is not in the right format
                                 if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(index) = number->value;
+                                    color.at(argIndex) = number->value;
                                 else
                                     return true; // Don't create as we can't parse the full colour
-                                index++;
+                                argIndex++;
                             }
                             RGB data = hsvToRgb({color[0], color[1], color[2]});
                             color[0] = data.r / 255.0;
@@ -205,7 +204,7 @@ struct DocumentColorVisitor : public Luau::AstVisitor
 
                         colors.emplace_back(lsp::ColorInformation{
                             lsp::Range{textDocument->convertPosition(call->location.begin), textDocument->convertPosition(call->location.end)},
-                            {color[0], color[1], color[2], 1.0}});
+                            {std::clamp(color[0], 0.0, 1.0), std::clamp(color[1], 0.0, 1.0), std::clamp(color[2], 0.0, 1.0), 1.0}});
                     }
                 }
             }
@@ -237,8 +236,7 @@ lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColor
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    // TODO: we only need parsing and no type checking
-    checkSimple(moduleName);
+    frontend.parse(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)

@@ -203,6 +203,6 @@ struct ProgressParams
      */
     LSPAny value = nullptr;
 };
-NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value);
+NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value)
 
 } // namespace lsp
