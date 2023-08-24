@@ -597,5 +597,8 @@ export async function deactivate() {
   if (client) {
     await client.stop();
   }
-  stopPluginServer(true);
+  for (const [workspace, _] of sourcemapGeneratorProcesses) {
+    await stopSourcemapGeneration(workspace);
+  }
+  await stopPluginServer(true);
 }

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.590
 
+### Fixed
+
+- Fixed cleanup of rojo sourcemap generation process when VSCode exits
+
 ## [1.23.0] - 2023-08-06
 
 ### Added
