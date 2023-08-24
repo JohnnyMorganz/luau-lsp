@@ -772,6 +772,9 @@ def escapeName(name: str):
     """Escape a name string to be property-compatible"""
     if name == "function":
         return "func"
+    if not isIdentifier(name):
+        escape_quotes = name.replace('"', '\\"')
+        return f'["{escape_quotes}"]'
     return name
 
 
@@ -831,10 +834,6 @@ def filterMember(klassName: str, member: ApiMember):
         and klassName
         and member["Name"] == "GetService"
     ):
-        return False
-
-    # TODO: support ["prop"] in CTVs
-    if not isIdentifier(member["Name"]):
         return False
 
     return True
@@ -915,7 +914,7 @@ def printEnums(dump: ApiDump):
         out += f"declare class Enum{enum} extends EnumItem end\n"
         out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
         for item in items:
-            out += f"\t{item}: Enum{enum}\n"
+            out += f"\t{escapeName(item)}: Enum{enum}\n"
         out += "end\n"
     print(out)
     print()
