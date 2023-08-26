@@ -482,7 +482,7 @@ static auto createMagicFunctionTypeLookup(const std::vector<std::string> lookupL
                 auto type = Luau::follow(tfun->type);
 
                 Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
-                Luau::TypePackId classTypePack = arena.addTypePack({tfun->type});
+                Luau::TypePackId classTypePack = arena.addTypePack({type});
                 return Luau::WithPredicate<Luau::TypePackId>{classTypePack};
             }
             else
