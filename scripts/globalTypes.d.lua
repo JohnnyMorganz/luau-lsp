@@ -4798,8 +4798,8 @@ declare class WrapTarget extends BaseWrap
 end
 
 declare class Beam extends Instance
-	Attachment0: Attachment
-	Attachment1: Attachment
+	Attachment0: Attachment?
+	Attachment1: Attachment?
 	Brightness: number
 	Color: ColorSequence
 	CurveSize0: number
@@ -5166,8 +5166,8 @@ end
 
 declare class Constraint extends Instance
 	Active: boolean
-	Attachment0: Attachment
-	Attachment1: Attachment
+	Attachment0: Attachment?
+	Attachment1: Attachment?
 	Color: BrickColor
 	Enabled: boolean
 	Visible: boolean
@@ -8067,8 +8067,8 @@ declare class Path extends Instance
 end
 
 declare class PathfindingLink extends Instance
-	Attachment0: Attachment
-	Attachment1: Attachment
+	Attachment0: Attachment?
+	Attachment1: Attachment?
 	IsBidirectional: boolean
 	Label: string
 end
@@ -10222,8 +10222,8 @@ declare class TrackerStreamAnimation extends Instance
 end
 
 declare class Trail extends Instance
-	Attachment0: Attachment
-	Attachment1: Attachment
+	Attachment0: Attachment?
+	Attachment1: Attachment?
 	Brightness: number
 	Color: ColorSequence
 	Enabled: boolean
