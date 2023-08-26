@@ -327,7 +327,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     // If in roblox mode - suggest services
     if (config.types.roblox && config.completion.imports.suggestServices && includeServices)
     {
-        auto services = getServiceNames(frontend.globalsForAutocomplete.globalScope);
+        auto services = definitionsFileMetadata.has_value() ? definitionsFileMetadata->SERVICES : std::vector<std::string>{};
         for (auto& service : services)
         {
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
@@ -609,8 +609,36 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 return result;
             }
+            else if (tag == "CreatableInstances")
+            {
+                Luau::AutocompleteEntryMap result;
+                if (definitionsFileMetadata)
+                {
+                    for (const auto& className : this->definitionsFileMetadata->CREATABLE_INSTANCES)
+                        result.insert_or_assign(className, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
+                                                               frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                }
+                return result;
+            }
+            else if (tag == "Services")
+            {
+                Luau::AutocompleteEntryMap result;
+
+                // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
+                // highlight this so that we can prioritise common services first in the list
+                isGetService = true;
+                if (definitionsFileMetadata)
+                {
+                    for (const auto& className : this->definitionsFileMetadata->SERVICES)
+                        result.insert_or_assign(className, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
+                                                               frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                }
+
+                return result;
+            }
             else if (tag == "PrioritiseCommonServices")
             {
+                // TODO: snip old code
                 // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
                 // highlight this so that we can prioritise common services first in the list
                 isGetService = true;

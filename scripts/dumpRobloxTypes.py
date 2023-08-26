@@ -14,6 +14,9 @@ CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/mas
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
+SPECIAL_INSTANCE_NEW_AND_GETSERVICE = (
+    True  # TODO: set to false and snip once happy with intersection types removed
+)
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
 OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyMover",
@@ -830,7 +833,8 @@ def filterMember(klassName: str, member: ApiMember):
     if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
         return False
     if (
-        member["MemberType"] == "Function"
+        SPECIAL_INSTANCE_NEW_AND_GETSERVICE
+        and member["MemberType"] == "Function"
         and klassName
         and member["Name"] == "GetService"
     ):
@@ -885,7 +889,7 @@ def declareClass(klass: ApiClass) -> str:
         return f'\tfunction GetService(self, service: "{service}"): {service}\n'
 
     # Special case ServiceProvider:GetService()
-    if klass["Name"] == "ServiceProvider":
+    if SPECIAL_INSTANCE_NEW_AND_GETSERVICE and klass["Name"] == "ServiceProvider":
         memberDefinitions = chain(memberDefinitions, map(declareService, SERVICES))
 
     if klass["Name"] in EXTRA_MEMBERS:
@@ -963,7 +967,11 @@ def printDataTypeConstructors(types: DataTypesDump):
         functions: defaultdict[str, List[ApiFunction]] = defaultdict(list)
         for member in members:
             if member["MemberType"] == "Function":
-                if name == "Instance" and member["Name"] == "new":
+                if (
+                    SPECIAL_INSTANCE_NEW_AND_GETSERVICE
+                    and name == "Instance"
+                    and member["Name"] == "new"
+                ):
                     isInstanceNew = True
                     continue
                 elif (
@@ -1218,6 +1226,12 @@ def processBrickColors(colors):
         BRICK_COLORS.add(color["Name"])
 
 
+def printJsonPrologue():
+    data = {"CREATABLE_INSTANCES": CREATABLE, "SERVICES": SERVICES}
+    print("--#METADATA#" + json.dumps(data, indent=None))
+    print()
+
+
 # Load BrickColors
 brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
@@ -1233,6 +1247,7 @@ loadClassesIntoStructures(dump)
 corrections: CorrectionsDump = json.loads(requests.get(CORRECTIONS_URL).text)
 applyCorrections(dump, corrections)
 
+printJsonPrologue()
 print(START_BASE)
 printEnums(dump)
 printDataTypes(topologicalSortDataTypes(dataTypes["DataTypes"]))

@@ -4,7 +4,6 @@
 
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
-#include "LSP/LuauExt.hpp"
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
@@ -235,8 +234,14 @@ void WorkspaceFolder::initialize()
             continue;
         }
 
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
-        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
+        // Parse definitions file metadata
+        if (auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents))
+            definitionsFileMetadata = metadata;
+
+        auto result = types::registerDefinitions(
+            frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false, definitionsFileMetadata);
+        types::registerDefinitions(
+            frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true, definitionsFileMetadata);
 
         auto uri = Uri::file(definitionsFile);
 
