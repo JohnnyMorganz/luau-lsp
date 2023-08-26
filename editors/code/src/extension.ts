@@ -28,8 +28,20 @@ const CURRENT_FFLAGS =
 type FFlags = Record<string, string>;
 type FFlagsEndpoint = { applicationSettings: FFlags };
 
-const globalTypesUri = (context: vscode.ExtensionContext) => {
-  return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.lua");
+const globalTypesUri = (
+  context: vscode.ExtensionContext,
+  mode: "Prod" | "Debug"
+) => {
+  if (mode === "Prod") {
+    return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.lua");
+  } else {
+    return vscode.Uri.joinPath(
+      context.extensionUri,
+      "..",
+      "..",
+      "scripts/globalTypes.d.lua"
+    );
+  }
 };
 
 const apiDocsUri = (context: vscode.ExtensionContext) => {
@@ -65,7 +77,7 @@ const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
             .then((r) => r.arrayBuffer())
             .then((data) =>
               vscode.workspace.fs.writeFile(
-                globalTypesUri(context),
+                globalTypesUri(context, "Prod"),
                 new Uint8Array(data)
               )
             ),
@@ -96,7 +108,7 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       "current-api-version"
     );
     const mustUpdate =
-      !(await exists(globalTypesUri(context))) ||
+      !(await exists(globalTypesUri(context, "Prod"))) ||
       !(await exists(apiDocsUri(context)));
 
     if (!currentVersion || currentVersion !== latestVersion || mustUpdate) {
@@ -338,13 +350,24 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   console.log("Starting Luau Language Server");
 
   const args = ["lsp"];
+  const debugArgs = ["lsp"];
+
+  const addArg = (argument: string, mode: "All" | "Prod" | "Debug" = "All") => {
+    if (mode === "All" || mode === "Prod") {
+      args.push(argument);
+    }
+    if (mode === "All" || mode === "Debug") {
+      debugArgs.push(argument);
+    }
+  };
 
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
   if (typesConfig.get<boolean>("roblox")) {
     await updateApiInfo(context);
-    args.push(`--definitions=${globalTypesUri(context).fsPath}`);
-    args.push(`--docs=${apiDocsUri(context).fsPath}`);
+    addArg(`--definitions=${globalTypesUri(context, "Prod").fsPath}`, "Prod");
+    addArg(`--definitions=${globalTypesUri(context, "Debug").fsPath}`, "Debug");
+    addArg(`--docs=${apiDocsUri(context).fsPath}`);
   }
 
   // Load extra type definitions
@@ -361,7 +384,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
         uri = vscode.Uri.file(definitionPath);
       }
       if (await exists(uri)) {
-        args.push(`--definitions=${uri.fsPath}`);
+        addArg(`--definitions=${uri.fsPath}`);
       } else {
         vscode.window.showWarningMessage(
           `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`
@@ -384,7 +407,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
         uri = vscode.Uri.file(documentationPath);
       }
       if (await exists(uri)) {
-        args.push(`--docs=${uri.fsPath}`);
+        addArg(`--docs=${uri.fsPath}`);
       } else {
         vscode.window.showWarningMessage(
           `Documentations file at ${documentationPath} does not exist`
@@ -398,7 +421,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   const fflagsConfig = vscode.workspace.getConfiguration("luau-lsp.fflags");
 
   if (!fflagsConfig.get<boolean>("enableByDefault")) {
-    args.push("--no-flags-enabled");
+    addArg("--no-flags-enabled");
   }
 
   // Sync FFlags with upstream
@@ -432,7 +455,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   // Pass FFlags as arguments
   for (const [name, value] of Object.entries(fflags)) {
-    args.push(`--flag:${name}=${value}`);
+    addArg(`--flag:${name}=${value}`);
   }
 
   const run: Executable = {
@@ -444,7 +467,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     args,
   };
 
-  // If debugging, run the locally build extension
+  // If debugging, run the locally build extension, with local type definitions file
   const debug: Executable = {
     command: vscode.Uri.joinPath(
       context.extensionUri,
@@ -452,7 +475,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       "..",
       process.env["SERVER_PATH"] ?? "unknown.exe"
     ).fsPath,
-    args,
+    args: debugArgs,
   };
 
   const serverOptions: ServerOptions = { run, debug };
