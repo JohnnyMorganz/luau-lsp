@@ -379,8 +379,9 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
                 {
                     auto lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
                     bool appendNewline = false;
-                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
-                        importsVisitor.firstRequireLine.value() - lineNumber == 0)
+                    // If there is no firstRequireLine, then the require that we insert will become the first require,
+                    // so we use `.value_or(lineNumber)` to ensure it equals 0 and a newline is added
+                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine.value_or(lineNumber) - lineNumber == 0)
                         appendNewline = true;
                     textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
                 }
