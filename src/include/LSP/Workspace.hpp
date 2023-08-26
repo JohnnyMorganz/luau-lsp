@@ -8,6 +8,7 @@
 #include "Protocol/SemanticTokens.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "LSP/LuauExt.hpp"
 
 struct Reference
 {
@@ -30,6 +31,7 @@ public:
     Luau::Frontend frontend;
     bool isConfigured = false;
     Luau::TypeArena instanceTypes;
+    std::optional<types::DefinitionsFileMetadata> definitionsFileMetadata;
 
 public:
     WorkspaceFolder(

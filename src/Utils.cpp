@@ -161,6 +161,14 @@ std::string& toLower(std::string& str)
     return str;
 }
 
+std::string_view getFirstLine(const std::string_view& str)
+{
+    size_t eol_char = str.find('\n');
+    if (eol_char == std::string::npos)
+        return str;
+    return str.substr(0, eol_char);
+}
+
 bool endsWith(const std::string_view& str, const std::string_view& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.592
+- Simplified Instance.new and game:GetService calls internally and in the definitions file to reduce complexity issues in the typechecker.
 
 ### Fixed
 

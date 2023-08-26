@@ -324,7 +324,8 @@ int startAnalyze(int argc, char** argv)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false,
+            types::parseDefinitionsFileMetadata(*definitionsContents));
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

@@ -70,4 +70,15 @@ TEST_CASE("resolvePath resolves paths including tilde expansions")
     CHECK_EQ(resolvePath("~/foo.lua"), home.value() / "foo.lua");
 }
 
+TEST_CASE("getFirstLine returns first line")
+{
+    CHECK_EQ(getFirstLine("--##{'x':true}\nhello = world"), "--##{'x':true}");
+}
+
+TEST_CASE("getFirstLine returns string when there is no newline")
+{
+    CHECK_EQ(getFirstLine(""), "");
+    CHECK_EQ(getFirstLine("testing"), "testing");
+}
+
 TEST_SUITE_END();

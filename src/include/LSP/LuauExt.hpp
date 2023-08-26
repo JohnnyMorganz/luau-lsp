@@ -15,10 +15,19 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
 bool isMetamethod(const Luau::Name& name);
 
+struct DefinitionsFileMetadata
+{
+    std::vector<std::string> CREATABLE_INSTANCES{};
+    std::vector<std::string> SERVICES{};
+};
+NLOHMANN_DEFINE_OPTIONAL(DefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
+
+std::optional<DefinitionsFileMetadata> parseDefinitionsFileMetadata(const std::string& definitions);
+
 void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
     const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
-Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions,
+    bool typeCheckForAutocomplete = false, std::optional<DefinitionsFileMetadata> metadata = std::nullopt);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
