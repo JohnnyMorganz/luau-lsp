@@ -20,6 +20,7 @@ void trim_start(std::string& str);
 void trim_end(std::string& str);
 void trim(std::string& str);
 std::string& toLower(std::string& str);
+std::string_view getFirstLine(const std::string_view& str);
 bool endsWith(const std::string_view& str, const std::string_view& suffix);
 bool replace(std::string& str, const std::string& from, const std::string& to);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);

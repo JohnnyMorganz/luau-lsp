@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.24.0] - 2023-08-26
+
 ### Changed
 
-- Sync to upstream Luau 0.590
+- Sync to upstream Luau 0.592
+- Simplified Instance.new and game:GetService calls internally and in the definitions file to reduce complexity issues in the typechecker.
+
+### Fixed
+
+- Fixed cleanup of rojo sourcemap generation process when VSCode exits
+- Fixed color presentations values being unclamped causing errors in other editors
+- Fixed newline not added to separate services and requires when the suggestion imports both at the same time
 
 ## [1.23.0] - 2023-08-06
 
