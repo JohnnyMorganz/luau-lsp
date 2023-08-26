@@ -182,46 +182,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     }
 }
 
-/// Attempts to retrieve a list of service names by inspecting the global type definitions
-static std::vector<std::string> getServiceNames(const Luau::ScopePtr& scope)
-{
-    std::vector<std::string> services{};
-
-    if (auto dataModelType = scope->lookupType("ServiceProvider"))
-    {
-        if (auto ctv = Luau::get<Luau::ClassType>(dataModelType->type))
-        {
-            if (auto getService = Luau::lookupClassProp(ctv, "GetService"))
-            {
-                if (auto itv = Luau::get<Luau::IntersectionType>(getService->type()))
-                {
-                    for (auto part : itv->parts)
-                    {
-                        if (auto ftv = Luau::get<Luau::FunctionType>(part))
-                        {
-                            auto it = Luau::begin(ftv->argTypes);
-                            auto end = Luau::end(ftv->argTypes);
-
-                            if (it != end && ++it != end)
-                            {
-                                if (auto stv = Luau::get<Luau::SingletonType>(*it))
-                                {
-                                    if (auto ss = Luau::get<Luau::StringSingleton>(stv))
-                                    {
-                                        services.emplace_back(ss->value);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return services;
-}
-
 static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
