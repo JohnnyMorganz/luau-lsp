@@ -15,7 +15,7 @@ BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc
 
 INCLUDE_DEPRECATED_METHODS = False
 SPECIAL_INSTANCE_NEW_AND_GETSERVICE = (
-    True  # TODO: set to false and snip once happy with intersection types removed
+    False  # TODO: set to false and snip once happy with intersection types removed
 )
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
 OVERRIDE_DEPRECATED_REMOVAL = [
