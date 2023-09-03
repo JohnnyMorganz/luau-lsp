@@ -14,8 +14,8 @@ enum struct DiagnosticSeverity
 {
     Error = 1,
     Warning = 2,
-    Information = 3,
-    Hint = 4,
+    Information [[maybe_unused]] = 3,
+    Hint [[maybe_unused]] = 4,
 };
 
 enum struct DiagnosticTag
@@ -29,13 +29,13 @@ struct DiagnosticRelatedInformation
     Location location;
     std::string message;
 };
-NLOHMANN_DEFINE_OPTIONAL(DiagnosticRelatedInformation, location, message);
+NLOHMANN_DEFINE_OPTIONAL(DiagnosticRelatedInformation, location, message)
 
 struct CodeDescription
 {
     URI href;
 };
-NLOHMANN_DEFINE_OPTIONAL(CodeDescription, href);
+NLOHMANN_DEFINE_OPTIONAL(CodeDescription, href)
 
 struct Diagnostic
 {
@@ -49,7 +49,7 @@ struct Diagnostic
     std::vector<DiagnosticRelatedInformation> relatedInformation{};
     // data?
 };
-NLOHMANN_DEFINE_OPTIONAL(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation);
+NLOHMANN_DEFINE_OPTIONAL(Diagnostic, range, severity, code, codeDescription, source, message, tags, relatedInformation)
 
 struct PublishDiagnosticsParams
 {
@@ -57,7 +57,7 @@ struct PublishDiagnosticsParams
     std::optional<size_t> version = std::nullopt;
     std::vector<Diagnostic> diagnostics{};
 };
-NLOHMANN_DEFINE_OPTIONAL(PublishDiagnosticsParams, uri, version, diagnostics);
+NLOHMANN_DEFINE_OPTIONAL(PublishDiagnosticsParams, uri, version, diagnostics)
 
 struct DocumentDiagnosticParams
 {
@@ -65,7 +65,7 @@ struct DocumentDiagnosticParams
     std::optional<std::string> identifier = std::nullopt;
     std::optional<std::string> previousResultId = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentDiagnosticParams, textDocument, identifier, previousResultId);
+NLOHMANN_DEFINE_OPTIONAL(DocumentDiagnosticParams, textDocument, identifier, previousResultId)
 
 enum struct DocumentDiagnosticReportKind
 {
@@ -73,7 +73,7 @@ enum struct DocumentDiagnosticReportKind
     Unchanged,
 };
 NLOHMANN_JSON_SERIALIZE_ENUM(
-    DocumentDiagnosticReportKind, {{DocumentDiagnosticReportKind::Full, "full"}, {DocumentDiagnosticReportKind::Unchanged, "unchanged"}});
+    DocumentDiagnosticReportKind, {{DocumentDiagnosticReportKind::Full, "full"}, {DocumentDiagnosticReportKind::Unchanged, "unchanged"}})
 
 // TODO: we slightly stray away from the specification here for simplicity
 // The specification defines separated types FullDocumentDiagnosticReport and UnchangedDocumentDiagnosticReport, depending on the kind
@@ -83,13 +83,13 @@ struct SingleDocumentDiagnosticReport
     std::optional<std::string> resultId = std::nullopt; // NB: this MUST be present if kind == Unchanged
     std::vector<Diagnostic> items{};                    // NB: this MUST NOT be present if kind == Unchanged
 };
-NLOHMANN_DEFINE_OPTIONAL(SingleDocumentDiagnosticReport, kind, resultId, items);
+NLOHMANN_DEFINE_OPTIONAL(SingleDocumentDiagnosticReport, kind, resultId, items)
 
 struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
     std::unordered_map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments{};
 };
-NLOHMANN_DEFINE_OPTIONAL(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments);
+NLOHMANN_DEFINE_OPTIONAL(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments)
 
 using DocumentDiagnosticReport = RelatedDocumentDiagnosticReport;
 
@@ -120,37 +120,37 @@ struct PreviousResultId
     DocumentUri uri;
     std::optional<std::string> value = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(PreviousResultId, uri, value);
+NLOHMANN_DEFINE_OPTIONAL(PreviousResultId, uri, value)
 
 struct WorkspaceDiagnosticParams : PartialResultParams
 {
     std::optional<std::string> identifier = std::nullopt;
     std::vector<PreviousResultId> previousResultIds{};
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticParams, partialResultToken, identifier, previousResultIds);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticParams, partialResultToken, identifier, previousResultIds)
 
 struct WorkspaceDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
     DocumentUri uri;
     std::optional<size_t> version = std::nullopt;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(WorkspaceDocumentDiagnosticReport, kind, resultId, items, uri, version)
 
 struct WorkspaceDiagnosticReport
 {
     std::vector<WorkspaceDocumentDiagnosticReport> items{};
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReport, items);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReport, items)
 
 struct WorkspaceDiagnosticReportPartialResult
 {
     std::vector<WorkspaceDocumentDiagnosticReport> items{};
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReportPartialResult, items);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceDiagnosticReportPartialResult, items)
 
 struct DiagnosticServerCancellationData
 {
     bool retriggerRequest = true;
 };
-NLOHMANN_DEFINE_OPTIONAL(DiagnosticServerCancellationData, retriggerRequest);
+NLOHMANN_DEFINE_OPTIONAL(DiagnosticServerCancellationData, retriggerRequest)
 } // namespace lsp

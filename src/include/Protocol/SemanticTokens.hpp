@@ -84,7 +84,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenTypes, {
                                                      {SemanticTokenTypes::RegExp, "regexp"},
                                                      {SemanticTokenTypes::Operator, "operator"},
                                                      {SemanticTokenTypes::Decorator, "decorator"},
-                                                 });
+                                                 })
 
 enum struct SemanticTokenModifiers : uint16_t
 {
@@ -125,7 +125,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SemanticTokenModifiers, {
                                                          {SemanticTokenModifiers::Modification, "modification"},
                                                          {SemanticTokenModifiers::Documentation, "documentation"},
                                                          {SemanticTokenModifiers::DefaultLibrary, "defaultLibrary"},
-                                                     });
+                                                     })
 
 constexpr SemanticTokenModifiers operator|(SemanticTokenModifiers a, SemanticTokenModifiers b) noexcept
 {
@@ -137,7 +137,7 @@ struct SemanticTokensLegend
     std::vector<SemanticTokenTypes> tokenTypes{};
     std::vector<SemanticTokenModifiers> tokenModifiers{};
 };
-NLOHMANN_DEFINE_OPTIONAL(SemanticTokensLegend, tokenTypes, tokenModifiers);
+NLOHMANN_DEFINE_OPTIONAL(SemanticTokensLegend, tokenTypes, tokenModifiers)
 
 enum struct TokenFormat
 {
@@ -146,18 +146,18 @@ enum struct TokenFormat
 
 NLOHMANN_JSON_SERIALIZE_ENUM(TokenFormat, {
                                               {TokenFormat::Relative, "relative"},
-                                          });
+                                          })
 
 struct SemanticTokensParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_OPTIONAL(SemanticTokensParams, textDocument);
+NLOHMANN_DEFINE_OPTIONAL(SemanticTokensParams, textDocument)
 
 struct SemanticTokens
 {
     std::optional<std::string> resultId = std::nullopt;
     std::vector<size_t> data{};
 };
-NLOHMANN_DEFINE_OPTIONAL(SemanticTokens, resultId, data);
+NLOHMANN_DEFINE_OPTIONAL(SemanticTokens, resultId, data)
 } // namespace lsp

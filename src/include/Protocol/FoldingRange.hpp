@@ -14,7 +14,7 @@ struct FoldingRangeParams
      */
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_OPTIONAL(FoldingRangeParams, textDocument);
+NLOHMANN_DEFINE_OPTIONAL(FoldingRangeParams, textDocument)
 
 enum struct FoldingRangeKind
 {
@@ -35,7 +35,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(FoldingRangeKind, {
                                                    {FoldingRangeKind::Comment, "comment"},
                                                    {FoldingRangeKind::Imports, "imports"},
                                                    {FoldingRangeKind::Region, "region"},
-                                               });
+                                               })
 
 
 /**
@@ -83,5 +83,5 @@ struct FoldingRange
      */
     std::optional<std::string> collapsedText;
 };
-NLOHMANN_DEFINE_OPTIONAL(FoldingRange, startLine, startCharacter, endLine, endCharacter, kind, collapsedText);
+NLOHMANN_DEFINE_OPTIONAL(FoldingRange, startLine, startCharacter, endLine, endCharacter, kind, collapsedText)
 } // namespace lsp

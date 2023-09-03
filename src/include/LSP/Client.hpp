@@ -16,8 +16,6 @@ using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const 
 
 struct BaseClient
 {
-    virtual ~BaseClient() {}
-
     virtual const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
 
     virtual void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) = 0;

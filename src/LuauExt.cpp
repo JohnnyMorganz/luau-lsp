@@ -105,8 +105,8 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
 
             // Create the ClassType representing the instance
             std::string typeName = getTypeName(baseTypeId).value_or(node->name);
-            Luau::ClassType ctv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
-            auto typeId = arena.addType(std::move(ctv));
+            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
+            auto typeId = arena.addType(std::move(baseInstanceCtv));
 
             // Attach Parent and Children info
             // Get the mutable version of the type var
@@ -447,7 +447,7 @@ static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libr
     replace(newDocumentationSymbol, "@roblox", "@luau");
     mutableTy->documentationSymbol = newDocumentationSymbol;
 
-    if (Luau::TableType* ttv = Luau::getMutable<Luau::TableType>(ty))
+    if (auto* ttv = Luau::getMutable<Luau::TableType>(ty))
     {
         ttv->name = "typeof(" + libraryName + ")";
         for (auto& [name, prop] : ttv->props)
@@ -459,7 +459,7 @@ static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libr
     }
 }
 
-static auto createMagicFunctionTypeLookup(const std::vector<std::string> lookupList, const std::string errorMessagePrefix)
+static auto createMagicFunctionTypeLookup(const std::vector<std::string>& lookupList, const std::string& errorMessagePrefix)
 {
     return [lookupList, errorMessagePrefix](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
                const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
@@ -560,7 +560,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
             // NOTE: This will OVERWRITE any metatables set on these classes!
-            // We assume that all subclasses of instance don't have any metamethaods
+            // We assume that all subclasses of instance don't have any metamethods
             for (auto& [_, ty] : globals.globalScope->exportedTypeBindings)
             {
                 if (auto* c = Luau::getMutable<Luau::ClassType>(ty.type))
@@ -612,7 +612,7 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
                 // TODO: snip old code and move metadata check above
                 // Mark `game:GetService()` with a tag so we can prioritise services when autocompleting
                 // :GetService is an intersection of function types, so we assign a tag on the first intersection
-                if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type()); itv && itv->parts.size() > 0)
+                if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type()); itv && !itv->parts.empty())
                     Luau::attachTag(itv->parts[0], "PrioritiseCommonServices");
             }
         }
@@ -762,7 +762,7 @@ std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::Fun
 
 std::string toStringReturnType(Luau::TypePackId retTypes, Luau::ToStringOptions options)
 {
-    return toStringReturnTypeDetailed(retTypes, options).name;
+    return toStringReturnTypeDetailed(retTypes, std::move(options)).name;
 }
 
 Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau::ToStringOptions options)
@@ -798,8 +798,8 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
 struct FindNodeType : public Luau::AstVisitor
 {
-    const Luau::Position pos;
-    const Luau::Position documentEnd;
+    Luau::Position pos;
+    Luau::Position documentEnd;
     Luau::AstNode* best = nullptr;
     bool closed = false;
 
@@ -810,7 +810,7 @@ struct FindNodeType : public Luau::AstVisitor
     {
     }
 
-    bool isCloserMatch(Luau::Location& newLocation)
+    bool isCloserMatch(Luau::Location& newLocation) const
     {
         return (closed ? newLocation.containsClosed(pos) : newLocation.contains(pos)) && (!best || best->location.encloses(newLocation));
     }
@@ -1047,7 +1047,7 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
 // Based on upstream, except we use containsClosed
 struct FindExprOrLocalClosed : public Luau::AstVisitor
 {
-    const Luau::Position pos;
+    Luau::Position pos;
     Luau::ExprOrLocal result;
 
     explicit FindExprOrLocalClosed(Luau::Position pos)
@@ -1146,7 +1146,7 @@ Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& sour
 
 struct FindSymbolReferences : public Luau::AstVisitor
 {
-    const Luau::Symbol symbol;
+    Luau::Symbol symbol;
     std::vector<Luau::Location> result{};
 
     explicit FindSymbolReferences(Luau::Symbol symbol)
@@ -1164,7 +1164,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return false;
     }
 
-    bool visitLocal(Luau::AstLocal* local)
+    bool visitLocal(Luau::AstLocal* local) const
     {
         if (Luau::Symbol(local) == symbol)
         {
@@ -1246,22 +1246,22 @@ std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& sourc
 
 struct FindTypeReferences : public Luau::AstVisitor
 {
-    const Luau::Name& typeName;
+    Luau::Name typeName;
     std::optional<const Luau::Name> prefix;
     std::vector<Luau::Location> result{};
 
-    explicit FindTypeReferences(const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
-        : typeName(typeName)
-        , prefix(prefix)
+    explicit FindTypeReferences(Luau::Name typeName, std::optional<const Luau::Name> prefix)
+        : typeName(std::move(typeName))
+        , prefix(std::move(prefix))
     {
     }
 
-    bool visit(class Luau::AstType* node)
+    bool visit(class Luau::AstType* node) override
     {
         return true;
     }
 
-    bool visit(class Luau::AstTypeReference* node)
+    bool visit(class Luau::AstTypeReference* node) override
     {
         if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
             result.push_back(node->nameLocation);
@@ -1272,7 +1272,7 @@ struct FindTypeReferences : public Luau::AstVisitor
 
 std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source, const Luau::Name& typeName, std::optional<const Luau::Name> prefix)
 {
-    FindTypeReferences finder(typeName, prefix);
+    FindTypeReferences finder(typeName, std::move(prefix));
     source.root->visit(&finder);
     return std::move(finder.result);
 }
