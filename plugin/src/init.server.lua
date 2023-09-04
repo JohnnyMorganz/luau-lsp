@@ -24,12 +24,14 @@ local AnalyticsService = game:GetService("AnalyticsService")
 
 local Settings = nil :: any
 
-local SettingsModule = AnalyticsService:FindFirstChild("LuauLSP_Settings")
+local SettingsModule = AnalyticsService:FindFirstChild("LuauLSP_Settings") :: ModuleScript
 if not SettingsModule then
-	SettingsModule = script.DefaultSettings:Clone()
+	SettingsModule = (script :: any).DefaultSettings:Clone()
+	assert(SettingsModule, "Luau Typechecking")
 	SettingsModule.Name = "LuauLSP_Settings"
 	SettingsModule.Parent = AnalyticsService
 end
+assert(SettingsModule, "failed to create settings module")
 
 local function LoadSettings()
 	local result, parseError: any = loadstring(SettingsModule.Source)
