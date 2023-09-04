@@ -104,6 +104,7 @@ IGNORED_MEMBERS = {
         "GetPlayerFromCharacter",
     ],
     "ContextActionService": ["BindAction", "BindActionAtPriority"],
+    "Plugin": ["OpenScript"],
     "PluginToolbar": [
         "CreateButton",
     ],
@@ -334,6 +335,9 @@ EXTRA_MEMBERS = {
     "ContextActionService": [
         "function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()",
         "function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()",
+    ],
+    "Plugin": [
+        "function OpenScript(self, script: LuaSourceContainer, lineNumber: number?): nil"
     ],
     "PluginToolbar": [
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",

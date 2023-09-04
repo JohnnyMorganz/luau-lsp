@@ -8388,7 +8388,7 @@ declare class Plugin extends Instance
 	function Negate(self, objects: { Instance }): { NegateOperation }
 	function OnInvoke(self, key: string, callback: ((...any) -> ...any)): Instance
 	function OnSetItem(self, key: string, callback: ((...any) -> ...any)): Instance
-	function OpenScript(self, script: BaseScript, lineNumber: number?): nil
+	function OpenScript(self, script: LuaSourceContainer, lineNumber: number?): nil
 	function OpenWikiPage(self, url: string): nil
 	function PauseSound(self, sound: Instance): nil
 	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
