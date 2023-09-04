@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed crash when attempting to Go To Definition of an imported type
+
 ## [1.24.0] - 2023-08-26
 
 ### Changed

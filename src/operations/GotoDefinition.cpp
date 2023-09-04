@@ -112,7 +112,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     else if (auto reference = node->as<Luau::AstTypeReference>())
     {
         auto uri = params.textDocument.uri;
-        TextDocumentPtr referenceTextDocument = {textDocument, false};
+        TextDocumentPtr referenceTextDocument(textDocument);
 
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)

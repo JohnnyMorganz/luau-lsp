@@ -2,6 +2,7 @@
 #include <optional>
 #include <filesystem>
 #include <unordered_map>
+#include <utility>
 #include "Luau/FileResolver.h"
 #include "Luau/StringUtils.h"
 #include "Luau/Config.h"
@@ -24,9 +25,14 @@ private:
     bool isTemporary = false;
 
 public:
-    TextDocumentPtr(const TextDocument* document, bool isTemporary)
+    explicit TextDocumentPtr(const TextDocument* document)
         : document(document)
-        , isTemporary(isTemporary)
+    {
+    }
+
+    explicit TextDocumentPtr(const lsp::DocumentUri& uri, const std::string& languageId, const std::string& content)
+        : document(new TextDocument(uri, languageId, 0, content))
+        , isTemporary(true)
     {
     }
 
@@ -35,7 +41,7 @@ public:
         return document != nullptr;
     }
 
-    const TextDocument* operator->()
+    const TextDocument* operator->() const
     {
         return document;
     }
@@ -44,6 +50,38 @@ public:
     {
         if (isTemporary)
             delete document;
+    }
+
+    TextDocumentPtr(const TextDocumentPtr& other)
+    {
+        if (other.isTemporary)
+        {
+            document = new TextDocument(other->uri(), other->languageId(), 0, other->getText());
+            isTemporary = true;
+        }
+        else
+        {
+            document = other.document;
+            isTemporary = false;
+        }
+    }
+
+    TextDocumentPtr(TextDocumentPtr&& other) noexcept
+        : document(std::exchange(other.document, nullptr))
+        , isTemporary(std::exchange(other.isTemporary, false))
+    {
+    }
+
+    TextDocumentPtr& operator=(const TextDocumentPtr& other)
+    {
+        return *this = TextDocumentPtr(other);
+    }
+
+    TextDocumentPtr& operator=(TextDocumentPtr&& other) noexcept
+    {
+        std::swap(document, other.document);
+        std::swap(isTemporary, other.isTemporary);
+        return *this;
     }
 };
 
@@ -76,8 +114,8 @@ struct WorkspaceFileResolver
     }
 
     // Create a WorkspaceFileResolver with a specific default configuration
-    WorkspaceFileResolver(const Luau::Config& defaultConfig)
-        : defaultConfig(defaultConfig){};
+    explicit WorkspaceFileResolver(Luau::Config defaultConfig)
+        : defaultConfig(std::move(defaultConfig)){};
 
     // Handle normalisation to simplify lookup
     const std::string normalisedUriString(const lsp::DocumentUri& uri) const;
@@ -89,7 +127,7 @@ struct WorkspaceFileResolver
     TextDocumentPtr getOrCreateTextDocumentFromModuleName(const Luau::ModuleName& name);
 
     /// The name points to a virtual path (i.e., game/ or ProjectRoot/)
-    bool isVirtualPath(const Luau::ModuleName& name) const
+    static bool isVirtualPath(const Luau::ModuleName& name)
     {
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }

@@ -58,14 +58,13 @@ const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const L
 TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(const Luau::ModuleName& name)
 {
     if (auto document = getTextDocumentFromModuleName(name))
-        return {document, false};
+        return TextDocumentPtr(document);
 
     if (auto filePath = resolveToRealPath(name))
         if (auto source = readSource(name))
-            return {new TextDocument{Uri::file(*filePath), "luau", 0, source->source}, true};
-
-
-    return {nullptr, false};
+            return TextDocumentPtr(Uri::file(*filePath), "luau", source->source);
+    
+    return TextDocumentPtr(nullptr);
 }
 
 std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
