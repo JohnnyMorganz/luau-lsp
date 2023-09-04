@@ -561,6 +561,7 @@ declare function printidentity(prefix: string?)
 POST_DATATYPES_BASE = """
 export type SharedTable = any
 export type OpenCloudModel = any
+export type ClipEvaluator = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
@@ -969,7 +970,7 @@ def printClasses(dump: ApiDump):
     # Forward declare "deprecated" classes in case they are still used
     for klass in dump["Classes"]:
         if shouldExcludeAsDeprecated(klass):
-            print(f"type {klass['Name']} = any")
+            print(f"export type {klass['Name']} = any")
 
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
