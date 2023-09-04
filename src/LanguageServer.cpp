@@ -16,9 +16,9 @@
     (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
 
 LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
-    const std::vector<std::filesystem::path>& documentationFiles, const std::optional<Luau::Config>& defaultConfig)
+    const std::vector<std::filesystem::path>& documentationFiles, std::optional<Luau::Config> defaultConfig)
     : client(std::make_shared<Client>())
-    , defaultConfig(defaultConfig)
+    , defaultConfig(std::move(defaultConfig))
 {
     client->definitionsFiles = definitionsFiles;
     client->documentationFiles = documentationFiles;
@@ -429,7 +429,7 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     return result;
 }
 
-void LanguageServer::onInitialized(const lsp::InitializedParams& params)
+void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams& params)
 {
     // Client received result of initialize
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
@@ -512,11 +512,11 @@ void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::D
 
     if (!diagnostics.relatedDocuments.empty())
     {
-        for (const auto& [uri, diagnostics] : diagnostics.relatedDocuments)
+        for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
         {
-            if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+            if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
             {
-                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
             }
         }
     }
@@ -614,11 +614,11 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
 
         if (!diagnostics.relatedDocuments.empty())
         {
-            for (const auto& [uri, diagnostics] : diagnostics.relatedDocuments)
+            for (const auto& [uri, relatedDiagnostics] : diagnostics.relatedDocuments)
             {
-                if (diagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
                 {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, diagnostics.items});
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, relatedDiagnostics.items});
                 }
             }
         }
@@ -743,8 +743,8 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
                     workspace->frontend.parse(moduleName);
 
                 // Re-check the reverse dependencies
-                for (const auto& moduleName : markedDirty)
-                    workspace->frontend.parse(moduleName);
+                for (const auto& reverseDep : markedDirty)
+                    workspace->frontend.parse(reverseDep);
             }
 
             // Clear the diagnostics for the file in case it was not managed
@@ -754,7 +754,7 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     }
 }
 
-Response LanguageServer::onShutdown(const id_type& id)
+Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)
 {
     shutdownRequested = true;
     return nullptr;

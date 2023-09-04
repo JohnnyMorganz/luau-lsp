@@ -118,7 +118,7 @@ struct WorkspaceFileResolver
         : defaultConfig(std::move(defaultConfig)){};
 
     // Handle normalisation to simplify lookup
-    const std::string normalisedUriString(const lsp::DocumentUri& uri) const;
+    static std::string normalisedUriString(const lsp::DocumentUri& uri);
 
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
@@ -136,14 +136,14 @@ struct WorkspaceFileResolver
 
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path
-    Luau::ModuleName getModuleName(const Uri& name);
+    Luau::ModuleName getModuleName(const Uri& name) const;
 
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
 
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
 
     std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
-    Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode) const;
+    static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
 
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const;
 
@@ -151,7 +151,7 @@ struct WorkspaceFileResolver
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
 
-    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString);
+    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString) const;
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
 
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;

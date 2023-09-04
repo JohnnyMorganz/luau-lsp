@@ -191,19 +191,35 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
         {
+            auto uri = params.textDocument.uri;
+            TextDocumentPtr referenceTextDocument(textDocument);
+
             auto scope = Luau::findScopeAtPosition(*module, position);
             if (!scope)
                 return std::nullopt;
 
-            // TODO: we currently can't handle if its imported from a module
             if (reference->prefix)
             {
-                if (auto importedName = scope->importedModules.find(reference->prefix.value().value); importedName != scope->importedModules.end())
+                if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
+                {
+                    auto fileName = fileResolver.resolveToRealPath(*importedName);
+                    if (!fileName)
+                        return std::nullopt;
+                    uri = Uri::file(*fileName);
+
                     // TODO: fix "forAutocomplete"
-                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(importedName->second);
+                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
                         importedModule && importedModule->hasModuleScope())
                         scope = importedModule->getModuleScope();
-                return std::nullopt;
+                    else
+                        return std::nullopt;
+
+                    referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
+                    if (!referenceTextDocument)
+                        return std::nullopt;
+                }
+                else
+                    return std::nullopt;
             }
 
             auto location = lookupTypeLocation(*scope, reference->name.value);
@@ -211,7 +227,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
                 return std::nullopt;
 
             return lsp::Location{
-                params.textDocument.uri, lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}};
+                uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}};
         }
         return std::nullopt;
     };

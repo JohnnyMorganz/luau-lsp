@@ -124,7 +124,7 @@ std::optional<std::string> printDocumentation(const Luau::DocumentationDatabase&
 {
     if (auto documentation = database.find(symbol))
     {
-        std::string result = "";
+        std::string result;
         if (auto* basic = documentation->get_if<Luau::BasicDocumentation>())
         {
             result = basic->documentation;

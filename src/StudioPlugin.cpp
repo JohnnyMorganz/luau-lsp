@@ -32,10 +32,9 @@ void SourceNode::mutateWithPluginInfo(const PluginNodePtr& pluginInstance)
     // We currently perform purely additive changes where we add in new children
     for (const auto& dmChild : pluginInstance->children)
     {
-        auto childNode = findChild(dmChild->name);
-        if (childNode)
+        if (auto existingChildNode = findChild(dmChild->name))
         {
-            childNode.value()->mutateWithPluginInfo(dmChild);
+            existingChildNode.value()->mutateWithPluginInfo(dmChild);
         }
         else
         {

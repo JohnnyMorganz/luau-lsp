@@ -80,7 +80,7 @@ public:
 
     void setTrace(const lsp::SetTraceParams& params);
 
-    bool readRawMessage(std::string& output);
+    static bool readRawMessage(std::string& output);
 
     void handleResponse(const JsonRpcMessage& message);
 

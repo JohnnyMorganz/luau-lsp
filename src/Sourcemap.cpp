@@ -47,24 +47,20 @@ Luau::SourceCode::Type SourceNode::sourceCodeType() const
     }
 }
 
-std::optional<SourceNodePtr> SourceNode::findChild(const std::string& name)
+std::optional<SourceNodePtr> SourceNode::findChild(const std::string& childName)
 {
     for (const auto& child : children)
-    {
-        if (child->name == name)
-        {
+        if (child->name == childName)
             return child;
-        }
-    }
     return std::nullopt;
 }
 
-std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& name)
+std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& ancestorName)
 {
     auto current = parent;
     while (auto currentPtr = current.lock())
     {
-        if (currentPtr->name == name)
+        if (currentPtr->name == ancestorName)
             return currentPtr;
         current = currentPtr->parent;
     }

@@ -936,11 +936,11 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             }
         }
 
-        if (auto tbl = Luau::get<Luau::TableType>(Luau::follow(mt->table)))
+        if (auto mtBaseTable = Luau::get<Luau::TableType>(Luau::follow(mt->table)))
         {
-            if (tbl->props.find(name) != tbl->props.end())
+            if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
             {
-                return tbl->props.at(name);
+                return mtBaseTable->props.at(name);
             }
         }
     }

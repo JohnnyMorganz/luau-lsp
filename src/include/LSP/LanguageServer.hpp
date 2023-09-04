@@ -12,7 +12,6 @@
 
 using json = nlohmann::json;
 using namespace json_rpc;
-using Response = json;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 using ClientPtr = std::shared_ptr<Client>;
 
@@ -31,11 +30,11 @@ private:
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
-    const std::optional<Luau::Config>& defaultConfig;
+    std::optional<Luau::Config> defaultConfig;
 
 public:
     explicit LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles, const std::vector<std::filesystem::path>& documentationFiles,
-        const std::optional<Luau::Config>& defaultConfig);
+        std::optional<Luau::Config> defaultConfig);
 
     lsp::ServerCapabilities getServerCapabilities();
 
@@ -51,7 +50,7 @@ public:
     // Dispatch handlers
 private:
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
-    void onInitialized(const lsp::InitializedParams& params);
+    void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
 
     void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version);
     void recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config);
@@ -83,7 +82,7 @@ private:
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
-    Response onShutdown(const id_type& id);
+    Response onShutdown([[maybe_unused]] const id_type& id);
 
 private:
     bool isInitialized = false;

@@ -6,7 +6,7 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
-Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
+Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
     // Handle non-file schemes
     if (name.scheme != "file")
@@ -21,7 +21,7 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name)
     return fsPath;
 }
 
-const std::string WorkspaceFileResolver::normalisedUriString(const lsp::DocumentUri& uri) const
+std::string WorkspaceFileResolver::normalisedUriString(const lsp::DocumentUri& uri)
 {
     auto uriString = uri.toString();
 
@@ -63,7 +63,7 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
     if (auto filePath = resolveToRealPath(name))
         if (auto source = readSource(name))
             return TextDocumentPtr(Uri::file(*filePath), "luau", source->source);
-    
+
     return TextDocumentPtr(nullptr);
 }
 
@@ -86,7 +86,7 @@ std::optional<SourceNodePtr> WorkspaceFileResolver::getSourceNodeFromRealPath(co
     return realPathsToSourceNodes.at(strName);
 }
 
-Luau::ModuleName WorkspaceFileResolver::getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode) const
+Luau::ModuleName WorkspaceFileResolver::getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode)
 {
     return sourceNode->virtualPath;
 }
@@ -136,7 +136,7 @@ std::optional<std::filesystem::path> WorkspaceFileResolver::resolveToRealPath(co
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
-    Luau::SourceCode::Type sourceType;
+    Luau::SourceCode::Type sourceType = Luau::SourceCode::Type::None;
     std::optional<std::string> source;
 
     std::filesystem::path realFileName = name;
@@ -185,7 +185,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
 }
 
 /// Modify the context so that game/Players/LocalPlayer items point to the correct place
-const std::string mapContext(const std::string& context)
+std::string mapContext(const std::string& context)
 {
     if (context == "game/Players/LocalPlayer/PlayerScripts")
         return "game/StarterPlayer/StarterPlayerScripts";
@@ -261,7 +261,7 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(const std::filesystem
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString) const
 {
     std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
     auto filePath = basePath / requiredString;
