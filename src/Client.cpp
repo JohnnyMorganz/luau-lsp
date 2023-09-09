@@ -62,7 +62,7 @@ void Client::sendLogMessage(const lsp::MessageType& type, const std::string& mes
     sendNotification("window/logMessage", params);
 }
 
-void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose)
+void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose) const
 {
     if (traceMode == lsp::TraceValue::Off)
         return;
@@ -85,7 +85,7 @@ void Client::registerCapability(const std::string& registrationId, const std::st
     sendRequest(nextRequestId++, "client/registerCapability", lsp::RegistrationParams{{registration}});
 }
 
-const ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
+ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
 {
     auto key = uri.toString();
     if (configStore.find(key) != configStore.end())

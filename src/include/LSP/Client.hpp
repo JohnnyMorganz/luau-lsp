@@ -16,13 +16,12 @@ using ConfigChangedCallback = std::function<void(const lsp::DocumentUri&, const 
 
 struct BaseClient
 {
-    virtual ~BaseClient(){};
+    virtual ~BaseClient() = default;
 
-    virtual const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
+    virtual ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
 
     virtual void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) = 0;
 };
-
 
 class Client : public BaseClient
 {
@@ -55,22 +54,22 @@ private:
 public:
     void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
         const std::optional<ResponseHandler>& handler = std::nullopt);
-    void sendResponse(const id_type& id, const json& result);
-    void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
-    void sendNotification(const std::string& method, const std::optional<json>& params);
+    static void sendResponse(const id_type& id, const json& result);
+    static void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
+    static void sendNotification(const std::string& method, const std::optional<json>& params);
 
-    void sendProgress(const lsp::ProgressParams& params)
+    static void sendProgress(const lsp::ProgressParams& params)
     {
         sendNotification("$/progress", params);
     }
 
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message);
-    void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt);
-    void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
+    static void sendLogMessage(const lsp::MessageType& type, const std::string& message);
+    void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
+    static void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
 
-    const ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override;
+    ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override;
     void removeConfiguration(const lsp::DocumentUri& uri);
     // TODO: this function only supports getting requests for workspaces
     void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);
@@ -87,5 +86,5 @@ public:
     void handleResponse(const JsonRpcMessage& message);
 
 private:
-    void sendRawMessage(const json& message);
+    static void sendRawMessage(const json& message);
 };
