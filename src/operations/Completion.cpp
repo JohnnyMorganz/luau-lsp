@@ -84,16 +84,15 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             return;
     }
 
-    Luau::AstNode* parent = ancestry.at(currentNodeIndex - 1);
-    if (!parent)
+    Luau::AstNode* currentNode = ancestry.at(currentNodeIndex);
+    if (!currentNode)
         return;
 
     // We should only apply it if the line just above us is the start of the unclosed statement
     // Otherwise, we insert ends in weird places if theirs an unclosed stat a while away
-    if (!parent->is<Luau::AstStatForIn>() && !parent->is<Luau::AstStatFor>() && !parent->is<Luau::AstStatIf>() && !parent->is<Luau::AstStatWhile>() &&
-        !parent->is<Luau::AstExprFunction>())
+    if (!currentNode->is<Luau::AstStatBlock>())
         return;
-    if (params.position.line - parent->location.begin.line > 1)
+    if (params.position.line - currentNode->location.begin.line > 1)
         return;
 
     auto unclosedBlock = false;
@@ -106,6 +105,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         if (auto* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->hasEnd)
             unclosedBlock = true;
         if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasEnd)
+            unclosedBlock = true;
+        if (auto* statBlock = (*it)->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
             unclosedBlock = true;
         if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->hasEnd)
             unclosedBlock = true;
