@@ -52,31 +52,15 @@ public:
             delete document;
     }
 
-    TextDocumentPtr(const TextDocumentPtr& other)
-    {
-        if (other.isTemporary)
-        {
-            document = new TextDocument(other->uri(), other->languageId(), 0, other->getText());
-            isTemporary = true;
-        }
-        else
-        {
-            document = other.document;
-            isTemporary = false;
-        }
-    }
+    TextDocumentPtr(const TextDocumentPtr& other) = delete;
+    TextDocumentPtr& operator=(const TextDocumentPtr& other) = delete;
 
     TextDocumentPtr(TextDocumentPtr&& other) noexcept
         : document(std::exchange(other.document, nullptr))
         , isTemporary(std::exchange(other.isTemporary, false))
     {
     }
-
-    TextDocumentPtr& operator=(const TextDocumentPtr& other)
-    {
-        return *this = TextDocumentPtr(other);
-    }
-
+    
     TextDocumentPtr& operator=(TextDocumentPtr&& other) noexcept
     {
         std::swap(document, other.document);
