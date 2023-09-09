@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.594
+
 ### Fixed
 
 - Fixed crash when attempting to Go To Definition of an imported type
@@ -33,7 +37,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.589
 - Changes to settings which require server restart will now reload the server instead of having to reload the whole VSCode workspace
-- Switch to Rojo `rojo sourcemap --watch` command for sourcemap autogeneration. Note that on rojo error, you must manually restart sourcemap regeneration. **Requires Rojo v7.3.0+**
+- Switch to Rojo `rojo sourcemap --watch` command for sourcemap autogeneration. Note that on rojo error, you must manually restart sourcemap regeneration.
+  **Requires Rojo v7.3.0+**
 
 ### Fixed
 
@@ -243,7 +248,7 @@ To enable this feature, the FFlag `LuauTinyControlFlowAnalysis` must currently b
 
 ```json
 "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+"source.organizeImports": true
 }
 ```
 
