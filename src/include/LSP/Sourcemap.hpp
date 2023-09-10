@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <Luau/FileResolver.h>
 #include "Luau/Type.h"
+#include "Luau/TypeInfer.h"
 #include "Luau/GlobalTypes.h"
 #include "nlohmann/json.hpp"
 #include "LSP/PluginDataModel.hpp"
