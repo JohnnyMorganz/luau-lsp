@@ -17,7 +17,7 @@ enum struct TraceValue
     Messages,
     Verbose,
 };
-NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {{TraceValue::Off, "off"}, {TraceValue::Messages, "messages"}, {TraceValue::Verbose, "verbose"}});
+NLOHMANN_JSON_SERIALIZE_ENUM(TraceValue, {{TraceValue::Off, "off"}, {TraceValue::Messages, "messages"}, {TraceValue::Verbose, "verbose"}})
 
 /**
  * General parameters to register for a capability.
@@ -40,13 +40,13 @@ struct Registration
      */
     LSPAny registerOptions = nullptr;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Registration, id, method, registerOptions);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Registration, id, method, registerOptions)
 
 struct RegistrationParams
 {
     std::vector<Registration> registrations{};
 };
-NLOHMANN_DEFINE_OPTIONAL(RegistrationParams, registrations);
+NLOHMANN_DEFINE_OPTIONAL(RegistrationParams, registrations)
 
 struct InitializeParams
 {
@@ -125,8 +125,8 @@ struct InitializeParams
      */
     std::optional<std::vector<WorkspaceFolder>> workspaceFolders = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(InitializeParams::ClientInfo, name, version);
-NLOHMANN_DEFINE_OPTIONAL(InitializeParams, processId, clientInfo, locale, rootUri, initializationOptions, capabilities, trace, workspaceFolders);
+NLOHMANN_DEFINE_OPTIONAL(InitializeParams::ClientInfo, name, version)
+NLOHMANN_DEFINE_OPTIONAL(InitializeParams, processId, clientInfo, locale, rootUri, initializationOptions, capabilities, trace, workspaceFolders)
 
 
 struct InitializeResult
@@ -140,8 +140,8 @@ struct InitializeResult
     ServerCapabilities capabilities;
     std::optional<ServerInfo> serverInfo = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(InitializeResult::ServerInfo, name, version);
-NLOHMANN_DEFINE_OPTIONAL(InitializeResult, capabilities, serverInfo);
+NLOHMANN_DEFINE_OPTIONAL(InitializeResult::ServerInfo, name, version)
+NLOHMANN_DEFINE_OPTIONAL(InitializeResult, capabilities, serverInfo)
 
 struct InitializedParams
 {
@@ -155,7 +155,7 @@ struct SetTraceParams
      */
     TraceValue value;
 };
-NLOHMANN_DEFINE_OPTIONAL(SetTraceParams, value);
+NLOHMANN_DEFINE_OPTIONAL(SetTraceParams, value)
 
 
 } // namespace lsp

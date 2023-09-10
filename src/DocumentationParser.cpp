@@ -267,12 +267,12 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
 struct AttachCommentsVisitor : public Luau::AstVisitor
 {
     Luau::Position pos;
-    const std::vector<Luau::Comment>& moduleComments; // A list of all comments in the module
+    std::vector<Luau::Comment> moduleComments; // A list of all comments in the module
     Luau::Position closestPreviousNode{0, 0};
 
-    explicit AttachCommentsVisitor(const Luau::Location node, const std::vector<Luau::Comment>& moduleComments)
+    explicit AttachCommentsVisitor(const Luau::Location node, std::vector<Luau::Comment> moduleComments)
         : pos(node.begin)
-        , moduleComments(moduleComments)
+        , moduleComments(std::move(moduleComments))
     {
     }
 

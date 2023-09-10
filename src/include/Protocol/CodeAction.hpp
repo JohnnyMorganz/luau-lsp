@@ -99,7 +99,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(CodeActionKind, {
                                                  {CodeActionKind::Source, "source"},
                                                  {CodeActionKind::SourceOrganizeImports, "source.organizeImports"},
                                                  {CodeActionKind::SourceFixAll, "source.fixAll"},
-                                             });
+                                             })
 
 
 /**
@@ -154,7 +154,7 @@ struct CodeActionContext
     // TODO: this is technicall optional, but it causes build issues
     CodeActionTriggerKind triggerKind = CodeActionTriggerKind::Invoked;
 };
-NLOHMANN_DEFINE_OPTIONAL(CodeActionContext, diagnostics, only, triggerKind);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionContext, diagnostics, only, triggerKind)
 
 /**
  * A code action represents a change that can be performed in code, e.g. to fix
@@ -246,8 +246,8 @@ struct CodeAction
      */
     std::optional<LSPAny> data = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(CodeAction::CodeActionDisabled, reason);
-NLOHMANN_DEFINE_OPTIONAL(CodeAction, title, kind, diagnostics, isPreferred, disabled, edit, command, data);
+NLOHMANN_DEFINE_OPTIONAL(CodeAction::CodeActionDisabled, reason)
+NLOHMANN_DEFINE_OPTIONAL(CodeAction, title, kind, diagnostics, isPreferred, disabled, edit, command, data)
 
 
 struct CodeActionParams
@@ -265,7 +265,7 @@ struct CodeActionParams
      */
     CodeActionContext context;
 };
-NLOHMANN_DEFINE_OPTIONAL(CodeActionParams, textDocument, range, context);
+NLOHMANN_DEFINE_OPTIONAL(CodeActionParams, textDocument, range, context)
 
 using CodeActionResult = std::optional<std::vector<CodeAction>>;
 } // namespace lsp

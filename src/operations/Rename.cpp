@@ -83,7 +83,8 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     {
         // Search for a local binding
         auto references = findSymbolReferences(*sourceModule, localSymbol);
-        std::vector<lsp::TextEdit> localChanges{};
+        std::vector<lsp::TextEdit> localChanges;
+        localChanges.reserve(references.size());
         for (auto& location : references)
         {
             localChanges.emplace_back(

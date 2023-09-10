@@ -2,8 +2,6 @@
 #pragma once
 #include <filesystem>
 #include <regex>
-#include <optional>
-#include <cctype>
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -43,13 +41,12 @@ public:
 public:
     Uri() = default;
 
-    Uri(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query = "",
-        const std::string& fragment = "")
-        : scheme(scheme)
-        , authority(authority)
+    Uri(const std::string& scheme, std::string authority, const std::string& path, std::string query = "", std::string fragment = "")
+        : scheme(std::move(scheme))
+        , authority(std::move(authority))
         , path(_referenceResolution(scheme, path))
-        , query(query)
-        , fragment(fragment)
+        , query(std::move(query))
+        , fragment(std::move(fragment))
     {
         // TODO: validate?
     }

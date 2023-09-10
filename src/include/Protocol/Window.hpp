@@ -16,12 +16,12 @@ struct LogMessageParams
     MessageType type = MessageType::Error;
     std::string message;
 };
-NLOHMANN_DEFINE_OPTIONAL(LogMessageParams, type, message);
+NLOHMANN_DEFINE_OPTIONAL(LogMessageParams, type, message)
 
 struct ShowMessageParams
 {
     MessageType type = MessageType::Error;
     std::string message;
 };
-NLOHMANN_DEFINE_OPTIONAL(ShowMessageParams, type, message);
+NLOHMANN_DEFINE_OPTIONAL(ShowMessageParams, type, message)
 } // namespace lsp

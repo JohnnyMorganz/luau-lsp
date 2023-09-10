@@ -33,7 +33,7 @@ struct ParameterInformation
      */
     std::optional<MarkupContent> documentation = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ParameterInformation, label, documentation);
+NLOHMANN_DEFINE_OPTIONAL(ParameterInformation, label, documentation)
 
 struct SignatureInformation
 {
@@ -42,7 +42,7 @@ struct SignatureInformation
     std::optional<std::vector<ParameterInformation>> parameters = std::nullopt;
     std::optional<size_t> activeParameter = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(SignatureInformation, label, documentation, parameters, activeParameter);
+NLOHMANN_DEFINE_OPTIONAL(SignatureInformation, label, documentation, parameters, activeParameter)
 
 struct SignatureHelp
 {
@@ -50,7 +50,7 @@ struct SignatureHelp
     size_t activeSignature = 0;
     size_t activeParameter = 0;
 };
-NLOHMANN_DEFINE_OPTIONAL(SignatureHelp, signatures, activeSignature, activeParameter);
+NLOHMANN_DEFINE_OPTIONAL(SignatureHelp, signatures, activeSignature, activeParameter)
 
 enum struct SignatureHelpTriggerKind
 {
@@ -66,7 +66,7 @@ struct SignatureHelpContext
     bool isRetrigger = false;
     std::optional<SignatureHelp> activeSignatureHelp = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp);
+NLOHMANN_DEFINE_OPTIONAL(SignatureHelpContext, triggerKind, triggerCharacter, isRetrigger, activeSignatureHelp)
 
 struct SignatureHelpParams : TextDocumentPositionParams
 {

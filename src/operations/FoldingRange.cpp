@@ -2,12 +2,12 @@
 
 struct FoldingRangeVisitor : public Luau::AstVisitor
 {
-    const lsp::ClientCapabilities& capabilities;
+    lsp::ClientCapabilities capabilities;
     const TextDocument* textDocument;
     std::vector<lsp::FoldingRange> ranges{};
 
-    explicit FoldingRangeVisitor(const lsp::ClientCapabilities& capabilities, const TextDocument* textDocument)
-        : capabilities(capabilities)
+    explicit FoldingRangeVisitor(lsp::ClientCapabilities capabilities, const TextDocument* textDocument)
+        : capabilities(std::move(capabilities))
         , textDocument(textDocument)
     {
     }

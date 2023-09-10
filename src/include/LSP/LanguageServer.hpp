@@ -7,7 +7,6 @@
 #include "Protocol/LanguageFeatures.hpp"
 
 #include "LSP/Client.hpp"
-#include "LSP/JsonRpc.hpp"
 #include "LSP/Workspace.hpp"
 
 using json = nlohmann::json;

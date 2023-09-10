@@ -1,6 +1,7 @@
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
 #include <algorithm>
+#include <fstream>
 
 std::optional<std::string> getParentPath(const std::string& path)
 {

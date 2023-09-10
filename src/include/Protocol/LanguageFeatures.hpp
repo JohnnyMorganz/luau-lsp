@@ -16,7 +16,7 @@ struct Hover
     MarkupContent contents;
     std::optional<Range> range = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(Hover, contents, range);
+NLOHMANN_DEFINE_OPTIONAL(Hover, contents, range)
 
 
 struct DefinitionParams : TextDocumentPositionParams
@@ -33,13 +33,13 @@ struct ReferenceContext
 {
     bool includeDeclaration = false;
 };
-NLOHMANN_DEFINE_OPTIONAL(ReferenceContext, includeDeclaration);
+NLOHMANN_DEFINE_OPTIONAL(ReferenceContext, includeDeclaration)
 
 struct ReferenceParams : TextDocumentPositionParams
 {
     ReferenceContext context;
 };
-NLOHMANN_DEFINE_OPTIONAL(ReferenceParams, textDocument, position, context);
+NLOHMANN_DEFINE_OPTIONAL(ReferenceParams, textDocument, position, context)
 
 using ReferenceResult = std::optional<std::vector<Location>>;
 
@@ -47,7 +47,7 @@ struct RenameParams : TextDocumentPositionParams
 {
     std::string newName;
 };
-NLOHMANN_DEFINE_OPTIONAL(RenameParams, textDocument, position, newName);
+NLOHMANN_DEFINE_OPTIONAL(RenameParams, textDocument, position, newName)
 
 using RenameResult = std::optional<WorkspaceEdit>;
 
@@ -55,7 +55,7 @@ struct DocumentLinkParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentLinkParams, textDocument);
+NLOHMANN_DEFINE_OPTIONAL(DocumentLinkParams, textDocument)
 
 struct DocumentLink
 {
@@ -64,13 +64,13 @@ struct DocumentLink
     std::optional<std::string> tooltip = std::nullopt;
     // std::optional<json> data; // for resolver
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentLink, range, target, tooltip);
+NLOHMANN_DEFINE_OPTIONAL(DocumentLink, range, target, tooltip)
 
 struct DocumentSymbolParams
 {
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentSymbolParams, textDocument);
+NLOHMANN_DEFINE_OPTIONAL(DocumentSymbolParams, textDocument)
 
 enum struct SymbolKind
 {
@@ -118,14 +118,14 @@ struct DocumentSymbol
     Range selectionRange;
     std::vector<DocumentSymbol> children{};
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children);
+NLOHMANN_DEFINE_OPTIONAL(DocumentSymbol, name, detail, kind, tags, deprecated, range, selectionRange, children)
 
 struct InlayHintParams
 {
     TextDocumentIdentifier textDocument;
     Range range;
 };
-NLOHMANN_DEFINE_OPTIONAL(InlayHintParams, textDocument, range);
+NLOHMANN_DEFINE_OPTIONAL(InlayHintParams, textDocument, range)
 
 enum struct InlayHintKind
 {
@@ -144,7 +144,7 @@ struct InlayHint
     bool paddingRight = false;
 };
 
-NLOHMANN_DEFINE_OPTIONAL(InlayHint, position, label, kind, textEdits, tooltip, paddingLeft, paddingRight);
+NLOHMANN_DEFINE_OPTIONAL(InlayHint, position, label, kind, textEdits, tooltip, paddingLeft, paddingRight)
 
 using InlayHintResult = std::vector<InlayHint>;
 
@@ -155,7 +155,7 @@ struct DocumentColorParams
      */
     TextDocumentIdentifier textDocument;
 };
-NLOHMANN_DEFINE_OPTIONAL(DocumentColorParams, textDocument);
+NLOHMANN_DEFINE_OPTIONAL(DocumentColorParams, textDocument)
 
 struct Color
 {
@@ -179,7 +179,7 @@ struct Color
      */
     double alpha = 0.0;
 };
-NLOHMANN_DEFINE_OPTIONAL(Color, red, green, blue, alpha);
+NLOHMANN_DEFINE_OPTIONAL(Color, red, green, blue, alpha)
 
 struct ColorInformation
 {
@@ -193,7 +193,7 @@ struct ColorInformation
      */
     Color color;
 };
-NLOHMANN_DEFINE_OPTIONAL(ColorInformation, range, color);
+NLOHMANN_DEFINE_OPTIONAL(ColorInformation, range, color)
 
 using DocumentColorResult = std::vector<ColorInformation>;
 
@@ -214,7 +214,7 @@ struct ColorPresentationParams
      */
     Range range;
 };
-NLOHMANN_DEFINE_OPTIONAL(ColorPresentationParams, textDocument, color, range);
+NLOHMANN_DEFINE_OPTIONAL(ColorPresentationParams, textDocument, color, range)
 
 
 struct ColorPresentation
@@ -238,7 +238,7 @@ struct ColorPresentation
      */
     std::optional<std::vector<TextEdit>> additionalTextEdits = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ColorPresentation, label, textEdit, additionalTextEdits);
+NLOHMANN_DEFINE_OPTIONAL(ColorPresentation, label, textEdit, additionalTextEdits)
 
 using ColorPresentationResult = std::vector<ColorPresentation>;
 
@@ -254,7 +254,7 @@ struct WorkspaceSymbolParams
      */
     std::string query;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbolParams, query);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbolParams, query)
 
 /**
  * A special workspace symbol that supports locations without a range
@@ -271,7 +271,7 @@ struct WorkspaceSymbol
     /**
      * The kind of this symbol.
      */
-    SymbolKind kind;
+    SymbolKind kind = SymbolKind::Variable;
 
     /**
      * Tags for this completion item.
@@ -295,7 +295,7 @@ struct WorkspaceSymbol
      */
     Location location;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbol, name, kind, tags, containerName, location);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceSymbol, name, kind, tags, containerName, location)
 
 struct CallHierarchyPrepareParams : TextDocumentPositionParams
 {
@@ -311,7 +311,7 @@ struct CallHierarchyItem
     /**
      * The kind of this item.
      */
-    SymbolKind kind;
+    SymbolKind kind = SymbolKind::Variable;
 
     /**
      * Tags for this item.
@@ -347,13 +347,13 @@ struct CallHierarchyItem
      */
     LSPAny data = nullptr;
 };
-NLOHMANN_DEFINE_OPTIONAL(CallHierarchyItem, name, kind, tags, detail, uri, range, selectionRange, data);
+NLOHMANN_DEFINE_OPTIONAL(CallHierarchyItem, name, kind, tags, detail, uri, range, selectionRange, data)
 
 struct CallHierarchyIncomingCallsParams
 {
     CallHierarchyItem item;
 };
-NLOHMANN_DEFINE_OPTIONAL(CallHierarchyIncomingCallsParams, item);
+NLOHMANN_DEFINE_OPTIONAL(CallHierarchyIncomingCallsParams, item)
 
 struct CallHierarchyIncomingCall
 {
@@ -368,13 +368,13 @@ struct CallHierarchyIncomingCall
      */
     std::vector<Range> fromRanges;
 };
-NLOHMANN_DEFINE_OPTIONAL(CallHierarchyIncomingCall, from, fromRanges);
+NLOHMANN_DEFINE_OPTIONAL(CallHierarchyIncomingCall, from, fromRanges)
 
 struct CallHierarchyOutgoingCallsParams
 {
     CallHierarchyItem item;
 };
-NLOHMANN_DEFINE_OPTIONAL(CallHierarchyOutgoingCallsParams, item);
+NLOHMANN_DEFINE_OPTIONAL(CallHierarchyOutgoingCallsParams, item)
 
 struct CallHierarchyOutgoingCall
 {
@@ -389,6 +389,6 @@ struct CallHierarchyOutgoingCall
      */
     std::vector<Range> fromRanges;
 };
-NLOHMANN_DEFINE_OPTIONAL(CallHierarchyOutgoingCall, to, fromRanges);
+NLOHMANN_DEFINE_OPTIONAL(CallHierarchyOutgoingCall, to, fromRanges)
 
 } // namespace lsp

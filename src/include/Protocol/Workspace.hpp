@@ -10,20 +10,20 @@ struct DidChangeConfigurationParams
 {
     json settings;
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeConfigurationParams, settings);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeConfigurationParams, settings)
 
 struct ConfigurationItem
 {
     std::optional<DocumentUri> scopeUri = std::nullopt;
     std::optional<std::string> section = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ConfigurationItem, scopeUri, section);
+NLOHMANN_DEFINE_OPTIONAL(ConfigurationItem, scopeUri, section)
 
 struct ConfigurationParams
 {
     std::vector<ConfigurationItem> items{};
 };
-NLOHMANN_DEFINE_OPTIONAL(ConfigurationParams, items);
+NLOHMANN_DEFINE_OPTIONAL(ConfigurationParams, items)
 
 using GetConfigurationResponse = std::vector<json>;
 
@@ -42,13 +42,13 @@ struct FileSystemWatcher
     GlobPattern globPattern;
     int kind = WatchKind::Create | WatchKind::Change | WatchKind::Delete;
 };
-NLOHMANN_DEFINE_OPTIONAL(FileSystemWatcher, globPattern, kind);
+NLOHMANN_DEFINE_OPTIONAL(FileSystemWatcher, globPattern, kind)
 
 struct DidChangeWatchedFilesRegistrationOptions
 {
     std::vector<FileSystemWatcher> watchers{};
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesRegistrationOptions, watchers);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesRegistrationOptions, watchers)
 
 enum struct FileChangeType
 {
@@ -62,33 +62,33 @@ struct FileEvent
     DocumentUri uri;
     FileChangeType type = FileChangeType::Created;
 };
-NLOHMANN_DEFINE_OPTIONAL(FileEvent, uri, type);
+NLOHMANN_DEFINE_OPTIONAL(FileEvent, uri, type)
 
 struct DidChangeWatchedFilesParams
 {
     std::vector<FileEvent> changes{};
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesParams, changes);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeWatchedFilesParams, changes)
 
 struct WorkspaceFoldersChangeEvent
 {
     std::vector<WorkspaceFolder> added{};
     std::vector<WorkspaceFolder> removed{};
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceFoldersChangeEvent, added, removed);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceFoldersChangeEvent, added, removed)
 
 struct DidChangeWorkspaceFoldersParams
 {
     WorkspaceFoldersChangeEvent event;
 };
-NLOHMANN_DEFINE_OPTIONAL(DidChangeWorkspaceFoldersParams, event);
+NLOHMANN_DEFINE_OPTIONAL(DidChangeWorkspaceFoldersParams, event)
 
 struct ApplyWorkspaceEditParams
 {
     std::optional<std::string> label = std::nullopt;
     WorkspaceEdit edit;
 };
-NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditParams, label, edit);
+NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditParams, label, edit)
 
 struct ApplyWorkspaceEditResult
 {
@@ -96,5 +96,5 @@ struct ApplyWorkspaceEditResult
     std::optional<std::string> failureReason = std::nullopt;
     std::optional<size_t> failedChange = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditResult, applied, failureReason, failedChange);
+NLOHMANN_DEFINE_OPTIONAL(ApplyWorkspaceEditResult, applied, failureReason, failedChange)
 } // namespace lsp

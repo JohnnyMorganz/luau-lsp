@@ -9,7 +9,6 @@
 #include "LSP/Client.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/Sourcemap.hpp"
-#include "LSP/PluginDataModel.hpp"
 #include "LSP/TextDocument.hpp"
 
 
@@ -60,7 +59,7 @@ public:
         , isTemporary(std::exchange(other.isTemporary, false))
     {
     }
-    
+
     TextDocumentPtr& operator=(TextDocumentPtr&& other) noexcept
     {
         std::swap(document, other.document);

@@ -16,11 +16,11 @@ private:
     mutable std::optional<std::vector<size_t>> _lineOffsets = std::nullopt;
 
 public:
-    TextDocument(const lsp::DocumentUri& uri, const std::string& languageId, size_t version, const std::string& content)
-        : _uri(uri)
-        , _languageId(languageId)
+    TextDocument(lsp::DocumentUri uri, std::string languageId, size_t version, std::string content)
+        : _uri(std::move(uri))
+        , _languageId(std::move(languageId))
         , _version(version)
-        , _content(content)
+        , _content(std::move(content))
     {
     }
 

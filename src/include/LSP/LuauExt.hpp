@@ -137,7 +137,7 @@ public:
 
             // If the requires are too many lines away, treat it as a new group
             if (previousRequireLine && line - previousRequireLine.value() > 1)
-                requiresMap.push_back({}); // Construct a new group
+                requiresMap.emplace_back(); // Construct a new group
 
             requiresMap.back().emplace(std::string(localName->name.value), local);
             previousRequireLine = line;

@@ -17,16 +17,16 @@ using Response = json;
 class JsonRpcException : public std::exception
 {
 public:
-    JsonRpcException(lsp::ErrorCode code, const std::string& message) noexcept
+    JsonRpcException(lsp::ErrorCode code, std::string message) noexcept
         : code(code)
-        , message(message)
+        , message(std::move(message))
         , data(nullptr)
     {
     }
-    JsonRpcException(lsp::ErrorCode code, const std::string& message, const json& data) noexcept
+    JsonRpcException(lsp::ErrorCode code, std::string message, json data) noexcept
         : code(code)
-        , message(message)
-        , data(data)
+        , message(std::move(message))
+        , data(std::move(data))
     {
     }
 

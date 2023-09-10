@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <climits>
 #include "Luau/Frontend.h"
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
@@ -12,8 +11,8 @@
 
 struct Reference
 {
-    const Luau::ModuleName moduleName;
-    const Luau::Location location;
+    Luau::ModuleName moduleName;
+    Luau::Location location;
 
     bool operator==(const Reference& other) const
     {
@@ -34,10 +33,9 @@ public:
     std::optional<types::DefinitionsFileMetadata> definitionsFileMetadata;
 
 public:
-    WorkspaceFolder(
-        const std::shared_ptr<Client>& client, const std::string& name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
-        , name(name)
+        , name(std::move(name))
         , rootUri(uri)
         , fileResolver(defaultConfig ? WorkspaceFileResolver(*defaultConfig) : WorkspaceFileResolver())
         // TODO: we don't really need to retainFullTypeGraphs by default
