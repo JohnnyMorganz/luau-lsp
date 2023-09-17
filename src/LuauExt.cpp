@@ -576,46 +576,27 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
     }
 
     // Attach onto Instance.new()
-    if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
-        if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
-            if (auto newFunction = ttv->props.find("new"); newFunction != ttv->props.end())
-            {
-                if (metadata.has_value() && !metadata->CREATABLE_INSTANCES.empty() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+    if (metadata.has_value() && !metadata->CREATABLE_INSTANCES.empty())
+        if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
+            if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
+                if (auto newFunction = ttv->props.find("new");
+                    newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
                 {
+
                     Luau::attachTag(newFunction->second.type(), "CreatableInstances");
                     Luau::attachMagicFunction(
                         newFunction->second.type(), createMagicFunctionTypeLookup(metadata->CREATABLE_INSTANCES, "Invalid class name"));
                 }
-                else
-                {
-                    // TODO: snip old code and move metadata check above
-                    if (auto itv = Luau::get<Luau::IntersectionType>(newFunction->second.type()))
-                        for (auto& part : itv->parts)
-                            if (auto ftv = Luau::get<Luau::FunctionType>(part))
-                                if (auto it = Luau::begin(ftv->argTypes); it != Luau::end(ftv->argTypes))
-                                    if (Luau::isPrim(*it, Luau::PrimitiveType::String))
-                                        Luau::attachMagicFunction(part, magicFunctionInstanceNew);
-                }
-            }
 
     // Attach onto `game:GetService()`
-    if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type))
-        {
-            if (metadata.has_value() && !metadata->CREATABLE_INSTANCES.empty() && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
+    if (metadata.has_value() && !metadata->SERVICES.empty())
+        if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
+            if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type);
+                ctv && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
             {
                 Luau::attachTag(ctv->props["GetService"].type(), "Services");
                 Luau::attachMagicFunction(ctv->props["GetService"].type(), createMagicFunctionTypeLookup(metadata->SERVICES, "Invalid service name"));
             }
-            else
-            {
-                // TODO: snip old code and move metadata check above
-                // Mark `game:GetService()` with a tag so we can prioritise services when autocompleting
-                // :GetService is an intersection of function types, so we assign a tag on the first intersection
-                if (auto* itv = Luau::getMutable<Luau::IntersectionType>(ctv->props["GetService"].type()); itv && !itv->parts.empty())
-                    Luau::attachTag(itv->parts[0], "PrioritiseCommonServices");
-            }
-        }
 
     // Move Enums over as imported type bindings
     std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes{};

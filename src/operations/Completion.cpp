@@ -602,13 +602,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 return result;
             }
-            else if (tag == "PrioritiseCommonServices")
-            {
-                // TODO: snip old code
-                // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
-                // highlight this so that we can prioritise common services first in the list
-                isGetService = true;
-            }
 
             return std::nullopt;
         });
