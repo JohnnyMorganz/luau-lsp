@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Prioritise `game:GetService()` as the first autocompletion entry when typing `game:`
+
 ## [1.24.1] - 2023-09-09
 
 ### Changed

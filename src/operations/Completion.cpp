@@ -57,6 +57,10 @@ static constexpr const char* COMMON_INSTANCE_PROPERTIES[] = {
     "SetAttribute",
 };
 
+static constexpr const char* COMMON_SERVICE_PROVIDER_PROPERTIES[] = {
+    "GetService",
+};
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -649,10 +653,19 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
                 item.sortText = SortText::PrioritisedSuggestion;
         }
+        // If calling a property on ServiceProvider, then prioritise these properties
+        if (auto dataModelType = frontend.globalsForAutocomplete.globalScope->lookupType("ServiceProvider");
+            dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
+            Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
+        {
+            if (auto it = std::find(std::begin(COMMON_SERVICE_PROVIDER_PROPERTIES), std::end(COMMON_SERVICE_PROVIDER_PROPERTIES), name);
+                it != std::end(COMMON_SERVICE_PROVIDER_PROPERTIES))
+                item.sortText = SortText::PrioritisedSuggestion;
+        }
         // If calling a property on an Instance, then prioritise these properties
-        if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
-            instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-            Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+        else if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
+                 instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+                 Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
         {
             if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
                 it != std::end(COMMON_INSTANCE_PROPERTIES))
