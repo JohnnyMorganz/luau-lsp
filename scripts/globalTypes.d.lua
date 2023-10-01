@@ -9,6 +9,8 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type OpenCloudModel = any
+type ClipEvaluator = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -52,8 +54,65 @@ declare utf8: {
     offset: (string, number, number?) -> number?,
 }
 
-declare shared: any
+declare class SharedTable
+  [string | number]: any
+end
 
+declare SharedTable: {
+    new: () -> SharedTable,
+    new: (t: { [any]: any }) -> SharedTable,
+    clear: (st: SharedTable) -> (),
+    clone: (st: SharedTable, deep: boolean?) -> SharedTable,
+    cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
+    increment: (st: SharedTable, key: string | number, delta: number) -> number,
+    isFrozen: (st: SharedTable) -> boolean,
+    size: (st: SharedTable) -> number,
+    update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
+}
+
+export type RBXScriptSignal<T... = ...any> = {
+    Wait: (self: RBXScriptSignal<T...>) -> T...,
+    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
+
+type HttpRequestOptions = {
+    Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
+    Headers: { [string]: string }?,
+    Body: string?,
+}
+
+type HttpResponseData = {
+    Success: boolean,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string },
+    Body: string?,
+}
+
+type HumanoidDescriptionAccessory = {
+    AssetId: number,
+    AccessoryType: EnumAccessoryType,
+    IsLayered: boolean,
+    Order: number?,
+    Puffiness: number?,
+}
+
+declare class GlobalSettings extends GenericSettings
+    Lua: LuaSettings
+    Game: GameSettings
+    Studio: Studio
+    Network: NetworkSettings
+    Physics: PhysicsSettings
+    Rendering: RenderSettings
+    Diagnostics: DebugSettings
+    function GetFFlag(self, name: string): boolean
+    function GetFVariable(self, name: string): string
+end
+
+declare shared: any
 declare function collectgarbage(mode: "count"): number
 declare function warn<T...>(...: T...)
 declare function tick(): number
@@ -64,6 +123,13 @@ declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
 declare function spawn<T...>(callback: (T...) -> ())
 declare function version(): string
 declare function printidentity(prefix: string?)
+
+declare game: DataModel
+declare workspace: Workspace
+declare plugin: Plugin
+declare script: LuaSourceContainer
+declare function settings(): GlobalSettings
+declare function UserSettings(): UserSettings
 
 declare class EnumAccessModifierType extends EnumItem end
 declare class EnumAccessModifierType_INTERNAL extends Enum
@@ -4167,44 +4233,6 @@ declare class Vector3int16
 	function __sub(self, other: Vector3int16): Vector3int16
 	function __unm(self): Vector3int16
 end
-
-
-declare class SharedTable
-  [string | number]: any
-end
-
-export type OpenCloudModel = any
-export type ClipEvaluator = any
-
-export type RBXScriptSignal<T... = ...any> = {
-    Wait: (self: RBXScriptSignal<T...>) -> T...,
-    Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-    Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-}
-
-type HttpRequestOptions = {
-    Url: string,
-    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
-    Headers: { [string]: string }?,
-    Body: string?,
-}
-
-type HttpResponseData = {
-    Success: boolean,
-    StatusCode: number,
-    StatusMessage: string,
-    Headers: { [string]: string },
-    Body: string?,
-}
-
-type HumanoidDescriptionAccessory = {
-    AssetId: number,
-    AccessoryType: EnumAccessoryType,
-    IsLayered: boolean,
-    Order: number?,
-    Puffiness: number?,
-}
 
 export type Hat = any
 export type AnalyticsService = any
@@ -11010,36 +11038,4 @@ declare FloatCurveKey: {
 declare RotationCurveKey: {
 	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode) -> RotationCurveKey),
 }
-
-
-declare class GlobalSettings extends GenericSettings
-    Lua: LuaSettings
-    Game: GameSettings
-    Studio: Studio
-    Network: NetworkSettings
-    Physics: PhysicsSettings
-    Rendering: RenderSettings
-    Diagnostics: DebugSettings
-    function GetFFlag(self, name: string): boolean
-    function GetFVariable(self, name: string): string
-end
-
-declare SharedTable: {
-    new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
-    clear: (st: SharedTable) -> (),
-    clone: (st: SharedTable, deep: boolean?) -> SharedTable,
-    cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
-    increment: (st: SharedTable, key: string | number, delta: number) -> number,
-    isFrozen: (st: SharedTable) -> boolean,
-    size: (st: SharedTable) -> number,
-    update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
-}
-
-declare game: DataModel
-declare workspace: Workspace
-declare plugin: Plugin
-declare script: LuaSourceContainer
-declare function settings(): GlobalSettings
-declare function UserSettings(): UserSettings
 
