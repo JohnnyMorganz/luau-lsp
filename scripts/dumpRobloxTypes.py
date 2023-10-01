@@ -559,16 +559,11 @@ declare function version(): string
 declare function printidentity(prefix: string?)
 """
 
-# Hardcoded types after data types have been defined
-# TODO: we wanted to declare SharedTable as the following:
-# declare class SharedTable
-#   [string | number]: any
-# end
-# but it bumps the minimum version required for luau-lsp.
-# We will leave it defined as any for now, and improve it later when stability improves
-
 POST_DATATYPES_BASE = """
-export type SharedTable = any
+declare class SharedTable
+  [string | number]: any
+end
+
 export type OpenCloudModel = any
 export type ClipEvaluator = any
 

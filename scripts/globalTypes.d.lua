@@ -4169,7 +4169,10 @@ declare class Vector3int16
 end
 
 
-export type SharedTable = any
+declare class SharedTable
+  [string | number]: any
+end
+
 export type OpenCloudModel = any
 export type ClipEvaluator = any
 
