@@ -56,6 +56,7 @@ IGNORED_INSTANCES: List[str] = [
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
+    "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -234,6 +235,9 @@ IGNORED_MEMBERS = {
     "PathfindingLink": [
         "Attachment0",
         "Attachment1",
+    ],
+    "Vector3": [
+        "Angle",
     ],
 }
 
@@ -825,6 +829,15 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
             name = "Enum" + name[5:]
         return "{ " + name + " }"
 
+    if "Union" in type:
+        unions = type["Union"]
+        parts = [resolveType(part) for part in unions]
+        return " | ".join(parts)
+
+    if "Tuple" in type:
+        subtype = resolveType(type["Tuple"])
+        return f"...({subtype})"
+
     name, category = (
         type["Name"],
         type["Category"] if "Category" in type else "Primitive",
@@ -1182,9 +1195,17 @@ def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
     dataTypeNames = {klass["Name"] for klass in dataTypes}
 
     def resolveClass(type: Union[ApiValueType, CorrectionsValueType]) -> Optional[str]:
+        # import sys
+
+        # print(type, file=sys.stderr)
+
         name = (
             type["Generic"]
             if "Generic" in type
+            else type["Tuple"]["Name"]
+            if "Tuple" in type
+            else type["Union"][0]["Name"]
+            if "Union" in type
             else type["Name"][:-1]
             if type["Name"][-1] == "?"
             else type["Name"]
