@@ -855,6 +855,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 def resolveParameter(param: ApiParameter):
     paramType = resolveType(param["Type"])
     isOptional = paramType[-1] == "?"
+    isVariadic = paramType.startswith("...")
+    if isVariadic:
+        return paramType  # cannot give it a name
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
 
