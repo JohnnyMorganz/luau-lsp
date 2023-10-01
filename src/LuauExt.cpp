@@ -300,21 +300,6 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
     return std::nullopt;
 }
 
-// Magic function attached to `Instance.new(string) -> Instance`, where if the argument given is a string literal
-// then we must error since we have hit the fallback value
-static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceNew(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
-    const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
-{
-    if (expr.args.size < 1)
-        return std::nullopt;
-
-    if (auto str = expr.args.data[0]->as<Luau::AstExprConstantString>())
-        typeChecker.reportError(Luau::TypeError{
-            expr.args.data[0]->location, Luau::GenericError{"Invalid class name '" + std::string(str->value.data, str->value.size) + "'"}});
-
-    return std::nullopt;
-}
-
 void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
     if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
