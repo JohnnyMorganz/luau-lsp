@@ -501,6 +501,7 @@ type QDir = string
 type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
+type Secret = any
 
 declare class Enum
     function GetEnumItems(self): { any }
