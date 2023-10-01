@@ -857,7 +857,8 @@ def resolveParameter(param: ApiParameter):
     isOptional = paramType[-1] == "?"
     isVariadic = paramType.startswith("...")
     if isVariadic:
-        return paramType  # cannot give it a name
+        actualType = paramType[3:]
+        return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
 
