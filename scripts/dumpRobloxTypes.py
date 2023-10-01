@@ -1188,97 +1188,6 @@ def loadClassesIntoStructures(dump: ApiDump):
         CLASSES[klass["Name"]] = klass
 
 
-def topologicalSortDataTypes(dataTypes: List[DataType]) -> List[DataType]:
-    # A child of node in graph indicates that the child references the node
-    graph: defaultdict[str, set[str]] = defaultdict(set)
-
-    dataTypeNames = {klass["Name"] for klass in dataTypes}
-
-    def resolveClass(type: Union[ApiValueType, CorrectionsValueType]) -> Optional[str]:
-        # import sys
-
-        # print(type, file=sys.stderr)
-
-        name = (
-            type["Generic"]
-            if "Generic" in type
-            else type["Tuple"]["Name"]
-            if "Tuple" in type
-            else type["Union"][0]["Name"]
-            if "Union" in type
-            else type["Name"][:-1]
-            if type["Name"][-1] == "?"
-            else type["Name"]
-        )
-        if name in dataTypeNames:
-            return name
-
-        return None
-
-    def createReference(klassName: str, referenced: Optional[str]):
-        if referenced is not None:
-            if klassName == referenced:
-                return
-            graph[referenced].add(klassName)
-
-    for klass in dataTypes:
-        klassName = klass["Name"]
-
-        if klassName in IGNORED_INSTANCES:
-            continue
-
-        if klassName not in graph:
-            graph[klassName] = set()
-
-        for member in klass["Members"]:
-            if member["MemberType"] == "Property":
-                createReference(klassName, resolveClass(member["ValueType"]))
-            elif (
-                member["MemberType"] == "Function" or member["MemberType"] == "Callback"
-            ):
-                for param in member["Parameters"]:
-                    createReference(klassName, resolveClass(param["Type"]))
-                if "TupleReturns" in member:
-                    for ret in member["TupleReturns"]:
-                        createReference(klassName, resolveClass(ret))
-                else:
-                    createReference(klassName, resolveClass(member["ReturnType"]))
-            elif member["MemberType"] == "Event":
-                for param in member["Parameters"]:
-                    createReference(klassName, resolveClass(param["Type"]))
-
-    visited: set[str] = set()
-    tempMark: set[str] = set()
-    sort: List[DataType] = []
-
-    def visit(klass: DataType):
-        n = klass["Name"]
-
-        if n in visited:
-            return
-
-        if n in tempMark:
-            raise RuntimeError(n)
-
-        tempMark.add(n)
-
-        for child in sorted(graph[n]):
-            visit(next(filter(lambda d: d["Name"] == child, dataTypes)))
-
-        tempMark.remove(n)
-        visited.add(n)
-        sort.append(klass)
-
-    stack = list(sorted(dataTypes, key=lambda x: x["Name"]))
-
-    while stack:
-        klass = stack.pop()
-        if klass["Name"] not in visited:
-            visit(klass)
-
-    return list(reversed(sort))
-
-
 def processBrickColors(colors):
     for color in colors["BrickColors"]:
         BRICK_COLORS.add(color["Name"])
@@ -1308,7 +1217,7 @@ applyCorrections(dump, corrections)
 printJsonPrologue()
 print(START_BASE)
 printEnums(dump)
-printDataTypes(topologicalSortDataTypes(dataTypes["DataTypes"]))
+printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]))
 print(POST_DATATYPES_BASE)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)

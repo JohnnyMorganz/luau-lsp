@@ -3854,6 +3854,47 @@ declare class Axes
 	Z: boolean
 end
 
+declare class BrickColor
+	Color: Color3
+	Name: string
+	Number: number
+	b: number
+	g: number
+	r: number
+end
+
+declare class CFrame
+	LookVector: Vector3
+	Position: Vector3
+	RightVector: Vector3
+	Rotation: CFrame
+	UpVector: Vector3
+	X: number
+	XVector: Vector3
+	Y: number
+	YVector: Vector3
+	Z: number
+	ZVector: Vector3
+	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
+	function Inverse(self): CFrame
+	function Lerp(self, goal: CFrame, alpha: number): CFrame
+	function Orthonormalize(self): CFrame
+	function PointToObjectSpace(self, v3: Vector3): Vector3
+	function PointToWorldSpace(self, v3: Vector3): Vector3
+	function ToAxisAngle(self): (Vector3, number)
+	function ToEulerAnglesXYZ(self): (number, number, number)
+	function ToEulerAnglesYXZ(self): (number, number, number)
+	function ToObjectSpace(self, cf: CFrame): CFrame
+	function ToOrientation(self): (number, number, number)
+	function ToWorldSpace(self, cf: CFrame): CFrame
+	function VectorToObjectSpace(self, v3: Vector3): Vector3
+	function VectorToWorldSpace(self, v3: Vector3): Vector3
+	function __add(self, other: Vector3): CFrame
+	function __mul(self, other: CFrame): CFrame
+	function __mul(self, other: Vector3): Vector3
+	function __sub(self, other: Vector3): CFrame
+end
+
 declare class CatalogSearchParams
 	AssetTypes: { EnumAssetType }
 	BundleType: { EnumBundleType }
@@ -3873,22 +3914,13 @@ declare class Color3
 	function ToHex(self): string
 end
 
-declare class BrickColor
-	Color: Color3
-	Name: string
-	Number: number
-	b: number
-	g: number
-	r: number
+declare class ColorSequence
+	Keypoints: { ColorSequenceKeypoint }
 end
 
 declare class ColorSequenceKeypoint
 	Time: number
 	Value: Color3
-end
-
-declare class ColorSequence
-	Keypoints: { ColorSequenceKeypoint }
 end
 
 declare class DateTime
@@ -3947,14 +3979,14 @@ declare class NumberRange
 	Min: number
 end
 
+declare class NumberSequence
+	Keypoints: { NumberSequenceKeypoint }
+end
+
 declare class NumberSequenceKeypoint
 	Envelope: number
 	Time: number
 	Value: number
-end
-
-declare class NumberSequence
-	Keypoints: { NumberSequenceKeypoint }
 end
 
 declare class OverlapParams
@@ -3965,6 +3997,11 @@ declare class OverlapParams
 	MaxParts: number
 	RespectCanCollide: boolean
 	function AddToFilter(self, instances: Instance | { Instance }): nil
+end
+
+declare class PathWaypoint
+	Action: EnumPathWaypointAction
+	Position: Vector3
 end
 
 declare class PhysicalProperties
@@ -3982,6 +4019,22 @@ end
 
 
 
+declare class Random
+	function Clone(self): Random
+	function NextInteger(self, min: number, max: number): number
+	function NextNumber(self): number
+	function NextNumber(self, min: number, max: number): number
+	function NextUnitVector(self): Vector3
+end
+
+declare class Ray
+	Direction: Vector3
+	Origin: Vector3
+	Unit: Ray
+	function ClosestPoint(self, point: Vector3): Vector3
+	function Distance(self, point: Vector3): number
+end
+
 declare class RaycastParams
 	BruteForceAllSlow: boolean
 	CollisionGroup: string
@@ -3990,6 +4043,40 @@ declare class RaycastParams
 	IgnoreWater: boolean
 	RespectCanCollide: boolean
 	function AddToFilter(self, instances: Instance | { Instance }): nil
+end
+
+declare class RaycastResult
+	Distance: number
+	Instance: Instance
+	Material: EnumMaterial
+	Normal: Vector3
+	Position: Vector3
+end
+
+declare class Rect
+	Height: number
+	Max: Vector2
+	Min: Vector2
+	Width: number
+end
+
+declare class Region3
+	CFrame: CFrame
+	Size: Vector3
+	function ExpandToGrid(self, Region: number): Region3
+end
+
+declare class Region3int16
+	Max: Vector3int16
+	Min: Vector3int16
+end
+
+declare class RotationCurveKey
+	Interpolation: EnumKeyInterpolationMode
+	LeftTangent: number
+	RightTangent: number
+	Time: number
+	Value: CFrame
 end
 
 
@@ -4039,13 +4126,6 @@ declare class Vector2
 	function __unm(self): Vector2
 end
 
-declare class Rect
-	Height: number
-	Max: Vector2
-	Min: Vector2
-	Width: number
-end
-
 declare class Vector2int16
 	X: number
 	Y: number
@@ -4076,81 +4156,6 @@ declare class Vector3
 	function __unm(self): Vector3
 end
 
-declare class RaycastResult
-	Distance: number
-	Instance: Instance
-	Material: EnumMaterial
-	Normal: Vector3
-	Position: Vector3
-end
-
-declare class Ray
-	Direction: Vector3
-	Origin: Vector3
-	Unit: Ray
-	function ClosestPoint(self, point: Vector3): Vector3
-	function Distance(self, point: Vector3): number
-end
-
-declare class Random
-	function Clone(self): Random
-	function NextInteger(self, min: number, max: number): number
-	function NextNumber(self): number
-	function NextNumber(self, min: number, max: number): number
-	function NextUnitVector(self): Vector3
-end
-
-declare class PathWaypoint
-	Action: EnumPathWaypointAction
-	Position: Vector3
-end
-
-declare class CFrame
-	LookVector: Vector3
-	Position: Vector3
-	RightVector: Vector3
-	Rotation: CFrame
-	UpVector: Vector3
-	X: number
-	XVector: Vector3
-	Y: number
-	YVector: Vector3
-	Z: number
-	ZVector: Vector3
-	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
-	function Inverse(self): CFrame
-	function Lerp(self, goal: CFrame, alpha: number): CFrame
-	function Orthonormalize(self): CFrame
-	function PointToObjectSpace(self, v3: Vector3): Vector3
-	function PointToWorldSpace(self, v3: Vector3): Vector3
-	function ToAxisAngle(self): (Vector3, number)
-	function ToEulerAnglesXYZ(self): (number, number, number)
-	function ToEulerAnglesYXZ(self): (number, number, number)
-	function ToObjectSpace(self, cf: CFrame): CFrame
-	function ToOrientation(self): (number, number, number)
-	function ToWorldSpace(self, cf: CFrame): CFrame
-	function VectorToObjectSpace(self, v3: Vector3): Vector3
-	function VectorToWorldSpace(self, v3: Vector3): Vector3
-	function __add(self, other: Vector3): CFrame
-	function __mul(self, other: CFrame): CFrame
-	function __mul(self, other: Vector3): Vector3
-	function __sub(self, other: Vector3): CFrame
-end
-
-declare class RotationCurveKey
-	Interpolation: EnumKeyInterpolationMode
-	LeftTangent: number
-	RightTangent: number
-	Time: number
-	Value: CFrame
-end
-
-declare class Region3
-	CFrame: CFrame
-	Size: Vector3
-	function ExpandToGrid(self, Region: number): Region3
-end
-
 declare class Vector3int16
 	X: number
 	Y: number
@@ -4160,11 +4165,6 @@ declare class Vector3int16
 	function __mul(self, other: Vector3int16 | number): Vector3int16
 	function __sub(self, other: Vector3int16): Vector3int16
 	function __unm(self): Vector3int16
-end
-
-declare class Region3int16
-	Max: Vector3int16
-	Min: Vector3int16
 end
 
 
