@@ -204,20 +204,24 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString = codeBlock("lua", typeString);
     }
 
-    if (std::optional<std::string> docs; documentationSymbol && (docs = printDocumentation(client->documentation, *documentationSymbol)) && docs)
+    if (std::optional<std::string> docs;
+        documentationSymbol && (docs = printDocumentation(client->documentation, *documentationSymbol)) && docs && !docs->empty())
     {
         typeString += "\n----------\n";
         typeString += *docs;
     }
-    else if (auto documentation = getDocumentationForType(*type))
+    else if (auto documentation = getDocumentationForType(*type); documentation && !documentation->empty())
     {
         typeString += "\n----------\n";
         typeString += *documentation;
     }
     else if (documentationLocation)
     {
-        typeString += "\n----------\n";
-        typeString += printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location));
+        if (auto text = printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location)); !text.empty())
+        {
+            typeString += "\n----------\n";
+            typeString += text;
+        }
     }
 
     return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
