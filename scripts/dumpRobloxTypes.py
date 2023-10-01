@@ -493,7 +493,7 @@ EXTRA_MEMBERS = {
 
 # Hardcoded types
 # These will go before anything else, and are useful to define for other tools
-PREDEFINED_TYPES = """
+START_BASE = """
 type Content = string
 type ProtectedString = string
 type BinaryString = string
@@ -502,8 +502,6 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
-type OpenCloudModel = any
-type ClipEvaluator = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -547,21 +545,27 @@ declare utf8: {
     offset: (string, number, number?) -> number?,
 }
 
+declare shared: any
+
+declare function collectgarbage(mode: "count"): number
+declare function warn<T...>(...: T...)
+declare function tick(): number
+declare function time(): number
+declare function elapsedTime(): number
+declare function wait(seconds: number?): (number, number)
+declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
+declare function spawn<T...>(callback: (T...) -> ())
+declare function version(): string
+declare function printidentity(prefix: string?)
+"""
+
+POST_DATATYPES_BASE = """
 declare class SharedTable
   [string | number]: any
 end
 
-declare SharedTable: {
-    new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
-    clear: (st: SharedTable) -> (),
-    clone: (st: SharedTable, deep: boolean?) -> SharedTable,
-    cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
-    increment: (st: SharedTable, key: string | number, delta: number) -> number,
-    isFrozen: (st: SharedTable) -> boolean,
-    size: (st: SharedTable) -> number,
-    update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
-}
+export type OpenCloudModel = any
+export type ClipEvaluator = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
@@ -592,7 +596,11 @@ type HumanoidDescriptionAccessory = {
     Order: number?,
     Puffiness: number?,
 }
+"""
 
+# More hardcoded types, but go at the end of the file
+# Useful if they rely on previously defined types
+END_BASE = """
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
@@ -605,17 +613,17 @@ declare class GlobalSettings extends GenericSettings
     function GetFVariable(self, name: string): string
 end
 
-declare shared: any
-declare function collectgarbage(mode: "count"): number
-declare function warn<T...>(...: T...)
-declare function tick(): number
-declare function time(): number
-declare function elapsedTime(): number
-declare function wait(seconds: number?): (number, number)
-declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
-declare function spawn<T...>(callback: (T...) -> ())
-declare function version(): string
-declare function printidentity(prefix: string?)
+declare SharedTable: {
+    new: () -> SharedTable,
+    new: (t: { [any]: any }) -> SharedTable,
+    clear: (st: SharedTable) -> (),
+    clone: (st: SharedTable, deep: boolean?) -> SharedTable,
+    cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
+    increment: (st: SharedTable, key: string | number, delta: number) -> number,
+    isFrozen: (st: SharedTable) -> boolean,
+    size: (st: SharedTable) -> number,
+    update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
+}
 
 declare game: DataModel
 declare workspace: Workspace
@@ -1207,8 +1215,10 @@ corrections: CorrectionsDump = json.loads(requests.get(CORRECTIONS_URL).text)
 applyCorrections(dump, corrections)
 
 printJsonPrologue()
-print(PREDEFINED_TYPES)
+print(START_BASE)
 printEnums(dump)
 printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]))
+print(POST_DATATYPES_BASE)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
+print(END_BASE)
