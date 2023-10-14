@@ -930,10 +930,9 @@ def declareClass(klass: ApiClass) -> str:
         elif member["MemberType"] == "Callback":
             return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
 
-    memberDefinitions = map(
-        declareMember,
-        filter(lambda member: filterMember(klass["Name"], member), klass["Members"]),
-    )
+    memberDefinitions = [
+        declareMember(m) for m in klass["Members"] if filterMember(klass["Name"], m)
+    ]
 
     def declareService(service: str):
         return f'\tfunction GetService(self, service: "{service}"): {service}\n'
@@ -967,6 +966,7 @@ def printEnums(dump: ApiDump):
         # Declare an atom for the enum
         out += f"declare class Enum{enum} extends EnumItem end\n"
         out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
+        items.sort()
         for item in items:
             out += f"\t{escapeName(item)}: Enum{enum}\n"
         out += "end\n"

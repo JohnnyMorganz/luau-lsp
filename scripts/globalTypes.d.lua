@@ -72,33 +72,33 @@ declare class EnumAccessModifierType_INTERNAL extends Enum
 end
 declare class EnumAccessoryType extends EnumItem end
 declare class EnumAccessoryType_INTERNAL extends Enum
-	Unknown: EnumAccessoryType
-	Hat: EnumAccessoryType
-	Hair: EnumAccessoryType
-	Face: EnumAccessoryType
-	Neck: EnumAccessoryType
-	Shoulder: EnumAccessoryType
-	Front: EnumAccessoryType
 	Back: EnumAccessoryType
-	Waist: EnumAccessoryType
-	TShirt: EnumAccessoryType
-	Shirt: EnumAccessoryType
-	Pants: EnumAccessoryType
-	Jacket: EnumAccessoryType
-	Sweater: EnumAccessoryType
-	Shorts: EnumAccessoryType
-	LeftShoe: EnumAccessoryType
-	RightShoe: EnumAccessoryType
 	DressSkirt: EnumAccessoryType
 	Eyebrow: EnumAccessoryType
 	Eyelash: EnumAccessoryType
+	Face: EnumAccessoryType
+	Front: EnumAccessoryType
+	Hair: EnumAccessoryType
+	Hat: EnumAccessoryType
+	Jacket: EnumAccessoryType
+	LeftShoe: EnumAccessoryType
+	Neck: EnumAccessoryType
+	Pants: EnumAccessoryType
+	RightShoe: EnumAccessoryType
+	Shirt: EnumAccessoryType
+	Shorts: EnumAccessoryType
+	Shoulder: EnumAccessoryType
+	Sweater: EnumAccessoryType
+	TShirt: EnumAccessoryType
+	Unknown: EnumAccessoryType
+	Waist: EnumAccessoryType
 end
 declare class EnumActionType extends EnumItem end
 declare class EnumActionType_INTERNAL extends Enum
+	Draw: EnumActionType
+	Lose: EnumActionType
 	Nothing: EnumActionType
 	Pause: EnumActionType
-	Lose: EnumActionType
-	Draw: EnumActionType
 	Win: EnumActionType
 end
 declare class EnumActuatorRelativeTo extends EnumItem end
@@ -109,8 +109,8 @@ declare class EnumActuatorRelativeTo_INTERNAL extends Enum
 end
 declare class EnumActuatorType extends EnumItem end
 declare class EnumActuatorType_INTERNAL extends Enum
-	None: EnumActuatorType
 	Motor: EnumActuatorType
+	None: EnumActuatorType
 	Servo: EnumActuatorType
 end
 declare class EnumAdShape extends EnumItem end
@@ -119,15 +119,15 @@ declare class EnumAdShape_INTERNAL extends Enum
 end
 declare class EnumAdTeleportMethod extends EnumItem end
 declare class EnumAdTeleportMethod_INTERNAL extends Enum
-	Undefined: EnumAdTeleportMethod
-	PortalForward: EnumAdTeleportMethod
 	InGameMenuBackButton: EnumAdTeleportMethod
+	PortalForward: EnumAdTeleportMethod
 	UIBackButton: EnumAdTeleportMethod
+	Undefined: EnumAdTeleportMethod
 end
 declare class EnumAdUnitStatus extends EnumItem end
 declare class EnumAdUnitStatus_INTERNAL extends Enum
-	Inactive: EnumAdUnitStatus
 	Active: EnumAdUnitStatus
+	Inactive: EnumAdUnitStatus
 end
 declare class EnumAdornCullingMode extends EnumItem end
 declare class EnumAdornCullingMode_INTERNAL extends Enum
@@ -146,57 +146,57 @@ declare class EnumAlphaMode_INTERNAL extends Enum
 end
 declare class EnumAnalyticsEconomyAction extends EnumItem end
 declare class EnumAnalyticsEconomyAction_INTERNAL extends Enum
-	Default: EnumAnalyticsEconomyAction
 	Acquire: EnumAnalyticsEconomyAction
+	Default: EnumAnalyticsEconomyAction
 	Spend: EnumAnalyticsEconomyAction
 end
 declare class EnumAnalyticsLogLevel extends EnumItem end
 declare class EnumAnalyticsLogLevel_INTERNAL extends Enum
-	Trace: EnumAnalyticsLogLevel
 	Debug: EnumAnalyticsLogLevel
-	Information: EnumAnalyticsLogLevel
-	Warning: EnumAnalyticsLogLevel
 	Error: EnumAnalyticsLogLevel
 	Fatal: EnumAnalyticsLogLevel
+	Information: EnumAnalyticsLogLevel
+	Trace: EnumAnalyticsLogLevel
+	Warning: EnumAnalyticsLogLevel
 end
 declare class EnumAnalyticsProgressionStatus extends EnumItem end
 declare class EnumAnalyticsProgressionStatus_INTERNAL extends Enum
-	Default: EnumAnalyticsProgressionStatus
+	Abandon: EnumAnalyticsProgressionStatus
 	Begin: EnumAnalyticsProgressionStatus
 	Complete: EnumAnalyticsProgressionStatus
-	Abandon: EnumAnalyticsProgressionStatus
+	Default: EnumAnalyticsProgressionStatus
 	Fail: EnumAnalyticsProgressionStatus
 end
 declare class EnumAnimationClipFromVideoStatus extends EnumItem end
 declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
+	Cancelled: EnumAnimationClipFromVideoStatus
+	ErrorGeneric: EnumAnimationClipFromVideoStatus
+	ErrorMultiplePeople: EnumAnimationClipFromVideoStatus
+	ErrorNoPersonDetected: EnumAnimationClipFromVideoStatus
+	ErrorUploadingVideo: EnumAnimationClipFromVideoStatus
+	ErrorVideoTooLong: EnumAnimationClipFromVideoStatus
+	ErrorVideoUnstable: EnumAnimationClipFromVideoStatus
 	Initializing: EnumAnimationClipFromVideoStatus
 	Pending: EnumAnimationClipFromVideoStatus
 	Processing: EnumAnimationClipFromVideoStatus
-	ErrorGeneric: EnumAnimationClipFromVideoStatus
 	Success: EnumAnimationClipFromVideoStatus
-	ErrorVideoTooLong: EnumAnimationClipFromVideoStatus
-	ErrorNoPersonDetected: EnumAnimationClipFromVideoStatus
-	ErrorVideoUnstable: EnumAnimationClipFromVideoStatus
 	Timeout: EnumAnimationClipFromVideoStatus
-	Cancelled: EnumAnimationClipFromVideoStatus
-	ErrorMultiplePeople: EnumAnimationClipFromVideoStatus
-	ErrorUploadingVideo: EnumAnimationClipFromVideoStatus
 end
 declare class EnumAnimationCompositorMode extends EnumItem end
 declare class EnumAnimationCompositorMode_INTERNAL extends Enum
 	Default: EnumAnimationCompositorMode
-	Enabled: EnumAnimationCompositorMode
 	Disabled: EnumAnimationCompositorMode
+	Enabled: EnumAnimationCompositorMode
 end
 declare class EnumAnimationPriority extends EnumItem end
 declare class EnumAnimationPriority_INTERNAL extends Enum
-	Core: EnumAnimationPriority
-	Idle: EnumAnimationPriority
-	Movement: EnumAnimationPriority
 	Action: EnumAnimationPriority
 	Action2: EnumAnimationPriority
 	Action3: EnumAnimationPriority
 	Action4: EnumAnimationPriority
+	Core: EnumAnimationPriority
+	Idle: EnumAnimationPriority
+	Movement: EnumAnimationPriority
 end
 declare class EnumAnimatorRetargetingMode extends EnumItem end
 declare class EnumAnimatorRetargetingMode_INTERNAL extends Enum
@@ -206,40 +206,40 @@ declare class EnumAnimatorRetargetingMode_INTERNAL extends Enum
 end
 declare class EnumAppShellActionType extends EnumItem end
 declare class EnumAppShellActionType_INTERNAL extends Enum
-	None: EnumAppShellActionType
-	OpenApp: EnumAppShellActionType
-	TapChatTab: EnumAppShellActionType
-	TapConversationEntry: EnumAppShellActionType
-	TapAvatarTab: EnumAppShellActionType
-	ReadConversation: EnumAppShellActionType
-	TapGamePageTab: EnumAppShellActionType
-	TapHomePageTab: EnumAppShellActionType
+	AvatarEditorPageLoaded: EnumAppShellActionType
 	GamePageLoaded: EnumAppShellActionType
 	HomePageLoaded: EnumAppShellActionType
-	AvatarEditorPageLoaded: EnumAppShellActionType
+	None: EnumAppShellActionType
+	OpenApp: EnumAppShellActionType
+	ReadConversation: EnumAppShellActionType
+	TapAvatarTab: EnumAppShellActionType
+	TapChatTab: EnumAppShellActionType
+	TapConversationEntry: EnumAppShellActionType
+	TapGamePageTab: EnumAppShellActionType
+	TapHomePageTab: EnumAppShellActionType
 end
 declare class EnumAppShellFeature extends EnumItem end
 declare class EnumAppShellFeature_INTERNAL extends Enum
-	None: EnumAppShellFeature
-	Chat: EnumAppShellFeature
 	AvatarEditor: EnumAppShellFeature
+	Chat: EnumAppShellFeature
 	GamePage: EnumAppShellFeature
 	HomePage: EnumAppShellFeature
-	More: EnumAppShellFeature
 	Landing: EnumAppShellFeature
+	More: EnumAppShellFeature
+	None: EnumAppShellFeature
 end
 declare class EnumAppUpdateStatus extends EnumItem end
 declare class EnumAppUpdateStatus_INTERNAL extends Enum
-	Unknown: EnumAppUpdateStatus
-	NotSupported: EnumAppUpdateStatus
+	Available: EnumAppUpdateStatus
 	Failed: EnumAppUpdateStatus
 	NotAvailable: EnumAppUpdateStatus
-	Available: EnumAppUpdateStatus
+	NotSupported: EnumAppUpdateStatus
+	Unknown: EnumAppUpdateStatus
 end
 declare class EnumApplyStrokeMode extends EnumItem end
 declare class EnumApplyStrokeMode_INTERNAL extends Enum
-	Contextual: EnumApplyStrokeMode
 	Border: EnumApplyStrokeMode
+	Contextual: EnumApplyStrokeMode
 end
 declare class EnumAspectType extends EnumItem end
 declare class EnumAspectType_INTERNAL extends Enum
@@ -248,84 +248,84 @@ declare class EnumAspectType_INTERNAL extends Enum
 end
 declare class EnumAssetCreatorType extends EnumItem end
 declare class EnumAssetCreatorType_INTERNAL extends Enum
-	User: EnumAssetCreatorType
 	Group: EnumAssetCreatorType
+	User: EnumAssetCreatorType
 end
 declare class EnumAssetFetchStatus extends EnumItem end
 declare class EnumAssetFetchStatus_INTERNAL extends Enum
-	Success: EnumAssetFetchStatus
 	Failure: EnumAssetFetchStatus
-	None: EnumAssetFetchStatus
 	Loading: EnumAssetFetchStatus
+	None: EnumAssetFetchStatus
+	Success: EnumAssetFetchStatus
 	TimedOut: EnumAssetFetchStatus
 end
 declare class EnumAssetType extends EnumItem end
 declare class EnumAssetType_INTERNAL extends Enum
-	Image: EnumAssetType
-	TShirt: EnumAssetType
-	Audio: EnumAssetType
-	Mesh: EnumAssetType
-	Lua: EnumAssetType
-	Hat: EnumAssetType
-	Place: EnumAssetType
-	Model: EnumAssetType
-	Shirt: EnumAssetType
-	Pants: EnumAssetType
-	Decal: EnumAssetType
-	Head: EnumAssetType
-	Face: EnumAssetType
-	Gear: EnumAssetType
-	Badge: EnumAssetType
 	Animation: EnumAssetType
-	Torso: EnumAssetType
-	RightArm: EnumAssetType
-	LeftArm: EnumAssetType
-	LeftLeg: EnumAssetType
-	RightLeg: EnumAssetType
-	Package: EnumAssetType
-	GamePass: EnumAssetType
-	Plugin: EnumAssetType
-	MeshPart: EnumAssetType
-	HairAccessory: EnumAssetType
-	FaceAccessory: EnumAssetType
-	NeckAccessory: EnumAssetType
-	ShoulderAccessory: EnumAssetType
-	FrontAccessory: EnumAssetType
+	Audio: EnumAssetType
 	BackAccessory: EnumAssetType
-	WaistAccessory: EnumAssetType
+	Badge: EnumAssetType
 	ClimbAnimation: EnumAssetType
 	DeathAnimation: EnumAssetType
-	FallAnimation: EnumAssetType
-	IdleAnimation: EnumAssetType
-	JumpAnimation: EnumAssetType
-	RunAnimation: EnumAssetType
-	SwimAnimation: EnumAssetType
-	WalkAnimation: EnumAssetType
-	PoseAnimation: EnumAssetType
-	EarAccessory: EnumAssetType
-	EyeAccessory: EnumAssetType
-	EmoteAnimation: EnumAssetType
-	Video: EnumAssetType
-	TShirtAccessory: EnumAssetType
-	ShirtAccessory: EnumAssetType
-	PantsAccessory: EnumAssetType
-	JacketAccessory: EnumAssetType
-	SweaterAccessory: EnumAssetType
-	ShortsAccessory: EnumAssetType
-	LeftShoeAccessory: EnumAssetType
-	RightShoeAccessory: EnumAssetType
+	Decal: EnumAssetType
 	DressSkirtAccessory: EnumAssetType
-	FontFamily: EnumAssetType
+	DynamicHead: EnumAssetType
+	EarAccessory: EnumAssetType
+	EmoteAnimation: EnumAssetType
+	EyeAccessory: EnumAssetType
 	EyebrowAccessory: EnumAssetType
 	EyelashAccessory: EnumAssetType
+	Face: EnumAssetType
+	FaceAccessory: EnumAssetType
+	FallAnimation: EnumAssetType
+	FontFamily: EnumAssetType
+	FrontAccessory: EnumAssetType
+	GamePass: EnumAssetType
+	Gear: EnumAssetType
+	HairAccessory: EnumAssetType
+	Hat: EnumAssetType
+	Head: EnumAssetType
+	IdleAnimation: EnumAssetType
+	Image: EnumAssetType
+	JacketAccessory: EnumAssetType
+	JumpAnimation: EnumAssetType
+	LeftArm: EnumAssetType
+	LeftLeg: EnumAssetType
+	LeftShoeAccessory: EnumAssetType
+	Lua: EnumAssetType
+	Mesh: EnumAssetType
+	MeshPart: EnumAssetType
+	Model: EnumAssetType
 	MoodAnimation: EnumAssetType
-	DynamicHead: EnumAssetType
+	NeckAccessory: EnumAssetType
+	Package: EnumAssetType
+	Pants: EnumAssetType
+	PantsAccessory: EnumAssetType
+	Place: EnumAssetType
+	Plugin: EnumAssetType
+	PoseAnimation: EnumAssetType
+	RightArm: EnumAssetType
+	RightLeg: EnumAssetType
+	RightShoeAccessory: EnumAssetType
+	RunAnimation: EnumAssetType
+	Shirt: EnumAssetType
+	ShirtAccessory: EnumAssetType
+	ShortsAccessory: EnumAssetType
+	ShoulderAccessory: EnumAssetType
+	SweaterAccessory: EnumAssetType
+	SwimAnimation: EnumAssetType
+	TShirt: EnumAssetType
+	TShirtAccessory: EnumAssetType
+	Torso: EnumAssetType
+	Video: EnumAssetType
+	WaistAccessory: EnumAssetType
+	WalkAnimation: EnumAssetType
 end
 declare class EnumAssetTypeVerification extends EnumItem end
 declare class EnumAssetTypeVerification_INTERNAL extends Enum
-	Default: EnumAssetTypeVerification
-	ClientOnly: EnumAssetTypeVerification
 	Always: EnumAssetTypeVerification
+	ClientOnly: EnumAssetTypeVerification
+	Default: EnumAssetTypeVerification
 end
 declare class EnumAudioSubType extends EnumItem end
 declare class EnumAudioSubType_INTERNAL extends Enum
@@ -334,84 +334,84 @@ declare class EnumAudioSubType_INTERNAL extends Enum
 end
 declare class EnumAudioWindowSize extends EnumItem end
 declare class EnumAudioWindowSize_INTERNAL extends Enum
-	Small: EnumAudioWindowSize
-	Medium: EnumAudioWindowSize
 	Large: EnumAudioWindowSize
+	Medium: EnumAudioWindowSize
+	Small: EnumAudioWindowSize
 end
 declare class EnumAutoIndentRule extends EnumItem end
 declare class EnumAutoIndentRule_INTERNAL extends Enum
-	Off: EnumAutoIndentRule
 	Absolute: EnumAutoIndentRule
+	Off: EnumAutoIndentRule
 	Relative: EnumAutoIndentRule
 end
 declare class EnumAutomaticSize extends EnumItem end
 declare class EnumAutomaticSize_INTERNAL extends Enum
 	None: EnumAutomaticSize
 	X: EnumAutomaticSize
-	Y: EnumAutomaticSize
 	XY: EnumAutomaticSize
+	Y: EnumAutomaticSize
 end
 declare class EnumAvatarAssetType extends EnumItem end
 declare class EnumAvatarAssetType_INTERNAL extends Enum
-	TShirt: EnumAvatarAssetType
-	Hat: EnumAvatarAssetType
-	Shirt: EnumAvatarAssetType
-	Pants: EnumAvatarAssetType
-	Head: EnumAvatarAssetType
-	Face: EnumAvatarAssetType
-	Gear: EnumAvatarAssetType
-	Torso: EnumAvatarAssetType
-	RightArm: EnumAvatarAssetType
-	LeftArm: EnumAvatarAssetType
-	LeftLeg: EnumAvatarAssetType
-	RightLeg: EnumAvatarAssetType
-	HairAccessory: EnumAvatarAssetType
-	FaceAccessory: EnumAvatarAssetType
-	NeckAccessory: EnumAvatarAssetType
-	ShoulderAccessory: EnumAvatarAssetType
-	FrontAccessory: EnumAvatarAssetType
 	BackAccessory: EnumAvatarAssetType
-	WaistAccessory: EnumAvatarAssetType
 	ClimbAnimation: EnumAvatarAssetType
-	FallAnimation: EnumAvatarAssetType
-	IdleAnimation: EnumAvatarAssetType
-	JumpAnimation: EnumAvatarAssetType
-	RunAnimation: EnumAvatarAssetType
-	SwimAnimation: EnumAvatarAssetType
-	WalkAnimation: EnumAvatarAssetType
-	MoodAnimation: EnumAvatarAssetType
-	EmoteAnimation: EnumAvatarAssetType
-	TShirtAccessory: EnumAvatarAssetType
-	ShirtAccessory: EnumAvatarAssetType
-	PantsAccessory: EnumAvatarAssetType
-	JacketAccessory: EnumAvatarAssetType
-	SweaterAccessory: EnumAvatarAssetType
-	ShortsAccessory: EnumAvatarAssetType
-	LeftShoeAccessory: EnumAvatarAssetType
-	RightShoeAccessory: EnumAvatarAssetType
 	DressSkirtAccessory: EnumAvatarAssetType
+	DynamicHead: EnumAvatarAssetType
+	EmoteAnimation: EnumAvatarAssetType
 	EyebrowAccessory: EnumAvatarAssetType
 	EyelashAccessory: EnumAvatarAssetType
-	DynamicHead: EnumAvatarAssetType
+	Face: EnumAvatarAssetType
+	FaceAccessory: EnumAvatarAssetType
+	FallAnimation: EnumAvatarAssetType
+	FrontAccessory: EnumAvatarAssetType
+	Gear: EnumAvatarAssetType
+	HairAccessory: EnumAvatarAssetType
+	Hat: EnumAvatarAssetType
+	Head: EnumAvatarAssetType
+	IdleAnimation: EnumAvatarAssetType
+	JacketAccessory: EnumAvatarAssetType
+	JumpAnimation: EnumAvatarAssetType
+	LeftArm: EnumAvatarAssetType
+	LeftLeg: EnumAvatarAssetType
+	LeftShoeAccessory: EnumAvatarAssetType
+	MoodAnimation: EnumAvatarAssetType
+	NeckAccessory: EnumAvatarAssetType
+	Pants: EnumAvatarAssetType
+	PantsAccessory: EnumAvatarAssetType
+	RightArm: EnumAvatarAssetType
+	RightLeg: EnumAvatarAssetType
+	RightShoeAccessory: EnumAvatarAssetType
+	RunAnimation: EnumAvatarAssetType
+	Shirt: EnumAvatarAssetType
+	ShirtAccessory: EnumAvatarAssetType
+	ShortsAccessory: EnumAvatarAssetType
+	ShoulderAccessory: EnumAvatarAssetType
+	SweaterAccessory: EnumAvatarAssetType
+	SwimAnimation: EnumAvatarAssetType
+	TShirt: EnumAvatarAssetType
+	TShirtAccessory: EnumAvatarAssetType
+	Torso: EnumAvatarAssetType
+	WaistAccessory: EnumAvatarAssetType
+	WalkAnimation: EnumAvatarAssetType
 end
 declare class EnumAvatarChatServiceFeature extends EnumItem end
 declare class EnumAvatarChatServiceFeature_INTERNAL extends Enum
 	None: EnumAvatarChatServiceFeature
-	UniverseAudio: EnumAvatarChatServiceFeature
-	UniverseVideo: EnumAvatarChatServiceFeature
 	PlaceAudio: EnumAvatarChatServiceFeature
 	PlaceVideo: EnumAvatarChatServiceFeature
-	UserAudioEligible: EnumAvatarChatServiceFeature
+	UniverseAudio: EnumAvatarChatServiceFeature
+	UniverseVideo: EnumAvatarChatServiceFeature
 	UserAudio: EnumAvatarChatServiceFeature
-	UserVideoEligible: EnumAvatarChatServiceFeature
-	UserVideo: EnumAvatarChatServiceFeature
+	UserAudioEligible: EnumAvatarChatServiceFeature
 	UserBanned: EnumAvatarChatServiceFeature
+	UserVideo: EnumAvatarChatServiceFeature
+	UserVideoEligible: EnumAvatarChatServiceFeature
 end
 declare class EnumAvatarContextMenuOption extends EnumItem end
 declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
-	Friend: EnumAvatarContextMenuOption
 	Chat: EnumAvatarContextMenuOption
 	Emote: EnumAvatarContextMenuOption
+	Friend: EnumAvatarContextMenuOption
 	InspectMenu: EnumAvatarContextMenuOption
 end
 declare class EnumAvatarItemType extends EnumItem end
@@ -422,14 +422,14 @@ end
 declare class EnumAvatarJointUpgrade extends EnumItem end
 declare class EnumAvatarJointUpgrade_INTERNAL extends Enum
 	Default: EnumAvatarJointUpgrade
-	Enabled: EnumAvatarJointUpgrade
 	Disabled: EnumAvatarJointUpgrade
+	Enabled: EnumAvatarJointUpgrade
 end
 declare class EnumAvatarPromptResult extends EnumItem end
 declare class EnumAvatarPromptResult_INTERNAL extends Enum
-	Success: EnumAvatarPromptResult
-	PermissionDenied: EnumAvatarPromptResult
 	Failed: EnumAvatarPromptResult
+	PermissionDenied: EnumAvatarPromptResult
+	Success: EnumAvatarPromptResult
 end
 declare class EnumAvatarThumbnailCustomizationType extends EnumItem end
 declare class EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum
@@ -450,51 +450,51 @@ declare class EnumAxis_INTERNAL extends Enum
 end
 declare class EnumBinType extends EnumItem end
 declare class EnumBinType_INTERNAL extends Enum
-	Script: EnumBinType
+	Clone: EnumBinType
 	GameTool: EnumBinType
 	Grab: EnumBinType
-	Clone: EnumBinType
 	Hammer: EnumBinType
+	Script: EnumBinType
 end
 declare class EnumBodyPart extends EnumItem end
 declare class EnumBodyPart_INTERNAL extends Enum
 	Head: EnumBodyPart
-	Torso: EnumBodyPart
 	LeftArm: EnumBodyPart
-	RightArm: EnumBodyPart
 	LeftLeg: EnumBodyPart
+	RightArm: EnumBodyPart
 	RightLeg: EnumBodyPart
+	Torso: EnumBodyPart
 end
 declare class EnumBodyPartR15 extends EnumItem end
 declare class EnumBodyPartR15_INTERNAL extends Enum
 	Head: EnumBodyPartR15
-	UpperTorso: EnumBodyPartR15
-	LowerTorso: EnumBodyPartR15
 	LeftFoot: EnumBodyPartR15
-	LeftLowerLeg: EnumBodyPartR15
-	LeftUpperLeg: EnumBodyPartR15
-	RightFoot: EnumBodyPartR15
-	RightLowerLeg: EnumBodyPartR15
-	RightUpperLeg: EnumBodyPartR15
 	LeftHand: EnumBodyPartR15
 	LeftLowerArm: EnumBodyPartR15
+	LeftLowerLeg: EnumBodyPartR15
 	LeftUpperArm: EnumBodyPartR15
+	LeftUpperLeg: EnumBodyPartR15
+	LowerTorso: EnumBodyPartR15
+	RightFoot: EnumBodyPartR15
 	RightHand: EnumBodyPartR15
 	RightLowerArm: EnumBodyPartR15
+	RightLowerLeg: EnumBodyPartR15
 	RightUpperArm: EnumBodyPartR15
+	RightUpperLeg: EnumBodyPartR15
 	RootPart: EnumBodyPartR15
 	Unknown: EnumBodyPartR15
+	UpperTorso: EnumBodyPartR15
 end
 declare class EnumBorderMode extends EnumItem end
 declare class EnumBorderMode_INTERNAL extends Enum
-	Outline: EnumBorderMode
-	Middle: EnumBorderMode
 	Inset: EnumBorderMode
+	Middle: EnumBorderMode
+	Outline: EnumBorderMode
 end
 declare class EnumBreakReason extends EnumItem end
 declare class EnumBreakReason_INTERNAL extends Enum
-	Other: EnumBreakReason
 	Error: EnumBreakReason
+	Other: EnumBreakReason
 	SpecialBreakpoint: EnumBreakReason
 	UserBreakpoint: EnumBreakReason
 end
@@ -511,22 +511,22 @@ declare class EnumBulkMoveMode_INTERNAL extends Enum
 end
 declare class EnumBundleType extends EnumItem end
 declare class EnumBundleType_INTERNAL extends Enum
-	BodyParts: EnumBundleType
 	Animations: EnumBundleType
-	Shoes: EnumBundleType
+	BodyParts: EnumBundleType
 	DynamicHead: EnumBundleType
 	DynamicHeadAvatar: EnumBundleType
+	Shoes: EnumBundleType
 end
 declare class EnumButton extends EnumItem end
 declare class EnumButton_INTERNAL extends Enum
-	Jump: EnumButton
 	Dismount: EnumButton
+	Jump: EnumButton
 end
 declare class EnumButtonStyle extends EnumItem end
 declare class EnumButtonStyle_INTERNAL extends Enum
 	Custom: EnumButtonStyle
-	RobloxButtonDefault: EnumButtonStyle
 	RobloxButton: EnumButtonStyle
+	RobloxButtonDefault: EnumButtonStyle
 	RobloxRoundButton: EnumButtonStyle
 	RobloxRoundDefaultButton: EnumButtonStyle
 	RobloxRoundDropdownButton: EnumButtonStyle
@@ -548,96 +548,96 @@ declare class EnumCameraPanMode_INTERNAL extends Enum
 end
 declare class EnumCameraSpeedAdjustBinding extends EnumItem end
 declare class EnumCameraSpeedAdjustBinding_INTERNAL extends Enum
+	AltScroll: EnumCameraSpeedAdjustBinding
 	None: EnumCameraSpeedAdjustBinding
 	RmbScroll: EnumCameraSpeedAdjustBinding
-	AltScroll: EnumCameraSpeedAdjustBinding
 end
 declare class EnumCameraType extends EnumItem end
 declare class EnumCameraType_INTERNAL extends Enum
-	Fixed: EnumCameraType
 	Attach: EnumCameraType
-	Watch: EnumCameraType
-	Track: EnumCameraType
-	Follow: EnumCameraType
 	Custom: EnumCameraType
-	Scriptable: EnumCameraType
+	Fixed: EnumCameraType
+	Follow: EnumCameraType
 	Orbital: EnumCameraType
+	Scriptable: EnumCameraType
+	Track: EnumCameraType
+	Watch: EnumCameraType
 end
 declare class EnumCatalogCategoryFilter extends EnumItem end
 declare class EnumCatalogCategoryFilter_INTERNAL extends Enum
-	None: EnumCatalogCategoryFilter
-	Featured: EnumCatalogCategoryFilter
 	Collectibles: EnumCatalogCategoryFilter
 	CommunityCreations: EnumCatalogCategoryFilter
+	Featured: EnumCatalogCategoryFilter
+	None: EnumCatalogCategoryFilter
 	Premium: EnumCatalogCategoryFilter
 	Recommended: EnumCatalogCategoryFilter
 end
 declare class EnumCatalogSortAggregation extends EnumItem end
 declare class EnumCatalogSortAggregation_INTERNAL extends Enum
-	Past12Hours: EnumCatalogSortAggregation
-	PastDay: EnumCatalogSortAggregation
-	Past3Days: EnumCatalogSortAggregation
-	PastWeek: EnumCatalogSortAggregation
-	PastMonth: EnumCatalogSortAggregation
 	AllTime: EnumCatalogSortAggregation
+	Past12Hours: EnumCatalogSortAggregation
+	Past3Days: EnumCatalogSortAggregation
+	PastDay: EnumCatalogSortAggregation
+	PastMonth: EnumCatalogSortAggregation
+	PastWeek: EnumCatalogSortAggregation
 end
 declare class EnumCatalogSortType extends EnumItem end
 declare class EnumCatalogSortType_INTERNAL extends Enum
-	Relevance: EnumCatalogSortType
+	Bestselling: EnumCatalogSortType
+	MostFavorited: EnumCatalogSortType
 	PriceHighToLow: EnumCatalogSortType
 	PriceLowToHigh: EnumCatalogSortType
-	MostFavorited: EnumCatalogSortType
 	RecentlyCreated: EnumCatalogSortType
-	Bestselling: EnumCatalogSortType
+	Relevance: EnumCatalogSortType
 end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
+	CornerWedge: EnumCellBlock
+	HorizontalWedge: EnumCellBlock
+	InverseCornerWedge: EnumCellBlock
 	Solid: EnumCellBlock
 	VerticalWedge: EnumCellBlock
-	CornerWedge: EnumCellBlock
-	InverseCornerWedge: EnumCellBlock
-	HorizontalWedge: EnumCellBlock
 end
 declare class EnumCellMaterial extends EnumItem end
 declare class EnumCellMaterial_INTERNAL extends Enum
-	Empty: EnumCellMaterial
-	Grass: EnumCellMaterial
-	Sand: EnumCellMaterial
-	Brick: EnumCellMaterial
-	Granite: EnumCellMaterial
-	Asphalt: EnumCellMaterial
-	Iron: EnumCellMaterial
 	Aluminum: EnumCellMaterial
-	Gold: EnumCellMaterial
-	WoodPlank: EnumCellMaterial
-	WoodLog: EnumCellMaterial
-	Gravel: EnumCellMaterial
-	CinderBlock: EnumCellMaterial
-	MossyStone: EnumCellMaterial
-	Cement: EnumCellMaterial
-	RedPlastic: EnumCellMaterial
+	Asphalt: EnumCellMaterial
 	BluePlastic: EnumCellMaterial
+	Brick: EnumCellMaterial
+	Cement: EnumCellMaterial
+	CinderBlock: EnumCellMaterial
+	Empty: EnumCellMaterial
+	Gold: EnumCellMaterial
+	Granite: EnumCellMaterial
+	Grass: EnumCellMaterial
+	Gravel: EnumCellMaterial
+	Iron: EnumCellMaterial
+	MossyStone: EnumCellMaterial
+	RedPlastic: EnumCellMaterial
+	Sand: EnumCellMaterial
 	Water: EnumCellMaterial
+	WoodLog: EnumCellMaterial
+	WoodPlank: EnumCellMaterial
 end
 declare class EnumCellOrientation extends EnumItem end
 declare class EnumCellOrientation_INTERNAL extends Enum
+	NegX: EnumCellOrientation
 	NegZ: EnumCellOrientation
 	X: EnumCellOrientation
 	Z: EnumCellOrientation
-	NegX: EnumCellOrientation
 end
 declare class EnumCenterDialogType extends EnumItem end
 declare class EnumCenterDialogType_INTERNAL extends Enum
-	UnsolicitedDialog: EnumCenterDialogType
-	PlayerInitiatedDialog: EnumCenterDialogType
 	ModalDialog: EnumCenterDialogType
+	PlayerInitiatedDialog: EnumCenterDialogType
 	QuitDialog: EnumCenterDialogType
+	UnsolicitedDialog: EnumCenterDialogType
 end
 declare class EnumChatCallbackType extends EnumItem end
 declare class EnumChatCallbackType_INTERNAL extends Enum
-	OnCreatingChatWindow: EnumChatCallbackType
-	OnClientSendingMessage: EnumChatCallbackType
 	OnClientFormattingMessage: EnumChatCallbackType
+	OnClientSendingMessage: EnumChatCallbackType
+	OnCreatingChatWindow: EnumChatCallbackType
 	OnServerReceivingMessage: EnumChatCallbackType
 end
 declare class EnumChatColor extends EnumItem end
@@ -655,13 +655,13 @@ end
 declare class EnumChatPrivacyMode extends EnumItem end
 declare class EnumChatPrivacyMode_INTERNAL extends Enum
 	AllUsers: EnumChatPrivacyMode
-	NoOne: EnumChatPrivacyMode
 	Friends: EnumChatPrivacyMode
+	NoOne: EnumChatPrivacyMode
 end
 declare class EnumChatStyle extends EnumItem end
 declare class EnumChatStyle_INTERNAL extends Enum
-	Classic: EnumChatStyle
 	Bubble: EnumChatStyle
+	Classic: EnumChatStyle
 	ClassicAndBubble: EnumChatStyle
 end
 declare class EnumChatVersion extends EnumItem end
@@ -678,70 +678,70 @@ end
 declare class EnumCollaboratorStatus extends EnumItem end
 declare class EnumCollaboratorStatus_INTERNAL extends Enum
 	Editing3D: EnumCollaboratorStatus
-	Scripting: EnumCollaboratorStatus
-	PrivateScripting: EnumCollaboratorStatus
 	None: EnumCollaboratorStatus
+	PrivateScripting: EnumCollaboratorStatus
+	Scripting: EnumCollaboratorStatus
 end
 declare class EnumCollisionFidelity extends EnumItem end
 declare class EnumCollisionFidelity_INTERNAL extends Enum
+	Box: EnumCollisionFidelity
 	Default: EnumCollisionFidelity
 	Hull: EnumCollisionFidelity
-	Box: EnumCollisionFidelity
 	PreciseConvexDecomposition: EnumCollisionFidelity
 end
 declare class EnumCommandPermission extends EnumItem end
 declare class EnumCommandPermission_INTERNAL extends Enum
-	Plugin: EnumCommandPermission
 	LocalUser: EnumCommandPermission
+	Plugin: EnumCommandPermission
 end
 declare class EnumCompileTarget extends EnumItem end
 declare class EnumCompileTarget_INTERNAL extends Enum
 	Client: EnumCompileTarget
 	CoreScript: EnumCompileTarget
-	Studio: EnumCompileTarget
 	CoreScriptRaw: EnumCompileTarget
+	Studio: EnumCompileTarget
 end
 declare class EnumCompletionItemKind extends EnumItem end
 declare class EnumCompletionItemKind_INTERNAL extends Enum
-	Text: EnumCompletionItemKind
-	Method: EnumCompletionItemKind
-	Function: EnumCompletionItemKind
-	Constructor: EnumCompletionItemKind
-	Field: EnumCompletionItemKind
-	Variable: EnumCompletionItemKind
 	Class: EnumCompletionItemKind
+	Color: EnumCompletionItemKind
+	Constant: EnumCompletionItemKind
+	Constructor: EnumCompletionItemKind
+	Enum: EnumCompletionItemKind
+	EnumMember: EnumCompletionItemKind
+	Event: EnumCompletionItemKind
+	Field: EnumCompletionItemKind
+	File: EnumCompletionItemKind
+	Folder: EnumCompletionItemKind
+	Function: EnumCompletionItemKind
 	Interface: EnumCompletionItemKind
+	Keyword: EnumCompletionItemKind
+	Method: EnumCompletionItemKind
 	Module: EnumCompletionItemKind
+	Operator: EnumCompletionItemKind
 	Property: EnumCompletionItemKind
+	Reference: EnumCompletionItemKind
+	Snippet: EnumCompletionItemKind
+	Struct: EnumCompletionItemKind
+	Text: EnumCompletionItemKind
+	TypeParameter: EnumCompletionItemKind
 	Unit: EnumCompletionItemKind
 	Value: EnumCompletionItemKind
-	Enum: EnumCompletionItemKind
-	Keyword: EnumCompletionItemKind
-	Snippet: EnumCompletionItemKind
-	Color: EnumCompletionItemKind
-	File: EnumCompletionItemKind
-	Reference: EnumCompletionItemKind
-	Folder: EnumCompletionItemKind
-	EnumMember: EnumCompletionItemKind
-	Constant: EnumCompletionItemKind
-	Struct: EnumCompletionItemKind
-	Event: EnumCompletionItemKind
-	Operator: EnumCompletionItemKind
-	TypeParameter: EnumCompletionItemKind
+	Variable: EnumCompletionItemKind
 end
 declare class EnumCompletionItemTag extends EnumItem end
 declare class EnumCompletionItemTag_INTERNAL extends Enum
+	AddParens: EnumCompletionItemTag
+	ClientServerBoundaryViolation: EnumCompletionItemTag
+	CommandLinePermissions: EnumCompletionItemTag
 	Deprecated: EnumCompletionItemTag
 	IncorrectIndexType: EnumCompletionItemTag
-	PluginPermissions: EnumCompletionItemTag
-	CommandLinePermissions: EnumCompletionItemTag
-	RobloxPermissions: EnumCompletionItemTag
-	AddParens: EnumCompletionItemTag
-	PutCursorInParens: EnumCompletionItemTag
-	TypeCorrect: EnumCompletionItemTag
-	ClientServerBoundaryViolation: EnumCompletionItemTag
 	Invalidated: EnumCompletionItemTag
+	PluginPermissions: EnumCompletionItemTag
 	PutCursorBeforeEnd: EnumCompletionItemTag
+	PutCursorInParens: EnumCompletionItemTag
+	RobloxPermissions: EnumCompletionItemTag
+	TypeCorrect: EnumCompletionItemTag
 end
 declare class EnumCompletionTriggerKind extends EnumItem end
 declare class EnumCompletionTriggerKind_INTERNAL extends Enum
@@ -751,89 +751,89 @@ declare class EnumCompletionTriggerKind_INTERNAL extends Enum
 end
 declare class EnumComputerCameraMovementMode extends EnumItem end
 declare class EnumComputerCameraMovementMode_INTERNAL extends Enum
-	Default: EnumComputerCameraMovementMode
+	CameraToggle: EnumComputerCameraMovementMode
 	Classic: EnumComputerCameraMovementMode
+	Default: EnumComputerCameraMovementMode
 	Follow: EnumComputerCameraMovementMode
 	Orbital: EnumComputerCameraMovementMode
-	CameraToggle: EnumComputerCameraMovementMode
 end
 declare class EnumComputerMovementMode extends EnumItem end
 declare class EnumComputerMovementMode_INTERNAL extends Enum
+	ClickToMove: EnumComputerMovementMode
 	Default: EnumComputerMovementMode
 	KeyboardMouse: EnumComputerMovementMode
-	ClickToMove: EnumComputerMovementMode
 end
 declare class EnumConnectionError extends EnumItem end
 declare class EnumConnectionError_INTERNAL extends Enum
-	OK: EnumConnectionError
-	Unknown: EnumConnectionError
-	DisconnectErrors: EnumConnectionError
 	DisconnectBadhash: EnumConnectionError
-	DisconnectSecurityKeyMismatch: EnumConnectionError
-	DisconnectNewSecurityKeyMismatch: EnumConnectionError
-	DisconnectProtocolMismatch: EnumConnectionError
-	DisconnectReceivePacketError: EnumConnectionError
-	DisconnectReceivePacketStreamError: EnumConnectionError
-	DisconnectSendPacketError: EnumConnectionError
-	DisconnectIllegalTeleport: EnumConnectionError
-	DisconnectDuplicatePlayer: EnumConnectionError
-	DisconnectDuplicateTicket: EnumConnectionError
-	DisconnectTimeout: EnumConnectionError
-	DisconnectLuaKick: EnumConnectionError
-	DisconnectOnRemoteSysStats: EnumConnectionError
-	DisconnectHashTimeout: EnumConnectionError
-	DisconnectCloudEditKick: EnumConnectionError
-	DisconnectPlayerless: EnumConnectionError
-	DisconnectEvicted: EnumConnectionError
-	DisconnectDevMaintenance: EnumConnectionError
-	DisconnectRobloxMaintenance: EnumConnectionError
-	DisconnectRejoin: EnumConnectionError
-	DisconnectConnectionLost: EnumConnectionError
-	DisconnectIdle: EnumConnectionError
-	DisconnectRaknetErrors: EnumConnectionError
-	DisconnectWrongVersion: EnumConnectionError
-	DisconnectBySecurityPolicy: EnumConnectionError
 	DisconnectBlockedIP: EnumConnectionError
+	DisconnectBySecurityPolicy: EnumConnectionError
 	DisconnectClientFailure: EnumConnectionError
 	DisconnectClientRequest: EnumConnectionError
-	DisconnectPrivateServerKickout: EnumConnectionError
-	DisconnectModeratedGame: EnumConnectionError
-	ServerShutdown: EnumConnectionError
-	DisconnectRomarkEndOfTest: EnumConnectionError
-	ReplicatorTimeout: EnumConnectionError
-	PlayerRemoved: EnumConnectionError
-	DisconnectOutOfMemoryKeepPlayingLeave: EnumConnectionError
+	DisconnectCloudEditKick: EnumConnectionError
 	DisconnectCollaboratorPermissionRevoked: EnumConnectionError
 	DisconnectCollaboratorUnderage: EnumConnectionError
-	PlacelaunchErrors: EnumConnectionError
-	PlacelaunchDisabled: EnumConnectionError
-	PlacelaunchError: EnumConnectionError
-	PlacelaunchGameEnded: EnumConnectionError
-	PlacelaunchGameFull: EnumConnectionError
-	PlacelaunchUserLeft: EnumConnectionError
-	PlacelaunchRestricted: EnumConnectionError
-	PlacelaunchUnauthorized: EnumConnectionError
-	PlacelaunchFlooded: EnumConnectionError
-	PlacelaunchHashExpired: EnumConnectionError
-	PlacelaunchHashException: EnumConnectionError
-	PlacelaunchPartyCannotFit: EnumConnectionError
-	PlacelaunchHttpError: EnumConnectionError
-	PlacelaunchUserPrivacyUnauthorized: EnumConnectionError
-	PlacelaunchCustomMessage: EnumConnectionError
-	PlacelaunchOtherError: EnumConnectionError
-	TeleportErrors: EnumConnectionError
-	TeleportFailure: EnumConnectionError
-	TeleportGameNotFound: EnumConnectionError
-	TeleportGameEnded: EnumConnectionError
-	TeleportGameFull: EnumConnectionError
-	TeleportUnauthorized: EnumConnectionError
-	TeleportFlooded: EnumConnectionError
-	TeleportIsTeleporting: EnumConnectionError
+	DisconnectConnectionLost: EnumConnectionError
+	DisconnectDevMaintenance: EnumConnectionError
+	DisconnectDuplicatePlayer: EnumConnectionError
+	DisconnectDuplicateTicket: EnumConnectionError
+	DisconnectErrors: EnumConnectionError
+	DisconnectEvicted: EnumConnectionError
+	DisconnectHashTimeout: EnumConnectionError
+	DisconnectIdle: EnumConnectionError
+	DisconnectIllegalTeleport: EnumConnectionError
+	DisconnectLuaKick: EnumConnectionError
+	DisconnectModeratedGame: EnumConnectionError
+	DisconnectNewSecurityKeyMismatch: EnumConnectionError
+	DisconnectOnRemoteSysStats: EnumConnectionError
+	DisconnectOutOfMemoryKeepPlayingLeave: EnumConnectionError
+	DisconnectPlayerless: EnumConnectionError
+	DisconnectPrivateServerKickout: EnumConnectionError
+	DisconnectProtocolMismatch: EnumConnectionError
+	DisconnectRaknetErrors: EnumConnectionError
+	DisconnectReceivePacketError: EnumConnectionError
+	DisconnectReceivePacketStreamError: EnumConnectionError
+	DisconnectRejoin: EnumConnectionError
+	DisconnectRobloxMaintenance: EnumConnectionError
+	DisconnectRomarkEndOfTest: EnumConnectionError
+	DisconnectSecurityKeyMismatch: EnumConnectionError
+	DisconnectSendPacketError: EnumConnectionError
+	DisconnectTimeout: EnumConnectionError
+	DisconnectWrongVersion: EnumConnectionError
 	NetworkInternal: EnumConnectionError
-	NetworkSend: EnumConnectionError
-	NetworkTimeout: EnumConnectionError
 	NetworkMisbehavior: EnumConnectionError
 	NetworkSecurity: EnumConnectionError
+	NetworkSend: EnumConnectionError
+	NetworkTimeout: EnumConnectionError
+	OK: EnumConnectionError
+	PlacelaunchCustomMessage: EnumConnectionError
+	PlacelaunchDisabled: EnumConnectionError
+	PlacelaunchError: EnumConnectionError
+	PlacelaunchErrors: EnumConnectionError
+	PlacelaunchFlooded: EnumConnectionError
+	PlacelaunchGameEnded: EnumConnectionError
+	PlacelaunchGameFull: EnumConnectionError
+	PlacelaunchHashException: EnumConnectionError
+	PlacelaunchHashExpired: EnumConnectionError
+	PlacelaunchHttpError: EnumConnectionError
+	PlacelaunchOtherError: EnumConnectionError
+	PlacelaunchPartyCannotFit: EnumConnectionError
+	PlacelaunchRestricted: EnumConnectionError
+	PlacelaunchUnauthorized: EnumConnectionError
+	PlacelaunchUserLeft: EnumConnectionError
+	PlacelaunchUserPrivacyUnauthorized: EnumConnectionError
+	PlayerRemoved: EnumConnectionError
+	ReplicatorTimeout: EnumConnectionError
+	ServerShutdown: EnumConnectionError
+	TeleportErrors: EnumConnectionError
+	TeleportFailure: EnumConnectionError
+	TeleportFlooded: EnumConnectionError
+	TeleportGameEnded: EnumConnectionError
+	TeleportGameFull: EnumConnectionError
+	TeleportGameNotFound: EnumConnectionError
+	TeleportIsTeleporting: EnumConnectionError
+	TeleportUnauthorized: EnumConnectionError
+	Unknown: EnumConnectionError
 end
 declare class EnumConnectionState extends EnumItem end
 declare class EnumConnectionState_INTERNAL extends Enum
@@ -842,14 +842,14 @@ declare class EnumConnectionState_INTERNAL extends Enum
 end
 declare class EnumContextActionPriority extends EnumItem end
 declare class EnumContextActionPriority_INTERNAL extends Enum
+	High: EnumContextActionPriority
 	Low: EnumContextActionPriority
 	Medium: EnumContextActionPriority
-	High: EnumContextActionPriority
 end
 declare class EnumContextActionResult extends EnumItem end
 declare class EnumContextActionResult_INTERNAL extends Enum
-	Sink: EnumContextActionResult
 	Pass: EnumContextActionResult
+	Sink: EnumContextActionResult
 end
 declare class EnumControlMode extends EnumItem end
 declare class EnumControlMode_INTERNAL extends Enum
@@ -858,30 +858,30 @@ declare class EnumControlMode_INTERNAL extends Enum
 end
 declare class EnumCoreGuiType extends EnumItem end
 declare class EnumCoreGuiType_INTERNAL extends Enum
-	PlayerList: EnumCoreGuiType
-	Health: EnumCoreGuiType
+	All: EnumCoreGuiType
 	Backpack: EnumCoreGuiType
 	Chat: EnumCoreGuiType
-	All: EnumCoreGuiType
 	EmotesMenu: EnumCoreGuiType
+	Health: EnumCoreGuiType
+	PlayerList: EnumCoreGuiType
 	SelfView: EnumCoreGuiType
 end
 declare class EnumCreateOutfitFailure extends EnumItem end
 declare class EnumCreateOutfitFailure_INTERNAL extends Enum
 	InvalidName: EnumCreateOutfitFailure
-	OutfitLimitReached: EnumCreateOutfitFailure
 	Other: EnumCreateOutfitFailure
+	OutfitLimitReached: EnumCreateOutfitFailure
 end
 declare class EnumCreatorType extends EnumItem end
 declare class EnumCreatorType_INTERNAL extends Enum
-	User: EnumCreatorType
 	Group: EnumCreatorType
+	User: EnumCreatorType
 end
 declare class EnumCreatorTypeFilter extends EnumItem end
 declare class EnumCreatorTypeFilter_INTERNAL extends Enum
-	User: EnumCreatorTypeFilter
-	Group: EnumCreatorTypeFilter
 	All: EnumCreatorTypeFilter
+	Group: EnumCreatorTypeFilter
+	User: EnumCreatorTypeFilter
 end
 declare class EnumCurrencyType extends EnumItem end
 declare class EnumCurrencyType_INTERNAL extends Enum
@@ -891,44 +891,44 @@ declare class EnumCurrencyType_INTERNAL extends Enum
 end
 declare class EnumCustomCameraMode extends EnumItem end
 declare class EnumCustomCameraMode_INTERNAL extends Enum
-	Default: EnumCustomCameraMode
 	Classic: EnumCustomCameraMode
+	Default: EnumCustomCameraMode
 	Follow: EnumCustomCameraMode
 end
 declare class EnumDataStoreRequestType extends EnumItem end
 declare class EnumDataStoreRequestType_INTERNAL extends Enum
 	GetAsync: EnumDataStoreRequestType
-	SetIncrementAsync: EnumDataStoreRequestType
-	UpdateAsync: EnumDataStoreRequestType
 	GetSortedAsync: EnumDataStoreRequestType
-	SetIncrementSortedAsync: EnumDataStoreRequestType
-	OnUpdate: EnumDataStoreRequestType
-	ListAsync: EnumDataStoreRequestType
 	GetVersionAsync: EnumDataStoreRequestType
+	ListAsync: EnumDataStoreRequestType
+	OnUpdate: EnumDataStoreRequestType
 	RemoveVersionAsync: EnumDataStoreRequestType
+	SetIncrementAsync: EnumDataStoreRequestType
+	SetIncrementSortedAsync: EnumDataStoreRequestType
+	UpdateAsync: EnumDataStoreRequestType
 end
 declare class EnumDeathStyle extends EnumItem end
 declare class EnumDeathStyle_INTERNAL extends Enum
-	Default: EnumDeathStyle
 	ClassicBreakApart: EnumDeathStyle
+	Default: EnumDeathStyle
 	NonGraphic: EnumDeathStyle
 	Scriptable: EnumDeathStyle
 end
 declare class EnumDebuggerEndReason extends EnumItem end
 declare class EnumDebuggerEndReason_INTERNAL extends Enum
 	ClientRequest: EnumDebuggerEndReason
-	Timeout: EnumDebuggerEndReason
-	InvalidHost: EnumDebuggerEndReason
-	Disconnected: EnumDebuggerEndReason
-	ServerShutdown: EnumDebuggerEndReason
-	ServerProtocolMismatch: EnumDebuggerEndReason
 	ConfigurationFailed: EnumDebuggerEndReason
+	Disconnected: EnumDebuggerEndReason
+	InvalidHost: EnumDebuggerEndReason
 	RpcError: EnumDebuggerEndReason
+	ServerProtocolMismatch: EnumDebuggerEndReason
+	ServerShutdown: EnumDebuggerEndReason
+	Timeout: EnumDebuggerEndReason
 end
 declare class EnumDebuggerExceptionBreakMode extends EnumItem end
 declare class EnumDebuggerExceptionBreakMode_INTERNAL extends Enum
-	Never: EnumDebuggerExceptionBreakMode
 	Always: EnumDebuggerExceptionBreakMode
+	Never: EnumDebuggerExceptionBreakMode
 	Unhandled: EnumDebuggerExceptionBreakMode
 end
 declare class EnumDebuggerFrameType extends EnumItem end
@@ -938,141 +938,141 @@ declare class EnumDebuggerFrameType_INTERNAL extends Enum
 end
 declare class EnumDebuggerPauseReason extends EnumItem end
 declare class EnumDebuggerPauseReason_INTERNAL extends Enum
-	Unknown: EnumDebuggerPauseReason
-	Requested: EnumDebuggerPauseReason
 	Breakpoint: EnumDebuggerPauseReason
-	Exception: EnumDebuggerPauseReason
-	SingleStep: EnumDebuggerPauseReason
 	Entrypoint: EnumDebuggerPauseReason
+	Exception: EnumDebuggerPauseReason
+	Requested: EnumDebuggerPauseReason
+	SingleStep: EnumDebuggerPauseReason
+	Unknown: EnumDebuggerPauseReason
 end
 declare class EnumDebuggerStatus extends EnumItem end
 declare class EnumDebuggerStatus_INTERNAL extends Enum
-	Success: EnumDebuggerStatus
-	Timeout: EnumDebuggerStatus
+	ConnectionClosed: EnumDebuggerStatus
 	ConnectionLost: EnumDebuggerStatus
-	InvalidResponse: EnumDebuggerStatus
 	InternalError: EnumDebuggerStatus
+	InvalidArgument: EnumDebuggerStatus
+	InvalidResponse: EnumDebuggerStatus
 	InvalidState: EnumDebuggerStatus
 	RpcError: EnumDebuggerStatus
-	InvalidArgument: EnumDebuggerStatus
-	ConnectionClosed: EnumDebuggerStatus
+	Success: EnumDebuggerStatus
+	Timeout: EnumDebuggerStatus
 end
 declare class EnumDevCameraOcclusionMode extends EnumItem end
 declare class EnumDevCameraOcclusionMode_INTERNAL extends Enum
-	Zoom: EnumDevCameraOcclusionMode
 	Invisicam: EnumDevCameraOcclusionMode
+	Zoom: EnumDevCameraOcclusionMode
 end
 declare class EnumDevComputerCameraMovementMode extends EnumItem end
 declare class EnumDevComputerCameraMovementMode_INTERNAL extends Enum
-	UserChoice: EnumDevComputerCameraMovementMode
+	CameraToggle: EnumDevComputerCameraMovementMode
 	Classic: EnumDevComputerCameraMovementMode
 	Follow: EnumDevComputerCameraMovementMode
 	Orbital: EnumDevComputerCameraMovementMode
-	CameraToggle: EnumDevComputerCameraMovementMode
+	UserChoice: EnumDevComputerCameraMovementMode
 end
 declare class EnumDevComputerMovementMode extends EnumItem end
 declare class EnumDevComputerMovementMode_INTERNAL extends Enum
-	UserChoice: EnumDevComputerMovementMode
-	KeyboardMouse: EnumDevComputerMovementMode
 	ClickToMove: EnumDevComputerMovementMode
+	KeyboardMouse: EnumDevComputerMovementMode
 	Scriptable: EnumDevComputerMovementMode
+	UserChoice: EnumDevComputerMovementMode
 end
 declare class EnumDevTouchCameraMovementMode extends EnumItem end
 declare class EnumDevTouchCameraMovementMode_INTERNAL extends Enum
-	UserChoice: EnumDevTouchCameraMovementMode
 	Classic: EnumDevTouchCameraMovementMode
 	Follow: EnumDevTouchCameraMovementMode
 	Orbital: EnumDevTouchCameraMovementMode
+	UserChoice: EnumDevTouchCameraMovementMode
 end
 declare class EnumDevTouchMovementMode extends EnumItem end
 declare class EnumDevTouchMovementMode_INTERNAL extends Enum
-	UserChoice: EnumDevTouchMovementMode
-	Thumbstick: EnumDevTouchMovementMode
-	DPad: EnumDevTouchMovementMode
-	Thumbpad: EnumDevTouchMovementMode
 	ClickToMove: EnumDevTouchMovementMode
-	Scriptable: EnumDevTouchMovementMode
+	DPad: EnumDevTouchMovementMode
 	DynamicThumbstick: EnumDevTouchMovementMode
+	Scriptable: EnumDevTouchMovementMode
+	Thumbpad: EnumDevTouchMovementMode
+	Thumbstick: EnumDevTouchMovementMode
+	UserChoice: EnumDevTouchMovementMode
 end
 declare class EnumDeveloperMemoryTag extends EnumItem end
 declare class EnumDeveloperMemoryTag_INTERNAL extends Enum
-	Internal: EnumDeveloperMemoryTag
-	HttpCache: EnumDeveloperMemoryTag
-	Instances: EnumDeveloperMemoryTag
-	Signals: EnumDeveloperMemoryTag
-	LuaHeap: EnumDeveloperMemoryTag
-	Script: EnumDeveloperMemoryTag
-	PhysicsCollision: EnumDeveloperMemoryTag
-	PhysicsParts: EnumDeveloperMemoryTag
-	GraphicsSolidModels: EnumDeveloperMemoryTag
+	Animation: EnumDeveloperMemoryTag
+	GeometryCSG: EnumDeveloperMemoryTag
 	GraphicsMeshParts: EnumDeveloperMemoryTag
 	GraphicsParticles: EnumDeveloperMemoryTag
 	GraphicsParts: EnumDeveloperMemoryTag
+	GraphicsSolidModels: EnumDeveloperMemoryTag
 	GraphicsSpatialHash: EnumDeveloperMemoryTag
 	GraphicsTerrain: EnumDeveloperMemoryTag
 	GraphicsTexture: EnumDeveloperMemoryTag
 	GraphicsTextureCharacter: EnumDeveloperMemoryTag
+	Gui: EnumDeveloperMemoryTag
+	HttpCache: EnumDeveloperMemoryTag
+	Instances: EnumDeveloperMemoryTag
+	Internal: EnumDeveloperMemoryTag
+	LuaHeap: EnumDeveloperMemoryTag
+	Navigation: EnumDeveloperMemoryTag
+	PhysicsCollision: EnumDeveloperMemoryTag
+	PhysicsParts: EnumDeveloperMemoryTag
+	Script: EnumDeveloperMemoryTag
+	Signals: EnumDeveloperMemoryTag
 	Sounds: EnumDeveloperMemoryTag
 	StreamingSounds: EnumDeveloperMemoryTag
 	TerrainVoxels: EnumDeveloperMemoryTag
-	Gui: EnumDeveloperMemoryTag
-	Animation: EnumDeveloperMemoryTag
-	Navigation: EnumDeveloperMemoryTag
-	GeometryCSG: EnumDeveloperMemoryTag
 end
 declare class EnumDeviceType extends EnumItem end
 declare class EnumDeviceType_INTERNAL extends Enum
-	Unknown: EnumDeviceType
 	Desktop: EnumDeviceType
-	Tablet: EnumDeviceType
 	Phone: EnumDeviceType
+	Tablet: EnumDeviceType
+	Unknown: EnumDeviceType
 end
 declare class EnumDialogBehaviorType extends EnumItem end
 declare class EnumDialogBehaviorType_INTERNAL extends Enum
-	SinglePlayer: EnumDialogBehaviorType
 	MultiplePlayers: EnumDialogBehaviorType
+	SinglePlayer: EnumDialogBehaviorType
 end
 declare class EnumDialogPurpose extends EnumItem end
 declare class EnumDialogPurpose_INTERNAL extends Enum
-	Quest: EnumDialogPurpose
 	Help: EnumDialogPurpose
+	Quest: EnumDialogPurpose
 	Shop: EnumDialogPurpose
 end
 declare class EnumDialogTone extends EnumItem end
 declare class EnumDialogTone_INTERNAL extends Enum
-	Neutral: EnumDialogTone
-	Friendly: EnumDialogTone
 	Enemy: EnumDialogTone
+	Friendly: EnumDialogTone
+	Neutral: EnumDialogTone
 end
 declare class EnumDominantAxis extends EnumItem end
 declare class EnumDominantAxis_INTERNAL extends Enum
-	Width: EnumDominantAxis
 	Height: EnumDominantAxis
+	Width: EnumDominantAxis
 end
 declare class EnumDraftStatusCode extends EnumItem end
 declare class EnumDraftStatusCode_INTERNAL extends Enum
-	OK: EnumDraftStatusCode
-	DraftOutdated: EnumDraftStatusCode
-	ScriptRemoved: EnumDraftStatusCode
 	DraftCommitted: EnumDraftStatusCode
+	DraftOutdated: EnumDraftStatusCode
+	OK: EnumDraftStatusCode
+	ScriptRemoved: EnumDraftStatusCode
 end
 declare class EnumDragDetectorDragStyle extends EnumItem end
 declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
-	TranslateLine: EnumDragDetectorDragStyle
-	TranslatePlane: EnumDragDetectorDragStyle
-	TranslatePlaneOrLine: EnumDragDetectorDragStyle
-	TranslateLineOrPlane: EnumDragDetectorDragStyle
-	TranslateViewPlane: EnumDragDetectorDragStyle
+	BestForDevice: EnumDragDetectorDragStyle
 	RotateAxis: EnumDragDetectorDragStyle
 	RotateTrackball: EnumDragDetectorDragStyle
 	Scriptable: EnumDragDetectorDragStyle
-	BestForDevice: EnumDragDetectorDragStyle
+	TranslateLine: EnumDragDetectorDragStyle
+	TranslateLineOrPlane: EnumDragDetectorDragStyle
+	TranslatePlane: EnumDragDetectorDragStyle
+	TranslatePlaneOrLine: EnumDragDetectorDragStyle
+	TranslateViewPlane: EnumDragDetectorDragStyle
 end
 declare class EnumDragDetectorResponseStyle extends EnumItem end
 declare class EnumDragDetectorResponseStyle_INTERNAL extends Enum
+	Custom: EnumDragDetectorResponseStyle
 	Geometric: EnumDragDetectorResponseStyle
 	Physical: EnumDragDetectorResponseStyle
-	Custom: EnumDragDetectorResponseStyle
 end
 declare class EnumDraggerCoordinateSpace extends EnumItem end
 declare class EnumDraggerCoordinateSpace_INTERNAL extends Enum
@@ -1087,22 +1087,22 @@ end
 declare class EnumEasingDirection extends EnumItem end
 declare class EnumEasingDirection_INTERNAL extends Enum
 	In: EnumEasingDirection
-	Out: EnumEasingDirection
 	InOut: EnumEasingDirection
+	Out: EnumEasingDirection
 end
 declare class EnumEasingStyle extends EnumItem end
 declare class EnumEasingStyle_INTERNAL extends Enum
-	Linear: EnumEasingStyle
-	Sine: EnumEasingStyle
 	Back: EnumEasingStyle
+	Bounce: EnumEasingStyle
+	Circular: EnumEasingStyle
+	Cubic: EnumEasingStyle
+	Elastic: EnumEasingStyle
+	Exponential: EnumEasingStyle
+	Linear: EnumEasingStyle
 	Quad: EnumEasingStyle
 	Quart: EnumEasingStyle
 	Quint: EnumEasingStyle
-	Bounce: EnumEasingStyle
-	Elastic: EnumEasingStyle
-	Exponential: EnumEasingStyle
-	Circular: EnumEasingStyle
-	Cubic: EnumEasingStyle
+	Sine: EnumEasingStyle
 end
 declare class EnumEditorLiveScripting extends EnumItem end
 declare class EnumEditorLiveScripting_INTERNAL extends Enum
@@ -1112,43 +1112,43 @@ declare class EnumEditorLiveScripting_INTERNAL extends Enum
 end
 declare class EnumElasticBehavior extends EnumItem end
 declare class EnumElasticBehavior_INTERNAL extends Enum
-	WhenScrollable: EnumElasticBehavior
 	Always: EnumElasticBehavior
 	Never: EnumElasticBehavior
+	WhenScrollable: EnumElasticBehavior
 end
 declare class EnumEnviromentalPhysicsThrottle extends EnumItem end
 declare class EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum
+	Always: EnumEnviromentalPhysicsThrottle
 	DefaultAuto: EnumEnviromentalPhysicsThrottle
 	Disabled: EnumEnviromentalPhysicsThrottle
-	Always: EnumEnviromentalPhysicsThrottle
+	Skip16: EnumEnviromentalPhysicsThrottle
 	Skip2: EnumEnviromentalPhysicsThrottle
 	Skip4: EnumEnviromentalPhysicsThrottle
 	Skip8: EnumEnviromentalPhysicsThrottle
-	Skip16: EnumEnviromentalPhysicsThrottle
 end
 declare class EnumExperienceAuthScope extends EnumItem end
 declare class EnumExperienceAuthScope_INTERNAL extends Enum
-	DefaultScope: EnumExperienceAuthScope
 	CreatorAssetsCreate: EnumExperienceAuthScope
+	DefaultScope: EnumExperienceAuthScope
 end
 declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
-	NoCraters: EnumExplosionType
 	Craters: EnumExplosionType
+	NoCraters: EnumExplosionType
 end
 declare class EnumFacialAnimationStreamingState extends EnumItem end
 declare class EnumFacialAnimationStreamingState_INTERNAL extends Enum
-	None: EnumFacialAnimationStreamingState
 	Audio: EnumFacialAnimationStreamingState
-	Video: EnumFacialAnimationStreamingState
+	None: EnumFacialAnimationStreamingState
 	Place: EnumFacialAnimationStreamingState
 	Server: EnumFacialAnimationStreamingState
+	Video: EnumFacialAnimationStreamingState
 end
 declare class EnumFieldOfViewMode extends EnumItem end
 declare class EnumFieldOfViewMode_INTERNAL extends Enum
-	Vertical: EnumFieldOfViewMode
 	Diagonal: EnumFieldOfViewMode
 	MaxAxis: EnumFieldOfViewMode
+	Vertical: EnumFieldOfViewMode
 end
 declare class EnumFillDirection extends EnumItem end
 declare class EnumFillDirection_INTERNAL extends Enum
@@ -1162,9 +1162,9 @@ declare class EnumFilterResult_INTERNAL extends Enum
 end
 declare class EnumFinishRecordingOperation extends EnumItem end
 declare class EnumFinishRecordingOperation_INTERNAL extends Enum
+	Append: EnumFinishRecordingOperation
 	Cancel: EnumFinishRecordingOperation
 	Commit: EnumFinishRecordingOperation
-	Append: EnumFinishRecordingOperation
 end
 declare class EnumFluidForces extends EnumItem end
 declare class EnumFluidForces_INTERNAL extends Enum
@@ -1173,38 +1173,32 @@ declare class EnumFluidForces_INTERNAL extends Enum
 end
 declare class EnumFont extends EnumItem end
 declare class EnumFont_INTERNAL extends Enum
-	Legacy: EnumFont
+	AmaticSC: EnumFont
+	Antique: EnumFont
+	Arcade: EnumFont
 	Arial: EnumFont
 	ArialBold: EnumFont
-	SourceSans: EnumFont
-	SourceSansBold: EnumFont
-	SourceSansSemibold: EnumFont
-	SourceSansLight: EnumFont
-	SourceSansItalic: EnumFont
+	Bangers: EnumFont
 	Bodoni: EnumFont
-	Garamond: EnumFont
 	Cartoon: EnumFont
 	Code: EnumFont
-	Highway: EnumFont
-	SciFi: EnumFont
-	Arcade: EnumFont
-	Fantasy: EnumFont
-	Antique: EnumFont
-	Gotham: EnumFont
-	GothamMedium: EnumFont
-	GothamBold: EnumFont
-	GothamBlack: EnumFont
-	AmaticSC: EnumFont
-	Bangers: EnumFont
 	Creepster: EnumFont
 	DenkOne: EnumFont
+	Fantasy: EnumFont
 	Fondamento: EnumFont
 	FredokaOne: EnumFont
+	Garamond: EnumFont
+	Gotham: EnumFont
+	GothamBlack: EnumFont
+	GothamBold: EnumFont
+	GothamMedium: EnumFont
 	GrenzeGotisch: EnumFont
+	Highway: EnumFont
 	IndieFlower: EnumFont
 	JosefinSans: EnumFont
 	Jura: EnumFont
 	Kalam: EnumFont
+	Legacy: EnumFont
 	LuckiestGuy: EnumFont
 	Merriweather: EnumFont
 	Michroma: EnumFont
@@ -1216,6 +1210,12 @@ declare class EnumFont_INTERNAL extends Enum
 	RobotoCondensed: EnumFont
 	RobotoMono: EnumFont
 	Sarpanch: EnumFont
+	SciFi: EnumFont
+	SourceSans: EnumFont
+	SourceSansBold: EnumFont
+	SourceSansItalic: EnumFont
+	SourceSansLight: EnumFont
+	SourceSansSemibold: EnumFont
 	SpecialElite: EnumFont
 	TitilliumWeb: EnumFont
 	Ubuntu: EnumFont
@@ -1223,38 +1223,38 @@ declare class EnumFont_INTERNAL extends Enum
 end
 declare class EnumFontSize extends EnumItem end
 declare class EnumFontSize_INTERNAL extends Enum
-	Size8: EnumFontSize
-	Size9: EnumFontSize
 	Size10: EnumFontSize
 	Size11: EnumFontSize
 	Size12: EnumFontSize
 	Size14: EnumFontSize
 	Size18: EnumFontSize
 	Size24: EnumFontSize
-	Size36: EnumFontSize
-	Size48: EnumFontSize
 	Size28: EnumFontSize
 	Size32: EnumFontSize
+	Size36: EnumFontSize
 	Size42: EnumFontSize
+	Size48: EnumFontSize
 	Size60: EnumFontSize
+	Size8: EnumFontSize
+	Size9: EnumFontSize
 	Size96: EnumFontSize
 end
 declare class EnumFontStyle extends EnumItem end
 declare class EnumFontStyle_INTERNAL extends Enum
-	Normal: EnumFontStyle
 	Italic: EnumFontStyle
+	Normal: EnumFontStyle
 end
 declare class EnumFontWeight extends EnumItem end
 declare class EnumFontWeight_INTERNAL extends Enum
-	Thin: EnumFontWeight
-	ExtraLight: EnumFontWeight
-	Light: EnumFontWeight
-	Regular: EnumFontWeight
-	Medium: EnumFontWeight
-	SemiBold: EnumFontWeight
 	Bold: EnumFontWeight
 	ExtraBold: EnumFontWeight
+	ExtraLight: EnumFontWeight
 	Heavy: EnumFontWeight
+	Light: EnumFontWeight
+	Medium: EnumFontWeight
+	Regular: EnumFontWeight
+	SemiBold: EnumFontWeight
+	Thin: EnumFontWeight
 end
 declare class EnumForceLimitMode extends EnumItem end
 declare class EnumForceLimitMode_INTERNAL extends Enum
@@ -1263,53 +1263,53 @@ declare class EnumForceLimitMode_INTERNAL extends Enum
 end
 declare class EnumFormFactor extends EnumItem end
 declare class EnumFormFactor_INTERNAL extends Enum
-	Symmetric: EnumFormFactor
 	Brick: EnumFormFactor
-	Plate: EnumFormFactor
 	Custom: EnumFormFactor
+	Plate: EnumFormFactor
+	Symmetric: EnumFormFactor
 end
 declare class EnumFrameStyle extends EnumItem end
 declare class EnumFrameStyle_INTERNAL extends Enum
-	Custom: EnumFrameStyle
 	ChatBlue: EnumFrameStyle
-	RobloxSquare: EnumFrameStyle
-	RobloxRound: EnumFrameStyle
 	ChatGreen: EnumFrameStyle
 	ChatRed: EnumFrameStyle
+	Custom: EnumFrameStyle
 	DropShadow: EnumFrameStyle
+	RobloxRound: EnumFrameStyle
+	RobloxSquare: EnumFrameStyle
 end
 declare class EnumFramerateManagerMode extends EnumItem end
 declare class EnumFramerateManagerMode_INTERNAL extends Enum
 	Automatic: EnumFramerateManagerMode
-	On: EnumFramerateManagerMode
 	Off: EnumFramerateManagerMode
+	On: EnumFramerateManagerMode
 end
 declare class EnumFriendRequestEvent extends EnumItem end
 declare class EnumFriendRequestEvent_INTERNAL extends Enum
-	Issue: EnumFriendRequestEvent
-	Revoke: EnumFriendRequestEvent
 	Accept: EnumFriendRequestEvent
 	Deny: EnumFriendRequestEvent
+	Issue: EnumFriendRequestEvent
+	Revoke: EnumFriendRequestEvent
 end
 declare class EnumFriendStatus extends EnumItem end
 declare class EnumFriendStatus_INTERNAL extends Enum
-	Unknown: EnumFriendStatus
-	NotFriend: EnumFriendStatus
 	Friend: EnumFriendStatus
-	FriendRequestSent: EnumFriendStatus
 	FriendRequestReceived: EnumFriendStatus
+	FriendRequestSent: EnumFriendStatus
+	NotFriend: EnumFriendStatus
+	Unknown: EnumFriendStatus
 end
 declare class EnumFunctionalTestResult extends EnumItem end
 declare class EnumFunctionalTestResult_INTERNAL extends Enum
+	Error: EnumFunctionalTestResult
 	Passed: EnumFunctionalTestResult
 	Warning: EnumFunctionalTestResult
-	Error: EnumFunctionalTestResult
 end
 declare class EnumGameAvatarType extends EnumItem end
 declare class EnumGameAvatarType_INTERNAL extends Enum
-	R6: EnumGameAvatarType
-	R15: EnumGameAvatarType
 	PlayerChoice: EnumGameAvatarType
+	R15: EnumGameAvatarType
+	R6: EnumGameAvatarType
 end
 declare class EnumGearGenreSetting extends EnumItem end
 declare class EnumGearGenreSetting_INTERNAL extends Enum
@@ -1318,60 +1318,60 @@ declare class EnumGearGenreSetting_INTERNAL extends Enum
 end
 declare class EnumGearType extends EnumItem end
 declare class EnumGearType_INTERNAL extends Enum
-	MeleeWeapons: EnumGearType
-	RangedWeapons: EnumGearType
-	Explosives: EnumGearType
-	PowerUps: EnumGearType
-	NavigationEnhancers: EnumGearType
-	MusicalInstruments: EnumGearType
-	SocialItems: EnumGearType
 	BuildingTools: EnumGearType
+	Explosives: EnumGearType
+	MeleeWeapons: EnumGearType
+	MusicalInstruments: EnumGearType
+	NavigationEnhancers: EnumGearType
+	PowerUps: EnumGearType
+	RangedWeapons: EnumGearType
+	SocialItems: EnumGearType
 	Transport: EnumGearType
 end
 declare class EnumGenre extends EnumItem end
 declare class EnumGenre_INTERNAL extends Enum
-	All: EnumGenre
-	TownAndCity: EnumGenre
-	Fantasy: EnumGenre
-	SciFi: EnumGenre
-	Ninja: EnumGenre
-	Scary: EnumGenre
-	Pirate: EnumGenre
 	Adventure: EnumGenre
-	Sports: EnumGenre
+	All: EnumGenre
+	Fantasy: EnumGenre
 	Funny: EnumGenre
-	WildWest: EnumGenre
-	War: EnumGenre
+	Ninja: EnumGenre
+	Pirate: EnumGenre
+	Scary: EnumGenre
+	SciFi: EnumGenre
 	SkatePark: EnumGenre
+	Sports: EnumGenre
+	TownAndCity: EnumGenre
 	Tutorial: EnumGenre
+	War: EnumGenre
+	WildWest: EnumGenre
 end
 declare class EnumGraphicsMode extends EnumItem end
 declare class EnumGraphicsMode_INTERNAL extends Enum
 	Automatic: EnumGraphicsMode
 	Direct3D11: EnumGraphicsMode
-	OpenGL: EnumGraphicsMode
 	Metal: EnumGraphicsMode
-	Vulkan: EnumGraphicsMode
 	NoGraphics: EnumGraphicsMode
+	OpenGL: EnumGraphicsMode
+	Vulkan: EnumGraphicsMode
 end
 declare class EnumGuiState extends EnumItem end
 declare class EnumGuiState_INTERNAL extends Enum
-	Idle: EnumGuiState
 	Hover: EnumGuiState
-	Press: EnumGuiState
+	Idle: EnumGuiState
 	NonInteractable: EnumGuiState
+	Press: EnumGuiState
 end
 declare class EnumGuiType extends EnumItem end
 declare class EnumGuiType_INTERNAL extends Enum
 	Core: EnumGuiType
 	Custom: EnumGuiType
-	PlayerNameplates: EnumGuiType
 	CustomBillboards: EnumGuiType
+	PlayerNameplates: EnumGuiType
 end
 declare class EnumHandlesStyle extends EnumItem end
 declare class EnumHandlesStyle_INTERNAL extends Enum
-	Resize: EnumHandlesStyle
 	Movement: EnumHandlesStyle
+	Resize: EnumHandlesStyle
 end
 declare class EnumHighlightDepthMode extends EnumItem end
 declare class EnumHighlightDepthMode_INTERNAL extends Enum
@@ -1386,108 +1386,108 @@ declare class EnumHorizontalAlignment_INTERNAL extends Enum
 end
 declare class EnumHoverAnimateSpeed extends EnumItem end
 declare class EnumHoverAnimateSpeed_INTERNAL extends Enum
-	VerySlow: EnumHoverAnimateSpeed
-	Slow: EnumHoverAnimateSpeed
-	Medium: EnumHoverAnimateSpeed
 	Fast: EnumHoverAnimateSpeed
+	Medium: EnumHoverAnimateSpeed
+	Slow: EnumHoverAnimateSpeed
 	VeryFast: EnumHoverAnimateSpeed
+	VerySlow: EnumHoverAnimateSpeed
 end
 declare class EnumHttpCachePolicy extends EnumItem end
 declare class EnumHttpCachePolicy_INTERNAL extends Enum
-	None: EnumHttpCachePolicy
-	Full: EnumHttpCachePolicy
 	DataOnly: EnumHttpCachePolicy
 	Default: EnumHttpCachePolicy
+	Full: EnumHttpCachePolicy
 	InternalRedirectRefresh: EnumHttpCachePolicy
+	None: EnumHttpCachePolicy
 end
 declare class EnumHttpContentType extends EnumItem end
 declare class EnumHttpContentType_INTERNAL extends Enum
 	ApplicationJson: EnumHttpContentType
-	ApplicationXml: EnumHttpContentType
 	ApplicationUrlEncoded: EnumHttpContentType
+	ApplicationXml: EnumHttpContentType
 	TextPlain: EnumHttpContentType
 	TextXml: EnumHttpContentType
 end
 declare class EnumHttpError extends EnumItem end
 declare class EnumHttpError_INTERNAL extends Enum
-	OK: EnumHttpError
-	InvalidUrl: EnumHttpError
-	DnsResolve: EnumHttpError
-	ConnectFail: EnumHttpError
-	OutOfMemory: EnumHttpError
-	TimedOut: EnumHttpError
-	TooManyRedirects: EnumHttpError
-	InvalidRedirect: EnumHttpError
-	NetFail: EnumHttpError
 	Aborted: EnumHttpError
+	ConnectFail: EnumHttpError
+	DnsResolve: EnumHttpError
+	InvalidRedirect: EnumHttpError
+	InvalidUrl: EnumHttpError
+	NetFail: EnumHttpError
+	OK: EnumHttpError
+	OutOfMemory: EnumHttpError
 	SslConnectFail: EnumHttpError
 	SslVerificationFail: EnumHttpError
+	TimedOut: EnumHttpError
+	TooManyRedirects: EnumHttpError
 	Unknown: EnumHttpError
 end
 declare class EnumHttpRequestType extends EnumItem end
 declare class EnumHttpRequestType_INTERNAL extends Enum
+	Analytics: EnumHttpRequestType
+	Avatar: EnumHttpRequestType
+	Chat: EnumHttpRequestType
 	Default: EnumHttpRequestType
+	Localization: EnumHttpRequestType
 	MarketplaceService: EnumHttpRequestType
 	Players: EnumHttpRequestType
-	Chat: EnumHttpRequestType
-	Avatar: EnumHttpRequestType
-	Analytics: EnumHttpRequestType
-	Localization: EnumHttpRequestType
 end
 declare class EnumHumanoidCollisionType extends EnumItem end
 declare class EnumHumanoidCollisionType_INTERNAL extends Enum
-	OuterBox: EnumHumanoidCollisionType
 	InnerBox: EnumHumanoidCollisionType
+	OuterBox: EnumHumanoidCollisionType
 end
 declare class EnumHumanoidDisplayDistanceType extends EnumItem end
 declare class EnumHumanoidDisplayDistanceType_INTERNAL extends Enum
-	Viewer: EnumHumanoidDisplayDistanceType
-	Subject: EnumHumanoidDisplayDistanceType
 	None: EnumHumanoidDisplayDistanceType
+	Subject: EnumHumanoidDisplayDistanceType
+	Viewer: EnumHumanoidDisplayDistanceType
 end
 declare class EnumHumanoidHealthDisplayType extends EnumItem end
 declare class EnumHumanoidHealthDisplayType_INTERNAL extends Enum
-	DisplayWhenDamaged: EnumHumanoidHealthDisplayType
-	AlwaysOn: EnumHumanoidHealthDisplayType
 	AlwaysOff: EnumHumanoidHealthDisplayType
+	AlwaysOn: EnumHumanoidHealthDisplayType
+	DisplayWhenDamaged: EnumHumanoidHealthDisplayType
 end
 declare class EnumHumanoidRigType extends EnumItem end
 declare class EnumHumanoidRigType_INTERNAL extends Enum
-	R6: EnumHumanoidRigType
 	R15: EnumHumanoidRigType
+	R6: EnumHumanoidRigType
 end
 declare class EnumHumanoidStateMachineMode extends EnumItem end
 declare class EnumHumanoidStateMachineMode_INTERNAL extends Enum
 	Default: EnumHumanoidStateMachineMode
 	Legacy: EnumHumanoidStateMachineMode
-	NoStateMachine: EnumHumanoidStateMachineMode
 	LuaStateMachine: EnumHumanoidStateMachineMode
+	NoStateMachine: EnumHumanoidStateMachineMode
 end
 declare class EnumHumanoidStateType extends EnumItem end
 declare class EnumHumanoidStateType_INTERNAL extends Enum
-	FallingDown: EnumHumanoidStateType
-	Running: EnumHumanoidStateType
-	RunningNoPhysics: EnumHumanoidStateType
 	Climbing: EnumHumanoidStateType
-	StrafingNoPhysics: EnumHumanoidStateType
-	Ragdoll: EnumHumanoidStateType
+	Dead: EnumHumanoidStateType
+	FallingDown: EnumHumanoidStateType
+	Flying: EnumHumanoidStateType
+	Freefall: EnumHumanoidStateType
 	GettingUp: EnumHumanoidStateType
 	Jumping: EnumHumanoidStateType
 	Landed: EnumHumanoidStateType
-	Flying: EnumHumanoidStateType
-	Freefall: EnumHumanoidStateType
-	Seated: EnumHumanoidStateType
-	PlatformStanding: EnumHumanoidStateType
-	Dead: EnumHumanoidStateType
-	Swimming: EnumHumanoidStateType
-	Physics: EnumHumanoidStateType
 	None: EnumHumanoidStateType
+	Physics: EnumHumanoidStateType
+	PlatformStanding: EnumHumanoidStateType
+	Ragdoll: EnumHumanoidStateType
+	Running: EnumHumanoidStateType
+	RunningNoPhysics: EnumHumanoidStateType
+	Seated: EnumHumanoidStateType
+	StrafingNoPhysics: EnumHumanoidStateType
+	Swimming: EnumHumanoidStateType
 end
 declare class EnumIKCollisionsMode extends EnumItem end
 declare class EnumIKCollisionsMode_INTERNAL extends Enum
+	IncludeContactedMechanisms: EnumIKCollisionsMode
 	NoCollisions: EnumIKCollisionsMode
 	OtherMechanismsAnchored: EnumIKCollisionsMode
-	IncludeContactedMechanisms: EnumIKCollisionsMode
 end
 declare class EnumIKControlConstraintSupport extends EnumItem end
 declare class EnumIKControlConstraintSupport_INTERNAL extends Enum
@@ -1497,20 +1497,20 @@ declare class EnumIKControlConstraintSupport_INTERNAL extends Enum
 end
 declare class EnumIKControlType extends EnumItem end
 declare class EnumIKControlType_INTERNAL extends Enum
-	Transform: EnumIKControlType
+	LookAt: EnumIKControlType
 	Position: EnumIKControlType
 	Rotation: EnumIKControlType
-	LookAt: EnumIKControlType
+	Transform: EnumIKControlType
 end
 declare class EnumIXPLoadingStatus extends EnumItem end
 declare class EnumIXPLoadingStatus_INTERNAL extends Enum
+	ErrorConnection: EnumIXPLoadingStatus
+	ErrorInvalidUser: EnumIXPLoadingStatus
+	ErrorJsonParse: EnumIXPLoadingStatus
+	ErrorTimedOut: EnumIXPLoadingStatus
+	Initialized: EnumIXPLoadingStatus
 	None: EnumIXPLoadingStatus
 	Pending: EnumIXPLoadingStatus
-	Initialized: EnumIXPLoadingStatus
-	ErrorTimedOut: EnumIXPLoadingStatus
-	ErrorConnection: EnumIXPLoadingStatus
-	ErrorJsonParse: EnumIXPLoadingStatus
-	ErrorInvalidUser: EnumIXPLoadingStatus
 end
 declare class EnumImageCombineType extends EnumItem end
 declare class EnumImageCombineType_INTERNAL extends Enum
@@ -1519,30 +1519,30 @@ declare class EnumImageCombineType_INTERNAL extends Enum
 end
 declare class EnumInOut extends EnumItem end
 declare class EnumInOut_INTERNAL extends Enum
+	Center: EnumInOut
 	Edge: EnumInOut
 	Inset: EnumInOut
-	Center: EnumInOut
 end
 declare class EnumInfoType extends EnumItem end
 declare class EnumInfoType_INTERNAL extends Enum
 	Asset: EnumInfoType
-	Product: EnumInfoType
-	GamePass: EnumInfoType
-	Subscription: EnumInfoType
 	Bundle: EnumInfoType
+	GamePass: EnumInfoType
+	Product: EnumInfoType
+	Subscription: EnumInfoType
 end
 declare class EnumInitialDockState extends EnumItem end
 declare class EnumInitialDockState_INTERNAL extends Enum
-	Top: EnumInitialDockState
 	Bottom: EnumInitialDockState
+	Float: EnumInitialDockState
 	Left: EnumInitialDockState
 	Right: EnumInitialDockState
-	Float: EnumInitialDockState
+	Top: EnumInitialDockState
 end
 declare class EnumInputType extends EnumItem end
 declare class EnumInputType_INTERNAL extends Enum
-	NoInput: EnumInputType
 	Constant: EnumInputType
+	NoInput: EnumInputType
 	Sin: EnumInputType
 end
 declare class EnumInterpolationThrottlingMode extends EnumItem end
@@ -1554,145 +1554,69 @@ end
 declare class EnumItemLineAlignment extends EnumItem end
 declare class EnumItemLineAlignment_INTERNAL extends Enum
 	Automatic: EnumItemLineAlignment
-	Start: EnumItemLineAlignment
 	Center: EnumItemLineAlignment
 	End: EnumItemLineAlignment
+	Start: EnumItemLineAlignment
 	Stretch: EnumItemLineAlignment
 end
 declare class EnumJointCreationMode extends EnumItem end
 declare class EnumJointCreationMode_INTERNAL extends Enum
 	All: EnumJointCreationMode
-	Surface: EnumJointCreationMode
 	None: EnumJointCreationMode
+	Surface: EnumJointCreationMode
 end
 declare class EnumKeyCode extends EnumItem end
 declare class EnumKeyCode_INTERNAL extends Enum
-	Unknown: EnumKeyCode
-	Backspace: EnumKeyCode
-	Tab: EnumKeyCode
-	Clear: EnumKeyCode
-	Return: EnumKeyCode
-	Pause: EnumKeyCode
-	Escape: EnumKeyCode
-	Space: EnumKeyCode
-	QuotedDouble: EnumKeyCode
-	Hash: EnumKeyCode
-	Dollar: EnumKeyCode
-	Percent: EnumKeyCode
-	Ampersand: EnumKeyCode
-	Quote: EnumKeyCode
-	LeftParenthesis: EnumKeyCode
-	RightParenthesis: EnumKeyCode
-	Asterisk: EnumKeyCode
-	Plus: EnumKeyCode
-	Comma: EnumKeyCode
-	Minus: EnumKeyCode
-	Period: EnumKeyCode
-	Slash: EnumKeyCode
-	Zero: EnumKeyCode
-	One: EnumKeyCode
-	Two: EnumKeyCode
-	Three: EnumKeyCode
-	Four: EnumKeyCode
-	Five: EnumKeyCode
-	Six: EnumKeyCode
-	Seven: EnumKeyCode
-	Eight: EnumKeyCode
-	Nine: EnumKeyCode
-	Colon: EnumKeyCode
-	Semicolon: EnumKeyCode
-	LessThan: EnumKeyCode
-	Equals: EnumKeyCode
-	GreaterThan: EnumKeyCode
-	Question: EnumKeyCode
-	At: EnumKeyCode
-	LeftBracket: EnumKeyCode
-	BackSlash: EnumKeyCode
-	RightBracket: EnumKeyCode
-	Caret: EnumKeyCode
-	Underscore: EnumKeyCode
-	Backquote: EnumKeyCode
 	A: EnumKeyCode
+	Ampersand: EnumKeyCode
+	Asterisk: EnumKeyCode
+	At: EnumKeyCode
 	B: EnumKeyCode
-	C: EnumKeyCode
-	D: EnumKeyCode
-	E: EnumKeyCode
-	F: EnumKeyCode
-	G: EnumKeyCode
-	H: EnumKeyCode
-	I: EnumKeyCode
-	J: EnumKeyCode
-	K: EnumKeyCode
-	L: EnumKeyCode
-	M: EnumKeyCode
-	N: EnumKeyCode
-	O: EnumKeyCode
-	P: EnumKeyCode
-	Q: EnumKeyCode
-	R: EnumKeyCode
-	S: EnumKeyCode
-	T: EnumKeyCode
-	U: EnumKeyCode
-	V: EnumKeyCode
-	W: EnumKeyCode
-	X: EnumKeyCode
-	Y: EnumKeyCode
-	Z: EnumKeyCode
-	LeftCurly: EnumKeyCode
-	Pipe: EnumKeyCode
-	RightCurly: EnumKeyCode
-	Tilde: EnumKeyCode
-	Delete: EnumKeyCode
-	KeypadZero: EnumKeyCode
-	KeypadOne: EnumKeyCode
-	KeypadTwo: EnumKeyCode
-	KeypadThree: EnumKeyCode
-	KeypadFour: EnumKeyCode
-	KeypadFive: EnumKeyCode
-	KeypadSix: EnumKeyCode
-	KeypadSeven: EnumKeyCode
-	KeypadEight: EnumKeyCode
-	KeypadNine: EnumKeyCode
-	KeypadPeriod: EnumKeyCode
-	KeypadDivide: EnumKeyCode
-	KeypadMultiply: EnumKeyCode
-	KeypadMinus: EnumKeyCode
-	KeypadPlus: EnumKeyCode
-	KeypadEnter: EnumKeyCode
-	KeypadEquals: EnumKeyCode
-	Up: EnumKeyCode
-	Down: EnumKeyCode
-	Right: EnumKeyCode
-	Left: EnumKeyCode
-	Insert: EnumKeyCode
-	Home: EnumKeyCode
-	End: EnumKeyCode
-	PageUp: EnumKeyCode
-	PageDown: EnumKeyCode
-	LeftShift: EnumKeyCode
-	RightShift: EnumKeyCode
-	LeftMeta: EnumKeyCode
-	RightMeta: EnumKeyCode
-	LeftAlt: EnumKeyCode
-	RightAlt: EnumKeyCode
-	LeftControl: EnumKeyCode
-	RightControl: EnumKeyCode
-	CapsLock: EnumKeyCode
-	NumLock: EnumKeyCode
-	ScrollLock: EnumKeyCode
-	LeftSuper: EnumKeyCode
-	RightSuper: EnumKeyCode
-	Mode: EnumKeyCode
-	Compose: EnumKeyCode
-	Help: EnumKeyCode
-	Print: EnumKeyCode
-	SysReq: EnumKeyCode
+	BackSlash: EnumKeyCode
+	Backquote: EnumKeyCode
+	Backspace: EnumKeyCode
 	Break: EnumKeyCode
-	Menu: EnumKeyCode
-	Power: EnumKeyCode
+	ButtonA: EnumKeyCode
+	ButtonB: EnumKeyCode
+	ButtonL1: EnumKeyCode
+	ButtonL2: EnumKeyCode
+	ButtonL3: EnumKeyCode
+	ButtonR1: EnumKeyCode
+	ButtonR2: EnumKeyCode
+	ButtonR3: EnumKeyCode
+	ButtonSelect: EnumKeyCode
+	ButtonStart: EnumKeyCode
+	ButtonX: EnumKeyCode
+	ButtonY: EnumKeyCode
+	C: EnumKeyCode
+	CapsLock: EnumKeyCode
+	Caret: EnumKeyCode
+	Clear: EnumKeyCode
+	Colon: EnumKeyCode
+	Comma: EnumKeyCode
+	Compose: EnumKeyCode
+	D: EnumKeyCode
+	DPadDown: EnumKeyCode
+	DPadLeft: EnumKeyCode
+	DPadRight: EnumKeyCode
+	DPadUp: EnumKeyCode
+	Delete: EnumKeyCode
+	Dollar: EnumKeyCode
+	Down: EnumKeyCode
+	E: EnumKeyCode
+	Eight: EnumKeyCode
+	End: EnumKeyCode
+	Equals: EnumKeyCode
+	Escape: EnumKeyCode
 	Euro: EnumKeyCode
-	Undo: EnumKeyCode
+	F: EnumKeyCode
 	F1: EnumKeyCode
+	F10: EnumKeyCode
+	F11: EnumKeyCode
+	F12: EnumKeyCode
+	F13: EnumKeyCode
+	F14: EnumKeyCode
+	F15: EnumKeyCode
 	F2: EnumKeyCode
 	F3: EnumKeyCode
 	F4: EnumKeyCode
@@ -1701,40 +1625,104 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	F7: EnumKeyCode
 	F8: EnumKeyCode
 	F9: EnumKeyCode
-	F10: EnumKeyCode
-	F11: EnumKeyCode
-	F12: EnumKeyCode
-	F13: EnumKeyCode
-	F14: EnumKeyCode
-	F15: EnumKeyCode
-	ButtonX: EnumKeyCode
-	ButtonY: EnumKeyCode
-	ButtonA: EnumKeyCode
-	ButtonB: EnumKeyCode
-	ButtonR1: EnumKeyCode
-	ButtonL1: EnumKeyCode
-	ButtonR2: EnumKeyCode
-	ButtonL2: EnumKeyCode
-	ButtonR3: EnumKeyCode
-	ButtonL3: EnumKeyCode
-	ButtonStart: EnumKeyCode
-	ButtonSelect: EnumKeyCode
-	DPadLeft: EnumKeyCode
-	DPadRight: EnumKeyCode
-	DPadUp: EnumKeyCode
-	DPadDown: EnumKeyCode
+	Five: EnumKeyCode
+	Four: EnumKeyCode
+	G: EnumKeyCode
+	GreaterThan: EnumKeyCode
+	H: EnumKeyCode
+	Hash: EnumKeyCode
+	Help: EnumKeyCode
+	Home: EnumKeyCode
+	I: EnumKeyCode
+	Insert: EnumKeyCode
+	J: EnumKeyCode
+	K: EnumKeyCode
+	KeypadDivide: EnumKeyCode
+	KeypadEight: EnumKeyCode
+	KeypadEnter: EnumKeyCode
+	KeypadEquals: EnumKeyCode
+	KeypadFive: EnumKeyCode
+	KeypadFour: EnumKeyCode
+	KeypadMinus: EnumKeyCode
+	KeypadMultiply: EnumKeyCode
+	KeypadNine: EnumKeyCode
+	KeypadOne: EnumKeyCode
+	KeypadPeriod: EnumKeyCode
+	KeypadPlus: EnumKeyCode
+	KeypadSeven: EnumKeyCode
+	KeypadSix: EnumKeyCode
+	KeypadThree: EnumKeyCode
+	KeypadTwo: EnumKeyCode
+	KeypadZero: EnumKeyCode
+	L: EnumKeyCode
+	Left: EnumKeyCode
+	LeftAlt: EnumKeyCode
+	LeftBracket: EnumKeyCode
+	LeftControl: EnumKeyCode
+	LeftCurly: EnumKeyCode
+	LeftMeta: EnumKeyCode
+	LeftParenthesis: EnumKeyCode
+	LeftShift: EnumKeyCode
+	LeftSuper: EnumKeyCode
+	LessThan: EnumKeyCode
+	M: EnumKeyCode
+	Menu: EnumKeyCode
+	Minus: EnumKeyCode
+	Mode: EnumKeyCode
+	N: EnumKeyCode
+	Nine: EnumKeyCode
+	NumLock: EnumKeyCode
+	O: EnumKeyCode
+	One: EnumKeyCode
+	P: EnumKeyCode
+	PageDown: EnumKeyCode
+	PageUp: EnumKeyCode
+	Pause: EnumKeyCode
+	Percent: EnumKeyCode
+	Period: EnumKeyCode
+	Pipe: EnumKeyCode
+	Plus: EnumKeyCode
+	Power: EnumKeyCode
+	Print: EnumKeyCode
+	Q: EnumKeyCode
+	Question: EnumKeyCode
+	Quote: EnumKeyCode
+	QuotedDouble: EnumKeyCode
+	R: EnumKeyCode
+	Return: EnumKeyCode
+	Right: EnumKeyCode
+	RightAlt: EnumKeyCode
+	RightBracket: EnumKeyCode
+	RightControl: EnumKeyCode
+	RightCurly: EnumKeyCode
+	RightMeta: EnumKeyCode
+	RightParenthesis: EnumKeyCode
+	RightShift: EnumKeyCode
+	RightSuper: EnumKeyCode
+	S: EnumKeyCode
+	ScrollLock: EnumKeyCode
+	Semicolon: EnumKeyCode
+	Seven: EnumKeyCode
+	Six: EnumKeyCode
+	Slash: EnumKeyCode
+	Space: EnumKeyCode
+	SysReq: EnumKeyCode
+	T: EnumKeyCode
+	Tab: EnumKeyCode
+	Three: EnumKeyCode
 	Thumbstick1: EnumKeyCode
 	Thumbstick2: EnumKeyCode
+	Tilde: EnumKeyCode
+	Two: EnumKeyCode
+	U: EnumKeyCode
+	Underscore: EnumKeyCode
+	Undo: EnumKeyCode
+	Unknown: EnumKeyCode
+	Up: EnumKeyCode
+	V: EnumKeyCode
+	W: EnumKeyCode
 	World0: EnumKeyCode
 	World1: EnumKeyCode
-	World2: EnumKeyCode
-	World3: EnumKeyCode
-	World4: EnumKeyCode
-	World5: EnumKeyCode
-	World6: EnumKeyCode
-	World7: EnumKeyCode
-	World8: EnumKeyCode
-	World9: EnumKeyCode
 	World10: EnumKeyCode
 	World11: EnumKeyCode
 	World12: EnumKeyCode
@@ -1745,6 +1733,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World17: EnumKeyCode
 	World18: EnumKeyCode
 	World19: EnumKeyCode
+	World2: EnumKeyCode
 	World20: EnumKeyCode
 	World21: EnumKeyCode
 	World22: EnumKeyCode
@@ -1755,6 +1744,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World27: EnumKeyCode
 	World28: EnumKeyCode
 	World29: EnumKeyCode
+	World3: EnumKeyCode
 	World30: EnumKeyCode
 	World31: EnumKeyCode
 	World32: EnumKeyCode
@@ -1765,6 +1755,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World37: EnumKeyCode
 	World38: EnumKeyCode
 	World39: EnumKeyCode
+	World4: EnumKeyCode
 	World40: EnumKeyCode
 	World41: EnumKeyCode
 	World42: EnumKeyCode
@@ -1775,6 +1766,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World47: EnumKeyCode
 	World48: EnumKeyCode
 	World49: EnumKeyCode
+	World5: EnumKeyCode
 	World50: EnumKeyCode
 	World51: EnumKeyCode
 	World52: EnumKeyCode
@@ -1785,6 +1777,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World57: EnumKeyCode
 	World58: EnumKeyCode
 	World59: EnumKeyCode
+	World6: EnumKeyCode
 	World60: EnumKeyCode
 	World61: EnumKeyCode
 	World62: EnumKeyCode
@@ -1795,6 +1788,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World67: EnumKeyCode
 	World68: EnumKeyCode
 	World69: EnumKeyCode
+	World7: EnumKeyCode
 	World70: EnumKeyCode
 	World71: EnumKeyCode
 	World72: EnumKeyCode
@@ -1805,6 +1799,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World77: EnumKeyCode
 	World78: EnumKeyCode
 	World79: EnumKeyCode
+	World8: EnumKeyCode
 	World80: EnumKeyCode
 	World81: EnumKeyCode
 	World82: EnumKeyCode
@@ -1815,23 +1810,28 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	World87: EnumKeyCode
 	World88: EnumKeyCode
 	World89: EnumKeyCode
+	World9: EnumKeyCode
 	World90: EnumKeyCode
 	World91: EnumKeyCode
 	World92: EnumKeyCode
 	World93: EnumKeyCode
 	World94: EnumKeyCode
 	World95: EnumKeyCode
+	X: EnumKeyCode
+	Y: EnumKeyCode
+	Z: EnumKeyCode
+	Zero: EnumKeyCode
 end
 declare class EnumKeyInterpolationMode extends EnumItem end
 declare class EnumKeyInterpolationMode_INTERNAL extends Enum
 	Constant: EnumKeyInterpolationMode
-	Linear: EnumKeyInterpolationMode
 	Cubic: EnumKeyInterpolationMode
+	Linear: EnumKeyInterpolationMode
 end
 declare class EnumKeywordFilterType extends EnumItem end
 declare class EnumKeywordFilterType_INTERNAL extends Enum
-	Include: EnumKeywordFilterType
 	Exclude: EnumKeywordFilterType
+	Include: EnumKeywordFilterType
 end
 declare class EnumLanguage extends EnumItem end
 declare class EnumLanguage_INTERNAL extends Enum
@@ -1839,25 +1839,25 @@ declare class EnumLanguage_INTERNAL extends Enum
 end
 declare class EnumLeftRight extends EnumItem end
 declare class EnumLeftRight_INTERNAL extends Enum
-	Left: EnumLeftRight
 	Center: EnumLeftRight
+	Left: EnumLeftRight
 	Right: EnumLeftRight
 end
 declare class EnumLimb extends EnumItem end
 declare class EnumLimb_INTERNAL extends Enum
 	Head: EnumLimb
-	Torso: EnumLimb
 	LeftArm: EnumLimb
-	RightArm: EnumLimb
 	LeftLeg: EnumLimb
+	RightArm: EnumLimb
 	RightLeg: EnumLimb
+	Torso: EnumLimb
 	Unknown: EnumLimb
 end
 declare class EnumLineJoinMode extends EnumItem end
 declare class EnumLineJoinMode_INTERNAL extends Enum
-	Round: EnumLineJoinMode
 	Bevel: EnumLineJoinMode
 	Miter: EnumLineJoinMode
+	Round: EnumLineJoinMode
 end
 declare class EnumListDisplayMode extends EnumItem end
 declare class EnumListDisplayMode_INTERNAL extends Enum
@@ -1866,23 +1866,23 @@ declare class EnumListDisplayMode_INTERNAL extends Enum
 end
 declare class EnumListenerType extends EnumItem end
 declare class EnumListenerType_INTERNAL extends Enum
-	Camera: EnumListenerType
 	CFrame: EnumListenerType
-	ObjectPosition: EnumListenerType
+	Camera: EnumListenerType
 	ObjectCFrame: EnumListenerType
+	ObjectPosition: EnumListenerType
 end
 declare class EnumLiveEditingAtomicUpdateResponse extends EnumItem end
 declare class EnumLiveEditingAtomicUpdateResponse_INTERNAL extends Enum
-	Success: EnumLiveEditingAtomicUpdateResponse
 	FailureGuidNotFound: EnumLiveEditingAtomicUpdateResponse
 	FailureHashMismatch: EnumLiveEditingAtomicUpdateResponse
 	FailureOperationIllegal: EnumLiveEditingAtomicUpdateResponse
+	Success: EnumLiveEditingAtomicUpdateResponse
 end
 declare class EnumLiveEditingBroadcastMessageType extends EnumItem end
 declare class EnumLiveEditingBroadcastMessageType_INTERNAL extends Enum
+	Error: EnumLiveEditingBroadcastMessageType
 	Normal: EnumLiveEditingBroadcastMessageType
 	Warning: EnumLiveEditingBroadcastMessageType
-	Error: EnumLiveEditingBroadcastMessageType
 end
 declare class EnumLoadCharacterLayeredClothing extends EnumItem end
 declare class EnumLoadCharacterLayeredClothing_INTERNAL extends Enum
@@ -1898,69 +1898,69 @@ declare class EnumLoadDynamicHeads_INTERNAL extends Enum
 end
 declare class EnumMarkupKind extends EnumItem end
 declare class EnumMarkupKind_INTERNAL extends Enum
-	PlainText: EnumMarkupKind
 	Markdown: EnumMarkupKind
+	PlainText: EnumMarkupKind
 end
 declare class EnumMaterial extends EnumItem end
 declare class EnumMaterial_INTERNAL extends Enum
-	Plastic: EnumMaterial
-	Wood: EnumMaterial
-	Slate: EnumMaterial
-	Concrete: EnumMaterial
-	CorrodedMetal: EnumMaterial
-	DiamondPlate: EnumMaterial
-	Foil: EnumMaterial
-	Grass: EnumMaterial
-	Ice: EnumMaterial
-	Marble: EnumMaterial
-	Granite: EnumMaterial
-	Brick: EnumMaterial
-	Pebble: EnumMaterial
-	Sand: EnumMaterial
-	Fabric: EnumMaterial
-	SmoothPlastic: EnumMaterial
-	Metal: EnumMaterial
-	WoodPlanks: EnumMaterial
-	Cobblestone: EnumMaterial
 	Air: EnumMaterial
-	Water: EnumMaterial
-	Rock: EnumMaterial
-	Glacier: EnumMaterial
-	Snow: EnumMaterial
-	Sandstone: EnumMaterial
-	Mud: EnumMaterial
-	Basalt: EnumMaterial
-	Ground: EnumMaterial
-	CrackedLava: EnumMaterial
-	Neon: EnumMaterial
-	Glass: EnumMaterial
 	Asphalt: EnumMaterial
-	LeafyGrass: EnumMaterial
-	Salt: EnumMaterial
-	Limestone: EnumMaterial
-	Pavement: EnumMaterial
-	ForceField: EnumMaterial
+	Basalt: EnumMaterial
+	Brick: EnumMaterial
 	Cardboard: EnumMaterial
 	Carpet: EnumMaterial
 	CeramicTiles: EnumMaterial
 	ClayRoofTiles: EnumMaterial
-	RoofShingles: EnumMaterial
+	Cobblestone: EnumMaterial
+	Concrete: EnumMaterial
+	CorrodedMetal: EnumMaterial
+	CrackedLava: EnumMaterial
+	DiamondPlate: EnumMaterial
+	Fabric: EnumMaterial
+	Foil: EnumMaterial
+	ForceField: EnumMaterial
+	Glacier: EnumMaterial
+	Glass: EnumMaterial
+	Granite: EnumMaterial
+	Grass: EnumMaterial
+	Ground: EnumMaterial
+	Ice: EnumMaterial
+	LeafyGrass: EnumMaterial
 	Leather: EnumMaterial
+	Limestone: EnumMaterial
+	Marble: EnumMaterial
+	Metal: EnumMaterial
+	Mud: EnumMaterial
+	Neon: EnumMaterial
+	Pavement: EnumMaterial
+	Pebble: EnumMaterial
 	Plaster: EnumMaterial
+	Plastic: EnumMaterial
+	Rock: EnumMaterial
+	RoofShingles: EnumMaterial
 	Rubber: EnumMaterial
+	Salt: EnumMaterial
+	Sand: EnumMaterial
+	Sandstone: EnumMaterial
+	Slate: EnumMaterial
+	SmoothPlastic: EnumMaterial
+	Snow: EnumMaterial
+	Water: EnumMaterial
+	Wood: EnumMaterial
+	WoodPlanks: EnumMaterial
 end
 declare class EnumMaterialPattern extends EnumItem end
 declare class EnumMaterialPattern_INTERNAL extends Enum
-	Regular: EnumMaterialPattern
 	Organic: EnumMaterialPattern
+	Regular: EnumMaterialPattern
 end
 declare class EnumMembershipType extends EnumItem end
 declare class EnumMembershipType_INTERNAL extends Enum
-	None: EnumMembershipType
 	BuildersClub: EnumMembershipType
-	TurboBuildersClub: EnumMembershipType
+	None: EnumMembershipType
 	OutrageousBuildersClub: EnumMembershipType
 	Premium: EnumMembershipType
+	TurboBuildersClub: EnumMembershipType
 end
 declare class EnumMeshPartDetailLevel extends EnumItem end
 declare class EnumMeshPartDetailLevel_INTERNAL extends Enum
@@ -1979,61 +1979,61 @@ declare class EnumMeshPartHeadsAndAccessories_INTERNAL extends Enum
 end
 declare class EnumMeshScaleUnit extends EnumItem end
 declare class EnumMeshScaleUnit_INTERNAL extends Enum
-	Stud: EnumMeshScaleUnit
-	Meter: EnumMeshScaleUnit
 	CM: EnumMeshScaleUnit
-	MM: EnumMeshScaleUnit
 	Foot: EnumMeshScaleUnit
 	Inch: EnumMeshScaleUnit
+	MM: EnumMeshScaleUnit
+	Meter: EnumMeshScaleUnit
+	Stud: EnumMeshScaleUnit
 end
 declare class EnumMeshType extends EnumItem end
 declare class EnumMeshType_INTERNAL extends Enum
-	Head: EnumMeshType
-	Torso: EnumMeshType
-	Wedge: EnumMeshType
-	Sphere: EnumMeshType
+	Brick: EnumMeshType
+	CornerWedge: EnumMeshType
 	Cylinder: EnumMeshType
 	FileMesh: EnumMeshType
-	Brick: EnumMeshType
+	Head: EnumMeshType
+	ParallelRamp: EnumMeshType
 	Prism: EnumMeshType
 	Pyramid: EnumMeshType
-	ParallelRamp: EnumMeshType
 	RightAngleRamp: EnumMeshType
-	CornerWedge: EnumMeshType
+	Sphere: EnumMeshType
+	Torso: EnumMeshType
+	Wedge: EnumMeshType
 end
 declare class EnumMessageType extends EnumItem end
 declare class EnumMessageType_INTERNAL extends Enum
-	MessageOutput: EnumMessageType
-	MessageInfo: EnumMessageType
-	MessageWarning: EnumMessageType
 	MessageError: EnumMessageType
+	MessageInfo: EnumMessageType
+	MessageOutput: EnumMessageType
+	MessageWarning: EnumMessageType
 end
 declare class EnumModelLevelOfDetail extends EnumItem end
 declare class EnumModelLevelOfDetail_INTERNAL extends Enum
 	Automatic: EnumModelLevelOfDetail
-	StreamingMesh: EnumModelLevelOfDetail
 	Disabled: EnumModelLevelOfDetail
+	StreamingMesh: EnumModelLevelOfDetail
 end
 declare class EnumModelStreamingBehavior extends EnumItem end
 declare class EnumModelStreamingBehavior_INTERNAL extends Enum
 	Default: EnumModelStreamingBehavior
-	Legacy: EnumModelStreamingBehavior
 	Improved: EnumModelStreamingBehavior
+	Legacy: EnumModelStreamingBehavior
 end
 declare class EnumModelStreamingMode extends EnumItem end
 declare class EnumModelStreamingMode_INTERNAL extends Enum
-	Default: EnumModelStreamingMode
 	Atomic: EnumModelStreamingMode
+	Default: EnumModelStreamingMode
+	Nonatomic: EnumModelStreamingMode
 	Persistent: EnumModelStreamingMode
 	PersistentPerPlayer: EnumModelStreamingMode
-	Nonatomic: EnumModelStreamingMode
 end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
-	Shift: EnumModifierKey
-	Ctrl: EnumModifierKey
 	Alt: EnumModifierKey
+	Ctrl: EnumModifierKey
 	Meta: EnumModifierKey
+	Shift: EnumModifierKey
 end
 declare class EnumMouseBehavior extends EnumItem end
 declare class EnumMouseBehavior_INTERNAL extends Enum
@@ -2043,21 +2043,21 @@ declare class EnumMouseBehavior_INTERNAL extends Enum
 end
 declare class EnumMoveState extends EnumItem end
 declare class EnumMoveState_INTERNAL extends Enum
-	Stopped: EnumMoveState
+	AirFree: EnumMoveState
 	Coasting: EnumMoveState
 	Pushing: EnumMoveState
+	Stopped: EnumMoveState
 	Stopping: EnumMoveState
-	AirFree: EnumMoveState
 end
 declare class EnumMuteState extends EnumItem end
 declare class EnumMuteState_INTERNAL extends Enum
-	Unmuted: EnumMuteState
 	Muted: EnumMuteState
+	Unmuted: EnumMuteState
 end
 declare class EnumNameOcclusion extends EnumItem end
 declare class EnumNameOcclusion_INTERNAL extends Enum
-	NoOcclusion: EnumNameOcclusion
 	EnemyOcclusion: EnumNameOcclusion
+	NoOcclusion: EnumNameOcclusion
 	OccludeAll: EnumNameOcclusion
 end
 declare class EnumNetworkOwnership extends EnumItem end
@@ -2068,20 +2068,20 @@ declare class EnumNetworkOwnership_INTERNAL extends Enum
 end
 declare class EnumNormalId extends EnumItem end
 declare class EnumNormalId_INTERNAL extends Enum
-	Top: EnumNormalId
-	Bottom: EnumNormalId
 	Back: EnumNormalId
+	Bottom: EnumNormalId
 	Front: EnumNormalId
-	Right: EnumNormalId
 	Left: EnumNormalId
+	Right: EnumNormalId
+	Top: EnumNormalId
 end
 declare class EnumOperationType extends EnumItem end
 declare class EnumOperationType_INTERNAL extends Enum
-	Null: EnumOperationType
-	Union: EnumOperationType
-	Subtraction: EnumOperationType
 	Intersection: EnumOperationType
+	Null: EnumOperationType
 	Primitive: EnumOperationType
+	Subtraction: EnumOperationType
+	Union: EnumOperationType
 end
 declare class EnumOrientationAlignmentMode extends EnumItem end
 declare class EnumOrientationAlignmentMode_INTERNAL extends Enum
@@ -2107,51 +2107,51 @@ declare class EnumOutputLayoutMode_INTERNAL extends Enum
 end
 declare class EnumOverrideMouseIconBehavior extends EnumItem end
 declare class EnumOverrideMouseIconBehavior_INTERNAL extends Enum
-	None: EnumOverrideMouseIconBehavior
-	ForceShow: EnumOverrideMouseIconBehavior
 	ForceHide: EnumOverrideMouseIconBehavior
+	ForceShow: EnumOverrideMouseIconBehavior
+	None: EnumOverrideMouseIconBehavior
 end
 declare class EnumPackagePermission extends EnumItem end
 declare class EnumPackagePermission_INTERNAL extends Enum
-	None: EnumPackagePermission
+	Edit: EnumPackagePermission
 	NoAccess: EnumPackagePermission
+	None: EnumPackagePermission
+	Own: EnumPackagePermission
 	Revoked: EnumPackagePermission
 	UseView: EnumPackagePermission
-	Edit: EnumPackagePermission
-	Own: EnumPackagePermission
 end
 declare class EnumPartType extends EnumItem end
 declare class EnumPartType_INTERNAL extends Enum
 	Ball: EnumPartType
 	Block: EnumPartType
+	CornerWedge: EnumPartType
 	Cylinder: EnumPartType
 	Wedge: EnumPartType
-	CornerWedge: EnumPartType
 end
 declare class EnumParticleEmitterShape extends EnumItem end
 declare class EnumParticleEmitterShape_INTERNAL extends Enum
 	Box: EnumParticleEmitterShape
-	Sphere: EnumParticleEmitterShape
 	Cylinder: EnumParticleEmitterShape
 	Disc: EnumParticleEmitterShape
+	Sphere: EnumParticleEmitterShape
 end
 declare class EnumParticleEmitterShapeInOut extends EnumItem end
 declare class EnumParticleEmitterShapeInOut_INTERNAL extends Enum
-	Outward: EnumParticleEmitterShapeInOut
-	Inward: EnumParticleEmitterShapeInOut
 	InAndOut: EnumParticleEmitterShapeInOut
+	Inward: EnumParticleEmitterShapeInOut
+	Outward: EnumParticleEmitterShapeInOut
 end
 declare class EnumParticleEmitterShapeStyle extends EnumItem end
 declare class EnumParticleEmitterShapeStyle_INTERNAL extends Enum
-	Volume: EnumParticleEmitterShapeStyle
 	Surface: EnumParticleEmitterShapeStyle
+	Volume: EnumParticleEmitterShapeStyle
 end
 declare class EnumParticleFlipbookLayout extends EnumItem end
 declare class EnumParticleFlipbookLayout_INTERNAL extends Enum
-	None: EnumParticleFlipbookLayout
 	Grid2x2: EnumParticleFlipbookLayout
 	Grid4x4: EnumParticleFlipbookLayout
 	Grid8x8: EnumParticleFlipbookLayout
+	None: EnumParticleFlipbookLayout
 end
 declare class EnumParticleFlipbookMode extends EnumItem end
 declare class EnumParticleFlipbookMode_INTERNAL extends Enum
@@ -2162,8 +2162,8 @@ declare class EnumParticleFlipbookMode_INTERNAL extends Enum
 end
 declare class EnumParticleFlipbookTextureCompatible extends EnumItem end
 declare class EnumParticleFlipbookTextureCompatible_INTERNAL extends Enum
-	NotCompatible: EnumParticleFlipbookTextureCompatible
 	Compatible: EnumParticleFlipbookTextureCompatible
+	NotCompatible: EnumParticleFlipbookTextureCompatible
 	Unknown: EnumParticleFlipbookTextureCompatible
 end
 declare class EnumParticleOrientation extends EnumItem end
@@ -2175,78 +2175,78 @@ declare class EnumParticleOrientation_INTERNAL extends Enum
 end
 declare class EnumPathStatus extends EnumItem end
 declare class EnumPathStatus_INTERNAL extends Enum
-	Success: EnumPathStatus
-	NoPath: EnumPathStatus
 	ClosestNoPath: EnumPathStatus
 	ClosestOutOfRange: EnumPathStatus
-	FailStartNotEmpty: EnumPathStatus
 	FailFinishNotEmpty: EnumPathStatus
+	FailStartNotEmpty: EnumPathStatus
+	NoPath: EnumPathStatus
+	Success: EnumPathStatus
 end
 declare class EnumPathWaypointAction extends EnumItem end
 declare class EnumPathWaypointAction_INTERNAL extends Enum
-	Walk: EnumPathWaypointAction
-	Jump: EnumPathWaypointAction
 	Custom: EnumPathWaypointAction
+	Jump: EnumPathWaypointAction
+	Walk: EnumPathWaypointAction
 end
 declare class EnumPermissionLevelShown extends EnumItem end
 declare class EnumPermissionLevelShown_INTERNAL extends Enum
 	Game: EnumPermissionLevelShown
+	Roblox: EnumPermissionLevelShown
 	RobloxGame: EnumPermissionLevelShown
 	RobloxScript: EnumPermissionLevelShown
 	Studio: EnumPermissionLevelShown
-	Roblox: EnumPermissionLevelShown
 end
 declare class EnumPhysicsSimulationRate extends EnumItem end
 declare class EnumPhysicsSimulationRate_INTERNAL extends Enum
-	Fixed240Hz: EnumPhysicsSimulationRate
 	Fixed120Hz: EnumPhysicsSimulationRate
+	Fixed240Hz: EnumPhysicsSimulationRate
 	Fixed60Hz: EnumPhysicsSimulationRate
 end
 declare class EnumPhysicsSteppingMethod extends EnumItem end
 declare class EnumPhysicsSteppingMethod_INTERNAL extends Enum
+	Adaptive: EnumPhysicsSteppingMethod
 	Default: EnumPhysicsSteppingMethod
 	Fixed: EnumPhysicsSteppingMethod
-	Adaptive: EnumPhysicsSteppingMethod
 end
 declare class EnumPlatform extends EnumItem end
 declare class EnumPlatform_INTERNAL extends Enum
-	Windows: EnumPlatform
-	OSX: EnumPlatform
-	IOS: EnumPlatform
 	Android: EnumPlatform
-	XBoxOne: EnumPlatform
-	PS4: EnumPlatform
-	PS3: EnumPlatform
-	XBox360: EnumPlatform
-	WiiU: EnumPlatform
-	NX: EnumPlatform
-	Ouya: EnumPlatform
 	AndroidTV: EnumPlatform
-	Chromecast: EnumPlatform
-	Linux: EnumPlatform
-	SteamOS: EnumPlatform
-	WebOS: EnumPlatform
-	DOS: EnumPlatform
 	BeOS: EnumPlatform
-	UWP: EnumPlatform
+	Chromecast: EnumPlatform
+	DOS: EnumPlatform
+	IOS: EnumPlatform
+	Linux: EnumPlatform
+	NX: EnumPlatform
 	None: EnumPlatform
+	OSX: EnumPlatform
+	Ouya: EnumPlatform
+	PS3: EnumPlatform
+	PS4: EnumPlatform
+	SteamOS: EnumPlatform
+	UWP: EnumPlatform
+	WebOS: EnumPlatform
+	WiiU: EnumPlatform
+	Windows: EnumPlatform
+	XBox360: EnumPlatform
+	XBoxOne: EnumPlatform
 end
 declare class EnumPlaybackState extends EnumItem end
 declare class EnumPlaybackState_INTERNAL extends Enum
 	Begin: EnumPlaybackState
-	Delayed: EnumPlaybackState
-	Playing: EnumPlaybackState
-	Paused: EnumPlaybackState
-	Completed: EnumPlaybackState
 	Cancelled: EnumPlaybackState
+	Completed: EnumPlaybackState
+	Delayed: EnumPlaybackState
+	Paused: EnumPlaybackState
+	Playing: EnumPlaybackState
 end
 declare class EnumPlayerActions extends EnumItem end
 declare class EnumPlayerActions_INTERNAL extends Enum
-	CharacterForward: EnumPlayerActions
 	CharacterBackward: EnumPlayerActions
+	CharacterForward: EnumPlayerActions
+	CharacterJump: EnumPlayerActions
 	CharacterLeft: EnumPlayerActions
 	CharacterRight: EnumPlayerActions
-	CharacterJump: EnumPlayerActions
 end
 declare class EnumPlayerChatType extends EnumItem end
 declare class EnumPlayerChatType_INTERNAL extends Enum
@@ -2257,16 +2257,16 @@ end
 declare class EnumPoseEasingDirection extends EnumItem end
 declare class EnumPoseEasingDirection_INTERNAL extends Enum
 	In: EnumPoseEasingDirection
-	Out: EnumPoseEasingDirection
 	InOut: EnumPoseEasingDirection
+	Out: EnumPoseEasingDirection
 end
 declare class EnumPoseEasingStyle extends EnumItem end
 declare class EnumPoseEasingStyle_INTERNAL extends Enum
-	Linear: EnumPoseEasingStyle
-	Constant: EnumPoseEasingStyle
-	Elastic: EnumPoseEasingStyle
-	Cubic: EnumPoseEasingStyle
 	Bounce: EnumPoseEasingStyle
+	Constant: EnumPoseEasingStyle
+	Cubic: EnumPoseEasingStyle
+	Elastic: EnumPoseEasingStyle
+	Linear: EnumPoseEasingStyle
 end
 declare class EnumPositionAlignmentMode extends EnumItem end
 declare class EnumPositionAlignmentMode_INTERNAL extends Enum
@@ -2275,26 +2275,26 @@ declare class EnumPositionAlignmentMode_INTERNAL extends Enum
 end
 declare class EnumPrimitiveType extends EnumItem end
 declare class EnumPrimitiveType_INTERNAL extends Enum
-	Null: EnumPrimitiveType
 	Ball: EnumPrimitiveType
-	Cylinder: EnumPrimitiveType
 	Block: EnumPrimitiveType
-	Wedge: EnumPrimitiveType
 	CornerWedge: EnumPrimitiveType
+	Cylinder: EnumPrimitiveType
+	Null: EnumPrimitiveType
+	Wedge: EnumPrimitiveType
 end
 declare class EnumPrivilegeType extends EnumItem end
 declare class EnumPrivilegeType_INTERNAL extends Enum
-	Owner: EnumPrivilegeType
 	Admin: EnumPrivilegeType
-	Member: EnumPrivilegeType
-	Visitor: EnumPrivilegeType
 	Banned: EnumPrivilegeType
+	Member: EnumPrivilegeType
+	Owner: EnumPrivilegeType
+	Visitor: EnumPrivilegeType
 end
 declare class EnumProductLocationRestriction extends EnumItem end
 declare class EnumProductLocationRestriction_INTERNAL extends Enum
-	AvatarShop: EnumProductLocationRestriction
-	AllowedGames: EnumProductLocationRestriction
 	AllGames: EnumProductLocationRestriction
+	AllowedGames: EnumProductLocationRestriction
+	AvatarShop: EnumProductLocationRestriction
 end
 declare class EnumProductPurchaseDecision extends EnumItem end
 declare class EnumProductPurchaseDecision_INTERNAL extends Enum
@@ -2303,44 +2303,44 @@ declare class EnumProductPurchaseDecision_INTERNAL extends Enum
 end
 declare class EnumPromptCreateAssetResult extends EnumItem end
 declare class EnumPromptCreateAssetResult_INTERNAL extends Enum
-	Success: EnumPromptCreateAssetResult
-	PermissionDenied: EnumPromptCreateAssetResult
-	Timeout: EnumPromptCreateAssetResult
-	UploadFailed: EnumPromptCreateAssetResult
 	NoUserInput: EnumPromptCreateAssetResult
+	PermissionDenied: EnumPromptCreateAssetResult
+	Success: EnumPromptCreateAssetResult
+	Timeout: EnumPromptCreateAssetResult
 	UnknownFailure: EnumPromptCreateAssetResult
+	UploadFailed: EnumPromptCreateAssetResult
 end
 declare class EnumPromptPublishAssetResult extends EnumItem end
 declare class EnumPromptPublishAssetResult_INTERNAL extends Enum
-	Success: EnumPromptPublishAssetResult
-	PermissionDenied: EnumPromptPublishAssetResult
-	Timeout: EnumPromptPublishAssetResult
-	UploadFailed: EnumPromptPublishAssetResult
 	NoUserInput: EnumPromptPublishAssetResult
+	PermissionDenied: EnumPromptPublishAssetResult
+	Success: EnumPromptPublishAssetResult
+	Timeout: EnumPromptPublishAssetResult
 	UnknownFailure: EnumPromptPublishAssetResult
+	UploadFailed: EnumPromptPublishAssetResult
 end
 declare class EnumPropertyStatus extends EnumItem end
 declare class EnumPropertyStatus_INTERNAL extends Enum
+	Error: EnumPropertyStatus
 	Ok: EnumPropertyStatus
 	Warning: EnumPropertyStatus
-	Error: EnumPropertyStatus
 end
 declare class EnumProximityPromptExclusivity extends EnumItem end
 declare class EnumProximityPromptExclusivity_INTERNAL extends Enum
-	OnePerButton: EnumProximityPromptExclusivity
-	OneGlobally: EnumProximityPromptExclusivity
 	AlwaysShow: EnumProximityPromptExclusivity
+	OneGlobally: EnumProximityPromptExclusivity
+	OnePerButton: EnumProximityPromptExclusivity
 end
 declare class EnumProximityPromptInputType extends EnumItem end
 declare class EnumProximityPromptInputType_INTERNAL extends Enum
-	Keyboard: EnumProximityPromptInputType
 	Gamepad: EnumProximityPromptInputType
+	Keyboard: EnumProximityPromptInputType
 	Touch: EnumProximityPromptInputType
 end
 declare class EnumProximityPromptStyle extends EnumItem end
 declare class EnumProximityPromptStyle_INTERNAL extends Enum
-	Default: EnumProximityPromptStyle
 	Custom: EnumProximityPromptStyle
+	Default: EnumProximityPromptStyle
 end
 declare class EnumQualityLevel extends EnumItem end
 declare class EnumQualityLevel_INTERNAL extends Enum
@@ -2369,8 +2369,8 @@ declare class EnumQualityLevel_INTERNAL extends Enum
 end
 declare class EnumR15CollisionType extends EnumItem end
 declare class EnumR15CollisionType_INTERNAL extends Enum
-	OuterBox: EnumR15CollisionType
 	InnerBox: EnumR15CollisionType
+	OuterBox: EnumR15CollisionType
 end
 declare class EnumRaycastFilterType extends EnumItem end
 declare class EnumRaycastFilterType_INTERNAL extends Enum
@@ -2386,21 +2386,21 @@ end
 declare class EnumRenderFidelity extends EnumItem end
 declare class EnumRenderFidelity_INTERNAL extends Enum
 	Automatic: EnumRenderFidelity
-	Precise: EnumRenderFidelity
 	Performance: EnumRenderFidelity
+	Precise: EnumRenderFidelity
 end
 declare class EnumRenderPriority extends EnumItem end
 declare class EnumRenderPriority_INTERNAL extends Enum
-	First: EnumRenderPriority
-	Input: EnumRenderPriority
 	Camera: EnumRenderPriority
 	Character: EnumRenderPriority
+	First: EnumRenderPriority
+	Input: EnumRenderPriority
 	Last: EnumRenderPriority
 end
 declare class EnumRenderingTestComparisonMethod extends EnumItem end
 declare class EnumRenderingTestComparisonMethod_INTERNAL extends Enum
-	psnr: EnumRenderingTestComparisonMethod
 	diff: EnumRenderingTestComparisonMethod
+	psnr: EnumRenderingTestComparisonMethod
 end
 declare class EnumReplicateInstanceDestroySetting extends EnumItem end
 declare class EnumReplicateInstanceDestroySetting_INTERNAL extends Enum
@@ -2415,16 +2415,16 @@ declare class EnumResamplerMode_INTERNAL extends Enum
 end
 declare class EnumReservedHighlightId extends EnumItem end
 declare class EnumReservedHighlightId_INTERNAL extends Enum
-	Standard: EnumReservedHighlightId
-	Selection: EnumReservedHighlightId
-	Hover: EnumReservedHighlightId
 	Active: EnumReservedHighlightId
+	Hover: EnumReservedHighlightId
+	Selection: EnumReservedHighlightId
+	Standard: EnumReservedHighlightId
 end
 declare class EnumRestPose extends EnumItem end
 declare class EnumRestPose_INTERNAL extends Enum
+	Custom: EnumRestPose
 	Default: EnumRestPose
 	RotationsReset: EnumRestPose
-	Custom: EnumRestPose
 end
 declare class EnumReturnKeyType extends EnumItem end
 declare class EnumReturnKeyType_INTERNAL extends Enum
@@ -2437,44 +2437,44 @@ declare class EnumReturnKeyType_INTERNAL extends Enum
 end
 declare class EnumReverbType extends EnumItem end
 declare class EnumReverbType_INTERNAL extends Enum
-	NoReverb: EnumReverbType
-	GenericReverb: EnumReverbType
-	PaddedCell: EnumReverbType
-	Room: EnumReverbType
-	Bathroom: EnumReverbType
-	LivingRoom: EnumReverbType
-	StoneRoom: EnumReverbType
-	Auditorium: EnumReverbType
-	ConcertHall: EnumReverbType
-	Cave: EnumReverbType
-	Arena: EnumReverbType
-	Hangar: EnumReverbType
-	CarpettedHallway: EnumReverbType
-	Hallway: EnumReverbType
-	StoneCorridor: EnumReverbType
 	Alley: EnumReverbType
-	Forest: EnumReverbType
+	Arena: EnumReverbType
+	Auditorium: EnumReverbType
+	Bathroom: EnumReverbType
+	CarpettedHallway: EnumReverbType
+	Cave: EnumReverbType
 	City: EnumReverbType
+	ConcertHall: EnumReverbType
+	Forest: EnumReverbType
+	GenericReverb: EnumReverbType
+	Hallway: EnumReverbType
+	Hangar: EnumReverbType
+	LivingRoom: EnumReverbType
 	Mountains: EnumReverbType
-	Quarry: EnumReverbType
-	Plain: EnumReverbType
+	NoReverb: EnumReverbType
+	PaddedCell: EnumReverbType
 	ParkingLot: EnumReverbType
+	Plain: EnumReverbType
+	Quarry: EnumReverbType
+	Room: EnumReverbType
 	SewerPipe: EnumReverbType
+	StoneCorridor: EnumReverbType
+	StoneRoom: EnumReverbType
 	UnderWater: EnumReverbType
 end
 declare class EnumRibbonTool extends EnumItem end
 declare class EnumRibbonTool_INTERNAL extends Enum
-	Select: EnumRibbonTool
-	Scale: EnumRibbonTool
-	Rotate: EnumRibbonTool
-	Move: EnumRibbonTool
-	Transform: EnumRibbonTool
 	ColorPicker: EnumRibbonTool
-	MaterialPicker: EnumRibbonTool
 	Group: EnumRibbonTool
-	Ungroup: EnumRibbonTool
+	MaterialPicker: EnumRibbonTool
+	Move: EnumRibbonTool
 	None: EnumRibbonTool
 	PivotEditor: EnumRibbonTool
+	Rotate: EnumRibbonTool
+	Scale: EnumRibbonTool
+	Select: EnumRibbonTool
+	Transform: EnumRibbonTool
+	Ungroup: EnumRibbonTool
 end
 declare class EnumRigScale extends EnumItem end
 declare class EnumRigScale_INTERNAL extends Enum
@@ -2484,30 +2484,30 @@ declare class EnumRigScale_INTERNAL extends Enum
 end
 declare class EnumRigType extends EnumItem end
 declare class EnumRigType_INTERNAL extends Enum
-	R15: EnumRigType
 	Custom: EnumRigType
 	None: EnumRigType
+	R15: EnumRigType
 end
 declare class EnumRollOffMode extends EnumItem end
 declare class EnumRollOffMode_INTERNAL extends Enum
 	Inverse: EnumRollOffMode
-	Linear: EnumRollOffMode
 	InverseTapered: EnumRollOffMode
+	Linear: EnumRollOffMode
 	LinearSquare: EnumRollOffMode
 end
 declare class EnumRotationOrder extends EnumItem end
 declare class EnumRotationOrder_INTERNAL extends Enum
 	XYZ: EnumRotationOrder
 	XZY: EnumRotationOrder
-	YZX: EnumRotationOrder
 	YXZ: EnumRotationOrder
+	YZX: EnumRotationOrder
 	ZXY: EnumRotationOrder
 	ZYX: EnumRotationOrder
 end
 declare class EnumRotationType extends EnumItem end
 declare class EnumRotationType_INTERNAL extends Enum
-	MovementRelative: EnumRotationType
 	CameraRelative: EnumRotationType
+	MovementRelative: EnumRotationType
 end
 declare class EnumRtlTextSupport extends EnumItem end
 declare class EnumRtlTextSupport_INTERNAL extends Enum
@@ -2517,21 +2517,21 @@ declare class EnumRtlTextSupport_INTERNAL extends Enum
 end
 declare class EnumRunContext extends EnumItem end
 declare class EnumRunContext_INTERNAL extends Enum
-	Legacy: EnumRunContext
-	Server: EnumRunContext
 	Client: EnumRunContext
+	Legacy: EnumRunContext
 	Plugin: EnumRunContext
+	Server: EnumRunContext
 end
 declare class EnumRuntimeUndoBehavior extends EnumItem end
 declare class EnumRuntimeUndoBehavior_INTERNAL extends Enum
 	Aggregate: EnumRuntimeUndoBehavior
-	Snapshot: EnumRuntimeUndoBehavior
 	Hybrid: EnumRuntimeUndoBehavior
+	Snapshot: EnumRuntimeUndoBehavior
 end
 declare class EnumSafeAreaCompatibility extends EnumItem end
 declare class EnumSafeAreaCompatibility_INTERNAL extends Enum
-	None: EnumSafeAreaCompatibility
 	FullscreenExtension: EnumSafeAreaCompatibility
+	None: EnumSafeAreaCompatibility
 end
 declare class EnumSalesTypeFilter extends EnumItem end
 declare class EnumSalesTypeFilter_INTERNAL extends Enum
@@ -2541,23 +2541,24 @@ declare class EnumSalesTypeFilter_INTERNAL extends Enum
 end
 declare class EnumSaveAvatarThumbnailCustomizationFailure extends EnumItem end
 declare class EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends Enum
+	BadDistanceScale: EnumSaveAvatarThumbnailCustomizationFailure
+	BadFieldOfViewDeg: EnumSaveAvatarThumbnailCustomizationFailure
 	BadThumbnailType: EnumSaveAvatarThumbnailCustomizationFailure
 	BadYRotDeg: EnumSaveAvatarThumbnailCustomizationFailure
-	BadFieldOfViewDeg: EnumSaveAvatarThumbnailCustomizationFailure
-	BadDistanceScale: EnumSaveAvatarThumbnailCustomizationFailure
 	Other: EnumSaveAvatarThumbnailCustomizationFailure
 	Throttled: EnumSaveAvatarThumbnailCustomizationFailure
 end
 declare class EnumSaveFilter extends EnumItem end
 declare class EnumSaveFilter_INTERNAL extends Enum
 	SaveAll: EnumSaveFilter
-	SaveWorld: EnumSaveFilter
 	SaveGame: EnumSaveFilter
+	SaveWorld: EnumSaveFilter
 end
 declare class EnumSavedQualitySetting extends EnumItem end
 declare class EnumSavedQualitySetting_INTERNAL extends Enum
 	Automatic: EnumSavedQualitySetting
 	QualityLevel1: EnumSavedQualitySetting
+	QualityLevel10: EnumSavedQualitySetting
 	QualityLevel2: EnumSavedQualitySetting
 	QualityLevel3: EnumSavedQualitySetting
 	QualityLevel4: EnumSavedQualitySetting
@@ -2566,32 +2567,31 @@ declare class EnumSavedQualitySetting_INTERNAL extends Enum
 	QualityLevel7: EnumSavedQualitySetting
 	QualityLevel8: EnumSavedQualitySetting
 	QualityLevel9: EnumSavedQualitySetting
-	QualityLevel10: EnumSavedQualitySetting
 end
 declare class EnumScaleType extends EnumItem end
 declare class EnumScaleType_INTERNAL extends Enum
-	Stretch: EnumScaleType
-	Slice: EnumScaleType
-	Tile: EnumScaleType
-	Fit: EnumScaleType
 	Crop: EnumScaleType
+	Fit: EnumScaleType
+	Slice: EnumScaleType
+	Stretch: EnumScaleType
+	Tile: EnumScaleType
 end
 declare class EnumScopeCheckResult extends EnumItem end
 declare class EnumScopeCheckResult_INTERNAL extends Enum
-	ConsentAccepted: EnumScopeCheckResult
-	InvalidScopes: EnumScopeCheckResult
-	Timeout: EnumScopeCheckResult
-	NoUserInput: EnumScopeCheckResult
 	BackendError: EnumScopeCheckResult
-	UnexpectedError: EnumScopeCheckResult
-	InvalidArgument: EnumScopeCheckResult
+	ConsentAccepted: EnumScopeCheckResult
 	ConsentDenied: EnumScopeCheckResult
+	InvalidArgument: EnumScopeCheckResult
+	InvalidScopes: EnumScopeCheckResult
+	NoUserInput: EnumScopeCheckResult
+	Timeout: EnumScopeCheckResult
+	UnexpectedError: EnumScopeCheckResult
 end
 declare class EnumScreenInsets extends EnumItem end
 declare class EnumScreenInsets_INTERNAL extends Enum
-	None: EnumScreenInsets
-	DeviceSafeInsets: EnumScreenInsets
 	CoreUISafeInsets: EnumScreenInsets
+	DeviceSafeInsets: EnumScreenInsets
+	None: EnumScreenInsets
 	TopbarSafeInsets: EnumScreenInsets
 end
 declare class EnumScreenOrientation extends EnumItem end
@@ -2604,15 +2604,15 @@ declare class EnumScreenOrientation_INTERNAL extends Enum
 end
 declare class EnumScrollBarInset extends EnumItem end
 declare class EnumScrollBarInset_INTERNAL extends Enum
+	Always: EnumScrollBarInset
 	None: EnumScrollBarInset
 	ScrollBar: EnumScrollBarInset
-	Always: EnumScrollBarInset
 end
 declare class EnumScrollingDirection extends EnumItem end
 declare class EnumScrollingDirection_INTERNAL extends Enum
 	X: EnumScrollingDirection
-	Y: EnumScrollingDirection
 	XY: EnumScrollingDirection
+	Y: EnumScrollingDirection
 end
 declare class EnumSelectionBehavior extends EnumItem end
 declare class EnumSelectionBehavior_INTERNAL extends Enum
@@ -2621,17 +2621,17 @@ declare class EnumSelectionBehavior_INTERNAL extends Enum
 end
 declare class EnumSelectionRenderMode extends EnumItem end
 declare class EnumSelectionRenderMode_INTERNAL extends Enum
-	Outlines: EnumSelectionRenderMode
-	BoundingBoxes: EnumSelectionRenderMode
 	Both: EnumSelectionRenderMode
+	BoundingBoxes: EnumSelectionRenderMode
+	Outlines: EnumSelectionRenderMode
 end
 declare class EnumSelfViewPosition extends EnumItem end
 declare class EnumSelfViewPosition_INTERNAL extends Enum
+	BottomLeft: EnumSelfViewPosition
+	BottomRight: EnumSelfViewPosition
 	LastPosition: EnumSelfViewPosition
 	TopLeft: EnumSelfViewPosition
 	TopRight: EnumSelfViewPosition
-	BottomLeft: EnumSelfViewPosition
-	BottomRight: EnumSelfViewPosition
 end
 declare class EnumSensorMode extends EnumItem end
 declare class EnumSensorMode_INTERNAL extends Enum
@@ -2640,8 +2640,8 @@ declare class EnumSensorMode_INTERNAL extends Enum
 end
 declare class EnumSensorUpdateType extends EnumItem end
 declare class EnumSensorUpdateType_INTERNAL extends Enum
-	OnRead: EnumSensorUpdateType
 	Manual: EnumSensorUpdateType
+	OnRead: EnumSensorUpdateType
 end
 declare class EnumServerAudioBehavior extends EnumItem end
 declare class EnumServerAudioBehavior_INTERNAL extends Enum
@@ -2651,9 +2651,9 @@ declare class EnumServerAudioBehavior_INTERNAL extends Enum
 end
 declare class EnumServerLiveEditingMode extends EnumItem end
 declare class EnumServerLiveEditingMode_INTERNAL extends Enum
-	Uninitialized: EnumServerLiveEditingMode
-	Enabled: EnumServerLiveEditingMode
 	Disabled: EnumServerLiveEditingMode
+	Enabled: EnumServerLiveEditingMode
+	Uninitialized: EnumServerLiveEditingMode
 end
 declare class EnumServiceVisibility extends EnumItem end
 declare class EnumServiceVisibility_INTERNAL extends Enum
@@ -2664,33 +2664,33 @@ end
 declare class EnumSeverity extends EnumItem end
 declare class EnumSeverity_INTERNAL extends Enum
 	Error: EnumSeverity
-	Warning: EnumSeverity
-	Information: EnumSeverity
 	Hint: EnumSeverity
+	Information: EnumSeverity
+	Warning: EnumSeverity
 end
 declare class EnumSignalBehavior extends EnumItem end
 declare class EnumSignalBehavior_INTERNAL extends Enum
-	Default: EnumSignalBehavior
-	Immediate: EnumSignalBehavior
-	Deferred: EnumSignalBehavior
 	AncestryDeferred: EnumSignalBehavior
+	Default: EnumSignalBehavior
+	Deferred: EnumSignalBehavior
+	Immediate: EnumSignalBehavior
 end
 declare class EnumSizeConstraint extends EnumItem end
 declare class EnumSizeConstraint_INTERNAL extends Enum
-	RelativeXY: EnumSizeConstraint
 	RelativeXX: EnumSizeConstraint
+	RelativeXY: EnumSizeConstraint
 	RelativeYY: EnumSizeConstraint
 end
 declare class EnumSolverConvergenceMetricType extends EnumItem end
 declare class EnumSolverConvergenceMetricType_INTERNAL extends Enum
-	IterationBased: EnumSolverConvergenceMetricType
 	AlgorithmAgnostic: EnumSolverConvergenceMetricType
+	IterationBased: EnumSolverConvergenceMetricType
 end
 declare class EnumSolverConvergenceVisualizationMode extends EnumItem end
 declare class EnumSolverConvergenceVisualizationMode_INTERNAL extends Enum
 	Disabled: EnumSolverConvergenceVisualizationMode
-	PerIsland: EnumSolverConvergenceVisualizationMode
 	PerEdge: EnumSolverConvergenceVisualizationMode
+	PerIsland: EnumSolverConvergenceVisualizationMode
 end
 declare class EnumSortDirection extends EnumItem end
 declare class EnumSortDirection_INTERNAL extends Enum
@@ -2699,30 +2699,30 @@ declare class EnumSortDirection_INTERNAL extends Enum
 end
 declare class EnumSortOrder extends EnumItem end
 declare class EnumSortOrder_INTERNAL extends Enum
-	Name: EnumSortOrder
 	Custom: EnumSortOrder
 	LayoutOrder: EnumSortOrder
+	Name: EnumSortOrder
 end
 declare class EnumSpecialKey extends EnumItem end
 declare class EnumSpecialKey_INTERNAL extends Enum
-	Insert: EnumSpecialKey
-	Home: EnumSpecialKey
-	End: EnumSpecialKey
-	PageUp: EnumSpecialKey
-	PageDown: EnumSpecialKey
 	ChatHotkey: EnumSpecialKey
+	End: EnumSpecialKey
+	Home: EnumSpecialKey
+	Insert: EnumSpecialKey
+	PageDown: EnumSpecialKey
+	PageUp: EnumSpecialKey
 end
 declare class EnumStartCorner extends EnumItem end
 declare class EnumStartCorner_INTERNAL extends Enum
-	TopLeft: EnumStartCorner
-	TopRight: EnumStartCorner
 	BottomLeft: EnumStartCorner
 	BottomRight: EnumStartCorner
+	TopLeft: EnumStartCorner
+	TopRight: EnumStartCorner
 end
 declare class EnumStatus extends EnumItem end
 declare class EnumStatus_INTERNAL extends Enum
-	Poison: EnumStatus
 	Confusion: EnumStatus
+	Poison: EnumStatus
 end
 declare class EnumStreamOutBehavior extends EnumItem end
 declare class EnumStreamOutBehavior_INTERNAL extends Enum
@@ -2739,217 +2739,217 @@ declare class EnumStreamingIntegrityMode_INTERNAL extends Enum
 end
 declare class EnumStreamingPauseMode extends EnumItem end
 declare class EnumStreamingPauseMode_INTERNAL extends Enum
+	ClientPhysicsPause: EnumStreamingPauseMode
 	Default: EnumStreamingPauseMode
 	Disabled: EnumStreamingPauseMode
-	ClientPhysicsPause: EnumStreamingPauseMode
 end
 declare class EnumStudioCloseMode extends EnumItem end
 declare class EnumStudioCloseMode_INTERNAL extends Enum
-	None: EnumStudioCloseMode
-	CloseStudio: EnumStudioCloseMode
 	CloseDoc: EnumStudioCloseMode
+	CloseStudio: EnumStudioCloseMode
+	None: EnumStudioCloseMode
 end
 declare class EnumStudioDataModelType extends EnumItem end
 declare class EnumStudioDataModelType_INTERNAL extends Enum
 	Edit: EnumStudioDataModelType
+	None: EnumStudioDataModelType
 	PlayClient: EnumStudioDataModelType
 	PlayServer: EnumStudioDataModelType
 	Standalone: EnumStudioDataModelType
-	None: EnumStudioDataModelType
 end
 declare class EnumStudioScriptEditorColorCategories extends EnumItem end
 declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
-	Default: EnumStudioScriptEditorColorCategories
-	Operator: EnumStudioScriptEditorColorCategories
-	Number: EnumStudioScriptEditorColorCategories
-	String: EnumStudioScriptEditorColorCategories
-	Comment: EnumStudioScriptEditorColorCategories
-	Keyword: EnumStudioScriptEditorColorCategories
-	Builtin: EnumStudioScriptEditorColorCategories
-	Method: EnumStudioScriptEditorColorCategories
-	Property: EnumStudioScriptEditorColorCategories
-	Nil: EnumStudioScriptEditorColorCategories
-	Bool: EnumStudioScriptEditorColorCategories
-	Function: EnumStudioScriptEditorColorCategories
-	Local: EnumStudioScriptEditorColorCategories
-	Self: EnumStudioScriptEditorColorCategories
-	LuauKeyword: EnumStudioScriptEditorColorCategories
-	FunctionName: EnumStudioScriptEditorColorCategories
-	TODO: EnumStudioScriptEditorColorCategories
-	Background: EnumStudioScriptEditorColorCategories
-	SelectionText: EnumStudioScriptEditorColorCategories
-	SelectionBackground: EnumStudioScriptEditorColorCategories
-	FindSelectionBackground: EnumStudioScriptEditorColorCategories
-	MatchingWordBackground: EnumStudioScriptEditorColorCategories
-	Warning: EnumStudioScriptEditorColorCategories
-	Error: EnumStudioScriptEditorColorCategories
-	Info: EnumStudioScriptEditorColorCategories
-	Hint: EnumStudioScriptEditorColorCategories
-	Whitespace: EnumStudioScriptEditorColorCategories
-	ActiveLine: EnumStudioScriptEditorColorCategories
-	DebuggerCurrentLine: EnumStudioScriptEditorColorCategories
-	DebuggerErrorLine: EnumStudioScriptEditorColorCategories
-	Ruler: EnumStudioScriptEditorColorCategories
-	Bracket: EnumStudioScriptEditorColorCategories
-	MenuPrimaryText: EnumStudioScriptEditorColorCategories
-	MenuSecondaryText: EnumStudioScriptEditorColorCategories
-	MenuSelectedText: EnumStudioScriptEditorColorCategories
-	MenuBackground: EnumStudioScriptEditorColorCategories
-	MenuSelectedBackground: EnumStudioScriptEditorColorCategories
-	MenuScrollbarBackground: EnumStudioScriptEditorColorCategories
-	MenuScrollbarHandle: EnumStudioScriptEditorColorCategories
-	MenuBorder: EnumStudioScriptEditorColorCategories
-	DocViewCodeBackground: EnumStudioScriptEditorColorCategories
-	AICOOverlayText: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackground: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackgroundHover: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackgroundPressed: EnumStudioScriptEditorColorCategories
+	AICOOverlayText: EnumStudioScriptEditorColorCategories
+	ActiveLine: EnumStudioScriptEditorColorCategories
+	Background: EnumStudioScriptEditorColorCategories
+	Bool: EnumStudioScriptEditorColorCategories
+	Bracket: EnumStudioScriptEditorColorCategories
+	Builtin: EnumStudioScriptEditorColorCategories
+	Comment: EnumStudioScriptEditorColorCategories
+	DebuggerCurrentLine: EnumStudioScriptEditorColorCategories
+	DebuggerErrorLine: EnumStudioScriptEditorColorCategories
+	Default: EnumStudioScriptEditorColorCategories
+	DocViewCodeBackground: EnumStudioScriptEditorColorCategories
+	Error: EnumStudioScriptEditorColorCategories
+	FindSelectionBackground: EnumStudioScriptEditorColorCategories
+	Function: EnumStudioScriptEditorColorCategories
+	FunctionName: EnumStudioScriptEditorColorCategories
+	Hint: EnumStudioScriptEditorColorCategories
 	IndentationRuler: EnumStudioScriptEditorColorCategories
+	Info: EnumStudioScriptEditorColorCategories
+	Keyword: EnumStudioScriptEditorColorCategories
+	Local: EnumStudioScriptEditorColorCategories
+	LuauKeyword: EnumStudioScriptEditorColorCategories
+	MatchingWordBackground: EnumStudioScriptEditorColorCategories
+	MenuBackground: EnumStudioScriptEditorColorCategories
+	MenuBorder: EnumStudioScriptEditorColorCategories
+	MenuPrimaryText: EnumStudioScriptEditorColorCategories
+	MenuScrollbarBackground: EnumStudioScriptEditorColorCategories
+	MenuScrollbarHandle: EnumStudioScriptEditorColorCategories
+	MenuSecondaryText: EnumStudioScriptEditorColorCategories
+	MenuSelectedBackground: EnumStudioScriptEditorColorCategories
+	MenuSelectedText: EnumStudioScriptEditorColorCategories
+	Method: EnumStudioScriptEditorColorCategories
+	Nil: EnumStudioScriptEditorColorCategories
+	Number: EnumStudioScriptEditorColorCategories
+	Operator: EnumStudioScriptEditorColorCategories
+	Property: EnumStudioScriptEditorColorCategories
+	Ruler: EnumStudioScriptEditorColorCategories
+	SelectionBackground: EnumStudioScriptEditorColorCategories
+	SelectionText: EnumStudioScriptEditorColorCategories
+	Self: EnumStudioScriptEditorColorCategories
+	String: EnumStudioScriptEditorColorCategories
+	TODO: EnumStudioScriptEditorColorCategories
+	Warning: EnumStudioScriptEditorColorCategories
+	Whitespace: EnumStudioScriptEditorColorCategories
 end
 declare class EnumStudioScriptEditorColorPresets extends EnumItem end
 declare class EnumStudioScriptEditorColorPresets_INTERNAL extends Enum
-	RobloxDefault: EnumStudioScriptEditorColorPresets
+	Custom: EnumStudioScriptEditorColorPresets
 	Extra1: EnumStudioScriptEditorColorPresets
 	Extra2: EnumStudioScriptEditorColorPresets
-	Custom: EnumStudioScriptEditorColorPresets
+	RobloxDefault: EnumStudioScriptEditorColorPresets
 end
 declare class EnumStudioStyleGuideColor extends EnumItem end
 declare class EnumStudioStyleGuideColor_INTERNAL extends Enum
-	MainBackground: EnumStudioStyleGuideColor
-	Titlebar: EnumStudioStyleGuideColor
-	Dropdown: EnumStudioStyleGuideColor
-	Tooltip: EnumStudioStyleGuideColor
-	Notification: EnumStudioStyleGuideColor
-	ScrollBar: EnumStudioStyleGuideColor
-	ScrollBarBackground: EnumStudioStyleGuideColor
-	TabBar: EnumStudioStyleGuideColor
-	Tab: EnumStudioStyleGuideColor
-	FilterButtonDefault: EnumStudioStyleGuideColor
-	FilterButtonHover: EnumStudioStyleGuideColor
-	FilterButtonChecked: EnumStudioStyleGuideColor
-	FilterButtonAccent: EnumStudioStyleGuideColor
-	FilterButtonBorder: EnumStudioStyleGuideColor
-	FilterButtonBorderAlt: EnumStudioStyleGuideColor
-	RibbonTab: EnumStudioStyleGuideColor
-	RibbonTabTopBar: EnumStudioStyleGuideColor
-	Button: EnumStudioStyleGuideColor
-	MainButton: EnumStudioStyleGuideColor
-	RibbonButton: EnumStudioStyleGuideColor
-	ViewPortBackground: EnumStudioStyleGuideColor
-	InputFieldBackground: EnumStudioStyleGuideColor
-	Item: EnumStudioStyleGuideColor
-	TableItem: EnumStudioStyleGuideColor
-	CategoryItem: EnumStudioStyleGuideColor
-	GameSettingsTableItem: EnumStudioStyleGuideColor
-	GameSettingsTooltip: EnumStudioStyleGuideColor
-	EmulatorBar: EnumStudioStyleGuideColor
-	EmulatorDropDown: EnumStudioStyleGuideColor
-	ColorPickerFrame: EnumStudioStyleGuideColor
-	CurrentMarker: EnumStudioStyleGuideColor
-	Border: EnumStudioStyleGuideColor
-	DropShadow: EnumStudioStyleGuideColor
-	Shadow: EnumStudioStyleGuideColor
-	Light: EnumStudioStyleGuideColor
-	Dark: EnumStudioStyleGuideColor
-	Mid: EnumStudioStyleGuideColor
-	MainText: EnumStudioStyleGuideColor
-	SubText: EnumStudioStyleGuideColor
-	TitlebarText: EnumStudioStyleGuideColor
-	BrightText: EnumStudioStyleGuideColor
-	DimmedText: EnumStudioStyleGuideColor
-	LinkText: EnumStudioStyleGuideColor
-	WarningText: EnumStudioStyleGuideColor
-	ErrorText: EnumStudioStyleGuideColor
-	InfoText: EnumStudioStyleGuideColor
-	SensitiveText: EnumStudioStyleGuideColor
-	ScriptSideWidget: EnumStudioStyleGuideColor
-	ScriptBackground: EnumStudioStyleGuideColor
-	ScriptText: EnumStudioStyleGuideColor
-	ScriptSelectionText: EnumStudioStyleGuideColor
-	ScriptSelectionBackground: EnumStudioStyleGuideColor
-	ScriptFindSelectionBackground: EnumStudioStyleGuideColor
-	ScriptMatchingWordSelectionBackground: EnumStudioStyleGuideColor
-	ScriptOperator: EnumStudioStyleGuideColor
-	ScriptNumber: EnumStudioStyleGuideColor
-	ScriptString: EnumStudioStyleGuideColor
-	ScriptComment: EnumStudioStyleGuideColor
-	ScriptKeyword: EnumStudioStyleGuideColor
-	ScriptBuiltInFunction: EnumStudioStyleGuideColor
-	ScriptWarning: EnumStudioStyleGuideColor
-	ScriptError: EnumStudioStyleGuideColor
-	ScriptInformation: EnumStudioStyleGuideColor
-	ScriptHint: EnumStudioStyleGuideColor
-	ScriptWhitespace: EnumStudioStyleGuideColor
-	ScriptRuler: EnumStudioStyleGuideColor
-	DocViewCodeBackground: EnumStudioStyleGuideColor
-	DebuggerCurrentLine: EnumStudioStyleGuideColor
-	DebuggerErrorLine: EnumStudioStyleGuideColor
-	ScriptEditorCurrentLine: EnumStudioStyleGuideColor
-	DiffFilePathText: EnumStudioStyleGuideColor
-	DiffTextHunkInfo: EnumStudioStyleGuideColor
-	DiffTextNoChange: EnumStudioStyleGuideColor
-	DiffTextAddition: EnumStudioStyleGuideColor
-	DiffTextDeletion: EnumStudioStyleGuideColor
-	DiffTextSeparatorBackground: EnumStudioStyleGuideColor
-	DiffTextNoChangeBackground: EnumStudioStyleGuideColor
-	DiffTextAdditionBackground: EnumStudioStyleGuideColor
-	DiffTextDeletionBackground: EnumStudioStyleGuideColor
-	DiffLineNum: EnumStudioStyleGuideColor
-	DiffLineNumSeparatorBackground: EnumStudioStyleGuideColor
-	DiffLineNumNoChangeBackground: EnumStudioStyleGuideColor
-	DiffLineNumAdditionBackground: EnumStudioStyleGuideColor
-	DiffLineNumDeletionBackground: EnumStudioStyleGuideColor
-	DiffFilePathBackground: EnumStudioStyleGuideColor
-	DiffFilePathBorder: EnumStudioStyleGuideColor
-	ChatIncomingBgColor: EnumStudioStyleGuideColor
-	ChatIncomingTextColor: EnumStudioStyleGuideColor
-	ChatOutgoingBgColor: EnumStudioStyleGuideColor
-	ChatOutgoingTextColor: EnumStudioStyleGuideColor
-	ChatModeratedMessageColor: EnumStudioStyleGuideColor
-	Separator: EnumStudioStyleGuideColor
-	ButtonBorder: EnumStudioStyleGuideColor
-	ButtonText: EnumStudioStyleGuideColor
-	InputFieldBorder: EnumStudioStyleGuideColor
-	CheckedFieldBackground: EnumStudioStyleGuideColor
-	CheckedFieldBorder: EnumStudioStyleGuideColor
-	CheckedFieldIndicator: EnumStudioStyleGuideColor
-	HeaderSection: EnumStudioStyleGuideColor
-	Midlight: EnumStudioStyleGuideColor
-	StatusBar: EnumStudioStyleGuideColor
-	DialogButton: EnumStudioStyleGuideColor
-	DialogButtonText: EnumStudioStyleGuideColor
-	DialogButtonBorder: EnumStudioStyleGuideColor
-	DialogMainButton: EnumStudioStyleGuideColor
-	DialogMainButtonText: EnumStudioStyleGuideColor
-	InfoBarWarningBackground: EnumStudioStyleGuideColor
-	InfoBarWarningText: EnumStudioStyleGuideColor
-	ScriptMethod: EnumStudioStyleGuideColor
-	ScriptProperty: EnumStudioStyleGuideColor
-	ScriptNil: EnumStudioStyleGuideColor
-	ScriptBool: EnumStudioStyleGuideColor
-	ScriptFunction: EnumStudioStyleGuideColor
-	ScriptLocal: EnumStudioStyleGuideColor
-	ScriptSelf: EnumStudioStyleGuideColor
-	ScriptLuauKeyword: EnumStudioStyleGuideColor
-	ScriptFunctionName: EnumStudioStyleGuideColor
-	ScriptTodo: EnumStudioStyleGuideColor
-	ScriptBracket: EnumStudioStyleGuideColor
-	AICOOverlayText: EnumStudioStyleGuideColor
 	AICOOverlayButtonBackground: EnumStudioStyleGuideColor
 	AICOOverlayButtonBackgroundHover: EnumStudioStyleGuideColor
 	AICOOverlayButtonBackgroundPressed: EnumStudioStyleGuideColor
+	AICOOverlayText: EnumStudioStyleGuideColor
 	AttributeCog: EnumStudioStyleGuideColor
+	Border: EnumStudioStyleGuideColor
+	BrightText: EnumStudioStyleGuideColor
+	Button: EnumStudioStyleGuideColor
+	ButtonBorder: EnumStudioStyleGuideColor
+	ButtonText: EnumStudioStyleGuideColor
+	CategoryItem: EnumStudioStyleGuideColor
+	ChatIncomingBgColor: EnumStudioStyleGuideColor
+	ChatIncomingTextColor: EnumStudioStyleGuideColor
+	ChatModeratedMessageColor: EnumStudioStyleGuideColor
+	ChatOutgoingBgColor: EnumStudioStyleGuideColor
+	ChatOutgoingTextColor: EnumStudioStyleGuideColor
+	CheckedFieldBackground: EnumStudioStyleGuideColor
+	CheckedFieldBorder: EnumStudioStyleGuideColor
+	CheckedFieldIndicator: EnumStudioStyleGuideColor
+	ColorPickerFrame: EnumStudioStyleGuideColor
+	CurrentMarker: EnumStudioStyleGuideColor
+	Dark: EnumStudioStyleGuideColor
+	DebuggerCurrentLine: EnumStudioStyleGuideColor
+	DebuggerErrorLine: EnumStudioStyleGuideColor
+	DialogButton: EnumStudioStyleGuideColor
+	DialogButtonBorder: EnumStudioStyleGuideColor
+	DialogButtonText: EnumStudioStyleGuideColor
+	DialogMainButton: EnumStudioStyleGuideColor
+	DialogMainButtonText: EnumStudioStyleGuideColor
+	DiffFilePathBackground: EnumStudioStyleGuideColor
+	DiffFilePathBorder: EnumStudioStyleGuideColor
+	DiffFilePathText: EnumStudioStyleGuideColor
+	DiffLineNum: EnumStudioStyleGuideColor
+	DiffLineNumAdditionBackground: EnumStudioStyleGuideColor
+	DiffLineNumDeletionBackground: EnumStudioStyleGuideColor
+	DiffLineNumNoChangeBackground: EnumStudioStyleGuideColor
+	DiffLineNumSeparatorBackground: EnumStudioStyleGuideColor
+	DiffTextAddition: EnumStudioStyleGuideColor
+	DiffTextAdditionBackground: EnumStudioStyleGuideColor
+	DiffTextDeletion: EnumStudioStyleGuideColor
+	DiffTextDeletionBackground: EnumStudioStyleGuideColor
+	DiffTextHunkInfo: EnumStudioStyleGuideColor
+	DiffTextNoChange: EnumStudioStyleGuideColor
+	DiffTextNoChangeBackground: EnumStudioStyleGuideColor
+	DiffTextSeparatorBackground: EnumStudioStyleGuideColor
+	DimmedText: EnumStudioStyleGuideColor
+	DocViewCodeBackground: EnumStudioStyleGuideColor
+	DropShadow: EnumStudioStyleGuideColor
+	Dropdown: EnumStudioStyleGuideColor
+	EmulatorBar: EnumStudioStyleGuideColor
+	EmulatorDropDown: EnumStudioStyleGuideColor
+	ErrorText: EnumStudioStyleGuideColor
+	FilterButtonAccent: EnumStudioStyleGuideColor
+	FilterButtonBorder: EnumStudioStyleGuideColor
+	FilterButtonBorderAlt: EnumStudioStyleGuideColor
+	FilterButtonChecked: EnumStudioStyleGuideColor
+	FilterButtonDefault: EnumStudioStyleGuideColor
+	FilterButtonHover: EnumStudioStyleGuideColor
+	GameSettingsTableItem: EnumStudioStyleGuideColor
+	GameSettingsTooltip: EnumStudioStyleGuideColor
+	HeaderSection: EnumStudioStyleGuideColor
+	InfoBarWarningBackground: EnumStudioStyleGuideColor
+	InfoBarWarningText: EnumStudioStyleGuideColor
+	InfoText: EnumStudioStyleGuideColor
+	InputFieldBackground: EnumStudioStyleGuideColor
+	InputFieldBorder: EnumStudioStyleGuideColor
+	Item: EnumStudioStyleGuideColor
+	Light: EnumStudioStyleGuideColor
+	LinkText: EnumStudioStyleGuideColor
+	MainBackground: EnumStudioStyleGuideColor
+	MainButton: EnumStudioStyleGuideColor
+	MainText: EnumStudioStyleGuideColor
+	Mid: EnumStudioStyleGuideColor
+	Midlight: EnumStudioStyleGuideColor
+	Notification: EnumStudioStyleGuideColor
 	OnboardingCover: EnumStudioStyleGuideColor
 	OnboardingHighlight: EnumStudioStyleGuideColor
 	OnboardingShadow: EnumStudioStyleGuideColor
+	RibbonButton: EnumStudioStyleGuideColor
+	RibbonTab: EnumStudioStyleGuideColor
+	RibbonTabTopBar: EnumStudioStyleGuideColor
+	ScriptBackground: EnumStudioStyleGuideColor
+	ScriptBool: EnumStudioStyleGuideColor
+	ScriptBracket: EnumStudioStyleGuideColor
+	ScriptBuiltInFunction: EnumStudioStyleGuideColor
+	ScriptComment: EnumStudioStyleGuideColor
+	ScriptEditorCurrentLine: EnumStudioStyleGuideColor
+	ScriptError: EnumStudioStyleGuideColor
+	ScriptFindSelectionBackground: EnumStudioStyleGuideColor
+	ScriptFunction: EnumStudioStyleGuideColor
+	ScriptFunctionName: EnumStudioStyleGuideColor
+	ScriptHint: EnumStudioStyleGuideColor
+	ScriptInformation: EnumStudioStyleGuideColor
+	ScriptKeyword: EnumStudioStyleGuideColor
+	ScriptLocal: EnumStudioStyleGuideColor
+	ScriptLuauKeyword: EnumStudioStyleGuideColor
+	ScriptMatchingWordSelectionBackground: EnumStudioStyleGuideColor
+	ScriptMethod: EnumStudioStyleGuideColor
+	ScriptNil: EnumStudioStyleGuideColor
+	ScriptNumber: EnumStudioStyleGuideColor
+	ScriptOperator: EnumStudioStyleGuideColor
+	ScriptProperty: EnumStudioStyleGuideColor
+	ScriptRuler: EnumStudioStyleGuideColor
+	ScriptSelectionBackground: EnumStudioStyleGuideColor
+	ScriptSelectionText: EnumStudioStyleGuideColor
+	ScriptSelf: EnumStudioStyleGuideColor
+	ScriptSideWidget: EnumStudioStyleGuideColor
+	ScriptString: EnumStudioStyleGuideColor
+	ScriptText: EnumStudioStyleGuideColor
+	ScriptTodo: EnumStudioStyleGuideColor
+	ScriptWarning: EnumStudioStyleGuideColor
+	ScriptWhitespace: EnumStudioStyleGuideColor
+	ScrollBar: EnumStudioStyleGuideColor
+	ScrollBarBackground: EnumStudioStyleGuideColor
+	SensitiveText: EnumStudioStyleGuideColor
+	Separator: EnumStudioStyleGuideColor
+	Shadow: EnumStudioStyleGuideColor
+	StatusBar: EnumStudioStyleGuideColor
+	SubText: EnumStudioStyleGuideColor
+	Tab: EnumStudioStyleGuideColor
+	TabBar: EnumStudioStyleGuideColor
+	TableItem: EnumStudioStyleGuideColor
+	Titlebar: EnumStudioStyleGuideColor
+	TitlebarText: EnumStudioStyleGuideColor
+	Tooltip: EnumStudioStyleGuideColor
+	ViewPortBackground: EnumStudioStyleGuideColor
+	WarningText: EnumStudioStyleGuideColor
 end
 declare class EnumStudioStyleGuideModifier extends EnumItem end
 declare class EnumStudioStyleGuideModifier_INTERNAL extends Enum
 	Default: EnumStudioStyleGuideModifier
-	Selected: EnumStudioStyleGuideModifier
-	Pressed: EnumStudioStyleGuideModifier
 	Disabled: EnumStudioStyleGuideModifier
 	Hover: EnumStudioStyleGuideModifier
+	Pressed: EnumStudioStyleGuideModifier
+	Selected: EnumStudioStyleGuideModifier
 end
 declare class EnumStyle extends EnumItem end
 declare class EnumStyle_INTERNAL extends Enum
@@ -2968,15 +2968,15 @@ declare class EnumSubscriptionPeriod_INTERNAL extends Enum
 end
 declare class EnumSurfaceConstraint extends EnumItem end
 declare class EnumSurfaceConstraint_INTERNAL extends Enum
-	None: EnumSurfaceConstraint
 	Hinge: EnumSurfaceConstraint
-	SteppingMotor: EnumSurfaceConstraint
 	Motor: EnumSurfaceConstraint
+	None: EnumSurfaceConstraint
+	SteppingMotor: EnumSurfaceConstraint
 end
 declare class EnumSurfaceGuiShape extends EnumItem end
 declare class EnumSurfaceGuiShape_INTERNAL extends Enum
-	Flat: EnumSurfaceGuiShape
 	CurvedHorizontally: EnumSurfaceGuiShape
+	Flat: EnumSurfaceGuiShape
 end
 declare class EnumSurfaceGuiSizingMode extends EnumItem end
 declare class EnumSurfaceGuiSizingMode_INTERNAL extends Enum
@@ -2985,104 +2985,104 @@ declare class EnumSurfaceGuiSizingMode_INTERNAL extends Enum
 end
 declare class EnumSurfaceType extends EnumItem end
 declare class EnumSurfaceType_INTERNAL extends Enum
-	Smooth: EnumSurfaceType
 	Glue: EnumSurfaceType
-	Weld: EnumSurfaceType
-	Studs: EnumSurfaceType
-	Inlet: EnumSurfaceType
-	Universal: EnumSurfaceType
 	Hinge: EnumSurfaceType
+	Inlet: EnumSurfaceType
 	Motor: EnumSurfaceType
-	SteppingMotor: EnumSurfaceType
+	Smooth: EnumSurfaceType
 	SmoothNoOutlines: EnumSurfaceType
+	SteppingMotor: EnumSurfaceType
+	Studs: EnumSurfaceType
+	Universal: EnumSurfaceType
+	Weld: EnumSurfaceType
 end
 declare class EnumSwipeDirection extends EnumItem end
 declare class EnumSwipeDirection_INTERNAL extends Enum
-	Right: EnumSwipeDirection
-	Left: EnumSwipeDirection
-	Up: EnumSwipeDirection
 	Down: EnumSwipeDirection
+	Left: EnumSwipeDirection
 	None: EnumSwipeDirection
+	Right: EnumSwipeDirection
+	Up: EnumSwipeDirection
 end
 declare class EnumTableMajorAxis extends EnumItem end
 declare class EnumTableMajorAxis_INTERNAL extends Enum
-	RowMajor: EnumTableMajorAxis
 	ColumnMajor: EnumTableMajorAxis
+	RowMajor: EnumTableMajorAxis
 end
 declare class EnumTechnology extends EnumItem end
 declare class EnumTechnology_INTERNAL extends Enum
-	Voxel: EnumTechnology
 	Compatibility: EnumTechnology
-	ShadowMap: EnumTechnology
 	Future: EnumTechnology
 	Legacy: EnumTechnology
+	ShadowMap: EnumTechnology
+	Voxel: EnumTechnology
 end
 declare class EnumTeleportMethod extends EnumItem end
 declare class EnumTeleportMethod_INTERNAL extends Enum
-	TeleportToSpawnByName: EnumTeleportMethod
+	TeleportPartyAsync: EnumTeleportMethod
 	TeleportToPlaceInstance: EnumTeleportMethod
 	TeleportToPrivateServer: EnumTeleportMethod
-	TeleportPartyAsync: EnumTeleportMethod
+	TeleportToSpawnByName: EnumTeleportMethod
 	TeleportToVIPServer: EnumTeleportMethod
 	TeleportUnknown: EnumTeleportMethod
 end
 declare class EnumTeleportResult extends EnumItem end
 declare class EnumTeleportResult_INTERNAL extends Enum
-	Success: EnumTeleportResult
 	Failure: EnumTeleportResult
-	GameNotFound: EnumTeleportResult
+	Flooded: EnumTeleportResult
 	GameEnded: EnumTeleportResult
 	GameFull: EnumTeleportResult
-	Unauthorized: EnumTeleportResult
-	Flooded: EnumTeleportResult
+	GameNotFound: EnumTeleportResult
 	IsTeleporting: EnumTeleportResult
+	Success: EnumTeleportResult
+	Unauthorized: EnumTeleportResult
 end
 declare class EnumTeleportState extends EnumItem end
 declare class EnumTeleportState_INTERNAL extends Enum
+	Failed: EnumTeleportState
+	InProgress: EnumTeleportState
 	RequestedFromServer: EnumTeleportState
 	Started: EnumTeleportState
 	WaitingForServer: EnumTeleportState
-	Failed: EnumTeleportState
-	InProgress: EnumTeleportState
 end
 declare class EnumTeleportType extends EnumItem end
 declare class EnumTeleportType_INTERNAL extends Enum
-	ToPlace: EnumTeleportType
 	ToInstance: EnumTeleportType
+	ToPlace: EnumTeleportType
 	ToReservedServer: EnumTeleportType
 	ToVIPServer: EnumTeleportType
 end
 declare class EnumTerrainAcquisitionMethod extends EnumItem end
 declare class EnumTerrainAcquisitionMethod_INTERNAL extends Enum
-	None: EnumTerrainAcquisitionMethod
-	Legacy: EnumTerrainAcquisitionMethod
-	Template: EnumTerrainAcquisitionMethod
-	Generate: EnumTerrainAcquisitionMethod
-	Import: EnumTerrainAcquisitionMethod
 	Convert: EnumTerrainAcquisitionMethod
 	EditAddTool: EnumTerrainAcquisitionMethod
-	EditSeaLevelTool: EnumTerrainAcquisitionMethod
 	EditReplaceTool: EnumTerrainAcquisitionMethod
+	EditSeaLevelTool: EnumTerrainAcquisitionMethod
+	Generate: EnumTerrainAcquisitionMethod
+	Import: EnumTerrainAcquisitionMethod
+	Legacy: EnumTerrainAcquisitionMethod
+	None: EnumTerrainAcquisitionMethod
+	Other: EnumTerrainAcquisitionMethod
 	RegionFillTool: EnumTerrainAcquisitionMethod
 	RegionPasteTool: EnumTerrainAcquisitionMethod
-	Other: EnumTerrainAcquisitionMethod
+	Template: EnumTerrainAcquisitionMethod
 end
 declare class EnumTerrainFace extends EnumItem end
 declare class EnumTerrainFace_INTERNAL extends Enum
-	Top: EnumTerrainFace
-	Side: EnumTerrainFace
 	Bottom: EnumTerrainFace
+	Side: EnumTerrainFace
+	Top: EnumTerrainFace
 end
 declare class EnumTextChatMessageStatus extends EnumItem end
 declare class EnumTextChatMessageStatus_INTERNAL extends Enum
-	Unknown: EnumTextChatMessageStatus
-	Success: EnumTextChatMessageStatus
-	Sending: EnumTextChatMessageStatus
-	TextFilterFailed: EnumTextChatMessageStatus
 	Floodchecked: EnumTextChatMessageStatus
 	InvalidPrivacySettings: EnumTextChatMessageStatus
 	InvalidTextChannelPermissions: EnumTextChatMessageStatus
 	MessageTooLong: EnumTextChatMessageStatus
+	Sending: EnumTextChatMessageStatus
+	Success: EnumTextChatMessageStatus
+	TextFilterFailed: EnumTextChatMessageStatus
+	Unknown: EnumTextChatMessageStatus
 end
 declare class EnumTextDirection extends EnumItem end
 declare class EnumTextDirection_INTERNAL extends Enum
@@ -3092,50 +3092,50 @@ declare class EnumTextDirection_INTERNAL extends Enum
 end
 declare class EnumTextFilterContext extends EnumItem end
 declare class EnumTextFilterContext_INTERNAL extends Enum
-	PublicChat: EnumTextFilterContext
 	PrivateChat: EnumTextFilterContext
+	PublicChat: EnumTextFilterContext
 end
 declare class EnumTextInputType extends EnumItem end
 declare class EnumTextInputType_INTERNAL extends Enum
 	Default: EnumTextInputType
+	Email: EnumTextInputType
 	NoSuggestions: EnumTextInputType
 	Number: EnumTextInputType
-	Email: EnumTextInputType
-	Phone: EnumTextInputType
+	OneTimePassword: EnumTextInputType
 	Password: EnumTextInputType
 	PasswordShown: EnumTextInputType
+	Phone: EnumTextInputType
 	Username: EnumTextInputType
-	OneTimePassword: EnumTextInputType
 end
 declare class EnumTextTruncate extends EnumItem end
 declare class EnumTextTruncate_INTERNAL extends Enum
-	None: EnumTextTruncate
 	AtEnd: EnumTextTruncate
+	None: EnumTextTruncate
 end
 declare class EnumTextXAlignment extends EnumItem end
 declare class EnumTextXAlignment_INTERNAL extends Enum
+	Center: EnumTextXAlignment
 	Left: EnumTextXAlignment
 	Right: EnumTextXAlignment
-	Center: EnumTextXAlignment
 end
 declare class EnumTextYAlignment extends EnumItem end
 declare class EnumTextYAlignment_INTERNAL extends Enum
-	Top: EnumTextYAlignment
-	Center: EnumTextYAlignment
 	Bottom: EnumTextYAlignment
+	Center: EnumTextYAlignment
+	Top: EnumTextYAlignment
 end
 declare class EnumTextureMode extends EnumItem end
 declare class EnumTextureMode_INTERNAL extends Enum
+	Static: EnumTextureMode
 	Stretch: EnumTextureMode
 	Wrap: EnumTextureMode
-	Static: EnumTextureMode
 end
 declare class EnumTextureQueryType extends EnumItem end
 declare class EnumTextureQueryType_INTERNAL extends Enum
-	NonHumanoid: EnumTextureQueryType
-	NonHumanoidOrphaned: EnumTextureQueryType
 	Humanoid: EnumTextureQueryType
 	HumanoidOrphaned: EnumTextureQueryType
+	NonHumanoid: EnumTextureQueryType
+	NonHumanoidOrphaned: EnumTextureQueryType
 end
 declare class EnumThreadPoolConfig extends EnumItem end
 declare class EnumThreadPoolConfig_INTERNAL extends Enum
@@ -3145,92 +3145,92 @@ declare class EnumThreadPoolConfig_INTERNAL extends Enum
 	PerCore3: EnumThreadPoolConfig
 	PerCore4: EnumThreadPoolConfig
 	Threads1: EnumThreadPoolConfig
+	Threads16: EnumThreadPoolConfig
 	Threads2: EnumThreadPoolConfig
 	Threads3: EnumThreadPoolConfig
 	Threads4: EnumThreadPoolConfig
 	Threads8: EnumThreadPoolConfig
-	Threads16: EnumThreadPoolConfig
 end
 declare class EnumThrottlingPriority extends EnumItem end
 declare class EnumThrottlingPriority_INTERNAL extends Enum
-	Extreme: EnumThrottlingPriority
-	ElevatedOnServer: EnumThrottlingPriority
 	Default: EnumThrottlingPriority
+	ElevatedOnServer: EnumThrottlingPriority
+	Extreme: EnumThrottlingPriority
 end
 declare class EnumThumbnailSize extends EnumItem end
 declare class EnumThumbnailSize_INTERNAL extends Enum
-	Size48x48: EnumThumbnailSize
-	Size180x180: EnumThumbnailSize
-	Size420x420: EnumThumbnailSize
-	Size60x60: EnumThumbnailSize
 	Size100x100: EnumThumbnailSize
 	Size150x150: EnumThumbnailSize
+	Size180x180: EnumThumbnailSize
 	Size352x352: EnumThumbnailSize
+	Size420x420: EnumThumbnailSize
+	Size48x48: EnumThumbnailSize
+	Size60x60: EnumThumbnailSize
 end
 declare class EnumThumbnailType extends EnumItem end
 declare class EnumThumbnailType_INTERNAL extends Enum
-	HeadShot: EnumThumbnailType
 	AvatarBust: EnumThumbnailType
 	AvatarThumbnail: EnumThumbnailType
+	HeadShot: EnumThumbnailType
 end
 declare class EnumTickCountSampleMethod extends EnumItem end
 declare class EnumTickCountSampleMethod_INTERNAL extends Enum
-	Fast: EnumTickCountSampleMethod
 	Benchmark: EnumTickCountSampleMethod
+	Fast: EnumTickCountSampleMethod
 	Precise: EnumTickCountSampleMethod
 end
 declare class EnumTopBottom extends EnumItem end
 declare class EnumTopBottom_INTERNAL extends Enum
-	Top: EnumTopBottom
-	Center: EnumTopBottom
 	Bottom: EnumTopBottom
+	Center: EnumTopBottom
+	Top: EnumTopBottom
 end
 declare class EnumTouchCameraMovementMode extends EnumItem end
 declare class EnumTouchCameraMovementMode_INTERNAL extends Enum
-	Default: EnumTouchCameraMovementMode
 	Classic: EnumTouchCameraMovementMode
+	Default: EnumTouchCameraMovementMode
 	Follow: EnumTouchCameraMovementMode
 	Orbital: EnumTouchCameraMovementMode
 end
 declare class EnumTouchMovementMode extends EnumItem end
 declare class EnumTouchMovementMode_INTERNAL extends Enum
-	Default: EnumTouchMovementMode
-	Thumbstick: EnumTouchMovementMode
-	DPad: EnumTouchMovementMode
-	Thumbpad: EnumTouchMovementMode
 	ClickToMove: EnumTouchMovementMode
+	DPad: EnumTouchMovementMode
+	Default: EnumTouchMovementMode
 	DynamicThumbstick: EnumTouchMovementMode
+	Thumbpad: EnumTouchMovementMode
+	Thumbstick: EnumTouchMovementMode
 end
 declare class EnumTrackerError extends EnumItem end
 declare class EnumTrackerError_INTERNAL extends Enum
-	Ok: EnumTrackerError
-	NoService: EnumTrackerError
+	AudioError: EnumTrackerError
+	AudioNoPermission: EnumTrackerError
 	InitFailed: EnumTrackerError
+	NoAudio: EnumTrackerError
+	NoService: EnumTrackerError
 	NoVideo: EnumTrackerError
+	Ok: EnumTrackerError
+	UnsupportedDevice: EnumTrackerError
 	VideoError: EnumTrackerError
 	VideoNoPermission: EnumTrackerError
 	VideoUnsupported: EnumTrackerError
-	NoAudio: EnumTrackerError
-	AudioError: EnumTrackerError
-	AudioNoPermission: EnumTrackerError
-	UnsupportedDevice: EnumTrackerError
 end
 declare class EnumTrackerExtrapolationFlagMode extends EnumItem end
 declare class EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum
 	Auto: EnumTrackerExtrapolationFlagMode
-	ForceDisabled: EnumTrackerExtrapolationFlagMode
 	ExtrapolateFacsAndPose: EnumTrackerExtrapolationFlagMode
 	ExtrapolateFacsOnly: EnumTrackerExtrapolationFlagMode
+	ForceDisabled: EnumTrackerExtrapolationFlagMode
 end
 declare class EnumTrackerFaceTrackingStatus extends EnumItem end
 declare class EnumTrackerFaceTrackingStatus_INTERNAL extends Enum
-	FaceTrackingSuccess: EnumTrackerFaceTrackingStatus
-	FaceTrackingNoFaceFound: EnumTrackerFaceTrackingStatus
-	FaceTrackingUnknown: EnumTrackerFaceTrackingStatus
-	FaceTrackingLost: EnumTrackerFaceTrackingStatus
 	FaceTrackingHasTrackingError: EnumTrackerFaceTrackingStatus
 	FaceTrackingIsOccluded: EnumTrackerFaceTrackingStatus
+	FaceTrackingLost: EnumTrackerFaceTrackingStatus
+	FaceTrackingNoFaceFound: EnumTrackerFaceTrackingStatus
+	FaceTrackingSuccess: EnumTrackerFaceTrackingStatus
 	FaceTrackingUninitialized: EnumTrackerFaceTrackingStatus
+	FaceTrackingUnknown: EnumTrackerFaceTrackingStatus
 end
 declare class EnumTrackerLodFlagMode extends EnumItem end
 declare class EnumTrackerLodFlagMode_INTERNAL extends Enum
@@ -3246,10 +3246,10 @@ declare class EnumTrackerLodValueMode_INTERNAL extends Enum
 end
 declare class EnumTrackerMode extends EnumItem end
 declare class EnumTrackerMode_INTERNAL extends Enum
-	None: EnumTrackerMode
 	Audio: EnumTrackerMode
-	Video: EnumTrackerMode
 	AudioVideo: EnumTrackerMode
+	None: EnumTrackerMode
+	Video: EnumTrackerMode
 end
 declare class EnumTrackerPromptEvent extends EnumItem end
 declare class EnumTrackerPromptEvent_INTERNAL extends Enum
@@ -3268,24 +3268,24 @@ declare class EnumTweenStatus_INTERNAL extends Enum
 end
 declare class EnumUIFlexAlignment extends EnumItem end
 declare class EnumUIFlexAlignment_INTERNAL extends Enum
-	None: EnumUIFlexAlignment
 	Fill: EnumUIFlexAlignment
+	None: EnumUIFlexAlignment
 	SpaceAround: EnumUIFlexAlignment
 	SpaceBetween: EnumUIFlexAlignment
 	SpaceEvenly: EnumUIFlexAlignment
 end
 declare class EnumUIFlexMode extends EnumItem end
 declare class EnumUIFlexMode_INTERNAL extends Enum
-	None: EnumUIFlexMode
-	Grow: EnumUIFlexMode
-	Shrink: EnumUIFlexMode
-	Fill: EnumUIFlexMode
 	Custom: EnumUIFlexMode
+	Fill: EnumUIFlexMode
+	Grow: EnumUIFlexMode
+	None: EnumUIFlexMode
+	Shrink: EnumUIFlexMode
 end
 declare class EnumUITheme extends EnumItem end
 declare class EnumUITheme_INTERNAL extends Enum
-	Light: EnumUITheme
 	Dark: EnumUITheme
+	Light: EnumUITheme
 end
 declare class EnumUiMessageType extends EnumItem end
 declare class EnumUiMessageType_INTERNAL extends Enum
@@ -3299,31 +3299,23 @@ declare class EnumUsageContext_INTERNAL extends Enum
 end
 declare class EnumUserCFrame extends EnumItem end
 declare class EnumUserCFrame_INTERNAL extends Enum
+	Floor: EnumUserCFrame
 	Head: EnumUserCFrame
 	LeftHand: EnumUserCFrame
 	RightHand: EnumUserCFrame
-	Floor: EnumUserCFrame
 end
 declare class EnumUserInputState extends EnumItem end
 declare class EnumUserInputState_INTERNAL extends Enum
 	Begin: EnumUserInputState
+	Cancel: EnumUserInputState
 	Change: EnumUserInputState
 	End: EnumUserInputState
-	Cancel: EnumUserInputState
 	None: EnumUserInputState
 end
 declare class EnumUserInputType extends EnumItem end
 declare class EnumUserInputType_INTERNAL extends Enum
-	MouseButton1: EnumUserInputType
-	MouseButton2: EnumUserInputType
-	MouseButton3: EnumUserInputType
-	MouseWheel: EnumUserInputType
-	MouseMovement: EnumUserInputType
-	Touch: EnumUserInputType
-	Keyboard: EnumUserInputType
-	Focus: EnumUserInputType
 	Accelerometer: EnumUserInputType
-	Gyro: EnumUserInputType
+	Focus: EnumUserInputType
 	Gamepad1: EnumUserInputType
 	Gamepad2: EnumUserInputType
 	Gamepad3: EnumUserInputType
@@ -3332,35 +3324,43 @@ declare class EnumUserInputType_INTERNAL extends Enum
 	Gamepad6: EnumUserInputType
 	Gamepad7: EnumUserInputType
 	Gamepad8: EnumUserInputType
-	TextInput: EnumUserInputType
+	Gyro: EnumUserInputType
 	InputMethod: EnumUserInputType
+	Keyboard: EnumUserInputType
+	MouseButton1: EnumUserInputType
+	MouseButton2: EnumUserInputType
+	MouseButton3: EnumUserInputType
+	MouseMovement: EnumUserInputType
+	MouseWheel: EnumUserInputType
 	None: EnumUserInputType
+	TextInput: EnumUserInputType
+	Touch: EnumUserInputType
 end
 declare class EnumVRComfortSetting extends EnumItem end
 declare class EnumVRComfortSetting_INTERNAL extends Enum
 	Comfort: EnumVRComfortSetting
-	Normal: EnumVRComfortSetting
-	Expert: EnumVRComfortSetting
 	Custom: EnumVRComfortSetting
+	Expert: EnumVRComfortSetting
+	Normal: EnumVRComfortSetting
 end
 declare class EnumVRSafetyBubbleMode extends EnumItem end
 declare class EnumVRSafetyBubbleMode_INTERNAL extends Enum
+	Anyone: EnumVRSafetyBubbleMode
 	NoOne: EnumVRSafetyBubbleMode
 	OnlyFriends: EnumVRSafetyBubbleMode
-	Anyone: EnumVRSafetyBubbleMode
 end
 declare class EnumVRScaling extends EnumItem end
 declare class EnumVRScaling_INTERNAL extends Enum
-	World: EnumVRScaling
 	Off: EnumVRScaling
+	World: EnumVRScaling
 end
 declare class EnumVRSessionState extends EnumItem end
 declare class EnumVRSessionState_INTERNAL extends Enum
-	Undefined: EnumVRSessionState
-	Idle: EnumVRSessionState
-	Visible: EnumVRSessionState
 	Focused: EnumVRSessionState
+	Idle: EnumVRSessionState
 	Stopping: EnumVRSessionState
+	Undefined: EnumVRSessionState
+	Visible: EnumVRSessionState
 end
 declare class EnumVRTouchpad extends EnumItem end
 declare class EnumVRTouchpad_INTERNAL extends Enum
@@ -3369,9 +3369,9 @@ declare class EnumVRTouchpad_INTERNAL extends Enum
 end
 declare class EnumVRTouchpadMode extends EnumItem end
 declare class EnumVRTouchpadMode_INTERNAL extends Enum
+	ABXY: EnumVRTouchpadMode
 	Touch: EnumVRTouchpadMode
 	VirtualThumbstick: EnumVRTouchpadMode
-	ABXY: EnumVRTouchpadMode
 end
 declare class EnumVelocityConstraintMode extends EnumItem end
 declare class EnumVelocityConstraintMode_INTERNAL extends Enum
@@ -3381,30 +3381,30 @@ declare class EnumVelocityConstraintMode_INTERNAL extends Enum
 end
 declare class EnumVerticalAlignment extends EnumItem end
 declare class EnumVerticalAlignment_INTERNAL extends Enum
+	Bottom: EnumVerticalAlignment
 	Center: EnumVerticalAlignment
 	Top: EnumVerticalAlignment
-	Bottom: EnumVerticalAlignment
 end
 declare class EnumVerticalScrollBarPosition extends EnumItem end
 declare class EnumVerticalScrollBarPosition_INTERNAL extends Enum
-	Right: EnumVerticalScrollBarPosition
 	Left: EnumVerticalScrollBarPosition
+	Right: EnumVerticalScrollBarPosition
 end
 declare class EnumVibrationMotor extends EnumItem end
 declare class EnumVibrationMotor_INTERNAL extends Enum
 	Large: EnumVibrationMotor
-	Small: EnumVibrationMotor
-	LeftTrigger: EnumVibrationMotor
-	RightTrigger: EnumVibrationMotor
 	LeftHand: EnumVibrationMotor
+	LeftTrigger: EnumVibrationMotor
 	RightHand: EnumVibrationMotor
+	RightTrigger: EnumVibrationMotor
+	Small: EnumVibrationMotor
 end
 declare class EnumViewMode extends EnumItem end
 declare class EnumViewMode_INTERNAL extends Enum
-	None: EnumViewMode
-	GeometryComplexity: EnumViewMode
-	Transparent: EnumViewMode
 	Decal: EnumViewMode
+	GeometryComplexity: EnumViewMode
+	None: EnumViewMode
+	Transparent: EnumViewMode
 end
 declare class EnumVirtualCursorMode extends EnumItem end
 declare class EnumVirtualCursorMode_INTERNAL extends Enum
@@ -3414,48 +3414,48 @@ declare class EnumVirtualCursorMode_INTERNAL extends Enum
 end
 declare class EnumVirtualInputMode extends EnumItem end
 declare class EnumVirtualInputMode_INTERNAL extends Enum
-	Recording: EnumVirtualInputMode
-	Playing: EnumVirtualInputMode
 	None: EnumVirtualInputMode
+	Playing: EnumVirtualInputMode
+	Recording: EnumVirtualInputMode
 end
 declare class EnumVoiceChatState extends EnumItem end
 declare class EnumVoiceChatState_INTERNAL extends Enum
-	Idle: EnumVoiceChatState
-	Joining: EnumVoiceChatState
-	JoiningRetry: EnumVoiceChatState
-	Joined: EnumVoiceChatState
-	Leaving: EnumVoiceChatState
 	Ended: EnumVoiceChatState
 	Failed: EnumVoiceChatState
+	Idle: EnumVoiceChatState
+	Joined: EnumVoiceChatState
+	Joining: EnumVoiceChatState
+	JoiningRetry: EnumVoiceChatState
+	Leaving: EnumVoiceChatState
 end
 declare class EnumVoiceControlPath extends EnumItem end
 declare class EnumVoiceControlPath_INTERNAL extends Enum
+	Join: EnumVoiceControlPath
 	Publish: EnumVoiceControlPath
 	Subscribe: EnumVoiceControlPath
-	Join: EnumVoiceControlPath
 end
 declare class EnumVolumetricAudio extends EnumItem end
 declare class EnumVolumetricAudio_INTERNAL extends Enum
-	Disabled: EnumVolumetricAudio
 	Automatic: EnumVolumetricAudio
+	Disabled: EnumVolumetricAudio
 	Enabled: EnumVolumetricAudio
 end
 declare class EnumWaterDirection extends EnumItem end
 declare class EnumWaterDirection_INTERNAL extends Enum
 	NegX: EnumWaterDirection
-	X: EnumWaterDirection
 	NegY: EnumWaterDirection
-	Y: EnumWaterDirection
 	NegZ: EnumWaterDirection
+	X: EnumWaterDirection
+	Y: EnumWaterDirection
 	Z: EnumWaterDirection
 end
 declare class EnumWaterForce extends EnumItem end
 declare class EnumWaterForce_INTERNAL extends Enum
+	Max: EnumWaterForce
+	Medium: EnumWaterForce
 	None: EnumWaterForce
 	Small: EnumWaterForce
-	Medium: EnumWaterForce
 	Strong: EnumWaterForce
-	Max: EnumWaterForce
 end
 declare class EnumWeldConstraintPreserve extends EnumItem end
 declare class EnumWeldConstraintPreserve_INTERNAL extends Enum
@@ -3466,37 +3466,37 @@ end
 declare class EnumWrapLayerAutoSkin extends EnumItem end
 declare class EnumWrapLayerAutoSkin_INTERNAL extends Enum
 	Disabled: EnumWrapLayerAutoSkin
-	EnabledPreserve: EnumWrapLayerAutoSkin
 	EnabledOverride: EnumWrapLayerAutoSkin
+	EnabledPreserve: EnumWrapLayerAutoSkin
 end
 declare class EnumWrapLayerDebugMode extends EnumItem end
 declare class EnumWrapLayerDebugMode_INTERNAL extends Enum
-	None: EnumWrapLayerDebugMode
 	BoundCage: EnumWrapLayerDebugMode
-	LayerCage: EnumWrapLayerDebugMode
 	BoundCageAndLinks: EnumWrapLayerDebugMode
-	Reference: EnumWrapLayerDebugMode
-	Rbf: EnumWrapLayerDebugMode
-	OuterCage: EnumWrapLayerDebugMode
-	ReferenceMeshAfterMorph: EnumWrapLayerDebugMode
-	HSROuterDetail: EnumWrapLayerDebugMode
-	HSROuter: EnumWrapLayerDebugMode
 	HSRInner: EnumWrapLayerDebugMode
 	HSRInnerReverse: EnumWrapLayerDebugMode
+	HSROuter: EnumWrapLayerDebugMode
+	HSROuterDetail: EnumWrapLayerDebugMode
+	LayerCage: EnumWrapLayerDebugMode
 	LayerCageFittedToBase: EnumWrapLayerDebugMode
 	LayerCageFittedToPrev: EnumWrapLayerDebugMode
+	None: EnumWrapLayerDebugMode
+	OuterCage: EnumWrapLayerDebugMode
+	Rbf: EnumWrapLayerDebugMode
+	Reference: EnumWrapLayerDebugMode
+	ReferenceMeshAfterMorph: EnumWrapLayerDebugMode
 end
 declare class EnumWrapTargetDebugMode extends EnumItem end
 declare class EnumWrapTargetDebugMode_INTERNAL extends Enum
 	None: EnumWrapTargetDebugMode
-	TargetCageOriginal: EnumWrapTargetDebugMode
+	OuterCageDetail: EnumWrapTargetDebugMode
+	Rbf: EnumWrapTargetDebugMode
 	TargetCageCompressed: EnumWrapTargetDebugMode
 	TargetCageInterface: EnumWrapTargetDebugMode
-	TargetLayerCageOriginal: EnumWrapTargetDebugMode
+	TargetCageOriginal: EnumWrapTargetDebugMode
 	TargetLayerCageCompressed: EnumWrapTargetDebugMode
+	TargetLayerCageOriginal: EnumWrapTargetDebugMode
 	TargetLayerInterface: EnumWrapTargetDebugMode
-	Rbf: EnumWrapTargetDebugMode
-	OuterCageDetail: EnumWrapTargetDebugMode
 end
 declare class EnumZIndexBehavior extends EnumItem end
 declare class EnumZIndexBehavior_INTERNAL extends Enum
