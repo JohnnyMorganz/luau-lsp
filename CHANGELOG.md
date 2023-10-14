@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.597
+- Sync to upstream Luau 0.599
 - Prioritise `game:GetService()` as the first autocompletion entry when typing `game:`
 - Code blocks in hover and documentation now use `luau` as the syntax highlighting
 
