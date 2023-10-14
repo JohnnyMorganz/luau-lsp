@@ -14,9 +14,6 @@ CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/mas
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
-SPECIAL_INSTANCE_NEW_AND_GETSERVICE = (
-    False  # TODO: set to false and snip once happy with intersection types removed
-)
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
 OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyMover",
@@ -882,14 +879,6 @@ def filterMember(klassName: str, member: ApiMember):
         return False
     if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
         return False
-    if (
-        SPECIAL_INSTANCE_NEW_AND_GETSERVICE
-        and member["MemberType"] == "Function"
-        and klassName
-        and member["Name"] == "GetService"
-    ):
-        return False
-
     return True
 
 
@@ -929,23 +918,17 @@ def declareClass(klass: ApiClass) -> str:
             return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
         elif member["MemberType"] == "Callback":
             return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+        else:
+            assert False, "Unhandled member type: " + member["MemberType"]
 
     memberDefinitions = [
         declareMember(m) for m in klass["Members"] if filterMember(klass["Name"], m)
     ]
 
-    def declareService(service: str):
-        return f'\tfunction GetService(self, service: "{service}"): {service}\n'
-
-    # Special case ServiceProvider:GetService()
-    if SPECIAL_INSTANCE_NEW_AND_GETSERVICE and klass["Name"] == "ServiceProvider":
-        memberDefinitions = chain(memberDefinitions, map(declareService, SERVICES))
-
     if klass["Name"] in EXTRA_MEMBERS:
-        memberDefinitions = chain(
-            memberDefinitions,
-            map(lambda member: f"\t{member}\n", EXTRA_MEMBERS[klass["Name"]]),
-        )
+        memberDefinitions += [
+            f"\t{member}\n" for member in EXTRA_MEMBERS[klass["Name"]]
+        ]
 
     out += "".join(sorted(memberDefinitions))
     out += "end"
@@ -1010,7 +993,6 @@ def printDataTypeConstructors(types: DataTypesDump):
         name = klass["Name"]
         members = klass["Members"]
 
-        isInstanceNew = False
         isBrickColorNew = False
 
         # Handle overloadable functions
@@ -1018,13 +1000,6 @@ def printDataTypeConstructors(types: DataTypesDump):
         for member in members:
             if member["MemberType"] == "Function":
                 if (
-                    SPECIAL_INSTANCE_NEW_AND_GETSERVICE
-                    and name == "Instance"
-                    and member["Name"] == "new"
-                ):
-                    isInstanceNew = True
-                    continue
-                elif (
                     name == "BrickColor"
                     and member["Name"] == "new"
                     and len(member["Parameters"]) == 1
@@ -1042,52 +1017,6 @@ def printDataTypeConstructors(types: DataTypesDump):
                 pass
             elif member["MemberType"] == "Event":
                 out += f"\t{escapeName(member['Name'])}: RBXScriptSignal,\n"  # TODO: type this
-
-        # Special case instance new
-        if isInstanceNew:
-            functions["new"] = [
-                {
-                    "Parameters": [
-                        {
-                            "Name": "className",
-                            "Type": {
-                                "Name": f'"{inst}"',
-                                "Category": "PRIMITIVE_SERVICE_NAME",
-                            },
-                        },
-                        {
-                            "Name": "parent",
-                            "Type": {
-                                "Name": "Instance?",
-                                "Category": "Class",
-                            },
-                        },
-                    ],
-                    "ReturnType": {"Name": inst, "Category": "PRIMITIVE_SERVICE"},
-                }
-                for inst in CREATABLE
-            ] + [
-                # Instance.new(string) -> Instance fallback
-                {
-                    "Parameters": [
-                        {
-                            "Name": "className",
-                            "Type": {
-                                "Name": "string",
-                                "Category": "PRIMITIVE_SERVICE_NAME",
-                            },
-                        },
-                        {
-                            "Name": "parent",
-                            "Type": {
-                                "Name": "Instance?",
-                                "Category": "Class",
-                            },
-                        },
-                    ],
-                    "ReturnType": {"Name": "Instance", "Category": "PRIMITIVE_SERVICE"},
-                }
-            ]
 
         # Special case string BrickColor new
         if isBrickColorNew:
