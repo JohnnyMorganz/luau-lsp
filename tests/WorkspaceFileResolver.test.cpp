@@ -91,16 +91,20 @@ TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
         {"@test1/", "C:/Users/test/test1"},
         {"@test2/", "~/test2"},
         {"@relative/", "src/client"},
+        {"@test4", "C:/Users/test/test1"},
     };
 
     auto home = getHomeDirectory();
     REQUIRE(home);
 
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/foo"), "C:/Users/test/test1/foo.lua");
+    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/foo"), "C:/Users/test/test1/foo");
     CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/foo.luau"), "C:/Users/test/test1/foo.luau");
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/", /* includeExtension = */ false), "C:/Users/test/test1");
+    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/"), "C:/Users/test/test1");
+    // NOTE: we do not strip `/` from `@test1`, so we use it as `@test4`
+    // for now we don't "fix" this, because our startsWith check is greedy, so we want to allow differentiation between `@foo/` and `@foobar/`
+    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test4"), "C:/Users/test/test1");
 
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test2/bar"), home.value() / "test2" / "bar.lua");
+    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test2/bar"), home.value() / "test2" / "bar");
 
     CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test3/bar"), std::nullopt);
 

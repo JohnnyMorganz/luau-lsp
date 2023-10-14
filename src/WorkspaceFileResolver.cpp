@@ -229,8 +229,8 @@ std::filesystem::path WorkspaceFileResolver::getRequireBasePath(std::optional<Lu
 }
 
 // Resolve the string using a directory alias if present
-std::optional<std::filesystem::path> resolveDirectoryAlias(const std::filesystem::path& rootPath,
-    const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str, bool includeExtension)
+std::optional<std::filesystem::path> resolveDirectoryAlias(
+    const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str)
 {
     for (const auto& [alias, path] : directoryAliases)
     {
@@ -247,13 +247,6 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(const std::filesystem
             if (!filePath.is_absolute())
                 filePath = rootPath / filePath;
 
-            if (includeExtension && !filePath.has_extension())
-            {
-                if (std::filesystem::exists(filePath.replace_extension(".luau")))
-                    return filePath.replace_extension(".luau");
-                else
-                    return filePath.replace_extension(".lua");
-            }
             return filePath;
         }
     }
@@ -284,6 +277,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(cons
     }
 
     std::error_code ec;
+    filePath = std::filesystem::weakly_canonical(filePath, ec);
 
     // Handle "init.luau" files in a directory
     if (std::filesystem::is_directory(filePath, ec))
@@ -294,10 +288,10 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(cons
     // Add file endings
     if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
     {
-        auto fullFilePath = std::filesystem::weakly_canonical(filePath.string() + ".luau", ec);
-        if (ec.value() != 0 || !std::filesystem::exists(fullFilePath))
+        auto fullFilePath = filePath.string() + ".luau";
+        if (!std::filesystem::exists(fullFilePath))
             // fall back to .lua if a module with .luau doesn't exist
-            filePath = std::filesystem::weakly_canonical(filePath.string() + ".lua", ec);
+            filePath = filePath.string() + ".lua";
         else
             filePath = fullFilePath;
     }

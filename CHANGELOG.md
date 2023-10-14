@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Do not add line separator in hover when there is no text documentation
+- Fixed init files not working with directory aliases (e.g. `require("@dir")` or `require("@dir/subdir")`)
 
 ## [1.24.1] - 2023-09-09
 
