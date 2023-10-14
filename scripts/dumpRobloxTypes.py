@@ -1,6 +1,5 @@
 # Script to pull in API Dump and export it into a definition file
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
-from itertools import chain
 import re
 from typing import List, Literal, Optional, Set, Union, TypedDict
 from collections import defaultdict
@@ -644,6 +643,8 @@ CorrectionsValueType = TypedDict(
         "Category": None,
         "Default": Optional[str],
         "Generic": Optional[str],
+        "Tuple": Optional["CorrectionsValueType"],
+        "Union": Optional[List["CorrectionsValueType"]],
     },
 )
 
@@ -717,7 +718,7 @@ ApiFunction = TypedDict(
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
-        "TupleReturns": Optional[CorrectionsValueType],
+        "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
     },
 )
@@ -743,7 +744,7 @@ ApiCallback = TypedDict(
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": ApiValueType,
-        "TupleReturns": Optional[CorrectionsValueType],
+        "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
     },
 )
@@ -816,18 +817,18 @@ def escapeName(name: str):
 
 
 def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
-    if "Generic" in type:
+    if "Generic" in type and type["Generic"] is not None:
         name = type["Generic"]
         if name.startswith("Enum."):
             name = "Enum" + name[5:]
         return "{ " + name + " }"
 
-    if "Union" in type:
+    if "Union" in type and type["Union"] is not None:
         unions = type["Union"]
         parts = [resolveType(part) for part in unions]
         return " | ".join(parts)
 
-    if "Tuple" in type:
+    if "Tuple" in type and type["Tuple"] is not None:
         subtype = resolveType(type["Tuple"])
         return f"...({subtype})"
 
@@ -860,11 +861,11 @@ def resolveParameterList(params: List[ApiParameter]):
 
 
 def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
-    return (
-        "(" + ", ".join(map(resolveType, member["TupleReturns"])) + ")"
-        if "TupleReturns" in member
-        else resolveType(member["ReturnType"])
-    )
+    if "TupleReturns" in member and member["TupleReturns"] is not None:
+        types = [resolveType(ret) for ret in member["TupleReturns"]]
+        return "(" + ", ".join(types) + ")"
+    else:
+        return resolveType(member["ReturnType"])
 
 
 def filterMember(klassName: str, member: ApiMember):
@@ -1073,7 +1074,10 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                         "ValueType"
                                     ]["Generic"]
 
-                            if "Parameters" in member:
+                            if (
+                                "Parameters" in member
+                                and member["Parameters"] is not None
+                            ):
                                 for param in member["Parameters"]:
                                     for otherParam in otherMember["Parameters"]:
                                         if otherParam["Name"] == param["Name"]:
