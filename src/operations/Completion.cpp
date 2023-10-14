@@ -213,7 +213,7 @@ static lsp::CompletionItem createSuggestService(const std::string& service, size
     item.label = service;
     item.kind = lsp::CompletionItemKind::Class;
     item.detail = "Auto-import";
-    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", textEdit.newText)};
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
     item.insertText = service;
     item.sortText = SortText::AutoImports;
 
@@ -228,7 +228,7 @@ static lsp::CompletionItem createSuggestRequire(const std::string& name, const s
     item.label = name;
     item.kind = lsp::CompletionItemKind::Module;
     item.detail = "Auto-import";
-    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("lua", textEdits[0].newText)};
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdits[0].newText)};
     item.insertText = name;
     item.sortText = sortText;
 

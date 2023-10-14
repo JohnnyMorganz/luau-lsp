@@ -166,7 +166,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     // If we have a function and its corresponding name
     if (!typeName.empty())
     {
-        typeString = codeBlock("lua", "type " + typeName + " = " + typeString);
+        typeString = codeBlock("luau", "type " + typeName + " = " + typeString);
     }
     else if (auto ftv = Luau::get<Luau::FunctionType>(*type))
     {
@@ -179,7 +179,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         types::ToStringNamedFunctionOpts funcOpts;
         funcOpts.hideTableKind = !config.hover.showTableKinds;
         funcOpts.multiline = config.hover.multilineFunctionDefinitions;
-        typeString = codeBlock("lua", types::toStringNamedFunction(module, ftv, name, scope, funcOpts));
+        typeString = codeBlock("luau", types::toStringNamedFunction(module, ftv, name, scope, funcOpts));
     }
     else if (exprOrLocal.getLocal() || node->as<Luau::AstExprLocal>())
     {
@@ -189,7 +189,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         else
             builder += Luau::getIdentifier(node->asExpr()).value;
         builder += ": " + typeString;
-        typeString = codeBlock("lua", builder);
+        typeString = codeBlock("luau", builder);
     }
     else if (auto global = node->as<Luau::AstExprGlobal>())
     {
@@ -197,11 +197,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         std::string builder = "type ";
         builder += global->name.value;
         builder += " = " + typeString;
-        typeString = codeBlock("lua", builder);
+        typeString = codeBlock("luau", builder);
     }
     else
     {
-        typeString = codeBlock("lua", typeString);
+        typeString = codeBlock("luau", typeString);
     }
 
     if (std::optional<std::string> docs;
