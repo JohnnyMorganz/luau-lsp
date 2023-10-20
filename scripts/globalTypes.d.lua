@@ -113,6 +113,12 @@ declare class EnumActuatorType_INTERNAL extends Enum
 	None: EnumActuatorType
 	Servo: EnumActuatorType
 end
+declare class EnumAdEventType extends EnumItem end
+declare class EnumAdEventType_INTERNAL extends Enum
+	UserCompletedVideo: EnumAdEventType
+	VideoLoaded: EnumAdEventType
+	VideoRemoved: EnumAdEventType
+end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
 	HorizontalRectangle: EnumAdShape
@@ -2202,6 +2208,12 @@ declare class EnumPhysicsSimulationRate_INTERNAL extends Enum
 	Fixed240Hz: EnumPhysicsSimulationRate
 	Fixed60Hz: EnumPhysicsSimulationRate
 end
+declare class EnumPhysicsSolver extends EnumItem end
+declare class EnumPhysicsSolver_INTERNAL extends Enum
+	Default: EnumPhysicsSolver
+	Disabled: EnumPhysicsSolver
+	Enabled: EnumPhysicsSolver
+end
 declare class EnumPhysicsSteppingMethod extends EnumItem end
 declare class EnumPhysicsSteppingMethod_INTERNAL extends Enum
 	Adaptive: EnumPhysicsSteppingMethod
@@ -2223,6 +2235,7 @@ declare class EnumPlatform_INTERNAL extends Enum
 	Ouya: EnumPlatform
 	PS3: EnumPlatform
 	PS4: EnumPlatform
+	PS5: EnumPlatform
 	SteamOS: EnumPlatform
 	UWP: EnumPlatform
 	WebOS: EnumPlatform
@@ -3511,6 +3524,7 @@ type ENUM_LIST = {
 	ActionType: EnumActionType_INTERNAL,
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
+	AdEventType: EnumAdEventType_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdTeleportMethod: EnumAdTeleportMethod_INTERNAL,
 	AdUnitStatus: EnumAdUnitStatus_INTERNAL,
@@ -3726,6 +3740,7 @@ type ENUM_LIST = {
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
 	PermissionLevelShown: EnumPermissionLevelShown_INTERNAL,
 	PhysicsSimulationRate: EnumPhysicsSimulationRate_INTERNAL,
+	PhysicsSolver: EnumPhysicsSolver_INTERNAL,
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod_INTERNAL,
 	Platform: EnumPlatform_INTERNAL,
 	PlaybackState: EnumPlaybackState_INTERNAL,
@@ -4510,6 +4525,7 @@ declare class AssetImportSession extends Instance
 	function ApplyPreset(self, preset: { [any]: any }): nil
 	function ApplySettings(self): nil
 	function Cancel(self): nil
+	function CreatePresetFromData(self, importData: Instance): { [any]: any }
 	function GetCurrentStatusTable(self): { [any]: any }
 	function GetFilename(self): string
 	function GetImportTree(self): Instance
@@ -6642,6 +6658,7 @@ declare class ViewportFrame extends GuiObject
 	IsMirrored: boolean
 	LightColor: Color3
 	LightDirection: Vector3
+	function CaptureSnapshotAsync(self): Content
 end
 
 declare class LayerCollector extends GuiBase2d
@@ -6711,7 +6728,9 @@ end
 
 declare class AdGui extends SurfaceGuiBase
 	AdShape: EnumAdShape
+	EnableVideoAds: boolean
 	FallbackImage: Content
+	OnAdEvent: (eventInfo: { [any]: any }) -> boolean
 	Status: EnumAdUnitStatus
 end
 
@@ -8156,6 +8175,7 @@ declare class Workspace extends WorldRoot
 	InterpolationThrottling: EnumInterpolationThrottlingMode
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
 	ModelStreamingBehavior: EnumModelStreamingBehavior
+	NewPhysicsSolver: EnumPhysicsSolver
 	PersistentLoaded: RBXScriptSignal<Player>
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
@@ -9365,6 +9385,7 @@ end
 declare class Sound extends Instance
 	ChannelCount: number
 	DidLoop: RBXScriptSignal<string, number>
+	EmitterSize: number
 	Ended: RBXScriptSignal<string>
 	IsLoaded: boolean
 	IsPaused: boolean
@@ -9373,6 +9394,8 @@ declare class Sound extends Instance
 	Loaded: RBXScriptSignal<string>
 	LoopRegion: NumberRange
 	Looped: boolean
+	MaxDistance: number
+	MinDistance: number
 	Paused: RBXScriptSignal<string>
 	PlayOnRemove: boolean
 	PlaybackLoudness: number
@@ -9476,6 +9499,7 @@ end
 
 declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
+	AudioInstanceAdded: RBXScriptSignal<Instance>
 	DeviceListChanged: RBXScriptSignal<any>
 	DistanceFactor: number
 	DopplerScale: number
@@ -10203,6 +10227,7 @@ end
 declare class TextChatService extends Instance
 	BubbleDisplayed: RBXScriptSignal<Instance, TextChatMessage>
 	ChatTranslationEnabled: boolean
+	ChatTranslationFTUXShown: boolean
 	ChatTranslationToggleEnabled: boolean
 	ChatVersion: EnumChatVersion
 	CreateDefaultCommands: boolean
@@ -10457,6 +10482,7 @@ end
 
 declare class UIListLayout extends UIGridStyleLayout
 	HorizontalFlex: EnumUIFlexAlignment
+	ItemLineAlignment: EnumItemLineAlignment
 	Padding: UDim
 	VerticalFlex: EnumUIFlexAlignment
 	Wraps: boolean
@@ -10519,6 +10545,9 @@ declare class UserGameSettings extends Instance
 	AllTutorialsDisabled: boolean
 	CameraMode: EnumCustomCameraMode
 	CameraYInverted: boolean
+	ChatTranslationEnabled: boolean
+	ChatTranslationFTUXShown: boolean
+	ChatTranslationToggleEnabled: boolean
 	ChatVisible: boolean
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode
 	ComputerMovementMode: EnumComputerMovementMode
