@@ -43,3 +43,90 @@ This provides documentation for any built-in definitions, but is not a requireme
 
 See https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json for an example of a
 documentation file.
+
+## Configuring FFlags
+
+The Luau project makes use of FFlag to gate and dynamically enable new features when they are released.
+
+For the Luau Language Server, FFlags are defined on the command line:
+
+```sh
+$ luau-lsp lsp --flag:NAME=VALUE
+```
+
+By default, all FFlags are enabled. You can disable all FFlags by passing `--no-flags-enabled`.
+
+```sh
+$ luau-lsp lsp --no-flags-enabled
+```
+
+The VSCode client makes use of the live Roblox Studio FFlag studios to sync FFlag state. You can find all current
+FFlag values at https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCDesktopClient.
+Note for simplicity that most relevant FFlags are prefixed by `Luau`. Some FFlags are prefixed by `DebugLuau`, but these
+FFlags are experimental and should not typically be enabled.
+
+To view all available FFlags, run:
+
+```sh
+$ luau-lsp --show-flags
+```
+
+## Optional: Custom `$/command` definition
+
+The Luau Language Server relies on a custom defined LSP notification: `$/command`.
+This notification corresponds to the execution of a [VSCode Command](https://code.visualstudio.com/api/references/commands).
+
+Right now, the only command sent is `cursorMove`. This is used during automatic `end` autocompletion, to move the cursor to
+the appropriate spot. The following payload is sent in this case:
+
+```json
+{
+  "command": "cursorMove",
+  "data": {
+    "to": "prevBlankLine"
+  }
+}
+```
+
+It is optional to decide whether to implement this command for your language client, and the server will run fine without
+it being defined. If not available, you may see slight problems when autocompleting `end`.
+
+## Optional: Roblox Studio plugin
+
+A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
+for users who would like intellisense for non-filesystem based DataModel instances.
+
+The companion plugin sends HTTP post requests to the following endpoints on localhost at the user-defined port:
+
+- `POST /full`
+- `POST /clear`
+
+The Language Server listens to the following notifications from a language client:
+
+- `$/plugin/full`
+- `$/plugin/clear`
+
+It is optional to implement support for the companion plugin. This involves creating a HTTP listener on your language
+client, which then sends the corresponding LSP notification to the server.
+
+The `POST /full` request receives a full DataModel tree with the following body:
+
+```json
+{
+    "tree": {
+        "Name": "string",
+        "ClassName": "string",
+        "Children": {
+            ...
+        }
+    }
+}
+```
+
+The `$/plugin/full` LSP notification expects the `tree` property directly sent (i.e., you should send `request.body.tree`).
+
+Further Reference:
+
+- https://github.com/JohnnyMorganz/luau-lsp/blob/main/plugin/src/init.server.lua
+- https://github.com/JohnnyMorganz/luau-lsp/blob/main/src/StudioPlugin.cpp
+- https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/code/src/extension.ts
