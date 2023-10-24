@@ -91,6 +91,21 @@ the appropriate spot. The following payload is sent in this case:
 It is optional to decide whether to implement this command for your language client, and the server will run fine without
 it being defined. If not available, you may see slight problems when autocompleting `end`.
 
+## Optional: Rojo Sourcemap Generation
+
+The Language Server automatically listens for any changes to a `sourcemap.json` file present in the opened workspace root.
+
+It is optional to implement automatic generation of this sourcemap for your language client. It is as simple as running
+the following command:
+
+```sh
+$ rojo sourcemap --include-non-scripts --watch default.project.json --output sourcemap.json
+```
+
+You may wish to make the `default.project.json` file configurable, as well as whether `--include-non-scripts` is enabled.
+
+The Language Server will operate without a sourcemap available, but will not resolve DataModel instances for intellisense.
+
 ## Optional: Roblox Studio plugin
 
 A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
