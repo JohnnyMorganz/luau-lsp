@@ -15,8 +15,7 @@ You can then run the following:
 $ luau-lsp lsp
 ```
 
-which will start a language server. The server listens to messages following the Language Server Protocol (LSP)
-via stdin, and sends messages via stdout.
+which will start a language server. The server listens to messages following the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/) specification via stdin, and sends messages via stdout.
 
 To find all the command-line options available, run
 
@@ -46,7 +45,7 @@ documentation file.
 
 ## Configuring FFlags
 
-The Luau project makes use of FFlag to gate and dynamically enable new features when they are released.
+The Luau project makes use of FFlags to gate and dynamically enable new features when they are released.
 
 For the Luau Language Server, FFlags are defined on the command line:
 
@@ -54,13 +53,14 @@ For the Luau Language Server, FFlags are defined on the command line:
 $ luau-lsp lsp --flag:NAME=VALUE
 ```
 
-By default, all FFlags are enabled. You can disable all FFlags by passing `--no-flags-enabled`.
+By default, all FFlags are enabled, apart from those that are [defined as experimental](https://github.com/luau-lang/luau/blob/master/Common/include/Luau/ExperimentalFlags.h).
+You can disable all FFlags by passing `--no-flags-enabled`.
 
 ```sh
 $ luau-lsp lsp --no-flags-enabled
 ```
 
-The VSCode client makes use of the live Roblox Studio FFlag studios to sync FFlag state. You can find all current
+The VSCode client makes use of the live Roblox Studio FFlag information to sync FFlag state. You can find all current
 FFlag values at https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCDesktopClient.
 Note for simplicity that most relevant FFlags are prefixed by `Luau`. Some FFlags are prefixed by `DebugLuau`, but these
 FFlags are experimental and should not typically be enabled.
