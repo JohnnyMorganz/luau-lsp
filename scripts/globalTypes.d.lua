@@ -6418,7 +6418,7 @@ end
 
 declare class OrderedDataStore extends GlobalDataStore
 	function GetAsync(self, key: string): (number?, DataStoreKeyInfo)
-	function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number, maxValue: number): DataStorePages
+	function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages
 	function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)
 	function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string
 	function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)

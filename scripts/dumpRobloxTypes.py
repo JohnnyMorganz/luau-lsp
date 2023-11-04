@@ -444,7 +444,7 @@ EXTRA_MEMBERS = {
     # So we override the method's types to use numbers instead of any
     "OrderedDataStore": [
         "function GetAsync(self, key: string): (number?, DataStoreKeyInfo)",
-        "function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number, maxValue: number): DataStorePages",
+        "function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages",
         "function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)",
         "function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string",
         "function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)",
