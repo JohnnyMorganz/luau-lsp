@@ -182,6 +182,73 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_variable_2")
     CHECK_EQ(1, comments.size());
 }
 
+TEST_CASE_FIXTURE(Fixture, "dont_attach_comments_before_whitespace")
+{
+    auto result = check(R"(
+        --- This shouldn't be included
+
+        --- A doc comment
+        local function foo()
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "dont_attach_comments_before_whitespace_2")
+{
+    auto result = check(R"(
+        --[[
+            This shouldn't be included
+        ]]
+
+        --[[
+            A doc comment
+        ]]
+        local function foo()
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(1, comments.size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "include_multiple_comments")
+{
+    auto result = check(R"(
+        --- This should be included, as it is a part of a whole block of comments
+        ---
+        --- A doc comment
+        local function foo()
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getCommentLocations(getMainSourceModule(), ftv->definition->definitionLocation);
+    CHECK_EQ(3, comments.size());
+}
+
 TEST_CASE_FIXTURE(Fixture, "print_comments")
 {
     auto result = check(R"(
