@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for documentation comments on table type properties:
+
+```lua
+type Foo = {
+  --- A documentation comment
+  map: () -> ()
+}
+```
+
 ### Changed
 
 - Sync to upstream Luau 0.602

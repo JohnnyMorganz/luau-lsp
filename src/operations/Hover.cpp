@@ -72,6 +72,28 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             return std::nullopt;
         type = typeFun->type;
     }
+    else if (auto typeTable = node->as<Luau::AstTypeTable>())
+    {
+        if (auto tableTy = module->astResolvedTypes.find(typeTable))
+        {
+            type = *tableTy;
+
+            // Check if we are inside one of the properties
+            for (auto& prop : typeTable->props)
+            {
+                if (prop.location.containsClosed(position))
+                {
+                    auto parentType = Luau::follow(*tableTy);
+                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
+                        documentationLocation = {definitionModuleName.value(), prop.location};
+                    auto resolvedProperty = lookupProp(parentType, prop.name.value);
+                    if (resolvedProperty)
+                        type = resolvedProperty->type();
+                    break;
+                }
+            }
+        }
+    }
     else if (auto astType = node->asType())
     {
         if (auto ty = module->astResolvedTypes.find(astType))
@@ -118,8 +140,13 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                 if (prop)
                 {
                     type = prop->type();
-                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType); definitionModuleName && prop->location)
-                        documentationLocation = {definitionModuleName.value(), prop->location.value()};
+                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
+                    {
+                        if (prop->location)
+                            documentationLocation = {definitionModuleName.value(), prop->location.value()};
+                        else if (prop->typeLocation)
+                            documentationLocation = {definitionModuleName.value(), prop->typeLocation.value()};
+                    }
                 }
             }
         }

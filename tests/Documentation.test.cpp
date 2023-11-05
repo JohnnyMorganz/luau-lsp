@@ -182,6 +182,22 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_variable_2")
     CHECK_EQ(1, comments.size());
 }
 
+TEST_CASE_FIXTURE(Fixture, "attach_comments_to_table_type_props")
+{
+    auto result = check(R"(
+        type Foo = {
+            --- A documentation comment
+            map: () -> (),
+        }
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    // Assume hovering over a var "tbl.data", which would give the position set to the property
+    auto comments = getCommentLocations(getMainSourceModule(), Luau::Location{{3, 17}, {3, 25}});
+    CHECK_EQ(1, comments.size());
+}
+
 TEST_CASE_FIXTURE(Fixture, "print_comments")
 {
     auto result = check(R"(

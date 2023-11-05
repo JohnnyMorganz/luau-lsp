@@ -456,6 +456,61 @@ static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
            capabilities.textDocument->completion->completionItem->snippetSupport;
 }
 
+std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
+    const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
+{
+    if (entry.documentationSymbol)
+        if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
+            return docs;
+
+    if (entry.type.has_value())
+        if (auto documentation = getDocumentationForType(entry.type.value()))
+            return documentation;
+
+    if (entry.prop)
+    {
+        std::optional<Luau::ModuleName> definitionModuleName;
+
+        if (entry.containingClass)
+        {
+            definitionModuleName = entry.containingClass.value()->definitionModuleName;
+        }
+        else
+        {
+            // TODO: there is not a nice way to get the containing table type from the entry, so we compute it ourselves
+            auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+
+            if (module)
+            {
+                Luau::TypeId* parentTy = nullptr;
+                if (auto node = ancestry.back())
+                {
+                    if (auto indexName = node->as<Luau::AstExprIndexName>())
+                        parentTy = module->astTypes.find(indexName->expr);
+                    else if (auto indexExpr = node->as<Luau::AstExprIndexExpr>())
+                        parentTy = module->astTypes.find(indexExpr->expr);
+                }
+
+                if (parentTy)
+                    definitionModuleName = Luau::getDefinitionModuleName(*parentTy);
+            }
+        }
+
+        if (definitionModuleName)
+        {
+            if (auto propLocation = entry.prop.value()->location)
+                if (auto text = printMoonwaveDocumentation(getComments(definitionModuleName.value(), propLocation.value())); !text.empty())
+                    return text;
+
+            if (auto typeLocation = entry.prop.value()->typeLocation)
+                if (auto text = printMoonwaveDocumentation(getComments(definitionModuleName.value(), typeLocation.value())); !text.empty())
+                    return text;
+        }
+    }
+
+    return std::nullopt;
+}
+
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
     auto config = client->getConfiguration(rootUri);
@@ -660,15 +715,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         item.deprecated = entry.deprecated;
         item.sortText = SortText::Default;
 
-        // Handle documentation
-        std::optional<std::string> documentationString = std::nullopt;
-        if (std::optional<std::string> docs;
-            entry.documentationSymbol && (docs = printDocumentation(client->documentation, *entry.documentationSymbol)) && docs)
-            documentationString = *docs;
-        else if (entry.type.has_value())
-            documentationString = getDocumentationForType(entry.type.value());
-        // TODO: Handle documentation on properties
-        if (documentationString)
+        if (auto documentationString = getDocumentationForAutocompleteEntry(entry, result.ancestry, moduleName))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         if (entry.wrongIndexType)

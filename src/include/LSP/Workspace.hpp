@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Luau/Frontend.h"
+#include "Luau/Autocomplete.h"
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
 #include "Protocol/SignatureHelp.hpp"
@@ -85,6 +86,8 @@ private:
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
     std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
+    std::optional<std::string> getDocumentationForAutocompleteEntry(
+        const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName);
     std::vector<Reference> findAllReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
     std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
