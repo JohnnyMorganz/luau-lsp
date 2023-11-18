@@ -215,6 +215,7 @@ int main(int argc, char** argv)
         .metavar("PATH");
     analyze_command.add_argument("--definitions", "--defs")
         .help("A path to a Luau definitions file to load into the global namespace")
+        .action(file_path_parser)
         .default_value<std::vector<std::filesystem::path>>({})
         .append()
         .metavar("PATH");
@@ -237,11 +238,13 @@ int main(int argc, char** argv)
     lsp_command.add_parents(parent_parser);
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
+        .action(file_path_parser)
         .default_value<std::vector<std::filesystem::path>>({})
         .append()
         .metavar("PATH");
     lsp_command.add_argument("--docs", "--documentation")
         .help("path to a Luau documentation database for loaded definitions")
+        .action(file_path_parser)
         .default_value<std::vector<std::filesystem::path>>({})
         .append()
         .metavar("PATH");
