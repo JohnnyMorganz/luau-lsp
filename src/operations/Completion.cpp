@@ -267,13 +267,18 @@ static lsp::CompletionItem createSuggestService(const std::string& service, size
     return item;
 }
 
-static lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText)
+static lsp::CompletionItem createSuggestRequire(
+    const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText, const std::string& path)
 {
+    std::string documentation;
+    for (const auto& edit : textEdits)
+        documentation += edit.newText;
+
     lsp::CompletionItem item;
     item.label = name;
     item.kind = lsp::CompletionItemKind::Module;
     item.detail = "Auto-import";
-    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdits[0].newText)};
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", documentation) + "\n\n" + path};
     item.insertText = name;
     item.sortText = sortText;
 
@@ -445,7 +450,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
 
             textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
 
-            result.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute));
+            result.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path));
         }
     }
 }

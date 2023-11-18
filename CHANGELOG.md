@@ -17,6 +17,8 @@ type Foo = {
 }
 ```
 
+- We now show the file path in the completion description when auto-requiring files
+
 ### Changed
 
 - Sync to upstream Luau 0.602
