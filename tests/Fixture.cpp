@@ -117,10 +117,11 @@ Luau::ModuleName fromString(std::string_view name)
     return Luau::ModuleName(name);
 }
 
-void Fixture::newDocument(const std::string& name, const std::string& source)
+Uri Fixture::newDocument(const std::string& name, const std::string& source)
 {
     Uri uri("file", "", name);
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
+    return uri;
 }
 
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)

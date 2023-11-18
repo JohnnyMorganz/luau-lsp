@@ -22,6 +22,10 @@ type Foo = {
 - Sync to upstream Luau 0.602
 - Overhauled command line argument parsing system to be more consistent and flexible
 
+### Fixed
+
+- Attempting to rename a generic type parameter now correctly renames it in all locations
+
 ## [1.25.0] - 2023-10-14
 
 ### Changed
