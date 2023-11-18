@@ -24,6 +24,7 @@ static constexpr const char* MetatableIndex = "6";
 static constexpr const char* AutoImports = "7";
 static constexpr const char* AutoImportsAbsolute = "71";
 static constexpr const char* Keywords = "8";
+static constexpr const char* Deprioritized = "9";
 } // namespace SortText
 
 static constexpr const char* COMMON_SERVICES[] = {
@@ -759,6 +760,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
                 it != std::end(COMMON_INSTANCE_PROPERTIES))
                 item.sortText = SortText::PrioritisedSuggestion;
+        }
+
+        // If the entry is `loadstring`, deprioritise it
+        if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
+            it != frontend.globalsForAutocomplete.globalScope->bindings.end())
+        {
+            if (entry.type == it->second.typeId)
+                item.sortText = SortText::Deprioritized;
         }
 
         switch (entry.kind)
