@@ -193,6 +193,14 @@ int startAnalyze(const argparse::ArgumentParser& program)
         return 1;
     }
 
+    auto reportFormatter = program.get<std::string>("--formatter");
+    if (reportFormatter == "default")
+        format = ReportFormat::Default;
+    else if (reportFormatter == "plain")
+        format = ReportFormat::Luacheck;
+    else if (reportFormatter == "gnu")
+        format = ReportFormat::Gnu;
+
 #if !defined(LUAU_ENABLE_TIME_TRACE)
     if (FFlag::DebugLuauTimeTracing)
     {

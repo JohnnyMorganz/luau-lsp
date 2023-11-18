@@ -10,26 +10,6 @@
 
 LUAU_FASTINT(LuauTarjanChildLimit)
 
-static void displayHelp(const char* argv0)
-{
-    printf("Usage: %s lsp [options]\n", argv0);
-    printf("Usage: %s analyze [--mode] [options] [file list]\n", argv0);
-    printf("\n");
-    printf("Analyze options:\n");
-    printf("  --formatter=plain: report analysis errors in Luacheck-compatible format\n");
-    printf("  --formatter=gnu: report analysis errors in GNU-compatible format\n");
-    printf("  --timetrace: record compiler time tracing information into trace.json\n");
-    printf("  --no-strict-dm-types: disable strict DataModel types in type-checking\n");
-    printf("  --sourcemap=PATH: path to a Rojo-style sourcemap\n");
-    printf("  --definitions=PATH: path to definition file for global types\n");
-    printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");
-    printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
-    printf("LSP options:\n");
-    printf("  --definitions=PATH: path to definition file for global types\n");
-    printf("  --docs=PATH: path to documentation file to power Intellisense\n");
-    printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
-}
-
 static void displayFlags()
 {
     printf("Available flags:\n");
