@@ -149,7 +149,6 @@ int startAnalyze(const argparse::ArgumentParser& program)
     auto baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
     auto settingsPath = program.present<std::filesystem::path>("--settings");
     std::vector<std::filesystem::path> files{};
-    bool expressiveTypes = !program.is_used("--no-strict-dm-types");
     FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
     if (auto filesArg = program.present<std::vector<std::string>>("files"))
@@ -332,7 +331,8 @@ int startAnalyze(const argparse::ArgumentParser& program)
         }
     }
 
-    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver, expressiveTypes);
+    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver,
+        !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
 
     Luau::freeze(frontend.globals.globalTypes);
     Luau::freeze(frontend.globalsForAutocomplete.globalTypes);

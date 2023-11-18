@@ -26,6 +26,8 @@ type Foo = {
 - Deprioritized `loadstring` in autocomplete
 - `luau-lsp.diagnostics.strictDatamodelTypes` now defaults to `false` on the language server side (note, it was already default `false` in VSCode).
   Defaulting to `true` was unintentional. This will affect external language client users (e.g. neovim)
+- Analyze CLI tool now respects `luau-lsp.diagnostics.strictDatamodelTypes` if set in the provided configuration.
+  The flag `--no-strict-dm-types` still remains for backwards compatibility reasons, but can be treated as deprecated.
 
 ### Fixed
 
