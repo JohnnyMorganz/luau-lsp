@@ -1,6 +1,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "Analyze/AnalyzeCli.hpp"
 #include "Luau/ExperimentalFlags.h"
+#include "argparse/argparse.hpp"
 
 #ifdef _WIN32
 #include <io.h>
@@ -9,80 +10,10 @@
 
 LUAU_FASTINT(LuauTarjanChildLimit)
 
-enum class CliMode
-{
-    Lsp,
-    Analyze
-};
-
-/// Validate to ensure the flag is correct
-static bool validateFlag(char* str, int argIndex)
-{
-    // Ignore arguments not starting with "-"
-    if (str[0] != '-')
-        return true;
-
-    auto n = strlen(str);
-
-    if (argIndex == 1 && strcmp(str, "--help") == 0)
-        return true;
-    else if (argIndex == 1 && strcmp(str, "--show-flags") == 0)
-        return true;
-    else if (strncmp(str, "--flag:", 7) == 0 && n > 8)
-        return true;
-    else if (strcmp(str, "--no-flags-enabled") == 0)
-        return true;
-    else if (strncmp(str, "--definitions=", 14) == 0 && n > 15)
-        return true;
-    else if (strncmp(str, "--docs=", 7) == 0 && n > 8)
-        return true;
-    else if (strncmp(str, "--base-luaurc=", 14) == 0 && n > 15)
-        return true;
-    else if (strncmp(str, "--settings=", 11) == 0 && n > 12)
-        return true;
-    else if (strcmp(str, "--formatter=plain") == 0)
-        return true;
-    else if (strcmp(str, "--formatter=gnu") == 0)
-        return true;
-    else if (strcmp(str, "--annotate") == 0)
-        return true;
-    else if (strcmp(str, "--timetrace") == 0)
-        return true;
-    else if (strcmp(str, "--no-strict-dm-types") == 0)
-        return true;
-    else if (strncmp(str, "--sourcemap=", 12) == 0 && n > 13)
-        return true;
-    else if (strncmp(str, "--defs=", 7) == 0 && n > 8)
-        return true;
-    else if (strncmp(str, "--ignore=", 9) == 0 && n > 10)
-        return true;
-    return false;
-}
-
-static void displayInvalidCommand(const std::string& argv0)
-{
-    std::cout << "Invalid command. You must specify a mode to run\n";
-    std::cout << "Usage: " + argv0 + " lsp [options]\n";
-    std::cout << "Usage: " + argv0 + " analyze [--mode] [options] [file list]\n";
-    std::cout << "Run '" + argv0 + " --help' for more information\n";
-}
-
 static void displayHelp(const char* argv0)
 {
     printf("Usage: %s lsp [options]\n", argv0);
     printf("Usage: %s analyze [--mode] [options] [file list]\n", argv0);
-    printf("\n");
-    printf("Global commands:\n");
-    printf("  %s --help: show this help message\n", argv0);
-    printf("  %s --show-flags: show all internal flags and their values\n", argv0);
-    printf("\n");
-    printf("Global options:\n");
-    printf("  --no-flags-enabled: does not enable all internal FFlags.\n");
-    printf("  --flag:FlagName=value: sets an internal flag. Use --show-flags to list all internal flags and default values.\n");
-    printf("\n");
-    printf("Analyze modes:\n");
-    printf("  omitted: typecheck and lint input files\n");
-    printf("  --annotate: typecheck input files and output source with type annotations\n");
     printf("\n");
     printf("Analyze options:\n");
     printf("  --formatter=plain: report analysis errors in Luacheck-compatible format\n");
@@ -93,7 +24,6 @@ static void displayHelp(const char* argv0)
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --ignore=GLOB: glob pattern to ignore error outputs\n");
     printf("  --base-luaurc=PATH: path to a .luaurc file which acts as the base default configuration\n");
-    printf("  --settings=PATH: path to LSP-style settings\n");
     printf("LSP options:\n");
     printf("  --definitions=PATH: path to definition file for global types\n");
     printf("  --docs=PATH: path to documentation file to power Intellisense\n");
@@ -165,32 +95,16 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags)
     }
 }
 
-int startLanguageServer(int argc, char** argv)
+int startLanguageServer(const argparse::ArgumentParser& program)
 {
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    std::vector<std::filesystem::path> definitionsFiles{};
-    std::vector<std::filesystem::path> documentationFiles{};
-    std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
-
-    for (int i = 1; i < argc; i++)
-    {
-        if (strncmp(argv[i], "--definitions=", 14) == 0)
-        {
-            definitionsFiles.emplace_back(argv[i] + 14);
-        }
-        else if (strncmp(argv[i], "--docs=", 7) == 0)
-        {
-            documentationFiles.emplace_back(argv[i] + 7);
-        }
-        else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
-        {
-            baseLuaurc = std::filesystem::path(argv[i] + 14);
-        }
-    }
+    auto definitionsFiles = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto documentationFiles = program.get<std::vector<std::filesystem::path>>("--docs");
+    std::optional<std::filesystem::path> baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
 
     std::optional<Luau::Config> defaultConfig = std::nullopt;
     if (baseLuaurc)
@@ -221,86 +135,134 @@ int startLanguageServer(int argc, char** argv)
     return server.requestedShutdown() ? 0 : 1;
 }
 
+std::filesystem::path file_path_parser(const std::string& value)
+{
+    return {value};
+}
+
 int main(int argc, char** argv)
 {
-    // Debug loop: uncomment and set a breakpoint on while to attach debugger before init
-    // auto d = 4;
-    // while (d == 4)
-    // {
-    //     d = 4;
-    // }
-
-    CliMode mode = CliMode::Lsp;
-
-    if (argc < 2)
-    {
-        displayInvalidCommand(argv[0]);
-        return 1;
-    }
-    else if (strcmp(argv[1], "--help") == 0)
-    {
-        displayHelp(argv[0]);
-        return 0;
-    }
-    else if (strcmp(argv[1], "--show-flags") == 0)
-    {
-        displayFlags();
-        return 0;
-    }
-    else if (strcmp(argv[1], "lsp") == 0)
-    {
-        mode = CliMode::Lsp;
-    }
-    else if (strcmp(argv[1], "analyze") == 0)
-    {
-        mode = CliMode::Analyze;
-    }
-    else
-    {
-        displayInvalidCommand(argv[0]);
-        return 1;
-    }
-
-    for (int i = 1; i < argc; i++)
-    {
-        if (!validateFlag(argv[i], i))
-        {
-            std::cerr << "Unknown option '" << std::string(argv[i]) << "'\n";
-            std::cerr << "Run '" + std::string(argv[0]) + " --help' for more information\n";
-            return 1;
-        }
-    }
-
     Luau::assertHandler() = [](const char* expr, const char* file, int line, const char*) -> int
     {
         fprintf(stderr, "%s(%d): ASSERTION FAILED: %s\n", file, line, expr);
         return 1;
     };
 
-    // Handle enabling FFlags
-    bool enableAllFlags = true;
-    std::unordered_map<std::string, std::string> fastFlags{};
-    for (int i = 1; i < argc; i++)
+    argparse::ArgumentParser program("luau-lsp", "1.25.0");
+    program.set_assign_chars(":=");
+
+    // Global arguments
+    program.add_argument("--delay-startup")
+        .help("debug flag to halt startup to allow connection of a debugger")
+        .default_value(false)
+        .implicit_value(true);
+
+    // FFlags
+    program.add_argument("--flag").help("set a Luau FFlag. Syntax: `--flag:KEY=VALUE`").default_value<std::vector<std::string>>({}).append();
+    program.add_argument("--no-flags-enabled").help("do not enable all Luau FFlags by default").default_value(false).implicit_value(true);
+    program.add_argument("--show-flags")
+        .help("display all the currently available Luau FFlags and their values")
+        .default_value(false)
+        .implicit_value(true);
+
+    // Analyze arguments
+    argparse::ArgumentParser analyze_command("analyze");
+    analyze_command.add_description("Run luau-analyze type checking and linting");
+    analyze_command.add_argument("--annotate")
+        .help("output the source file with type annotations after typechecking")
+        .default_value(false)
+        .implicit_value(true);
+    analyze_command.add_argument("--timetrace")
+        .help("record compiler time tracing information into trace.json")
+        .default_value(false)
+        .implicit_value(true);
+    analyze_command.add_argument("--formatter")
+        .help("output analysis errors in a particular format")
+        .default_value(std::string("default"))
+        .choices("default", "plain", "gnu");
+    analyze_command.add_argument("--no-strict-dm-types")
+        .help("disable strict DataModel types in type-checking")
+        .default_value(false)
+        .implicit_value(true);
+    analyze_command.add_argument("--sourcemap")
+        .help("path to a Rojo-style instance sourcemap to understand the DataModel")
+        .action(file_path_parser)
+        .metavar("PATH");
+    analyze_command.add_argument("--definitions")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::filesystem::path>>({})
+        .append()
+        .metavar("PATH");
+    analyze_command.add_argument("--ignore")
+        .help("file glob pattern for ignoring error outputs")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("GLOB");
+    analyze_command.add_argument("--base-luaurc")
+        .help("path to a .luaurc file which acts as the base default configuration")
+        .action(file_path_parser)
+        .metavar("PATH");
+    analyze_command.add_argument("--settings").help("path to LSP-style settings").action(file_path_parser).metavar("PATH");
+    analyze_command.add_argument("files").help("files to perform analysis on").remaining();
+
+    // Language server arguments
+    argparse::ArgumentParser lsp_command("lsp");
+    lsp_command.add_description("Start the language server");
+    lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
+    lsp_command.add_argument("--definitions")
+        .help("path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::filesystem::path>>({})
+        .append()
+        .metavar("PATH");
+    lsp_command.add_argument("--docs", "--documentation")
+        .help("path to a Luau documentation database for loaded definitions")
+        .default_value<std::vector<std::filesystem::path>>({})
+        .append()
+        .metavar("PATH");
+    lsp_command.add_argument("--base-luaurc")
+        .help("path to a .luaurc file which acts as the base default configuration")
+        .action(file_path_parser)
+        .metavar("PATH");
+
+    program.add_subparser(analyze_command);
+    program.add_subparser(lsp_command);
+
+    try
     {
-        if (strncmp(argv[i], "--flag:", 7) == 0)
-        {
-            std::string flagSet = std::string(argv[i] + 7);
+        program.parse_args(argc, argv);
+    }
+    catch (const std::exception& err)
+    {
+        std::cerr << err.what() << '\n';
+        std::cerr << program;
+        return 1;
+    }
 
-            size_t eqIndex = flagSet.find('=');
-            if (eqIndex == std::string::npos)
-            {
-                std::cerr << "Bad flag option, missing =: " << flagSet << "\n";
-                return 1;
-            }
-
-            std::string flagName = flagSet.substr(0, eqIndex);
-            std::string flagValue = flagSet.substr(eqIndex + 1, flagSet.length());
-            fastFlags.emplace(flagName, flagValue);
-        }
-        else if (strcmp(argv[i], "--no-flags-enabled") == 0)
+    // Debug loop: set a breakpoint inside while loop to attach debugger before init
+    if (program.is_used("--delay-startup"))
+    {
+        auto d = 4;
+        while (d == 4)
         {
-            enableAllFlags = false;
+            d = 4;
         }
+    }
+
+    // Handle enabling FFlags
+    bool enableAllFlags = !program.is_used("--no-flags-enabled");
+    std::unordered_map<std::string, std::string> fastFlags{};
+    for (const auto& flag : program.get<std::vector<std::string>>("--flag"))
+    {
+        size_t eqIndex = flag.find('=');
+        if (eqIndex == std::string::npos)
+        {
+            std::cerr << "Invalid key-value pair, expected KEY=VALUE, instead got " << flag << '\n';
+            return 1;
+        }
+
+        std::string flagName = flag.substr(0, eqIndex);
+        std::string flagValue = flag.substr(eqIndex + 1, flag.length());
+        fastFlags.emplace(flagName, flagValue);
     }
 
     if (enableAllFlags)
@@ -316,8 +278,19 @@ int main(int argc, char** argv)
     if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
         FInt::LuauTarjanChildLimit.value = 15000;
 
-    if (mode == CliMode::Lsp)
-        return startLanguageServer(argc, argv);
-    else
-        return startAnalyze(argc, argv);
+    if (program.is_used("--show-flags"))
+    {
+        displayFlags();
+        return 0;
+    }
+
+    if (program.is_subcommand_used("lsp"))
+        return startLanguageServer(lsp_command);
+    else if (program.is_subcommand_used("analyze"))
+        return startAnalyze(analyze_command);
+
+    // No sub-command specified
+    std::cerr << "Specify a particular mode to run the program (analyze/lsp)" << '\n';
+    std::cerr << program;
+    return 1;
 }

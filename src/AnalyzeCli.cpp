@@ -139,54 +139,26 @@ static bool analyzeFile(
     return reportedErrors == 0 && cr.lintResult.errors.empty();
 }
 
-int startAnalyze(int argc, char** argv)
+int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
-    bool annotate = false;
-    std::optional<std::filesystem::path> sourcemapPath = std::nullopt;
-    std::vector<std::filesystem::path> definitionsPaths{};
+    bool annotate = program.is_used("--annotate");
+    auto sourcemapPath = program.present<std::filesystem::path>("--sourcemap");
+    auto definitionsPaths = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto ignoreGlobPatterns = program.get<std::vector<std::string>>("--ignore");
+    auto baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
+    auto settingsPath = program.present<std::filesystem::path>("--settings");
     std::vector<std::filesystem::path> files{};
-    std::vector<std::string> ignoreGlobPatterns{};
-    std::optional<std::filesystem::path> baseLuaurc = std::nullopt;
-    std::optional<std::filesystem::path> settingsPath = std::nullopt;
-    bool expressiveTypes = true;
+    bool expressiveTypes = !program.is_used("--no-strict-dm-types");
+    FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
-    for (int i = 2; i < argc; ++i)
+    if (auto filesArg = program.present<std::vector<std::string>>("files"))
     {
-        if (argv[i][0] == '-')
+        for (const auto& pathString : *filesArg)
         {
-            // Handle options
-            if (strcmp(argv[i], "--formatter=plain") == 0)
-                format = ReportFormat::Luacheck;
-            else if (strcmp(argv[i], "--formatter=gnu") == 0)
-                format = ReportFormat::Gnu;
-            else if (strcmp(argv[i], "--annotate") == 0)
-                annotate = true;
-            else if (strcmp(argv[i], "--timetrace") == 0)
-                FFlag::DebugLuauTimeTracing.value = true;
-            else if (strcmp(argv[i], "--no-strict-dm-types") == 0)
-                expressiveTypes = false;
-            else if (strncmp(argv[i], "--sourcemap=", 12) == 0)
-                sourcemapPath = std::string(argv[i] + 12);
-            else if (strncmp(argv[i], "--definitions=", 14) == 0)
-                definitionsPaths.emplace_back(std::string(argv[i] + 14));
-            else if (strncmp(argv[i], "--base-luaurc=", 14) == 0)
-                baseLuaurc = std::filesystem::path(argv[i] + 14);
-            else if (strncmp(argv[i], "--settings=", 11) == 0)
-                settingsPath = std::filesystem::path(argv[i] + 11);
-            // Backwards compatibility
-            else if (strncmp(argv[i], "--defs=", 7) == 0)
-                definitionsPaths.emplace_back(std::string(argv[i] + 7));
-            else if (strncmp(argv[i], "--ignore=", 9) == 0)
-                ignoreGlobPatterns.emplace_back(std::string(argv[i] + 9));
-        }
-        else
-        {
-            auto path = std::filesystem::path(argv[i]);
-
             // If the path is not absolute, then we want to construct it into an absolute path
             // by appending it to the current working directory
-            path = std::filesystem::absolute(path);
+            auto path = std::filesystem::absolute(pathString);
 
             if (path != "-" && !std::filesystem::exists(path))
             {
@@ -214,6 +186,11 @@ int startAnalyze(int argc, char** argv)
                 files.push_back(path);
             }
         }
+    }
+    else
+    {
+        fprintf(stderr, "error: no files provided\n");
+        return 1;
     }
 
 #if !defined(LUAU_ENABLE_TIME_TRACE)
