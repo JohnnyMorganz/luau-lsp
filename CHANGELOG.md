@@ -25,6 +25,7 @@ type Foo = {
 ### Fixed
 
 - Attempting to rename a generic type parameter now correctly renames it in all locations
+- Fixed renaming a local variable not appropriately renaming any imported types
 
 ## [1.25.0] - 2023-10-14
 
