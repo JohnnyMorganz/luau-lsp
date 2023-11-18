@@ -31,7 +31,7 @@ struct Fixture
     explicit Fixture();
     ~Fixture();
 
-    void newDocument(const std::string& name, const std::string& source);
+    Uri newDocument(const std::string& name, const std::string& source);
 
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
     Luau::LoadDefinitionFileResult loadDefinition(const std::string& source);

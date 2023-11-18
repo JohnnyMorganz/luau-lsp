@@ -83,7 +83,7 @@ struct Range
     Position start;
     Position end;
 
-    bool operator==(const Range& other)
+    bool operator==(const Range& other) const
     {
         return start == other.start && end == other.end;
     }
