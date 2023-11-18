@@ -28,10 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: Roblox/setup-foreman@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Build Plugin
         run: rojo build plugin --output Luau.rbxm
