@@ -24,6 +24,8 @@ type Foo = {
 - Sync to upstream Luau 0.604
 - Overhauled command line argument parsing system to be more consistent and flexible
 - Deprioritized `loadstring` in autocomplete
+- `luau-lsp.diagnostics.strictDatamodelTypes` now defaults to `false` on the language server side (note, it was already default `false` in VSCode).
+  Defaulting to `true` was unintentional. This will affect external language client users (e.g. neovim)
 
 ### Fixed
 

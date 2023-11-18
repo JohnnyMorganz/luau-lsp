@@ -9,7 +9,7 @@ struct ClientDiagnosticsConfiguration
     /// Whether to compute diagnostics for a whole workspace
     bool workspace = false;
     /// Whether to use expressive DM types in the diagnostics typechecker
-    bool strictDatamodelTypes = true;
+    bool strictDatamodelTypes = false;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes)
 
