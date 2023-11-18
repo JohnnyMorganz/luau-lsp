@@ -20,6 +20,7 @@ type Foo = {
 ### Changed
 
 - Sync to upstream Luau 0.602
+- Overhauled command line argument parsing system to be more consistent and flexible
 
 ## [1.25.0] - 2023-10-14
 
