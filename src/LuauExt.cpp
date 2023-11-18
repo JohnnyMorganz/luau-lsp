@@ -1201,6 +1201,20 @@ struct FindSymbolReferences : public Luau::AstVisitor
         }
         return true;
     }
+
+    bool visit(Luau::AstType* type) override
+    {
+        return true;
+    }
+
+    bool visit(Luau::AstTypeReference* typeReference) override
+    {
+        // TODO: this is not *completely* correct in the case of shadowing, as it is just a name comparison
+        // Upstream issue: https://github.com/luau-lang/luau/issues/1108
+        if (typeReference->prefix && symbol.local && typeReference->prefix.value() == symbol.astName())
+            result.push_back(typeReference->prefixLocation.value());
+        return true;
+    }
 };
 
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol)
