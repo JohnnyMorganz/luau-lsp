@@ -21,7 +21,7 @@ type Foo = {
 
 ### Changed
 
-- Sync to upstream Luau 0.602
+- Sync to upstream Luau 0.604
 - Overhauled command line argument parsing system to be more consistent and flexible
 
 ### Fixed
