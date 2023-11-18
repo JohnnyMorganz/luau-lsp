@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
     name: Build Server (${{matrix.os}})
     runs-on: ${{matrix.os}}
     steps:
@@ -104,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
     name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -144,8 +144,14 @@ jobs:
         run: rojo sourcemap default.project.json --output sourcemap.json
         working-directory: plugin
 
+      - name: Build Tool
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build . --target Luau.LanguageServer.CLI -j 3
+
       - name: Run Luau Analyze
-        run: luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.lua src
+        run: ../build/luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.lua src
         working-directory: plugin
 
       - name: Build Plugin
