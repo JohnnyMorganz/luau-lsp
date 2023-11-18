@@ -77,6 +77,16 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags)
 
 int startLanguageServer(const argparse::ArgumentParser& program)
 {
+    // Debug loop: set a breakpoint inside while loop to attach debugger before init
+    if (program.is_used("--delay-startup"))
+    {
+        auto d = 4;
+        while (d == 4)
+        {
+            d = 4;
+        }
+    }
+
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
@@ -115,6 +125,39 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     return server.requestedShutdown() ? 0 : 1;
 }
 
+void processFFlags(const argparse::ArgumentParser& program)
+{
+    // Handle enabling FFlags
+    bool enableAllFlags = !program.is_used("--no-flags-enabled");
+    std::unordered_map<std::string, std::string> fastFlags{};
+    for (const auto& flag : program.get<std::vector<std::string>>("--flag"))
+    {
+        size_t eqIndex = flag.find('=');
+        if (eqIndex == std::string::npos)
+        {
+            std::cerr << "Invalid key-value pair, expected KEY=VALUE, instead got " << flag << '\n';
+            exit(1);
+        }
+
+        std::string flagName = flag.substr(0, eqIndex);
+        std::string flagValue = flag.substr(eqIndex + 1, flag.length());
+        fastFlags.emplace(flagName, flagValue);
+    }
+
+    if (enableAllFlags)
+    {
+        for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
+            if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isFlagExperimental(flag->name))
+                flag->value = true;
+    }
+    registerFastFlags(fastFlags);
+
+    // Manually enforce a LuauTarjanChildLimit increase
+    // TODO: re-evaluate the necessity of this change
+    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
+        FInt::LuauTarjanChildLimit.value = 15000;
+}
+
 std::filesystem::path file_path_parser(const std::string& value)
 {
     return {value};
@@ -132,14 +175,15 @@ int main(int argc, char** argv)
     program.set_assign_chars(":=");
 
     // Global arguments
-    program.add_argument("--delay-startup")
-        .help("debug flag to halt startup to allow connection of a debugger")
-        .default_value(false)
-        .implicit_value(true);
+    argparse::ArgumentParser parent_parser("-", "0.0", argparse::default_arguments::none);
 
     // FFlags
-    program.add_argument("--flag").help("set a Luau FFlag. Syntax: `--flag:KEY=VALUE`").default_value<std::vector<std::string>>({}).append();
-    program.add_argument("--no-flags-enabled").help("do not enable all Luau FFlags by default").default_value(false).implicit_value(true);
+    parent_parser.add_argument("--flag")
+        .help("set a Luau FFlag. Syntax: `--flag:KEY=VALUE`")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("KEY=VALUE");
+    parent_parser.add_argument("--no-flags-enabled").help("do not enable all Luau FFlags by default").default_value(false).implicit_value(true);
     program.add_argument("--show-flags")
         .help("display all the currently available Luau FFlags and their values")
         .default_value(false)
@@ -148,6 +192,7 @@ int main(int argc, char** argv)
     // Analyze arguments
     argparse::ArgumentParser analyze_command("analyze");
     analyze_command.add_description("Run luau-analyze type checking and linting");
+    analyze_command.add_parents(parent_parser);
     analyze_command.add_argument("--annotate")
         .help("output the source file with type annotations after typechecking")
         .default_value(false)
@@ -168,7 +213,7 @@ int main(int argc, char** argv)
         .help("path to a Rojo-style instance sourcemap to understand the DataModel")
         .action(file_path_parser)
         .metavar("PATH");
-    analyze_command.add_argument("--definitions")
+    analyze_command.add_argument("--definitions", "--defs")
         .help("A path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::filesystem::path>>({})
         .append()
@@ -189,6 +234,7 @@ int main(int argc, char** argv)
     argparse::ArgumentParser lsp_command("lsp");
     lsp_command.add_description("Start the language server");
     lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
+    lsp_command.add_parents(parent_parser);
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::filesystem::path>>({})
@@ -203,7 +249,12 @@ int main(int argc, char** argv)
         .help("path to a .luaurc file which acts as the base default configuration")
         .action(file_path_parser)
         .metavar("PATH");
+    lsp_command.add_argument("--delay-startup")
+        .help("debug flag to halt startup to allow connection of a debugger")
+        .default_value(false)
+        .implicit_value(true);
 
+    program.add_parents(parent_parser);
     program.add_subparser(analyze_command);
     program.add_subparser(lsp_command);
 
@@ -218,46 +269,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // Debug loop: set a breakpoint inside while loop to attach debugger before init
-    if (program.is_used("--delay-startup"))
-    {
-        auto d = 4;
-        while (d == 4)
-        {
-            d = 4;
-        }
-    }
-
-    // Handle enabling FFlags
-    bool enableAllFlags = !program.is_used("--no-flags-enabled");
-    std::unordered_map<std::string, std::string> fastFlags{};
-    for (const auto& flag : program.get<std::vector<std::string>>("--flag"))
-    {
-        size_t eqIndex = flag.find('=');
-        if (eqIndex == std::string::npos)
-        {
-            std::cerr << "Invalid key-value pair, expected KEY=VALUE, instead got " << flag << '\n';
-            return 1;
-        }
-
-        std::string flagName = flag.substr(0, eqIndex);
-        std::string flagValue = flag.substr(eqIndex + 1, flag.length());
-        fastFlags.emplace(flagName, flagValue);
-    }
-
-    if (enableAllFlags)
-    {
-        for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
-            if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isFlagExperimental(flag->name))
-                flag->value = true;
-    }
-    registerFastFlags(fastFlags);
-
-    // Manually enforce a LuauTarjanChildLimit increase
-    // TODO: re-evaluate the necessity of this change
-    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
-        FInt::LuauTarjanChildLimit.value = 15000;
-
+    processFFlags(program);
     if (program.is_used("--show-flags"))
     {
         displayFlags();
@@ -265,9 +277,15 @@ int main(int argc, char** argv)
     }
 
     if (program.is_subcommand_used("lsp"))
+    {
+        processFFlags(lsp_command);
         return startLanguageServer(lsp_command);
+    }
     else if (program.is_subcommand_used("analyze"))
+    {
+        processFFlags(analyze_command);
         return startAnalyze(analyze_command);
+    }
 
     // No sub-command specified
     std::cerr << "Specify a particular mode to run the program (analyze/lsp)" << '\n';
