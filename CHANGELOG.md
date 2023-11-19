@@ -27,12 +27,13 @@ type Foo = {
 - `luau-lsp.diagnostics.strictDatamodelTypes` now defaults to `false` on the language server side (note, it was already default `false` in VSCode).
   Defaulting to `true` was unintentional. This will affect external language client users (e.g. neovim)
 - Analyze CLI tool now respects `luau-lsp.diagnostics.strictDatamodelTypes` if set in the provided configuration.
-  The flag `--no-strict-dm-types` still remains for backwards compatibility reasons, but can be treated as deprecated.
+  The flag `--no-strict-dm-types` still remains for backwards compatibility reasons, but is now deprecated.
 
 ### Fixed
 
 - Attempting to rename a generic type parameter now correctly renames it in all locations
 - Fixed renaming a local variable not appropriately renaming any imported types
+- Auto-import requires will now show the full codeblock that will be inserted, rather than just the first line if also inserting a service
 
 ## [1.25.0] - 2023-10-14
 
