@@ -116,9 +116,9 @@ local function cleanup()
 	for _, connection in pairs(connections) do
 		if type(connection) == "thread" then
 			task.cancel(connection)
-			continue
+		else
+			connection:Disconnect()
 		end
-		connection:Disconnect()
 	end
 	connected.Value = false
 end
