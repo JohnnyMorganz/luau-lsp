@@ -77,7 +77,7 @@ local ConnectAction = plugin:CreatePluginAction(
 )
 
 local connected = Instance.new("BoolValue")
-local connections = {}
+local connections = {} :: { RBXScriptConnection | thread }
 
 type EncodedInstance = {
 	Name: string,
@@ -114,11 +114,15 @@ end
 
 local function cleanup()
 	for _, connection in pairs(connections) do
+		if type(connection) == "thread" then
+			task.cancel(connection)
+			continue
+		end
 		connection:Disconnect()
 	end
 	connected.Value = false
 end
-local function sendFullDMInfo(isSilent: boolean?)
+local function sendFullDMInfo()
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
@@ -139,14 +143,12 @@ local function sendFullDMInfo(isSilent: boolean?)
 		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
 		connected.Value = false
 	else
-		if not isSilent then
-			print("[Luau Language Server] Listening for DataModel changes")
-		end
 		connected.Value = true
 	end
 end
 
 local function watchChanges(isSilent)
+	local wasUpdated = false
 	if connected.Value or Settings == nil then
 		if not isSilent then
 			warn("[Luau Language Server] Connecting to server failed: invalid settings")
@@ -154,20 +156,31 @@ local function watchChanges(isSilent)
 		return
 	end
 	cleanup()
+	local batchLoop = task.spawn(function()
+		while true do
+			task.wait(0.5)
+			if wasUpdated then
+				sendFullDMInfo()
+				wasUpdated = false
+			end
+		end
+	end)
 
 	-- TODO: we should only send delta info if possible
 	local function descendantChanged(instance: Instance)
 		for _, service in Settings.include do
 			if instance:IsDescendantOf(service) then
-				sendFullDMInfo()
+				wasUpdated = true
 				return
 			end
 		end
 	end
+
 	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
+	table.insert(connections, batchLoop)
 
-	sendFullDMInfo(isSilent)
+	sendFullDMInfo()
 end
 
 function connectServer(isSilent: boolean?)
