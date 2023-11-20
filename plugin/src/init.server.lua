@@ -77,7 +77,7 @@ local ConnectAction = plugin:CreatePluginAction(
 )
 
 local connected = Instance.new("BoolValue")
-local connections = {} :: { RBXScriptConnection | thread }
+local connections = {}
 
 type EncodedInstance = {
 	Name: string,
@@ -114,14 +114,11 @@ end
 
 local function cleanup()
 	for _, connection in pairs(connections) do
-		if type(connection) == "thread" then
-			task.cancel(connection)
-		else
-			connection:Disconnect()
-		end
+		connection:Disconnect()
 	end
 	connected.Value = false
 end
+
 local function sendFullDMInfo()
 	local tree = encodeInstance(game, filterServices)
 
@@ -138,6 +135,7 @@ local function sendFullDMInfo()
 
 	if not success then
 		warn(`[Luau Language Server] Connecting to server failed: {result}`)
+		cleanup()
 		connected.Value = false
 	elseif not result.Success then
 		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
@@ -148,7 +146,7 @@ local function sendFullDMInfo()
 end
 
 local function watchChanges(isSilent)
-	local wasUpdated = false
+	local sendTask: thread?
 	if connected.Value or Settings == nil then
 		if not isSilent then
 			warn("[Luau Language Server] Connecting to server failed: invalid settings")
@@ -156,21 +154,22 @@ local function watchChanges(isSilent)
 		return
 	end
 	cleanup()
-	local batchLoop = task.spawn(function()
-		while true do
-			task.wait(0.5)
-			if wasUpdated then
-				sendFullDMInfo()
-				wasUpdated = false
-			end
+
+	local function deferSend()
+		if sendTask then
+			task.cancel(sendTask)
 		end
-	end)
+		sendTask = task.delay(0.5, function()
+			sendFullDMInfo()
+			sendTask = nil
+		end)
+	end
 
 	-- TODO: we should only send delta info if possible
 	local function descendantChanged(instance: Instance)
 		for _, service in Settings.include do
 			if instance:IsDescendantOf(service) then
-				wasUpdated = true
+				deferSend()
 				return
 			end
 		end
@@ -178,8 +177,6 @@ local function watchChanges(isSilent)
 
 	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
-	table.insert(connections, batchLoop)
-
 	sendFullDMInfo()
 end
 
