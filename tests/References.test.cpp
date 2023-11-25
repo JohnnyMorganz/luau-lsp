@@ -104,8 +104,15 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
-    CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(0).range);
-    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(1).range);
+    std::sort(result->begin(), result->end(),
+        [](const lsp::Location& a, const lsp::Location& b)
+        {
+            return a.uri.toString() < b.uri.toString() || a.range.start < b.range.start;
+        });
+
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(1).range);
 }
 
 
