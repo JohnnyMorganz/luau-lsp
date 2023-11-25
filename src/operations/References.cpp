@@ -442,6 +442,25 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                 return processReferences(fileResolver, references);
             }
         }
+        else if (auto constantString = expr->as<Luau::AstExprConstantString>())
+        {
+            // Potentially a property defined inside of a table
+            auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes= */ false);
+            if (ancestry.size() > 1)
+            {
+                auto parent = ancestry.at(ancestry.size() - 2);
+                if (auto tbl = parent->as<Luau::AstExprTable>())
+                {
+                    auto possibleTableTy = module->astTypes.find(tbl);
+                    if (possibleTableTy)
+                    {
+                        auto references =
+                            findAllReferences(Luau::follow(*possibleTableTy), Luau::Name(constantString->value.data, constantString->value.size));
+                        return processReferences(fileResolver, references);
+                    }
+                }
+            }
+        }
     }
 
     // Search for a type reference

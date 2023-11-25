@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "Fixture.h"
 
+#include "LSP/IostreamHelpers.hpp"
+
 TEST_SUITE_BEGIN("References");
 
 // TODO: cross module tests
@@ -79,6 +81,31 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_4")
     CHECK(references[0].location.begin.column == 19);
     CHECK(references[0].location.end.line == 3);
     CHECK(references[0].location.end.column == 23);
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
+{
+    // Finding reference of "name" inlined in "T"
+    auto source = R"(
+        local T = {
+            name = "string"
+        }
+
+        local x = T.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 12};
+
+    auto result = workspace.references(params);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(1).range);
 }
 
 
