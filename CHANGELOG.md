@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Made rename operation fully backed by find all references, to ensure both return results that are consistent with each other
+
 ## [1.26.0] - 2023-11-19
 
 ### Added
