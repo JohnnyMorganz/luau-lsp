@@ -118,7 +118,8 @@ local function cleanup()
 	end
 	connected.Value = false
 end
-local function sendFullDMInfo(isSilent: boolean?)
+
+local function sendFullDMInfo()
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
@@ -134,19 +135,18 @@ local function sendFullDMInfo(isSilent: boolean?)
 
 	if not success then
 		warn(`[Luau Language Server] Connecting to server failed: {result}`)
+		cleanup()
 		connected.Value = false
 	elseif not result.Success then
 		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
-		connected.Value = false
+		cleanup()
 	else
-		if not isSilent then
-			print("[Luau Language Server] Listening for DataModel changes")
-		end
 		connected.Value = true
 	end
 end
 
 local function watchChanges(isSilent)
+	local sendTask: thread?
 	if connected.Value or Settings == nil then
 		if not isSilent then
 			warn("[Luau Language Server] Connecting to server failed: invalid settings")
@@ -155,19 +155,29 @@ local function watchChanges(isSilent)
 	end
 	cleanup()
 
+	local function deferSend()
+		if sendTask then
+			task.cancel(sendTask)
+		end
+		sendTask = task.delay(0.5, function()
+			sendFullDMInfo()
+			sendTask = nil
+		end)
+	end
+
 	-- TODO: we should only send delta info if possible
 	local function descendantChanged(instance: Instance)
 		for _, service in Settings.include do
 			if instance:IsDescendantOf(service) then
-				sendFullDMInfo()
+				deferSend()
 				return
 			end
 		end
 	end
+
 	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
-
-	sendFullDMInfo(isSilent)
+	sendFullDMInfo()
 end
 
 function connectServer(isSilent: boolean?)
