@@ -947,13 +947,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     // Trigger Signature Help
                     item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
                 }
-
-                // Add documentation
-                if (!entry.documentationSymbol && ftv->definition && ftv->definition->definitionModuleName)
-                {
-                    item.documentation = {lsp::MarkupKind::Markdown,
-                        printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation))};
-                }
             }
             else if (auto ttv = Luau::get<Luau::TableType>(id))
             {
