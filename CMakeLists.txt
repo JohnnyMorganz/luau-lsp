@@ -50,6 +50,7 @@ target_sources(Luau.LanguageServer.CLI PRIVATE
 target_sources(Luau.LanguageServer.Test PRIVATE
         tests/main.cpp
         tests/Fixture.cpp
+        tests/Autocomplete.test.cpp
         tests/Diagnostics.test.cpp
         tests/Documentation.test.cpp
         tests/TextDocument.test.cpp
