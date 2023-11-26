@@ -136,7 +136,6 @@ local function sendFullDMInfo()
 	if not success then
 		warn(`[Luau Language Server] Connecting to server failed: {result}`)
 		cleanup()
-		connected.Value = false
 	elseif not result.Success then
 		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
 		cleanup()
