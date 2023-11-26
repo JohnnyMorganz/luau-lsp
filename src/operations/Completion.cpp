@@ -462,6 +462,18 @@ static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
            capabilities.textDocument->completion->completionItem->snippetSupport;
 }
 
+static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::MarkupContent> documentation)
+{
+    if (entry.deprecated)
+        return true;
+
+    if (documentation)
+        if (documentation->value.find("@deprecated") != std::string::npos)
+            return true;
+
+    return false;
+}
+
 static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry)
 {
     if (entry.type.has_value())
@@ -505,7 +517,7 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
     case Luau::AutocompleteEntryKind::GeneratedFunction:
         return lsp::CompletionItemKind::Function;
     }
-    
+
     return std::nullopt;
 }
 
@@ -874,11 +886,11 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     {
         lsp::CompletionItem item;
         item.label = name;
-        item.deprecated = entry.deprecated;
 
         if (auto documentationString = getDocumentationForAutocompleteEntry(entry, result.ancestry, moduleName))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
+        item.deprecated = deprecated(entry, item.documentation);
         item.kind = entryKind(entry);
         item.sortText = sortText(frontend, name, entry, isGetService);
 

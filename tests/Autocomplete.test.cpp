@@ -3,7 +3,7 @@
 
 static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
 {
-    auto marker = source.find('@');
+    auto marker = source.find('|');
     REQUIRE(marker != std::string::npos);
 
     source.replace(marker, 1, "");
@@ -51,7 +51,7 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
         local function foo()
         end
 
-        local x = @
+        local x = |
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -67,6 +67,27 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
     trim(item.documentation->value);
     CHECK_EQ(item.documentation->value, "This is a function documentation comment");
+}
+
+TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_to_autocomplete_entry")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --- @deprecated Use `bar` instead
+        local function foo()
+        end
+
+        local x = |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = getItem(result, "foo");
+    CHECK(item.deprecated);
 }
 
 TEST_SUITE_END();
