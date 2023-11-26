@@ -462,6 +462,162 @@ static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
            capabilities.textDocument->completion->completionItem->snippetSupport;
 }
 
+static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry)
+{
+    if (entry.type.has_value())
+    {
+        auto id = Luau::follow(entry.type.value());
+        if (Luau::isOverloadedFunction(id))
+            return lsp::CompletionItemKind::Function;
+
+        // Try to infer more type info about the entry to provide better suggestion info
+        if (Luau::get<Luau::FunctionType>(id))
+            return lsp::CompletionItemKind::Function;
+        else if (auto ttv = Luau::get<Luau::TableType>(id))
+        {
+            // Special case the RBXScriptSignal type as a connection
+            if (ttv->name && ttv->name.value() == "RBXScriptSignal")
+                return lsp::CompletionItemKind::Event;
+        }
+        else if (Luau::get<Luau::ClassType>(id))
+            return lsp::CompletionItemKind::Class;
+    }
+
+    if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
+        return lsp::CompletionItemKind::File;
+    else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
+        return lsp::CompletionItemKind::Folder;
+
+    switch (entry.kind)
+    {
+    case Luau::AutocompleteEntryKind::Property:
+        return lsp::CompletionItemKind::Field;
+    case Luau::AutocompleteEntryKind::Binding:
+        return lsp::CompletionItemKind::Variable;
+    case Luau::AutocompleteEntryKind::Keyword:
+        return lsp::CompletionItemKind::Keyword;
+    case Luau::AutocompleteEntryKind::String:
+        return lsp::CompletionItemKind::Constant;
+    case Luau::AutocompleteEntryKind::Type:
+        return lsp::CompletionItemKind::Interface;
+    case Luau::AutocompleteEntryKind::Module:
+        return lsp::CompletionItemKind::Module;
+    case Luau::AutocompleteEntryKind::GeneratedFunction:
+        return lsp::CompletionItemKind::Function;
+    }
+    
+    return std::nullopt;
+}
+
+static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry, bool isGetService)
+{
+    // If it's a file or directory alias, de-prioritise it compared to normal paths
+    if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+        return SortText::AutoImports;
+
+    // If it's a `game:GetSerivce("$1")` call, then prioritise common services
+    if (isGetService)
+        if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
+            return SortText::PrioritisedSuggestion;
+
+    // If calling a property on ServiceProvider, then prioritise these properties
+    if (auto dataModelType = frontend.globalsForAutocomplete.globalScope->lookupType("ServiceProvider");
+        dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
+        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
+    {
+        if (auto it = std::find(std::begin(COMMON_SERVICE_PROVIDER_PROPERTIES), std::end(COMMON_SERVICE_PROVIDER_PROPERTIES), name);
+            it != std::end(COMMON_SERVICE_PROVIDER_PROPERTIES))
+            return SortText::PrioritisedSuggestion;
+    }
+
+    // If calling a property on an Instance, then prioritise these properties
+    else if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
+             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+    {
+        if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
+            it != std::end(COMMON_INSTANCE_PROPERTIES))
+            return SortText::PrioritisedSuggestion;
+    }
+
+    // If the entry is `loadstring`, deprioritise it
+    if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
+        it != frontend.globalsForAutocomplete.globalScope->bindings.end())
+    {
+        if (entry.type == it->second.typeId)
+            return SortText::Deprioritized;
+    }
+
+    if (entry.wrongIndexType)
+        return SortText::WrongIndexType;
+    if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
+        return SortText::CorrectTypeKind;
+    else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
+        return SortText::CorrectFunctionResult;
+    else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
+        return SortText::MetatableIndex;
+    else if (entry.kind == Luau::AutocompleteEntryKind::Property)
+        return SortText::TableProperties;
+    else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
+        return SortText::Keywords;
+
+    return SortText::Default;
+}
+
+static std::pair<std::string, std::string> computeLabelDetailsForFunction(const Luau::AutocompleteEntry& entry, const Luau::FunctionType* ftv)
+{
+    std::string detail = "(";
+    std::string parenthesesSnippet = "(";
+
+    bool comma = false;
+    size_t argIndex = 0;
+    size_t snippetIndex = 1;
+
+    auto [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
+
+    auto it = Luau::begin(ftv->argTypes);
+    for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
+    {
+        std::string argName = "_";
+        if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
+            argName = ftv->argNames.at(argIndex)->name;
+
+        if (argIndex == 0 && entry.indexedWithSelf)
+            continue;
+
+        // If the rest of the arguments are optional, don't include in filled call arguments
+        bool includeParensSnippet = argIndex < minCount;
+
+        if (comma)
+        {
+            detail += ", ";
+            if (includeParensSnippet)
+                parenthesesSnippet += ", ";
+        }
+
+        detail += argName;
+        if (includeParensSnippet)
+            parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
+
+        comma = true;
+        snippetIndex++;
+    }
+
+    if (auto tail = it.tail())
+    {
+        if (comma)
+        {
+            detail += ", ";
+        }
+        detail += Luau::toString(*tail);
+    }
+
+    detail += ")";
+    parenthesesSnippet += ")";
+
+    return std::make_pair(detail, parenthesesSnippet);
+}
+
 std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
     const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
 {
@@ -719,96 +875,20 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
         item.deprecated = entry.deprecated;
-        item.sortText = SortText::Default;
 
         if (auto documentationString = getDocumentationForAutocompleteEntry(entry, result.ancestry, moduleName))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
-        if (entry.wrongIndexType)
-            item.sortText = SortText::WrongIndexType;
-        if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
-            item.sortText = SortText::CorrectTypeKind;
-        else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
-            item.sortText = SortText::CorrectFunctionResult;
-        else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
-            item.sortText = SortText::MetatableIndex;
-        else if (entry.kind == Luau::AutocompleteEntryKind::Property)
-            item.sortText = SortText::TableProperties;
-        else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
-            item.sortText = SortText::Keywords;
+        item.kind = entryKind(entry);
+        item.sortText = sortText(frontend, name, entry, isGetService);
 
-        // If its a `game:GetSerivce("$1")` call, then prioritise common services
-        if (isGetService)
-        {
-            if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
-                item.sortText = SortText::PrioritisedSuggestion;
-        }
-        // If calling a property on ServiceProvider, then prioritise these properties
-        if (auto dataModelType = frontend.globalsForAutocomplete.globalScope->lookupType("ServiceProvider");
-            dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
-            Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
-        {
-            if (auto it = std::find(std::begin(COMMON_SERVICE_PROVIDER_PROPERTIES), std::end(COMMON_SERVICE_PROVIDER_PROPERTIES), name);
-                it != std::end(COMMON_SERVICE_PROVIDER_PROPERTIES))
-                item.sortText = SortText::PrioritisedSuggestion;
-        }
-        // If calling a property on an Instance, then prioritise these properties
-        else if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
-                 instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-                 Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
-        {
-            if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
-                it != std::end(COMMON_INSTANCE_PROPERTIES))
-                item.sortText = SortText::PrioritisedSuggestion;
-        }
-
-        // If the entry is `loadstring`, deprioritise it
-        if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
-            it != frontend.globalsForAutocomplete.globalScope->bindings.end())
-        {
-            if (entry.type == it->second.typeId)
-                item.sortText = SortText::Deprioritized;
-        }
-
-        switch (entry.kind)
-        {
-        case Luau::AutocompleteEntryKind::Property:
-            item.kind = lsp::CompletionItemKind::Field;
-            break;
-        case Luau::AutocompleteEntryKind::Binding:
-            item.kind = lsp::CompletionItemKind::Variable;
-            break;
-        case Luau::AutocompleteEntryKind::Keyword:
-            item.kind = lsp::CompletionItemKind::Keyword;
-            break;
-        case Luau::AutocompleteEntryKind::String:
-            item.kind = lsp::CompletionItemKind::Constant; // TODO: is a string autocomplete always a singleton constant?
-            break;
-        case Luau::AutocompleteEntryKind::Type:
-            item.kind = lsp::CompletionItemKind::Interface;
-            break;
-        case Luau::AutocompleteEntryKind::Module:
-            item.kind = lsp::CompletionItemKind::Module;
-            break;
-        case Luau::AutocompleteEntryKind::GeneratedFunction:
-            item.kind = lsp::CompletionItemKind::Function;
+        if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
-        }
 
-        // Special cases: Files and directory
+        // We shouldn't include the extension when inserting a file
         if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
-        {
-            item.kind = lsp::CompletionItemKind::File;
-            // We shouldn't include the extension when inserting
             if (auto pos = name.find_last_of('.'); pos != std::string::npos)
                 item.insertText = std::string(name).erase(pos);
-        }
-        else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
-            item.kind = lsp::CompletionItemKind::Folder;
-
-        // If its a file or directory alias, de-prioritise it compared to normal paths
-        if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
-            item.sortText = SortText::AutoImports;
 
         // Handle if name is not an identifier
         if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
@@ -871,64 +951,13 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (entry.type.has_value())
         {
             auto id = Luau::follow(entry.type.value());
-            if (Luau::isOverloadedFunction(id))
-                item.kind = lsp::CompletionItemKind::Function;
+            item.detail = Luau::toString(id);
 
             // Try to infer more type info about the entry to provide better suggestion info
             if (auto ftv = Luau::get<Luau::FunctionType>(id); ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction)
             {
-                item.kind = lsp::CompletionItemKind::Function;
-
-                // Add label details
-                // We also create a better detailed parentheses snippet if we are filling arguments
-                std::string detail = "(";
-                std::string parenthesesSnippet = "(";
-
-                bool comma = false;
-                size_t argIndex = 0;
-                size_t snippetIndex = 1;
-
-                auto [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
-
-                auto it = Luau::begin(ftv->argTypes);
-                for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
-                {
-                    std::string argName = "_";
-                    if (argIndex < ftv->argNames.size() && ftv->argNames.at(argIndex))
-                        argName = ftv->argNames.at(argIndex)->name;
-
-                    if (argIndex == 0 && entry.indexedWithSelf)
-                        continue;
-
-                    // If the rest of the arguments are optional, don't include in filled call arguments
-                    bool includeParensSnippet = argIndex < minCount;
-
-                    if (comma)
-                    {
-                        detail += ", ";
-                        if (includeParensSnippet)
-                            parenthesesSnippet += ", ";
-                    }
-
-                    detail += argName;
-                    if (includeParensSnippet)
-                        parenthesesSnippet += "${" + std::to_string(snippetIndex) + ":" + argName + "}";
-
-                    comma = true;
-                    snippetIndex++;
-                }
-
-                if (auto tail = it.tail())
-                {
-                    if (comma)
-                    {
-                        detail += ", ";
-                    }
-                    detail += Luau::toString(*tail);
-                }
-
-                detail += ")";
-                parenthesesSnippet += ")";
+                // Compute label details and more detailed parentheses snippet
+                auto [detail, parenthesesSnippet] = computeLabelDetailsForFunction(entry, ftv);
                 item.labelDetails = {detail};
 
                 // If we had CursorAfter, then the function call would not have any arguments
@@ -944,23 +973,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                         item.insertText = name + parenthesesSnippet;
 
                     item.insertTextFormat = lsp::InsertTextFormat::Snippet;
-                    // Trigger Signature Help
                     item.command = lsp::Command{"Trigger Signature Help", "editor.action.triggerParameterHints"};
                 }
             }
-            else if (auto ttv = Luau::get<Luau::TableType>(id))
-            {
-                // Special case the RBXScriptSignal type as a connection
-                if (ttv->name && ttv->name.value() == "RBXScriptSignal")
-                {
-                    item.kind = lsp::CompletionItemKind::Event;
-                }
-            }
-            else if (Luau::get<Luau::ClassType>(id))
-            {
-                item.kind = lsp::CompletionItemKind::Class;
-            }
-            item.detail = Luau::toString(id);
         }
 
         items.emplace_back(item);
