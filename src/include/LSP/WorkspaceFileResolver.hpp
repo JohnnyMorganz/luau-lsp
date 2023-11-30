@@ -88,9 +88,6 @@ public:
 
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
 
-    // Plugin-provided DataModel information
-    PluginNodePtr pluginInfo;
-
     // Currently opened files where content is managed by client
     mutable std::unordered_map</* DocumentUri */ std::string, TextDocument> managedFiles{};
 

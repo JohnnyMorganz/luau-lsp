@@ -14,6 +14,9 @@ using namespace json_rpc;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 using ClientPtr = std::shared_ptr<Client>;
 
+#define JSON_REQUIRED_PARAMS(params, method) \
+    (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
+
 inline lsp::PositionEncodingKind& positionEncoding()
 {
     static lsp::PositionEncodingKind encoding = lsp::PositionEncodingKind::UTF16;
@@ -60,9 +63,6 @@ private:
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
-
-    void onStudioPluginFullChange(const PluginNode& dataModel);
-    void onStudioPluginClear();
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);

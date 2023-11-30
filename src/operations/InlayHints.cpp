@@ -291,8 +291,6 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    std::vector<lsp::DocumentLink> result{};
-
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
     checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
 
@@ -304,7 +302,13 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
 
     InlayHintVisitor visitor{module, config, textDocument};
     visitor.visit(sourceModule->root);
-    return visitor.hints;
+
+    lsp::InlayHintResult result = visitor.hints;
+
+    if (platform)
+        platform->handleInlayHints(*textDocument, *sourceModule, result);
+
+    return result;
 }
 
 lsp::InlayHintResult LanguageServer::inlayHint(const lsp::InlayHintParams& params)

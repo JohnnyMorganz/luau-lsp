@@ -45,6 +45,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     if (!sourceModule)
         return std::nullopt;
 
+    if (auto signatureHelp = platform->handleSignatureHelp(*textDocument, *sourceModule, position))
+        return signatureHelp;
+
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);

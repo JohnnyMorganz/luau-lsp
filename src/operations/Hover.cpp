@@ -36,6 +36,9 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (!sourceModule)
         return std::nullopt;
 
+    if (auto hover = platform->handleHover(*textDocument, *sourceModule, position))
+        return hover;
+
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);

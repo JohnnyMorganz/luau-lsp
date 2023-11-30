@@ -12,9 +12,6 @@
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
-#define REQUIRED_PARAMS(params, method) \
-    (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
-
 LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
     const std::vector<std::filesystem::path>& documentationFiles, std::optional<Luau::Config> defaultConfig)
     : client(std::make_shared<Client>())
@@ -134,7 +131,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
 
     if (method == "initialize")
     {
-        response = onInitialize(REQUIRED_PARAMS(baseParams, "initialize"));
+        response = onInitialize(JSON_REQUIRED_PARAMS(baseParams, "initialize"));
     }
     else if (method == "shutdown")
     {
@@ -142,63 +139,63 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/completion")
     {
-        response = completion(REQUIRED_PARAMS(baseParams, "textDocument/completion"));
+        response = completion(JSON_REQUIRED_PARAMS(baseParams, "textDocument/completion"));
     }
     else if (method == "textDocument/documentLink")
     {
-        response = documentLink(REQUIRED_PARAMS(baseParams, "textDocument/documentLink"));
+        response = documentLink(JSON_REQUIRED_PARAMS(baseParams, "textDocument/documentLink"));
     }
     else if (method == "textDocument/hover")
     {
-        response = hover(REQUIRED_PARAMS(baseParams, "textDocument/hover"));
+        response = hover(JSON_REQUIRED_PARAMS(baseParams, "textDocument/hover"));
     }
     else if (method == "textDocument/signatureHelp")
     {
-        response = signatureHelp(REQUIRED_PARAMS(baseParams, "textDocument/signatureHelp"));
+        response = signatureHelp(JSON_REQUIRED_PARAMS(baseParams, "textDocument/signatureHelp"));
     }
     else if (method == "textDocument/definition")
     {
-        response = gotoDefinition(REQUIRED_PARAMS(baseParams, "textDocument/definition"));
+        response = gotoDefinition(JSON_REQUIRED_PARAMS(baseParams, "textDocument/definition"));
     }
     else if (method == "textDocument/typeDefinition")
     {
-        response = gotoTypeDefinition(REQUIRED_PARAMS(baseParams, "textDocument/typeDefinition"));
+        response = gotoTypeDefinition(JSON_REQUIRED_PARAMS(baseParams, "textDocument/typeDefinition"));
     }
     else if (method == "textDocument/references")
     {
-        response = references(REQUIRED_PARAMS(baseParams, "textDocument/references"));
+        response = references(JSON_REQUIRED_PARAMS(baseParams, "textDocument/references"));
     }
     else if (method == "textDocument/rename")
     {
-        response = rename(REQUIRED_PARAMS(baseParams, "textDocument/rename"));
+        response = rename(JSON_REQUIRED_PARAMS(baseParams, "textDocument/rename"));
     }
     else if (method == "textDocument/documentSymbol")
     {
-        response = documentSymbol(REQUIRED_PARAMS(baseParams, "textDocument/documentSymbol"));
+        response = documentSymbol(JSON_REQUIRED_PARAMS(baseParams, "textDocument/documentSymbol"));
     }
     else if (method == "textDocument/codeAction")
     {
-        response = codeAction(REQUIRED_PARAMS(baseParams, "textDocument/codeAction"));
+        response = codeAction(JSON_REQUIRED_PARAMS(baseParams, "textDocument/codeAction"));
     }
     // else if (method == "codeAction/resolve")
     // {
-    //     response = codeActionResolve(REQUIRED_PARAMS(params, "codeAction/resolve"));
+    //     response = codeActionResolve(JSON_REQUIRED_PARAMS(params, "codeAction/resolve"));
     // }
     else if (method == "textDocument/semanticTokens/full")
     {
-        response = semanticTokens(REQUIRED_PARAMS(baseParams, "textDocument/semanticTokens/full"));
+        response = semanticTokens(JSON_REQUIRED_PARAMS(baseParams, "textDocument/semanticTokens/full"));
     }
     else if (method == "textDocument/inlayHint")
     {
-        response = inlayHint(REQUIRED_PARAMS(baseParams, "textDocument/inlayHint"));
+        response = inlayHint(JSON_REQUIRED_PARAMS(baseParams, "textDocument/inlayHint"));
     }
     else if (method == "textDocument/documentColor")
     {
-        response = documentColor(REQUIRED_PARAMS(baseParams, "textDocument/documentColor"));
+        response = documentColor(JSON_REQUIRED_PARAMS(baseParams, "textDocument/documentColor"));
     }
     else if (method == "textDocument/colorPresentation")
     {
-        response = colorPresentation(REQUIRED_PARAMS(baseParams, "textDocument/colorPresentation"));
+        response = colorPresentation(JSON_REQUIRED_PARAMS(baseParams, "textDocument/colorPresentation"));
     }
     else if (method == "textDocument/prepareCallHierarchy")
     {
@@ -230,13 +227,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/diagnostic")
     {
-        response = documentDiagnostic(REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"));
+        response = documentDiagnostic(JSON_REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"));
     }
     else if (method == "workspace/diagnostic")
     {
         // This request has partial request support.
         // If workspaceDiagnostic returns nothing, then we don't signal a response (as data will be sent as progress notifications)
-        if (auto report = workspaceDiagnostic(REQUIRED_PARAMS(baseParams, "workspace/diagnostic")))
+        if (auto report = workspaceDiagnostic(JSON_REQUIRED_PARAMS(baseParams, "workspace/diagnostic")))
         {
             response = report;
         }
@@ -283,11 +280,11 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "initialized")
     {
-        onInitialized(REQUIRED_PARAMS(params, "initialized"));
+        onInitialized(JSON_REQUIRED_PARAMS(params, "initialized"));
     }
     else if (method == "$/setTrace")
     {
-        client->setTrace(REQUIRED_PARAMS(params, "$/setTrace"));
+        client->setTrace(JSON_REQUIRED_PARAMS(params, "$/setTrace"));
     }
     else if (method == "$/cancelRequest")
     {
@@ -296,11 +293,11 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "textDocument/didOpen")
     {
-        onDidOpenTextDocument(REQUIRED_PARAMS(params, "textDocument/didOpen"));
+        onDidOpenTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didOpen"));
     }
     else if (method == "textDocument/didChange")
     {
-        onDidChangeTextDocument(REQUIRED_PARAMS(params, "textDocument/didChange"));
+        onDidChangeTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didChange"));
     }
     else if (method == "textDocument/didSave")
     {
@@ -308,30 +305,28 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "textDocument/didClose")
     {
-        onDidCloseTextDocument(REQUIRED_PARAMS(params, "textDocument/didClose"));
+        onDidCloseTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didClose"));
     }
     else if (method == "workspace/didChangeConfiguration")
     {
-        onDidChangeConfiguration(REQUIRED_PARAMS(params, "workspace/didChangeConfiguration"));
+        onDidChangeConfiguration(JSON_REQUIRED_PARAMS(params, "workspace/didChangeConfiguration"));
     }
     else if (method == "workspace/didChangeWorkspaceFolders")
     {
-        onDidChangeWorkspaceFolders(REQUIRED_PARAMS(params, "workspace/didChangeWorkspaceFolders"));
+        onDidChangeWorkspaceFolders(JSON_REQUIRED_PARAMS(params, "workspace/didChangeWorkspaceFolders"));
     }
     else if (method == "workspace/didChangeWatchedFiles")
     {
-        onDidChangeWatchedFiles(REQUIRED_PARAMS(params, "workspace/didChangeWatchedFiles"));
-    }
-    else if (method == "$/plugin/full")
-    {
-        onStudioPluginFullChange(REQUIRED_PARAMS(params, "$/plugin/full"));
-    }
-    else if (method == "$/plugin/clear")
-    {
-        onStudioPluginClear();
+        onDidChangeWatchedFiles(JSON_REQUIRED_PARAMS(params, "workspace/didChangeWatchedFiles"));
     }
     else
     {
+        for (auto& workspace : workspaceFolders)
+        {
+            if (workspace->platform && workspace->platform->handleNotification(method, params))
+                return;
+        }
+
         client->sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
     }
 }

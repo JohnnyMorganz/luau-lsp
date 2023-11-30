@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <memory>
+#include "Platform/LSPPlatform.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Protocol/Structures.hpp"
@@ -9,6 +11,23 @@
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/LuauExt.hpp"
+
+/// Defining sort text levels assigned to completion items
+/// Note that sort text is lexicographically
+namespace SortText
+{
+static constexpr const char* PrioritisedSuggestion = "0";
+static constexpr const char* TableProperties = "1";
+static constexpr const char* CorrectTypeKind = "2";
+static constexpr const char* CorrectFunctionResult = "3";
+static constexpr const char* Default = "4";
+static constexpr const char* WrongIndexType = "5";
+static constexpr const char* MetatableIndex = "6";
+static constexpr const char* AutoImports = "7";
+static constexpr const char* AutoImportsAbsolute = "71";
+static constexpr const char* Keywords = "8";
+static constexpr const char* Deprioritized = "9";
+} // namespace SortText
 
 struct Reference
 {
@@ -25,13 +44,13 @@ class WorkspaceFolder
 {
 public:
     std::shared_ptr<Client> client;
+    std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
     bool isConfigured = false;
-    Luau::TypeArena instanceTypes;
-    std::optional<types::DefinitionsFileMetadata> definitionsFileMetadata;
+    std::optional<nlohmann::json> definitionsFileMetadata;
 
 public:
     WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
@@ -78,10 +97,10 @@ public:
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool includeServices = true);
+        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool isType = true);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
-    lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
+    std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);

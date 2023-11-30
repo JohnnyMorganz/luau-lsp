@@ -2,6 +2,7 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/ColorProvider.hpp"
 
+#include "Platform/LSPPlatform.hpp"
 #include "Protocol/LanguageFeatures.hpp"
 
 #include <cmath>
@@ -115,100 +116,19 @@ std::string rgbToHex(RGB in)
 struct DocumentColorVisitor : public Luau::AstVisitor
 {
     const TextDocument* textDocument;
+    LSPPlatform* platform;
     std::vector<lsp::ColorInformation> colors{};
 
-    explicit DocumentColorVisitor(const TextDocument* textDocument)
+    explicit DocumentColorVisitor(const TextDocument* textDocument, LSPPlatform* platform)
         : textDocument(textDocument)
+        , platform(platform)
     {
     }
 
     bool visit(Luau::AstExprCall* call) override
     {
-        if (auto index = call->func->as<Luau::AstExprIndexName>())
-        {
-            if (auto global = index->expr->as<Luau::AstExprGlobal>())
-            {
-                if (global->name == "Color3")
-                {
-                    if (index->index == "new" || index->index == "fromRGB" || index->index == "fromHSV" || index->index == "fromHex")
-                    {
-                        std::array<double, 3> color = {0.0, 0.0, 0.0};
-
-                        if (index->index == "new")
-                        {
-                            size_t argIndex = 0;
-                            for (auto arg : call->args)
-                            {
-                                if (argIndex >= 3)
-                                    return true; // Don't create as the colour is not in the right format
-                                if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(argIndex) = number->value;
-                                else
-                                    return true; // Don't create as we can't parse the full colour
-                                argIndex++;
-                            }
-                        }
-                        else if (index->index == "fromRGB")
-                        {
-                            size_t argIndex = 0;
-                            for (auto arg : call->args)
-                            {
-                                if (argIndex >= 3)
-                                    return true; // Don't create as the colour is not in the right format
-                                if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(argIndex) = number->value / 255.0;
-                                else
-                                    return true; // Don't create as we can't parse the full colour
-                                argIndex++;
-                            }
-                        }
-                        else if (index->index == "fromHSV")
-                        {
-                            size_t argIndex = 0;
-                            for (auto arg : call->args)
-                            {
-                                if (argIndex >= 3)
-                                    return true; // Don't create as the colour is not in the right format
-                                if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                                    color.at(argIndex) = number->value;
-                                else
-                                    return true; // Don't create as we can't parse the full colour
-                                argIndex++;
-                            }
-                            RGB data = hsvToRgb({color[0], color[1], color[2]});
-                            color[0] = data.r / 255.0;
-                            color[1] = data.g / 255.0;
-                            color[2] = data.b / 255.0;
-                        }
-                        else if (index->index == "fromHex")
-                        {
-                            if (call->args.size != 1)
-                                return true; // Don't create as the colour is not in the right format
-                            if (auto string = call->args.data[0]->as<Luau::AstExprConstantString>())
-                            {
-                                try
-                                {
-                                    RGB data = hexToRgb(std::string(string->value.data, string->value.size));
-                                    color[0] = data.r / 255.0;
-                                    color[1] = data.g / 255.0;
-                                    color[2] = data.b / 255.0;
-                                }
-                                catch (const std::exception&)
-                                {
-                                    return true; // Invalid hex string
-                                }
-                            }
-                            else
-                                return true; // Don't create as we can't parse the full colour
-                        }
-
-                        colors.emplace_back(lsp::ColorInformation{
-                            lsp::Range{textDocument->convertPosition(call->location.begin), textDocument->convertPosition(call->location.end)},
-                            {std::clamp(color[0], 0.0, 1.0), std::clamp(color[1], 0.0, 1.0), std::clamp(color[2], 0.0, 1.0), 1.0}});
-                    }
-                }
-            }
-        }
+        if (auto colorInfo = platform->colorInformation(call, textDocument))
+            colors.emplace_back(colorInfo.value());
 
         return true;
     }
@@ -226,10 +146,10 @@ struct DocumentColorVisitor : public Luau::AstVisitor
 
 lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColorParams& params)
 {
-    // Only enabled for Roblox code
-    auto config = client->getConfiguration(rootUri);
-    if (!config.types.roblox)
+    if (!platform)
         return {};
+
+    auto config = client->getConfiguration(rootUri);
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -242,7 +162,7 @@ lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColor
     if (!sourceModule)
         return {};
 
-    DocumentColorVisitor visitor{textDocument};
+    DocumentColorVisitor visitor{textDocument, platform.get()};
     visitor.visit(sourceModule->root);
     return visitor.colors;
 }
@@ -255,33 +175,7 @@ lsp::DocumentColorResult LanguageServer::documentColor(const lsp::DocumentColorP
 
 lsp::ColorPresentationResult WorkspaceFolder::colorPresentation(const lsp::ColorPresentationParams& params)
 {
-    // Create color presentations
-    lsp::ColorPresentationResult presentations;
-
-    // Add Color3.new
-    presentations.emplace_back(lsp::ColorPresentation{"Color3.new(" + std::to_string(params.color.red) + ", " + std::to_string(params.color.green) +
-                                                      ", " + std::to_string(params.color.blue) + ")"});
-
-    // Convert to RGB values
-    RGB rgb{
-        (int)std::floor(params.color.red * 255.0),
-        (int)std::floor(params.color.green * 255.0),
-        (int)std::floor(params.color.blue * 255.0),
-    };
-
-    // Add Color3.fromRGB
-    presentations.emplace_back(
-        lsp::ColorPresentation{"Color3.fromRGB(" + std::to_string(rgb.r) + ", " + std::to_string(rgb.g) + ", " + std::to_string(rgb.b) + ")"});
-
-    // Add Color3.fromHSV
-    HSV hsv = rgbToHsv(rgb);
-    presentations.emplace_back(
-        lsp::ColorPresentation{"Color3.fromHSV(" + std::to_string(hsv.h) + ", " + std::to_string(hsv.s) + ", " + std::to_string(hsv.v) + ")"});
-
-    // Add Color3.fromHex
-    presentations.emplace_back(lsp::ColorPresentation{"Color3.fromHex(\"" + rgbToHex(rgb) + "\")"});
-
-    return presentations;
+    return platform->colorPresentation(params);
 }
 
 lsp::ColorPresentationResult LanguageServer::colorPresentation(const lsp::ColorPresentationParams& params)

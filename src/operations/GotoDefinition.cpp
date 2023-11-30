@@ -25,6 +25,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     if (!sourceModule || !module)
         return result;
 
+    if (auto platformResult = platform->handleGotoDefinition(*textDocument, *sourceModule, position))
+        return platformResult.value();
+
     auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
     if (binding)
     {
@@ -181,6 +184,9 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (!sourceModule || !module)
         return std::nullopt;
+
+    if (auto result = platform->handleGotoTypeDefinition(*textDocument, *sourceModule, position))
+        return result;
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     if (!node)

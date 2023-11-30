@@ -1,7 +1,10 @@
 #include "LSP/Workspace.hpp"
 
 #include <iostream>
+#include <memory>
 
+#include "Platform/LSPPlatform.hpp"
+#include "Platform/RobloxPlatform.hpp"
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
@@ -191,15 +194,13 @@ bool WorkspaceFolder::updateSourceMap()
         frontend.clear();
         fileResolver.updateSourceMap(sourceMapContents.value());
 
-        // Recreate instance types
         auto config = client->getConfiguration(rootUri);
-        instanceTypes.clear();
         // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
         // We pass the same setting even when we are registering autocomplete globals since
         // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
-        types::registerInstanceTypes(frontend, frontend.globals, instanceTypes, fileResolver,
+        platform->handleSourcemapUpdate(frontend, frontend.globals, fileResolver,
             /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
-        types::registerInstanceTypes(frontend, frontend.globalsForAutocomplete, instanceTypes, fileResolver,
+        platform->handleSourcemapUpdate(frontend, frontend.globalsForAutocomplete, fileResolver,
             /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
 
         return true;
@@ -238,10 +239,8 @@ void WorkspaceFolder::initialize()
         if (auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents))
             definitionsFileMetadata = metadata;
 
-        auto result = types::registerDefinitions(
-            frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false, definitionsFileMetadata);
-        types::registerDefinitions(
-            frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true, definitionsFileMetadata);
+        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
 
         auto uri = Uri::file(definitionsFile);
 
@@ -273,7 +272,16 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
-    isConfigured = true;
+    platform = LSPPlatform::getPlatform(configuration, this);
+
+    if (!isConfigured)
+    {
+        isConfigured = true;
+
+        platform->handleRegisterDefinitions(frontend.globals, definitionsFileMetadata);
+        platform->handleRegisterDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
+    }
+
     if (configuration.sourcemap.enabled)
     {
         if (!isNullWorkspace() && !updateSourceMap())

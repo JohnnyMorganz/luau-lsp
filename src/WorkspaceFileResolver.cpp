@@ -472,19 +472,6 @@ void WorkspaceFileResolver::updateSourceMap(const std::string& sourceMapContents
         auto j = json::parse(sourceMapContents);
         rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
 
-        // Mutate with plugin info
-        if (pluginInfo)
-        {
-            if (rootSourceNode->className == "DataModel")
-            {
-                rootSourceNode->mutateWithPluginInfo(pluginInfo);
-            }
-            else
-            {
-                std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
-            }
-        }
-
         // Write paths
         std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
         writePathsToMap(rootSourceNode, base);

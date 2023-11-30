@@ -22,8 +22,9 @@ target_sources(Luau.LanguageServer PRIVATE
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/StudioPlugin.cpp
         src/CliConfigurationParser.cpp
+        src/platform/LSPPlatform.cpp
+        src/platform/RobloxPlatform.cpp
         src/operations/Diagnostics.cpp
         src/operations/Completion.cpp
         src/operations/DocumentSymbol.cpp

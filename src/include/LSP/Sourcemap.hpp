@@ -29,9 +29,6 @@ struct SourceNode
     std::optional<SourceNodePtr> findChild(const std::string& name);
     // O(n) search for ancestor of name
     std::optional<SourceNodePtr> findAncestor(const std::string& name);
-
-    // Studio Plugin
-    void mutateWithPluginInfo(const PluginNodePtr& pluginInfo);
 };
 
 static void from_json(const json& j, SourceNode& p)

@@ -3,6 +3,7 @@
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Analyze/CliClient.hpp"
 
+#include "Platform/LSPPlatform.hpp"
 #include "Luau/ModuleResolver.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
@@ -14,6 +15,7 @@
 #include "glob/glob.hpp"
 #include <iostream>
 #include <filesystem>
+#include <memory>
 #include <vector>
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
@@ -256,6 +258,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
         }
     }
 
+    std::unique_ptr<LSPPlatform> platform = LSPPlatform::getPlatform(client.configuration);
 
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
@@ -308,8 +311,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false,
-            types::parseDefinitionsFileMetadata(*definitionsContents));
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");
@@ -329,10 +331,12 @@ int startAnalyze(const argparse::ArgumentParser& program)
             }
             return 1;
         }
+
+        platform->handleRegisterDefinitions(frontend.globals, types::parseDefinitionsFileMetadata(*definitionsContents));
     }
 
-    types::registerInstanceTypes(frontend, frontend.globals, frontend.globals.globalTypes, fileResolver,
-        !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
+    platform->handleSourcemapUpdate(
+        frontend, frontend.globals, fileResolver, !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
 
     Luau::freeze(frontend.globals.globalTypes);
     Luau::freeze(frontend.globalsForAutocomplete.globalTypes);

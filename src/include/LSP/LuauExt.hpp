@@ -8,6 +8,8 @@
 #include "Protocol/Structures.hpp"
 #include "Protocol/Diagnostics.hpp"
 
+#include "nlohmann/json.hpp"
+
 namespace types
 {
 std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className);
@@ -15,19 +17,11 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
 bool isMetamethod(const Luau::Name& name);
 
-struct DefinitionsFileMetadata
-{
-    std::vector<std::string> CREATABLE_INSTANCES{};
-    std::vector<std::string> SERVICES{};
-};
-NLOHMANN_DEFINE_OPTIONAL(DefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
+std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions);
 
-std::optional<DefinitionsFileMetadata> parseDefinitionsFileMetadata(const std::string& definitions);
-
-void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
-    const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions,
-    bool typeCheckForAutocomplete = false, std::optional<DefinitionsFileMetadata> metadata = std::nullopt);
+Luau::MagicFunction createMagicFunctionTypeLookup(const std::vector<std::string>& lookupList, const std::string& errorMessagePrefix);
+Luau::LoadDefinitionFileResult registerDefinitions(
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
@@ -81,25 +75,22 @@ private:
     std::optional<size_t> previousRequireLine = std::nullopt;
 
 public:
-    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
-    std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
     std::optional<size_t> firstRequireLine = std::nullopt;
     std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
 
-    size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber)
+    virtual bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line)
     {
-        if (firstServiceDefinitionLine)
-            minimumLineNumber = *firstServiceDefinitionLine > minimumLineNumber ? *firstServiceDefinitionLine : minimumLineNumber;
+        return false;
+    }
 
-        size_t lineNumber = minimumLineNumber;
-        for (auto& [definedService, stat] : serviceLineMap)
-        {
-            auto location = stat->location.end.line;
-            if (definedService < serviceName && location >= lineNumber)
-                lineNumber = location + 1;
-        }
-        return lineNumber;
+    [[nodiscard]] virtual size_t getMinimumRequireLine() const
+    {
+        return 0;
+    }
+
+    [[nodiscard]] virtual bool shouldPrependNewline(size_t lineNumber) const
+    {
+        return false;
     }
 
     bool containsRequire(const std::string& module)
@@ -123,15 +114,10 @@ public:
 
         auto line = expr->location.end.line;
 
-        if (isGetService(expr))
-        {
-            firstServiceDefinitionLine =
-                !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
-            lastServiceDefinitionLine =
-                !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= line ? line : lastServiceDefinitionLine.value();
-            serviceLineMap.emplace(std::string(localName->name.value), local);
-        }
-        else if (isRequire(expr))
+        if (handleLocal(local, localName, expr, line))
+            return false;
+
+        if (isRequire(expr))
         {
             firstRequireLine = !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
 

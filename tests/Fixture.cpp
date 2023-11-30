@@ -1,6 +1,7 @@
 // This file is part of the Luau programming language and is licensed under MIT License; see LICENSE.txt for details
 #include "Fixture.h"
 
+#include "Platform/RobloxPlatform.hpp"
 #include "Luau/Parser.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "LSP/LuauExt.hpp"
@@ -191,8 +192,11 @@ Luau::TypeId Fixture::requireType(const std::string& name)
 
 Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source)
 {
+    RobloxPlatform platform;
+
     Luau::unfreeze(workspace.frontend.globals.globalTypes);
     Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, workspace.frontend.globals, source);
+    platform.handleRegisterDefinitions(workspace.frontend.globals, std::nullopt);
     Luau::freeze(workspace.frontend.globals.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");

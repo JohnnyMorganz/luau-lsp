@@ -1,3 +1,6 @@
+#include <unordered_set>
+#include <utility>
+
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/TypeUtils.h"
@@ -9,61 +12,6 @@
 
 LUAU_FASTFLAG(LuauClipExtraHasEndProps);
 LUAU_FASTFLAG(LuauAutocompleteDoEnd);
-
-/// Defining sort text levels assigned to completion items
-/// Note that sort text is lexicographically
-namespace SortText
-{
-static constexpr const char* PrioritisedSuggestion = "0";
-static constexpr const char* TableProperties = "1";
-static constexpr const char* CorrectTypeKind = "2";
-static constexpr const char* CorrectFunctionResult = "3";
-static constexpr const char* Default = "4";
-static constexpr const char* WrongIndexType = "5";
-static constexpr const char* MetatableIndex = "6";
-static constexpr const char* AutoImports = "7";
-static constexpr const char* AutoImportsAbsolute = "71";
-static constexpr const char* Keywords = "8";
-static constexpr const char* Deprioritized = "9";
-} // namespace SortText
-
-static constexpr const char* COMMON_SERVICES[] = {
-    "Players",
-    "ReplicatedStorage",
-    "ServerStorage",
-    "MessagingService",
-    "TeleportService",
-    "HttpService",
-    "CollectionService",
-    "DataStoreService",
-    "ContextActionService",
-    "UserInputService",
-    "Teams",
-    "Chat",
-    "TextService",
-    "TextChatService",
-    "GamepadService",
-    "VoiceChatService",
-};
-
-static constexpr const char* COMMON_INSTANCE_PROPERTIES[] = {
-    "Parent",
-    "Name",
-    // Methods
-    "FindFirstChild",
-    "IsA",
-    "Destroy",
-    "GetAttribute",
-    "GetChildren",
-    "GetDescendants",
-    "WaitForChild",
-    "Clone",
-    "SetAttribute",
-};
-
-static constexpr const char* COMMON_SERVICE_PROVIDER_PROPERTIES[] = {
-    "GetService",
-};
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
@@ -242,32 +190,6 @@ static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::s
     return {range, importText};
 }
 
-static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false)
-{
-    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
-    if (appendNewline)
-        importText += "\n";
-    return {range, importText};
-}
-
-static lsp::CompletionItem createSuggestService(const std::string& service, size_t lineNumber, bool appendNewline = false)
-{
-    auto textEdit = createServiceTextEdit(service, lineNumber, appendNewline);
-
-    lsp::CompletionItem item;
-    item.label = service;
-    item.kind = lsp::CompletionItemKind::Class;
-    item.detail = "Auto-import";
-    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
-    item.insertText = service;
-    item.sortText = SortText::AutoImports;
-
-    item.additionalTextEdits.emplace_back(textEdit);
-
-    return item;
-}
-
 static lsp::CompletionItem createSuggestRequire(
     const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText, const std::string& path)
 {
@@ -315,7 +237,7 @@ static std::string optimiseAbsoluteRequire(const std::string& path)
 }
 
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool includeServices)
+    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool isType)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -336,47 +258,29 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             hotCommentsLineNumber = hotComment.location.begin.line + 1U;
     }
 
-    // Find all GetService and require calls
-    FindImportsVisitor importsVisitor;
-    importsVisitor.visit(sourceModule->root);
+    // Find all import calls
+    std::unique_ptr<FindImportsVisitor> importsVisitor = platform->getImportVisitor();
+    importsVisitor->visit(sourceModule->root);
 
-    // If in roblox mode - suggest services
-    if (config.types.roblox && config.completion.imports.suggestServices && includeServices)
-    {
-        auto services = definitionsFileMetadata.has_value() ? definitionsFileMetadata->SERVICES : std::vector<std::string>{};
-        for (auto& service : services)
-        {
-            // ASSUMPTION: if the service was defined, it was defined with the exact same name
-            if (contains(importsVisitor.serviceLineMap, service))
-                continue;
-
-            size_t lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
-
-            bool appendNewline = false;
-            if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
-                importsVisitor.firstRequireLine.value() - lineNumber == 0)
-                appendNewline = true;
-
-            result.emplace_back(createSuggestService(service, lineNumber, appendNewline));
-        }
-    }
+    platform->handleSuggestImports(config, importsVisitor.get(), hotCommentsLineNumber, isType, result);
 
     if (config.completion.imports.suggestRequires)
     {
         size_t minimumLineNumber = hotCommentsLineNumber;
-        if (importsVisitor.lastServiceDefinitionLine)
-            minimumLineNumber =
-                *importsVisitor.lastServiceDefinitionLine >= minimumLineNumber ? (*importsVisitor.lastServiceDefinitionLine + 1) : minimumLineNumber;
+        size_t visitorMinimumLine = importsVisitor->getMinimumRequireLine();
 
-        if (importsVisitor.firstRequireLine)
-            minimumLineNumber = *importsVisitor.firstRequireLine >= minimumLineNumber ? (*importsVisitor.firstRequireLine) : minimumLineNumber;
+        if (visitorMinimumLine > minimumLineNumber)
+            minimumLineNumber = visitorMinimumLine;
+
+        if (importsVisitor->firstRequireLine)
+            minimumLineNumber = *importsVisitor->firstRequireLine >= minimumLineNumber ? (*importsVisitor->firstRequireLine) : minimumLineNumber;
 
         for (auto& [path, node] : fileResolver.virtualPathsToSourceNodes)
         {
             auto name = node->name;
             replaceAll(name, " ", "_");
 
-            if (path == moduleName || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
+            if (path == moduleName || node->className != "ModuleScript" || importsVisitor->containsRequire(name))
                 continue;
             if (auto scriptFilePath = fileResolver.getRealPathFromSourceNode(node); scriptFilePath && isIgnoredFile(*scriptFilePath, config))
                 continue;
@@ -402,7 +306,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
 
             size_t lineNumber = minimumLineNumber;
             size_t bestLength = 0;
-            for (auto& group : importsVisitor.requiresMap)
+            for (auto& group : importsVisitor->requiresMap)
             {
                 for (auto& [_, stat] : group)
                 {
@@ -426,28 +330,10 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
                 }
             }
 
-            if (!isRelative)
-            {
-                // Service will be the first part of the path
-                // If we haven't imported the service already, then we auto-import it
-                auto service = requirePath.substr(0, requirePath.find('/'));
-                if (!contains(importsVisitor.serviceLineMap, service))
-                {
-                    auto lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
-                    bool appendNewline = false;
-                    // If there is no firstRequireLine, then the require that we insert will become the first require,
-                    // so we use `.value_or(lineNumber)` to ensure it equals 0 and a newline is added
-                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine.value_or(lineNumber) - lineNumber == 0)
-                        appendNewline = true;
-                    textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
-                }
-            }
+            platform->handleRequire(requirePath, lineNumber, isRelative, config, importsVisitor.get(), hotCommentsLineNumber, textEdits);
 
             // Whether we need to add a newline before the require to separate it from the services
-            bool prependNewline = false;
-            if (config.completion.imports.separateGroupsWithLine && importsVisitor.lastServiceDefinitionLine &&
-                lineNumber - importsVisitor.lastServiceDefinitionLine.value() == 1)
-                prependNewline = true;
+            bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor->shouldPrependNewline(lineNumber);
 
             textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
 
@@ -474,8 +360,11 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     return false;
 }
 
-static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry)
+std::optional<lsp::CompletionItemKind> WorkspaceFolder::entryKind(const Luau::AutocompleteEntry& entry)
 {
+    if (auto kind = platform->handleEntryKind(entry))
+        return kind;
+
     if (entry.type.has_value())
     {
         auto id = Luau::follow(entry.type.value());
@@ -485,12 +374,6 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
         // Try to infer more type info about the entry to provide better suggestion info
         if (Luau::get<Luau::FunctionType>(id))
             return lsp::CompletionItemKind::Function;
-        else if (auto ttv = Luau::get<Luau::TableType>(id))
-        {
-            // Special case the RBXScriptSignal type as a connection
-            if (ttv->name && ttv->name.value() == "RBXScriptSignal")
-                return lsp::CompletionItemKind::Event;
-        }
         else if (Luau::get<Luau::ClassType>(id))
             return lsp::CompletionItemKind::Class;
     }
@@ -521,36 +404,15 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
     return std::nullopt;
 }
 
-static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry, bool isGetService)
+static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
+    const std::unordered_set<std::string>& tags, LSPPlatform& platform)
 {
+    if (auto text = platform.handleSortText(frontend, name, entry, tags))
+        return text;
+
     // If it's a file or directory alias, de-prioritise it compared to normal paths
     if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
         return SortText::AutoImports;
-
-    // If it's a `game:GetSerivce("$1")` call, then prioritise common services
-    if (isGetService)
-        if (auto it = std::find(std::begin(COMMON_SERVICES), std::end(COMMON_SERVICES), name); it != std::end(COMMON_SERVICES))
-            return SortText::PrioritisedSuggestion;
-
-    // If calling a property on ServiceProvider, then prioritise these properties
-    if (auto dataModelType = frontend.globalsForAutocomplete.globalScope->lookupType("ServiceProvider");
-        dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
-        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
-    {
-        if (auto it = std::find(std::begin(COMMON_SERVICE_PROVIDER_PROPERTIES), std::end(COMMON_SERVICE_PROVIDER_PROPERTIES), name);
-            it != std::end(COMMON_SERVICE_PROVIDER_PROPERTIES))
-            return SortText::PrioritisedSuggestion;
-    }
-
-    // If calling a property on an Instance, then prioritise these properties
-    else if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
-             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
-    {
-        if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
-            it != std::end(COMMON_INSTANCE_PROPERTIES))
-            return SortText::PrioritisedSuggestion;
-    }
 
     // If the entry is `loadstring`, deprioritise it
     if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
@@ -704,7 +566,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    bool isGetService = false;
+    std::unordered_set<std::string> tags;
 
     // We must perform check before autocompletion
     checkStrict(moduleName, /* forAutocomplete: */ true);
@@ -714,68 +576,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
             std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
         {
-            if (tag == "ClassNames")
-            {
-                if (auto instanceType = frontend.globals.globalScope->lookupType("Instance"))
-                {
-                    if (auto* ctv = Luau::get<Luau::ClassType>(instanceType->type))
-                    {
-                        Luau::AutocompleteEntryMap result;
-                        for (auto& [_, ty] : frontend.globals.globalScope->exportedTypeBindings)
-                        {
-                            if (auto* c = Luau::get<Luau::ClassType>(ty.type))
-                            {
-                                // Check if the ctv is a subclass of instance
-                                if (Luau::isSubclass(c, ctv))
+            tags.insert(tag);
 
-                                    result.insert_or_assign(
-                                        c->name, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType,
-                                                     false, false, Luau::TypeCorrectKind::Correct});
-                            }
-                        }
-
-                        return result;
-                    }
-                }
-            }
-            else if (tag == "Properties")
-            {
-                if (ctx && ctx.value())
-                {
-                    Luau::AutocompleteEntryMap result;
-                    auto ctv = ctx.value();
-                    while (ctv)
-                    {
-                        for (auto& [propName, _] : ctv->props)
-                        {
-                            result.insert_or_assign(propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
-                                                                  frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
-                        }
-                        if (ctv->parent)
-                            ctv = Luau::get<Luau::ClassType>(*ctv->parent);
-                        else
-                            break;
-                    }
-                    return result;
-                }
-            }
-            else if (tag == "Enums")
-            {
-                auto it = frontend.globals.globalScope->importedTypeBindings.find("Enum");
-                if (it == frontend.globals.globalScope->importedTypeBindings.end())
-                    return std::nullopt;
-
-                Luau::AutocompleteEntryMap result;
-                for (auto& [enumName, _] : it->second)
-                    result.insert_or_assign(enumName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType,
-                                                          false, false, Luau::TypeCorrectKind::Correct});
-
-                return result;
-            }
-            else if (tag == "Require")
+            if (tag == "Require")
             {
                 if (!contents.has_value())
                     return std::nullopt;
+
+                auto config = client->getConfiguration(rootUri);
 
                 Luau::AutocompleteEntryMap result;
 
@@ -848,39 +656,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
                 return result;
             }
-            else if (tag == "CreatableInstances")
-            {
-                Luau::AutocompleteEntryMap result;
-                if (definitionsFileMetadata)
-                {
-                    for (const auto& className : this->definitionsFileMetadata->CREATABLE_INSTANCES)
-                        result.insert_or_assign(className, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
-                                                               frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
-                }
-                return result;
-            }
-            else if (tag == "Services")
-            {
-                Luau::AutocompleteEntryMap result;
 
-                // We are autocompleting a `game:GetService("$1")` call, so we set a flag to
-                // highlight this so that we can prioritise common services first in the list
-                isGetService = true;
-                if (definitionsFileMetadata)
-                {
-                    for (const auto& className : this->definitionsFileMetadata->SERVICES)
-                        result.insert_or_assign(className, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
-                                                               frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
-                }
-
-                return result;
-            }
-
-            return std::nullopt;
+            return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
         });
 
 
     std::vector<lsp::CompletionItem> items{};
+
+    if (auto module = frontend.getSourceModule(moduleName))
+        platform->handleCompletion(*textDocument, *module, position, items);
 
     for (auto& [name, entry] : result.entryMap)
     {
@@ -892,7 +676,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         item.deprecated = deprecated(entry, item.documentation);
         item.kind = entryKind(entry);
-        item.sortText = sortText(frontend, name, entry, isGetService);
+        item.sortText = sortText(frontend, name, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
@@ -997,7 +781,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     {
         if (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement)
         {
-            suggestImports(moduleName, position, config, *textDocument, items, /* includeServices: */ true);
+            suggestImports(moduleName, position, config, *textDocument, items, /* isType: */ false);
         }
         else if (result.context == Luau::AutocompleteContext::Type)
         {
@@ -1005,7 +789,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             if (auto node = result.ancestry.back())
                 if (auto typeReference = node->as<Luau::AstTypeReference>())
                     if (!typeReference->prefix)
-                        suggestImports(moduleName, position, config, *textDocument, items, /* includeServices: */ false);
+                        suggestImports(moduleName, position, config, *textDocument, items, /* isType: */ true);
         }
     }
 

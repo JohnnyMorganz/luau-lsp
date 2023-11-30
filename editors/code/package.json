@@ -112,6 +112,22 @@
           ],
           "scope": "resource"
         },
+        "luau-lsp.platform.platform": {
+          "markdownDescription": "Platform-specific support features",
+          "type": "string",
+          "enum": [
+            "vanilla",
+            "roblox"
+          ],
+          "scope": "window",
+          "default": "roblox"
+        },
+        "luau-lsp.platform.roblox.suggestServices": {
+          "markdownDescription": "Whether `GetService` completions are suggested in autocomplete when `#luau-lsp.completion.imports.enabled#` is `true`",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.sourcemap.enabled": {
           "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
           "type": "boolean",
@@ -209,7 +225,9 @@
           "scope": "window",
           "tags": [
             "usesOnlineServices"
-          ]
+          ],
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.platform#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.platform instead."
         },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
@@ -327,7 +345,9 @@
           "markdownDescription": "Whether GetService completions are suggested in autocomplete",
           "type": "boolean",
           "default": true,
-          "scope": "resource"
+          "scope": "resource",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.roblox.suggestServices#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.roblox.suggestServices instead."
         },
         "luau-lsp.completion.imports.suggestRequires": {
           "markdownDescription": "Whether module requires are suggested in autocomplete",

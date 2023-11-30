@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.platform`
+- Deprecated `luau-lsp.completion.imports.suggestServices` setting in favour of `luau-lsp.platform.roblox.suggestServices`
+
 ### Added
 
 - Autocompletion items for items marked as `@deprecated` via documentation comments will now reflect their deprecated status
+- Added `luau-lsp.platform.platform` to separate platform-specific functionality from the main LSP
 
 ### Changed
 

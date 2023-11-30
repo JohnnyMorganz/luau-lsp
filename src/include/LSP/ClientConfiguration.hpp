@@ -29,6 +29,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSourcemapConfiguration, en
 struct ClientTypesConfiguration
 {
     /// Whether Roblox-related definitions should be supported
+    /// DEPRECATED: USE `platform.platform` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
     std::vector<std::filesystem::path> definitionFiles{};
@@ -96,6 +97,7 @@ struct ClientCompletionImportsConfiguration
     /// Whether we should suggest automatic imports in completions
     bool enabled = false;
     /// Whether services should be suggested in auto-import
+    /// DEPRECATED: USE `platform.roblox.suggestServices` INSTEAD
     bool suggestServices = true;
     /// Whether requires should be suggested in auto-import
     bool suggestRequires = true;
@@ -182,6 +184,31 @@ struct ClientFFlagsConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
 
+enum struct LSPPlatformConfig
+{
+    Vanilla,
+    Roblox
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(LSPPlatformConfig, {
+                                                    {LSPPlatformConfig::Vanilla, "vanilla"},
+                                                    {LSPPlatformConfig::Roblox, "roblox"},
+                                                })
+
+struct ClientRobloxPlatformConfiguration
+{
+    /// Whether services should be suggested in auto-import
+    bool suggestServices = true;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices);
+
+struct ClientPlatformConfiguration
+{
+    LSPPlatformConfig platform = LSPPlatformConfig::Roblox;
+    ClientRobloxPlatformConfiguration roblox;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, platform, roblox);
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -191,6 +218,7 @@ struct ClientConfiguration
     /// DEPRECATED: Use completion.autocompleteEnd instead
     bool autocompleteEnd = false;
     std::vector<std::string> ignoreGlobs{};
+    ClientPlatformConfiguration platform{};
     ClientSourcemapConfiguration sourcemap{};
     ClientDiagnosticsConfiguration diagnostics{};
     ClientTypesConfiguration types{};
@@ -202,5 +230,5 @@ struct ClientConfiguration
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover,
-    completion, signatureHelp, require, index, fflags);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
+    inlayHints, hover, completion, signatureHelp, require, index, fflags);
