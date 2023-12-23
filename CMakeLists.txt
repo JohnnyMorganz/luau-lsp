@@ -64,6 +64,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/ColorProvider.test.cpp
         tests/LuauExt.test.cpp
         tests/CliConfigurationParser.test.cpp
+        tests/Hover.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging

@@ -75,9 +75,10 @@ struct ClientHoverConfiguration
     bool showTableKinds = false;
     bool multilineFunctionDefinitions = false;
     bool strictDatamodelTypes = true;
+    bool includeStringLength = true;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
+    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes, includeStringLength);
 
 enum struct ImportRequireStyle
 {

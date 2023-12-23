@@ -271,6 +271,12 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.hover.includeStringLength": {
+          "markdownDescription": "Show string length when hovering over a string literal",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.enabled": {
           "markdownDescription": "Enable autocomplete",
           "type": "boolean",
