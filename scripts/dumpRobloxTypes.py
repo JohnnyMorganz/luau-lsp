@@ -81,6 +81,13 @@ IGNORED_MEMBERS = {
         "OnClientEvent",
         "OnServerEvent",
     ],
+    "UnreliableRemoteEvent": [
+        "FireAllClients",
+        "FireClient",
+        "FireServer",
+        "OnClientEvent",
+        "OnServerEvent",
+    ],
     "RemoteFunction": [
         "InvokeClient",
         "InvokeServer",
@@ -307,6 +314,13 @@ EXTRA_MEMBERS = {
     ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
+        "function FireAllClients(self, ...: any): ()",
+        "function FireClient(self, player: Player, ...: any): ()",
+        "function FireServer(self, ...: any): ()",
+        "OnClientEvent: RBXScriptSignal<...any>",
+        "OnServerEvent: RBXScriptSignal<(Player, ...any)>",
+    ],
+    "UnreliableRemoteEvent": [
         "function FireAllClients(self, ...: any): ()",
         "function FireClient(self, player: Player, ...: any): ()",
         "function FireServer(self, ...: any): ()",

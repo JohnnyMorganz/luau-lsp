@@ -5078,11 +5078,11 @@ declare class RemoteEvent extends BaseRemoteEvent
 end
 
 declare class UnreliableRemoteEvent extends BaseRemoteEvent
-	OnClientEvent: RBXScriptSignal<any>
-	OnServerEvent: RBXScriptSignal<Player, any>
-	function FireAllClients(self, arguments: any): nil
-	function FireClient(self, player: Player, arguments: any): nil
-	function FireServer(self, arguments: any): nil
+	OnClientEvent: RBXScriptSignal<...any>
+	OnServerEvent: RBXScriptSignal<(Player, ...any)>
+	function FireAllClients(self, ...: any): ()
+	function FireClient(self, player: Player, ...: any): ()
+	function FireServer(self, ...: any): ()
 end
 
 declare class BaseWrap extends Instance
