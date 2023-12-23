@@ -746,8 +746,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     auto ctv = ctx.value();
                     while (ctv)
                     {
-                        for (auto& [propName, _] : ctv->props)
+                        for (auto& [propName, prop] : ctv->props)
                         {
+                            // Don't include functions or events
+                            auto ty = Luau::follow(prop.type());
+                            if (Luau::get<Luau::FunctionType>(ty) || Luau::isOverloadedFunction(ty))
+                                continue;
+                            else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
+                                continue;
+
                             result.insert_or_assign(propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
                                                                   frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
                         }

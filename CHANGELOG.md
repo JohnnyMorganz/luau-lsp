@@ -25,6 +25,8 @@ local T = {
 }
 ```
 
+- Fixed methods and events showing up in "GetPropertyChangedSignal" autocomplete
+
 ## [1.26.0] - 2023-11-19
 
 ### Added
