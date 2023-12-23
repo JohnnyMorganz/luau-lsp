@@ -44,7 +44,7 @@ static const char* utf8_decode(const char* o, int* val)
 static std::optional<size_t> utflen(const char* s, size_t len)
 {
     size_t n = 0;
-    int posi = 0;
+    size_t posi = 0;
     while (posi < len)
     {
         const char* s1 = utf8_decode(s + posi, NULL);
