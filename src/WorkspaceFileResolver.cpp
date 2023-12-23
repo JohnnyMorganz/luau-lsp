@@ -282,7 +282,7 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(cons
     // Handle "init.luau" files in a directory
     if (std::filesystem::is_directory(filePath, ec))
     {
-        filePath /= "init.luau";
+        filePath /= "init";
     }
 
     // Add file endings

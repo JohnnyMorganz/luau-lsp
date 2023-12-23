@@ -27,6 +27,7 @@ local T = {
 ```
 
 - Fixed methods and events showing up in "GetPropertyChangedSignal" autocomplete
+- Fixed requiring a directory containing "init.lua" not working
 
 ## [1.26.0] - 2023-11-19
 
