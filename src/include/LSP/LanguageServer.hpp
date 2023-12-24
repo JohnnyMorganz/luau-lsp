@@ -26,10 +26,10 @@ private:
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
-    WorkspaceFolderPtr nullWorkspace;
-    std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
     std::optional<Luau::Config> defaultConfig;
+    WorkspaceFolderPtr nullWorkspace;
+    std::vector<WorkspaceFolderPtr> workspaceFolders;
 
 public:
     explicit LanguageServer(ClientPtr client, std::optional<Luau::Config> defaultConfig)
