@@ -183,6 +183,15 @@ struct ClientFFlagsConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
 
+struct ClientBytecodeConfiguration
+{
+    int debugLevel = 1;
+    std::string vectorLib = "Vector3";
+    std::string vectorCtor = "new";
+    std::string vectorType = "Vector3";
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, vectorLib, vectorCtor, vectorType)
+
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -202,6 +211,7 @@ struct ClientConfiguration
     ClientRequireConfiguration require{};
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
+    ClientBytecodeConfiguration bytecode{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover,
-    completion, signatureHelp, require, index, fflags);
+    completion, signatureHelp, require, index, fflags, bytecode);

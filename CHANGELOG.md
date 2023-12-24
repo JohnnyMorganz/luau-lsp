@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Autocompletion items for items marked as `@deprecated` via documentation comments will now reflect their deprecated status
 - Show string literal byte length and utf8 characters on hover
 - Support passing `--settings` to `luau-lsp lsp` configuring the default global settings to use
+- Added support for viewing bytecode compiler remarks using the `Luau: Compute Compiler Remarks for file` command.
+  This opens up a new view with remarks inlined as comments in the source file
+  - Added configuration `luau-lsp.bytecode.vectorLib`, `luau-lsp.bytecode.vectorCtor` and `luau-lsp.bytecode.vectorType` to configure compiler options when generating bytecode
+  - Custom editors should handle the `luau-lsp/compilerRemarks` LSP message to integrate compiler remarks info in their editor
 
 ### Changed
 

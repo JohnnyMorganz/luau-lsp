@@ -249,6 +249,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         }
         response = result;
     }
+    else if (method == "luau-lsp/compilerRemarks")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/compilerRemarks")
+        auto params = baseParams->get<lsp::CompilerRemarksParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->compilerRemarks(params);
+    }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);

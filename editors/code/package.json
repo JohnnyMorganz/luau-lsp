@@ -85,6 +85,11 @@
       {
         "command": "luau-lsp.reloadServer",
         "title": "Luau: Reload Language Server"
+      },
+      {
+        "command": "luau-lsp.computeCompilerRemarks",
+        "title": "Luau: Compute Compiler Remarks for file",
+        "enablement": "resourceLangId == luau"
       }
     ],
     "configuration": {
@@ -423,6 +428,32 @@
           "default": 10000,
           "scope": "window",
           "markdownDescription": "The maximum amount of files that can be indexed. If more files are indexed, more memory is needed"
+        },
+        "luau-lsp.bytecode.debugLevel": {
+          "type": "number",
+          "default": 1,
+          "scope": "resource",
+          "minimum": 0,
+          "maximum": 2,
+          "markdownDescription": "The `debugLevel` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorLib": {
+          "type": "string",
+          "default": "Vector3",
+          "scope": "resource",
+          "markdownDescription": "The `vectorLib` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorCtor": {
+          "type": "string",
+          "default": "new",
+          "scope": "resource",
+          "markdownDescription": "The `vectorCtor` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorType": {
+          "type": "string",
+          "default": "Vector3",
+          "scope": "resource",
+          "markdownDescription": "The `vectorType` to use when compiling bytecode"
         }
       }
     }
