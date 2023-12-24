@@ -34,20 +34,20 @@
   "contributes": {
     "languages": [
       {
-        "id": "lua",
+        "id": "luau",
         "aliases": [
           "Luau"
         ],
         "extensions": [
-          ".lua",
-          ".luau"
+          ".luau",
+          ".lua"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "lua",
+        "language": "luau",
         "scopeName": "source.luau",
         "path": "./syntaxes/Luau.tmLanguage.json",
         "tokenTypes": {
