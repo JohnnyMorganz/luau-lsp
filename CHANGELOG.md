@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.607
 - Made rename operation fully backed by find all references, to ensure both return results that are consistent with each other
+- Hide return type hints for no-op functions
 
 ### Fixed
 

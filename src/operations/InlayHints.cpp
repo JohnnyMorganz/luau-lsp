@@ -13,6 +13,12 @@ bool isLiteral(const Luau::AstExpr* expr)
            expr->is<Luau::AstExprConstantNil>();
 }
 
+// Function with no statements in body
+bool isNoOpFunction(const Luau::AstExprFunction* func)
+{
+    return func->body->body.size == 0;
+}
+
 // Adds a text edit onto the hint so that it can be inserted.
 void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
 {
@@ -151,6 +157,20 @@ struct InlayHintVisitor : public Luau::AstVisitor
         auto followedTy = Luau::follow(*ty);
         if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
         {
+            // Add return type annotation
+            if (config.inlayHints.functionReturnTypes)
+            {
+                if (!func->returnAnnotation && func->argLocation && !isNoOpFunction(func))
+                {
+                    lsp::InlayHint hint;
+                    hint.kind = lsp::InlayHintKind::Type;
+                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
+                    hint.position = textDocument->convertPosition(func->argLocation->end);
+                    makeInsertable(hint, ftv->retTypes);
+                    hints.emplace_back(hint);
+                }
+            }
+            
             // Parameter types hint
             if (config.inlayHints.parameterTypes)
             {
@@ -180,20 +200,6 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     }
 
                     it++;
-                }
-            }
-
-            // Add return type annotation
-            if (config.inlayHints.functionReturnTypes)
-            {
-                if (!func->returnAnnotation && func->argLocation)
-                {
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
-                    hint.position = textDocument->convertPosition(func->argLocation->end);
-                    makeInsertable(hint, ftv->retTypes);
-                    hints.emplace_back(hint);
                 }
             }
         }
