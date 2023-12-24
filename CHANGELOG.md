@@ -28,6 +28,7 @@ local T = {
 
 - Fixed methods and events showing up in "GetPropertyChangedSignal" autocomplete
 - Fixed requiring a directory containing "init.lua" not working
+- Fixed go to definition on a property of a table that stores a cross-module type value (e.g. the result of a function defined in another module)
 
 ## [1.26.0] - 2023-11-19
 
