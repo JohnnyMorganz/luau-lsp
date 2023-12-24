@@ -221,6 +221,18 @@
             "usesOnlineServices"
           ]
         },
+        "luau-lsp.types.robloxSecurityLevel": {
+          "markdownDescription": "Security Level to use in the Roblox API definitions",
+          "type": "string",
+          "default": "PluginSecurity",
+          "scope": "window",
+          "enum": [
+            "None",
+            "LocalUserSecurity",
+            "PluginSecurity",
+            "RobloxScriptSecurity"
+          ]
+        },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
           "type": "string",
