@@ -32,9 +32,9 @@ private:
     std::vector<WorkspaceFolderPtr> workspaceFolders;
 
 public:
-    explicit LanguageServer(ClientPtr client, std::optional<Luau::Config> defaultConfig)
-        : client(std::move(client))
-        , defaultConfig(std::move(defaultConfig))
+    explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
+        : client(std::move(aClient))
+        , defaultConfig(std::move(aDefaultConfig))
         , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
     {
     }
