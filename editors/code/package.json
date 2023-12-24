@@ -97,6 +97,18 @@
         "enablement": "resourceLangId == luau"
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == luau",
+          "command": "luau-lsp.computeBytecode"
+        },
+        {
+          "when": "resourceLangId == luau",
+          "command": "luau-lsp.computeCompilerRemarks"
+        }
+      ]
+    },
     "configuration": {
       "title": "Luau Language Server",
       "properties": {
