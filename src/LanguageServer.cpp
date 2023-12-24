@@ -15,17 +15,6 @@
 #define REQUIRED_PARAMS(params, method) \
     (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
 
-LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
-    const std::vector<std::filesystem::path>& documentationFiles, std::optional<Luau::Config> defaultConfig)
-    : client(std::make_shared<Client>())
-    , defaultConfig(std::move(defaultConfig))
-{
-    client->definitionsFiles = definitionsFiles;
-    client->documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client->documentation, client);
-    nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig);
-}
-
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)

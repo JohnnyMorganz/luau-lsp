@@ -32,8 +32,12 @@ private:
     std::optional<Luau::Config> defaultConfig;
 
 public:
-    explicit LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles, const std::vector<std::filesystem::path>& documentationFiles,
-        std::optional<Luau::Config> defaultConfig);
+    explicit LanguageServer(ClientPtr client, std::optional<Luau::Config> defaultConfig)
+        : client(std::move(client))
+        , defaultConfig(std::move(defaultConfig))
+        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
+    {
+    }
 
     lsp::ServerCapabilities getServerCapabilities();
 
