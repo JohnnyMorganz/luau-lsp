@@ -26,6 +26,10 @@ jobs:
         run: |
           cd scripts
           python dumpRobloxTypes.py > globalTypes.d.luau
+          python dumpRobloxTypes.py None > globalTypes.None.d.luau
+          python dumpRobloxTypes.py LocalUserSecurity > globalTypes.LocalUserSecurity.d.luau
+          python dumpRobloxTypes.py PluginSecurity > globalTypes.PluginSecurity.d.luau
+          python dumpRobloxTypes.py RobloxScriptSecurity > globalTypes.RobloxScriptSecurity.d.luau
           python dumpRobloxTypes.py > globalTypes.d.lua
 
       - name: Create Pull Request

@@ -5,6 +5,7 @@ from typing import List, Literal, Optional, Set, Union, TypedDict
 from collections import defaultdict
 import requests
 import json
+import sys
 
 # API Endpoints
 DATA_TYPES_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json"
@@ -13,6 +14,16 @@ CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/mas
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
+DEFAULT_SECURITY_LEVEL = "RobloxScriptSecurity"
+SECURITY_LEVELS = [
+    "None",
+    "LocalUserSecurity",
+    "PluginSecurity",
+    "RobloxScriptSecurity",
+    "RobloxSecurity",
+    "NotAccessibleSecurity",
+]
+
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
 OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyMover",
@@ -710,6 +721,8 @@ ApiParameter = TypedDict(
     },
 )
 
+ApiPropertySecurityLevel = TypedDict("PropertySecurity", {"Read": str, "Write": str})
+
 ApiProperty = TypedDict(
     "ApiProperty",
     {
@@ -720,6 +733,7 @@ ApiProperty = TypedDict(
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Category": str,  # TODO: stricter type?
         "ValueType": ApiValueType,
+        "Security": ApiPropertySecurityLevel,
     },
 )
 
@@ -734,6 +748,7 @@ ApiFunction = TypedDict(
         "ReturnType": ApiValueType,
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
+        "Security": str,
     },
 )
 
@@ -746,6 +761,7 @@ ApiEvent = TypedDict(
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "Tags": Optional[List[str]],  # TODO: stricter type?
+        "Security": str,
     },
 )
 
@@ -760,6 +776,7 @@ ApiCallback = TypedDict(
         "ReturnType": ApiValueType,
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
+        "Security": str,
     },
 )
 
@@ -814,6 +831,12 @@ DataTypesDump = TypedDict(
     "DataTypesDump",
     {"DataTypes": List[DataType], "Constructors": List[DataTypesConstructor]},
 )
+
+
+chosenSecurityLevel = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SECURITY_LEVEL
+assert (
+    chosenSecurityLevel in SECURITY_LEVELS
+), f"Unknown security level: {chosenSecurityLevel}"
 
 
 def isIdentifier(name: str):
@@ -894,6 +917,19 @@ def filterMember(klassName: str, member: ApiMember):
         return False
     if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
         return False
+    if "Security" in member:
+        if isinstance(member["Security"], str):
+            if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
+                chosenSecurityLevel
+            ):
+                return False
+        else:
+            if min(
+                SECURITY_LEVELS.index(member["Security"]["Read"]),
+                SECURITY_LEVELS.index(member["Security"]["Write"]),
+            ) > SECURITY_LEVELS.index(chosenSecurityLevel):
+                return False
+
     return True
 
 
