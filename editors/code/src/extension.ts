@@ -19,6 +19,7 @@ import {
 
 let client: LanguageClient | undefined = undefined;
 let pluginServer: Server | undefined = undefined;
+const clientDisposables: vscode.Disposable[] = [];
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
@@ -367,9 +368,10 @@ const stopPluginServer = async (isDeactivating = false) => {
 };
 
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
-  if (client) {
-    await client.stop();
+  for (const disposable of clientDisposables) {
+    await disposable.dispose();
   }
+  clientDisposables.splice(0, clientDisposables.length); // empty the list
 
   console.log("Starting Luau Language Server");
 
@@ -531,14 +533,15 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     serverOptions,
     clientOptions
   );
+  clientDisposables.push(client);
 
   // Register commands
   client.onNotification("$/command", (params) => {
     vscode.commands.executeCommand(params.command, params.data);
   });
 
-  registerComputeBytecode(context, client);
-  registerComputeCompilerRemarks(context, client);
+  clientDisposables.push(...registerComputeBytecode(context, client));
+  clientDisposables.push(...registerComputeCompilerRemarks(context, client));
 
   console.log("LSP Setup");
   await client.start();
@@ -652,8 +655,8 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate() {
-  if (client) {
-    await client.stop();
+  for (const disposable of clientDisposables) {
+    disposable.dispose();
   }
   for (const [workspace, _] of sourcemapGeneratorProcesses) {
     await stopSourcemapGeneration(workspace);

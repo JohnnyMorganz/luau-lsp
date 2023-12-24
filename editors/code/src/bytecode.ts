@@ -150,11 +150,8 @@ const getBytecodeInfo = (
     }
   })();
 
-  context.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider(scheme, tdcp)
-  );
-
-  context.subscriptions.push(
+  return [
+    vscode.workspace.registerTextDocumentContentProvider(scheme, tdcp),
     vscode.commands.registerTextEditorCommand(
       command,
       async (textEditor: vscode.TextEditor) => {
@@ -169,15 +166,15 @@ const getBytecodeInfo = (
           });
         }
       }
-    )
-  );
+    ),
+  ];
 };
 
 export const registerComputeBytecode = (
   context: vscode.ExtensionContext,
   client: LanguageClient
-) => {
-  getBytecodeInfo(
+): vscode.Disposable[] => {
+  return getBytecodeInfo(
     context,
     client,
     "luau-lsp.computeBytecode",
@@ -190,8 +187,8 @@ export const registerComputeBytecode = (
 export const registerComputeCompilerRemarks = (
   context: vscode.ExtensionContext,
   client: LanguageClient
-) => {
-  getBytecodeInfo(
+): vscode.Disposable[] => {
+  return getBytecodeInfo(
     context,
     client,
     "luau-lsp.computeCompilerRemarks",
