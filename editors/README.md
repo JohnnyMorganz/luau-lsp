@@ -34,7 +34,7 @@ $ luau-lsp lsp --definitions=/path/to/globalTypes.d.luau
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
 
-For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.lua
+For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.luau
 (using something like `curl` or `wget` should be sufficient).
 
 Optionally, you can define documentation files as well, by passing `--docs=PATH`.

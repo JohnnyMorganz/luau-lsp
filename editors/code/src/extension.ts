@@ -23,7 +23,7 @@ let pluginServer: Server | undefined = undefined;
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
 const GLOBAL_TYPES_DEFINITION =
-  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.lua";
+  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.luau";
 const API_DOCS =
   "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json";
 const CURRENT_FFLAGS =
@@ -37,13 +37,13 @@ const globalTypesUri = (
   mode: "Prod" | "Debug"
 ) => {
   if (mode === "Prod") {
-    return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.lua");
+    return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.luau");
   } else {
     return vscode.Uri.joinPath(
       context.extensionUri,
       "..",
       "..",
-      "scripts/globalTypes.d.lua"
+      "scripts/globalTypes.d.luau"
     );
   }
 };

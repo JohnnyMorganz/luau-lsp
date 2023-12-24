@@ -25,7 +25,7 @@ jobs:
       - name: Update types dump
         run: |
           cd scripts
-          python dumpRobloxTypes.py > globalTypes.d.lua
+          python dumpRobloxTypes.py > globalTypes.d.luau
 
       - name: Create Pull Request
         id: create_pull_request
