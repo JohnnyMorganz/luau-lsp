@@ -12,7 +12,10 @@ import {
 import { Server } from "http";
 import express from "express";
 import { spawn, ChildProcess } from "child_process";
-import { registerCompilerRemarks } from "./bytecode";
+import {
+  registerComputeBytecode,
+  registerComputeCompilerRemarks,
+} from "./bytecode";
 
 let client: LanguageClient | undefined = undefined;
 let pluginServer: Server | undefined = undefined;
@@ -506,7 +509,8 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     vscode.commands.executeCommand(params.command, params.data);
   });
 
-  registerCompilerRemarks(context, client);
+  registerComputeBytecode(context, client);
+  registerComputeCompilerRemarks(context, client);
 
   console.log("LSP Setup");
   await client.start();

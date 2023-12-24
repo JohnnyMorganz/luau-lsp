@@ -11,6 +11,15 @@ enum CompilerRemarksOptimizationLevel
     O2 = 2,
 };
 
+struct BytecodeParams
+{
+    TextDocumentIdentifier textDocument;
+    CompilerRemarksOptimizationLevel optimizationLevel = CompilerRemarksOptimizationLevel::O1;
+};
+NLOHMANN_DEFINE_OPTIONAL(BytecodeParams, textDocument, optimizationLevel)
+
+using BytecodeResult = std::string;
+
 struct CompilerRemarksParams
 {
     TextDocumentIdentifier textDocument;

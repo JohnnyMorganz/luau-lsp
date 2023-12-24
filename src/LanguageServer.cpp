@@ -249,6 +249,14 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         }
         response = result;
     }
+    else if (method == "luau-lsp/bytecode")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/bytecode")
+        auto params = baseParams->get<lsp::BytecodeParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->bytecode(params);
+    }
+
     else if (method == "luau-lsp/compilerRemarks")
     {
         ASSERT_PARAMS(baseParams, "luau-lsp/compilerRemarks")

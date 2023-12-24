@@ -120,6 +120,7 @@ public:
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
 
+    lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
 
     bool updateSourceMap();

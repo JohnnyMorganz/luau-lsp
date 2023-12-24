@@ -8,19 +8,31 @@ static std::string constructError(const std::string& type, const Luau::Location&
     return type + "(" + std::to_string(location.begin.line + 1) + "," + std::to_string(location.begin.column + 1) + "): " + message + "\n";
 }
 
-lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerRemarksParams& params)
+enum class BytecodeOutputType
 {
-    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
-    if (!textDocument)
-        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+    Textual,
+    CompilerRemarks
+};
 
+static uint32_t flagsForType(BytecodeOutputType type)
+{
+    switch (type)
+    {
+    case BytecodeOutputType::Textual:
+        return Luau::BytecodeBuilder::Dump_Code | Luau::BytecodeBuilder::Dump_Source | Luau::BytecodeBuilder::Dump_Locals |
+               Luau::BytecodeBuilder::Dump_Remarks;
+    case BytecodeOutputType::CompilerRemarks:
+        return Luau::BytecodeBuilder::Dump_Source | Luau::BytecodeBuilder::Dump_Remarks;
+    }
+    return 0;
+}
+
+static std::string computeBytecodeOutput(const std::string& source, const ClientConfiguration& config, int optimizationLevel, BytecodeOutputType type)
+{
     try
     {
-        auto source = textDocument->getText();
-
         Luau::BytecodeBuilder bcb;
-        bcb.setDumpFlags(Luau::BytecodeBuilder::Dump_Source | Luau::BytecodeBuilder::Dump_Remarks);
+        bcb.setDumpFlags(flagsForType(type));
         bcb.setDumpSource(source);
 
         Luau::Allocator allocator;
@@ -30,16 +42,19 @@ lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerR
         if (!result.errors.empty())
             throw Luau::ParseErrors(result.errors);
 
-        auto config = client->getConfiguration(rootUri);
         Luau::CompileOptions options = {};
-        options.optimizationLevel = params.optimizationLevel;
+        options.optimizationLevel = optimizationLevel;
         options.debugLevel = config.bytecode.debugLevel;
         options.vectorLib = config.bytecode.vectorLib.empty() ? nullptr : config.bytecode.vectorLib.c_str();
         options.vectorCtor = config.bytecode.vectorCtor.empty() ? nullptr : config.bytecode.vectorCtor.c_str();
         options.vectorType = config.bytecode.vectorType.empty() ? nullptr : config.bytecode.vectorType.c_str();
 
         Luau::compileOrThrow(bcb, result, names, options);
-        return bcb.dumpSourceRemarks();
+
+        if (type == BytecodeOutputType::Textual)
+            return bcb.dumpEverything();
+        else
+            return bcb.dumpSourceRemarks();
     }
     catch (Luau::ParseErrors& e)
     {
@@ -52,4 +67,26 @@ lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerR
     {
         return constructError("CompileError", e.getLocation(), e.what());
     }
+}
+
+lsp::CompilerRemarksResult WorkspaceFolder::bytecode(const lsp::BytecodeParams& params)
+{
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+
+    auto config = client->getConfiguration(rootUri);
+    return computeBytecodeOutput(textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::Textual);
+}
+
+lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerRemarksParams& params)
+{
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+
+    auto config = client->getConfiguration(rootUri);
+    return computeBytecodeOutput(textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CompilerRemarks);
 }

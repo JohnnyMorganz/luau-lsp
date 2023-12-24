@@ -87,6 +87,11 @@
         "title": "Luau: Reload Language Server"
       },
       {
+        "command": "luau-lsp.computeBytecode",
+        "title": "Luau: Compute Bytecode for file",
+        "enablement": "resourceLangId == luau"
+      },
+      {
         "command": "luau-lsp.computeCompilerRemarks",
         "title": "Luau: Compute Compiler Remarks for file",
         "enablement": "resourceLangId == luau"

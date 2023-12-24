@@ -148,10 +148,11 @@ Further Reference:
 
 ## Optional: Bytecode generation
 
-The Language server implements support for computing file-level source code remarks, for lower level debugging features.
+The Language server implements support for computing file-level textual bytecode and source code remarks, for lower level debugging features.
 
 A custom LSP request message is implemented:
 
+- `luau-lsp/bytecode`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - textual bytecode output
 - `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
 
 You can implement this request via a custom command to surface this information in your editor
