@@ -29,7 +29,7 @@ public:
     lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
     /// A registered definitions file passed by the client
-    std::vector<std::filesystem::path> definitionsFiles{};
+    std::unordered_map<std::string, std::filesystem::path> definitionsFiles{};
     /// A registered documentation file passed by the client
     std::vector<std::filesystem::path> documentationFiles{};
     /// Parsed documentation database

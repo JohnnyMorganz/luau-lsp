@@ -26,8 +26,8 @@ std::optional<DefinitionsFileMetadata> parseDefinitionsFileMetadata(const std::s
 
 void registerInstanceTypes(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, Luau::TypeArena& arena,
     const WorkspaceFileResolver& fileResolver, bool expressiveTypes);
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions,
-    bool typeCheckForAutocomplete = false, std::optional<DefinitionsFileMetadata> metadata = std::nullopt);
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName,
+    const std::string& definitions, bool typeCheckForAutocomplete = false, std::optional<DefinitionsFileMetadata> metadata = std::nullopt);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 

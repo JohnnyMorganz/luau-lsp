@@ -77,6 +77,39 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags)
     }
 }
 
+std::unordered_map<std::string, std::filesystem::path> processDefinitionsFilePaths(const argparse::ArgumentParser& program)
+{
+    std::unordered_map<std::string, std::filesystem::path> definitionsFiles{};
+    size_t backwardsCompatibilityNameSuffix = 0;
+    for (const auto& definition : program.get<std::vector<std::string>>("--definitions"))
+    {
+        std::string packageName = definition;
+        std::filesystem::path filePath = definition;
+
+        size_t eqIndex = definition.find('=');
+        if (eqIndex == std::string::npos)
+        {
+            // TODO: Remove Me - backwards compatibility
+            packageName = "@roblox";
+            if (backwardsCompatibilityNameSuffix > 0)
+                packageName += std::to_string(backwardsCompatibilityNameSuffix);
+            backwardsCompatibilityNameSuffix += 1;
+        }
+        else
+        {
+            packageName = definition.substr(0, eqIndex);
+            filePath = definition.substr(eqIndex + 1, definition.length());
+        }
+
+        if (!Luau::startsWith(packageName, "@"))
+            packageName = "@" + packageName;
+        
+        definitionsFiles.emplace(packageName, filePath);
+    }
+
+    return definitionsFiles;
+}
+
 int startLanguageServer(const argparse::ArgumentParser& program)
 {
     // Debug loop: set a breakpoint inside while loop to attach debugger before init
@@ -94,7 +127,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    auto definitionsFiles = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto definitionsFiles = processDefinitionsFilePaths(program);
     auto documentationFiles = program.get<std::vector<std::filesystem::path>>("--docs");
     std::optional<std::filesystem::path> baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
 
@@ -259,8 +292,7 @@ int main(int argc, char** argv)
     lsp_command.add_parents(parent_parser);
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
     lsp_command.add_argument("--docs", "--documentation")

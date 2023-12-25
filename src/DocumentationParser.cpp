@@ -330,6 +330,26 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return false;
     }
 
+    bool visit(Luau::AstStatDeclareClass* klass) override
+    {
+        if (klass->location.begin >= pos)
+            return false;
+        if (klass->location.begin > closestPreviousNode)
+            closestPreviousNode = klass->location.begin;
+
+        for (const auto& item : klass->props)
+        {
+            if (item.ty->location.begin >= pos)
+                continue;
+            closestPreviousNode = std::max(closestPreviousNode, item.ty->location.begin);
+            item.ty->visit(this);
+            if (item.ty->location.end <= pos)
+                closestPreviousNode = std::max(closestPreviousNode, item.ty->location.end);
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         // If the position is after the block, then it can be ignored
@@ -372,17 +392,28 @@ std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module,
 /// Performs transformations so that the comments are normalised to lines inside of it (i.e., trimming whitespace, removing comment start/end)
 std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& moduleName, const Luau::Location& node)
 {
-    auto sourceModule = frontend.getSourceModule(moduleName);
-    if (!sourceModule)
-        return {};
+    Luau::SourceModule* sourceModule;
+    TextDocumentPtr textDocument(nullptr);
+
+    if (auto sm = definitionsSourceModules.find(moduleName); sm != definitionsSourceModules.end())
+    {
+        sourceModule = &sm->second.second;
+        textDocument = TextDocumentPtr(&sm->second.first);
+    }
+    else
+    {
+        sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return {};
+
+        // Get relevant text document
+        textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
+        if (!textDocument)
+            return {};
+    }
 
     auto commentLocations = getCommentLocations(sourceModule, node);
     if (commentLocations.empty())
-        return {};
-
-    // Get relevant text document
-    auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
-    if (!textDocument)
         return {};
 
     std::vector<std::string> comments{};

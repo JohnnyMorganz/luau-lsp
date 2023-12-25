@@ -144,7 +144,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     ReportFormat format = ReportFormat::Default;
     bool annotate = program.is_used("--annotate");
     auto sourcemapPath = program.present<std::filesystem::path>("--sourcemap");
-    auto definitionsPaths = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto definitionsPaths = processDefinitionsFilePaths(program);
     auto ignoreGlobPatterns = program.get<std::vector<std::string>>("--ignore");
     auto baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
     auto settingsPath = program.present<std::filesystem::path>("--settings");
@@ -293,7 +293,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
     Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
 
-    for (auto& definitionsPath : definitionsPaths)
+    for (auto& [packageName, definitionsPath] : definitionsPaths)
     {
         if (!std::filesystem::exists(definitionsPath))
         {
@@ -308,8 +308,8 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false,
-            types::parseDefinitionsFileMetadata(*definitionsContents));
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents,
+            /* typeCheckForAutocomplete = */ false, types::parseDefinitionsFileMetadata(*definitionsContents));
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

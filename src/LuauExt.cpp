@@ -492,153 +492,157 @@ std::optional<DefinitionsFileMetadata> parseDefinitionsFileMetadata(const std::s
     return std::nullopt;
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions,
-    bool typeCheckForAutocomplete, std::optional<DefinitionsFileMetadata> metadata)
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName,
+    const std::string& definitions, bool typeCheckForAutocomplete, std::optional<DefinitionsFileMetadata> metadata)
 {
-    // TODO: packageName shouldn't just be "@roblox"
     auto loadResult =
-        frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
+        frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ false, typeCheckForAutocomplete);
     if (!loadResult.success)
         return loadResult;
 
-    // HACK: Mark "debug" using `@luau` symbol instead
-    if (auto it = globals.globalScope->bindings.find(Luau::AstName("debug")); it != globals.globalScope->bindings.end())
+    if (packageName == "roblox")
     {
-        auto newDocumentationSymbol = it->second.documentationSymbol.value();
-        replace(newDocumentationSymbol, "@roblox", "@luau");
-        it->second.documentationSymbol = newDocumentationSymbol;
-        fixDebugDocumentationSymbol(it->second.typeId, "debug");
-    }
-
-    // HACK: Mark "utf8" using `@luau` symbol instead
-    if (auto it = globals.globalScope->bindings.find(Luau::AstName("utf8")); it != globals.globalScope->bindings.end())
-    {
-        auto newDocumentationSymbol = it->second.documentationSymbol.value();
-        replace(newDocumentationSymbol, "@roblox", "@luau");
-        it->second.documentationSymbol = newDocumentationSymbol;
-        fixDebugDocumentationSymbol(it->second.typeId, "utf8");
-    }
-
-    // Extend Instance types
-    if (auto instanceType = globals.globalScope->lookupType("Instance"))
-    {
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
+        // HACK: Mark "debug" using `@luau` symbol instead
+        if (auto it = globals.globalScope->bindings.find(Luau::AstName("debug")); it != globals.globalScope->bindings.end())
         {
-            Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionInstanceIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
-            Luau::attachMagicFunction(ctv->props["Clone"].type(), types::magicFunctionInstanceClone);
-            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
+            auto newDocumentationSymbol = it->second.documentationSymbol.value();
+            replace(newDocumentationSymbol, "@roblox", "@luau");
+            it->second.documentationSymbol = newDocumentationSymbol;
+            fixDebugDocumentationSymbol(it->second.typeId, "debug");
+        }
 
-            // Autocomplete ClassNames for :IsA("") and counterparts
-            Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type(), "ClassNames");
 
-            // Autocomplete Properties for :GetPropertyChangedSignal("")
-            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
+        // HACK: Mark "utf8" using `@luau` symbol instead
+        if (auto it = globals.globalScope->bindings.find(Luau::AstName("utf8")); it != globals.globalScope->bindings.end())
+        {
+            auto newDocumentationSymbol = it->second.documentationSymbol.value();
+            replace(newDocumentationSymbol, "@roblox", "@luau");
+            it->second.documentationSymbol = newDocumentationSymbol;
+            fixDebugDocumentationSymbol(it->second.typeId, "utf8");
+        }
 
-            // Go through all the defined classes and if they are a subclass of Instance then give them the
-            // same metatable identity as Instance so that equality comparison works.
-            // NOTE: This will OVERWRITE any metatables set on these classes!
-            // We assume that all subclasses of instance don't have any metamethods
-            for (auto& [_, ty] : globals.globalScope->exportedTypeBindings)
+        // Extend Instance types
+        if (auto instanceType = globals.globalScope->lookupType("Instance"))
+        {
+            if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
             {
-                if (auto* c = Luau::getMutable<Luau::ClassType>(ty.type))
+                Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionInstanceIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
+                Luau::attachMagicFunction(ctv->props["Clone"].type(), types::magicFunctionInstanceClone);
+                Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
+
+                // Autocomplete ClassNames for :IsA("") and counterparts
+                Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
+                Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type(), "ClassNames");
+                Luau::attachTag(ctv->props["FindFirstChildOfClass"].type(), "ClassNames");
+                Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type(), "ClassNames");
+                Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type(), "ClassNames");
+
+                // Autocomplete Properties for :GetPropertyChangedSignal("")
+                Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
+
+                // Go through all the defined classes and if they are a subclass of Instance then give them the
+                // same metatable identity as Instance so that equality comparison works.
+                // NOTE: This will OVERWRITE any metatables set on these classes!
+                // We assume that all subclasses of instance don't have any metamethods
+                for (auto& [_, ty] : globals.globalScope->exportedTypeBindings)
                 {
-                    // Check if the ctv is a subclass of instance
-                    if (Luau::isSubclass(c, ctv))
+                    if (auto* c = Luau::getMutable<Luau::ClassType>(ty.type))
                     {
-                        c->metatable = ctv->metatable;
+                        // Check if the ctv is a subclass of instance
+                        if (Luau::isSubclass(c, ctv))
+                        {
+                            c->metatable = ctv->metatable;
+                        }
                     }
                 }
             }
         }
-    }
 
-    // Attach onto Instance.new()
-    if (metadata.has_value() && !metadata->CREATABLE_INSTANCES.empty())
-        if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
-            if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
-                if (auto newFunction = ttv->props.find("new");
-                    newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+        // Attach onto Instance.new()
+        if (metadata.has_value() && !metadata->CREATABLE_INSTANCES.empty())
+            if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
+                if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
+                    if (auto newFunction = ttv->props.find("new");
+                        newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+                    {
+
+                        Luau::attachTag(newFunction->second.type(), "CreatableInstances");
+                        Luau::attachMagicFunction(
+                            newFunction->second.type(), createMagicFunctionTypeLookup(metadata->CREATABLE_INSTANCES, "Invalid class name"));
+                    }
+
+        // Attach onto `game:GetService()`
+        if (metadata.has_value() && !metadata->SERVICES.empty())
+            if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
+                if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type);
+                    ctv && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
                 {
-
-                    Luau::attachTag(newFunction->second.type(), "CreatableInstances");
+                    Luau::attachTag(ctv->props["GetService"].type(), "Services");
                     Luau::attachMagicFunction(
-                        newFunction->second.type(), createMagicFunctionTypeLookup(metadata->CREATABLE_INSTANCES, "Invalid class name"));
+                        ctv->props["GetService"].type(), createMagicFunctionTypeLookup(metadata->SERVICES, "Invalid service name"));
                 }
 
-    // Attach onto `game:GetService()`
-    if (metadata.has_value() && !metadata->SERVICES.empty())
-        if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
-            if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type);
-                ctv && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
-            {
-                Luau::attachTag(ctv->props["GetService"].type(), "Services");
-                Luau::attachMagicFunction(ctv->props["GetService"].type(), createMagicFunctionTypeLookup(metadata->SERVICES, "Invalid service name"));
-            }
-
-    // Move Enums over as imported type bindings
-    std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes{};
-    for (auto it = globals.globalScope->exportedTypeBindings.begin(); it != globals.globalScope->exportedTypeBindings.end();)
-    {
-        auto erase = false;
-        auto ty = it->second.type;
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
+        // Move Enums over as imported type bindings
+        std::unordered_map<Luau::Name, Luau::TypeFun> enumTypes{};
+        for (auto it = globals.globalScope->exportedTypeBindings.begin(); it != globals.globalScope->exportedTypeBindings.end();)
         {
-            if (Luau::startsWith(ctv->name, "Enum"))
+            auto erase = false;
+            auto ty = it->second.type;
+            if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
             {
-                if (ctv->name == "EnumItem")
+                if (Luau::startsWith(ctv->name, "Enum"))
                 {
-                    Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionEnumItemIsA);
-                    Luau::attachTag(ctv->props["IsA"].type(), "Enums");
+                    if (ctv->name == "EnumItem")
+                    {
+                        Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionEnumItemIsA);
+                        Luau::attachTag(ctv->props["IsA"].type(), "Enums");
+                    }
+                    else if (ctv->name != "Enum" && ctv->name != "Enums")
+                    {
+                        // Erase the "Enum" at the start
+                        ctv->name = ctv->name.substr(4);
+
+                        // Move the enum over to the imported types if it is not internal, otherwise rename the type
+                        if (endsWith(ctv->name, "_INTERNAL"))
+                        {
+                            ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
+                        }
+                        else
+                        {
+                            enumTypes.emplace(ctv->name, it->second);
+                            // Erase the metatable for the type, so it can be used in comparison
+                        }
+
+                        // Update the documentation symbol
+                        Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
+                        for (auto& [name, prop] : ctv->props)
+                        {
+                            prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                            Luau::attachTag(prop, "EnumItem");
+                        }
+
+                        // Prefix the name (after it has been placed into enumTypes) with "Enum."
+                        ctv->name = "Enum." + ctv->name;
+
+                        erase = true;
+                    }
+
+                    // Erase the metatable from the type to allow comparison
+                    ctv->metatable = std::nullopt;
                 }
-                else if (ctv->name != "Enum" && ctv->name != "Enums")
-                {
-                    // Erase the "Enum" at the start
-                    ctv->name = ctv->name.substr(4);
-
-                    // Move the enum over to the imported types if it is not internal, otherwise rename the type
-                    if (endsWith(ctv->name, "_INTERNAL"))
-                    {
-                        ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
-                    }
-                    else
-                    {
-                        enumTypes.emplace(ctv->name, it->second);
-                        // Erase the metatable for the type, so it can be used in comparison
-                    }
-
-                    // Update the documentation symbol
-                    Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
-                    for (auto& [name, prop] : ctv->props)
-                    {
-                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
-                        Luau::attachTag(prop, "EnumItem");
-                    }
-
-                    // Prefix the name (after it has been placed into enumTypes) with "Enum."
-                    ctv->name = "Enum." + ctv->name;
-
-                    erase = true;
-                }
-
-                // Erase the metatable from the type to allow comparison
-                ctv->metatable = std::nullopt;
             }
-        }
 
-        if (erase)
-            it = globals.globalScope->exportedTypeBindings.erase(it);
-        else
-            ++it;
+            if (erase)
+                it = globals.globalScope->exportedTypeBindings.erase(it);
+            else
+                ++it;
+        }
+        globals.globalScope->importedTypeBindings.emplace("Enum", enumTypes);
     }
-    globals.globalScope->importedTypeBindings.emplace("Enum", enumTypes);
 
     return loadResult;
 }

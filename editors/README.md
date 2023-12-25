@@ -25,11 +25,11 @@ $ luau-lsp --help
 
 ## Configuring Definitions and Documentation
 
-You can add in built-in definitions by passing the `--definitions=PATH` argument.
+You can add in built-in definitions by passing the `--definitions:@name=PATH` argument. The `name` should be a unique reference to the definitions file.
 This can be done multiple times:
 
 ```sh
-$ luau-lsp lsp --definitions=/path/to/globalTypes.d.luau
+$ luau-lsp lsp --definitions:@roblox=/path/to/globalTypes.d.luau
 ```
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time

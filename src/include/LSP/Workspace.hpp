@@ -24,6 +24,9 @@ struct Reference
 
 class WorkspaceFolder
 {
+private:
+    std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules;
+
 public:
     std::shared_ptr<Client> client;
     std::string name;
