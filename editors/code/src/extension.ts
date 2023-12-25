@@ -369,9 +369,12 @@ const stopPluginServer = async (isDeactivating = false) => {
 
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
   for (const disposable of clientDisposables) {
-    await disposable.dispose();
+    disposable.dispose();
   }
   clientDisposables.splice(0, clientDisposables.length); // empty the list
+  if (client) {
+    await client.stop();
+  }
 
   console.log("Starting Luau Language Server");
 
@@ -533,7 +536,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     serverOptions,
     clientOptions
   );
-  clientDisposables.push(client);
 
   // Register commands
   client.onNotification("$/command", (params) => {
@@ -655,11 +657,12 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate() {
-  for (const disposable of clientDisposables) {
-    disposable.dispose();
-  }
-  for (const [workspace, _] of sourcemapGeneratorProcesses) {
-    await stopSourcemapGeneration(workspace);
-  }
-  await stopPluginServer(true);
+  return Promise.allSettled([
+    ...Array.from(sourcemapGeneratorProcesses.keys()).map((workspace) =>
+      stopSourcemapGeneration(workspace)
+    ),
+    stopPluginServer(true),
+    client?.stop(),
+    clientDisposables.map((disposable) => disposable.dispose()),
+  ]);
 }
