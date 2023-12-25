@@ -5089,7 +5089,6 @@ declare class BaseWrap extends Instance
 	CageMeshId: Content
 	CageOrigin: CFrame
 	CageOriginWorld: CFrame
-	HSRAssetId: Content
 	ImportOrigin: CFrame
 	ImportOriginWorld: CFrame
 	function GetCageOffset(self): Vector3
@@ -7620,10 +7619,6 @@ declare class LogService extends Instance
 end
 
 declare class LoginService extends Instance
-	LoginFailed: RBXScriptSignal<string>
-	LoginSucceeded: RBXScriptSignal<string>
-	function Logout(self): nil
-	function PromptLogin(self): nil
 end
 
 declare class LuaSettings extends Instance
@@ -7750,48 +7745,8 @@ declare class MaterialGenerationSession extends Instance
 end
 
 declare class MaterialService extends Instance
-	AsphaltName: string
-	BasaltName: string
-	BrickName: string
-	CardboardName: string
-	CarpetName: string
-	CeramicTilesName: string
-	ClayRoofTilesName: string
-	CobblestoneName: string
-	ConcreteName: string
-	CorrodedMetalName: string
-	CrackedLavaName: string
-	DiamondPlateName: string
-	FabricName: string
-	FoilName: string
-	GlacierName: string
-	GraniteName: string
-	GrassName: string
-	GroundName: string
-	IceName: string
-	LeafyGrassName: string
-	LeatherName: string
-	LimestoneName: string
-	MarbleName: string
-	MetalName: string
-	MudName: string
 	OverrideStatusChanged: RBXScriptSignal<EnumMaterial>
-	PavementName: string
-	PebbleName: string
-	PlasterName: string
-	PlasticName: string
-	RockName: string
-	RoofShinglesName: string
-	RubberName: string
-	SaltName: string
-	SandName: string
-	SandstoneName: string
-	SlateName: string
-	SmoothPlasticName: string
-	SnowName: string
 	Use2022Materials: boolean
-	WoodName: string
-	WoodPlanksName: string
 	function GetBaseMaterialOverride(self, material: EnumMaterial): string
 	function GetMaterialOverrideChanged(self, material: EnumMaterial): RBXScriptSignal
 	function GetMaterialVariant(self, material: EnumMaterial, name: string): MaterialVariant
@@ -8678,7 +8633,6 @@ declare class Player extends Instance
 	function DistanceFromCharacter(self, point: Vector3): number
 	function GetFriendStatus(self, player: Player): EnumFriendStatus
 	function GetFriendsOnline(self, maxFriends: number?): { any }
-	function GetGameSessionID(self): string
 	function GetJoinData(self): { [any]: any }
 	function GetMouse(self): Mouse
 	function GetNetworkPing(self): number
@@ -8713,7 +8667,6 @@ declare class PlayerEmulatorService extends Instance
 	EmulatedCountryCode: string
 	EmulatedGameLocale: string
 	PlayerEmulationEnabled: boolean
-	SerializedEmulatedPolicyInfo: BinaryString
 	function GetEmulatedPolicyInfo(self): { [any]: any }
 	function RegionCodeWillHaveAutomaticNonCustomPolicies(self, regionCode: string): boolean
 	function SetEmulatedPolicyInfo(self, emulatedPolicyInfo: { [any]: any }): nil
@@ -9080,7 +9033,6 @@ declare class ReflectionMetadataClass extends ReflectionMetadataItem
 	ExplorerOrder: number
 	Insertable: boolean
 	PreferredParent: string
-	ServiceVisibility: EnumServiceVisibility
 end
 
 declare class ReflectionMetadataEnum extends ReflectionMetadataItem
@@ -9484,8 +9436,6 @@ declare class UserSettings extends GenericSettings
 end
 
 declare class ServiceVisibilityService extends Instance
-	HiddenServices: BinaryString
-	VisibleServices: BinaryString
 end
 
 declare class SessionService extends Instance
@@ -9877,8 +9827,6 @@ declare class Studio extends Instance
 	PermissionLevelShown: EnumPermissionLevelShown
 	PluginDebuggingEnabled: boolean
 	PluginsDir: QDir
-	ReloadBuiltinPluginsOnChange: boolean
-	ReloadLocalPluginsOnChange: boolean
 	Rulers: string
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior
 	ScriptEditorMenuBorderColor: Color3
@@ -9939,8 +9887,6 @@ declare class Studio extends Instance
 	["Highlight Current Line"]: boolean
 	["Highlight Occurances"]: boolean
 	["Hover Animate Speed"]: EnumHoverAnimateSpeed
-	["Hover Box Thickness"]: number
-	["Hover Line Thickness"]: number
 	["Hover Over Color"]: Color3
 	["Indent Using Spaces"]: boolean
 	["Keyword Color"]: Color3
@@ -9957,7 +9903,6 @@ declare class Studio extends Instance
 	["Output Font"]: QFont
 	["Output Layout Mode"]: EnumOutputLayoutMode
 	["Physical Draggers Select Scope By Default"]: boolean
-	["Pivot Snap To Geometry Color"]: Color3
 	["Primary Text Color"]: Color3
 	["Property Color"]: Color3
 	["Respect Studio shortcuts when game has focus"]: boolean
@@ -9972,9 +9917,7 @@ declare class Studio extends Instance
 	["Selected Menu Item Background Color"]: Color3
 	["Selected Text Color"]: Color3
 	["Selection Background Color"]: Color3
-	["Selection Box Thickness"]: number
 	["Selection Color"]: Color3
-	["Selection Line Thickness"]: number
 	["Server Audio Behavior"]: EnumServerAudioBehavior
 	["Set Pivot of Imported Parts"]: boolean
 	["Show Core GUI in Explorer while Playing"]: boolean
@@ -10201,7 +10144,6 @@ declare class SurfaceAppearance extends Instance
 	MetalnessMap: Content
 	NormalMap: Content
 	RoughnessMap: Content
-	TexturePack: Content
 end
 
 declare class TaskScheduler extends Instance
@@ -11139,8 +11081,6 @@ declare class VoiceChatService extends Instance
 	EnableDefaultVoice: boolean
 	UseAudioApi: EnumAudioApiRollout
 	UseNewAudioApi: boolean
-	UseNewControlPaths: boolean
-	UseNewJoinFlow: boolean
 	VoiceChatEnabledForPlaceOnRcc: boolean
 	VoiceChatEnabledForUniverseOnRcc: boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
