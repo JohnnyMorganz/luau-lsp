@@ -290,6 +290,7 @@ const startSourcemapGeneration = async (
     }
     if (code !== 0) {
       let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
+      let options = ["Retry"];
 
       if (stderr.includes("Found argument 'sourcemap' which wasn't expected")) {
         output +=
@@ -299,13 +300,25 @@ const startSourcemapGeneration = async (
       ) {
         output +=
           "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
+      } else if (
+        stderr.includes("is not recognized") ||
+        stderr.includes("ENOENT")
+      ) {
+        output +=
+          "Rojo not found. Please install Rojo to your PATH or disable sourcemap autogeneration";
+        options.push("Configure Settings");
       } else {
         output += stderr;
       }
 
-      vscode.window.showWarningMessage(output, "Retry").then((value) => {
+      vscode.window.showWarningMessage(output, ...options).then((value) => {
         if (value === "Retry") {
           startSourcemapGeneration(workspaceFolder);
+        } else if (value === "Configure Settings") {
+          vscode.commands.executeCommand(
+            "workbench.action.openSettings",
+            "luau-lsp.sourcemap"
+          );
         }
       });
     }

@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Changed the VSCode registered language and grammar ID from `lua` to `luau`. **NOTE:** this may affect existing custom themes!
 - Renamed `script/globalTypes.d.lua` to `script/globalTypes.d.luau` (the old file will be kept temporarily for compatibility)
 - Default security level of API types changed from `RobloxScriptSecurity` to `PluginSecurity` - set `luau-lsp.types.robloxSecurityLevel` to `RobloxScriptSecurity` to see original behaviour
+- Improved warning message when Rojo not found when attempting to generate sourcemap, with option to configure settings to disable autogeneration
 
 ### Fixed
 
