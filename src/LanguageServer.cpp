@@ -444,6 +444,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
+        client->sendTrace("client supports configuration, setting up didChangeConfiguration capability");
         requestedConfiguration = true;
 
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
@@ -464,6 +465,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         };
 
         // Send off requests to get the configuration for each workspace
+        client->sendTrace("config: requesting initial configuration for each workspace");
         std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
             items.emplace_back(workspace->rootUri);
@@ -496,10 +498,12 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     // a race condition where the first LSP events are executed before receiving the user configuration,
     // causing us to fall back to the global configuration. Sending the request for configuration
     // first means we receive the user config before processing the first LSP events
+    client->sendTrace("initializing null workspace");
     nullWorkspace->initialize();
     nullWorkspace->setupWithConfiguration(client->globalConfig);
     for (auto& folder : workspaceFolders)
     {
+        client->sendTrace("initializing workspace: " + folder->rootUri.toString());
         folder->initialize();
         // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
         if (!requestedConfiguration)

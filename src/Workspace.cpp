@@ -149,6 +149,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     if (isNullWorkspace())
         return;
 
+    client->sendTrace("workspace: indexing all files");
+
     size_t indexCount = 0;
 
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath()), end; next != end; ++next)
@@ -177,6 +179,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             }
         }
     }
+
+    client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
 bool WorkspaceFolder::updateSourceMap()
@@ -212,15 +216,14 @@ bool WorkspaceFolder::updateSourceMap()
 
 void WorkspaceFolder::initialize()
 {
+    client->sendTrace("workspace initialization: registering Luau globals");
     Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
     Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
 
     Luau::attachTag(Luau::getGlobalBinding(frontend.globalsForAutocomplete, "require"), "Require");
 
     if (client->definitionsFiles.empty())
-    {
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
-    }
 
     for (const auto& definitionsFile : client->definitionsFiles)
     {
@@ -235,13 +238,17 @@ void WorkspaceFolder::initialize()
         }
 
         // Parse definitions file metadata
+        client->sendTrace("workspace initialization: parsing definitions file metadata");
         if (auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents))
             definitionsFileMetadata = metadata;
+        client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
+        client->sendTrace("workspace initialization: registering types definition");
         auto result = types::registerDefinitions(
             frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false, definitionsFileMetadata);
         types::registerDefinitions(
             frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true, definitionsFileMetadata);
+        client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         auto uri = Uri::file(definitionsFile);
 
@@ -273,9 +280,11 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    client->sendTrace("workspace: setting up with configuration");
     isConfigured = true;
     if (configuration.sourcemap.enabled)
     {
+        client->sendTrace("workspace: sourcemap enabled");
         if (!isNullWorkspace() && !updateSourceMap())
         {
             client->sendWindowMessage(
