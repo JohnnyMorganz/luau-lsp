@@ -12,14 +12,17 @@ import {
 import { Server } from "http";
 import express from "express";
 import { spawn, ChildProcess } from "child_process";
+import {
+  registerComputeBytecode,
+  registerComputeCompilerRemarks,
+} from "./bytecode";
 
 let client: LanguageClient | undefined = undefined;
 let pluginServer: Server | undefined = undefined;
+const clientDisposables: vscode.Disposable[] = [];
 
 const CURRENT_VERSION_TXT =
   "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/version.txt";
-const GLOBAL_TYPES_DEFINITION =
-  "https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.d.lua";
 const API_DOCS =
   "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json";
 const CURRENT_FFLAGS =
@@ -28,18 +31,32 @@ const CURRENT_FFLAGS =
 type FFlags = Record<string, string>;
 type FFlagsEndpoint = { applicationSettings: FFlags };
 
+const SECURITY_LEVELS = [
+  "None",
+  "LocalUserSecurity",
+  "PluginSecurity",
+  "RobloxScriptSecurity",
+];
+const globalTypesEndpointForSecurityLevel = (securityLevel: string) => {
+  return `https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.${securityLevel}.d.luau`;
+};
+
 const globalTypesUri = (
   context: vscode.ExtensionContext,
+  securityLevel: string,
   mode: "Prod" | "Debug"
 ) => {
   if (mode === "Prod") {
-    return vscode.Uri.joinPath(context.globalStorageUri, "globalTypes.d.lua");
+    return vscode.Uri.joinPath(
+      context.globalStorageUri,
+      `globalTypes.${securityLevel}.d.luau`
+    );
   } else {
     return vscode.Uri.joinPath(
       context.extensionUri,
       "..",
       "..",
-      "scripts/globalTypes.d.lua"
+      `scripts/globalTypes.${securityLevel}.d.luau`
     );
   }
 };
@@ -73,14 +90,16 @@ const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
       },
       async () => {
         return Promise.all([
-          fetch(GLOBAL_TYPES_DEFINITION)
-            .then((r) => r.arrayBuffer())
-            .then((data) =>
-              vscode.workspace.fs.writeFile(
-                globalTypesUri(context, "Prod"),
-                new Uint8Array(data)
+          ...SECURITY_LEVELS.map((level) =>
+            fetch(globalTypesEndpointForSecurityLevel(level))
+              .then((r) => r.arrayBuffer())
+              .then((data) =>
+                vscode.workspace.fs.writeFile(
+                  globalTypesUri(context, level, "Prod"),
+                  new Uint8Array(data)
+                )
               )
-            ),
+          ),
           fetch(API_DOCS)
             .then((r) => r.arrayBuffer())
             .then((data) =>
@@ -108,8 +127,14 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
       "current-api-version"
     );
     const mustUpdate =
-      !(await exists(globalTypesUri(context, "Prod"))) ||
-      !(await exists(apiDocsUri(context)));
+      (
+        await Promise.all(
+          SECURITY_LEVELS.map(
+            async (level) =>
+              await exists(globalTypesUri(context, level, "Prod"))
+          )
+        )
+      ).some((doesExist) => !doesExist) || !(await exists(apiDocsUri(context)));
 
     if (!currentVersion || currentVersion !== latestVersion || mustUpdate) {
       context.globalState.update("current-api-version", latestVersion);
@@ -265,6 +290,7 @@ const startSourcemapGeneration = async (
     }
     if (code !== 0) {
       let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
+      let options = ["Retry"];
 
       if (stderr.includes("Found argument 'sourcemap' which wasn't expected")) {
         output +=
@@ -274,13 +300,25 @@ const startSourcemapGeneration = async (
       ) {
         output +=
           "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
+      } else if (
+        stderr.includes("is not recognized") ||
+        stderr.includes("ENOENT")
+      ) {
+        output +=
+          "Rojo not found. Please install Rojo to your PATH or disable sourcemap autogeneration";
+        options.push("Configure Settings");
       } else {
         output += stderr;
       }
 
-      vscode.window.showWarningMessage(output, "Retry").then((value) => {
+      vscode.window.showWarningMessage(output, ...options).then((value) => {
         if (value === "Retry") {
           startSourcemapGeneration(workspaceFolder);
+        } else if (value === "Configure Settings") {
+          vscode.commands.executeCommand(
+            "workbench.action.openSettings",
+            "luau-lsp.sourcemap"
+          );
         }
       });
     }
@@ -343,6 +381,10 @@ const stopPluginServer = async (isDeactivating = false) => {
 };
 
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
+  for (const disposable of clientDisposables) {
+    disposable.dispose();
+  }
+  clientDisposables.splice(0, clientDisposables.length); // empty the list
   if (client) {
     await client.stop();
   }
@@ -364,9 +406,17 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
   if (typesConfig.get<boolean>("roblox")) {
+    const securityLevel =
+      typesConfig.get<string>("robloxSecurityLevel") ?? "PluginSecurity";
     await updateApiInfo(context);
-    addArg(`--definitions=${globalTypesUri(context, "Prod").fsPath}`, "Prod");
-    addArg(`--definitions=${globalTypesUri(context, "Debug").fsPath}`, "Debug");
+    addArg(
+      `--definitions=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
+      "Prod"
+    );
+    addArg(
+      `--definitions=${globalTypesUri(context, securityLevel, "Debug").fsPath}`,
+      "Debug"
+    );
     addArg(`--docs=${apiDocsUri(context).fsPath}`);
   }
 
@@ -505,6 +555,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     vscode.commands.executeCommand(params.command, params.data);
   });
 
+  clientDisposables.push(...registerComputeBytecode(context, client));
+  clientDisposables.push(...registerComputeCompilerRemarks(context, client));
+
   console.log("LSP Setup");
   await client.start();
 };
@@ -617,11 +670,12 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate() {
-  if (client) {
-    await client.stop();
-  }
-  for (const [workspace, _] of sourcemapGeneratorProcesses) {
-    await stopSourcemapGeneration(workspace);
-  }
-  await stopPluginServer(true);
+  return Promise.allSettled([
+    ...Array.from(sourcemapGeneratorProcesses.keys()).map((workspace) =>
+      stopSourcemapGeneration(workspace)
+    ),
+    stopPluginServer(true),
+    client?.stop(),
+    clientDisposables.map((disposable) => disposable.dispose()),
+  ]);
 }

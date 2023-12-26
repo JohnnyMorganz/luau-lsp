@@ -8,6 +8,7 @@
 #include "Protocol/LanguageFeatures.hpp"
 #include "Protocol/SignatureHelp.hpp"
 #include "Protocol/SemanticTokens.hpp"
+#include "Protocol/Extensions.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/LuauExt.hpp"
@@ -137,6 +138,9 @@ public:
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
+
+    lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
+    lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
 
     bool updateSourceMap();
 

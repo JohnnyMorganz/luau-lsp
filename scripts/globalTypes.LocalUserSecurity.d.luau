@@ -4383,8 +4383,6 @@ declare class Instance
 	Destroying: RBXScriptSignal<>
 	Name: string
 	Parent: Instance?
-	RobloxLocked: boolean
-	SourceAssetId: number
 	function AddTag(self, tag: string): nil
 	function ClearAllChildren(self): nil
 	function Clone(self): Instance
@@ -4401,7 +4399,6 @@ declare class Instance
 	function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
 	function GetAttributes(self): { [string]: any }
 	function GetChildren(self): { Instance }
-	function GetDebugId(self, scopeLength: number?): string
 	function GetDescendants(self): { Instance }
 	function GetFullName(self): string
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
@@ -4428,8 +4425,6 @@ declare class AccessoryDescription extends Instance
 end
 
 declare class AccountService extends Instance
-	function DeviceIntegrityAvailable(self): boolean
-	function GetDeviceIntegrityToken(self, data: string): string
 end
 
 declare class Accoutrement extends Instance
@@ -4448,19 +4443,10 @@ end
 
 declare class AdPortal extends Instance
 	PortalInvalidReason: string
-	PortalVersion: number
 	Status: EnumAdUnitStatus
-	function TeleportConfirmed(self, placeId: number, player: Player): nil
-	function TeleportRejected(self, shouldCooldown: boolean, rejectedByDistance: boolean): nil
 end
 
 declare class AdService extends Instance
-	AdTeleportEnded: RBXScriptSignal<>
-	AdTeleportInitiated: RBXScriptSignal<>
-	PortalPrompt: RBXScriptSignal<number, Instance, boolean>
-	function GetAdTeleportInfo(self): any
-	function GetReportAdInfo(self): { any }
-	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 end
 
 declare class AdvancedDragger extends Instance
@@ -4473,7 +4459,6 @@ declare class Animation extends Instance
 end
 
 declare class AnimationClip extends Instance
-	Guid: string
 	Loop: boolean
 	Priority: EnumAnimationPriority
 end
@@ -4482,7 +4467,6 @@ declare class CurveAnimation extends AnimationClip
 end
 
 declare class KeyframeSequence extends AnimationClip
-	AuthoredHipHeight: number
 	function AddKeyframe(self, keyframe: Keyframe): nil
 	function GetKeyframes(self): { Instance }
 	function RemoveKeyframe(self, keyframe: Keyframe): nil
@@ -4492,7 +4476,6 @@ declare class AnimationClipProvider extends Instance
 	function GetAnimationClipAsync(self, assetId: Content): AnimationClip
 	function GetAnimations(self, userId: number): Instance
 	function GetClipEvaluatorAsync(self, assetId: Content): ClipEvaluator
-	function GetMemStats(self): { [any]: any }
 	function RegisterActiveAnimationClip(self, animationClip: AnimationClip): Content
 	function RegisterAnimationClip(self, animationClip: AnimationClip): Content
 end
@@ -4501,34 +4484,20 @@ declare class AnimationController extends Instance
 end
 
 declare class AnimationFromVideoCreatorService extends Instance
-	function CreateJob(self, filePath: string): string
-	function DownloadJobResult(self, jobId: string, outputFilePath: string): string
-	function FullProcess(self, videoFilePath: string, progressCallback: ((...any) -> ...any)): string
-	function GetJobStatus(self, jobId: string): string
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
-	function CreateAnimationByUploadingVideo(self, progressCallback: ((...any) -> ...any)): string
-	function ImportVideoWithPrompt(self): string
-	function IsAgeRestricted(self): boolean
 end
 
 declare class AnimationRigData extends Instance
-	function LoadFromHumanoid(self, humanoid: Instance): boolean
 end
 
 declare class AnimationStreamTrack extends Instance
 	Animation: TrackerStreamAnimation
 	IsPlaying: boolean
 	Priority: EnumAnimationPriority
-	Stopped: RBXScriptSignal<>
 	WeightCurrent: number
 	WeightTarget: number
-	function AdjustWeight(self, weight: number?, fadeTime: number?): nil
-	function GetTrackerData(self): any
-	function Play(self, fadeTime: number?, weight: number?): nil
-	function Stop(self, fadeTime: number?): nil
-	function TogglePause(self, paused: boolean): nil
 end
 
 declare class AnimationTrack extends Instance
@@ -4555,29 +4524,17 @@ end
 
 declare class Animator extends Instance
 	AnimationPlayed: RBXScriptSignal<AnimationTrack>
-	AnimationPlayedCoreScript: RBXScriptSignal<AnimationTrack>
-	AnimationStreamTrackPlayed: RBXScriptSignal<AnimationStreamTrack>
 	EvaluationThrottled: boolean
 	PreferLodEnabled: boolean
 	RootMotion: CFrame
 	RootMotionWeight: number
 	function ApplyJointVelocities(self, motors: any): nil
 	function GetPlayingAnimationTracks(self): { AnimationTrack }
-	function GetPlayingAnimationTracksCoreScript(self): { any }
 	function LoadAnimation(self, animation: Animation): AnimationTrack
-	function LoadAnimationCoreScript(self, animation: Animation): AnimationTrack
-	function LoadStreamAnimation(self, animation: TrackerStreamAnimation): AnimationStreamTrack
-	function LoadStreamAnimationForSelfieView_deprecated(self, animation: TrackerStreamAnimation, player: Player): AnimationStreamTrack
 	function RegisterEvaluationParallelCallback(self, callback: ((...any) -> ...any)): nil
-	function StepAnimations(self, deltaTime: number): nil
 end
 
 declare class AppUpdateService extends Instance
-	function CanPerformBinaryUpdate(self): boolean
-	function CheckForUpdate(self, handler: ((...any) -> ...any)?): nil
-	function DisableDUAR(self): nil
-	function DisableDUARAndOpenSurvey(self, surveyUrl: string): nil
-	function PerformManagedUpdate(self): boolean
 end
 
 declare class AssetCounterService extends Instance
@@ -4590,72 +4547,14 @@ declare class AssetDeliveryProxy extends Instance
 end
 
 declare class AssetImportService extends Instance
-	function GetAllPresets(self): { [any]: any }
-	function GetPreset(self, name: string): { [any]: any }
-	function PickFileWithPrompt(self): string
-	function PickMultipleFilesWithPrompt(self): { any }
-	function RemovePreset(self, name: string): nil
-	function SavePreset(self, name: string, preset: { [any]: any }): boolean
-	function StartSessionWithPath(self, filePath: string): AssetImportSession
-	function StartSessionWithPrompt(self): AssetImportSession
 end
 
 declare class AssetImportSession extends Instance
 	UploadComplete: RBXScriptSignal<{ [any]: any }>
 	UploadProgress: RBXScriptSignal<number>
-	function ApplyPreset(self, preset: { [any]: any }): nil
-	function ApplySettings(self): nil
-	function Cancel(self): nil
-	function CreatePresetFromData(self, importData: Instance): { [any]: any }
-	function GetCurrentStatusTable(self): { [any]: any }
-	function GetFilename(self): string
-	function GetImportTree(self): Instance
-	function GetInstance(self, nodeId: number): Instance
-	function GetRigVisualization(self): Instance
-	function HasAnimation(self): boolean
-	function IsAvatar(self): boolean
-	function IsGltf(self): boolean
-	function IsR15(self): boolean
-	function Reset(self): nil
-	function Upload(self): nil
-	function usesCustomRestPoseLua(self): boolean
 end
 
 declare class AssetManagerService extends Instance
-	AssetImportedSignal: RBXScriptSignal<EnumAssetType, string, number>
-	ImportSessionFinished: RBXScriptSignal<>
-	ImportSessionStarted: RBXScriptSignal<>
-	MayBeLinkedSourceModified: RBXScriptSignal<string>
-	function AddNewPlace(self): number
-	function CreateAlias(self, assetType: number, assetId: number, aliasName: string): nil
-	function DeleteAlias(self, aliasName: string): nil
-	function GetMeshIdFromAliasName(self, aliasName: string): number
-	function GetMeshIdFromAssetId(self, assetId: number): number
-	function GetTextureIdFromAliasName(self, aliasName: string): number
-	function GetTextureIdFromAssetId(self, assetId: number): number
-	function HasUnpublishedChangesForLinkedSource(self, aliasName: string): boolean
-	function InsertAudio(self, assetId: number, assetName: string): nil
-	function InsertImage(self, assetId: number): nil
-	function InsertLinkedSourceAsLocalScript(self, aliasName: string): nil
-	function InsertLinkedSourceAsModuleScript(self, aliasName: string): nil
-	function InsertLinkedSourceAsScript(self, aliasName: string): nil
-	function InsertMesh(self, aliasName: string, insertWithLocation: boolean): nil
-	function InsertMeshesWithLocation(self, aliasNames: { any }): nil
-	function InsertModel(self, modelId: number): nil
-	function InsertPackage(self, packageId: number): nil
-	function InsertVideo(self, assetId: number, assetName: string): nil
-	function OpenLinkedSource(self, aliasName: string): nil
-	function OpenPlace(self, placeId: number): nil
-	function PublishLinkedSource(self, assetId: number, aliasName: string): nil
-	function RefreshLinkedSource(self, aliasName: string): nil
-	function RemovePlace(self, placeId: number): nil
-	function RenameAlias(self, assetType: number, assetId: number, oldAliasName: string, newAliasName: string): nil
-	function RenameModel(self, modelId: number, newName: string): nil
-	function RenamePlace(self, placeId: number, newName: string): nil
-	function RevertLinkedSourceToLastPublishedVersion(self, aliasName: string): nil
-	function ShowPackageDetails(self, packageId: number): nil
-	function UpdateAllPackages(self, packageId: number): nil
-	function ViewPackageOnWebsite(self, packageId: number): nil
 end
 
 declare class AssetPatchSettings extends Instance
@@ -4665,21 +4564,16 @@ declare class AssetPatchSettings extends Instance
 end
 
 declare class AssetService extends Instance
-	OpenCreateResultModal: RBXScriptSignal<EnumPromptCreateAssetResult>
-	OpenPublishResultModal: RBXScriptSignal<EnumPromptPublishAssetResult>
 	function CreateEditableImageAsync(self, textureId: Content): EditableImage
 	function CreateEditableMeshAsync(self, meshId: Content): EditableMesh
 	function CreateEditableMeshFromPartAsync(self, meshPart: Instance): EditableMesh
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
-	function DeserializeInstance(self, serializedInstance: string): Instance
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
-	function GetBundleDetailsSync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
 	function PromptCreateAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
 	function PromptImportAnimationClipFromVideoAsync(self, player: Player, progressCallback: ((...any) -> ...any)): any
-	function RegisterUGCValidationFunction(self, func: ((...any) -> ...any)): nil
 	function SavePlaceAsync(self): nil
 	function SearchAudio(self, searchParameters: AudioSearchParams): AudioPages
 end
@@ -4717,7 +4611,6 @@ end
 declare class AudioAnalyzer extends Instance
 	PeakLevel: number
 	RmsLevel: number
-	function GetConnectedWires(self, pin: string): { any }
 	function GetSpectrum(self): { any }
 end
 
@@ -4725,7 +4618,6 @@ declare class AudioChorus extends Instance
 	Depth: number
 	Mix: number
 	Rate: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioCompressor extends Instance
@@ -4734,28 +4626,23 @@ declare class AudioCompressor extends Instance
 	Ratio: number
 	Release: number
 	Threshold: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioDeviceInput extends Instance
 	AccessType: EnumAccessModifierType
 	Active: boolean
-	IsReady: boolean
 	Muted: boolean
 	Player: Player
-	function GetConnectedWires(self, pin: string): { any }
 	function GetUserIdAccessList(self): { any }
 	function SetUserIdAccessList(self, userIds: { any }): nil
 end
 
 declare class AudioDeviceOutput extends Instance
 	Player: Player
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioDistortion extends Instance
 	Level: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioEcho extends Instance
@@ -4763,14 +4650,10 @@ declare class AudioEcho extends Instance
 	DryLevel: number
 	Feedback: number
 	WetLevel: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioEmitter extends Instance
 	AudioInteractionGroup: string
-	function GetAudibilityFor(self, listener: AudioListener): number
-	function GetConnectedWires(self, pin: string): { any }
-	function GetInteractingListeners(self): { any }
 end
 
 declare class AudioEqualizer extends Instance
@@ -4778,31 +4661,24 @@ declare class AudioEqualizer extends Instance
 	LowGain: number
 	MidGain: number
 	MidRange: NumberRange
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioFader extends Instance
 	Volume: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioFlanger extends Instance
 	Depth: number
 	Mix: number
 	Rate: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioListener extends Instance
 	AudioInteractionGroup: string
-	function GetAudibilityOf(self, emitter: AudioEmitter): number
-	function GetConnectedWires(self, pin: string): { any }
-	function GetInteractingEmitters(self): { any }
 end
 
 declare class AudioPitchShifter extends Instance
 	Pitch: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioPlayer extends Instance
@@ -4816,7 +4692,6 @@ declare class AudioPlayer extends Instance
 	PlaybackSpeed: number
 	TimeLength: number
 	TimePosition: number
-	function GetConnectedWires(self, pin: string): { any }
 	function Play(self): nil
 	function Stop(self): nil
 end
@@ -4834,7 +4709,6 @@ declare class AudioReverb extends Instance
 	LowShelfGain: number
 	ReferenceFrequency: number
 	WetLevel: number
-	function GetConnectedWires(self, pin: string): { any }
 end
 
 declare class AudioSearchParams extends Instance
@@ -4849,16 +4723,6 @@ declare class AudioSearchParams extends Instance
 end
 
 declare class AvatarChatService extends Instance
-	ClientFeatures: number
-	ClientFeaturesInitialized: boolean
-	ServerFeatures: number
-	function GetClientFeaturesAsync(self): number
-	function GetServerFeaturesAsync(self): number
-	function IsEnabled(self, mask: number, feature: EnumAvatarChatServiceFeature): boolean
-	function IsPlaceEnabled(self): boolean
-	function IsUniverseEnabled(self): boolean
-	function PollClientFeatures(self): number
-	function PollServerFeatures(self): number
 end
 
 declare class AvatarCreationService extends Instance
@@ -4866,19 +4730,11 @@ declare class AvatarCreationService extends Instance
 end
 
 declare class AvatarEditorService extends Instance
-	OpenAllowInventoryReadAccess: RBXScriptSignal<>
-	OpenPromptCreateOufit: RBXScriptSignal<HumanoidDescription, EnumHumanoidRigType>
-	OpenPromptDeleteOutfit: RBXScriptSignal<number>
-	OpenPromptRenameOutfit: RBXScriptSignal<number>
-	OpenPromptSaveAvatar: RBXScriptSignal<HumanoidDescription, EnumHumanoidRigType>
-	OpenPromptSetFavorite: RBXScriptSignal<number, EnumAvatarItemType, boolean>
-	OpenPromptUpdateOutfit: RBXScriptSignal<number, HumanoidDescription, EnumHumanoidRigType>
 	PromptAllowInventoryReadAccessCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptCreateOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult, any>
 	PromptDeleteOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptRenameOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptSaveAvatarCompleted: RBXScriptSignal<EnumAvatarPromptResult, HumanoidDescription>
-	PromptSaveAvatarThumbnailCustomizationCompleted: RBXScriptSignal<EnumAvatarPromptResult, any>
 	PromptSetFavoriteCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptUpdateOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	function CheckApplyDefaultClothing(self, humanoidDescription: HumanoidDescription): HumanoidDescription
@@ -4893,19 +4749,6 @@ declare class AvatarEditorService extends Instance
 	function GetOutfits(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
 	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
 	function GetRecommendedBundles(self, bundleId: number): { any }
-	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string): boolean
-	function NoPromptDeleteOutfit(self, outfitId: number): boolean
-	function NoPromptRenameOutfit(self, outfitId: number, name: string): boolean
-	function NoPromptSaveAvatar(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, saveDict: { [any]: any }, gearAssetId: number?): boolean
-	function NoPromptSaveAvatarThumbnailCustomization(self, thumbnailType: EnumAvatarThumbnailCustomizationType, emoteAssetId: number, cameraDistanceScale: number, yRotDeg: number, fieldOfViewDeg: number?): boolean
-	function NoPromptSetFavorite(self, itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean): boolean
-	function NoPromptUpdateOutfit(self, outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType): boolean
-	function PerformCreateOutfitWithDescription(self, humanoidDescription: HumanoidDescription, name: string): nil
-	function PerformDeleteOutfit(self): nil
-	function PerformRenameOutfit(self, name: string): nil
-	function PerformSaveAvatarWithDescription(self, humanoidDescription: HumanoidDescription, addedAssets: { any }, removedAssets: { any }): nil
-	function PerformSetFavorite(self): nil
-	function PerformUpdateOutfit(self, humanoidDescription: HumanoidDescription): nil
 	function PromptAllowInventoryReadAccess(self): nil
 	function PromptCreateOutfit(self, outfit: HumanoidDescription, rigType: EnumHumanoidRigType): nil
 	function PromptDeleteOutfit(self, outfitId: number): nil
@@ -4914,35 +4757,15 @@ declare class AvatarEditorService extends Instance
 	function PromptSetFavorite(self, itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean): nil
 	function PromptUpdateOutfit(self, outfitId: number, updatedOutfit: HumanoidDescription, rigType: EnumHumanoidRigType): nil
 	function SearchCatalog(self, searchParameters: CatalogSearchParams): CatalogPages
-	function SetAllowInventoryReadAccess(self, inventoryReadAccessGranted: boolean): nil
-	function SignalCreateOutfitFailed(self): nil
-	function SignalCreateOutfitPermissionDenied(self): nil
-	function SignalDeleteOutfitFailed(self): nil
-	function SignalDeleteOutfitPermissionDenied(self): nil
-	function SignalRenameOutfitFailed(self): nil
-	function SignalRenameOutfitPermissionDenied(self): nil
-	function SignalSaveAvatarFailed(self): nil
-	function SignalSaveAvatarPermissionDenied(self): nil
-	function SignalSetFavoriteFailed(self): nil
-	function SignalSetFavoritePermissionDenied(self): nil
-	function SignalUpdateOutfitFailed(self): nil
-	function SignalUpdateOutfitPermissionDenied(self): nil
 end
 
 declare class AvatarImportService extends Instance
-	function ImportFBXAnimationFromFilePathUserMayChooseModel(self, fbxFilePath: string, selectedRig: Instance, userChooseModelThenImportCB: ((...any) -> ...any)): Instance
-	function ImportFBXAnimationUserMayChooseModel(self, selectedRig: Instance, userChooseModelThenImportCB: ((...any) -> ...any)): Instance
-	function ImportFbxRigWithoutSceneLoad(self, isR15: boolean?): Instance
-	function ImportLoadedFBXAnimation(self, useFBXModel: boolean): Instance
-	function LoadRigAndDetectType(self, promptR15Callback: ((...any) -> ...any)): Instance
 end
 
 declare class Backpack extends Instance
 end
 
 declare class BadgeService extends Instance
-	BadgeAwarded: RBXScriptSignal<string, number, number>
-	OnBadgeAwarded: RBXScriptSignal<number, number, number>
 	function AwardBadge(self, userId: number, badgeId: number): boolean
 	function GetBadgeInfoAsync(self, badgeId: number): { [any]: any }
 	function UserHasBadgeAsync(self, userId: number, badgeId: number): boolean
@@ -4954,9 +4777,6 @@ declare class BaseImportData extends Instance
 	ShouldImport: boolean
 	StatusRemoved: RBXScriptSignal<{ [any]: any }>
 	StatusReported: RBXScriptSignal<{ [any]: any }>
-	function CreatePresetFromData(self): { [any]: any }
-	function GetStatuses(self): { [any]: any }
-	function GetStatuses_DEPRECATED(self): { [any]: any }
 end
 
 declare class AnimationImportData extends BaseImportData
@@ -5037,12 +4857,7 @@ declare class BasePlayerGui extends Instance
 end
 
 declare class CoreGui extends BasePlayerGui
-	SelectionImageObject: GuiObject
-	UserGuiRenderingChanged: RBXScriptSignal<boolean, Instance, EnumNormalId, number>
 	Version: number
-	function SetUserGuiRendering(self, enabled: boolean, guiAdornee: Instance, faceId: EnumNormalId, horizontalCurvature: number?): nil
-	function TakeScreenshot(self): nil
-	function ToggleRecording(self): nil
 end
 
 declare class PlayerGui extends BasePlayerGui
@@ -5052,16 +4867,12 @@ declare class PlayerGui extends BasePlayerGui
 end
 
 declare class StarterGui extends BasePlayerGui
-	CoreGuiChangedSignal: RBXScriptSignal<EnumCoreGuiType, boolean>
-	ProcessUserInput: boolean
 	RtlTextSupport: EnumRtlTextSupport
 	ScreenOrientation: EnumScreenOrientation
 	ShowDevelopmentGui: boolean
 	VirtualCursorMode: EnumVirtualCursorMode
 	function GetCore(self, parameterName: string): any
 	function GetCoreGuiEnabled(self, coreGuiType: EnumCoreGuiType): boolean
-	function RegisterGetCore(self, parameterName: string, getFunction: ((...any) -> ...any)): nil
-	function RegisterSetCore(self, parameterName: string, setFunction: ((...any) -> ...any)): nil
 	function SetCore(self, parameterName: string, value: any): nil
 	function SetCoreGuiEnabled(self, coreGuiType: EnumCoreGuiType, enabled: boolean): nil
 end
@@ -5091,11 +4902,6 @@ declare class BaseWrap extends Instance
 	CageOriginWorld: CFrame
 	ImportOrigin: CFrame
 	ImportOriginWorld: CFrame
-	function GetCageOffset(self): Vector3
-	function GetFaces(self, cageType: EnumCageType): { any }
-	function GetVertices(self, cageType: EnumCageType): { any }
-	function IsHSRReady(self): boolean
-	function ModifyVertices(self, cageType: EnumCageType, vertices: { any }): nil
 end
 
 declare class WrapLayer extends BaseWrap
@@ -5203,33 +5009,9 @@ declare class BodyPartDescription extends Instance
 end
 
 declare class Breakpoint extends Instance
-	Condition: string
-	ContinueExecution: boolean
-	Enabled: boolean
-	Id: number
-	Line: number
-	LogMessage: string
-	MetaBreakpointId: number
-	RemoveOnHit: boolean
-	Script: string
-	Valid: boolean
-	Verified: boolean
 end
 
 declare class BrowserService extends Instance
-	AuthCookieCopiedToEngine: RBXScriptSignal<>
-	BrowserWindowClosed: RBXScriptSignal<>
-	BrowserWindowWillNavigate: RBXScriptSignal<string>
-	JavaScriptCallback: RBXScriptSignal<string>
-	function CloseBrowserWindow(self): nil
-	function CopyAuthCookieFromBrowserToEngine(self): nil
-	function EmitHybridEvent(self, moduleName: string, eventName: string, params: string): nil
-	function ExecuteJavaScript(self, javascript: string): nil
-	function OpenBrowserWindow(self, url: string): nil
-	function OpenNativeOverlay(self, title: string, url: string): nil
-	function OpenWeChatAuthWindow(self): nil
-	function ReturnToJavaScript(self, callbackId: string, success: boolean, params: string): nil
-	function SendCommand(self, command: string): nil
 end
 
 declare class BubbleChatMessageProperties extends Instance
@@ -5242,11 +5024,6 @@ declare class BubbleChatMessageProperties extends Instance
 end
 
 declare class BulkImportService extends Instance
-	AssetImported: RBXScriptSignal<EnumAssetType, string, number>
-	BulkImportFinished: RBXScriptSignal<number>
-	BulkImportStarted: RBXScriptSignal<>
-	function LaunchBulkImport(self, assetTypeToImport: number): nil
-	function ShowBulkImportView(self): nil
 end
 
 declare class CacheableContentProvider extends Instance
@@ -5256,16 +5033,12 @@ declare class HSRDataContentProvider extends CacheableContentProvider
 end
 
 declare class MeshContentProvider extends CacheableContentProvider
-	function GetContentMemoryData(self): { [any]: any }
 end
 
 declare class SolidModelContentProvider extends CacheableContentProvider
 end
 
 declare class CalloutService extends Instance
-	function AttachCallout(self, definitionId: string, locationId: string, target: Instance): nil
-	function DefineCallout(self, definitionId: string, title: string, description: string, learnMoreURL: string): nil
-	function DetachCalloutsByDefinitionId(self, definitionId: string): nil
 end
 
 declare class Camera extends Instance
@@ -5288,12 +5061,10 @@ declare class Camera extends Instance
 	function GetRenderCFrame(self): CFrame
 	function GetRoll(self): number
 	function ScreenPointToRay(self, x: number, y: number, depth: number?): Ray
-	function SetImageServerView(self, modelCoord: CFrame): nil
 	function SetRoll(self, rollAngle: number): nil
 	function ViewportPointToRay(self, x: number, y: number, depth: number?): Ray
 	function WorldToScreenPoint(self, worldPoint: Vector3): (Vector3, boolean)
 	function WorldToViewportPoint(self, worldPoint: Vector3): (Vector3, boolean)
-	function Zoom(self, distance: number): boolean
 	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
 end
 
@@ -5301,37 +5072,12 @@ declare class CaptureService extends Instance
 	CaptureBegan: RBXScriptSignal<>
 	CaptureEnded: RBXScriptSignal<>
 	CaptureSaved: RBXScriptSignal<{ [any]: any }>
-	OpenSaveCapturesPrompt: RBXScriptSignal<number, { any }>
-	OpenShareCapturePrompt: RBXScriptSignal<number, Content, string, string>
 	UserCaptureSaved: RBXScriptSignal<Content>
-	function DeleteCapture(self, capturePath: string): nil
-	function GetCaptureSizeAsync(self, captureContentId: Content): Vector2
-	function OnCaptureBegan(self): nil
-	function OnCaptureEnded(self): nil
-	function OnSavePromptFinished(self, promptId: number, results: { [any]: any }): nil
-	function OnSharePromptFinished(self, promptId: number, accepted: boolean): nil
 	function PromptSaveCapturesToGallery(self, contentIds: { any }, resultCallback: ((...any) -> ...any)): nil
 	function PromptShareCapture(self, contentId: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
-	function RetrieveCaptures(self): { any }
-	function SaveCaptureToExternalStorage(self, capturePath: string): nil
-	function SaveScreenshotCapture(self): nil
 end
 
 declare class ChangeHistoryService extends Instance
-	OnRecordingFinished: RBXScriptSignal<string, string?, string?, EnumFinishRecordingOperation, { [any]: any }?>
-	OnRecordingStarted: RBXScriptSignal<string, string?>
-	OnRedo: RBXScriptSignal<string>
-	OnUndo: RBXScriptSignal<string>
-	function FinishRecording(self, identifier: string, operation: EnumFinishRecordingOperation, finalOptions: { [any]: any }?): nil
-	function GetCanRedo(self): any
-	function GetCanUndo(self): any
-	function IsRecordingInProgress(self, identifier: string?): boolean
-	function Redo(self): nil
-	function ResetWaypoints(self): nil
-	function SetEnabled(self, state: boolean): nil
-	function SetWaypoint(self, name: string): nil
-	function TryBeginRecording(self, name: string, displayName: string?): string?
-	function Undo(self): nil
 end
 
 declare class CharacterAppearance extends Instance
@@ -5380,30 +5126,19 @@ end
 
 declare class Chat extends Instance
 	BubbleChatEnabled: boolean
-	BubbleChatSettingsChanged: RBXScriptSignal<any>
 	Chatted: RBXScriptSignal<BasePart, string, EnumChatColor>
 	LoadDefaultChat: boolean
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
 	function Chat(self, partOrCharacter: Instance, message: string, color: EnumChatColor?): nil
-	function ChatLocal(self, partOrCharacter: Instance, message: string, color: EnumChatColor?): nil
 	function FilterStringAsync(self, stringToFilter: string, playerFrom: Player, playerTo: Player): string
 	function FilterStringForBroadcast(self, stringToFilter: string, playerFrom: Player): string
-	function GetShouldUseLuaChat(self): boolean
 	function InvokeChatCallback(self, callbackType: EnumChatCallbackType, callbackArguments: any): any
 	function RegisterChatCallback(self, callbackType: EnumChatCallbackType, callbackFunction: ((...any) -> ...any)): nil
 	function SetBubbleChatSettings(self, settings: any): nil
 end
 
 declare class ChatbotUIService extends Instance
-	ActionActivatedSignal: RBXScriptSignal<string>
-	FindVariationsSignal: RBXScriptSignal<string>
-	SetMaterialSettingsSignal: RBXScriptSignal<string, number, boolean>
-	SettingChangedSignal: RBXScriptSignal<string, any>
-	ShiftToAssetIdSignal: RBXScriptSignal<string, number>
-	ShiftVariationSignal: RBXScriptSignal<string, number>
-	function DisplayContent(self, contentType: string, data: { [any]: any }): nil
-	function GetSettings(self): { [any]: any }
 end
 
 declare class ClickDetector extends Instance
@@ -5487,22 +5222,11 @@ end
 
 declare class CommandInstance extends Instance
 	AllowGUIAccessPoints: boolean
-	Checked: boolean
-	DefaultShortcut: string
 	DisplayName: string
-	Enabled: boolean
-	Icon: string
 	Name: string
-	Permission: EnumCommandPermission
-	StatusTip: string
-	function EnableGuiAccess(self, displayName: string, statusTip: string, defaultShortcut: string): nil
-	function RegisterExecutionCallback(self, callbackFunction: ((...any) -> ...any)): nil
 end
 
 declare class CommandService extends Instance
-	CommandExecuting: RBXScriptSignal<string, any>
-	function Execute(self, name: string, params: any): any
-	function RegisterCommand(self, plugin: Plugin, name: string, context: string, permission: EnumCommandPermission?): CommandInstance
 end
 
 declare class Configuration extends Instance
@@ -5734,12 +5458,8 @@ declare class ContentProvider extends Instance
 	AssetFetchFailed: RBXScriptSignal<Content>
 	BaseUrl: string
 	RequestQueueSize: number
-	function CalculateNumTrianglesInMesh(self, meshId: string): number
-	function CalculateNumTrianglesInMeshSync(self, meshId: string): number
 	function GetAssetFetchStatus(self, contentId: Content): EnumAssetFetchStatus
 	function GetAssetFetchStatusChangedSignal(self, contentId: Content): RBXScriptSignal
-	function GetDetailedFailedRequests(self): { any }
-	function GetFailedRequests(self): { any }
 	function ListEncryptedAssets(self): { any }
 	function PreloadAsync(self, contentIdList: { any }, callbackFunction: ((...any) -> ...any)?): nil
 	function RegisterDefaultEncryptionKey(self, encryptionKey: string): nil
@@ -5752,24 +5472,13 @@ declare class ContentProvider extends Instance
 end
 
 declare class ContextActionService extends Instance
-	BoundActionAdded: RBXScriptSignal<string, boolean, { [any]: any }, boolean>
-	BoundActionChanged: RBXScriptSignal<string, string, { [any]: any }>
-	BoundActionRemoved: RBXScriptSignal<string, { [any]: any }, boolean>
-	GetActionButtonEvent: RBXScriptSignal<string>
 	LocalToolEquipped: RBXScriptSignal<Tool>
 	LocalToolUnequipped: RBXScriptSignal<Tool>
 	function BindAction(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, ...: EnumUserInputType | EnumKeyCode): ()
 	function BindActionAtPriority(self, actionName: string, functionToBind: (actionName: string, inputState: EnumUserInputState, inputObject: InputObject) -> EnumContextActionResult?, createTouchButton: boolean, priorityLevel: number, ...: EnumUserInputType | EnumKeyCode): ()
 	function BindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodesForActivation: any): nil
-	function BindCoreAction(self, actionName: string, functionToBind: ((...any) -> ...any), createTouchButton: boolean, inputTypes: any): nil
-	function BindCoreActionAtPriority(self, actionName: string, functionToBind: ((...any) -> ...any), createTouchButton: boolean, priorityLevel: number, inputTypes: any): nil
-	function BindCoreActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodesForActivation: any): nil
-	function CallFunction(self, actionName: string, state: EnumUserInputState, inputObject: Instance): any
-	function FireActionButtonFoundSignal(self, actionName: string, actionButton: Instance): nil
 	function GetAllBoundActionInfo(self): { [any]: any }
-	function GetAllBoundCoreActionInfo(self): { [any]: any }
 	function GetBoundActionInfo(self, actionName: string): { [any]: any }
-	function GetBoundCoreActionInfo(self, actionName: string): { [any]: any }
 	function GetButton(self, actionName: string): ImageButton
 	function GetCurrentLocalToolIcon(self): string
 	function SetDescription(self, actionName: string, description: string): nil
@@ -5779,8 +5488,6 @@ declare class ContextActionService extends Instance
 	function UnbindAction(self, actionName: string): nil
 	function UnbindActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodeForActivation: EnumKeyCode?): nil
 	function UnbindAllActions(self): nil
-	function UnbindCoreAction(self, actionName: string): nil
-	function UnbindCoreActivate(self, userInputTypeForActivation: EnumUserInputType, keyCodeForActivation: EnumKeyCode?): nil
 end
 
 declare class Controller extends Instance
@@ -5872,17 +5579,12 @@ declare class CoreScriptDebuggingManagerHelper extends Instance
 end
 
 declare class CoreScriptSyncService extends Instance
-	function GetScriptFilePath(self, script: Instance): any
 end
 
 declare class CreationDBService extends Instance
 end
 
 declare class CrossDMScriptChangeListener extends Instance
-	GuidLineContentsChanged: RBXScriptSignal<string, number, string>
-	GuidNameChanged: RBXScriptSignal<string, string>
-	function IsWatchingScriptLine(self, scriptRef: string, lineNumber: number): boolean
-	function StartWatchingScriptLine(self, scriptRef: string, debuggerConnectionId: number, lineNumber: number): nil
 end
 
 
@@ -5937,18 +5639,9 @@ declare class SpecialMesh extends FileMesh
 end
 
 declare class DataModelPatchService extends Instance
-	function GetPatch(self, patchName: string): Instance
-	function RegisterPatch(self, patchName: string, behaviorName: string, localConfigPath: string, userId: number): nil
-	function UpdatePatch(self, userId: number, patchName: string, callbackFunction: ((...any) -> ...any)): nil
 end
 
 declare class DataModelSession extends Instance
-	CurrentDataModelType: EnumStudioDataModelType
-	CurrentDataModelTypeAboutToChange: RBXScriptSignal<EnumStudioDataModelType>
-	CurrentDataModelTypeChanged: RBXScriptSignal<>
-	DataModelCreated: RBXScriptSignal<EnumStudioDataModelType>
-	DataModelWillBeDestroyed: RBXScriptSignal<EnumStudioDataModelType>
-	SessionId: string
 end
 
 declare class DataStoreGetOptions extends Instance
@@ -6032,56 +5725,15 @@ declare class DebuggerBreakpoint extends Instance
 end
 
 declare class DebuggerConnection extends Instance
-	BreakpointAdded: RBXScriptSignal<Breakpoint>
-	BreakpointChanged: RBXScriptSignal<Breakpoint>
-	BreakpointRemoved: RBXScriptSignal<Breakpoint, EnumBreakpointRemoveReason>
-	ErrorMessage: string
-	HasError: boolean
-	Id: number
-	IsPaused: boolean
-	Paused: RBXScriptSignal<PausedState, EnumDebuggerPauseReason>
-	Resumed: RBXScriptSignal<PausedState>
-	function AddBreakpoint(self, script: string, line: number, breakpoint: Breakpoint): nil
-	function Close(self): nil
-	function EvaluateWatch(self, expression: string, frame: StackFrame, callback: ((...any) -> ...any)): number
-	function GetFrameById(self, id: number): StackFrame
-	function GetSource(self, scriptRef: string, status: ((...any) -> ...any)): number
-	function GetThreadById(self, id: number): ThreadState
-	function GetThreads(self, callback: ((...any) -> ...any)): number
-	function GetVariableById(self, id: number): DebuggerVariable
-	function Pause(self, thread: ThreadState, status: ((...any) -> ...any)): number
-	function Populate(self, instance: Instance, callback: ((...any) -> ...any)): number
-	function RemoveBreakpoint(self, breakpoint: Breakpoint): nil
-	function Resume(self, thread: ThreadState, status: ((...any) -> ...any)): number
-	function SetExceptionBreakMode(self, breakMode: EnumDebuggerExceptionBreakMode, callback: ((...any) -> ...any)): number
-	function SetVariable(self, variable: DebuggerVariable, value: string, callback: ((...any) -> ...any)): number
-	function Step(self, thread: ThreadState, callback: ((...any) -> ...any)): number
-	function StepIn(self, thread: ThreadState, callback: ((...any) -> ...any)): number
-	function StepOut(self, thread: ThreadState, callback: ((...any) -> ...any)): number
-	function UpdateSelectedFrame(self, threadId: number, frameNumber: number): nil
 end
 
 declare class LocalDebuggerConnection extends DebuggerConnection
 end
 
 declare class DebuggerConnectionManager extends Instance
-	ConnectionEnded: RBXScriptSignal<DebuggerConnection, EnumDebuggerEndReason>
-	ConnectionStarted: RBXScriptSignal<DebuggerConnection>
-	FocusChanged: RBXScriptSignal<DebuggerConnection>
-	Timeout: number
-	function ConnectLocal(self, dataModel: DataModel): number
-	function ConnectRemote(self, host: string, port: number): number
-	function FocusConnection(self, connection: DebuggerConnection): nil
-	function GetConnectionById(self, id: number): DebuggerConnection
 end
 
 declare class DebuggerLuaResponse extends Instance
-	IsError: boolean
-	IsSuccess: boolean
-	Message: string
-	RequestId: number
-	Status: EnumDebuggerStatus
-	function GetArg(self): any
 end
 
 declare class DebuggerManager extends Instance
@@ -6095,30 +5747,9 @@ declare class DebuggerManager extends Instance
 end
 
 declare class DebuggerUIService extends Instance
-	ExpressionAdded: RBXScriptSignal<string>
-	ExpressionsCleared: RBXScriptSignal<>
-	function EditBreakpoint(self, metaBreakpointId: number): nil
-	function EditWatch(self, expression: string): nil
-	function IsConnectionForPlayDataModel(self, debuggerConnectionId: number): boolean
-	function OpenExceptionMessagePopup(self, exceptionMessage: string, pausedLine: number): nil
-	function OpenScriptAtLine(self, guid: string, debuggerConnectionId: number, line: number, showErrorOnFail: boolean): nil
-	function Pause(self): nil
-	function RemoveScriptLineMarkers(self, debuggerConnectionId: number, allMarkers: boolean): nil
-	function Resume(self): nil
-	function SetCurrentThreadId(self, debuggerThreadId: number): nil
-	function SetScriptLineMarker(self, guid: string, debuggerConnectionId: number, line: number, lineMarkerType: boolean): nil
-	function SetWatchExpressions(self, expressions: { any }): nil
 end
 
 declare class DebuggerVariable extends Instance
-	Name: string
-	Populated: boolean
-	Type: string
-	Value: string
-	VariableId: number
-	VariablesCount: number
-	function GetVariableByIndex(self, index: number): DebuggerVariable
-	function GetVariableByName(self, name: string): DebuggerVariable
 end
 
 declare class DebuggerWatch extends Instance
@@ -6126,7 +5757,6 @@ declare class DebuggerWatch extends Instance
 end
 
 declare class DeviceIdService extends Instance
-	function GetDeviceId(self): string
 end
 
 declare class Dialog extends Instance
@@ -6142,8 +5772,6 @@ declare class Dialog extends Instance
 	TriggerDistance: number
 	TriggerOffset: Vector3
 	function GetCurrentPlayers(self): { Player }
-	function SetPlayerIsUsing(self, player: Instance, isUsing: boolean): nil
-	function SignalDialogChoiceSelected(self, player: Instance, dialogChoice: Instance): nil
 end
 
 declare class DialogChoice extends Instance
@@ -6154,21 +5782,6 @@ declare class DialogChoice extends Instance
 end
 
 declare class DraftsService extends Instance
-	CommitStatusChanged: RBXScriptSignal<Instance, EnumDraftStatusCode>
-	DraftAdded: RBXScriptSignal<Instance>
-	DraftRemoved: RBXScriptSignal<Instance>
-	DraftStatusChanged: RBXScriptSignal<Instance>
-	EditorsListChanged: RBXScriptSignal<Instance>
-	UpdateStatusChanged: RBXScriptSignal<Instance, EnumDraftStatusCode>
-	function CommitEdits(self, scripts: { Instance }): nil
-	function DiscardEdits(self, scripts: { Instance }): nil
-	function GetDraftStatus(self, script: Instance): EnumDraftStatusCode
-	function GetDrafts(self): { Instance }
-	function GetEditors(self, script: Instance): { Instance }
-	function RestoreScripts(self, scripts: { Instance }): nil
-	function ShowDiffsAgainstBase(self, scripts: { Instance }): nil
-	function ShowDiffsAgainstServer(self, scripts: { Instance }): nil
-	function UpdateToLatestVersion(self, scripts: { Instance }): nil
 end
 
 declare class Dragger extends Instance
@@ -6188,12 +5801,10 @@ declare class DraggerService extends Instance
 	DraggerMovementMode: EnumDraggerMovementMode
 	GeometrySnapColor: Color3
 	HoverAnimateFrequency: number
-	HoverLineThickness: number
 	HoverThickness: number
 	JointsEnabled: boolean
 	LinearSnapEnabled: boolean
 	LinearSnapIncrement: number
-	PivotSnapToGeometry: boolean
 	ShowHover: boolean
 	ShowPivotIndicator: boolean
 end
@@ -6225,15 +5836,9 @@ declare class EulerRotationCurve extends Instance
 end
 
 declare class EventIngestService extends Instance
-	function SendEventDeferred(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SendEventImmediately(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SetRBXEvent(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SetRBXEventStream(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
 end
 
 declare class ExperienceAuthService extends Instance
-	OpenAuthPrompt: RBXScriptSignal<string, { any }, { [any]: any }>
-	function ScopeCheckUIComplete(self, guid: string, scopes: { any }, result: EnumScopeCheckResult, metadata: { [any]: any }): nil
 end
 
 declare class ExperienceInviteOptions extends Instance
@@ -6248,18 +5853,9 @@ declare class ExperienceNotificationService extends Instance
 end
 
 declare class ExperienceService extends Instance
-	function LaunchExperience(self, params: { [any]: any }): string
-	function LaunchExperienceFromSource(self, params: { [any]: any }, source: string): string
-	function LaunchExperienceFromSourceWithCallback(self, params: { [any]: any }, source: string, callback: ((...any) -> ...any)): nil
-	function RegisterForExperienceJoin(self, callback: ((...any) -> ...any)): RBXScriptConnection
-	function RegisterForExperienceLeave(self, callback: ((...any) -> ...any)): RBXScriptConnection
 end
 
 declare class ExperienceStateCaptureService extends Instance
-	IsInCaptureMode: boolean
-	ItemSelectedInCaptureMode: RBXScriptSignal<Instance>
-	function ResetHighlight(self): nil
-	function ToggleCaptureMode(self): nil
 end
 
 declare class Explosion extends Instance
@@ -6274,71 +5870,9 @@ declare class Explosion extends Instance
 end
 
 declare class FaceAnimatorService extends Instance
-	AudioAnimationEnabled: boolean
-	FaceTrackingStatusEnum: EnumTrackerFaceTrackingStatus
-	FlipHeadOrientation: boolean
-	TrackerError: RBXScriptSignal<EnumTrackerError>
-	TrackerPrompt: RBXScriptSignal<EnumTrackerPromptEvent>
-	VideoAnimationEnabled: boolean
-	function GetTrackerLodController(self): TrackerLodController
-	function Init(self, videoEnabled: boolean, audioEnabled: boolean): nil
-	function IsStarted(self): boolean
-	function Start(self): nil
-	function Step(self): nil
-	function Stop(self): nil
 end
 
 declare class FaceControls extends Instance
-	ChinRaiser: number
-	ChinRaiserUpperLip: number
-	Corrugator: number
-	EyesLookDown: number
-	EyesLookLeft: number
-	EyesLookRight: number
-	EyesLookUp: number
-	FlatPucker: number
-	Funneler: number
-	JawDrop: number
-	JawLeft: number
-	JawRight: number
-	LeftBrowLowerer: number
-	LeftCheekPuff: number
-	LeftCheekRaiser: number
-	LeftDimpler: number
-	LeftEyeClosed: number
-	LeftEyeUpperLidRaiser: number
-	LeftInnerBrowRaiser: number
-	LeftLipCornerDown: number
-	LeftLipCornerPuller: number
-	LeftLipStretcher: number
-	LeftLowerLipDepressor: number
-	LeftNoseWrinkler: number
-	LeftOuterBrowRaiser: number
-	LeftUpperLipRaiser: number
-	LipPresser: number
-	LipsTogether: number
-	LowerLipSuck: number
-	MouthLeft: number
-	MouthRight: number
-	Pucker: number
-	RightBrowLowerer: number
-	RightCheekPuff: number
-	RightCheekRaiser: number
-	RightDimpler: number
-	RightEyeClosed: number
-	RightEyeUpperLidRaiser: number
-	RightInnerBrowRaiser: number
-	RightLipCornerDown: number
-	RightLipCornerPuller: number
-	RightLipStretcher: number
-	RightLowerLipDepressor: number
-	RightNoseWrinkler: number
-	RightOuterBrowRaiser: number
-	RightUpperLipRaiser: number
-	TongueDown: number
-	TongueOut: number
-	TongueUp: number
-	UpperLipSuck: number
 end
 
 declare class FaceInstance extends Instance
@@ -6361,24 +5895,12 @@ declare class Texture extends Decal
 end
 
 declare class FacialAnimationRecordingService extends Instance
-	BiometricDataConsent: boolean
-	function CheckOrRequestCameraPermission(self): string
-	function IsAgeRestricted(self): boolean
 end
 
 declare class FacialAnimationStreamingServiceStats extends Instance
-	function Get(self, label: string): number
-	function GetWithPlayerId(self, label: string, playerId: number): number
 end
 
 declare class FacialAnimationStreamingServiceV2 extends Instance
-	ServiceState: number
-	function GetStats(self): FacialAnimationStreamingServiceStats
-	function IsAudioEnabled(self, mask: number): boolean
-	function IsPlaceEnabled(self, mask: number): boolean
-	function IsServerEnabled(self, mask: number): boolean
-	function IsVideoEnabled(self, mask: number): boolean
-	function ResolveStateForUser(self, userId: number): number
 end
 
 declare class FacialAnimationStreamingSubsessionStats extends Instance
@@ -6396,9 +5918,6 @@ end
 
 
 declare class File extends Instance
-	Size: number
-	function GetBinaryContents(self): string
-	function GetTemporaryId(self): Content
 end
 
 declare class Fire extends Instance
@@ -6408,7 +5927,6 @@ declare class Fire extends Instance
 	SecondaryColor: Color3
 	Size: number
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class FlagStandService extends Instance
@@ -6442,8 +5960,6 @@ declare class ForceField extends Instance
 end
 
 declare class FriendService extends Instance
-	FriendsUpdated: RBXScriptSignal<{ any }>
-	function GetPlatformFriends(self): { any }
 end
 
 
@@ -6453,17 +5969,12 @@ end
 
 declare class GameSettings extends Instance
 	VideoCaptureEnabled: boolean
-	VideoRecording: boolean
-	VideoRecordingChangeRequest: RBXScriptSignal<boolean>
 end
 
 declare class GamepadService extends Instance
 	GamepadCursorEnabled: boolean
-	GamepadThumbstick1Changed: RBXScriptSignal<Vector2>
 	function DisableGamepadCursor(self): nil
 	function EnableGamepadCursor(self, guiObject: Instance): nil
-	function GetGamepadCursorPosition(self): Vector2
-	function SetGamepadCursorPosition(self, position: Vector2): nil
 end
 
 declare class Geometry extends Instance
@@ -6471,9 +5982,7 @@ end
 
 declare class GeometryService extends Instance
 	function CalculateConstraintsToPreserve(self, source: Instance, destination: { any }, options: { [any]: any }?): { any }
-	function HashMeshAsync(self, meshId: Content): string
 	function IntersectAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
-	function StitchMeshesAsync(self, meshParts: { any }): Content
 	function SubtractAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 	function UnionAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 end
@@ -6526,9 +6035,6 @@ declare class GuiBase2d extends GuiBase
 	AbsoluteRotation: number
 	AbsoluteSize: Vector2
 	AutoLocalize: boolean
-	ClippedRect: Rect
-	IsNotOccluded: boolean
-	RawRect2D: Rect
 	RootLocalizationTable: LocalizationTable
 	SelectionBehaviorDown: EnumSelectionBehavior
 	SelectionBehaviorLeft: EnumSelectionBehavior
@@ -6536,7 +6042,6 @@ declare class GuiBase2d extends GuiBase
 	SelectionBehaviorUp: EnumSelectionBehavior
 	SelectionChanged: RBXScriptSignal<boolean, GuiObject, GuiObject>
 	SelectionGroup: boolean
-	TotalGroupScale: number
 end
 
 declare class GuiObject extends GuiBase2d
@@ -6611,7 +6116,6 @@ declare class GuiButton extends GuiObject
 end
 
 declare class ImageButton extends GuiButton
-	ContentImageSize: Vector2
 	HoverImage: Content
 	Image: Content
 	ImageColor3: Color3
@@ -6625,7 +6129,6 @@ declare class ImageButton extends GuiButton
 	SliceCenter: Rect
 	SliceScale: number
 	TileSize: UDim2
-	function SetEnableContentImageSizeChangedEvents(self, enabled: boolean): nil
 end
 
 declare class TextButton extends GuiButton
@@ -6633,8 +6136,6 @@ declare class TextButton extends GuiButton
 	Font: EnumFont
 	FontFace: Font
 	LineHeight: number
-	LocalizationMatchIdentifier: string
-	LocalizationMatchedSourceText: string
 	LocalizedText: string
 	MaxVisibleGraphemes: number
 	RichText: boolean
@@ -6652,14 +6153,12 @@ declare class TextButton extends GuiButton
 	TextWrapped: boolean
 	TextXAlignment: EnumTextXAlignment
 	TextYAlignment: EnumTextYAlignment
-	function SetTextFromInput(self, text: string): nil
 end
 
 declare class GuiLabel extends GuiObject
 end
 
 declare class ImageLabel extends GuiLabel
-	ContentImageSize: Vector2
 	Image: Content
 	ImageColor3: Color3
 	ImageRectOffset: Vector2
@@ -6671,7 +6170,6 @@ declare class ImageLabel extends GuiLabel
 	SliceCenter: Rect
 	SliceScale: number
 	TileSize: UDim2
-	function SetEnableContentImageSizeChangedEvents(self, enabled: boolean): nil
 end
 
 declare class TextLabel extends GuiLabel
@@ -6679,8 +6177,6 @@ declare class TextLabel extends GuiLabel
 	Font: EnumFont
 	FontFace: Font
 	LineHeight: number
-	LocalizationMatchIdentifier: string
-	LocalizationMatchedSourceText: string
 	LocalizedText: string
 	MaxVisibleGraphemes: number
 	RichText: boolean
@@ -6698,7 +6194,6 @@ declare class TextLabel extends GuiLabel
 	TextWrapped: boolean
 	TextXAlignment: EnumTextXAlignment
 	TextYAlignment: EnumTextYAlignment
-	function SetTextFromInput(self, text: string): nil
 end
 
 declare class ScrollingFrame extends GuiObject
@@ -6709,23 +6204,16 @@ declare class ScrollingFrame extends GuiObject
 	CanvasPosition: Vector2
 	CanvasSize: UDim2
 	ElasticBehavior: EnumElasticBehavior
-	HorizontalBarRect: Rect
 	HorizontalScrollBarInset: EnumScrollBarInset
-	MaxCanvasPosition: Vector2
 	MidImage: Content
 	ScrollBarImageColor3: Color3
 	ScrollBarImageTransparency: number
 	ScrollBarThickness: number
-	ScrollVelocity: Vector2
 	ScrollingDirection: EnumScrollingDirection
 	ScrollingEnabled: boolean
 	TopImage: Content
-	VerticalBarRect: Rect
 	VerticalScrollBarInset: EnumScrollBarInset
 	VerticalScrollBarPosition: EnumVerticalScrollBarPosition
-	function ClearInertialScrolling(self): nil
-	function GetSampledInertialVelocity(self): Vector2
-	function ScrollToTop(self): nil
 end
 
 declare class TextBox extends GuiObject
@@ -6737,15 +6225,10 @@ declare class TextBox extends GuiObject
 	Font: EnumFont
 	FontFace: Font
 	LineHeight: number
-	LocalizationMatchIdentifier: string
-	LocalizationMatchedSourceText: string
-	ManualFocusRelease: boolean
 	MaxVisibleGraphemes: number
 	MultiLine: boolean
-	OverlayNativeInput: boolean
 	PlaceholderColor3: Color3
 	PlaceholderText: string
-	ReturnKeyType: EnumReturnKeyType
 	ReturnPressedFromOnScreenKeyboard: RBXScriptSignal<>
 	RichText: boolean
 	SelectionStart: number
@@ -6756,7 +6239,6 @@ declare class TextBox extends GuiObject
 	TextDirection: EnumTextDirection
 	TextEditable: boolean
 	TextFits: boolean
-	TextInputType: EnumTextInputType
 	TextScaled: boolean
 	TextSize: number
 	TextStrokeColor3: Color3
@@ -6769,8 +6251,6 @@ declare class TextBox extends GuiObject
 	function CaptureFocus(self): nil
 	function IsFocused(self): boolean
 	function ReleaseFocus(self, submitted: boolean?): nil
-	function ResetKeyboardMode(self): nil
-	function SetTextFromInput(self, text: string): nil
 end
 
 declare class VideoFrame extends GuiObject
@@ -6796,10 +6276,8 @@ declare class ViewportFrame extends GuiObject
 	CurrentCamera: Camera
 	ImageColor3: Color3
 	ImageTransparency: number
-	IsMirrored: boolean
 	LightColor: Color3
 	LightDirection: Vector3
-	function CaptureSnapshotAsync(self): Content
 end
 
 declare class LayerCollector extends GuiBase2d
@@ -6827,24 +6305,15 @@ declare class BillboardGui extends LayerCollector
 	SizeOffset: Vector2
 	StudsOffset: Vector3
 	StudsOffsetWorldSpace: Vector3
-	function GetScreenSpaceBounds(self): any
 end
 
 declare class PluginGui extends LayerCollector
-	PluginDragDropped: RBXScriptSignal<{ [any]: any }>
-	PluginDragEntered: RBXScriptSignal<{ [any]: any }>
-	PluginDragLeft: RBXScriptSignal<{ [any]: any }>
-	PluginDragMoved: RBXScriptSignal<{ [any]: any }>
 	Title: string
-	WindowFocusReleased: RBXScriptSignal<>
-	WindowFocused: RBXScriptSignal<>
 	function BindToClose(self, func: ((...any) -> ...any)?): nil
-	function GetRelativeMousePosition(self): Vector2
 end
 
 declare class DockWidgetPluginGui extends PluginGui
 	HostWidgetWasRestored: boolean
-	function RequestRaise(self): nil
 end
 
 declare class QWidgetPluginGui extends PluginGui
@@ -6854,7 +6323,6 @@ declare class ScreenGui extends LayerCollector
 	ClipToDeviceSafeArea: boolean
 	DisplayOrder: number
 	IgnoreGuiInset: boolean
-	OnTopOfCoreBlur: boolean
 	SafeAreaCompatibility: EnumSafeAreaCompatibility
 	ScreenInsets: EnumScreenInsets
 end
@@ -6880,11 +6348,9 @@ declare class SurfaceGui extends SurfaceGuiBase
 	Brightness: number
 	CanvasSize: Vector2
 	ClipsDescendants: boolean
-	HorizontalCurvature: number
 	LightInfluence: number
 	MaxDistance: number
 	PixelsPerStud: number
-	Shape: EnumSurfaceGuiShape
 	SizingMode: EnumSurfaceGuiSizingMode
 	ToolPunchThroughDistance: number
 	ZOffset: number
@@ -6904,7 +6370,6 @@ end
 
 declare class SelectionBox extends InstanceAdornment
 	LineThickness: number
-	StudioSelectionBox: boolean
 	SurfaceColor3: Color3
 	SurfaceTransparency: number
 end
@@ -6964,12 +6429,6 @@ declare class WireframeHandleAdornment extends HandleAdornment
 end
 
 declare class ParabolaAdornment extends PVAdornment
-	A: number
-	B: number
-	C: number
-	Range: number
-	Thickness: number
-	function FindPartOnParabola(self, ignoreDescendentsTable: { Instance }): any
 end
 
 declare class SelectionSphere extends PVAdornment
@@ -7016,104 +6475,36 @@ end
 
 
 declare class Path2D extends GuiBase
-	AbsoluteSize: Vector2
-	Color: Color3
-	Position: UDim2
-	SelectedControlPoint: number
-	Thickness: number
-	Transparency: number
-	Visible: boolean
-	function GetControlPoints(self): { any }
-	function GetPositionOnCurve(self, t: number): UDim2
-	function GetPositionOnCurveArcLength(self, t: number): UDim2
-	function GetSegmentCount(self): number
-	function GetTangentOnCurve(self, t: number): Vector2
-	function GetTangentOnCurveArcLength(self, t: number): Vector2
-	function SetControlPoints(self, controlPoints: { any }): nil
 end
 
 declare class GuiService extends Instance
 	AutoSelectGuiEnabled: boolean
-	CloseInspectMenuRequest: RBXScriptSignal<>
-	CoreEffectFolder: Folder
-	CoreGuiFolder: Folder
 	CoreGuiNavigationEnabled: boolean
-	CoreGuiRenderOverflowed: RBXScriptSignal<>
-	EmotesMenuOpenChanged: RBXScriptSignal<boolean>
 	GuiNavigationEnabled: boolean
-	GuiVisibilityChangedSignal: RBXScriptSignal<EnumGuiType, boolean>
-	InspectMenuEnabledChangedSignal: RBXScriptSignal<boolean>
-	InspectPlayerFromHumanoidDescriptionRequest: RBXScriptSignal<Instance, string>
-	InspectPlayerFromUserIdWithCtxRequest: RBXScriptSignal<number, string>
-	KeyPressed: RBXScriptSignal<string, string>
 	MenuClosed: RBXScriptSignal<>
 	MenuIsOpen: boolean
 	MenuOpened: RBXScriptSignal<>
-	NativeClose: RBXScriptSignal<>
-	NetworkPausedEnabledChanged: RBXScriptSignal<boolean>
-	Open9SliceEditor: RBXScriptSignal<Instance>
 	PreferredTransparency: number
-	PurchasePromptShown: RBXScriptSignal<>
 	ReducedMotionEnabled: boolean
-	SafeZoneOffsetsChanged: RBXScriptSignal<>
-	SelectedCoreObject: GuiObject
 	SelectedObject: GuiObject?
-	SendCoreUiNotification: (title: string, text: string) -> nil
-	ShowLeaveConfirmation: RBXScriptSignal<>
-	SpecialKeyPressed: RBXScriptSignal<EnumSpecialKey, string>
 	TopbarInset: Rect
 	TouchControlsEnabled: boolean
-	UiMessageChanged: RBXScriptSignal<EnumUiMessageType, string>
-	function AddCenterDialog(self, dialog: Instance, centerDialogType: EnumCenterDialogType, showFunction: ((...any) -> ...any), hideFunction: ((...any) -> ...any)): nil
-	function AddKey(self, key: string): nil
 	function AddSelectionParent(self, selectionName: string, selectionParent: Instance): nil
 	function AddSelectionTuple(self, selectionName: string, selections: any): nil
-	function AddSpecialKey(self, key: EnumSpecialKey): nil
-	function BroadcastNotification(self, data: string, notificationType: number): nil
-	function ClearError(self): nil
 	function CloseInspectMenu(self): nil
-	function CloseStatsBasedOnInputString(self, input: string): boolean
-	function ForceTenFootInterface(self, isForced: boolean): nil
-	function GetBrickCount(self): number
-	function GetClosestDialogToPosition(self, position: Vector3): Instance
 	function GetEmotesMenuOpen(self): boolean
-	function GetErrorCode(self): EnumConnectionError
-	function GetErrorType(self): EnumConnectionError
 	function GetGameplayPausedNotificationEnabled(self): boolean
 	function GetGuiInset(self): (Vector2, Vector2)
-	function GetGuiIsVisible(self, guiType: EnumGuiType): boolean
-	function GetHardwareSafeViewport(self): Vector2
 	function GetInspectMenuEnabled(self): boolean
-	function GetNotificationTypeList(self): { [any]: any }
-	function GetResolutionScale(self): number
-	function GetSafeZoneOffsets(self): { [any]: any }
-	function GetScreenResolution(self): Vector2
-	function GetUiMessage(self): string
 	function InspectPlayerFromHumanoidDescription(self, humanoidDescription: HumanoidDescription, name: string): nil
 	function InspectPlayerFromUserId(self, userId: number): nil
-	function InspectPlayerFromUserIdWithCtx(self, userId: number, ctx: string): nil
-	function IsMemoryTrackerEnabled(self): boolean
 	function IsTenFootInterface(self): boolean
-	function RemoveCenterDialog(self, dialog: Instance): nil
-	function RemoveKey(self, key: string): nil
 	function RemoveSelectionGroup(self, selectionName: string): nil
-	function RemoveSpecialKey(self, key: EnumSpecialKey): nil
 	function Select(self, selectionParent: Instance): nil
-	function SendUIOcclusionMetricsForQueryRegion(self, position: UDim2, size: UDim2, regionName: string): nil
 	function SetEmotesMenuOpen(self, isOpen: boolean): nil
 	function SetGameplayPausedNotificationEnabled(self, enabled: boolean): nil
-	function SetGlobalGuiInset(self, x1: number, y1: number, x2: number, y2: number): nil
-	function SetHardwareSafeAreaInsets(self, left: number, top: number, right: number, bottom: number): nil
 	function SetInspectMenuEnabled(self, enabled: boolean): nil
-	function SetMenuIsOpen(self, open: boolean, menuName: string?): nil
-	function SetPurchasePromptIsShown(self, isShown: boolean): nil
-	function SetSafeZoneOffsets(self, top: number, bottom: number, left: number, right: number): nil
-	function SetTopbarInset(self, topbarInset: Rect): nil
 	function SetUiMessage(self, msgType: EnumUiMessageType, uiMessage: string?): nil
-	function ShowStatsBasedOnInputString(self, input: string): boolean
-	function ToggleFullscreen(self): nil
-	function ToggleGuiIsVisibleForCaptures(self, guiType: EnumGuiType): nil
-	function ToggleGuiIsVisibleIfAllowed(self, guiType: EnumGuiType): nil
 end
 
 declare class GuidRegistryService extends Instance
@@ -7127,14 +6518,6 @@ declare class HapticService extends Instance
 end
 
 declare class HeightmapImporterService extends Instance
-	ColormapHasUnknownPixels: RBXScriptSignal<>
-	ProgressUpdate: RBXScriptSignal<number, string>
-	function CancelImportHeightmap(self): nil
-	function GetHeightmapPreviewAsync(self, heightmapAssetId: Content): any
-	function ImportHeightmap(self, region: Region3, heightmapAssetId: Content, colormapAssetId: Content, defaultMaterial: EnumMaterial): nil
-	function IsValidColormap(self, colormapAssetId: Content): any
-	function IsValidHeightmap(self, heightmapAssetId: Content): any
-	function SetImportHeightmapPaused(self, paused: boolean): nil
 end
 
 declare class HiddenSurfaceRemovalAsset extends Instance
@@ -7146,42 +6529,28 @@ declare class Highlight extends Instance
 	Enabled: boolean
 	FillColor: Color3
 	FillTransparency: number
-	LineThickness: number
 	OutlineColor: Color3
 	OutlineTransparency: number
-	ReservedId: EnumReservedHighlightId
 end
 
 
 
 declare class HttpRbxApiService extends Instance
-	function GetAsync(self, apiUrlPath: string, priority: EnumThrottlingPriority?, httpRequestType: EnumHttpRequestType?): string
-	function GetAsyncFullUrl(self, apiUrl: string, priority: EnumThrottlingPriority?, httpRequestType: EnumHttpRequestType?): string
-	function GetDocumentationUrl(self, partialUrl: string): string
-	function PostAsync(self, apiUrlPath: string, data: string, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
-	function PostAsyncFullUrl(self, apiUrl: string, data: string, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
-	function RequestAsync(self, requestOptions: { [any]: any }, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
 	function RequestLimitedAsync(self, requestOptions: { [any]: any }, priority: EnumThrottlingPriority?, content_type: EnumHttpContentType?, httpRequestType: EnumHttpRequestType?): string
 end
 
 declare class HttpRequest extends Instance
-	function Cancel(self): nil
-	function Start(self, callback: ((...any) -> ...any)): nil
 end
 
 declare class HttpService extends Instance
 	HttpEnabled: boolean
 	function GenerateGUID(self, wrapInCurlyBraces: boolean?): string
 	function GetAsync(self, url: string, nocache: boolean?, headers: any): string
-	function GetHttpEnabled(self): boolean
 	function GetSecret(self, key: string): Secret
-	function GetUserAgent(self): string
 	function JSONDecode(self, input: string): any
 	function JSONEncode(self, input: any): string
 	function PostAsync(self, url: string, data: string, content_type: EnumHttpContentType?, compress: boolean?, headers: any): string
 	function RequestAsync(self, options: HttpRequestOptions): HttpResponseData
-	function RequestInternal(self, options: { [any]: any }): Instance
-	function SetHttpEnabled(self, enabled: boolean): nil
 	function UrlEncode(self, input: string): string
 end
 
@@ -7192,11 +6561,9 @@ declare class Humanoid extends Instance
 	BreakJointsOnDeath: boolean
 	CameraOffset: Vector3
 	Climbing: RBXScriptSignal<number>
-	ClusterCompositionFinished: RBXScriptSignal<>
 	Died: RBXScriptSignal<>
 	DisplayDistanceType: EnumHumanoidDisplayDistanceType
 	DisplayName: string
-	EmoteTriggered: RBXScriptSignal<boolean, AnimationTrack>
 	EvaluateStateMachine: boolean
 	FallingDown: RBXScriptSignal<boolean>
 	FloorMaterial: EnumMaterial
@@ -7207,7 +6574,6 @@ declare class Humanoid extends Instance
 	HealthDisplayDistance: number
 	HealthDisplayType: EnumHumanoidHealthDisplayType
 	HipHeight: number
-	InternalDisplayName: string
 	Jump: boolean
 	JumpHeight: number
 	JumpPower: number
@@ -7240,14 +6606,11 @@ declare class Humanoid extends Instance
 	WalkToPoint: Vector3
 	function AddAccessory(self, accessory: Accessory): nil
 	function ApplyDescription(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
-	function ApplyDescriptionClientServer(self, humanoidDescription: HumanoidDescription): nil
 	function ApplyDescriptionReset(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
 	function BuildRigFromAttachments(self): nil
-	function CacheDefaults(self): nil
 	function ChangeState(self, state: EnumHumanoidStateType?): nil
 	function EquipTool(self, tool: Tool): nil
 	function GetAccessories(self): { Accessory }
-	function GetAccessoryHandleScale(self, instance: Instance, partType: EnumBodyPartR15): Vector3
 	function GetAppliedDescription(self): HumanoidDescription
 	function GetBodyPartR15(self, part: BasePart): EnumBodyPartR15
 	function GetLimb(self, part: BasePart): EnumLimb
@@ -7257,10 +6620,8 @@ declare class Humanoid extends Instance
 	function Move(self, moveDirection: Vector3, relativeToCamera: boolean?): nil
 	function MoveTo(self, location: Vector3, part: BasePart?): nil
 	function PlayEmote(self, emoteName: string): boolean
-	function PlayEmoteAndGetAnimTrackById(self, emoteId: number): any
 	function RemoveAccessories(self): nil
 	function ReplaceBodyPartR15(self, bodyPart: EnumBodyPartR15, part: BasePart): boolean
-	function SetClickToWalkEnabled(self, enabled: boolean): nil
 	function SetStateEnabled(self, state: EnumHumanoidStateType, enabled: boolean): nil
 	function TakeDamage(self, amount: number): nil
 	function UnequipTools(self): nil
@@ -7293,7 +6654,6 @@ declare class HumanoidDescription extends Instance
 	LeftLegColor: Color3
 	MoodAnimation: number
 	NeckAccessory: string
-	NumberEmotesLoaded: number
 	Pants: number
 	ProportionScale: number
 	RightArm: number
@@ -7381,19 +6741,13 @@ end
 
 declare class InsertService extends Instance
 	AllowClientInsertModels: boolean
-	function CreateMeshPartAsync(self, meshId: Content, collisionFidelity: EnumCollisionFidelity, renderFidelity: EnumRenderFidelity): MeshPart
 	function GetCollection(self, categoryId: number): { any }
 	function GetFreeDecals(self, searchText: string, pageNum: number): { any }
 	function GetFreeModels(self, searchText: string, pageNum: number): { any }
 	function GetLatestAssetVersionAsync(self, assetId: number): number
-	function GetLocalFileContents(self, contentId: string): string
 	function GetUserSets(self, userId: number): { any }
 	function LoadAsset(self, assetId: number): Instance
 	function LoadAssetVersion(self, assetVersionId: number): Instance
-	function LoadAssetWithFormat(self, assetId: number, format: string): { Instance }
-	function LoadLocalAsset(self, assetPath: string): Instance
-	function LoadPackageAsset(self, url: Content): { Instance }
-	function LoadPackageAssetAsync(self, url: Content): { Instance }
 end
 
 declare class JointInstance extends Instance
@@ -7470,7 +6824,6 @@ end
 declare class KeyframeSequenceProvider extends Instance
 	function GetAnimations(self, userId: number): Instance
 	function GetKeyframeSequenceAsync(self, assetId: Content): Instance
-	function GetMemStats(self): { [any]: any }
 	function RegisterActiveKeyframeSequence(self, keyframeSequence: Instance): Content
 	function RegisterKeyframeSequence(self, keyframeSequence: Instance): Content
 end
@@ -7522,7 +6875,6 @@ declare class Lighting extends Instance
 	OutdoorAmbient: Color3
 	ShadowSoftness: number
 	Technology: EnumTechnology
-	TempUseNewSkyRemovalBehaviour: boolean
 	TimeOfDay: string
 	function GetMinutesAfterMidnight(self): number
 	function GetMoonDirection(self): Vector3
@@ -7535,12 +6887,6 @@ declare class LiveScriptingService extends Instance
 end
 
 declare class LocalStorageService extends Instance
-	ItemWasSet: RBXScriptSignal<string, string>
-	StoreWasCleared: RBXScriptSignal<>
-	function Flush(self): nil
-	function GetItem(self, key: string): string
-	function SetItem(self, key: string, value: string): nil
-	function WhenLoaded(self, callback: ((...any) -> ...any)): nil
 end
 
 declare class AppStorageService extends LocalStorageService
@@ -7550,12 +6896,8 @@ declare class UserStorageService extends LocalStorageService
 end
 
 declare class LocalizationService extends Instance
-	AutoTranslateWillRun: RBXScriptSignal<>
 	ForcePlayModeGameLocaleId: string
 	ForcePlayModeRobloxLocaleId: string
-	IsTextScraperRunning: boolean
-	RobloxForcePlayModeGameLocaleId: string
-	RobloxForcePlayModeRobloxLocaleId: string
 	RobloxLocaleId: string
 	SystemLocaleId: string
 	function GetCorescriptLocalizations(self): { Instance }
@@ -7564,13 +6906,6 @@ declare class LocalizationService extends Instance
 	function GetTranslatorForLocaleAsync(self, locale: string): Translator
 	function GetTranslatorForPlayer(self, player: Player): Translator
 	function GetTranslatorForPlayerAsync(self, player: Player): Translator
-	function PromptDownloadGameTableToCSV(self, table: Instance): nil
-	function PromptExportToCSVs(self): nil
-	function PromptImportFromCSVs(self): nil
-	function PromptUploadCSVToGameTable(self): Instance
-	function SetRobloxLocaleId(self, locale: string): nil
-	function StartTextScraper(self): nil
-	function StopTextScraper(self): nil
 end
 
 declare class LocalizationTable extends Instance
@@ -7586,7 +6921,6 @@ declare class LocalizationTable extends Instance
 	function SetEntryKey(self, key: string, source: string, context: string, newKey: string): nil
 	function SetEntrySource(self, key: string, source: string, context: string, newSource: string): nil
 	function SetEntryValue(self, key: string, source: string, context: string, localeId: string, text: string): nil
-	function SetIsExemptFromUGCAnalytics(self, value: boolean): nil
 end
 
 declare class CloudLocalizationTable extends LocalizationTable
@@ -7600,22 +6934,12 @@ declare class LodDataService extends Instance
 end
 
 declare class LogReporterService extends Instance
-	function ReportLog(self, logId: string, desc: string): boolean
 end
 
 declare class LogService extends Instance
-	HttpResultOut: RBXScriptSignal<{ [any]: any }>
 	MessageOut: RBXScriptSignal<string, EnumMessageType>
-	OnHttpResultApproved: RBXScriptSignal<boolean>
-	ServerHttpResultOut: RBXScriptSignal<{ [any]: any }>
-	ServerMessageOut: RBXScriptSignal<string, EnumMessageType, number>
 	function ClearOutput(self): nil
-	function ExecuteScript(self, source: string): nil
-	function GetHttpResultHistory(self): { any }
 	function GetLogHistory(self): { any }
-	function RequestHttpResultApproved(self): nil
-	function RequestServerHttpResult(self): nil
-	function RequestServerOutput(self): nil
 end
 
 declare class LoginService extends Instance
@@ -7626,7 +6950,6 @@ end
 
 declare class LuaSourceContainer extends Instance
 	CurrentEditor: Instance
-	RuntimeSource: string
 end
 
 declare class BaseScript extends LuaSourceContainer
@@ -7640,7 +6963,6 @@ declare class CoreScript extends BaseScript
 end
 
 declare class Script extends BaseScript
-	Source: ProtectedString
 	function GetHash(self): string
 end
 
@@ -7649,7 +6971,6 @@ end
 
 declare class ModuleScript extends LuaSourceContainer
 	LinkedSource: Content
-	Source: ProtectedString
 end
 
 declare class LuaWebService extends Instance
@@ -7667,117 +6988,54 @@ declare class MarkerCurve extends Instance
 end
 
 declare class MarketplaceService extends Instance
-	ClientLuaDialogRequested: RBXScriptSignal<any>
-	ClientPurchaseSuccess: RBXScriptSignal<string, number, number>
-	NativePurchaseFinished: RBXScriptSignal<Player, string, boolean>
-	NativePurchaseFinishedWithLocalPlayer: RBXScriptSignal<string, boolean>
-	PrepareCollectiblesPurchaseRequested: RBXScriptSignal<Instance, number, string, string, string, number>
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
 	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
-	PromptBundlePurchaseRequested: RBXScriptSignal<Instance, number>
-	PromptCollectiblesPurchaseRequested: RBXScriptSignal<Instance, number, string, string, string, number, string, string>
 	PromptGamePassPurchaseFinished: RBXScriptSignal<Player, number, boolean>
-	PromptGamePassPurchaseRequested: RBXScriptSignal<Player, number>
 	PromptPremiumPurchaseFinished: RBXScriptSignal<>
-	PromptPremiumPurchaseRequested: RBXScriptSignal<Instance>
 	PromptProductPurchaseFinished: RBXScriptSignal<number, number, boolean>
-	PromptProductPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
 	PromptPurchaseFinished: RBXScriptSignal<Player, number, boolean>
-	PromptPurchaseRequested: RBXScriptSignal<Player, number, boolean, EnumCurrencyType>
-	PromptPurchaseRequestedV2: RBXScriptSignal<Instance, number, boolean, EnumCurrencyType, string, string>
-	PromptRobloxPurchaseRequested: RBXScriptSignal<number, boolean>
 	PromptSubscriptionPurchaseFinished: RBXScriptSignal<Player, string, boolean>
-	PromptSubscriptionPurchaseRequested: RBXScriptSignal<string>
-	ServerPurchaseVerification: RBXScriptSignal<{ [any]: any }>
 	ThirdPartyPurchaseFinished: RBXScriptSignal<Instance, string, string, boolean>
 	function GetDeveloperProductsAsync(self): Pages
 	function GetProductInfo(self, assetId: number, infoType: EnumInfoType?): { [any]: any }
-	function GetRobuxBalance(self): number
 	function GetSubscriptionProductInfoAsync(self, subscriptionId: string): { [any]: any }
-	function GetSubscriptionPurchaseInfoAsync(self, subscriptionId: string): { [any]: any }
 	function GetUserSubscriptionPaymentHistoryAsync(self, user: Player, subscriptionId: string): { any }
 	function GetUserSubscriptionStatusAsync(self, user: Player, subscriptionId: string): { [any]: any }
-	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?, purchaseAuthToken: string?): { [any]: any }
-	function PerformPurchaseV2(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectiblesProductDetails: { [any]: any }): { [any]: any }
-	function PerformSubscriptionPurchase(self, subscriptionId: string): string
-	function PlayerCanMakePurchases(self, player: Instance): boolean
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
-	function PrepareCollectiblesPurchase(self, player: Instance, assetId: number, collectibleItemId: string, collectibleItemInstanceId: string, collectibleProductId: string, expectedPrice: number): nil
 	function PromptBundlePurchase(self, player: Player, bundleId: number): nil
-	function PromptCollectiblesPurchase(self, player: Instance, assetId: number, collectibleItemId: string, collectibleItemInstanceId: string, collectibleProductId: string, expectedPrice: number): nil
 	function PromptGamePassPurchase(self, player: Player, gamePassId: number): nil
-	function PromptNativePurchase(self, player: Instance, productId: string): nil
-	function PromptNativePurchaseWithLocalPlayer(self, productId: string): nil
 	function PromptPremiumPurchase(self, player: Player): nil
 	function PromptProductPurchase(self, player: Player, productId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
 	function PromptPurchase(self, player: Player, assetId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
-	function PromptRobloxPurchase(self, assetId: number, equipIfPurchased: boolean): nil
 	function PromptSubscriptionPurchase(self, user: Player, subscriptionId: string): nil
 	function PromptThirdPartyPurchase(self, player: Instance, productId: string): nil
-	function ReportAssetSale(self, assetId: string, robuxAmount: number): nil
-	function ReportRobuxUpsellStarted(self): nil
-	function SignalAssetTypePurchased(self, player: Instance, assetType: EnumAssetType): nil
-	function SignalClientPurchaseSuccess(self, ticket: string, playerId: number, productId: number): nil
-	function SignalMockPurchasePremium(self): nil
-	function SignalPromptBundlePurchaseFinished(self, player: Instance, bundleId: number, success: boolean): nil
-	function SignalPromptGamePassPurchaseFinished(self, player: Instance, gamePassId: number, success: boolean): nil
-	function SignalPromptPremiumPurchaseFinished(self, didTryPurchasing: boolean): nil
-	function SignalPromptProductPurchaseFinished(self, userId: number, productId: number, success: boolean): nil
-	function SignalPromptPurchaseFinished(self, player: Instance, assetId: number, success: boolean): nil
-	function SignalPromptSubscriptionPurchaseFinished(self, subscriptionId: string, didTryPurchasing: boolean): nil
-	function SignalServerLuaDialogClosed(self, value: boolean): nil
 	function UserOwnsGamePassAsync(self, userId: number, gamePassId: number): boolean
 end
 
 declare class MaterialGenerationService extends Instance
-	function GenerateMaterialVariantsAsync(self, prompt: string, samples: number): { Instance }
-	function GetAccountingBalanceAsync(self): number
-	function RefillAccountingBalanceAsync(self): number
-	function StartSession(self): MaterialGenerationSession
-	function UploadMaterialVariantsAsync(self, materialVaraints: { Instance }): nil
 end
 
 declare class MaterialGenerationSession extends Instance
-	function GenerateImagesAsync(self, prompt: string, options: { [any]: any }): any
-	function GenerateMaterialMapsAsync(self, imageId: string): { [any]: any }
-	function UploadMaterialAsync(self, imageId: string): { [any]: any }
 end
 
 declare class MaterialService extends Instance
-	OverrideStatusChanged: RBXScriptSignal<EnumMaterial>
-	Use2022Materials: boolean
 	function GetBaseMaterialOverride(self, material: EnumMaterial): string
-	function GetMaterialOverrideChanged(self, material: EnumMaterial): RBXScriptSignal
 	function GetMaterialVariant(self, material: EnumMaterial, name: string): MaterialVariant
-	function GetOverrideStatus(self, material: EnumMaterial): EnumPropertyStatus
 	function SetBaseMaterialOverride(self, material: EnumMaterial, name: string): nil
 end
 
 declare class MaterialVariant extends Instance
 	BaseMaterial: EnumMaterial
-	ColorMap: Content
 	CustomPhysicalProperties: PhysicalProperties
 	MaterialPattern: EnumMaterialPattern
-	MetalnessMap: Content
-	NormalMap: Content
-	RoughnessMap: Content
 	StudsPerTile: number
 end
 
 declare class MemStorageConnection extends Instance
-	function Disconnect(self): nil
 end
 
 declare class MemStorageService extends Instance
-	function Bind(self, key: string, callback: ((...any) -> ...any)): MemStorageConnection
-	function BindAndFire(self, key: string, callback: ((...any) -> ...any)): MemStorageConnection
-	function Call(self, key: string, input: any): any
-	function Fire(self, key: string, value: string?): nil
-	function GetItem(self, key: string, defaultValue: string?): string
-	function HasItem(self, key: string): boolean
-	function RemoveItem(self, key: string): boolean
-	function SetItem(self, key: string, value: string?): nil
 end
 
 declare class MemoryStoreHashMap extends Instance
@@ -7813,23 +7071,9 @@ end
 
 
 declare class MessageBusConnection extends Instance
-	function Disconnect(self): nil
 end
 
 declare class MessageBusService extends Instance
-	function Call(self, key: string, input: any): any
-	function GetLast(self, mid: string): any
-	function GetMessageId(self, domainName: string, messageName: string): string
-	function GetProtocolMethodRequestMessageId(self, protocolName: string, methodName: string): string
-	function GetProtocolMethodResponseMessageId(self, protocolName: string, methodName: string): string
-	function MakeRequest(self, protocolName: string, methodName: string, message: any, callback: ((...any) -> ...any), customTelemetryData: any): nil
-	function Publish(self, mid: string, params: any): nil
-	function PublishProtocolMethodRequest(self, protocolName: string, methodName: string, message: any, customTelemetryData: any): nil
-	function PublishProtocolMethodResponse(self, protocolName: string, methodName: string, message: any, responseCode: number, customTelemetryData: any): nil
-	function SetRequestHandler(self, protocolName: string, methodName: string, callback: ((...any) -> ...any)): nil
-	function Subscribe(self, mid: string, callback: ((...any) -> ...any), once: boolean, sticky: boolean): Instance
-	function SubscribeToProtocolMethodRequest(self, protocolName: string, methodName: string, callback: ((...any) -> ...any), once: boolean, sticky: boolean): Instance
-	function SubscribeToProtocolMethodResponse(self, protocolName: string, methodName: string, callback: ((...any) -> ...any), once: boolean, sticky: boolean): Instance
 end
 
 declare class MessagingService extends Instance
@@ -7838,37 +7082,12 @@ declare class MessagingService extends Instance
 end
 
 declare class MetaBreakpoint extends Instance
-	Condition: string
-	ContinueExecution: boolean
-	Enabled: boolean
-	Id: number
-	IsLogpoint: boolean
-	Line: number
-	LogMessage: string
-	RemoveOnHit: boolean
-	Script: string
-	Valid: boolean
-	function GetContextBreakpoints(self): { [any]: any }
-	function Remove(self, status: ((...any) -> ...any)): number
-	function SetChildBreakpointEnabledByScriptAndContext(self, script: string, contextGST: number, enabled: boolean): nil
-	function SetContextEnabled(self, context: number, enabled: boolean): nil
-	function SetContinueExecution(self, enabled: boolean): nil
-	function SetEnabled(self, enabled: boolean): nil
-	function SetLine(self, line: number, status: ((...any) -> ...any)): number
-	function SetRemoveOnHit(self, enabled: boolean): nil
 end
 
 declare class MetaBreakpointContext extends Instance
 end
 
 declare class MetaBreakpointManager extends Instance
-	MetaBreakpointAdded: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointChanged: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointRemoved: RBXScriptSignal<MetaBreakpoint>
-	MetaBreakpointSetChanged: RBXScriptSignal<MetaBreakpoint, { [any]: any }>
-	function AddBreakpoint(self, script: Instance, line: number, condition: Instance): Instance
-	function GetBreakpointById(self, metaBreakpointId: number): MetaBreakpoint
-	function RemoveBreakpointById(self, metaBreakpointId: number): nil
 end
 
 declare class Mouse extends Instance
@@ -7897,18 +7116,12 @@ declare class PlayerMouse extends Mouse
 end
 
 declare class PluginMouse extends Mouse
-	DragEnter: RBXScriptSignal<{ Instance }>
 end
 
 declare class MouseService extends Instance
-	MouseEnterStudioViewport: RBXScriptSignal<>
-	MouseLeaveStudioViewport: RBXScriptSignal<>
 end
 
 declare class MultipleDocumentInterfaceInstance extends Instance
-	DataModelSessionEnded: RBXScriptSignal<Instance>
-	DataModelSessionStarted: RBXScriptSignal<Instance>
-	FocusedDataModelSession: Instance
 end
 
 declare class NetworkMarker extends Instance
@@ -7916,7 +7129,6 @@ declare class NetworkMarker extends Instance
 end
 
 declare class NetworkPeer extends Instance
-	function SetOutgoingKBPSLimit(self, limit: number): nil
 end
 
 declare class NetworkClient extends NetworkPeer
@@ -7933,20 +7145,12 @@ declare class NetworkReplicator extends Instance
 end
 
 declare class ClientReplicator extends NetworkReplicator
-	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
-	StatsReceived: RBXScriptSignal<{ [any]: any }>
-	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
-	function RequestServerScriptProfiling(self, start: boolean, frequency: number?): nil
-	function RequestServerScriptProfilingData(self): nil
-	function RequestServerStats(self, request: boolean): nil
 end
 
 declare class ServerReplicator extends NetworkReplicator
 end
 
 declare class NetworkSettings extends Instance
-	EmulatedTotalMemoryInMB: number
-	FreeMemoryMBytes: number
 	HttpProxyEnabled: boolean
 	HttpProxyURL: string
 	IncomingReplicationLag: number
@@ -7965,27 +7169,15 @@ declare class NoCollisionConstraint extends Instance
 end
 
 declare class NotificationService extends Instance
-	IsConnected: boolean
-	IsLuaChatEnabled: boolean
-	IsLuaGameDetailsEnabled: boolean
 	Roblox17sConnectionChanged: RBXScriptSignal<string, EnumConnectionState, string>
 	Roblox17sEventReceived: RBXScriptSignal<{ [any]: any }>
-	RobloxConnectionChanged: RBXScriptSignal<string, EnumConnectionState, string, string>
-	RobloxEventReceived: RBXScriptSignal<{ [any]: any }>
-	SelectedTheme: string
-	function ActionEnabled(self, actionType: EnumAppShellActionType): nil
-	function ActionTaken(self, actionType: EnumAppShellActionType): nil
 	function CancelAllNotification(self, userId: number): nil
 	function CancelNotification(self, userId: number, alertId: number): nil
 	function GetScheduledNotifications(self, userId: number): { any }
 	function ScheduleNotification(self, userId: number, alertId: number, alertMsg: string, minutesToFire: number): nil
-	function SwitchedToAppShellFeature(self, appShellFeature: EnumAppShellFeature): nil
 end
 
 declare class OmniRecommendationsService extends Instance
-	function ClearSessionId(self): nil
-	function GetSessionId(self): string
-	function MakeRequest(self, nextPageToken: string): HttpRequest
 end
 
 declare class OpenCloudApiV1 extends Instance
@@ -7995,10 +7187,7 @@ end
 
 declare class OpenCloudService extends Instance
 	function GetApiV1(self): OpenCloudApiV1
-	function HttpRequestAsync(self, options: { [any]: any }): { [any]: any }
 	function InvokeAsync(self, version: string, methodName: string, arguments: { [any]: any }): { [any]: any }
-	function RegisterOpenCloud(self, version: string, methodName: string, method: ((...any) -> ...any)): nil
-	function RegistrationComplete(self): nil
 end
 
 declare class OperationGraph extends Instance
@@ -8120,18 +7309,13 @@ end
 declare class Terrain extends BasePart
 	Decoration: boolean
 	GrassLength: number
-	LastUsedModificationMethod: EnumTerrainAcquisitionMethod
 	MaterialColors: BinaryString
 	MaxExtents: Region3int16
-	ShorelinesUpgraded: boolean
-	SmoothVoxelsUpgraded: boolean
 	WaterColor: Color3
 	WaterReflectance: number
 	WaterTransparency: number
 	WaterWaveSize: number
 	WaterWaveSpeed: number
-	function CanShorelinesBeUpgraded(self): boolean
-	function CanSmoothVoxelsBeUpgraded(self): boolean
 	function CellCenterToWorld(self, x: number, y: number, z: number): Vector3
 	function CellCornerToWorld(self, x: number, y: number, z: number): Vector3
 	function Clear(self): nil
@@ -8143,17 +7327,11 @@ declare class Terrain extends BasePart
 	function FillRegion(self, region: Region3, resolution: number, material: EnumMaterial): nil
 	function FillWedge(self, cframe: CFrame, size: Vector3, material: EnumMaterial): nil
 	function GetMaterialColor(self, material: EnumMaterial): Color3
-	function GetTerrainWireframe(self, cframe: CFrame, size: Vector3): { any }
 	function PasteRegion(self, region: TerrainRegion, corner: Vector3int16, pasteEmptyCells: boolean): nil
 	function ReadVoxelChannels(self, region: Region3, resolution: number, channelIds: { any }): { [any]: any }
 	function ReadVoxels(self, region: Region3, resolution: number): any
 	function ReplaceMaterial(self, region: Region3, resolution: number, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
-	function ReplaceMaterialInTransform(self, cframe: CFrame, size: Vector3, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
-	function ReplaceMaterialInTransformSubregion(self, cframe: CFrame, size: Vector3, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial, targetRegion: Region3int16): nil
 	function SetMaterialColor(self, material: EnumMaterial, value: Color3): nil
-	function SetMaterialInTransform(self, cframe: CFrame, size: Vector3, targetMaterial: EnumMaterial): nil
-	function SetMaterialInTransformSubregion(self, cframe: CFrame, size: Vector3, targetMaterial: EnumMaterial, targetRegion: Region3int16): nil
-	function SmoothRegion(self, region: Region3, resolution: number, strength: number): any
 	function WorldToCell(self, position: Vector3): Vector3
 	function WorldToCellPreferEmpty(self, position: Vector3): Vector3
 	function WorldToCellPreferSolid(self, position: Vector3): Vector3
@@ -8215,7 +7393,6 @@ declare class VehicleSeat extends BasePart
 end
 
 declare class Model extends PVInstance
-	LevelOfDetail: EnumModelLevelOfDetail
 	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
 	Scale: number
@@ -8270,15 +7447,10 @@ declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
 	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
-	function CacheCurrentTerrain(self, id: string, center: Vector3, radius: number): string
-	function ClearCachedTerrain(self, id: string): boolean
 	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
 	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
 	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
-	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
-	function RaycastCachedTerrain(self, id: string, origin: Vector3, direction: Vector3, ignoreWater: boolean): RaycastResult
-	function SetInsertPoint(self, point: Vector3, ignoreGrid: boolean?): nil
 	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult
 	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult
 end
@@ -8314,9 +7486,6 @@ declare class Workspace extends WorldRoot
 	StreamingTargetRadius: number
 	Terrain: Terrain
 	TouchesUseCollisionGroups: boolean
-	function CalculateJumpDistance(self, gravity: number, jumpPower: number, walkSpeed: number): number
-	function CalculateJumpHeight(self, gravity: number, jumpPower: number): number
-	function CalculateJumpPower(self, gravity: number, jumpHeight: number): number
 	function ExperimentalSolverIsEnabled(self): boolean
 	function GetNumAwakeParts(self): number
 	function GetPhysicsThrottling(self): number
@@ -8324,11 +7493,8 @@ declare class Workspace extends WorldRoot
 	function GetServerTimeNow(self): number
 	function JoinToOutsiders(self, objects: { Instance }, jointType: EnumJointCreationMode): nil
 	function PGSIsEnabled(self): boolean
-	function SetAvatarUnificationMode(self, value: EnumAvatarUnificationMode): nil
-	function SetMeshPartHeadsAndAccessories(self, value: EnumMeshPartHeadsAndAccessories): nil
 	function SetPhysicsThrottleEnabled(self, value: boolean): nil
 	function UnjoinFromOutsiders(self, objects: { Instance }): nil
-	function ZoomToExtents(self): nil
 end
 
 declare class WorldModel extends WorldRoot
@@ -8342,7 +7508,6 @@ declare class PackageLink extends Instance
 	PackageId: Content
 	PermissionLevel: EnumPackagePermission
 	SerializedDefaultAttributes: BinaryString
-	Status: string
 	VersionNumber: number
 end
 
@@ -8350,12 +7515,6 @@ declare class PackageService extends Instance
 end
 
 declare class PackageUIService extends Instance
-	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
-	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
-	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
-	function GetPackageInfo(self, packageAssetId: number): { [any]: any }
-	function PublishPackage(self, packageInstance: Instance): nil
-	function SetPackageVersion(self, packageInstance: Instance, versionNumber: number): Instance
 end
 
 declare class Pages extends Instance
@@ -8441,7 +7600,6 @@ declare class ParticleEmitter extends Instance
 	ZOffset: number
 	function Clear(self): nil
 	function Emit(self, particleCount: number?): nil
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class PatchBundlerFileWatch extends Instance
@@ -8480,25 +7638,15 @@ declare class PathfindingService extends Instance
 end
 
 declare class PausedState extends Instance
-	AllThreadsPaused: boolean
-	Reason: EnumDebuggerPauseReason
-	ThreadId: number
 end
 
 declare class PausedStateBreakpoint extends PausedState
-	Breakpoint: Breakpoint
 end
 
 declare class PausedStateException extends PausedState
-	ExceptionText: string
 end
 
 declare class PermissionsService extends Instance
-	function GetIsThirdPartyAssetAllowed(self): boolean
-	function GetIsThirdPartyPurchaseAllowed(self): boolean
-	function GetIsThirdPartyTeleportAllowed(self): boolean
-	function GetPermissions(self, assetId: string): { any }
-	function SetPermissions(self, assetId: string, permissions: { any }): nil
 end
 
 declare class PhysicsService extends Instance
@@ -8506,7 +7654,6 @@ declare class PhysicsService extends Instance
 	function CollisionGroupsAreCollidable(self, name1: string, name2: string): boolean
 	function GetMaxCollisionGroups(self): number
 	function GetRegisteredCollisionGroups(self): { any }
-	function IkSolve(self, part: BasePart, target: CFrame, translateStiffness: number, rotateStiffness: number): nil
 	function IsCollisionGroupRegistered(self, name: string): boolean
 	function LocalIkSolve(self, part: BasePart, target: CFrame, translateStiffness: number, rotateStiffness: number): nil
 	function RegisterCollisionGroup(self, name: string): nil
@@ -8518,42 +7665,28 @@ declare class PhysicsSettings extends Instance
 	AllowSleep: boolean
 	AreAnchorsShown: boolean
 	AreAssembliesShown: boolean
-	AreAssemblyCentersOfMassShown: boolean
 	AreAwakePartsHighlighted: boolean
 	AreBodyTypesShown: boolean
-	AreCollisionCostsShown: boolean
-	AreConstraintForcesShownForSelectedOrHoveredInstances: boolean
-	AreConstraintTorquesShownForSelectedOrHoveredInstances: boolean
-	AreContactForcesShownForSelectedOrHoveredAssemblies: boolean
 	AreContactIslandsShown: boolean
 	AreContactPointsShown: boolean
-	AreGravityForcesShownForSelectedOrHoveredAssemblies: boolean
 	AreJointCoordinatesShown: boolean
-	AreMagnitudesShownForDrawnForcesAndTorques: boolean
 	AreMechanismsShown: boolean
 	AreModelCoordsShown: boolean
 	AreNonAnchorsShown: boolean
 	AreOwnersShown: boolean
 	ArePartCoordsShown: boolean
 	AreRegionsShown: boolean
-	AreSolverIslandsShown: boolean
 	AreTerrainReplicationRegionsShown: boolean
-	AreTimestepsShown: boolean
 	AreUnalignedPartsShown: boolean
 	AreWorldCoordsShown: boolean
 	DisableCSGv2: boolean
 	DisableCSGv3ForPlugins: boolean
-	FluidForceDrawScale: number
 	ForceCSGv2: boolean
-	ForceDrawScale: number
 	IsInterpolationThrottleShown: boolean
 	IsReceiveAgeShown: boolean
 	IsTreeShown: boolean
 	PhysicsEnvironmentalThrottle: EnumEnviromentalPhysicsThrottle
 	ShowDecompositionGeometry: boolean
-	ShowFluidForcesForSelectedOrHoveredMechanisms: boolean
-	SolverConvergenceMetricType: EnumSolverConvergenceMetricType
-	SolverConvergenceVisualizationMode: EnumSolverConvergenceVisualizationMode
 	ThrottleAdjustTime: number
 	UseCSGv2: boolean
 end
@@ -8562,22 +7695,12 @@ declare class PlaceStatsService extends Instance
 end
 
 declare class PlacesService extends Instance
-	function StartPlaySolo(self): nil
-	function StopPlaySolo(self): nil
 end
 
 declare class PlatformCloudStorageService extends Instance
-	function GetUserDataAsync(self, key: string): { [any]: any }
-	function IsUserDataAvailable(self): boolean
-	function SetUserDataAsync(self, key: string, data: { [any]: any }): nil
 end
 
 declare class PlatformFriendsService extends Instance
-	function GetPartyMembers(self): { any }
-	function IsInviteFriendsEnabled(self): boolean
-	function IsProfileEnabled(self): boolean
-	function ShowInviteFriendsUI(self): nil
-	function ShowProfile(self, platformUserId: string): nil
 end
 
 declare class Player extends Instance
@@ -8592,7 +7715,6 @@ declare class Player extends Instance
 	CharacterAppearanceId: number
 	CharacterAppearanceLoaded: RBXScriptSignal<Model>
 	CharacterRemoving: RBXScriptSignal<Model>
-	ChatMode: EnumChatMode
 	Chatted: RBXScriptSignal<string, Player?>
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMode: EnumDevComputerCameraMovementMode
@@ -8602,9 +7724,7 @@ declare class Player extends Instance
 	DevTouchMovementMode: EnumDevTouchMovementMode
 	DisplayName: string
 	FollowUserId: number
-	FriendStatusChanged: RBXScriptSignal<Player, EnumFriendStatus>
 	GameplayPaused: boolean
-	Guest: boolean
 	HasVerifiedBadge: boolean
 	HealthDisplayDistance: number
 	Idled: RBXScriptSignal<number>
@@ -8614,31 +7734,21 @@ declare class Player extends Instance
 	NameDisplayDistance: number
 	Neutral: boolean
 	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
-	OsPlatform: string
-	PlatformName: string
 	ReplicationFocus: Instance
 	RespawnLocation: SpawnLocation
 	SimulationRadius: number
 	SimulationRadiusChanged: RBXScriptSignal<number>
 	Team: Team
 	TeamColor: BrickColor
-	Teleported: boolean
-	TeleportedIn: boolean
-	UnfilteredChat: boolean
 	UserId: number
-	VRDevice: string
-	VREnabled: boolean
-	function AddToBlockList(self, userIds: { any }): nil
 	function ClearCharacterAppearance(self): nil
 	function DistanceFromCharacter(self, point: Vector3): number
-	function GetFriendStatus(self, player: Player): EnumFriendStatus
 	function GetFriendsOnline(self, maxFriends: number?): { any }
 	function GetJoinData(self): { [any]: any }
 	function GetMouse(self): Mouse
 	function GetNetworkPing(self): number
 	function GetRankInGroup(self, groupId: number): number
 	function GetRoleInGroup(self, groupId: number): string
-	function GetUnder13(self): boolean
 	function HasAppearanceLoaded(self): boolean
 	function IsFriendsWith(self, userId: number): boolean
 	function IsInGroup(self, groupId: number): boolean
@@ -8649,42 +7759,17 @@ declare class Player extends Instance
 	function LoadCharacterWithHumanoidDescription(self, humanoidDescription: HumanoidDescription): nil
 	function Move(self, walkDirection: Vector3, relativeToCamera: boolean?): nil
 	function RemoveCharacter(self): nil
-	function RequestFriendship(self, player: Player): nil
 	function RequestStreamAroundAsync(self, position: Vector3, timeOut: number?): nil
-	function RevokeFriendship(self, player: Player): nil
-	function SetAccountAge(self, accountAge: number): nil
-	function SetBlockListInitialized(self): nil
-	function SetCharacterAppearanceJson(self, jsonBlob: string): nil
-	function SetExperienceSettingsLocaleId(self, locale: string): nil
-	function SetMembershipType(self, membershipType: EnumMembershipType): nil
-	function SetModerationAccessKey(self, moderationAccessKey: string): nil
-	function SetSuperSafeChat(self, value: boolean): nil
-	function UpdatePlayerBlocked(self, userId: number, blocked: boolean): nil
 end
 
 declare class PlayerEmulatorService extends Instance
-	CustomPoliciesEnabled: boolean
-	EmulatedCountryCode: string
-	EmulatedGameLocale: string
-	PlayerEmulationEnabled: boolean
-	function GetEmulatedPolicyInfo(self): { [any]: any }
-	function RegionCodeWillHaveAutomaticNonCustomPolicies(self, regionCode: string): boolean
-	function SetEmulatedPolicyInfo(self, emulatedPolicyInfo: { [any]: any }): nil
 end
 
 declare class PlayerScripts extends Instance
-	ComputerCameraMovementModeRegistered: RBXScriptSignal<>
-	ComputerMovementModeRegistered: RBXScriptSignal<>
-	TouchCameraMovementModeRegistered: RBXScriptSignal<>
-	TouchMovementModeRegistered: RBXScriptSignal<>
 	function ClearComputerCameraMovementModes(self): nil
 	function ClearComputerMovementModes(self): nil
 	function ClearTouchCameraMovementModes(self): nil
 	function ClearTouchMovementModes(self): nil
-	function GetRegisteredComputerCameraMovementModes(self): { any }
-	function GetRegisteredComputerMovementModes(self): { any }
-	function GetRegisteredTouchCameraMovementModes(self): { any }
-	function GetRegisteredTouchMovementModes(self): { any }
 	function RegisterComputerCameraMovementMode(self, cameraMovementMode: EnumComputerCameraMovementMode): nil
 	function RegisterComputerMovementMode(self, movementMode: EnumComputerMovementMode): nil
 	function RegisterTouchCameraMovementMode(self, cameraMovementMode: EnumTouchCameraMovementMode): nil
@@ -8699,8 +7784,6 @@ declare class Players extends Instance
 	BubbleChat: boolean
 	CharacterAutoLoads: boolean
 	ClassicChat: boolean
-	FriendRequestEvent: RBXScriptSignal<Player, Player, EnumFriendRequestEvent>
-	GameAnnounce: RBXScriptSignal<string>
 	LocalPlayer: Player
 	MaxPlayers: number
 	MaxPlayersInternal: number
@@ -8716,7 +7799,6 @@ declare class Players extends Instance
 	RespawnTime: number
 	UseStrafingAnimations: boolean
 	UserSubscriptionStatusChanged: RBXScriptSignal<Player, string>
-	function Chat(self, message: string): nil
 	function CreateHumanoidModelFromDescription(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	function CreateHumanoidModelFromUserId(self, userId: number): Model
 	function CreateLocalPlayer(self): Player
@@ -8731,79 +7813,24 @@ declare class Players extends Instance
 	function GetUserIdFromNameAsync(self, userName: string): number
 	function GetUserThumbnailAsync(self, userId: number, thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
-	function ReportAbuseV3(self, player: Player, jsonTags: string): nil
 	function ResetLocalPlayer(self): nil
-	function SetChatStyle(self, style: EnumChatStyle?): nil
-	function SetLocalPlayerInfo(self, userId: number, userName: string, displayName: string, membershipType: EnumMembershipType, isUnder13: boolean): nil
-	function TeamChat(self, message: string): nil
 	function WhisperChat(self, message: string, player: Instance): nil
 end
 
 declare class Plugin extends Instance
 	CollisionEnabled: boolean
-	Deactivation: RBXScriptSignal<>
 	GridSize: number
-	HostDataModelType: EnumStudioDataModelType
-	HostDataModelTypeIsCurrent: boolean
-	MultipleDocumentInterfaceInstance: MultipleDocumentInterfaceInstance
-	ProcessAssetInsertionDrag: (assetId: string, assetTypeId: number, instances: { Instance }) -> { Instance }
-	ProcessAssetInsertionDrop: () -> nil
-	Ready: RBXScriptSignal<>
-	Unloading: RBXScriptSignal<>
-	UsesAssetInsertionDrag: boolean
-	function Activate(self, exclusiveMouse: boolean): nil
-	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
-	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
-	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
-	function CreateQWidgetPluginGui(self, pluginGuiId: string, pluginGuiOptions: { [any]: any }): QWidgetPluginGui
-	function CreateToolbar(self, name: string): PluginToolbar
-	function Deactivate(self): nil
-	function GetItem(self, key: string, defaultValue: any): any
-	function GetJoinMode(self): EnumJointCreationMode
-	function GetMouse(self): PluginMouse
-	function GetSelectedRibbonTool(self): EnumRibbonTool
-	function GetSetting(self, key: string): any
-	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
-	function ImportFbxRig(self, isR15: boolean?): Instance
-	function Intersect(self, objects: { Instance }): Instance
-	function Invoke(self, key: string, arguments: any): nil
-	function IsActivated(self): boolean
-	function IsActivatedWithExclusiveMouse(self): boolean
-	function Negate(self, objects: { Instance }): { NegateOperation }
-	function OnInvoke(self, key: string, callback: ((...any) -> ...any)): Instance
-	function OnSetItem(self, key: string, callback: ((...any) -> ...any)): Instance
 	function OpenScript(self, script: LuaSourceContainer, lineNumber: number?): nil
-	function OpenWikiPage(self, url: string): nil
-	function PauseSound(self, sound: Instance): nil
-	function PlaySound(self, sound: Instance, normalizedTimePosition: number?): nil
-	function PromptForExistingAssetId(self, assetType: string): number
-	function PromptSaveSelection(self, suggestedFileName: string?): boolean
-	function ResumeSound(self, sound: Instance): nil
-	function SaveSelectedToRoblox(self): nil
-	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
-	function Separate(self, objects: { Instance }): { UnionOperation }
-	function SetItem(self, key: string, value: any): nil
-	function SetReady(self): nil
-	function SetSetting(self, key: string, value: any): nil
-	function StartDecalDrag(self, decal: Instance): nil
-	function StartDrag(self, dragData: { [any]: any }): nil
-	function StopAllSounds(self): nil
-	function Union(self, objects: { Instance }): UnionOperation
 end
 
 declare class PluginAction extends Instance
 	ActionId: string
 	AllowBinding: boolean
-	Checked: boolean
-	DefaultShortcut: string
-	Enabled: boolean
 	StatusTip: string
 	Text: string
-	Triggered: RBXScriptSignal<>
 end
 
 declare class PluginCapabilities extends Instance
-	Manifest: string
 end
 
 declare class PluginDebugService extends Instance
@@ -8820,56 +7847,36 @@ declare class PluginGuiService extends Instance
 end
 
 declare class PluginManagementService extends Instance
-	function GetOTAPluginVersion(self, pluginName: string?): number
-	function SetAutoUpdate(self, pluginId: number, state: boolean): nil
 end
 
 declare class PluginManager extends Instance
-	function ExportPlace(self, filePath: string?): nil
-	function ExportSelection(self, filePath: string?): nil
 end
 
 declare class PluginManagerInterface extends Instance
-	function ExportPlace(self, filePath: string?): nil
-	function ExportSelection(self, filePath: string?): nil
 end
 
 declare class PluginMenu extends Instance
 	Icon: string
 	Title: string
-	function AddAction(self, action: PluginAction): nil
-	function AddMenu(self, menu: PluginMenu): nil
-	function AddNewAction(self, actionId: string, text: string, icon: string?): PluginAction
-	function AddSeparator(self): nil
-	function Clear(self): nil
-	function ShowAsync(self): PluginAction
 end
 
 declare class PluginPolicyService extends Instance
-	function GetPluginPolicy(self, pluginName: string): { [any]: any }
 end
 
 declare class PluginToolbar extends Instance
 	function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton
-	function CreatePopupButton(self, buttonId: string, tooltip: string, iconname: string, text: string?): Instance
 end
 
 declare class PluginToolbarButton extends Instance
-	Click: RBXScriptSignal<>
 	ClickableWhenViewportHidden: boolean
-	DropdownClick: RBXScriptSignal<>
 	Enabled: boolean
 	Icon: Content
-	function SetActive(self, active: boolean): nil
 end
 
 
 
 declare class PolicyService extends Instance
-	IsLuobuServer: EnumTriStateBoolean
-	LuobuWhitelisted: EnumTriStateBoolean
 	function GetPolicyInfoForPlayerAsync(self, player: Player): { [any]: any }
-	function GetPolicyInfoForServerRobloxOnlyAsync(self): { [any]: any }
 end
 
 declare class PoseBase extends Instance
@@ -8962,33 +7969,9 @@ declare class ProximityPromptService extends Instance
 end
 
 declare class PublishService extends Instance
-	function CreateAssetAndWaitForAssetId(self, instances: { Instance }, operationId: string, creatorType: EnumAssetCreatorType, creatorId: number, assetType: string, name: string, description: string, expectedPrice: number?): number
-	function PublishCageMeshAsync(self, wrap: Instance, cageType: EnumCageType): Content
-	function PublishDescendantAssets(self, instance: Instance): boolean
 end
 
 declare class RbxAnalyticsService extends Instance
-	function AddGlobalPointsField(self, key: string, value: number): nil
-	function AddGlobalPointsTag(self, key: string, value: string): nil
-	function DEPRECATED_TrackEvent(self, category: string, action: string, label: string, value: number?): nil
-	function DEPRECATED_TrackEventWithArgs(self, category: string, action: string, label: string, args: { [any]: any }, value: number?): nil
-	function GetClientId(self): string
-	function GetPlaySessionId(self): string
-	function GetSessionId(self): string
-	function ReleaseRBXEventStream(self, target: string): nil
-	function RemoveGlobalPointsField(self, key: string): nil
-	function RemoveGlobalPointsTag(self, key: string): nil
-	function ReportCounter(self, counterName: string, amount: number?): nil
-	function ReportInfluxSeries(self, seriesName: string, points: { [any]: any }, throttlingPercentage: number): nil
-	function ReportStats(self, category: string, value: number): nil
-	function ReportToDiagByCountryCode(self, featureName: string, measureName: string, seconds: number): nil
-	function SendEventDeferred(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SendEventImmediately(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SetRBXEvent(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function SetRBXEventStream(self, target: string, eventContext: string, eventName: string, additionalArgs: { [any]: any }): nil
-	function TrackEvent(self, category: string, action: string, label: string, value: number?): nil
-	function TrackEventWithArgs(self, category: string, action: string, label: string, args: { [any]: any }, value: number?): nil
-	function UpdateHeartbeatObject(self, args: { [any]: any }): nil
 end
 
 declare class ReflectionMetadata extends Instance
@@ -9051,7 +8034,6 @@ declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
 declare class ReflectionService extends Instance
-	function GetPropertyNames(self, name: string): { any }
 end
 
 declare class RemoteCursorService extends Instance
@@ -9104,22 +8086,13 @@ declare class RenderingTest extends Instance
 end
 
 declare class ReplicatedFirst extends Instance
-	DefaultLoadingGuiRemoved: RBXScriptSignal<>
-	FinishedReplicating: RBXScriptSignal<>
-	RemoveDefaultLoadingGuiSignal: RBXScriptSignal<>
-	function IsDefaultLoadingGuiRemoved(self): boolean
-	function IsFinishedReplicating(self): boolean
 	function RemoveDefaultLoadingScreen(self): nil
-	function SetDefaultLoadingGuiRemoved(self): nil
 end
 
 declare class ReplicatedStorage extends Instance
 end
 
 declare class RibbonNotificationService extends Instance
-	NewNotificationFromRibbon: RBXScriptSignal<string>
-	ToggleNotificationTray: RBXScriptSignal<boolean, boolean>
-	function OnNotificationUpdateFromPlugin(self, newNotificationId: string, seenNotificationId: string): nil
 end
 
 declare class RobloxPluginGuiService extends Instance
@@ -9150,7 +8123,6 @@ declare class RtMessagingService extends Instance
 end
 
 declare class RunService extends Instance
-	ClientGitHash: string
 	Heartbeat: RBXScriptSignal<number>
 	PostSimulation: RBXScriptSignal<number>
 	PreAnimation: RBXScriptSignal<number>
@@ -9159,31 +8131,18 @@ declare class RunService extends Instance
 	RenderStepped: RBXScriptSignal<number>
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
-	function GetCoreScriptVersion(self): string
-	function GetRobloxClientChannel(self): string
-	function GetRobloxVersion(self): string
 	function IsClient(self): boolean
-	function IsEdit(self): boolean
 	function IsRunMode(self): boolean
 	function IsRunning(self): boolean
 	function IsServer(self): boolean
 	function IsStudio(self): boolean
-	function Pause(self): nil
-	function Run(self): nil
-	function Set3dRenderingEnabled(self, enable: boolean): nil
-	function SetRobloxGuiFocused(self, focus: boolean): nil
-	function Stop(self): nil
 	function UnbindFromRenderStep(self, name: string): nil
-	function setThrottleFramerateEnabled(self, enable: boolean): nil
 end
 
 declare class RuntimeScriptService extends Instance
 end
 
 declare class SafetyService extends Instance
-	ScreenshotContentReady: RBXScriptSignal<number, Content>
-	ScreenshotUploaded: RBXScriptSignal<number, string>
-	function TakeScreenshot(self, screenshotOptions: { [any]: any }): number
 end
 
 declare class ScreenshotHud extends Instance
@@ -9210,11 +8169,6 @@ declare class SyncScriptBuilder extends ScriptBuilder
 end
 
 declare class ScriptChangeService extends Instance
-	ScriptAdded: RBXScriptSignal<LuaSourceContainer>
-	ScriptBeingRemoved: RBXScriptSignal<LuaSourceContainer>
-	ScriptChanged: RBXScriptSignal<LuaSourceContainer, string>
-	ScriptFullNameChanged: RBXScriptSignal<LuaSourceContainer>
-	ScriptSourceChanged: RBXScriptSignal<LuaSourceContainer>
 end
 
 declare class ScriptCloneWatcher extends Instance
@@ -9228,17 +8182,7 @@ end
 
 declare class ScriptContext extends Instance
 	Error: RBXScriptSignal<string, string, Instance>
-	ErrorDetailed: RBXScriptSignal<string, string, Instance, string, number>
 	ScriptsDisabled: boolean
-	function AddCoreScriptLocal(self, name: string, parent: Instance): nil
-	function ClearScriptProfilingData(self): nil
-	function DeserializeScriptProfilerString(self, jsonString: string): { [any]: any }
-	function GetCoverageStats(self): { any }
-	function GetScriptProfilingData(self): string
-	function SaveScriptProfilingData(self, filename: string): nil
-	function SetTimeout(self, seconds: number): nil
-	function StartScriptProfiling(self, frequency: number?): nil
-	function StopScriptProfiling(self): string
 end
 
 declare class ScriptDebugger extends Instance
@@ -9267,45 +8211,12 @@ declare class ScriptDebugger extends Instance
 end
 
 declare class ScriptDocument extends Instance
-	SelectionChanged: RBXScriptSignal<number, number, number, number>
-	ViewportChanged: RBXScriptSignal<number, number>
-	function CloseAsync(self): any
-	function EditTextAsync(self, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
-	function ForceSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
-	function GetInternalUri(self): string
-	function GetLine(self, lineIndex: number?): string
-	function GetLineCount(self): number
-	function GetScript(self): LuaSourceContainer
-	function GetSelectedText(self): string
-	function GetSelection(self): any
-	function GetSelectionEnd(self): any
-	function GetSelectionStart(self): any
-	function GetText(self, startLine: number?, startCharacter: number?, endLine: number?, endCharacter: number?): string
-	function GetViewport(self): any
-	function HasSelectedText(self): boolean
-	function IsCommandBar(self): boolean
-	function RequestSetSelectionAsync(self, cursorLine: number, cursorCharacter: number, anchorLine: number?, anchorCharacter: number?): any
 end
 
 declare class ScriptEditorService extends Instance
-	TextDocumentDidChange: RBXScriptSignal<ScriptDocument, any>
-	TextDocumentDidClose: RBXScriptSignal<ScriptDocument>
-	TextDocumentDidOpen: RBXScriptSignal<ScriptDocument>
-	function DeregisterAutocompleteCallback(self, name: string): nil
-	function DeregisterScriptAnalysisCallback(self, name: string): nil
-	function EditSourceAsyncWithRanges(self, script: LuaSourceContainer, newText: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number): any
-	function FindScriptDocument(self, script: LuaSourceContainer): ScriptDocument
-	function ForceReloadSource(self, uri: string, newsrc: string): nil
-	function GetEditorSource(self, script: LuaSourceContainer): string
-	function GetScriptDocuments(self): { Instance }
-	function OpenScriptDocumentAsync(self, script: LuaSourceContainer): any
-	function RegisterAutocompleteCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
-	function RegisterScriptAnalysisCallback(self, name: string, priority: number, callbackFunction: ((...any) -> ...any)): nil
-	function UpdateSourceAsync(self, script: LuaSourceContainer, callback: ((...any) -> ...any)): nil
 end
 
 declare class ScriptRegistrationService extends Instance
-	function GetSourceContainerByScriptGuid(self, guid: string): LuaSourceContainer
 end
 
 declare class ScriptRuntime extends Instance
@@ -9315,19 +8226,8 @@ declare class ScriptService extends Instance
 end
 
 declare class Selection extends Instance
-	ActiveInstance: Instance
-	RenderMode: EnumSelectionRenderMode
-	SelectionBoxThickness: number
 	SelectionChanged: RBXScriptSignal<>
-	SelectionLineThickness: number
 	SelectionThickness: number
-	ShowActiveInstanceHighlight: boolean
-	function Add(self, instancesToAdd: { Instance }): nil
-	function ClearTerrainSelectionHack(self): nil
-	function Get(self): { Instance }
-	function Remove(self, instancesToRemove: { Instance }): nil
-	function Set(self, selection: { Instance }): nil
-	function SetTerrainSelectionHack(self, center: Vector3, size: Vector3): nil
 end
 
 declare class SelectionHighlightManager extends Instance
@@ -9376,48 +8276,20 @@ declare class DataModel extends ServiceProvider
 	GameId: number
 	Genre: EnumGenre
 	GraphicsQualityChangeRequest: RBXScriptSignal<boolean>
-	IsSFFlagsLoaded: boolean
 	JobId: string
 	Loaded: RBXScriptSignal<>
 	PlaceId: number
 	PlaceVersion: number
 	PrivateServerId: string
 	PrivateServerOwnerId: number
-	ScreenshotReady: RBXScriptSignal<string>
-	ScreenshotSavedToAlbum: RBXScriptSignal<string, boolean, string>
-	UniverseMetadataLoaded: RBXScriptSignal<>
 	Workspace: Workspace
 	function BindToClose(self, func: ((...any) -> ...any)): nil
-	function DefineFastFlag(self, name: string, defaultValue: boolean): boolean
-	function DefineFastInt(self, name: string, defaultValue: number): number
-	function DefineFastString(self, name: string, defaultValue: string): string
 	function GetEngineFeature(self, name: string): boolean
 	function GetFastFlag(self, name: string): boolean
 	function GetFastInt(self, name: string): number
 	function GetFastString(self, name: string): string
-	function GetJobsInfo(self): { any }
-	function GetObjects(self, url: Content): { Instance }
-	function GetObjectsAllOrNone(self, url: Content, binaryFormatOnly: boolean?): { Instance }
-	function GetObjectsAsync(self, url: Content): { Instance }
-	function GetObjectsList(self, urls: { any }): { any }
-	function GetPlaySessionId(self): string
-	function HttpGetAsync(self, url: string, httpRequestType: EnumHttpRequestType?): string
-	function HttpPostAsync(self, url: string, data: string, contentType: string?, httpRequestType: EnumHttpRequestType?): string
-	function InsertObjectsAndJoinIfLegacyAsync(self, url: Content): { Instance }
-	function IsContentLoaded(self): boolean
 	function IsLoaded(self): boolean
-	function IsUniverseMetadataLoaded(self): boolean
 	function Load(self, url: Content): nil
-	function OpenScreenshotsFolder(self): nil
-	function OpenVideosFolder(self): nil
-	function ReportInGoogleAnalytics(self, category: string, action: string?, label: string?, value: number?): nil
-	function SetFastFlagForTesting(self, name: string, newValue: boolean): boolean
-	function SetFastIntForTesting(self, name: string, newValue: number): number
-	function SetFastStringForTesting(self, name: string, newValue: string): string
-	function SetFlagVersion(self, name: string, version: number): nil
-	function SetIsLoaded(self, value: boolean, placeSizeInBytes: number?): nil
-	function SetPlaceId(self, placeId: number): nil
-	function SetUniverseId(self, universeId: number): nil
 	function Shutdown(self): nil
 end
 
@@ -9432,28 +8304,12 @@ declare class UserSettings extends GenericSettings
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
 	function IsUserFeatureEnabled(self, name: string): boolean
 	function Reset(self): nil
-	function SaveState(self): nil
 end
 
 declare class ServiceVisibilityService extends Instance
 end
 
 declare class SessionService extends Instance
-	function AcquireContextFocus(self, context: string): nil
-	function GenerateSessionInfoString(self, includeArbitrarySessions: boolean, includeTag: boolean, includeTimestamps: boolean, includeMetadata: boolean): string
-	function GetCreatedTimestampUtcMs(self, sid: string): number
-	function GetMetadata(self, sid: string, key: string): any
-	function GetRootSID(self): string
-	function GetSessionTag(self, sid: string): string
-	function IsContextFocused(self, context: string): boolean
-	function ReleaseContextFocus(self, context: string): nil
-	function RemoveMetadata(self, sid: string, key: string, context: string?): nil
-	function RemoveSession(self, sid: string, context: string?): nil
-	function RemoveSessionsWithMetadataKey(self, key: string): nil
-	function ReplaceSession(self, sid: string, tag: string): nil
-	function SessionExists(self, sid: string): boolean
-	function SetMetadata(self, sid: string, key: string, value: any, context: string?): nil
-	function SetSession(self, parentSid: string, childSid: string, tag: string, context: string?): nil
 end
 
 declare class SharedTableRegistry extends Instance
@@ -9462,9 +8318,6 @@ declare class SharedTableRegistry extends Instance
 end
 
 declare class ShorelineUpgraderService extends Instance
-	Status: RBXScriptSignal<number>
-	function Cancel(self): nil
-	function Start(self): nil
 end
 
 declare class Sky extends Instance
@@ -9489,13 +8342,9 @@ declare class Smoke extends Instance
 	RiseVelocity: number
 	Size: number
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class SmoothVoxelsUpgraderService extends Instance
-	Status: RBXScriptSignal<number>
-	function Cancel(self): nil
-	function Start(self): nil
 end
 
 declare class SnippetService extends Instance
@@ -9506,29 +8355,20 @@ declare class SocialService extends Instance
 	GameInvitePromptClosed: RBXScriptSignal<Instance, { any }>
 	OnCallInviteInvoked: (tag: string, callParticipantIds: { any }) -> Instance
 	PhoneBookPromptClosed: RBXScriptSignal<Instance>
-	PromptInviteRequested: RBXScriptSignal<Instance, Instance>
-	PromptIrisInviteRequested: RBXScriptSignal<Instance, string>
-	SelfViewHidden: RBXScriptSignal<>
-	SelfViewVisible: RBXScriptSignal<EnumSelfViewPosition>
 	function CanSendCallInviteAsync(self, player: Instance): boolean
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
 	function HideSelfView(self): nil
-	function InvokeGameInvitePromptClosed(self, player: Instance, recipientIds: { any }): nil
-	function InvokeIrisInvite(self, player: Instance, tag: string, irisParticipants: { any }): nil
-	function InvokeIrisInvitePromptClosed(self, player: Instance): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
 	function ShowSelfView(self, selfViewPosition: EnumSelfViewPosition?): nil
 end
 
 declare class Sound extends Instance
-	ChannelCount: number
 	DidLoop: RBXScriptSignal<string, number>
 	Ended: RBXScriptSignal<string>
 	IsLoaded: boolean
 	IsPaused: boolean
 	IsPlaying: boolean
-	IsSpatial: boolean
 	Loaded: RBXScriptSignal<string>
 	LoopRegion: NumberRange
 	Looped: boolean
@@ -9541,7 +8381,6 @@ declare class Sound extends Instance
 	Played: RBXScriptSignal<string>
 	Playing: boolean
 	Resumed: RBXScriptSignal<string>
-	RollOffGain: number
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
@@ -9550,7 +8389,6 @@ declare class Sound extends Instance
 	Stopped: RBXScriptSignal<string>
 	TimeLength: number
 	TimePosition: number
-	UsageContextPermission: EnumUsageContext
 	Volume: number
 	function Pause(self): nil
 	function Play(self): nil
@@ -9635,27 +8473,14 @@ end
 
 declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
-	AudioInstanceAdded: RBXScriptSignal<Instance>
-	DeviceListChanged: RBXScriptSignal<any>
 	DistanceFactor: number
 	DopplerScale: number
 	RespectFilteringEnabled: boolean
 	RolloffScale: number
 	VolumetricAudio: EnumVolumetricAudio
-	function BeginRecording(self): boolean
-	function EndRecording(self): { [any]: any }
-	function GetInputDevice(self): any
-	function GetInputDevices(self): any
 	function GetListener(self): (EnumListenerType, any)
-	function GetOutputDevice(self): any
-	function GetOutputDevices(self): any
-	function GetRecordingDevices(self): { [any]: any }
-	function GetSoundMemoryData(self): { [any]: any }
 	function PlayLocalSound(self, sound: Sound): nil
-	function SetInputDevice(self, name: string, guid: string): nil
 	function SetListener(self, listenerType: EnumListenerType, listener: any): nil
-	function SetOutputDevice(self, name: string, guid: string): nil
-	function SetRecordingDevice(self, deviceIndex: number): boolean
 end
 
 declare class Sparkles extends Instance
@@ -9663,22 +8488,12 @@ declare class Sparkles extends Instance
 	Enabled: boolean
 	SparkleColor: Color3
 	TimeScale: number
-	function FastForward(self, numFrames: number): nil
 end
 
 declare class SpawnerService extends Instance
 end
 
 declare class StackFrame extends Instance
-	FrameId: number
-	FrameName: string
-	FrameType: EnumDebuggerFrameType
-	Globals: DebuggerVariable
-	Line: number
-	Locals: DebuggerVariable
-	Populated: boolean
-	Script: string
-	Upvalues: DebuggerVariable
 end
 
 declare class StandalonePluginScripts extends Instance
@@ -9711,23 +8526,6 @@ declare class StarterPlayer extends Instance
 	DevTouchMovementMode: EnumDevTouchMovementMode
 	EnableDynamicHeads: EnumLoadDynamicHeads
 	EnableMouseLockOption: boolean
-	GameSettingsAssetIDFace: number
-	GameSettingsAssetIDHead: number
-	GameSettingsAssetIDLeftArm: number
-	GameSettingsAssetIDLeftLeg: number
-	GameSettingsAssetIDPants: number
-	GameSettingsAssetIDRightArm: number
-	GameSettingsAssetIDRightLeg: number
-	GameSettingsAssetIDShirt: number
-	GameSettingsAssetIDTeeShirt: number
-	GameSettingsAssetIDTorso: number
-	GameSettingsAvatar: EnumGameAvatarType
-	GameSettingsR15Collision: EnumR15CollisionType
-	GameSettingsScaleRangeBodyType: NumberRange
-	GameSettingsScaleRangeHead: NumberRange
-	GameSettingsScaleRangeHeight: NumberRange
-	GameSettingsScaleRangeProportion: NumberRange
-	GameSettingsScaleRangeWidth: NumberRange
 	HealthDisplayDistance: number
 	HumanoidStateMachineMode: EnumHumanoidStateMachineMode
 	LoadCharacterAppearance: boolean
@@ -9735,7 +8533,6 @@ declare class StarterPlayer extends Instance
 	NameDisplayDistance: number
 	UserEmotesEnabled: boolean
 	["LoadCharacterLayeredClothing "]: EnumLoadCharacterLayeredClothing
-	function ClearDefaults(self): nil
 end
 
 declare class StarterPlayerScripts extends Instance
@@ -9755,16 +8552,11 @@ declare class Stats extends Instance
 	PhysicsSendKbps: number
 	PhysicsStepTimeMs: number
 	PrimitivesCount: number
-	function GetBrowserTrackerId(self): string
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
-	function GetPaginatedMemoryByTexture(self, queryType: EnumTextureQueryType, pageIndex: number, pageSize: number): { [any]: any }
 	function GetTotalMemoryUsageMb(self): number
 end
 
 declare class StatsItem extends Instance
-	DisplayName: string
-	function GetValue(self): number
-	function GetValueString(self): string
 end
 
 declare class RunningAverageItemDouble extends StatsItem
@@ -9780,47 +8572,18 @@ declare class TotalCountTimeIntervalItem extends StatsItem
 end
 
 declare class StopWatchReporter extends Instance
-	function FinishTask(self, taskId: number): nil
-	function SendReport(self, reportName: string): nil
-	function StartTask(self, reportName: string, taskName: string): number
 end
 
 declare class StreamingService extends Instance
-	RequestEnded: RBXScriptSignal<string>
-	RequestError: RBXScriptSignal<string, string, string>
-	RequestStarted: RBXScriptSignal<string, string>
-	SequentialCommandsFinished: RBXScriptSignal<string, boolean>
-	Stream: RBXScriptSignal<string, string>
-	function ExecuteCommandAsync(self, requestId: string, commandName: string, arg: any): nil
-	function GetEphemeralVariable(self, key: string): any
-	function GetInstance(self, collectorName: string, requestId: string?): Instance
-	function InvokeCommand(self, requestId: string, commandName: string, arg: any): nil
-	function RegisterCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
-	function RegisterContextCollector(self, collectorName: string, func: ((...any) -> ...any)?): nil
-	function RegisterSequentialCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
-	function SetEphemeralVariable(self, key: string, value: any, timeToLive: number?): nil
-	function SetPluginInfoCallback(self, func: ((...any) -> ...any)?): nil
-	function UnregisterCommand(self, commandName: string): nil
-	function UnregisterContextCollector(self, collectorName: string): nil
 end
 
 declare class Studio extends Instance
-	CameraAdaptiveSpeed: boolean
-	CameraTweenFocus: boolean
 	CommandBarLocalState: boolean
 	DefaultScriptFileDir: QDir
 	DeprecatedObjectsShown: boolean
-	DisplayLanguage: string
-	EnableIndentationRulers: boolean
-	EnableOnTypeAutocomplete: boolean
 	Font: QFont
-	FreeCameraSpeedScroll: boolean
 	HintColor: Color3
-	IconOverrideDir: QDir
-	IndentationRulerColor: Color3
 	InformationColor: Color3
-	LargeFileLineCountThreshold: number
-	LargeFileThreshold: number
 	LocalAssetsFolder: QDir
 	LuaDebuggerEnabled: boolean
 	LuaDebuggerEnabledAtStartup: boolean
@@ -9829,12 +8592,8 @@ declare class Studio extends Instance
 	PluginsDir: QDir
 	Rulers: string
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior
-	ScriptEditorMenuBorderColor: Color3
-	ScriptEditorShouldShowPluginMethods: boolean
 	ScriptTimeoutLength: number
-	ShowCorePackagesInExplorer: boolean
 	Theme: StudioTheme
-	ThemeChanged: RBXScriptSignal<>
 	["Active Color"]: Color3
 	["Active Hover Over Color"]: Color3
 	["Always Save Script Changes"]: boolean
@@ -9847,15 +8606,12 @@ declare class Studio extends Instance
 	["Auto-Recovery Enabled"]: boolean
 	["Auto-Recovery Interval (Minutes)"]: number
 	["Auto-Recovery Path"]: QDir
-	["Automatically commit locked scripts when you save or publish to Roblox"]: boolean
-	["Automatically trigger AI Code Completion"]: boolean
 	["Background Color"]: Color3
 	["Basic Objects Display Mode"]: EnumListDisplayMode
 	["Bool Color"]: Color3
 	["Bracket Color"]: Color3
 	["Built-in Function Color"]: Color3
 	["Camera Mouse Wheel Speed"]: number
-	["Camera Pan Speed"]: number
 	["Camera Shift Speed"]: number
 	["Camera Speed Adjust Binding"]: EnumCameraSpeedAdjustBinding
 	["Camera Speed"]: number
@@ -9865,20 +8621,13 @@ declare class Studio extends Instance
 	["Current Line Highlight Color"]: Color3
 	["Debugger Current Line Color"]: Color3
 	["Debugger Error Line Color"]: Color3
-	["Doc View Code Background Color"]: Color3
-	["Enable Autocomplete Doc View"]: boolean
 	["Enable Autocomplete"]: boolean
 	["Enable CoreScript Debugger"]: boolean
 	["Enable Http Sandboxing"]: boolean
 	["Enable Internal Beta Features"]: boolean
 	["Enable Internal Features"]: boolean
-	["Enable Script Analysis"]: boolean
-	["Enable Scrollbar Markers"]: boolean
-	["Enable Signature Help Doc View"]: boolean
-	["Enable Signature Help"]: boolean
 	["Enable Temporary Tabs In Explorer"]: boolean
 	["Enable Temporary Tabs"]: boolean
-	["Enable Type Hover"]: boolean
 	["Error Color"]: Color3
 	["Find Selection Background Color"]: Color3
 	["Format On Paste"]: boolean
@@ -9892,7 +8641,6 @@ declare class Studio extends Instance
 	["Keyword Color"]: Color3
 	["Line Thickness"]: number
 	["Luau Keyword Color"]: Color3
-	["Main Volume"]: number
 	["Matching Word Background Color"]: Color3
 	["Maximum Output Lines"]: number
 	["Menu Item Background Color"]: Color3
@@ -9902,7 +8650,6 @@ declare class Studio extends Instance
 	["Operator Color"]: Color3
 	["Output Font"]: QFont
 	["Output Layout Mode"]: EnumOutputLayoutMode
-	["Physical Draggers Select Scope By Default"]: boolean
 	["Primary Text Color"]: Color3
 	["Property Color"]: Color3
 	["Respect Studio shortcuts when game has focus"]: boolean
@@ -9925,12 +8672,8 @@ declare class Studio extends Instance
 	["Show FileSyncService"]: boolean
 	["Show Hidden Objects in Explorer"]: boolean
 	["Show Hover Over"]: boolean
-	["Show Light Guides"]: boolean
-	["Show Navigation Labels"]: boolean
 	["Show Navigation Mesh"]: boolean
-	["Show Pathfinding Links"]: boolean
 	["Show Plugin GUI Service in Explorer"]: boolean
-	["Show Singly Selected Attachment Parent Frame"]: boolean
 	["Show Whitespace"]: boolean
 	["Show plus button on hover in Explorer"]: boolean
 	["Skip Closing Brackets and Quotes"]: boolean
@@ -9938,7 +8681,6 @@ declare class Studio extends Instance
 	["Tab Width"]: number
 	["Text Color"]: Color3
 	["Text Wrapping"]: boolean
-	["Use Bounding Box Move Handles"]: boolean
 	["Warning Color"]: Color3
 	["Whitespace Color"]: Color3
 	["\"TODO\" Color"]: Color3
@@ -9946,20 +8688,9 @@ declare class Studio extends Instance
 	["\"local\" Color"]: Color3
 	["\"nil\" Color"]: Color3
 	["\"self\" Color"]: Color3
-	function GetAvailableThemes(self): { any }
 end
 
 declare class StudioAssetService extends Instance
-	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
-	OnPublishPackageResult: RBXScriptSignal<{ [any]: any }, string>
-	OnSaveToRoblox: RBXScriptSignal<{ Instance }, any, boolean>
-	OnUGCSubmitCompleted: RBXScriptSignal<boolean>
-	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
-	function FireOnUGCSubmitCompleted(self, cancelled: boolean): nil
-	function PublishPackage(self, instance: Instance, publishInfo: { [any]: any }): nil
-	function RequestAvatarAutosetupAsync(self, meshId: Content, textureId: Content, progressCallback: ((...any) -> ...any)): Instance
-	function SerializeInstances(self, instances: { Instance }): string
-	function ShowSaveToRoblox(self, instances: { Instance }, assetType: any, hasSubsequent: boolean?): nil
 end
 
 declare class StudioAttachment extends Instance
@@ -9971,132 +8702,43 @@ declare class StudioAttachment extends Instance
 end
 
 declare class StudioCallout extends Instance
-	AnchorPoint: Vector2
-	IsArrowVisible: boolean
-	IsNextVisible: boolean
-	RowName: string
-	Text: string
-	Title: string
-	function SetOnNextClicked(self, onClick: ((...any) -> ...any)): nil
 end
 
 declare class StudioData extends Instance
-	EnableScriptCollabByDefaultOnLoad: boolean
 end
 
 declare class StudioDeviceEmulatorService extends Instance
-	CurrentDeviceIdChanged: RBXScriptSignal<>
-	HasMultiTouchStarted: boolean
-	IsMultiTouchEmulationOn: boolean
-	IsMultiTouchEnabled: boolean
-	OrientationChanged: RBXScriptSignal<>
-	PivotPosition: Vector2
-	TouchInBoundsChanged: RBXScriptSignal<>
-	TouchPositionsChanged: RBXScriptSignal<>
-	function EmulatePCDeviceWithResolution(self, deviceId: string, resolution: Vector2): boolean
-	function GetCurrentDeviceId(self): string
-	function GetCurrentOrientation(self): EnumScreenOrientation
-	function GetMaxNumTouches(self): number
-	function GetTouchInBounds(self, index: number): boolean
-	function GetTouchPosition(self, index: number): Vector2
-	function HasDeviceWithId(self, deviceId: string): boolean
-	function SetCurrentDeviceId(self, deviceId: string): nil
-	function SetCurrentOrientation(self, orientation: EnumScreenOrientation): nil
 end
 
 declare class StudioObjectBase extends Instance
 end
 
 declare class StudioWidget extends StudioObjectBase
-	function SetFixedSize(self, width: number, height: number): nil
 end
 
 declare class StudioPublishService extends Instance
-	GameNameUpdated: RBXScriptSignal<string>
-	GamePublishCancelled: RBXScriptSignal<>
-	GamePublishFinished: RBXScriptSignal<boolean, number, string, EnumStudioPlaceUpdateFailureReason>
-	OnPublishAttempt: RBXScriptSignal<>
-	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
-	PublishLocked: boolean
-	function ClearUploadNames(self): nil
-	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
-	function PublishThenTurnOnTeamCreate(self): nil
-	function RefreshDocumentDisplayName(self): nil
-	function SetTeamCreateOnPublishInfo(self, shouldTurnOnTcOnPublish: boolean, newPlaceName: string): nil
-	function SetUniverseDisplayName(self, newName: string): nil
-	function SetUploadNames(self, placeName: string, universeName: string): nil
-	function ShowSaveOrPublishPlaceToRoblox(self, showGameSelect: boolean, isPublish: boolean, closeMode: EnumStudioCloseMode): nil
 end
 
 declare class StudioScriptDebugEventListener extends Instance
 end
 
 declare class StudioSdkService extends Instance
-	function GetSdk(self): Instance
-	function SetSdk(self, sdk: Instance): nil
 end
 
 declare class StudioService extends Instance
 	ActiveScript: Instance
-	AlignDraggedObjects: boolean
 	DraggerSolveConstraints: boolean
 	GridSize: number
-	HoverInstance: Instance
-	InstalledPluginData: string
-	OnImportFromRoblox: RBXScriptSignal<>
-	OnOpenGameSettings: RBXScriptSignal<string>
-	OnOpenManagePackagePlugin: RBXScriptSignal<number, number>
-	OnPluginInstalledFromToolbox: RBXScriptSignal<>
-	OnPluginInstalledFromWeb: RBXScriptSignal<string>
-	OnPublishAsPlugin: RBXScriptSignal<{ Instance }>
-	OnSaveToRoblox: RBXScriptSignal<{ Instance }>
-	PivotSnapToGeometry: boolean
-	PromptTransformPluginCheckEnable: RBXScriptSignal<>
 	RotateIncrement: number
-	SaveLocallyAsComplete: RBXScriptSignal<boolean>
 	ShowConstraintDetails: boolean
 	StudioLocaleId: string
 	UseLocalSpace: boolean
-	function AnimationIdSelected(self, id: number): nil
-	function CopyToClipboard(self, stringToCopy: string): nil
-	function GetBadgeConfigureUrl(self, badgeId: number): string
-	function GetBadgeUploadUrl(self): string
-	function GetClassIcon(self, className: string): { [any]: any }
-	function GetPlaceIsPersistedToCloud(self): boolean
-	function GetResourceByCategory(self, category: string): { [any]: any }
-	function GetStartupAssetId(self): string
-	function GetStartupPluginId(self): string
-	function GetTermsOfUseUrl(self): string
-	function GetUserId(self): number
-	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult
-	function HasInternalPermission(self): boolean
-	function IsPluginInstalled(self, assetId: number): boolean
-	function IsPluginUpToDate(self, assetId: number, currentAssetVersion: number): boolean
-	function OpenInBrowser_DONOTUSE(self, url: string): nil
-	function PromptImportFile(self, fileTypeFilter: { any }?): Instance
-	function PromptImportFiles(self, fileTypeFilter: { any }?): { Instance }
-	function RequestClose(self, closeMode: EnumStudioCloseMode): nil
-	function SetPluginEnabled(self, assetId: number, state: boolean): nil
-	function ShowPlaceVersionHistoryDialog(self, placeId: number): nil
-	function ShowPublishToRoblox(self): nil
-	function TryInstallPlugin(self, assetId: number, assetVersionId: number): nil
-	function UninstallPlugin(self, assetId: number): nil
-	function UpdatePluginManagement(self): nil
 end
 
 declare class StudioTheme extends Instance
-	function GetColor(self, styleguideitem: EnumStudioStyleGuideColor, modifier: EnumStudioStyleGuideModifier?): Color3
 end
 
 declare class StudioWidgetsService extends Instance
-	function ApplyFillInBox(self, target: StudioWidget): nil
-	function ApplyHighlight(self, target: StudioWidget, rowName: string?): nil
-	function ApplyShadows(self): nil
-	function ApplySpotlight(self, target: StudioWidget, rowName: string?): nil
-	function AttachPluginGui(self, target: StudioWidget, gui: PluginGui, attachment: StudioAttachment): nil
-	function GetWidgetFromLabel(self, label: string): StudioWidget
-	function GetWidgetFromPluginGui(self, gui: PluginGui): StudioWidget
-	function HideSpotlight(self): nil
 end
 
 declare class StyleBase extends Instance
@@ -10109,11 +8751,8 @@ end
 declare class StyleRule extends StyleBase
 	Selector: string
 	SelectorError: string
-	StyleRulePropertyChanged: RBXScriptSignal<string>
 	function GetProperties(self): { [any]: any }
-	function GetPropertiesResolved(self): { [any]: any }
 	function GetProperty(self, name: string): any
-	function GetPropertyResolved(self, name: string): any
 	function SetProperties(self, table: { [any]: any }): nil
 	function SetProperty(self, name: string, value: any): nil
 end
@@ -10132,18 +8771,9 @@ declare class StyleLink extends Instance
 end
 
 declare class StylingService extends Instance
-	function GetAppliedStyles(self, instance: Instance): { any }
-	function GetStyleInfo(self, style: StyleRule): { [any]: any }
-	function GetStyleSheetDerivesChain(self, styleSheet: StyleSheet): { Instance }
-	function GetStyleSheetInfo(self, styleSheet: StyleSheet): { [any]: any }
 end
 
 declare class SurfaceAppearance extends Instance
-	AlphaMode: EnumAlphaMode
-	ColorMap: Content
-	MetalnessMap: Content
-	NormalMap: Content
-	RoughnessMap: Content
 end
 
 declare class TaskScheduler extends Instance
@@ -10155,7 +8785,6 @@ end
 
 declare class Team extends Instance
 	AutoAssignable: boolean
-	ChildOrder: number
 	PlayerAdded: RBXScriptSignal<Player>
 	PlayerRemoved: RBXScriptSignal<Player>
 	TeamColor: BrickColor
@@ -10169,8 +8798,6 @@ declare class TeamCreatePublishService extends Instance
 end
 
 declare class TeamCreateService extends Instance
-	ToggleManageCollaborators: RBXScriptSignal<>
-	function CloseGameIfUserDoesntHavePerms(self): nil
 end
 
 declare class Teams extends Instance
@@ -10192,9 +8819,7 @@ end
 
 declare class TeleportService extends Instance
 	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
-	MenuTeleportAttempt: RBXScriptSignal<>
 	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
-	function Block(self): nil
 	function GetArrivingTeleportGui(self): ScreenGui
 	function GetLocalPlayerTeleportData(self): any
 	function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)
@@ -10204,12 +8829,10 @@ declare class TeleportService extends Instance
 	function SetTeleportSetting(self, setting: string, value: any): nil
 	function Teleport(self, placeId: number, player: Player?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult
-	function TeleportCancel(self): nil
 	function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string
 	function TeleportToPlaceInstance(self, placeId: number, instanceId: string, player: Player?, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil
 	function TeleportToSpawnByName(self, placeId: number, spawnName: string, player: Player?, teleportData: any, customLoadingScreen: GuiObject?): nil
-	function UnblockAsync(self): any
 end
 
 declare class TemporaryCageMeshProvider extends Instance
@@ -10219,20 +8842,13 @@ declare class TemporaryScriptService extends Instance
 end
 
 declare class TerrainDetail extends Instance
-	ColorMap: Content
 	Face: EnumTerrainFace
 	MaterialPattern: EnumMaterialPattern
-	MetalnessMap: Content
-	NormalMap: Content
-	RoughnessMap: Content
 	StudsPerTile: number
 end
 
 declare class TerrainRegion extends Instance
 	SizeInCells: Vector3
-	function ApplyTransform(self, rotation: CFrame, size: Vector3): nil
-	function ApplyTransformSubregion(self, rotation: CFrame, size: Vector3, region: Region3int16): TerrainRegion
-	function GetRegionWireframe(self): { any }
 end
 
 declare class TestService extends Instance
@@ -10257,7 +8873,6 @@ declare class TestService extends Instance
 	function Fail(self, description: string, source: Instance?, line: number?): nil
 	function Message(self, text: string, source: Instance?, line: number?): nil
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
-	function Run(self): nil
 	function ScopeTime(self): { [any]: any }
 	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function isFeatureEnabled(self, name: string): boolean
@@ -10307,16 +8922,13 @@ end
 
 declare class ChatInputBarConfiguration extends TextChatConfigurations
 	AbsolutePosition: Vector2
-	AbsolutePositionWrite: Vector2
 	AbsoluteSize: Vector2
-	AbsoluteSizeWrite: Vector2
 	AutocompleteEnabled: boolean
 	BackgroundColor3: Color3
 	BackgroundTransparency: number
 	Enabled: boolean
 	FontFace: Font
 	IsFocused: boolean
-	IsFocusedWrite: boolean
 	KeyboardKeyCode: EnumKeyCode
 	PlaceholderColor3: Color3
 	TargetTextChannel: TextChannel
@@ -10329,9 +8941,7 @@ end
 
 declare class ChatWindowConfiguration extends TextChatConfigurations
 	AbsolutePosition: Vector2
-	AbsolutePositionWrite: Vector2
 	AbsoluteSize: Vector2
-	AbsoluteSizeWrite: Vector2
 	BackgroundColor3: Color3
 	BackgroundTransparency: number
 	Enabled: boolean
@@ -10368,8 +8978,6 @@ end
 declare class TextChatService extends Instance
 	BubbleDisplayed: RBXScriptSignal<Instance, TextChatMessage>
 	ChatTranslationEnabled: boolean
-	ChatTranslationFTUXShown: boolean
-	ChatTranslationToggleEnabled: boolean
 	ChatVersion: EnumChatVersion
 	CreateDefaultCommands: boolean
 	CreateDefaultTextChannels: boolean
@@ -10399,10 +9007,8 @@ declare class TextService extends Instance
 	function FilterAndTranslateStringAsync(self, stringToFilter: string, fromUserId: number, targetLocales: { any }, textContext: EnumTextFilterContext?): Instance
 	function FilterStringAsync(self, stringToFilter: string, fromUserId: number, textContext: EnumTextFilterContext?): Instance
 	function GetFamilyInfoAsync(self, assetId: Content): { [any]: any }
-	function GetFontMemoryData(self): { [any]: any }
 	function GetTextBoundsAsync(self, params: GetTextBoundsParams): Vector2
 	function GetTextSize(self, string: string, fontSize: number, font: EnumFont, frameSize: Vector2): Vector2
-	function SetResolutionScale(self, scale: number): nil
 end
 
 declare class TextSource extends Instance
@@ -10411,34 +9017,18 @@ declare class TextSource extends Instance
 end
 
 declare class TextureGenerationMeshHandler extends Instance
-	function PrepareInstancesForTexturingAsync(self, instances: { Instance }, unwrapMode: EnumTextureGenerationMeshHandlerUnwrapMode): string
 end
 
 declare class ThirdPartyUserService extends Instance
-	ActiveUserSignedOut: RBXScriptSignal<number>
-	function GetUserPlatformId(self): string
-	function GetUserPlatformName(self): string
-	function HaveActiveUser(self): boolean
-	function IsOver13(self): boolean
-	function RegisterActiveUser(self, gamepadId: EnumUserInputType): number
-	function ReturnToEngagement(self): nil
-	function ShowAccountPicker(self): nil
 end
 
 declare class ThreadState extends Instance
-	FrameCount: number
-	Populated: boolean
-	ThreadId: number
-	ThreadName: string
-	function GetFrame(self, index: number): Instance
 end
 
 declare class TimerService extends Instance
 end
 
 declare class ToastNotificationService extends Instance
-	function HideNotification(self, notificationId: string): nil
-	function ShowNotification(self, message: string, notificationId: string): nil
 end
 
 declare class TouchInputService extends Instance
@@ -10448,20 +9038,13 @@ declare class TouchTransmitter extends Instance
 end
 
 declare class TracerService extends Instance
-	function FinishSpan(self, spanId: string): nil
-	function StartSpan(self, name: string, parentId: string): string
 end
 
 declare class TrackerLodController extends Instance
 	AudioMode: EnumTrackerLodFlagMode
-	UpdateState: RBXScriptSignal<>
 	VideoExtrapolationMode: EnumTrackerExtrapolationFlagMode
 	VideoLodMode: EnumTrackerLodValueMode
 	VideoMode: EnumTrackerLodFlagMode
-	function getExtrapolation(self): number
-	function getVideoLod(self): number
-	function isAudioEnabled(self): boolean
-	function isVideoEnabled(self): boolean
 end
 
 declare class TrackerStreamAnimation extends Instance
@@ -10490,20 +9073,10 @@ end
 declare class Translator extends Instance
 	LocaleId: string
 	function FormatByKey(self, key: string, args: any): string
-	function RobloxOnlyTranslate(self, context: Instance, text: string): string
 	function Translate(self, context: Instance, text: string): string
 end
 
 declare class TutorialService extends Instance
-	function GetMainViewSessionId(self): string
-	function GetStudioWidgetFromLabel(self, label: string): StudioWidget
-	function GetTutorialIDToLaunch(self): string
-	function HasUserCompletedTutorial(self): boolean
-	function HideWidgets(self, commaSeparatedNames: string): boolean
-	function PromptClosePlace(self): nil
-	function SetTutorialCompletionStatus(self, completed: boolean): nil
-	function ShouldLaunchTutorial(self): boolean
-	function ShowWidgets(self, commaSeparatedNames: string): boolean
 end
 
 declare class TweenBase extends Instance
@@ -10528,66 +9101,7 @@ declare class UGCAvatarService extends Instance
 end
 
 declare class UGCValidationService extends Instance
-	function CalculateEditableMeshUniqueUVCount(self, editableMesh: EditableMesh): number
-	function CalculateUniqueUVCount(self, meshId: string): number
-	function CanLoadAsset(self, assetId: string): boolean
-	function CheckEditableMeshInCameraFrustum(self, editableMesh: EditableMesh, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
-	function CheckMeshInCameraFrustum(self, meshId: string, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
 	function CompareTextureOverlapByteString(self, byteStringBaseline: string, byteStringFollowup: string): { any }
-	function CompareTextureOverlapTextureId(self, textureIdBaseline: string, textureIdFollowup: string): { any }
-	function FetchAssetWithFormat(self, url: Content, assetFormat: string): { Instance }
-	function GetDynamicHeadEditableMeshInactiveControls(self, editableMesh: EditableMesh, controlNames: { any }): any
-	function GetDynamicHeadMeshInactiveControls(self, meshId: string, controlNames: { any }): any
-	function GetEditableImageSize(self, editableImage: EditableImage): Vector2
-	function GetEditableMeshTriCount(self, editableMesh: EditableMesh): number
-	function GetEditableMeshVertColors(self, editableMesh: EditableMesh): { any }
-	function GetEditableMeshVerts(self, editableMesh: EditableMesh): { any }
-	function GetMeshTriCount(self, meshId: string): number
-	function GetMeshVertColors(self, meshId: string): { any }
-	function GetMeshVerts(self, meshId: string): { any }
-	function GetPropertyValue(self, instance: Instance, property: string): any
-	function GetTextureSize(self, textureId: string): Vector2
-	function RegisterUGCValidationFunction(self, setFunction: ((...any) -> ...any)): nil
-	function ResetCollisionFidelity(self, meshPart: Instance, collisionFidelity: EnumCollisionFidelity?): nil
-	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
-	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
-	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
-	function ValidateCageUVTriangleArea(self, meshId: string): boolean
-	function ValidateDynamicHeadEditableMesh(self, editableMesh: EditableMesh): boolean
-	function ValidateDynamicHeadMesh(self, meshId: string): boolean
-	function ValidateEditableImageNumTextureChannels(self, editableImage: EditableImage, numTextureChannelsRequired: number): boolean
-	function ValidateEditableImageSize(self, editableImage: EditableImage): boolean
-	function ValidateEditableMeshBounds(self, editableMesh: EditableMesh, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
-	function ValidateEditableMeshCageMeshIntersection(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh): any
-	function ValidateEditableMeshCageNonManifoldAndHoles(self, editableMesh: EditableMesh): any
-	function ValidateEditableMeshCageUVTriangleArea(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshFullBodyCageDeletion(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshMisMatchUV(self, innerCage: EditableMesh, outerCage: EditableMesh): boolean
-	function ValidateEditableMeshOverlappingVertices(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshTriangleArea(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshTriangles(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshUVSpace(self, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshUVValuesInReference(self, referenceValues: { any }, editableMesh: EditableMesh): boolean
-	function ValidateEditableMeshUniqueUVCount(self, editableMesh: EditableMesh, numRequired: number): boolean
-	function ValidateEditableMeshVertColors(self, editableMesh: EditableMesh, includeAlpha: boolean?): boolean
-	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
-	function ValidateImageTransparencyThresholdByteString(self, image: string, threshold: number): boolean
-	function ValidateImageTransparencyThresholdTextureID(self, textureId: string, threshold: number): boolean
-	function ValidateMeshBounds(self, meshId: string, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
-	function ValidateMeshTriangleArea(self, meshId: string): boolean
-	function ValidateMeshTriangles(self, meshId: string): boolean
-	function ValidateMeshVertColors(self, meshId: string, includeAlpha: boolean?): boolean
-	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
-	function ValidateNumTextureChannels(self, textureId: string, numChannelsRequired: number): boolean
-	function ValidateOverlappingVertices(self, meshId: string): boolean
-	function ValidateSkinnedEditableMesh(self, editableMesh: EditableMesh): boolean
-	function ValidateSkinnedMesh(self, meshId: string): boolean
-	function ValidateTextureAlpha(self, textureId: string, pixelWidth: number): boolean
-	function ValidateTextureAlphaByteString(self, byteString: string, pixelWidth: number): boolean
-	function ValidateTextureSize(self, textureId: string): boolean
-	function ValidateUVSpace(self, meshId: string): boolean
-	function ValidateUVValuesInReference(self, referenceValues: { any }, meshId: string): boolean
-	function ValidateUniqueUVCount(self, meshId: string, numRequired: number): boolean
 end
 
 declare class UIBase extends Instance
@@ -10710,83 +9224,35 @@ declare class UIStroke extends UIComponent
 end
 
 declare class UnvalidatedAssetService extends Instance
-	function AppendTempAssetId(self, userId: number, id: number, lookAt: Vector3, camPos: Vector3, usage: string): nil
-	function AppendVantagePoint(self, userId: number, id: number, lookAt: Vector3, camPos: Vector3): boolean
-	function UpgradeTempAssetId(self, userId: number, tempId: number, assetId: number): boolean
 end
 
 declare class UserGameSettings extends Instance
-	AllTutorialsDisabled: boolean
-	CameraMode: EnumCustomCameraMode
-	CameraYInverted: boolean
-	ChatTranslationEnabled: boolean
-	ChatTranslationFTUXShown: boolean
-	ChatTranslationToggleEnabled: boolean
-	ChatVisible: boolean
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode
 	ComputerMovementMode: EnumComputerMovementMode
 	ControlMode: EnumControlMode
-	DefaultCameraID: string
-	Fullscreen: boolean
 	FullscreenChanged: RBXScriptSignal<boolean>
 	GamepadCameraSensitivity: number
-	GraphicsQualityLevel: number
-	HasEverUsedVR: boolean
-	IsUsingCameraYInverted: boolean
-	IsUsingGamepadCameraSensitivity: boolean
-	MasterVolume: number
-	MicroProfilerWebServerEnabled: boolean
-	MicroProfilerWebServerIP: string
-	MicroProfilerWebServerPort: number
 	MouseSensitivity: number
-	MouseSensitivityFirstPerson: Vector2
-	MouseSensitivityThirdPerson: Vector2
-	OnScreenProfilerEnabled: boolean
-	OnboardingsCompleted: string
-	PerformanceStatsVisible: boolean
-	PerformanceStatsVisibleChanged: RBXScriptSignal<boolean>
-	PlayerHeight: number
-	PreferredTransparency: number
 	RCCProfilerRecordFrameRate: number
 	RCCProfilerRecordTimeFrame: number
-	ReducedMotion: boolean
 	RotationType: EnumRotationType
 	SavedQualityLevel: EnumSavedQualitySetting
-	StartMaximized: boolean
-	StartScreenPosition: Vector2
-	StartScreenSize: Vector2
 	StudioModeChanged: RBXScriptSignal<boolean>
 	TouchCameraMovementMode: EnumTouchCameraMovementMode
 	TouchMovementMode: EnumTouchMovementMode
-	UiNavigationKeyBindEnabled: boolean
-	UsedCoreGuiIsVisibleToggle: boolean
-	UsedCustomGuiIsVisibleToggle: boolean
-	UsedHideHudShortcut: boolean
-	VRComfortSetting: EnumVRComfortSetting
-	VREnabled: boolean
-	VRRotationIntensity: number
-	VRSafetyBubbleMode: EnumVRSafetyBubbleMode
 	VRSmoothRotationEnabled: boolean
-	VRSmoothRotationEnabledCustomOption: boolean
-	VRThirdPersonFollowCamEnabled: boolean
-	VRThirdPersonFollowCamEnabledCustomOption: boolean
 	VignetteEnabled: boolean
-	VignetteEnabledCustomOption: boolean
 	function GetCameraYInvertValue(self): number
 	function GetOnboardingCompleted(self, onboardingId: string): boolean
-	function GetTutorialState(self, tutorialId: string): boolean
 	function InFullScreen(self): boolean
 	function InStudioMode(self): boolean
-	function ResetOnboardingCompleted(self, onboardingId: string): nil
 	function SetCameraYInvertVisible(self): nil
 	function SetGamepadCameraSensitivityVisible(self): nil
 	function SetOnboardingCompleted(self, onboardingId: string): nil
-	function SetTutorialState(self, tutorialId: string, value: boolean): nil
 end
 
 declare class UserInputService extends Instance
 	AccelerometerEnabled: boolean
-	BottomBarSize: Vector2
 	DeviceAccelerationChanged: RBXScriptSignal<InputObject>
 	DeviceGravityChanged: RBXScriptSignal<InputObject>
 	DeviceRotationChanged: RBXScriptSignal<InputObject, CFrame>
@@ -10800,22 +9266,15 @@ declare class UserInputService extends Instance
 	JumpRequest: RBXScriptSignal<>
 	KeyboardEnabled: boolean
 	LastInputTypeChanged: RBXScriptSignal<EnumUserInputType>
-	LegacyInputEventsEnabled: boolean
 	MouseBehavior: EnumMouseBehavior
 	MouseDeltaSensitivity: number
 	MouseEnabled: boolean
 	MouseIcon: Content
 	MouseIconEnabled: boolean
-	NavBarSize: Vector2
-	OnScreenKeyboardAnimationDuration: number
 	OnScreenKeyboardPosition: Vector2
 	OnScreenKeyboardSize: Vector2
 	OnScreenKeyboardVisible: boolean
-	OverrideMouseIconBehavior: EnumOverrideMouseIconBehavior
 	PointerAction: RBXScriptSignal<number, Vector2, number, boolean>
-	RightBarSize: Vector2
-	StatusBarSize: Vector2
-	StatusBarTapped: RBXScriptSignal<Vector2>
 	TextBoxFocusReleased: RBXScriptSignal<TextBox>
 	TextBoxFocused: RBXScriptSignal<TextBox>
 	TouchEnabled: boolean
@@ -10837,7 +9296,6 @@ declare class UserInputService extends Instance
 	function GetDeviceAcceleration(self): InputObject
 	function GetDeviceGravity(self): InputObject
 	function GetDeviceRotation(self): (number, CFrame)
-	function GetDeviceType(self): EnumDeviceType
 	function GetFocusedTextBox(self): TextBox
 	function GetGamepadConnected(self, gamepadNum: EnumUserInputType): boolean
 	function GetGamepadState(self, gamepadNum: EnumUserInputType): { InputObject }
@@ -10848,7 +9306,6 @@ declare class UserInputService extends Instance
 	function GetMouseDelta(self): Vector2
 	function GetMouseLocation(self): Vector2
 	function GetNavigationGamepads(self): { EnumUserInputType }
-	function GetPlatform(self): EnumPlatform
 	function GetStringForKeyCode(self, keyCode: EnumKeyCode): string
 	function GetSupportedGamepadKeyCodes(self, gamepadNum: EnumUserInputType): { EnumKeyCode }
 	function IsGamepadButtonDown(self, gamepadNum: EnumUserInputType, gamepadKeyCode: EnumKeyCode): boolean
@@ -10856,7 +9313,6 @@ declare class UserInputService extends Instance
 	function IsMouseButtonPressed(self, mouseButton: EnumUserInputType): boolean
 	function IsNavigationGamepad(self, gamepadEnum: EnumUserInputType): boolean
 	function RecenterUserHeadCFrame(self): nil
-	function SendAppUISizes(self, statusBarSize: Vector2, navBarSize: Vector2, bottomBarSize: Vector2, rightBarSize: Vector2): nil
 	function SetNavigationGamepad(self, gamepadEnum: EnumUserInputType, enabled: boolean): nil
 end
 
@@ -10893,28 +9349,17 @@ end
 
 declare class VRService extends Instance
 	AutomaticScaling: EnumVRScaling
-	DidPointerHit: boolean
 	FadeOutViewOnCollision: boolean
 	GuiInputUserCFrame: EnumUserCFrame
-	LaserDistance: number
-	LaserPointerTriggered: RBXScriptSignal<InputObject>
 	NavigationRequested: RBXScriptSignal<CFrame, EnumUserCFrame>
-	PointerHitCFrame: CFrame
-	QuestASWState: boolean
-	QuestDisplayRefreshRate: number
 	ThirdPersonFollowCamEnabled: boolean
 	TouchpadModeChanged: RBXScriptSignal<EnumVRTouchpad, EnumVRTouchpadMode>
 	UserCFrameChanged: RBXScriptSignal<EnumUserCFrame, CFrame>
 	UserCFrameEnabled: RBXScriptSignal<EnumUserCFrame, boolean>
-	VRDeviceAvailable: boolean
-	VRDeviceName: string
 	VREnabled: boolean
-	VRSessionState: EnumVRSessionState
 	function GetTouchpadMode(self, pad: EnumVRTouchpad): EnumVRTouchpadMode
 	function GetUserCFrame(self, type: EnumUserCFrame): CFrame
 	function GetUserCFrameEnabled(self, type: EnumUserCFrame): boolean
-	function IsMaquettes(self): boolean
-	function IsVRAppBuild(self): boolean
 	function RecenterUserHeadCFrame(self): nil
 	function RequestNavigation(self, cframe: CFrame, inputUserCFrame: EnumUserCFrame): nil
 	function SetTouchpadMode(self, pad: EnumVRTouchpad, mode: EnumVRTouchpadMode): nil
@@ -10992,49 +9437,15 @@ declare class Vector3Curve extends Instance
 end
 
 declare class VersionControlService extends Instance
-	ScriptCollabEnabled: boolean
 end
 
 declare class VideoCaptureService extends Instance
-	Active: boolean
-	CameraID: string
-	DevicesChanged: RBXScriptSignal<>
-	Error: RBXScriptSignal<string, string>
-	Started: RBXScriptSignal<string>
-	Stopped: RBXScriptSignal<string>
-	function GetCameraDevices(self): { [any]: any }
 end
 
 declare class VideoService extends Instance
 end
 
 declare class VirtualInputManager extends Instance
-	AdditionalLuaState: string
-	PlaybackCompleted: RBXScriptSignal<string>
-	RecordingCompleted: RBXScriptSignal<string>
-	function Dump(self): nil
-	function HandleGamepadAxisInput(self, objectId: number, keyCode: EnumKeyCode, x: number, y: number, z: number): nil
-	function HandleGamepadButtonInput(self, deviceId: number, keyCode: EnumKeyCode, buttonState: number): nil
-	function HandleGamepadConnect(self, deviceId: number): nil
-	function HandleGamepadDisconnect(self, deviceId: number): nil
-	function SendAccelerometerEvent(self, x: number, y: number, z: number): nil
-	function SendGravityEvent(self, x: number, y: number, z: number): nil
-	function SendGyroscopeEvent(self, quatX: number, quatY: number, quatZ: number, quatW: number): nil
-	function SendKeyEvent(self, isPressed: boolean, keyCode: EnumKeyCode, isRepeatedKey: boolean, layerCollector: Instance): nil
-	function SendMouseButtonEvent(self, x: number, y: number, mouseButton: number, isDown: boolean, layerCollector: Instance, repeatCount: number): nil
-	function SendMouseMoveEvent(self, x: number, y: number, layerCollector: Instance): nil
-	function SendMouseWheelEvent(self, x: number, y: number, isForwardScroll: boolean, layerCollector: Instance): nil
-	function SendTextInputCharacterEvent(self, str: string, layerCollector: Instance): nil
-	function SendTouchEvent(self, touchId: number, state: number, x: number, y: number): nil
-	function SetInputTypesToIgnore(self, inputTypesToIgnore: any): nil
-	function StartPlaying(self, fileName: string): nil
-	function StartPlayingJSON(self, string: string): nil
-	function StartRecording(self): nil
-	function StopPlaying(self): nil
-	function StopRecording(self): nil
-	function WaitForInputEventsProcessed(self): nil
-	function sendRobloxEvent(self, namespace: string, detail: string, detailType: string): nil
-	function sendThemeChangeEvent(self, themeName: string): nil
 end
 
 declare class VirtualUser extends Instance
@@ -11063,26 +9474,10 @@ declare class Visit extends Instance
 end
 
 declare class VoiceChatInternal extends Instance
-	LocalPlayerModerated: RBXScriptSignal<>
-	function GetChannelId(self): string
-	function GetGroupId(self): string
-	function GetSessionId(self): string
-	function GetVoiceExperienceId(self): string
-	function IsContextVoiceEnabled(self): boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
-	function LogPublisherWebRTCStats(self): boolean
-	function LogSubscriptionWebRTCStats(self): boolean
-	function SubscribeBlock(self, userId: number): boolean
-	function SubscribeRetry(self, userId: number): boolean
-	function SubscribeUnblock(self, userId: number): boolean
 end
 
 declare class VoiceChatService extends Instance
-	EnableDefaultVoice: boolean
-	UseAudioApi: EnumAudioApiRollout
-	UseNewAudioApi: boolean
-	VoiceChatEnabledForPlaceOnRcc: boolean
-	VoiceChatEnabledForUniverseOnRcc: boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
 end
 

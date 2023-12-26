@@ -12,17 +12,6 @@
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
-LanguageServer::LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles,
-    const std::vector<std::filesystem::path>& documentationFiles, std::optional<Luau::Config> defaultConfig)
-    : client(std::make_shared<Client>())
-    , defaultConfig(std::move(defaultConfig))
-{
-    client->definitionsFiles = definitionsFiles;
-    client->documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client->documentation, client);
-    nullWorkspace = std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig);
-}
-
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
@@ -257,6 +246,21 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         }
         response = result;
     }
+    else if (method == "luau-lsp/bytecode")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/bytecode")
+        auto params = baseParams->get<lsp::BytecodeParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->bytecode(params);
+    }
+
+    else if (method == "luau-lsp/compilerRemarks")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/compilerRemarks")
+        auto params = baseParams->get<lsp::CompilerRemarksParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->compilerRemarks(params);
+    }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
@@ -435,6 +439,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
         client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
     {
+        client->sendTrace("client supports configuration, setting up didChangeConfiguration capability");
         requestedConfiguration = true;
 
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
@@ -455,6 +460,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         };
 
         // Send off requests to get the configuration for each workspace
+        client->sendTrace("config: requesting initial configuration for each workspace");
         std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
             items.emplace_back(workspace->rootUri);
@@ -487,10 +493,12 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     // a race condition where the first LSP events are executed before receiving the user configuration,
     // causing us to fall back to the global configuration. Sending the request for configuration
     // first means we receive the user config before processing the first LSP events
+    client->sendTrace("initializing null workspace");
     nullWorkspace->initialize();
     nullWorkspace->setupWithConfiguration(client->globalConfig);
     for (auto& folder : workspaceFolders)
     {
+        client->sendTrace("initializing workspace: " + folder->rootUri.toString());
         folder->initialize();
         // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
         if (!requestedConfiguration)

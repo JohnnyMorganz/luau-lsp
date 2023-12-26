@@ -29,14 +29,18 @@ private:
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
-    WorkspaceFolderPtr nullWorkspace;
-    std::vector<WorkspaceFolderPtr> workspaceFolders;
     ClientPtr client;
     std::optional<Luau::Config> defaultConfig;
+    WorkspaceFolderPtr nullWorkspace;
+    std::vector<WorkspaceFolderPtr> workspaceFolders;
 
 public:
-    explicit LanguageServer(const std::vector<std::filesystem::path>& definitionsFiles, const std::vector<std::filesystem::path>& documentationFiles,
-        std::optional<Luau::Config> defaultConfig);
+    explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
+        : client(std::move(aClient))
+        , defaultConfig(std::move(aDefaultConfig))
+        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
+    {
+    }
 
     lsp::ServerCapabilities getServerCapabilities();
 

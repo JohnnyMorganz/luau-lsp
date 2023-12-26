@@ -1,5 +1,7 @@
 #include "LSP/LanguageServer.hpp"
+#include "LSP/DocumentationParser.hpp"
 #include "Analyze/AnalyzeCli.hpp"
+#include "Analyze/CliConfigurationParser.hpp"
 #include "Luau/ExperimentalFlags.h"
 #include "argparse/argparse.hpp"
 
@@ -116,7 +118,26 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         }
     }
 
-    LanguageServer server(definitionsFiles, documentationFiles, defaultConfig);
+    // Setup client
+    auto client = std::make_shared<Client>();
+    client->definitionsFiles = definitionsFiles;
+    client->documentationFiles = documentationFiles;
+    parseDocumentation(documentationFiles, client->documentation, client);
+
+    // Parse LSP Settings
+    auto settingsPath = program.present<std::filesystem::path>("--settings");
+    if (settingsPath)
+    {
+        if (std::optional<std::string> contents = readFile(*settingsPath))
+            client->globalConfig = dottedToClientConfiguration(contents.value());
+        else
+        {
+            std::cerr << "Failed to read base LSP settings at '" << settingsPath->generic_string() << "'\n";
+            return 1;
+        }
+    }
+
+    LanguageServer server(client, defaultConfig);
 
     // Begin input loop
     server.processInputLoop();
@@ -171,7 +192,7 @@ int main(int argc, char** argv)
         return 1;
     };
 
-    argparse::ArgumentParser program("luau-lsp", "1.26.0");
+    argparse::ArgumentParser program("luau-lsp", "1.27.0");
     program.set_assign_chars(":=");
 
     // Global arguments
@@ -252,6 +273,7 @@ int main(int argc, char** argv)
         .help("path to a .luaurc file which acts as the base default configuration")
         .action(file_path_parser)
         .metavar("PATH");
+    lsp_command.add_argument("--settings").help("path to LSP settings to use as default").action(file_path_parser).metavar("PATH");
     lsp_command.add_argument("--delay-startup")
         .help("debug flag to halt startup to allow connection of a debugger")
         .default_value(false)

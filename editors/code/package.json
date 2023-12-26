@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.26.0",
+  "version": "1.27.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -34,20 +34,24 @@
   "contributes": {
     "languages": [
       {
-        "id": "lua",
+        "id": "luau",
         "aliases": [
           "Luau"
         ],
         "extensions": [
-          ".lua",
-          ".luau"
+          ".luau",
+          ".lua"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./assets/file-icon-light.svg",
+          "dark": "./assets/file-icon-dark.svg"
+        }
       }
     ],
     "grammars": [
       {
-        "language": "lua",
+        "language": "luau",
         "scopeName": "source.luau",
         "path": "./syntaxes/Luau.tmLanguage.json",
         "tokenTypes": {
@@ -85,8 +89,30 @@
       {
         "command": "luau-lsp.reloadServer",
         "title": "Luau: Reload Language Server"
+      },
+      {
+        "command": "luau-lsp.computeBytecode",
+        "title": "Luau: Compute Bytecode for file",
+        "enablement": "resourceLangId == luau"
+      },
+      {
+        "command": "luau-lsp.computeCompilerRemarks",
+        "title": "Luau: Compute Compiler Remarks for file",
+        "enablement": "resourceLangId == luau"
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == luau",
+          "command": "luau-lsp.computeBytecode"
+        },
+        {
+          "when": "resourceLangId == luau",
+          "command": "luau-lsp.computeCompilerRemarks"
+        }
+      ]
+    },
     "configuration": {
       "title": "Luau Language Server",
       "properties": {
@@ -229,6 +255,18 @@
           "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.platform#` instead.",
           "deprecationMessage": "Deprecated: Please use luau-lsp.platform.platform instead."
         },
+        "luau-lsp.types.robloxSecurityLevel": {
+          "markdownDescription": "Security Level to use in the Roblox API definitions",
+          "type": "string",
+          "default": "PluginSecurity",
+          "scope": "window",
+          "enum": [
+            "None",
+            "LocalUserSecurity",
+            "PluginSecurity",
+            "RobloxScriptSecurity"
+          ]
+        },
         "luau-lsp.inlayHints.parameterNames": {
           "markdownDescription": "Show inlay hints for function parameter names",
           "type": "string",
@@ -285,6 +323,12 @@
         },
         "luau-lsp.hover.strictDatamodelTypes": {
           "markdownDescription": "Use strict DataModel types in hover display. When on, this is equivalent to autocompletion types. When off, this is equivalent to diagnostic types",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.hover.includeStringLength": {
+          "markdownDescription": "Show string length when hovering over a string literal",
           "type": "boolean",
           "default": true,
           "scope": "resource"
@@ -437,6 +481,32 @@
           "default": 10000,
           "scope": "window",
           "markdownDescription": "The maximum amount of files that can be indexed. If more files are indexed, more memory is needed"
+        },
+        "luau-lsp.bytecode.debugLevel": {
+          "type": "number",
+          "default": 1,
+          "scope": "resource",
+          "minimum": 0,
+          "maximum": 2,
+          "markdownDescription": "The `debugLevel` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorLib": {
+          "type": "string",
+          "default": "Vector3",
+          "scope": "resource",
+          "markdownDescription": "The `vectorLib` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorCtor": {
+          "type": "string",
+          "default": "new",
+          "scope": "resource",
+          "markdownDescription": "The `vectorCtor` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.vectorType": {
+          "type": "string",
+          "default": "Vector3",
+          "scope": "resource",
+          "markdownDescription": "The `vectorType` to use when compiling bytecode"
         }
       }
     }
@@ -462,7 +532,7 @@
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
     "@vscode/test-cli": "^0.0.4",
-    "@vscode/test-electron": "^2.3.6",
+    "@vscode/test-electron": "^2.3.8",
     "eslint": "^8.14.0",
     "glob": "^8.0.1",
     "mocha": "^9.2.2",

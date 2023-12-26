@@ -69,6 +69,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 return result;
             baseType = Luau::follow(*baseType);
 
+            definitionModuleName = Luau::getDefinitionModuleName(*baseType);
+            location = getLocation(*baseType);
+
             std::vector<Luau::Property> properties{};
             for (auto it = keys.rbegin(); it != keys.rend(); ++it)
             {
@@ -76,22 +79,11 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 auto prop = lookupProp(base, *it);
                 if (!prop)
                     return result;
+
+                definitionModuleName = Luau::getDefinitionModuleName(base);
+                location = prop->location;
                 properties.push_back(*prop);
             }
-
-            for (auto it = properties.rbegin(); it != properties.rend(); ++it)
-            {
-                if (!location && it->location)
-                    location = it->location;
-                if (!definitionModuleName)
-                    definitionModuleName = Luau::getDefinitionModuleName(Luau::follow(it->type()));
-            }
-
-            if (!definitionModuleName)
-                definitionModuleName = Luau::getDefinitionModuleName(*baseType);
-
-            if (!location)
-                location = getLocation(*baseType);
         }
 
         if (location)

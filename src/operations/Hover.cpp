@@ -6,6 +6,59 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
+// Lifted from lutf8lib.cpp
+/*
+** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
+*/
+static const char* utf8_decode(const char* o, int* val)
+{
+    static const unsigned int limits[] = {0xFF, 0x7F, 0x7FF, 0xFFFF};
+    const unsigned char* s = (const unsigned char*)o;
+    unsigned int c = s[0];
+    unsigned int res = 0; // final result
+    if (c < 0x80)         // ascii?
+        res = c;
+    else
+    {
+        int count = 0; // to count number of continuation bytes
+        while (c & 0x40)
+        {                                   // still have continuation bytes?
+            int cc = s[++count];            // read next byte
+            if ((cc & 0xC0) != 0x80)        // not a continuation byte?
+                return NULL;                // invalid byte sequence
+            res = (res << 6) | (cc & 0x3F); // add lower 6 bits from cont. byte
+            c <<= 1;                        // to test next bit
+        }
+        res |= ((c & 0x7F) << (count * 5)); // add first byte
+        if (count > 3 || res > 0x10FFFF || res <= limits[count])
+            return NULL; // invalid byte sequence
+        if (unsigned(res - 0xD800) < 0x800)
+            return NULL; // surrogate
+        s += count;      // skip continuation bytes read
+    }
+    if (val)
+        *val = res;
+    return (const char*)s + 1; // +1 to include first byte
+}
+
+static std::optional<size_t> utflen(const char* s, size_t len)
+{
+    size_t n = 0;
+    size_t posi = 0;
+    while (posi < len)
+    {
+        const char* s1 = utf8_decode(s + posi, NULL);
+        if (s1 == NULL)
+        {
+            return std::nullopt;
+        }
+        posi = (int)(s1 - s);
+        n++;
+    }
+    return n;
+}
+
+
 struct DocumentationLocation
 {
     Luau::ModuleName moduleName;
@@ -228,6 +281,20 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         builder += global->name.value;
         builder += " = " + typeString;
         typeString = codeBlock("luau", builder);
+    }
+    else if (auto string = node->as<Luau::AstExprConstantString>())
+    {
+        if (config.hover.includeStringLength)
+        {
+            auto byteLen = string->value.size;
+            auto utf8Len = utflen(string->value.data, string->value.size);
+            if (utf8Len && utf8Len != byteLen)
+                typeString = codeBlock("luau", "string (" + std::to_string(byteLen) + " bytes, " + std::to_string(utf8Len.value()) + " characters)");
+            else
+                typeString = codeBlock("luau", "string (" + std::to_string(byteLen) + " bytes)");
+        }
+        else
+            typeString = codeBlock("luau", "string");
     }
     else
     {

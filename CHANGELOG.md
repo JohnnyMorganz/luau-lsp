@@ -13,12 +13,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Autocompletion items for items marked as `@deprecated` via documentation comments will now reflect their deprecated status
 - Added `luau-lsp.platform.platform` to separate platform-specific functionality from the main LSP
+
+## [1.27.0] - 2023-12-25
+
+### Added
+
+- Autocompletion items for items marked as `@deprecated` via documentation comments will now reflect their deprecated status
+- Show string literal byte length and utf8 characters on hover
+- Support passing `--settings` to `luau-lsp lsp` configuring the default global settings to use
+- Added support for viewing textual bytecode and compiler remarks using commands `Luau: Compute Bytecode for file` and `Luau: Compute Compiler Remarks for file`.
+  This opens up a new view with bytecode/remarks inlined as comments in the source file
+  - Added configuration `luau-lsp.bytecode.vectorLib`, `luau-lsp.bytecode.vectorCtor` and `luau-lsp.bytecode.vectorType` to configure compiler options when generating bytecode
+  - Custom editors should handle the `luau-lsp/bytecode` and `luau-lsp/compilerRemarks` LSP message to integrate compiler remarks info in their editor
+- Added `luau-lsp.types.robloxSecurityLevel` to select what security level to use for the API types, out of: `None`, `LocalUserSecurity`, `PluginSecurity` and `RobloxScriptSecurity`
 
 ### Changed
 
+- Sync to upstream Luau 0.607
 - Made rename operation fully backed by find all references, to ensure both return results that are consistent with each other
+- Hide return type hints for no-op functions
+- Changed the VSCode registered language and grammar ID from `lua` to `luau`. **NOTE:** this may affect existing custom themes!
+- Renamed `script/globalTypes.d.lua` to `script/globalTypes.d.luau` (the old file will be kept temporarily for compatibility)
+- Default security level of API types changed from `RobloxScriptSecurity` to `PluginSecurity` - set `luau-lsp.types.robloxSecurityLevel` to `RobloxScriptSecurity` to see original behaviour
+- Improved warning message when Rojo not found when attempting to generate sourcemap, with option to configure settings to disable autogeneration
 
 ### Fixed
 
@@ -29,6 +47,10 @@ local T = {
   name = "string"
 }
 ```
+
+- Fixed methods and events showing up in "GetPropertyChangedSignal" autocomplete
+- Fixed requiring a directory containing "init.lua" not working
+- Fixed go to definition on a property of a table that stores a cross-module type value (e.g. the result of a function defined in another module)
 
 ## [1.26.0] - 2023-11-19
 

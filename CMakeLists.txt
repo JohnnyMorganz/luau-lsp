@@ -41,6 +41,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/WorkspaceSymbol.cpp
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
+        src/operations/Bytecode.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE
@@ -65,6 +66,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/ColorProvider.test.cpp
         tests/LuauExt.test.cpp
         tests/CliConfigurationParser.test.cpp
+        tests/Hover.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
@@ -80,7 +82,7 @@ set(EXTERN_INCLUDES extern/json/include extern/glob/single_include extern/argpar
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
-target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis)
+target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler)
 
 set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
 target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)

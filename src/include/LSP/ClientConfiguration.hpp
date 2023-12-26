@@ -76,9 +76,10 @@ struct ClientHoverConfiguration
     bool showTableKinds = false;
     bool multilineFunctionDefinitions = false;
     bool strictDatamodelTypes = true;
+    bool includeStringLength = true;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes);
+    ClientHoverConfiguration, enabled, showTableKinds, multilineFunctionDefinitions, strictDatamodelTypes, includeStringLength);
 
 enum struct ImportRequireStyle
 {
@@ -184,6 +185,15 @@ struct ClientFFlagsConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
 
+struct ClientBytecodeConfiguration
+{
+    int debugLevel = 1;
+    std::string vectorLib = "Vector3";
+    std::string vectorCtor = "new";
+    std::string vectorType = "Vector3";
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, vectorLib, vectorCtor, vectorType)
+
 enum struct LSPPlatformConfig
 {
     Vanilla,
@@ -229,6 +239,7 @@ struct ClientConfiguration
     ClientRequireConfiguration require{};
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
+    ClientBytecodeConfiguration bytecode{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);

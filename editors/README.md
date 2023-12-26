@@ -34,7 +34,7 @@ $ luau-lsp lsp --definitions=/path/to/globalTypes.d.luau
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
 
-For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.lua
+For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.luau
 (using something like `curl` or `wget` should be sufficient).
 
 Optionally, you can define documentation files as well, by passing `--docs=PATH`.
@@ -145,3 +145,14 @@ Further Reference:
 - https://github.com/JohnnyMorganz/luau-lsp/blob/main/plugin/src/init.server.lua
 - https://github.com/JohnnyMorganz/luau-lsp/blob/main/src/StudioPlugin.cpp
 - https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/code/src/extension.ts
+
+## Optional: Bytecode generation
+
+The Language server implements support for computing file-level textual bytecode and source code remarks, for lower level debugging features.
+
+A custom LSP request message is implemented:
+
+- `luau-lsp/bytecode`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - textual bytecode output
+- `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
+
+You can implement this request via a custom command to surface this information in your editor
