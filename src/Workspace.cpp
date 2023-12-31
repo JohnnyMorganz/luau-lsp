@@ -8,6 +8,8 @@
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
+LUAU_FASTFLAG(LuauStacklessTypeClone3)
+
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
     auto normalisedUri = fileResolver.normalisedUriString(uri);
@@ -110,9 +112,14 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
 // NOTE: use `frontend.parse` if you do not care about typechecking
-// TODO: THIS IS CURRENTLY UNUSED DUE TO RETAINFULLTYPEGRAPHS=FALSE BUG - EITHER CLIP OR USE IT
 Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks)
 {
+    // TODO: We do not need to store the type graphs. But it leads to a bad bug if we disable it so for now, we keep the type graphs
+    // https://github.com/Roblox/luau/issues/975
+    if (!FFlag::LuauStacklessTypeClone3)
+        return frontend.check(
+            moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ runLintChecks});
+    
     try
     {
         return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});

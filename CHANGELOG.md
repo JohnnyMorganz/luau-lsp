@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added `luau-lsp.platform.platform` to separate platform-specific functionality from the main LSP
 
+### Fixed
+
+- Switched to memory-efficient implementation of workspace diagnostics (currently behind FFlag `LuauStacklessTypeClone3`)
+
 ## [1.27.0] - 2023-12-25
 
 ### Added
@@ -33,7 +37,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.607
 - Made rename operation fully backed by find all references, to ensure both return results that are consistent with each other
 - Hide return type hints for no-op functions
-- Changed the VSCode registered language and grammar ID from `lua` to `luau`. **NOTE:** this may affect existing custom themes!
+- Changed the VSCode registered language and grammar ID from `lua` to `luau`. **NOTE:
+  ** this may affect existing custom themes!
 - Renamed `script/globalTypes.d.lua` to `script/globalTypes.d.luau` (the old file will be kept temporarily for compatibility)
 - Default security level of API types changed from `RobloxScriptSecurity` to `PluginSecurity` - set `luau-lsp.types.robloxSecurityLevel` to `RobloxScriptSecurity` to see original behaviour
 - Improved warning message when Rojo not found when attempting to generate sourcemap, with option to configure settings to disable autogeneration
