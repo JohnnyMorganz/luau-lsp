@@ -690,8 +690,9 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                     else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
                         continue;
 
-                    result.insert_or_assign(propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType,
-                                                          false, false, Luau::TypeCorrectKind::Correct});
+                    result.insert_or_assign(
+                        propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
+                                      false, false, Luau::TypeCorrectKind::Correct});
                 }
                 if (ctv->parent)
                     ctv = Luau::get<Luau::ClassType>(*ctv->parent);
