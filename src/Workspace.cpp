@@ -119,7 +119,7 @@ Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleNam
     if (!FFlag::LuauStacklessTypeClone3)
         return frontend.check(
             moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ runLintChecks});
-    
+
     try
     {
         return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
@@ -293,8 +293,8 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     {
         isConfigured = true;
 
-        platform->handleRegisterDefinitions(frontend.globals, definitionsFileMetadata);
-        platform->handleRegisterDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
+        platform->mutateRegisteredDefinitions(frontend.globals, definitionsFileMetadata);
+        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
     }
 
     if (configuration.sourcemap.enabled)

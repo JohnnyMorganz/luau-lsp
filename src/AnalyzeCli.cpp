@@ -3,6 +3,7 @@
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Analyze/CliClient.hpp"
 
+#include "LSP/ClientConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/ModuleResolver.h"
 #include "Luau/BuiltinDefinitions.h"
@@ -258,6 +259,14 @@ int startAnalyze(const argparse::ArgumentParser& program)
         }
     }
 
+    if (auto platformArg = program.present("--platform"))
+    {
+        if (platformArg == "standard")
+            client.configuration.platform.type = LSPPlatformConfig::Standard;
+        else if (platformArg == "roblox")
+            client.configuration.platform.type = LSPPlatformConfig::Roblox;
+    }
+
     std::unique_ptr<LSPPlatform> platform = LSPPlatform::getPlatform(client.configuration);
 
     WorkspaceFileResolver fileResolver;
@@ -332,7 +341,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        platform->handleRegisterDefinitions(frontend.globals, types::parseDefinitionsFileMetadata(*definitionsContents));
+        platform->mutateRegisteredDefinitions(frontend.globals, types::parseDefinitionsFileMetadata(*definitionsContents));
     }
 
     platform->handleSourcemapUpdate(

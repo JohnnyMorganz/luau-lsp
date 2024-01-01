@@ -196,7 +196,7 @@ Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source
 
     Luau::unfreeze(workspace.frontend.globals.globalTypes);
     Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, workspace.frontend.globals, source);
-    platform.handleRegisterDefinitions(workspace.frontend.globals, std::nullopt);
+    platform.mutateRegisteredDefinitions(workspace.frontend.globals, std::nullopt);
     Luau::freeze(workspace.frontend.globals.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");

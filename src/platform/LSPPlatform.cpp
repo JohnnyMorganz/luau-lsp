@@ -12,7 +12,7 @@ LSPPlatform::LSPPlatform(WorkspaceFolder* workspaceFolder)
 
 std::unique_ptr<LSPPlatform> LSPPlatform::getPlatform(const ClientConfiguration& config, WorkspaceFolder* workspaceFolder)
 {
-    if (config.types.roblox && config.platform.platform == LSPPlatformConfig::Roblox)
+    if (config.types.roblox && config.platform.type == LSPPlatformConfig::Roblox)
         return std::make_unique<RobloxPlatform>(workspaceFolder);
 
     return std::make_unique<LSPPlatform>(workspaceFolder);

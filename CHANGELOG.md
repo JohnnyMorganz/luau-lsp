@@ -8,12 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Deprecated
 
-- Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.platform`
+- Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.type`
 - Deprecated `luau-lsp.completion.imports.suggestServices` setting in favour of `luau-lsp.platform.roblox.suggestServices`
 
 ### Added
 
-- Added `luau-lsp.platform.platform` to separate platform-specific functionality from the main LSP
+- Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
 
 ### Fixed
 

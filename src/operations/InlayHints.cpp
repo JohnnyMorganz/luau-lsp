@@ -170,7 +170,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     hints.emplace_back(hint);
                 }
             }
-            
+
             // Parameter types hint
             if (config.inlayHints.parameterTypes)
             {
@@ -309,12 +309,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     InlayHintVisitor visitor{module, config, textDocument};
     visitor.visit(sourceModule->root);
 
-    lsp::InlayHintResult result = visitor.hints;
-
-    if (platform)
-        platform->handleInlayHints(*textDocument, *sourceModule, result);
-
-    return result;
+    return visitor.hints;
 }
 
 lsp::InlayHintResult LanguageServer::inlayHint(const lsp::InlayHintParams& params)

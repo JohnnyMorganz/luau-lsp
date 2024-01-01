@@ -114,8 +114,8 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
 Luau::LoadDefinitionFileResult registerDefinitions(
     Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
 {
-    // TODO: packageName shouldn't just be "@lsp"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@lsp", /* captureComments = */ false, typeCheckForAutocomplete);
+    // TODO: packageName shouldn't just be "@roblox"
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;

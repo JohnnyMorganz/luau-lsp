@@ -5,6 +5,7 @@
 #include "Luau/Autocomplete.h"
 #include "Luau/TypeUtils.h"
 
+#include "LSP/Completion.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
@@ -237,7 +238,7 @@ static std::string optimiseAbsoluteRequire(const std::string& path)
 }
 
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool isType)
+    const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -262,7 +263,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     std::unique_ptr<FindImportsVisitor> importsVisitor = platform->getImportVisitor();
     importsVisitor->visit(sourceModule->root);
 
-    platform->handleSuggestImports(config, importsVisitor.get(), hotCommentsLineNumber, isType, result);
+    platform->handleSuggestImports(config, importsVisitor.get(), hotCommentsLineNumber, completingTypeReferencePrefix, result);
 
     if (config.completion.imports.suggestRequires)
     {
@@ -330,7 +331,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
                 }
             }
 
-            platform->handleRequire(requirePath, lineNumber, isRelative, config, importsVisitor.get(), hotCommentsLineNumber, textEdits);
+            platform->handleRequireAutoImport(requirePath, lineNumber, isRelative, config, importsVisitor.get(), hotCommentsLineNumber, textEdits);
 
             // Whether we need to add a newline before the require to separate it from the services
             bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor->shouldPrependNewline(lineNumber);
@@ -360,7 +361,7 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     return false;
 }
 
-std::optional<lsp::CompletionItemKind> WorkspaceFolder::entryKind(const Luau::AutocompleteEntry& entry)
+static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry, LSPPlatform* platform)
 {
     if (auto kind = platform->handleEntryKind(entry))
         return kind;
@@ -663,9 +664,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     std::vector<lsp::CompletionItem> items{};
 
-    if (auto module = frontend.getSourceModule(moduleName))
-        platform->handleCompletion(*textDocument, *module, position, items);
-
     for (auto& [name, entry] : result.entryMap)
     {
         lsp::CompletionItem item;
@@ -675,7 +673,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
-        item.kind = entryKind(entry);
+        item.kind = entryKind(entry, platform.get());
         item.sortText = sortText(frontend, name, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
@@ -777,11 +775,14 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         items.emplace_back(item);
     }
 
+    if (auto module = frontend.getSourceModule(moduleName))
+        platform->handleCompletion(*textDocument, *module, position, items);
+
     if (config.completion.suggestImports || config.completion.imports.enabled)
     {
         if (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement)
         {
-            suggestImports(moduleName, position, config, *textDocument, items, /* isType: */ false);
+            suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
         }
         else if (result.context == Luau::AutocompleteContext::Type)
         {
@@ -789,7 +790,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             if (auto node = result.ancestry.back())
                 if (auto typeReference = node->as<Luau::AstTypeReference>())
                     if (!typeReference->prefix)
-                        suggestImports(moduleName, position, config, *textDocument, items, /* isType: */ true);
+                        suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ true);
         }
     }
 

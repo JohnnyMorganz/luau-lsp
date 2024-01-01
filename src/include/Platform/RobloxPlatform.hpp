@@ -67,7 +67,7 @@ public:
         return std::make_unique<RobloxFindImportsVisitor>();
     }
 
-    void handleRegisterDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
+    void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
     void handleSourcemapUpdate(
         Luau::Frontend& frontend, const Luau::GlobalTypes& globals, const WorkspaceFileResolver& fileResolver, bool expressiveTypes) override;
@@ -80,16 +80,16 @@ public:
 
     std::optional<lsp::CompletionItemKind> handleEntryKind(const Luau::AutocompleteEntry& entry) override;
 
-    void handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, bool isType,
-        std::vector<lsp::CompletionItem>& items) override;
+    void handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber,
+        bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items) override;
 
-    void handleRequire(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
+    void handleRequireAutoImport(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
         FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, std::vector<lsp::TextEdit>& textEdits) override;
 
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;
 
-    std::optional<lsp::ColorInformation> colorInformation(Luau::AstExprCall* call, const TextDocument* textDocument) override;
+    lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module) override;
 
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params) override;
 

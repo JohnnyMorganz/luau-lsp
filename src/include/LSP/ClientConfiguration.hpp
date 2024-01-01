@@ -29,7 +29,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSourcemapConfiguration, en
 struct ClientTypesConfiguration
 {
     /// Whether Roblox-related definitions should be supported
-    /// DEPRECATED: USE `platform.platform` INSTEAD
+    /// DEPRECATED: USE `platform.type` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
     std::vector<std::filesystem::path> definitionFiles{};
@@ -196,11 +196,11 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, deb
 
 enum struct LSPPlatformConfig
 {
-    Vanilla,
+    Standard,
     Roblox
 };
 NLOHMANN_JSON_SERIALIZE_ENUM(LSPPlatformConfig, {
-                                                    {LSPPlatformConfig::Vanilla, "vanilla"},
+                                                    {LSPPlatformConfig::Standard, "standard"},
                                                     {LSPPlatformConfig::Roblox, "roblox"},
                                                 })
 
@@ -214,11 +214,11 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguratio
 
 struct ClientPlatformConfiguration
 {
-    LSPPlatformConfig platform = LSPPlatformConfig::Roblox;
+    LSPPlatformConfig type = LSPPlatformConfig::Roblox;
     ClientRobloxPlatformConfiguration roblox;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, platform, roblox);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, type, roblox);
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings

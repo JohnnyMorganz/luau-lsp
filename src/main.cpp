@@ -249,6 +249,9 @@ int main(int argc, char** argv)
         .help("path to a .luaurc file which acts as the base default configuration")
         .action(file_path_parser)
         .metavar("PATH");
+    analyze_command.add_argument("--platform")
+        .help("platform-specific support features")
+        .choices("standard", "roblox");
     analyze_command.add_argument("--settings").help("path to LSP-style settings").action(file_path_parser).metavar("PATH");
     analyze_command.add_argument("files").help("files to perform analysis on").remaining();
 

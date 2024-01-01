@@ -31,7 +31,7 @@ public:
         return std::make_unique<FindImportsVisitor>();
     }
 
-    virtual void handleRegisterDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) {}
+    virtual void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) {}
 
     virtual void handleSourcemapUpdate(
         Luau::Frontend& frontend, const Luau::GlobalTypes& globals, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
@@ -61,26 +61,25 @@ public:
     }
 
     virtual void handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber,
-        bool isType, std::vector<lsp::CompletionItem>& items)
+        bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
     {
     }
 
-    virtual void handleRequire(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
+    virtual void handleRequireAutoImport(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
         FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, std::vector<lsp::TextEdit>& textEdits)
     {
     }
 
-    virtual std::optional<lsp::SignatureHelp> handleSignatureHelp(
-        const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position)
+    virtual void handleSignatureHelp(
+        const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, lsp::SignatureHelp& signatureHelp)
     {
-        return std::nullopt;
     }
 
     virtual void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) {}
 
-    virtual std::optional<lsp::ColorInformation> colorInformation(Luau::AstExprCall* call, const TextDocument* textDocument)
+    virtual lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
     {
-        return std::nullopt;
+        return {};
     }
 
     virtual lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params)
@@ -89,20 +88,6 @@ public:
     }
 
     virtual std::optional<lsp::Hover> handleHover(const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position)
-    {
-        return std::nullopt;
-    }
-
-    virtual void handleInlayHints(const TextDocument& textDocument, const Luau::SourceModule& module, lsp::InlayHintResult& items) {}
-
-    virtual std::optional<lsp::DefinitionResult> handleGotoDefinition(
-        const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position)
-    {
-        return std::nullopt;
-    }
-
-    virtual std::optional<lsp::Location> handleGotoTypeDefinition(
-        const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position)
     {
         return std::nullopt;
     }

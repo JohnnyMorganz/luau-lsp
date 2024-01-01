@@ -3,6 +3,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Utils.hpp"
 #include "LSP/ColorProvider.hpp"
+#include "LSP/Completion.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Transpiler.h"
 #include "nlohmann/json.hpp"
@@ -52,13 +53,126 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
+struct RobloxColorVisitor : public Luau::AstVisitor
+{
+    const TextDocument* textDocument;
+    std::vector<lsp::ColorInformation> colors{};
+
+    explicit RobloxColorVisitor(const TextDocument* textDocument)
+        : textDocument(textDocument)
+    {
+    }
+
+    bool visit(Luau::AstExprCall* call) override
+    {
+        auto index = call->func->as<Luau::AstExprIndexName>();
+        if (!index)
+            return true;
+
+        auto global = index->expr->as<Luau::AstExprGlobal>();
+        if (!global || global->name != "Color3")
+            return true;
+
+        std::array<double, 3> color = {0.0, 0.0, 0.0};
+
+        if (index->index == "new")
+        {
+            size_t argIndex = 0;
+            for (auto arg : call->args)
+            {
+                if (argIndex >= 3)
+                    return true; // Don't create as the colour is not in the right format
+                if (auto number = arg->as<Luau::AstExprConstantNumber>())
+                    color.at(argIndex) = number->value;
+                else
+                    return true; // Don't create as we can't parse the full colour
+                argIndex++;
+            }
+        }
+        else if (index->index == "fromRGB")
+        {
+            size_t argIndex = 0;
+            for (auto arg : call->args)
+            {
+                if (argIndex >= 3)
+                    return true; // Don't create as the colour is not in the right format
+                if (auto number = arg->as<Luau::AstExprConstantNumber>())
+                    color.at(argIndex) = number->value / 255.0;
+                else
+                    return true; // Don't create as we can't parse the full colour
+                argIndex++;
+            }
+        }
+        else if (index->index == "fromHSV")
+        {
+            size_t argIndex = 0;
+            for (auto arg : call->args)
+            {
+                if (argIndex >= 3)
+                    return true; // Don't create as the colour is not in the right format
+                if (auto number = arg->as<Luau::AstExprConstantNumber>())
+                    color.at(argIndex) = number->value;
+                else
+                    return true; // Don't create as we can't parse the full colour
+                argIndex++;
+            }
+            RGB data = hsvToRgb({color[0], color[1], color[2]});
+            color[0] = data.r / 255.0;
+            color[1] = data.g / 255.0;
+            color[2] = data.b / 255.0;
+        }
+        else if (index->index == "fromHex")
+        {
+            if (call->args.size != 1)
+                return true; // Don't create as the colour is not in the right format
+
+            if (auto string = call->args.data[0]->as<Luau::AstExprConstantString>())
+            {
+                try
+                {
+                    RGB data = hexToRgb(std::string(string->value.data, string->value.size));
+                    color[0] = data.r / 255.0;
+                    color[1] = data.g / 255.0;
+                    color[2] = data.b / 255.0;
+                }
+                catch (const std::exception&)
+                {
+                    return true; // Invalid hex string
+                }
+            }
+            else
+                return true; // Don't create as we can't parse the full colour
+        }
+        else
+        {
+            return true;
+        }
+
+        colors.emplace_back(
+            lsp::ColorInformation{lsp::Range{textDocument->convertPosition(call->location.begin), textDocument->convertPosition(call->location.end)},
+                {std::clamp(color[0], 0.0, 1.0), std::clamp(color[1], 0.0, 1.0), std::clamp(color[2], 0.0, 1.0), 1.0}});
+
+        return true;
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        for (Luau::AstStat* stat : block->body)
+        {
+            stat->visit(this);
+        }
+
+        return false;
+    }
+};
+
 // Since in Roblox land, debug is extended to introduce more methods, but the api-docs
-// mark the package name as `@luau` instead of `@lsp`
+// mark the package name as `@luau` instead of `@roblox`
 static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libraryName)
 {
     auto mutableTy = Luau::asMutable(ty);
     auto newDocumentationSymbol = mutableTy->documentationSymbol.value();
-    replace(newDocumentationSymbol, "@lsp", "@luau");
+    replace(newDocumentationSymbol, "@roblox", "@luau");
     mutableTy->documentationSymbol = newDocumentationSymbol;
 
     if (auto* ttv = Luau::getMutable<Luau::TableType>(ty))
@@ -67,7 +181,7 @@ static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libr
         for (auto& [name, prop] : ttv->props)
         {
             newDocumentationSymbol = prop.documentationSymbol.value();
-            replace(newDocumentationSymbol, "@lsp", "@luau");
+            replace(newDocumentationSymbol, "@roblox", "@luau");
             prop.documentationSymbol = newDocumentationSymbol;
         }
     }
@@ -245,13 +359,13 @@ static void mutateSourceNodeWithPluginInfo(SourceNode& sourceNode, const PluginN
     }
 }
 
-void RobloxPlatform::handleRegisterDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata)
+void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata)
 {
     // HACK: Mark "debug" using `@luau` symbol instead
     if (auto it = globals.globalScope->bindings.find(Luau::AstName("debug")); it != globals.globalScope->bindings.end())
     {
         auto newDocumentationSymbol = it->second.documentationSymbol.value();
-        replace(newDocumentationSymbol, "@lsp", "@luau");
+        replace(newDocumentationSymbol, "@roblox", "@luau");
         it->second.documentationSymbol = newDocumentationSymbol;
         fixDebugDocumentationSymbol(it->second.typeId, "debug");
     }
@@ -260,7 +374,7 @@ void RobloxPlatform::handleRegisterDefinitions(Luau::GlobalTypes& globals, std::
     if (auto it = globals.globalScope->bindings.find(Luau::AstName("utf8")); it != globals.globalScope->bindings.end())
     {
         auto newDocumentationSymbol = it->second.documentationSymbol.value();
-        replace(newDocumentationSymbol, "@lsp", "@luau");
+        replace(newDocumentationSymbol, "@roblox", "@luau");
         it->second.documentationSymbol = newDocumentationSymbol;
         fixDebugDocumentationSymbol(it->second.typeId, "utf8");
     }
@@ -364,10 +478,10 @@ void RobloxPlatform::handleRegisterDefinitions(Luau::GlobalTypes& globals, std::
                     }
 
                     // Update the documentation symbol
-                    Luau::asMutable(ty)->documentationSymbol = "@lsp/enum/" + ctv->name;
+                    Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
                     for (auto& [name, prop] : ctv->props)
                     {
-                        prop.documentationSymbol = "@lsp/enum/" + ctv->name + "." + name;
+                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
                         Luau::attachTag(prop, "EnumItem");
                     }
 
@@ -435,7 +549,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
             // Create the ClassType representing the instance
             std::string typeName = types::getTypeName(baseTypeId).value_or(node->name);
-            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@lsp"};
+            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
             auto typeId = arena.addType(std::move(baseInstanceCtv));
 
             // Attach Parent and Children info
@@ -473,7 +587,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
                             return std::nullopt;
                         });
-                    ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@lsp/globaltype/Instance.FindFirstAncestor");
+                    ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
 
                     auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
                     Luau::attachMagicFunction(findFirstChildFunction,
@@ -492,7 +606,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
                             return std::nullopt;
                         });
-                    ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@lsp/globaltype/Instance.FindFirstChild");
+                    ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
                 }
             }
 
@@ -796,9 +910,9 @@ std::optional<lsp::CompletionItemKind> RobloxPlatform::handleEntryKind(const Lua
 }
 
 void RobloxPlatform::handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber,
-    bool isType, std::vector<lsp::CompletionItem>& items)
+    bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
-    if (!config.platform.roblox.suggestServices || !config.completion.imports.suggestServices || isType)
+    if (!config.platform.roblox.suggestServices || !config.completion.imports.suggestServices || completingTypeReferencePrefix)
         return;
 
     // Suggest services
@@ -826,7 +940,7 @@ void RobloxPlatform::handleSuggestImports(const ClientConfiguration& config, Fin
     }
 }
 
-void RobloxPlatform::handleRequire(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
+void RobloxPlatform::handleRequireAutoImport(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
     FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, std::vector<lsp::TextEdit>& textEdits)
 {
     if (!isRelative)
@@ -920,93 +1034,11 @@ void RobloxPlatform::handleCodeAction(const lsp::CodeActionParams& params, std::
     }
 }
 
-std::optional<lsp::ColorInformation> RobloxPlatform::colorInformation(Luau::AstExprCall* call, const TextDocument* textDocument)
+lsp::DocumentColorResult RobloxPlatform::documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
 {
-    auto index = call->func->as<Luau::AstExprIndexName>();
-    if (!index)
-        return std::nullopt;
-
-    auto global = index->expr->as<Luau::AstExprGlobal>();
-    if (!global || global->name != "Color3")
-        return std::nullopt;
-
-    std::array<double, 3> color = {0.0, 0.0, 0.0};
-
-    if (index->index == "new")
-    {
-        size_t argIndex = 0;
-        for (auto arg : call->args)
-        {
-            if (argIndex >= 3)
-                return std::nullopt; // Don't create as the colour is not in the right format
-            if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                color.at(argIndex) = number->value;
-            else
-                return std::nullopt; // Don't create as we can't parse the full colour
-            argIndex++;
-        }
-    }
-    else if (index->index == "fromRGB")
-    {
-        size_t argIndex = 0;
-        for (auto arg : call->args)
-        {
-            if (argIndex >= 3)
-                return std::nullopt; // Don't create as the colour is not in the right format
-            if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                color.at(argIndex) = number->value / 255.0;
-            else
-                return std::nullopt; // Don't create as we can't parse the full colour
-            argIndex++;
-        }
-    }
-    else if (index->index == "fromHSV")
-    {
-        size_t argIndex = 0;
-        for (auto arg : call->args)
-        {
-            if (argIndex >= 3)
-                return std::nullopt; // Don't create as the colour is not in the right format
-            if (auto number = arg->as<Luau::AstExprConstantNumber>())
-                color.at(argIndex) = number->value;
-            else
-                return std::nullopt; // Don't create as we can't parse the full colour
-            argIndex++;
-        }
-        RGB data = hsvToRgb({color[0], color[1], color[2]});
-        color[0] = data.r / 255.0;
-        color[1] = data.g / 255.0;
-        color[2] = data.b / 255.0;
-    }
-    else if (index->index == "fromHex")
-    {
-        if (call->args.size != 1)
-            return std::nullopt; // Don't create as the colour is not in the right format
-
-        if (auto string = call->args.data[0]->as<Luau::AstExprConstantString>())
-        {
-            try
-            {
-                RGB data = hexToRgb(std::string(string->value.data, string->value.size));
-                color[0] = data.r / 255.0;
-                color[1] = data.g / 255.0;
-                color[2] = data.b / 255.0;
-            }
-            catch (const std::exception&)
-            {
-                return std::nullopt; // Invalid hex string
-            }
-        }
-        else
-            return std::nullopt; // Don't create as we can't parse the full colour
-    }
-    else
-    {
-        return std::nullopt;
-    }
-
-    return lsp::ColorInformation{lsp::Range{textDocument->convertPosition(call->location.begin), textDocument->convertPosition(call->location.end)},
-        {std::clamp(color[0], 0.0, 1.0), std::clamp(color[1], 0.0, 1.0), std::clamp(color[2], 0.0, 1.0), 1.0}};
+    RobloxColorVisitor visitor{&textDocument};
+    module.root->visit(&visitor);
+    return visitor.colors;
 }
 
 lsp::ColorPresentationResult RobloxPlatform::colorPresentation(const lsp::ColorPresentationParams& params)

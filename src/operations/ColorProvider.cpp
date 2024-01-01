@@ -113,42 +113,8 @@ std::string rgbToHex(RGB in)
     return hexString.str();
 }
 
-struct DocumentColorVisitor : public Luau::AstVisitor
-{
-    const TextDocument* textDocument;
-    LSPPlatform* platform;
-    std::vector<lsp::ColorInformation> colors{};
-
-    explicit DocumentColorVisitor(const TextDocument* textDocument, LSPPlatform* platform)
-        : textDocument(textDocument)
-        , platform(platform)
-    {
-    }
-
-    bool visit(Luau::AstExprCall* call) override
-    {
-        if (auto colorInfo = platform->colorInformation(call, textDocument))
-            colors.emplace_back(colorInfo.value());
-
-        return true;
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        for (Luau::AstStat* stat : block->body)
-        {
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
-
 lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColorParams& params)
 {
-    if (!platform)
-        return {};
-
     auto config = client->getConfiguration(rootUri);
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -162,9 +128,7 @@ lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColor
     if (!sourceModule)
         return {};
 
-    DocumentColorVisitor visitor{textDocument, platform.get()};
-    visitor.visit(sourceModule->root);
-    return visitor.colors;
+    return platform->documentColor(*textDocument, *sourceModule);
 }
 
 lsp::DocumentColorResult LanguageServer::documentColor(const lsp::DocumentColorParams& params)

@@ -138,11 +138,11 @@
           ],
           "scope": "resource"
         },
-        "luau-lsp.platform.platform": {
+        "luau-lsp.platform.type": {
           "markdownDescription": "Platform-specific support features",
           "type": "string",
           "enum": [
-            "vanilla",
+            "standard",
             "roblox"
           ],
           "scope": "window",
@@ -252,8 +252,8 @@
           "tags": [
             "usesOnlineServices"
           ],
-          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.platform#` instead.",
-          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.platform instead."
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.type#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.type instead."
         },
         "luau-lsp.types.robloxSecurityLevel": {
           "markdownDescription": "Security Level to use in the Roblox API definitions",
