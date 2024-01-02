@@ -115,6 +115,9 @@ std::string rgbToHex(RGB in)
 
 lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColorParams& params)
 {
+    if (!platform)
+        return {};
+
     auto config = client->getConfiguration(rootUri);
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);

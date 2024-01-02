@@ -3,6 +3,13 @@
 #include "LSP/LuauExt.hpp"
 #include "Platform/LSPPlatform.hpp"
 
+struct RobloxDefinitionsFileMetadata
+{
+    std::vector<std::string> CREATABLE_INSTANCES{};
+    std::vector<std::string> SERVICES{};
+};
+NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
+
 struct RobloxFindImportsVisitor : public FindImportsVisitor
 {
 public:
