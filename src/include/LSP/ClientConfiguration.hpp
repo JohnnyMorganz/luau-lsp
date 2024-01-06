@@ -9,11 +9,12 @@ struct ClientDiagnosticsConfiguration
     /// Whether to compute diagnostics for a whole workspace
     bool workspace = false;
     /// Whether to use expressive DM types in the diagnostics typechecker
+    /// DEPRECATED: USE `platform.roblox.diagnostics.strictDatamodelTypes`
     bool strictDatamodelTypes = false;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes)
 
-struct ClientSourcemapConfiguration
+struct ClientRobloxSourcemapConfiguration
 {
     /// Whether Rojo sourcemap-related features are enabled
     bool enabled = true;
@@ -24,7 +25,7 @@ struct ClientSourcemapConfiguration
     /// Whether non script instances should be included in the generated sourcemap
     bool includeNonScripts = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts);
 
 struct ClientTypesConfiguration
 {
@@ -204,10 +205,20 @@ NLOHMANN_JSON_SERIALIZE_ENUM(LSPPlatformConfig, {
                                                     {LSPPlatformConfig::Roblox, "roblox"},
                                                 })
 
+struct ClientRobloxDiagnosticsConfiguration
+{
+    /// Whether to use expressive DM types in the diagnostics typechecker
+    bool strictDatamodelTypes = false;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxDiagnosticsConfiguration, strictDatamodelTypes);
+
 struct ClientRobloxPlatformConfiguration
 {
     /// Whether services should be suggested in auto-import
     bool suggestServices = true;
+    ClientRobloxSourcemapConfiguration sourcemap{};
+    ClientRobloxDiagnosticsConfiguration diagnostics{};
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices);
@@ -229,7 +240,8 @@ struct ClientConfiguration
     bool autocompleteEnd = false;
     std::vector<std::string> ignoreGlobs{};
     ClientPlatformConfiguration platform{};
-    ClientSourcemapConfiguration sourcemap{};
+    /// DEPRECATED: Use platform.roblox.sourcemap instead
+    ClientRobloxSourcemapConfiguration sourcemap{};
     ClientDiagnosticsConfiguration diagnostics{};
     ClientTypesConfiguration types{};
     ClientInlayHintsConfiguration inlayHints{};

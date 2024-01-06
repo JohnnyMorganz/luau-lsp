@@ -101,7 +101,7 @@ Fixture::Fixture()
     )BUILTIN_SRC");
 
     ClientConfiguration config;
-    config.sourcemap.enabled = false;
+    config.platform.roblox.sourcemap.enabled = false;
     config.index.enabled = false;
     workspace.setupWithConfiguration(config);
 

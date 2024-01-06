@@ -90,6 +90,8 @@ struct FoldingRangeVisitor : public Luau::AstVisitor
 
 std::vector<lsp::FoldingRange> WorkspaceFolder::foldingRange(const lsp::FoldingRangeParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

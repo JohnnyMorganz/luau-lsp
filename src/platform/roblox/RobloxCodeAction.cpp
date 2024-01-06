@@ -5,8 +5,8 @@
 
 lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
 {
-    auto moduleName = workspaceFolder->fileResolver.getModuleName(uri);
-    auto textDocument = workspaceFolder->fileResolver.getTextDocument(uri);
+    auto moduleName = fileResolver->getModuleName(uri);
+    auto textDocument = fileResolver->getTextDocument(uri);
 
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + uri.toString());

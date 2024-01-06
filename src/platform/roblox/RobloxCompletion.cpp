@@ -67,9 +67,67 @@ static lsp::CompletionItem createSuggestService(const std::string& service, size
     return item;
 }
 
+static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false)
+{
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    auto importText = "local " + name + " = require(" + path + ")\n";
+    if (prependNewline)
+        importText = "\n" + importText;
+    return {range, importText};
+}
+
+static lsp::CompletionItem createSuggestRequire(
+    const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText, const std::string& path)
+{
+    std::string documentation;
+    for (const auto& edit : textEdits)
+        documentation += edit.newText;
+
+    lsp::CompletionItem item;
+    item.label = name;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = "Auto-import";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", documentation) + "\n\n" + path};
+    item.insertText = name;
+    item.sortText = sortText;
+
+    item.additionalTextEdits = textEdits;
+
+    return item;
+}
+
+static size_t getLengthEqual(const std::string& a, const std::string& b)
+{
+    size_t i = 0;
+    for (; i < a.size() && i < b.size(); ++i)
+    {
+        if (a[i] != b[i])
+            break;
+    }
+    return i;
+}
+
+static std::string optimiseAbsoluteRequire(const std::string& path)
+{
+    if (!Luau::startsWith(path, "game/"))
+        return path;
+
+    auto parts = Luau::split(path, '/');
+    if (parts.size() > 2)
+    {
+        auto service = std::string(parts[1]);
+        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
+    }
+
+    return path;
+}
+
 std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
     const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
+    if (auto parentResult = LSPPlatform::completionCallback(tag, ctx, contents, moduleName))
+        return parentResult;
+
     std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
 
     if (tag == "ClassNames")
@@ -218,58 +276,124 @@ std::optional<lsp::CompletionItemKind> RobloxPlatform::handleEntryKind(const Lua
     return std::nullopt;
 }
 
-void RobloxPlatform::handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber,
-    bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
+void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
+    size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
-    if (!config.platform.roblox.suggestServices || !config.completion.imports.suggestServices || completingTypeReferencePrefix)
-        return;
+    // Find all import calls
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(module.root);
 
-    // Suggest services
-    auto robloxVisitor = dynamic_cast<RobloxFindImportsVisitor*>(importsVisitor);
-    if (robloxVisitor == nullptr)
-        return;
-
-    std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
-
-    auto services = metadata.has_value() ? metadata->SERVICES : std::vector<std::string>{};
-    for (auto& service : services)
+    if (config.platform.roblox.suggestServices && config.completion.imports.suggestServices && !completingTypeReferencePrefix)
     {
-        // ASSUMPTION: if the service was defined, it was defined with the exact same name
-        if (contains(robloxVisitor->serviceLineMap, service))
-            continue;
+        std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
 
-        size_t lineNumber = robloxVisitor->findBestLineForService(service, hotCommentsLineNumber);
+        auto services = metadata.has_value() ? metadata->SERVICES : std::vector<std::string>{};
+        for (auto& service : services)
+        {
+            // ASSUMPTION: if the service was defined, it was defined with the exact same name
+            if (contains(importsVisitor.serviceLineMap, service))
+                continue;
 
-        bool appendNewline = false;
-        if (config.completion.imports.separateGroupsWithLine && importsVisitor->firstRequireLine &&
-            importsVisitor->firstRequireLine.value() - lineNumber == 0)
-            appendNewline = true;
+            size_t lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
 
-        items.emplace_back(createSuggestService(service, lineNumber, appendNewline));
+            bool appendNewline = false;
+            if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
+                importsVisitor.firstRequireLine.value() - lineNumber == 0)
+                appendNewline = true;
+
+            items.emplace_back(createSuggestService(service, lineNumber, appendNewline));
+        }
     }
-}
 
-void RobloxPlatform::handleRequireAutoImport(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
-    FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, std::vector<lsp::TextEdit>& textEdits)
-{
-    if (!isRelative)
-        return;
-
-    auto robloxVisitor = dynamic_cast<RobloxFindImportsVisitor*>(importsVisitor);
-    if (robloxVisitor == nullptr)
-        return;
-
-    // Service will be the first part of the path
-    // If we haven't imported the service already, then we auto-import it
-    auto service = requirePath.substr(0, requirePath.find('/'));
-    if (!contains(robloxVisitor->serviceLineMap, service))
+    if (config.completion.imports.suggestRequires)
     {
-        auto lineNumber = robloxVisitor->findBestLineForService(service, hotCommentsLineNumber);
-        bool appendNewline = false;
-        // If there is no firstRequireLine, then the require that we insert will become the first require,
-        // so we use `.value_or(lineNumber)` to ensure it equals 0 and a newline is added
-        if (config.completion.imports.separateGroupsWithLine && robloxVisitor->firstRequireLine.value_or(lineNumber) - lineNumber == 0)
-            appendNewline = true;
-        textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
+        size_t minimumLineNumber = hotCommentsLineNumber;
+        size_t visitorMinimumLine = importsVisitor.getMinimumRequireLine();
+
+        if (visitorMinimumLine > minimumLineNumber)
+            minimumLineNumber = visitorMinimumLine;
+
+        if (importsVisitor.firstRequireLine)
+            minimumLineNumber = *importsVisitor.firstRequireLine >= minimumLineNumber ? (*importsVisitor.firstRequireLine) : minimumLineNumber;
+
+        for (auto& [path, node] : virtualPathsToSourceNodes)
+        {
+            auto name = node->name;
+            replaceAll(name, " ", "_");
+
+            if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
+                continue;
+            if (auto scriptFilePath = getRealPathFromSourceNode(node); scriptFilePath && workspaceFolder->isIgnoredFile(*scriptFilePath, config))
+                continue;
+
+            std::string requirePath;
+            std::vector<lsp::TextEdit> textEdits;
+
+            // Compute the style of require
+            bool isRelative = false;
+            auto parent1 = getParentPath(module.name), parent2 = getParentPath(path);
+            if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
+                Luau::startsWith(path, "ProjectRoot/") || // All model projects should always require relatively
+                (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
+                    (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
+            {
+                requirePath = "./" + std::filesystem::relative(path, module.name).string();
+                isRelative = true;
+            }
+            else
+                requirePath = optimiseAbsoluteRequire(path);
+
+            auto require = convertToScriptPath(requirePath);
+
+            size_t lineNumber = minimumLineNumber;
+            size_t bestLength = 0;
+            for (auto& group : importsVisitor.requiresMap)
+            {
+                for (auto& [_, stat] : group)
+                {
+                    auto line = stat->location.end.line;
+
+                    // HACK: We read the text of the require argument to sort the lines
+                    // Note: requires may be in the form `require(path) :: any`, so we need to handle that too
+                    Luau::AstExprCall* call = stat->values.data[0]->as<Luau::AstExprCall>();
+                    if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
+                        call = assertion->expr->as<Luau::AstExprCall>();
+                    if (!call)
+                        continue;
+
+                    auto location = call->args.data[0]->location;
+                    auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
+                    auto argText = textDocument.getText(range);
+                    auto length = getLengthEqual(argText, require);
+
+                    if (length > bestLength && argText < require && line >= lineNumber)
+                        lineNumber = line + 1;
+                }
+            }
+
+            if (isRelative)
+            {
+                // Service will be the first part of the path
+                // If we haven't imported the service already, then we auto-import it
+                auto service = requirePath.substr(0, requirePath.find('/'));
+                if (!contains(importsVisitor.serviceLineMap, service))
+                {
+                    auto lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
+                    bool appendNewline = false;
+                    // If there is no firstRequireLine, then the require that we insert will become the first require,
+                    // so we use `.value_or(lineNumber)` to ensure it equals 0 and a newline is added
+                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine.value_or(lineNumber) - lineNumber == 0)
+                        appendNewline = true;
+                    textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
+                }
+            }
+
+            // Whether we need to add a newline before the require to separate it from the services
+            bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+
+            textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
+
+            items.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path));
+        }
     }
 }

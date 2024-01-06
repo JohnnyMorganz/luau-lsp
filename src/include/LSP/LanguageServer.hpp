@@ -1,6 +1,7 @@
 #include <optional>
 #include <filesystem>
 
+#include "LSP/JsonRpc.hpp"
 #include "nlohmann/json.hpp"
 
 #include "Protocol/Structures.hpp"
@@ -23,6 +24,10 @@ inline lsp::PositionEncodingKind& positionEncoding()
     return encoding;
 }
 
+class MessagePostponeException : public std::exception
+{
+};
+
 class LanguageServer
 {
 private:
@@ -33,6 +38,8 @@ private:
     std::optional<Luau::Config> defaultConfig;
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
+
+    std::vector<json_rpc::JsonRpcMessage> postponedMessages;
 
 public:
     explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
@@ -55,11 +62,10 @@ public:
 
     // Dispatch handlers
 private:
+    void handleMessage(const json_rpc::JsonRpcMessage& msg);
+
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
-
-    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version);
-    void recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config);
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);

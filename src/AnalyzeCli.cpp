@@ -5,6 +5,7 @@
 
 #include "LSP/ClientConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
+#include "Platform/RobloxPlatform.hpp"
 #include "Luau/ModuleResolver.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
@@ -74,11 +75,11 @@ static bool reportError(
 {
     auto* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
     std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
-    auto path = fileResolver->resolveToRealPath(error.moduleName);
+    auto path = fileResolver->platform->resolveToRealPath(error.moduleName);
 
     // For consistency, we want to map the error.moduleName to a relative path (if it is a real path)
     Luau::ModuleName errorFriendlyName = error.moduleName;
-    if (!fileResolver->isVirtualPath(error.moduleName))
+    if (!fileResolver->platform->isVirtualPath(error.moduleName))
         errorFriendlyName = std::filesystem::proximate(*path, rootUriPath).generic_string();
 
     std::string humanReadableName = fileResolver->getHumanReadableModuleName(errorFriendlyName);
@@ -259,16 +260,6 @@ int startAnalyze(const argparse::ArgumentParser& program)
         }
     }
 
-    if (auto platformArg = program.present("--platform"))
-    {
-        if (platformArg == "standard")
-            client.configuration.platform.type = LSPPlatformConfig::Standard;
-        else if (platformArg == "roblox")
-            client.configuration.platform.type = LSPPlatformConfig::Roblox;
-    }
-
-    std::unique_ptr<LSPPlatform> platform = LSPPlatform::getPlatform(client.configuration);
-
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
     {
@@ -292,15 +283,20 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
     fileResolver.rootUri = Uri::file(std::filesystem::current_path());
     fileResolver.client = std::make_shared<CliClient>(client);
-    Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 
-    if (sourcemapPath)
+    if (auto platformArg = program.present("--platform"))
     {
-        if (auto sourceMapContents = readFile(*sourcemapPath))
-        {
-            fileResolver.updateSourceMap(sourceMapContents.value());
-        }
+        if (platformArg == "standard")
+            client.configuration.platform.type = LSPPlatformConfig::Standard;
+        else if (platformArg == "roblox")
+            client.configuration.platform.type = LSPPlatformConfig::Roblox;
     }
+
+    std::unique_ptr<LSPPlatform> platform = LSPPlatform::getPlatform(client.configuration, &fileResolver);
+
+    fileResolver.platform = platform.get();
+
+    Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 
     Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
     Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
@@ -344,8 +340,19 @@ int startAnalyze(const argparse::ArgumentParser& program)
         platform->mutateRegisteredDefinitions(frontend.globals, types::parseDefinitionsFileMetadata(*definitionsContents));
     }
 
-    platform->handleSourcemapUpdate(
-        frontend, frontend.globals, fileResolver, !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
+    if (sourcemapPath && client.configuration.platform.type == LSPPlatformConfig::Roblox)
+    {
+        auto robloxPlatform = dynamic_cast<RobloxPlatform*>(platform.get());
+
+        if (auto sourceMapContents = readFile(*sourcemapPath))
+        {
+            robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
+
+            robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals,
+                !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes &&
+                    client.configuration.platform.roblox.diagnostics.strictDatamodelTypes);
+        }
+    }
 
     Luau::freeze(frontend.globals.globalTypes);
     Luau::freeze(frontend.globalsForAutocomplete.globalTypes);

@@ -1,5 +1,6 @@
 #include "Platform/RobloxPlatform.hpp"
 
+#include "LSP/Workspace.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
 static void mutateSourceNodeWithPluginInfo(SourceNode& sourceNode, const PluginNodePtr& pluginInstance)
@@ -167,21 +168,91 @@ static void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& 
     }
 }
 
+bool RobloxPlatform::updateSourceMap()
+{
+    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / "sourcemap.json";
+    workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
+
+    // Read in the sourcemap
+    // TODO: we assume a sourcemap.json file in the workspace root
+    if (auto sourceMapContents = readFile(sourcemapPath))
+    {
+        workspaceFolder->frontend.clear();
+        updateSourceNodeMap(sourceMapContents.value());
+
+        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+        bool expressiveTypes = config.diagnostics.strictDatamodelTypes && config.platform.roblox.diagnostics.strictDatamodelTypes;
+
+        // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
+        // We pass the same setting even when we are registering autocomplete globals since
+        // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
+        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
+        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::string& base)
+{
+    node->virtualPath = base;
+    virtualPathsToSourceNodes[base] = node;
+
+    if (auto realPath = node->getScriptFilePath())
+    {
+        std::error_code ec;
+        auto canonicalName = std::filesystem::weakly_canonical(fileResolver->rootUri.fsPath() / *realPath, ec);
+        if (ec.value() != 0)
+            canonicalName = *realPath;
+        realPathsToSourceNodes[canonicalName.generic_string()] = node;
+    }
+
+    for (auto& child : node->children)
+    {
+        child->parent = node;
+        writePathsToMap(child, base + "/" + child->name);
+    }
+}
+
+void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
+{
+    realPathsToSourceNodes.clear();
+    virtualPathsToSourceNodes.clear();
+
+    try
+    {
+        auto j = json::parse(sourceMapContents);
+        rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
+
+        // Write paths
+        std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
+        writePathsToMap(rootSourceNode, base);
+    }
+    catch (const std::exception& e)
+    {
+        // TODO: log message?
+        std::cerr << e.what() << '\n';
+    }
+}
+
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
 // to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
 // Remove this once Luau has improved
-void RobloxPlatform::handleSourcemapUpdate(
-    Luau::Frontend& frontend, const Luau::GlobalTypes& globals, const WorkspaceFileResolver& fileResolver, bool expressiveTypes)
+void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes)
 {
-    if (!fileResolver.rootSourceNode)
+    if (!rootSourceNode)
         return;
 
     // Mutate with plugin info
     if (pluginInfo)
     {
-        if (fileResolver.rootSourceNode->className == "DataModel")
+        if (rootSourceNode->className == "DataModel")
         {
-            mutateSourceNodeWithPluginInfo(*fileResolver.rootSourceNode, pluginInfo);
+            mutateSourceNodeWithPluginInfo(*rootSourceNode, pluginInfo);
         }
         else
         {
@@ -193,17 +264,17 @@ void RobloxPlatform::handleSourcemapUpdate(
     instanceTypes.clear();
 
     // Create a type for the root source node
-    getSourcemapType(globals, instanceTypes, fileResolver.rootSourceNode);
+    getSourcemapType(globals, instanceTypes, rootSourceNode);
 
     // Modify sourcemap types
-    if (fileResolver.rootSourceNode->className == "DataModel")
+    if (rootSourceNode->className == "DataModel")
     {
         // Mutate DataModel with its children
         if (auto dataModelType = globals.globalScope->lookupType("DataModel"))
-            addChildrenToCTV(globals, instanceTypes, dataModelType->type, fileResolver.rootSourceNode);
+            addChildrenToCTV(globals, instanceTypes, dataModelType->type, rootSourceNode);
 
         // Mutate globally-registered Services to include children information (so it's available through :GetService)
-        for (const auto& service : fileResolver.rootSourceNode->children)
+        for (const auto& service : rootSourceNode->children)
         {
             auto serviceName = service->className; // We know it must be a service of the same class name
             if (auto serviceType = globals.globalScope->lookupType(serviceName))
@@ -226,7 +297,7 @@ void RobloxPlatform::handleSourcemapUpdate(
                 // Player.PlayerGui should contain StarterGui instances
                 if (auto playerGuiType = globals.globalScope->lookupType("PlayerGui"))
                 {
-                    if (auto starterGui = fileResolver.rootSourceNode->findChild("StarterGui"))
+                    if (auto starterGui = rootSourceNode->findChild("StarterGui"))
                         addChildrenToCTV(globals, instanceTypes, playerGuiType->type, *starterGui);
                     ctv->props["PlayerGui"] = Luau::makeProperty(playerGuiType->type);
                 }
@@ -234,7 +305,7 @@ void RobloxPlatform::handleSourcemapUpdate(
                 // Player.StarterGear should contain StarterPack instances
                 if (auto starterGearType = globals.globalScope->lookupType("StarterGear"))
                 {
-                    if (auto starterPack = fileResolver.rootSourceNode->findChild("StarterPack"))
+                    if (auto starterPack = rootSourceNode->findChild("StarterPack"))
                         addChildrenToCTV(globals, instanceTypes, starterGearType->type, *starterPack);
 
                     ctv->props["StarterGear"] = Luau::makeProperty(starterGearType->type);
@@ -243,7 +314,7 @@ void RobloxPlatform::handleSourcemapUpdate(
                 // Player.PlayerScripts should contain StarterPlayerScripts instances
                 if (auto playerScriptsType = globals.globalScope->lookupType("PlayerScripts"))
                 {
-                    if (auto starterPlayer = fileResolver.rootSourceNode->findChild("StarterPlayer"))
+                    if (auto starterPlayer = rootSourceNode->findChild("StarterPlayer"))
                     {
                         if (auto starterPlayerScripts = starterPlayer.value()->findChild("StarterPlayerScripts"))
                         {
@@ -257,8 +328,7 @@ void RobloxPlatform::handleSourcemapUpdate(
     }
 
     // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-    frontend.prepareModuleScope = [this, &frontend, &fileResolver, expressiveTypes](
-                                      const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
+    frontend.prepareModuleScope = [this, &frontend, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
     {
         Luau::GlobalTypes& globals = forAutocomplete ? frontend.globalsForAutocomplete : frontend.globals;
 
@@ -271,8 +341,42 @@ void RobloxPlatform::handleSourcemapUpdate(
         }
 
         if (expressiveTypes || forAutocomplete)
-            if (auto node =
-                    fileResolver.isVirtualPath(name) ? fileResolver.getSourceNodeFromVirtualPath(name) : fileResolver.getSourceNodeFromRealPath(name))
+            if (auto node = isVirtualPath(name) ? getSourceNodeFromVirtualPath(name) : getSourceNodeFromRealPath(name))
                 scope->bindings[Luau::AstName("script")] = Luau::Binding{getSourcemapType(globals, instanceTypes, node.value())};
     };
+}
+
+std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
+{
+    if (virtualPathsToSourceNodes.find(name) == virtualPathsToSourceNodes.end())
+        return std::nullopt;
+    return virtualPathsToSourceNodes.at(name);
+}
+
+std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromRealPath(const std::string& name) const
+{
+    std::error_code ec;
+    auto canonicalName = std::filesystem::weakly_canonical(name, ec);
+    if (ec.value() != 0)
+        canonicalName = name;
+    auto strName = canonicalName.generic_string();
+    if (realPathsToSourceNodes.find(strName) == realPathsToSourceNodes.end())
+        return std::nullopt;
+    return realPathsToSourceNodes.at(strName);
+}
+
+Luau::ModuleName RobloxPlatform::getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode)
+{
+    return sourceNode->virtualPath;
+}
+
+std::optional<std::filesystem::path> RobloxPlatform::getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const
+{
+    // NOTE: this filepath is generated by the sourcemap, which is relative to the cwd where the sourcemap
+    // command was run from. Hence, we concatenate it to the end of the workspace path
+    // TODO: make sure this is correct once we make sourcemap.json generic
+    auto filePath = sourceNode->getScriptFilePath();
+    if (filePath)
+        return fileResolver->rootUri.fsPath() / *filePath;
+    return std::nullopt;
 }

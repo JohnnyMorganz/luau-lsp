@@ -144,6 +144,8 @@ struct DocumentSymbolsVisitor : public Luau::AstVisitor
 
 std::optional<std::vector<lsp::DocumentSymbol>> WorkspaceFolder::documentSymbol(const lsp::DocumentSymbolParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

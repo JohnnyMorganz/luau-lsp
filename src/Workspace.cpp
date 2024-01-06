@@ -3,12 +3,19 @@
 #include <iostream>
 #include <memory>
 
+#include "LSP/LanguageServer.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
 LUAU_FASTFLAG(LuauStacklessTypeClone3)
+
+void WorkspaceFolder::ensureConfigured() const
+{
+    if (!isConfigured)
+        throw MessagePostponeException();
+}
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
@@ -17,9 +24,12 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
     fileResolver.managedFiles.emplace(
         std::make_pair(normalisedUri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
 
-    // Mark the file as dirty as we don't know what changes were made to it
-    auto moduleName = fileResolver.getModuleName(uri);
-    frontend.markDirty(moduleName);
+    if (isConfigured)
+    {
+        // Mark the file as dirty as we don't know what changes were made to it
+        auto moduleName = fileResolver.getModuleName(uri);
+        frontend.markDirty(moduleName);
+    }
 }
 
 void WorkspaceFolder::updateTextDocument(
@@ -71,6 +81,54 @@ void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
     else
     {
         client->refreshWorkspaceDiagnostics();
+    }
+}
+
+void WorkspaceFolder::onDidChangeWatchedFiles(const lsp::FileEvent& change)
+{
+    auto filePath = change.uri.fsPath();
+    auto config = client->getConfiguration(rootUri);
+
+    platform->onDidChangeWatchedFiles(change);
+
+    if (filePath.filename() == ".luaurc")
+    {
+        client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
+        fileResolver.clearConfigCache();
+
+        // Recompute diagnostics
+        recomputeDiagnostics(config);
+    }
+    else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
+    {
+        // Notify if it was a definitions file
+        if (isDefinitionFile(filePath, config))
+        {
+            client->sendWindowMessage(
+                lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
+            return;
+        }
+
+        // Index the workspace on changes
+        // We only update the require graph. We do not perform type checking
+        if (config.index.enabled && isConfigured)
+        {
+            auto moduleName = fileResolver.getModuleName(change.uri);
+
+            std::vector<Luau::ModuleName> markedDirty{};
+            frontend.markDirty(moduleName, &markedDirty);
+
+            if (change.type == lsp::FileChangeType::Created)
+                frontend.parse(moduleName);
+
+            // Re-check the reverse dependencies
+            for (const auto& reverseDep : markedDirty)
+                frontend.parse(reverseDep);
+        }
+
+        // Clear the diagnostics for the file in case it was not managed
+        if (change.type == lsp::FileChangeType::Deleted)
+            clearDiagnosticsForFile(change.uri);
     }
 }
 
@@ -193,35 +251,6 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-bool WorkspaceFolder::updateSourceMap()
-{
-    auto sourcemapPath = rootUri.fsPath() / "sourcemap.json";
-    client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
-
-    // Read in the sourcemap
-    // TODO: we assume a sourcemap.json file in the workspace root
-    if (auto sourceMapContents = readFile(sourcemapPath))
-    {
-        frontend.clear();
-        fileResolver.updateSourceMap(sourceMapContents.value());
-
-        auto config = client->getConfiguration(rootUri);
-        // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
-        // We pass the same setting even when we are registering autocomplete globals since
-        // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
-        platform->handleSourcemapUpdate(frontend, frontend.globals, fileResolver,
-            /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
-        platform->handleSourcemapUpdate(frontend, frontend.globalsForAutocomplete, fileResolver,
-            /* expressiveTypes: */ config.diagnostics.strictDatamodelTypes);
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 void WorkspaceFolder::initialize()
 {
     client->sendTrace("workspace initialization: registering Luau globals");
@@ -287,7 +316,9 @@ void WorkspaceFolder::initialize()
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
     client->sendTrace("workspace: setting up with configuration");
-    platform = LSPPlatform::getPlatform(configuration, this);
+    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
+
+    fileResolver.platform = platform.get();
 
     if (!isConfigured)
     {
@@ -297,16 +328,8 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
     }
 
-    if (configuration.sourcemap.enabled)
-    {
-        client->sendTrace("workspace: sourcemap enabled");
-        if (!isNullWorkspace() && !updateSourceMap())
-        {
-            client->sendWindowMessage(
-                lsp::MessageType::Error, "Failed to load sourcemap.json for workspace '" + name + "'. Instance information will not be available");
-        }
-    }
-
     if (configuration.index.enabled)
         indexFiles(configuration);
+
+    platform->setupWithConfiguration(configuration);
 }

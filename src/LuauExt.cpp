@@ -4,6 +4,7 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
 #include "Luau/Transpiler.h"
+#include "Luau/TypeInfer.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
 

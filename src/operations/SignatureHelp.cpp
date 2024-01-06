@@ -2,6 +2,8 @@
 #include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
+#include "Luau/Normalize.h"
+#include "Luau/Unifier.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
@@ -26,6 +28,8 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
 
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
+    ensureConfigured();
+
     auto config = client->getConfiguration(rootUri);
 
     if (!config.signatureHelp.enabled)

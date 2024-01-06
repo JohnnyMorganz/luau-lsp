@@ -71,6 +71,8 @@ static std::string computeBytecodeOutput(const std::string& source, const Client
 
 lsp::CompilerRemarksResult WorkspaceFolder::bytecode(const lsp::BytecodeParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
@@ -82,6 +84,8 @@ lsp::CompilerRemarksResult WorkspaceFolder::bytecode(const lsp::BytecodeParams& 
 
 lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerRemarksParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

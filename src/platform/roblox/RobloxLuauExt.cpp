@@ -1,6 +1,7 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/TypeInfer.h"
 
 // Since in Roblox land, debug is extended to introduce more methods, but the api-docs
 // mark the package name as `@luau` instead of `@roblox`

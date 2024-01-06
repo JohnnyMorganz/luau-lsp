@@ -3,6 +3,10 @@
 #include "LSP/LuauExt.hpp"
 #include "Platform/LSPPlatform.hpp"
 
+using json = nlohmann::json;
+using SourceNodePtr = std::shared_ptr<struct SourceNode>;
+using PluginNodePtr = std::shared_ptr<struct PluginNode>;
+
 struct RobloxDefinitionsFileMetadata
 {
     std::vector<std::string> CREATABLE_INSTANCES{};
@@ -60,24 +64,111 @@ public:
     }
 };
 
+struct SourceNode
+{
+    std::weak_ptr<struct SourceNode> parent; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
+    std::string name;
+    std::string className;
+    std::vector<std::filesystem::path> filePaths{};
+    std::vector<SourceNodePtr> children{};
+    std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    // The corresponding TypeId for this sourcemap node
+    // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
+    std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
+
+    bool isScript();
+    std::optional<std::filesystem::path> getScriptFilePath();
+    Luau::SourceCode::Type sourceCodeType() const;
+    std::optional<SourceNodePtr> findChild(const std::string& name);
+    // O(n) search for ancestor of name
+    std::optional<SourceNodePtr> findAncestor(const std::string& name);
+};
+
+static void from_json(const json& j, SourceNode& p)
+{
+    j.at("name").get_to(p.name);
+    j.at("className").get_to(p.className);
+
+    if (j.contains("filePaths"))
+        j.at("filePaths").get_to(p.filePaths);
+
+    if (j.contains("children"))
+    {
+        for (auto& child : j.at("children"))
+        {
+            p.children.push_back(std::make_shared<SourceNode>(child.get<SourceNode>()));
+        }
+    }
+}
+
+struct PluginNode
+{
+    std::string name = "";
+    std::string className = "";
+    std::vector<PluginNodePtr> children{};
+};
+
+static void from_json(const json& j, PluginNode& p)
+{
+    j.at("Name").get_to(p.name);
+    j.at("ClassName").get_to(p.className);
+
+    if (j.contains("Children"))
+    {
+        for (auto& child : j.at("Children"))
+        {
+            p.children.push_back(std::make_shared<PluginNode>(child.get<PluginNode>()));
+        }
+    }
+}
+
 class RobloxPlatform : public LSPPlatform
 {
 private:
     // Plugin-provided DataModel information
     PluginNodePtr pluginInfo;
 
+    // The root source node from a parsed Rojo source map
+    SourceNodePtr rootSourceNode;
+
+    mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes{};
+    mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
+
+    std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
+    std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
+    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
+    static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
+
+    bool updateSourceMap();
+    void writePathsToMap(const SourceNodePtr& node, const std::string& base);
+
 public:
     Luau::TypeArena instanceTypes;
 
-    std::unique_ptr<FindImportsVisitor> getImportVisitor() override
-    {
-        return std::make_unique<RobloxFindImportsVisitor>();
-    }
-
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
-    void handleSourcemapUpdate(
-        Luau::Frontend& frontend, const Luau::GlobalTypes& globals, const WorkspaceFileResolver& fileResolver, bool expressiveTypes) override;
+    void onDidChangeWatchedFiles(const lsp::FileEvent& change) override;
+
+    void setupWithConfiguration(const ClientConfiguration& config) override;
+
+    bool isVirtualPath(const Luau::ModuleName& name) const override
+    {
+        return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
+    }
+
+    std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
+
+    std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const override;
+
+    Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
+
+    std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const override;
+
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
+
+    void updateSourceNodeMap(const std::string& sourceMapContents);
+
+    void handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes);
 
     std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ClassType*> ctx,
         std::optional<std::string> contents, const Luau::ModuleName& moduleName) override;
@@ -87,11 +178,8 @@ public:
 
     std::optional<lsp::CompletionItemKind> handleEntryKind(const Luau::AutocompleteEntry& entry) override;
 
-    void handleSuggestImports(const ClientConfiguration& config, FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber,
-        bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items) override;
-
-    void handleRequireAutoImport(const std::string& requirePath, size_t lineNumber, bool isRelative, const ClientConfiguration& config,
-        FindImportsVisitor* importsVisitor, size_t hotCommentsLineNumber, std::vector<lsp::TextEdit>& textEdits) override;
+    void handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
+        size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items) override;
 
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;

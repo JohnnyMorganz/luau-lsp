@@ -115,8 +115,7 @@ std::string rgbToHex(RGB in)
 
 lsp::DocumentColorResult WorkspaceFolder::documentColor(const lsp::DocumentColorParams& params)
 {
-    if (!platform)
-        return {};
+    ensureConfigured();
 
     auto config = client->getConfiguration(rootUri);
 
@@ -142,6 +141,7 @@ lsp::DocumentColorResult LanguageServer::documentColor(const lsp::DocumentColorP
 
 lsp::ColorPresentationResult WorkspaceFolder::colorPresentation(const lsp::ColorPresentationParams& params)
 {
+    ensureConfigured();
     return platform->colorPresentation(params);
 }
 

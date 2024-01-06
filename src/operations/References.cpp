@@ -202,7 +202,7 @@ static std::vector<lsp::Location> processReferences(WorkspaceFileResolver& fileR
         }
         else
         {
-            if (auto filePath = fileResolver.resolveToRealPath(reference.moduleName))
+            if (auto filePath = fileResolver.platform->resolveToRealPath(reference.moduleName))
             {
                 if (auto source = fileResolver.readSource(reference.moduleName))
                 {
@@ -386,6 +386,8 @@ bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::A
 
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

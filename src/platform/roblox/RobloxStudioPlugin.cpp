@@ -11,7 +11,7 @@ void RobloxPlatform::onStudioPluginFullChange(const PluginNode& dataModel)
     pluginInfo = std::make_shared<PluginNode>(dataModel);
 
     // Mutate the sourcemap with the new information
-    workspaceFolder->updateSourceMap();
+    updateSourceMap();
 }
 
 void RobloxPlatform::onStudioPluginClear()
@@ -22,7 +22,7 @@ void RobloxPlatform::onStudioPluginClear()
     pluginInfo = nullptr;
 
     // Mutate the sourcemap with the new information
-    workspaceFolder->updateSourceMap();
+    updateSourceMap();
 }
 
 bool RobloxPlatform::handleNotification(const std::string& method, std::optional<json> params)

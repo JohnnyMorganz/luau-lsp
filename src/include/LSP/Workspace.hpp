@@ -63,6 +63,8 @@ public:
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
+    void onDidChangeWatchedFiles(const lsp::FileEvent& change);
+
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
     /// Whether the file has been specified in the configuration as a definitions file
@@ -70,6 +72,8 @@ public:
 
     lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
+    void recomputeDiagnostics(const ClientConfiguration& config);
+    void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
 
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
@@ -79,6 +83,8 @@ public:
     void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
 
 private:
+    void ensureConfigured() const;
+
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);
@@ -123,8 +129,6 @@ public:
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
-
-    bool updateSourceMap();
 
     bool isNullWorkspace() const
     {

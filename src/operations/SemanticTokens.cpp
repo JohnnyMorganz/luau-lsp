@@ -396,6 +396,8 @@ std::vector<size_t> packTokens(const TextDocument* textDocument, std::vector<Sem
 
 std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
 {
+    ensureConfigured();
+
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

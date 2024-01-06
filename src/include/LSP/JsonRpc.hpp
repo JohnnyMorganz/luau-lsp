@@ -44,17 +44,17 @@ public:
     std::optional<json> result;
     std::optional<JsonRpcException> error;
 
-    bool is_request()
+    [[nodiscard]] bool is_request() const
     {
         return this->id.has_value() && this->method.has_value();
     }
 
-    bool is_response()
+    [[nodiscard]] bool is_response() const
     {
         return this->id.has_value() && (this->result.has_value() || this->error.has_value());
     }
 
-    bool is_notification()
+    [[nodiscard]] bool is_notification() const
     {
         return !this->id.has_value() && this->method.has_value();
     }

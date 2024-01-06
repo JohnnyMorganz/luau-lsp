@@ -3,6 +3,7 @@
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/TxnLog.h"
 #include "Luau/TypeUtils.h"
 
 #include "LSP/Completion.hpp"
@@ -182,61 +183,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     }
 }
 
-static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false)
-{
-    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = require(" + path + ")\n";
-    if (prependNewline)
-        importText = "\n" + importText;
-    return {range, importText};
-}
-
-static lsp::CompletionItem createSuggestRequire(
-    const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText, const std::string& path)
-{
-    std::string documentation;
-    for (const auto& edit : textEdits)
-        documentation += edit.newText;
-
-    lsp::CompletionItem item;
-    item.label = name;
-    item.kind = lsp::CompletionItemKind::Module;
-    item.detail = "Auto-import";
-    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", documentation) + "\n\n" + path};
-    item.insertText = name;
-    item.sortText = sortText;
-
-    item.additionalTextEdits = textEdits;
-
-    return item;
-}
-
-static size_t getLengthEqual(const std::string& a, const std::string& b)
-{
-    size_t i = 0;
-    for (; i < a.size() && i < b.size(); ++i)
-    {
-        if (a[i] != b[i])
-            break;
-    }
-    return i;
-}
-
-static std::string optimiseAbsoluteRequire(const std::string& path)
-{
-    if (!Luau::startsWith(path, "game/"))
-        return path;
-
-    auto parts = Luau::split(path, '/');
-    if (parts.size() > 2)
-    {
-        auto service = std::string(parts[1]);
-        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
-    }
-
-    return path;
-}
-
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
     const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix)
 {
@@ -259,88 +205,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
             hotCommentsLineNumber = hotComment.location.begin.line + 1U;
     }
 
-    // Find all import calls
-    std::unique_ptr<FindImportsVisitor> importsVisitor = platform->getImportVisitor();
-    importsVisitor->visit(sourceModule->root);
-
-    platform->handleSuggestImports(config, importsVisitor.get(), hotCommentsLineNumber, completingTypeReferencePrefix, result);
-
-    if (config.completion.imports.suggestRequires)
-    {
-        size_t minimumLineNumber = hotCommentsLineNumber;
-        size_t visitorMinimumLine = importsVisitor->getMinimumRequireLine();
-
-        if (visitorMinimumLine > minimumLineNumber)
-            minimumLineNumber = visitorMinimumLine;
-
-        if (importsVisitor->firstRequireLine)
-            minimumLineNumber = *importsVisitor->firstRequireLine >= minimumLineNumber ? (*importsVisitor->firstRequireLine) : minimumLineNumber;
-
-        for (auto& [path, node] : fileResolver.virtualPathsToSourceNodes)
-        {
-            auto name = node->name;
-            replaceAll(name, " ", "_");
-
-            if (path == moduleName || node->className != "ModuleScript" || importsVisitor->containsRequire(name))
-                continue;
-            if (auto scriptFilePath = fileResolver.getRealPathFromSourceNode(node); scriptFilePath && isIgnoredFile(*scriptFilePath, config))
-                continue;
-
-            std::string requirePath;
-            std::vector<lsp::TextEdit> textEdits;
-
-            // Compute the style of require
-            bool isRelative = false;
-            auto parent1 = getParentPath(moduleName), parent2 = getParentPath(path);
-            if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
-                Luau::startsWith(path, "ProjectRoot/") || // All model projects should always require relatively
-                (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
-                    (Luau::startsWith(moduleName, path) || Luau::startsWith(path, moduleName) || parent1 == parent2)))
-            {
-                requirePath = "./" + std::filesystem::relative(path, moduleName).string();
-                isRelative = true;
-            }
-            else
-                requirePath = optimiseAbsoluteRequire(path);
-
-            auto require = convertToScriptPath(requirePath);
-
-            size_t lineNumber = minimumLineNumber;
-            size_t bestLength = 0;
-            for (auto& group : importsVisitor->requiresMap)
-            {
-                for (auto& [_, stat] : group)
-                {
-                    auto line = stat->location.end.line;
-
-                    // HACK: We read the text of the require argument to sort the lines
-                    // Note: requires may be in the form `require(path) :: any`, so we need to handle that too
-                    Luau::AstExprCall* call = stat->values.data[0]->as<Luau::AstExprCall>();
-                    if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
-                        call = assertion->expr->as<Luau::AstExprCall>();
-                    if (!call)
-                        continue;
-
-                    auto location = call->args.data[0]->location;
-                    auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
-                    auto argText = textDocument.getText(range);
-                    auto length = getLengthEqual(argText, require);
-
-                    if (length > bestLength && argText < require && line >= lineNumber)
-                        lineNumber = line + 1;
-                }
-            }
-
-            platform->handleRequireAutoImport(requirePath, lineNumber, isRelative, config, importsVisitor.get(), hotCommentsLineNumber, textEdits);
-
-            // Whether we need to add a newline before the require to separate it from the services
-            bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor->shouldPrependNewline(lineNumber);
-
-            textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
-
-            result.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path));
-        }
-    }
+    platform->handleSuggestImports(textDocument, *sourceModule, config, hotCommentsLineNumber, completingTypeReferencePrefix, result);
 }
 
 static bool canUseSnippets(const lsp::ClientCapabilities& capabilities)
@@ -550,6 +415,8 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
 
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
+    ensureConfigured();
+
     auto config = client->getConfiguration(rootUri);
 
     if (!config.completion.enabled)
@@ -578,86 +445,6 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
         {
             tags.insert(tag);
-
-            if (tag == "Require")
-            {
-                if (!contents.has_value())
-                    return std::nullopt;
-
-                auto config = client->getConfiguration(rootUri);
-
-                Luau::AutocompleteEntryMap result;
-
-                // Include any files in the directory
-                auto contentsString = contents.value();
-
-                // We should strip any trailing values until a `/` is found in case autocomplete
-                // is triggered half-way through.
-                // E.g., for "Contents/Test|", we should only consider up to "Contents/" to find all files
-                // For "Mod|", we should only consider an empty string ""
-                auto separator = contentsString.find_last_of("/\\");
-                if (separator == std::string::npos)
-                    contentsString = "";
-                else
-                    contentsString = contentsString.substr(0, separator + 1);
-
-                // Populate with custom file aliases
-                for (const auto& [aliasName, _] : config.require.fileAliases)
-                {
-                    Luau::AutocompleteEntry entry{
-                        Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                    entry.tags.push_back("File");
-                    entry.tags.push_back("Alias");
-                    result.insert_or_assign(aliasName, entry);
-                }
-
-                // Populate with custom directory aliases, if we are at the start of a string require
-                if (contentsString == "")
-                {
-                    for (const auto& [aliasName, _] : config.require.directoryAliases)
-                    {
-                        Luau::AutocompleteEntry entry{
-                            Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                        entry.tags.push_back("Directory");
-                        entry.tags.push_back("Alias");
-                        result.insert_or_assign(aliasName, entry);
-                    }
-                }
-
-                // Check if it starts with a directory alias, otherwise resolve with require base path
-                std::filesystem::path currentDirectory = resolveDirectoryAlias(rootUri.fsPath(), config.require.directoryAliases, contentsString)
-                                                             .value_or(fileResolver.getRequireBasePath(moduleName).append(contentsString));
-
-                try
-                {
-                    for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))
-                    {
-                        if (dir_entry.is_regular_file() || dir_entry.is_directory())
-                        {
-                            std::string fileName = dir_entry.path().filename().generic_string();
-                            Luau::AutocompleteEntry entry{
-                                Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                            entry.tags.push_back(dir_entry.is_directory() ? "Directory" : "File");
-                            result.insert_or_assign(fileName, entry);
-                        }
-                    }
-
-                    // Add in ".." support
-                    if (currentDirectory.has_parent_path())
-                    {
-                        Luau::AutocompleteEntry dotdotEntry{
-                            Luau::AutocompleteEntryKind::String, frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct};
-                        dotdotEntry.tags.push_back("Directory");
-                        result.insert_or_assign("..", dotdotEntry);
-                    }
-                }
-                catch (std::exception&)
-                {
-                }
-
-                return result;
-            }
-
             return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
         });
 

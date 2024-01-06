@@ -71,6 +71,8 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
 
 lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& params)
 {
+    ensureConfigured();
+
     std::vector<lsp::CodeAction> result;
 
     auto config = client->getConfiguration(rootUri);

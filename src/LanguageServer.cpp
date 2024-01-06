@@ -335,11 +335,55 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
 }
 
+void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
+{
+    try
+    {
+        if (msg.is_request())
+        {
+            onRequest(msg.id.value(), msg.method.value(), msg.params);
+        }
+        else if (msg.is_response())
+        {
+            client->handleResponse(msg);
+        }
+        else if (msg.is_notification())
+        {
+            onNotification(msg.method.value(), msg.params);
+        }
+        else
+        {
+            throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
+        }
+    }
+    catch (const MessagePostponeException& e)
+    {
+        postponedMessages.push_back(msg);
+    }
+    catch (const JsonRpcException& e)
+    {
+        client->sendError(msg.id, e);
+    }
+    catch (const std::exception& e)
+    {
+        client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
+    }
+}
+
 void LanguageServer::processInputLoop()
 {
     std::string jsonString;
     while (std::cin)
     {
+        if (postponedMessages.size() > 0)
+        {
+            auto prevPostponedMessages = postponedMessages;
+            postponedMessages.clear();
+
+            for (const auto& msg : prevPostponedMessages)
+                handleMessage(msg);
+        }
+
         if (client->readRawMessage(jsonString))
         {
             // sendTrace(jsonString, std::nullopt);
@@ -350,34 +394,11 @@ void LanguageServer::processInputLoop()
                 auto msg = json_rpc::parse(jsonString);
                 id = msg.id;
 
-                if (msg.is_request())
-                {
-                    onRequest(msg.id.value(), msg.method.value(), msg.params);
-                }
-                else if (msg.is_response())
-                {
-                    client->handleResponse(msg);
-                }
-                else if (msg.is_notification())
-                {
-                    onNotification(msg.method.value(), msg.params);
-                }
-                else
-                {
-                    throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
-                }
-            }
-            catch (const JsonRpcException& e)
-            {
-                client->sendError(id, e);
+                handleMessage(msg);
             }
             catch (const json::exception& e)
             {
                 client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
-            }
-            catch (const std::exception& e)
-            {
-                client->sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
             }
         }
     }
@@ -452,7 +473,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
             workspace->setupWithConfiguration(config);
 
             // Refresh diagnostics
-            this->recomputeDiagnostics(workspace, config);
+            workspace->recomputeDiagnostics(config);
 
             // Refresh inlay hint if changed
             if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
@@ -506,57 +527,6 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     }
 }
 
-void LanguageServer::pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version)
-{
-    // Convert the diagnostics report into a series of diagnostics published for each relevant file
-    lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
-    auto diagnostics = workspace->documentDiagnostics(params);
-    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
-
-    if (!diagnostics.relatedDocuments.empty())
-    {
-        for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
-        {
-            if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
-            {
-                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
-            }
-        }
-    }
-}
-
-/// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
-void LanguageServer::recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config)
-{
-    // Handle diagnostics if in push-mode
-    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
-    {
-        // Recompute workspace diagnostics if requested
-        if (config.diagnostics.workspace)
-        {
-            auto diagnostics = workspace->workspaceDiagnostics({});
-            for (const auto& report : diagnostics.items)
-            {
-                if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
-                {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
-                }
-            }
-        }
-        // Recompute diagnostics for all currently opened files
-        else
-        {
-            for (const auto& [_, document] : workspace->fileResolver.managedFiles)
-                this->pushDiagnostics(workspace, document.uri(), document.version());
-        }
-    }
-    else
-    {
-        client->terminateWorkspaceDiagnostics();
-        client->refreshWorkspaceDiagnostics();
-    }
-}
-
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
 {
     // Start managing the file in-memory
@@ -568,7 +538,7 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
     // however if a client doesn't yet support it, we push the diagnostics instead
     if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
     {
-        pushDiagnostics(workspace, params.textDocument.uri, params.textDocument.version);
+        workspace->pushDiagnostics(params.textDocument.uri, params.textDocument.version);
     }
 }
 
@@ -599,7 +569,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
             std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics{};
             for (auto& module : markedDirty)
             {
-                auto filePath = workspace->fileResolver.resolveToRealPath(module);
+                auto filePath = workspace->platform->resolveToRealPath(module);
                 if (filePath)
                 {
                     auto uri = Uri::file(*filePath);
@@ -702,58 +672,7 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
     for (const auto& change : params.changes)
     {
         auto workspace = findWorkspace(change.uri);
-        auto config = client->getConfiguration(workspace->rootUri);
-        auto filePath = change.uri.fsPath();
-
-        // Flag sourcemap changes
-        if (filePath.filename() == "sourcemap.json")
-        {
-            client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspace->name);
-            workspace->updateSourceMap();
-
-            // Recompute diagnostics
-            this->recomputeDiagnostics(workspace, config);
-        }
-        else if (filePath.filename() == ".luaurc")
-        {
-            client->sendLogMessage(
-                lsp::MessageType::Info, "Acknowledge config changed for workspace " + workspace->name + ", clearing configuration cache");
-            workspace->fileResolver.clearConfigCache();
-
-            // Recompute diagnostics
-            this->recomputeDiagnostics(workspace, config);
-        }
-        else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
-        {
-            // Notify if it was a definitions file
-            if (workspace->isDefinitionFile(filePath, config))
-            {
-                client->sendWindowMessage(
-                    lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
-                continue;
-            }
-
-            // Index the workspace on changes
-            // We only update the require graph. We do not perform type checking
-            if (config.index.enabled && workspace->isConfigured)
-            {
-                auto moduleName = workspace->fileResolver.getModuleName(change.uri);
-
-                std::vector<Luau::ModuleName> markedDirty{};
-                workspace->frontend.markDirty(moduleName, &markedDirty);
-
-                if (change.type == lsp::FileChangeType::Created)
-                    workspace->frontend.parse(moduleName);
-
-                // Re-check the reverse dependencies
-                for (const auto& reverseDep : markedDirty)
-                    workspace->frontend.parse(reverseDep);
-            }
-
-            // Clear the diagnostics for the file in case it was not managed
-            if (change.type == lsp::FileChangeType::Deleted)
-                workspace->clearDiagnosticsForFile(change.uri);
-        }
+        workspace->onDidChangeWatchedFiles(change);
     }
 }
 
