@@ -439,30 +439,28 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
     client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
 
-    // Dynamically register for configuration changed notifications
-    bool requestedConfiguration = false;
-    if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
-        client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
+    // Handle configuration responses
+    client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
     {
-        client->sendTrace("client supports configuration, setting up didChangeConfiguration capability");
+        auto workspace = findWorkspace(workspaceUri);
+
+        // Update the workspace setup with the new configuration
+        workspace->setupWithConfiguration(config);
+
+        // Refresh diagnostics
+        this->recomputeDiagnostics(workspace, config);
+
+        // Refresh inlay hint if changed
+        if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
+            client->refreshInlayHints();
+    };
+
+    // Request configuration if the client supports it
+    bool requestedConfiguration = false;
+    if (client->capabilities.workspace && client->capabilities.workspace->configuration)
+    {
+        client->sendTrace("client supports configuration");
         requestedConfiguration = true;
-
-        client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
-        client->configChangedCallback =
-            [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
-        {
-            auto workspace = findWorkspace(workspaceUri);
-
-            // Update the workspace setup with the new configuration
-            workspace->setupWithConfiguration(config);
-
-            // Refresh diagnostics
-            this->recomputeDiagnostics(workspace, config);
-
-            // Refresh inlay hint if changed
-            if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
-                client->refreshInlayHints();
-        };
 
         // Send off requests to get the configuration for each workspace
         client->sendTrace("config: requesting initial configuration for each workspace");
@@ -470,6 +468,14 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         for (auto& workspace : workspaceFolders)
             items.emplace_back(workspace->rootUri);
         client->requestConfiguration(items);
+    }
+
+    // Dynamically register for configuration changed notifications
+    if (client->capabilities.workspace && client->capabilities.workspace->didChangeConfiguration &&
+        client->capabilities.workspace->didChangeConfiguration->dynamicRegistration)
+    {
+        client->sendTrace("client supports didChangedConfiguration, registering capability");
+        client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
     }
 
     // Dynamically register file watchers

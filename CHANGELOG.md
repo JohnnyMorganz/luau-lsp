@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Switched to memory-efficient implementation of workspace diagnostics (currently behind FFlag `LuauStacklessTypeClone3`)
+- Improved handling of configuration info received from non-VSCode clients
 
 ## [1.27.0] - 2023-12-25
 
