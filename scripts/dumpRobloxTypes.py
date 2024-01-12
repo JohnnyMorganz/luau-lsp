@@ -271,6 +271,7 @@ EXTRA_MEMBERS = {
         "function __sub(self, other: Vector2): Vector2",
         "function __mul(self, other: Vector2 | number): Vector2",
         "function __div(self, other: Vector2 | number): Vector2",
+        "function __idiv(self, other: Vector2 | number): Vector2",
         "function __unm(self): Vector2",
     ],
     "Vector3int16": [
