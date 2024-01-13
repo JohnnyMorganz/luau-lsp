@@ -8,7 +8,6 @@
 #include "LSP/DocumentationParser.hpp"
 
 LUAU_FASTFLAG(LuauClipExtraHasEndProps);
-LUAU_FASTFLAG(LuauAutocompleteDoEnd);
 
 /// Defining sort text levels assigned to completion items
 /// Note that sort text is lexicographically
@@ -128,15 +127,12 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
                 unclosedBlock = true;
             else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
                 unclosedBlock = true;
-            if (FFlag::LuauAutocompleteDoEnd)
-            {
-                if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
-                    unclosedBlock = true;
+            if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
+                unclosedBlock = true;
 
-                // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
-                if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
-                    unclosedBlock = false;
-            }
+            // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
+            if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
+                unclosedBlock = false;
         }
     }
     else
@@ -151,11 +147,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
                 unclosedBlock = true;
             if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->DEPRECATED_hasEnd)
                 unclosedBlock = true;
-            if (FFlag::LuauAutocompleteDoEnd)
-            {
-                if (auto* statBlock = (*it)->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
-                    unclosedBlock = true;
-            }
+            if (auto* statBlock = (*it)->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
+                unclosedBlock = true;
             if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->DEPRECATED_hasEnd)
                 unclosedBlock = true;
         }
