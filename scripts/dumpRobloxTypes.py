@@ -253,6 +253,9 @@ IGNORED_MEMBERS = {
     "Vector3": [
         "Angle",
     ],
+    "ControllerPartSensor": [
+        "SensedPart",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -511,6 +514,9 @@ EXTRA_MEMBERS = {
     "PathfindingLink": [
         "Attachment0: Attachment?",
         "Attachment1: Attachment?",
+    ],
+    "ControllerPartSensor": [
+        "SensedPart: BasePart?",
     ],
 }
 
