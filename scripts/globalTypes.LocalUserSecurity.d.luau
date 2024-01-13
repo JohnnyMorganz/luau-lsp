@@ -8275,7 +8275,7 @@ declare class ControllerPartSensor extends ControllerSensor
 	HitFrame: CFrame
 	HitNormal: Vector3
 	SearchDistance: number
-	SensedPart: BasePart
+	SensedPart: BasePart?
 	SensorMode: EnumSensorMode
 end
 
