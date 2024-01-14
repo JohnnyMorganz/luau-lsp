@@ -1,6 +1,7 @@
 #pragma once
-#include "Luau/Ast.h"
+#include "Luau/Location.h"
 #include "Luau/Module.h"
+#include "Luau/Frontend.h"
 #include "Protocol/SemanticTokens.hpp"
 
 struct SemanticToken
@@ -11,4 +12,4 @@ struct SemanticToken
     lsp::SemanticTokenModifiers tokenModifiers;
 };
 
-std::vector<SemanticToken> getSemanticTokens(const Luau::ModulePtr& module, Luau::SourceModule* sourceModule);
+std::vector<SemanticToken> getSemanticTokens(const Luau::Frontend& frontend, const Luau::ModulePtr& module, const Luau::SourceModule* sourceModule);

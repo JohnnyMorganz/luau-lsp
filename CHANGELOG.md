@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Switched to memory-efficient implementation of workspace diagnostics (currently behind FFlag `LuauStacklessTypeClone3`)
 - Improved handling of configuration info received from non-VSCode clients
+- Functions with explicitly defined `self` parameters are correctly marked with the `method` semantic token
 
 ## [1.27.0] - 2023-12-25
 

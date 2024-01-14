@@ -42,7 +42,7 @@ static lsp::SemanticTokenTypes inferTokenType(const Luau::TypeId ty, lsp::Semant
 
     if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
     {
-        if (ftv->hasSelf)
+        if (isMethod(ftv))
             return lsp::SemanticTokenTypes::Method;
         else
             return lsp::SemanticTokenTypes::Function;

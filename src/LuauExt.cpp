@@ -1296,3 +1296,17 @@ bool isRequire(const Luau::AstExpr* expr)
 
     return false;
 }
+
+bool isMethod(const Luau::FunctionType* ftv)
+{
+    if (ftv->hasSelf)
+        return true;
+
+    // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
+    if (ftv->argNames.size() > 0 && ftv->argNames[0].has_value() && ftv->argNames[0]->name == "self")
+    {
+        return true;
+    }
+
+    return false;
+}

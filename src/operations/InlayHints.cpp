@@ -170,7 +170,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     hints.emplace_back(hint);
                 }
             }
-            
+
             // Parameter types hint
             if (config.inlayHints.parameterTypes)
             {
@@ -179,8 +179,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     return true;
 
                 // Skip first item if it is self
-                // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                if (ftv->hasSelf || (func->args.size > 0 && func->args.data[0]->name == "self"))
+                if (isMethod(ftv))
                     it++;
 
                 for (auto param : func->args)
@@ -228,8 +227,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
             {
                 // Skip first item if it is self
                 // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                if (idx == 0 && (ftv->hasSelf || (namesIt != ftv->argNames.end() && namesIt->has_value() && namesIt->value().name == "self")) &&
-                    call->self)
+                if (idx == 0 && isMethod(ftv) && call->self)
                     namesIt++;
 
                 if (namesIt == ftv->argNames.end())
