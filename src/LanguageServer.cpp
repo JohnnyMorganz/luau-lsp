@@ -356,7 +356,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
             throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
         }
     }
-    catch (const MessagePostponeException& e)
+    catch (const MessagePostponeException&)
     {
         postponedMessages.push_back(msg);
     }
