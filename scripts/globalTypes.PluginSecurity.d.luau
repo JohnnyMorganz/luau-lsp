@@ -4168,6 +4168,7 @@ declare class Random
 	function NextNumber(self): number
 	function NextNumber(self, min: number, max: number): number
 	function NextUnitVector(self): Vector3
+	function Shuffle(self, table: { any })
 end
 
 declare class Ray
