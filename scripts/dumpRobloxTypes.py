@@ -307,6 +307,9 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: CFrame): CFrame",
         "function __mul(self, other: Vector3): Vector3",
     ],
+    "Random": [
+        "function Shuffle(self, table: { any })",
+    ],
     "UserSettings": [
         "GameSettings: UserGameSettings",
         'function GetService(self, service: "UserGameSettings"): UserGameSettings',
