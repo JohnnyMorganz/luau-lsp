@@ -192,12 +192,6 @@ declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
 	Success: EnumAnimationClipFromVideoStatus
 	Timeout: EnumAnimationClipFromVideoStatus
 end
-declare class EnumAnimationCompositorMode extends EnumItem end
-declare class EnumAnimationCompositorMode_INTERNAL extends Enum
-	Default: EnumAnimationCompositorMode
-	Disabled: EnumAnimationCompositorMode
-	Enabled: EnumAnimationCompositorMode
-end
 declare class EnumAnimationPriority extends EnumItem end
 declare class EnumAnimationPriority_INTERNAL extends Enum
 	Action: EnumAnimationPriority
@@ -1497,13 +1491,6 @@ declare class EnumHumanoidRigType extends EnumItem end
 declare class EnumHumanoidRigType_INTERNAL extends Enum
 	R15: EnumHumanoidRigType
 	R6: EnumHumanoidRigType
-end
-declare class EnumHumanoidStateMachineMode extends EnumItem end
-declare class EnumHumanoidStateMachineMode_INTERNAL extends Enum
-	Default: EnumHumanoidStateMachineMode
-	Legacy: EnumHumanoidStateMachineMode
-	LuaStateMachine: EnumHumanoidStateMachineMode
-	NoStateMachine: EnumHumanoidStateMachineMode
 end
 declare class EnumHumanoidStateType extends EnumItem end
 declare class EnumHumanoidStateType_INTERNAL extends Enum
@@ -3614,7 +3601,6 @@ type ENUM_LIST = {
 	AnalyticsLogLevel: EnumAnalyticsLogLevel_INTERNAL,
 	AnalyticsProgressionStatus: EnumAnalyticsProgressionStatus_INTERNAL,
 	AnimationClipFromVideoStatus: EnumAnimationClipFromVideoStatus_INTERNAL,
-	AnimationCompositorMode: EnumAnimationCompositorMode_INTERNAL,
 	AnimationPriority: EnumAnimationPriority_INTERNAL,
 	AnimatorRetargetingMode: EnumAnimatorRetargetingMode_INTERNAL,
 	AppShellActionType: EnumAppShellActionType_INTERNAL,
@@ -3759,7 +3745,6 @@ type ENUM_LIST = {
 	HumanoidDisplayDistanceType: EnumHumanoidDisplayDistanceType_INTERNAL,
 	HumanoidHealthDisplayType: EnumHumanoidHealthDisplayType_INTERNAL,
 	HumanoidRigType: EnumHumanoidRigType_INTERNAL,
-	HumanoidStateMachineMode: EnumHumanoidStateMachineMode_INTERNAL,
 	HumanoidStateType: EnumHumanoidStateType_INTERNAL,
 	IKCollisionsMode: EnumIKCollisionsMode_INTERNAL,
 	IKControlConstraintSupport: EnumIKControlConstraintSupport_INTERNAL,
@@ -5329,6 +5314,7 @@ declare class CaptureService extends Instance
 	OpenSaveCapturesPrompt: RBXScriptSignal<number, { any }>
 	OpenShareCapturePrompt: RBXScriptSignal<number, Content, string, string>
 	UserCaptureSaved: RBXScriptSignal<Content>
+	function CaptureScreenshot(self, onCaptureReady: ((...any) -> ...any)): nil
 	function DeleteCapture(self, capturePath: string): nil
 	function GetCaptureSizeAsync(self, captureContentId: Content): Vector2
 	function OnCaptureBegan(self): nil
@@ -5490,6 +5476,7 @@ declare class Collaborator extends Instance
 	CollaboratorColor: number
 	CurDocGUID: string
 	CurScriptLineNumber: number
+	IsIdle: boolean
 	UserId: number
 	Username: string
 end
@@ -6203,6 +6190,7 @@ declare class DraftsService extends Instance
 	function RestoreScripts(self, scripts: { Instance }): nil
 	function ShowDiffsAgainstBase(self, scripts: { Instance }): nil
 	function ShowDiffsAgainstServer(self, scripts: { Instance }): nil
+	function ShowSourceDiffsAgainstCurrent(self, sources: { any }, scripts: { Instance }): nil
 	function UpdateToLatestVersion(self, scripts: { Instance }): nil
 end
 
@@ -8733,6 +8721,8 @@ end
 
 declare class PlayerViewService extends Instance
 	function GetDeviceCameraCFrame(self, player: Player?): CFrame
+	function OnCameraCFrameReplicationRequest(self): nil
+	function UpdateDeviceCFrame(self, player: Player?, cframe: CFrame?, timestamp: number?): nil
 end
 
 declare class Players extends Instance
@@ -9277,7 +9267,7 @@ declare class ScriptContext extends Instance
 	function GetLuauHeapInstanceReferenceReport(self, target: string): { [any]: any }
 	function GetLuauHeapMemoryReport(self, target: string): { [any]: any }
 	function GetScriptProfilingData(self): string
-	function SaveScriptProfilingData(self, filename: string): nil
+	function SaveScriptProfilingData(self, jsonString: string, filename: string): string
 	function SetTimeout(self, seconds: number): nil
 	function StartScriptProfiling(self, frequency: number?): nil
 	function StopScriptProfiling(self): string
@@ -9734,7 +9724,6 @@ end
 
 declare class StarterPlayer extends Instance
 	AllowCustomAnimations: boolean
-	AnimationCompositorMode: EnumAnimationCompositorMode
 	AutoJumpEnabled: boolean
 	AvatarJointUpgrade: EnumAvatarJointUpgrade
 	CameraMaxZoomDistance: number
@@ -9771,7 +9760,6 @@ declare class StarterPlayer extends Instance
 	GameSettingsScaleRangeProportion: NumberRange
 	GameSettingsScaleRangeWidth: NumberRange
 	HealthDisplayDistance: number
-	HumanoidStateMachineMode: EnumHumanoidStateMachineMode
 	LoadCharacterAppearance: boolean
 	LuaCharacterController: EnumCharacterControlMode
 	NameDisplayDistance: number
@@ -10595,6 +10583,7 @@ declare class UGCValidationService extends Instance
 	function GetTextureSize(self, textureId: string): Vector2
 	function RegisterUGCValidationFunction(self, setFunction: ((...any) -> ...any)): nil
 	function ResetCollisionFidelity(self, meshPart: Instance, collisionFidelity: EnumCollisionFidelity?): nil
+	function ResetCollisionFidelityWithEditableMeshDataLua(self, meshPart: MeshPart, editableMesh: EditableMesh, collisionFidelity: EnumCollisionFidelity?): nil
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
 	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
 	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
