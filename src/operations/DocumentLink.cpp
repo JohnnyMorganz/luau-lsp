@@ -32,8 +32,6 @@ struct FindRequireVisitor : public Luau::AstVisitor
 
 std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::DocumentLinkParams& params)
 {
-    ensureConfigured();
-
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     std::vector<lsp::DocumentLink> result{};
 

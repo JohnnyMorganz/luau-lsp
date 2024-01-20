@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
+- Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
 
 ### Fixed
 

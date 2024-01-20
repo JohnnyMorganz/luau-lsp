@@ -221,7 +221,7 @@ struct ClientRobloxPlatformConfiguration
     ClientRobloxDiagnosticsConfiguration diagnostics{};
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices, sourcemap, diagnostics);
 
 struct ClientPlatformConfiguration
 {

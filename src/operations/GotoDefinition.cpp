@@ -8,8 +8,6 @@
 
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
-    ensureConfigured();
-
     lsp::DefinitionResult result{};
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -158,8 +156,6 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
 std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
 {
-    ensureConfigured();
-
     // If its a binding, we should find its assigned type if possible, and then find the definition of that type
     // If its a type, then just find the definintion of that type (i.e. the type alias)
 

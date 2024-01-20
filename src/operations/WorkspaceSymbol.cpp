@@ -105,8 +105,6 @@ struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 
 std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbol(const lsp::WorkspaceSymbolParams& params)
 {
-    ensureConfigured();
-
     std::vector<lsp::WorkspaceSymbol> result;
 
     for (const auto& [moduleName, sourceModule] : frontend.sourceModules)

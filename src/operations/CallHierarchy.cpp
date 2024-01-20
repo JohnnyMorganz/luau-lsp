@@ -110,8 +110,6 @@ struct FindAllCallsVisitor : public Luau::AstVisitor
 
 std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const lsp::CallHierarchyPrepareParams& params)
 {
-    ensureConfigured();
-
     // TODO: this is largely based off goto definition, maybe DRY?
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -207,8 +205,6 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
 
 std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomingCalls(const lsp::CallHierarchyIncomingCallsParams& params)
 {
-    ensureConfigured();
-
     auto moduleName = fileResolver.getModuleName(params.item.uri);
 
     // NOTE: the text document in this case may not necessarily be managed
@@ -324,8 +320,6 @@ std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomi
 }
 std::vector<lsp::CallHierarchyOutgoingCall> WorkspaceFolder::callHierarchyOutgoingCalls(const lsp::CallHierarchyOutgoingCallsParams& params)
 {
-    ensureConfigured();
-
     auto moduleName = fileResolver.getModuleName(params.item.uri);
 
     // NOTE: the text document in this case may not necessarily be managed

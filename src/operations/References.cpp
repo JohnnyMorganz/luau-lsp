@@ -386,8 +386,6 @@ bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::A
 
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
-    ensureConfigured();
-
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)

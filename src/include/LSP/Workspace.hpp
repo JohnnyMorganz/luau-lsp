@@ -83,8 +83,6 @@ public:
     void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
 
 private:
-    void ensureConfigured() const;
-
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);

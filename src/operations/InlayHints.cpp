@@ -290,8 +290,6 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
 lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params)
 {
-    ensureConfigured();
-
     auto config = client->getConfiguration(rootUri);
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);

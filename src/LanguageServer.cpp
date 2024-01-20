@@ -335,12 +335,26 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
 }
 
+bool LanguageServer::allWorkspacesConfigured() const
+{
+    for (auto& workspace : workspaceFolders)
+    {
+        if (!workspace->isConfigured)
+            return false;
+    }
+
+    return true;
+}
+
 void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
 {
     try
     {
         if (msg.is_request())
         {
+            if (isInitialized && !allWorkspacesConfigured())
+                configPostponedMessages.emplace_back(msg);
+
             onRequest(msg.id.value(), msg.method.value(), msg.params);
         }
         else if (msg.is_response())
@@ -355,10 +369,6 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         {
             throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
         }
-    }
-    catch (const MessagePostponeException&)
-    {
-        postponedMessages.push_back(msg);
     }
     catch (const JsonRpcException& e)
     {
@@ -375,13 +385,12 @@ void LanguageServer::processInputLoop()
     std::string jsonString;
     while (std::cin)
     {
-        if (postponedMessages.size() > 0)
+        if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
         {
-            auto prevPostponedMessages = postponedMessages;
-            postponedMessages.clear();
-
-            for (const auto& msg : prevPostponedMessages)
+            for (const auto& msg : configPostponedMessages)
                 handleMessage(msg);
+
+            configPostponedMessages.clear();
         }
 
         if (client->readRawMessage(jsonString))

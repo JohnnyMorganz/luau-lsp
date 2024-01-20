@@ -340,17 +340,25 @@ int startAnalyze(const argparse::ArgumentParser& program)
         platform->mutateRegisteredDefinitions(frontend.globals, types::parseDefinitionsFileMetadata(*definitionsContents));
     }
 
-    if (sourcemapPath && client.configuration.platform.type == LSPPlatformConfig::Roblox)
+    if (sourcemapPath)
     {
-        auto robloxPlatform = dynamic_cast<RobloxPlatform*>(platform.get());
-
-        if (auto sourceMapContents = readFile(*sourcemapPath))
+        if (client.configuration.platform.type == LSPPlatformConfig::Roblox)
         {
-            robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
+            auto robloxPlatform = dynamic_cast<RobloxPlatform*>(platform.get());
 
-            robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals,
-                !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes &&
-                    client.configuration.platform.roblox.diagnostics.strictDatamodelTypes);
+            if (auto sourceMapContents = readFile(*sourcemapPath))
+            {
+                robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
+
+                robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals,
+                    !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes &&
+                        client.configuration.platform.roblox.diagnostics.strictDatamodelTypes);
+            }
+        }
+        else
+        {
+            std::cerr << "warning: a sourcemap was provided, but the current platform is not `roblox`. Use `--platform roblox` to ensure the "
+                         "sourcemap option is respected.\n";
         }
     }
 

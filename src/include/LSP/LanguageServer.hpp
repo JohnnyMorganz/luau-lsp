@@ -24,10 +24,6 @@ inline lsp::PositionEncodingKind& positionEncoding()
     return encoding;
 }
 
-class MessagePostponeException : public std::exception
-{
-};
-
 class LanguageServer
 {
 private:
@@ -39,7 +35,7 @@ private:
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
 
-    std::vector<json_rpc::JsonRpcMessage> postponedMessages;
+    std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
     explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
@@ -62,6 +58,7 @@ public:
 
     // Dispatch handlers
 private:
+    bool allWorkspacesConfigured() const;
     void handleMessage(const json_rpc::JsonRpcMessage& msg);
 
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);

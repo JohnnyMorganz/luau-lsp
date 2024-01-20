@@ -67,8 +67,6 @@ struct DocumentationLocation
 
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 {
-    ensureConfigured();
-
     auto config = client->getConfiguration(rootUri);
 
     if (!config.hover.enabled)

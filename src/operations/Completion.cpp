@@ -415,8 +415,6 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
 
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
-    ensureConfigured();
-
     auto config = client->getConfiguration(rootUri);
 
     if (!config.completion.enabled)

@@ -28,8 +28,6 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
 
 std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
 {
-    ensureConfigured();
-
     auto config = client->getConfiguration(rootUri);
 
     if (!config.signatureHelp.enabled)

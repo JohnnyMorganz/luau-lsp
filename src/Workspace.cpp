@@ -11,12 +11,6 @@
 
 LUAU_FASTFLAG(LuauStacklessTypeClone3)
 
-void WorkspaceFolder::ensureConfigured() const
-{
-    if (!isConfigured)
-        throw MessagePostponeException();
-}
-
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
     auto normalisedUri = fileResolver.normalisedUriString(uri);
