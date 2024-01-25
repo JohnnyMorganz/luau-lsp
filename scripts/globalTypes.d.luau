@@ -5482,6 +5482,7 @@ declare class Collaborator extends Instance
 end
 
 declare class CollaboratorsService extends Instance
+	function GetCollaboratorsList(self): { Instance }
 end
 
 declare class CollectionService extends Instance
@@ -8721,6 +8722,7 @@ end
 
 declare class PlayerViewService extends Instance
 	function GetDeviceCameraCFrame(self, player: Player?): CFrame
+	function GetDeviceCameraCFrameForSelfView(self): CFrame
 	function OnCameraCFrameReplicationRequest(self): nil
 	function UpdateDeviceCFrame(self, player: Player?, cframe: CFrame?, timestamp: number?): nil
 end
@@ -9187,10 +9189,12 @@ declare class RunService extends Instance
 	PreRender: RBXScriptSignal<number>
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
+	RobloxGuiFocusedChanged: RBXScriptSignal<boolean>
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
+	function GetRobloxGuiFocused(self): boolean
 	function GetRobloxVersion(self): string
 	function IsClient(self): boolean
 	function IsEdit(self): boolean
@@ -10756,6 +10760,7 @@ declare class UserGameSettings extends Instance
 	CameraYInverted: boolean
 	ChatTranslationEnabled: boolean
 	ChatTranslationFTUXShown: boolean
+	ChatTranslationLocale: string
 	ChatTranslationToggleEnabled: boolean
 	ChatVisible: boolean
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode
