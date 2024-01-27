@@ -7,8 +7,6 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
-LUAU_FASTFLAG(LuauClipExtraHasEndProps);
-
 /// Defining sort text levels assigned to completion items
 /// Note that sort text is lexicographically
 namespace SortText
@@ -103,55 +101,34 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
 
     auto unclosedBlock = false;
-    if (FFlag::LuauClipExtraHasEndProps)
+    for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
     {
-        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
+        if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
         {
-            if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
+            bool hasEnd = statIf->thenbody->hasEnd;
+            if (statIf->elsebody)
             {
-                bool hasEnd = statIf->thenbody->hasEnd;
-                if (statIf->elsebody)
-                {
-                    if (auto* elseBlock = statIf->elsebody->as<Luau::AstStatBlock>())
-                        hasEnd = elseBlock->hasEnd;
-                }
-
-                if (!hasEnd)
-                    unclosedBlock = true;
+                if (auto* elseBlock = statIf->elsebody->as<Luau::AstStatBlock>())
+                    hasEnd = elseBlock->hasEnd;
             }
-            else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
-                unclosedBlock = true;
-            if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
-                unclosedBlock = true;
 
-            // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
-            if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
-                unclosedBlock = false;
-        }
-    }
-    else
-    {
-        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
-        {
-            if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statBlock = (*it)->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
-                unclosedBlock = true;
-            if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->DEPRECATED_hasEnd)
+            if (!hasEnd)
                 unclosedBlock = true;
         }
+        else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
+            unclosedBlock = true;
+        if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
+            unclosedBlock = true;
+
+        // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
+        if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
+            unclosedBlock = false;
     }
 
     // TODO: we could potentially extend this further that just `hasEnd`
