@@ -861,6 +861,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     for (auto& [name, entry] : result.entryMap)
     {
+        // If this entry is a non-function property, and we are autocompleting after a `:`
+        // then hide it if configured to do so
+        if (!config.completion.showPropertiesOnMethodCall && entry.kind == Luau::AutocompleteEntryKind::Property && entry.indexedWithSelf &&
+            !(Luau::get<Luau::FunctionType>(*entry.type) || Luau::isOverloadedFunction(*entry.type)))
+            continue;
+
         lsp::CompletionItem item;
         item.label = name;
 

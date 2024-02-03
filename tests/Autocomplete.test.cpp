@@ -33,13 +33,19 @@ static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source
     return std::make_pair(source, lsp::Position{line, column});
 }
 
-lsp::CompletionItem getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     for (const auto& item : items)
         if (item.label == label)
             return item;
-    REQUIRE_MESSAGE(false, "no item found");
-    return {};
+    return std::nullopt;
+}
+
+lsp::CompletionItem requireItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+{
+    auto item = getItem(items, label);
+    REQUIRE_MESSAGE(item.has_value(), "no item found");
+    return item.value();
 }
 
 TEST_SUITE_BEGIN("Autocomplete");
@@ -61,7 +67,7 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     params.position = marker;
 
     auto result = workspace.completion(params);
-    auto item = getItem(result, "foo");
+    auto item = requireItem(result, "foo");
 
     REQUIRE(item.documentation);
     CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
@@ -86,8 +92,37 @@ TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_t
     params.position = marker;
 
     auto result = workspace.completion(params);
-    auto item = getItem(result, "foo");
+    auto item = requireItem(result, "foo");
     CHECK(item.deprecated);
+}
+
+TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index_with_colon")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local Foo = {}
+        Foo.Value = 5
+
+        function Foo:Bar()
+        end
+
+        local _ = Foo:|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    client->globalConfig.completion.showPropertiesOnMethodCall = true;
+    auto result = workspace.completion(params);
+    CHECK(getItem(result, "Bar"));
+    CHECK(getItem(result, "Value"));
+
+    client->globalConfig.completion.showPropertiesOnMethodCall = false;
+    result = workspace.completion(params);
+    CHECK(getItem(result, "Bar"));
+    CHECK_FALSE(getItem(result, "Value"));
 }
 
 TEST_SUITE_END();

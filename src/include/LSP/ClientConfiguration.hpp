@@ -124,10 +124,12 @@ struct ClientCompletionConfiguration
     bool addTabstopAfterParentheses = true;
     /// If parentheses are added, fill call arguments with parameter names
     bool fillCallArguments = true;
+    /// Whether to show non-function properties when performing a method call with a colon
+    bool showPropertiesOnMethodCall = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses, addTabstopAfterParentheses, fillCallArguments);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall);
 
 struct ClientSignatureHelpConfiguration
 {
