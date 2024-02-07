@@ -9,6 +9,7 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type Path2DControlPoint = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -1086,6 +1087,12 @@ declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
 	TranslatePlane: EnumDragDetectorDragStyle
 	TranslatePlaneOrLine: EnumDragDetectorDragStyle
 	TranslateViewPlane: EnumDragDetectorDragStyle
+end
+declare class EnumDragDetectorPermissionPolicy extends EnumItem end
+declare class EnumDragDetectorPermissionPolicy_INTERNAL extends Enum
+	Everybody: EnumDragDetectorPermissionPolicy
+	Nobody: EnumDragDetectorPermissionPolicy
+	Scriptable: EnumDragDetectorPermissionPolicy
 end
 declare class EnumDragDetectorResponseStyle extends EnumItem end
 declare class EnumDragDetectorResponseStyle_INTERNAL extends Enum
@@ -3704,6 +3711,7 @@ type ENUM_LIST = {
 	DominantAxis: EnumDominantAxis_INTERNAL,
 	DraftStatusCode: EnumDraftStatusCode_INTERNAL,
 	DragDetectorDragStyle: EnumDragDetectorDragStyle_INTERNAL,
+	DragDetectorPermissionPolicy: EnumDragDetectorPermissionPolicy_INTERNAL,
 	DragDetectorResponseStyle: EnumDragDetectorResponseStyle_INTERNAL,
 	DraggerCoordinateSpace: EnumDraggerCoordinateSpace_INTERNAL,
 	DraggerMovementMode: EnumDraggerMovementMode_INTERNAL,
@@ -5457,6 +5465,7 @@ declare class DragDetector extends ClickDetector
 	MinDragAngle: number
 	MinDragTranslation: Vector3
 	Orientation: Vector3
+	PermissionPolicy: EnumDragDetectorPermissionPolicy
 	ReferenceInstance: Instance
 	ResponseStyle: EnumDragDetectorResponseStyle
 	Responsiveness: number
@@ -5471,6 +5480,7 @@ declare class DragDetector extends ClickDetector
 	function GetReferenceFrame(self): CFrame
 	function RestartDrag(self): nil
 	function SetDragStyleFunction(self, func: ((...any) -> ...any)): nil
+	function SetPermissionPolicyFunction(self, func: ((...any) -> ...any)): nil
 end
 
 declare class Clouds extends Instance
@@ -5489,6 +5499,7 @@ declare class Collaborator extends Instance
 	CurDocGUID: string
 	CurScriptLineNumber: number
 	IsIdle: boolean
+	Status: EnumCollaboratorStatus
 	UserId: number
 	Username: string
 end
@@ -5499,6 +5510,7 @@ declare class CollaboratorsService extends Instance
 	CollaboratorInstanceDestroyedSignal: RBXScriptSignal<number>
 	CollaboratorStatusUpdatedSignal: RBXScriptSignal<number, EnumCollaboratorStatus>
 	function GetCollaboratorsList(self): { Instance }
+	function RequestFlyToCollaborator(self, collaboratorId: number): nil
 end
 
 declare class CollectionService extends Instance
@@ -5621,7 +5633,6 @@ declare class HingeConstraint extends Constraint
 	Radius: number
 	Restitution: number
 	ServoMaxTorque: number
-	SoftlockServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 end
@@ -5690,7 +5701,6 @@ declare class SlidingBallConstraint extends Constraint
 	Restitution: number
 	ServoMaxForce: number
 	Size: number
-	SoftlockServoUponReachingTarget: boolean
 	Speed: number
 	TargetPosition: number
 	UpperLimit: number
@@ -5711,7 +5721,6 @@ declare class CylindricalConstraint extends SlidingBallConstraint
 	MotorMaxTorque: number
 	RotationAxisVisible: boolean
 	ServoMaxTorque: number
-	SoftlockAngularServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 	WorldRotationAxis: Vector3
@@ -5985,8 +5994,6 @@ declare class DataModelSession extends Instance
 	CurrentDataModelType: EnumStudioDataModelType
 	CurrentDataModelTypeAboutToChange: RBXScriptSignal<EnumStudioDataModelType>
 	CurrentDataModelTypeChanged: RBXScriptSignal<>
-	DataModelCreated: RBXScriptSignal<EnumStudioDataModelType>
-	DataModelWillBeDestroyed: RBXScriptSignal<EnumStudioDataModelType>
 	SessionId: string
 end
 
@@ -7069,13 +7076,17 @@ declare class Path2D extends GuiBase
 	Visible: boolean
 	ZIndex: number
 	function GetBoundingRect2D(self): Rect
+	function GetControlPoint(self, index: number): Path2DControlPoint
 	function GetControlPoints(self): { any }
 	function GetPositionOnCurve(self, t: number): UDim2
 	function GetPositionOnCurveArcLength(self, t: number): UDim2
 	function GetSegmentCount(self): number
 	function GetTangentOnCurve(self, t: number): Vector2
 	function GetTangentOnCurveArcLength(self, t: number): Vector2
+	function InsertControlPoint(self, index: number, point: Path2DControlPoint): nil
+	function RemoveControlPoint(self, index: number): nil
 	function SetControlPoints(self, controlPoints: { any }): nil
+	function UpdateControlPoint(self, index: number, point: Path2DControlPoint): nil
 end
 
 declare class GuiService extends Instance
@@ -8600,6 +8611,7 @@ declare class PhysicsSettings extends Instance
 	SolverConvergenceMetricType: EnumSolverConvergenceMetricType
 	SolverConvergenceVisualizationMode: EnumSolverConvergenceVisualizationMode
 	ThrottleAdjustTime: number
+	TorqueDrawScale: number
 	UseCSGv2: boolean
 end
 
@@ -8700,6 +8712,7 @@ declare class Player extends Instance
 	function SetAccountAge(self, accountAge: number): nil
 	function SetBlockListInitialized(self): nil
 	function SetCharacterAppearanceJson(self, jsonBlob: string): nil
+	function SetChatTranslationSettingsLocaleId(self, locale: string): nil
 	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetMembershipType(self, membershipType: EnumMembershipType): nil
 	function SetModerationAccessKey(self, moderationAccessKey: string): nil
@@ -9865,6 +9878,16 @@ declare class Studio extends Instance
 	DefaultScriptFileDir: QDir
 	DeprecatedObjectsShown: boolean
 	DisplayLanguage: string
+	DraggerActiveColor: Color3
+	DraggerMajorGridIncrement: number
+	DraggerMaxSoftSnaps: number
+	DraggerPassiveColor: Color3
+	DraggerShowHoverRuler: boolean
+	DraggerShowMeasurement: boolean
+	DraggerShowTargetSnap: boolean
+	DraggerSoftSnapMarginFactor: number
+	DraggerSummonMarginFactor: number
+	DraggerTiltRotateDuration: number
 	EnableIndentationRulers: boolean
 	EnableOnTypeAutocomplete: boolean
 	Font: QFont
@@ -10792,6 +10815,7 @@ declare class UserGameSettings extends Instance
 	ComputerMovementMode: EnumComputerMovementMode
 	ControlMode: EnumControlMode
 	DefaultCameraID: string
+	FramerateCap: number
 	Fullscreen: boolean
 	FullscreenChanged: RBXScriptSignal<boolean>
 	GamepadCameraSensitivity: number
@@ -11358,7 +11382,7 @@ end
 
 declare SharedTable: {
     new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
+    new: (t: { [any]: any }?) -> SharedTable,
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,

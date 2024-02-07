@@ -534,6 +534,7 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type Path2DControlPoint = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -647,7 +648,7 @@ end
 
 declare SharedTable: {
     new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
+    new: (t: { [any]: any }?) -> SharedTable,
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,

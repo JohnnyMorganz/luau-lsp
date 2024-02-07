@@ -9,6 +9,7 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type Path2DControlPoint = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -1086,6 +1087,12 @@ declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
 	TranslatePlane: EnumDragDetectorDragStyle
 	TranslatePlaneOrLine: EnumDragDetectorDragStyle
 	TranslateViewPlane: EnumDragDetectorDragStyle
+end
+declare class EnumDragDetectorPermissionPolicy extends EnumItem end
+declare class EnumDragDetectorPermissionPolicy_INTERNAL extends Enum
+	Everybody: EnumDragDetectorPermissionPolicy
+	Nobody: EnumDragDetectorPermissionPolicy
+	Scriptable: EnumDragDetectorPermissionPolicy
 end
 declare class EnumDragDetectorResponseStyle extends EnumItem end
 declare class EnumDragDetectorResponseStyle_INTERNAL extends Enum
@@ -3704,6 +3711,7 @@ type ENUM_LIST = {
 	DominantAxis: EnumDominantAxis_INTERNAL,
 	DraftStatusCode: EnumDraftStatusCode_INTERNAL,
 	DragDetectorDragStyle: EnumDragDetectorDragStyle_INTERNAL,
+	DragDetectorPermissionPolicy: EnumDragDetectorPermissionPolicy_INTERNAL,
 	DragDetectorResponseStyle: EnumDragDetectorResponseStyle_INTERNAL,
 	DraggerCoordinateSpace: EnumDraggerCoordinateSpace_INTERNAL,
 	DraggerMovementMode: EnumDraggerMovementMode_INTERNAL,
@@ -5184,6 +5192,7 @@ declare class DragDetector extends ClickDetector
 	MinDragAngle: number
 	MinDragTranslation: Vector3
 	Orientation: Vector3
+	PermissionPolicy: EnumDragDetectorPermissionPolicy
 	ReferenceInstance: Instance
 	ResponseStyle: EnumDragDetectorResponseStyle
 	Responsiveness: number
@@ -5198,6 +5207,7 @@ declare class DragDetector extends ClickDetector
 	function GetReferenceFrame(self): CFrame
 	function RestartDrag(self): nil
 	function SetDragStyleFunction(self, func: ((...any) -> ...any)): nil
+	function SetPermissionPolicyFunction(self, func: ((...any) -> ...any)): nil
 end
 
 declare class Clouds extends Instance
@@ -5216,6 +5226,7 @@ declare class Collaborator extends Instance
 	CurDocGUID: string
 	CurScriptLineNumber: number
 	IsIdle: boolean
+	Status: EnumCollaboratorStatus
 	UserId: number
 	Username: string
 end
@@ -5330,7 +5341,6 @@ declare class HingeConstraint extends Constraint
 	Radius: number
 	Restitution: number
 	ServoMaxTorque: number
-	SoftlockServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 end
@@ -5399,7 +5409,6 @@ declare class SlidingBallConstraint extends Constraint
 	Restitution: number
 	ServoMaxForce: number
 	Size: number
-	SoftlockServoUponReachingTarget: boolean
 	Speed: number
 	TargetPosition: number
 	UpperLimit: number
@@ -5420,7 +5429,6 @@ declare class CylindricalConstraint extends SlidingBallConstraint
 	MotorMaxTorque: number
 	RotationAxisVisible: boolean
 	ServoMaxTorque: number
-	SoftlockAngularServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 	WorldRotationAxis: Vector3
@@ -9716,7 +9724,7 @@ end
 
 declare SharedTable: {
     new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
+    new: (t: { [any]: any }?) -> SharedTable,
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,
