@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-20.04, macos-latest]
     name: Build Server (${{matrix.os}})
     runs-on: ${{matrix.os}}
     steps:
@@ -36,7 +36,7 @@ jobs:
         include:
           - os: windows-latest
             test-path: ./build/Debug/Luau.LanguageServer.Test
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             test-path: ./build/Luau.LanguageServer.Test
 
     name: Run Tests (${{ matrix.os }})
@@ -58,7 +58,7 @@ jobs:
 
   types_smoketest:
     name: Types Smoketest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -83,7 +83,7 @@ jobs:
 
   lint_extension:
     name: Lint Extension
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -104,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-20.04, windows-latest]
     name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -125,7 +125,7 @@ jobs:
 
   build_plugin:
     name: Verify and Build Roblox Studio Plugin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
