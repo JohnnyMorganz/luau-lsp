@@ -125,4 +125,43 @@ TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index
     CHECK_FALSE(getItem(result, "Value"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "variable_with_a_class_type_should_not_have_class_entry_kind_1")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local player: Instance = nil
+        local x = p|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "player");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Variable);
+}
+
+TEST_CASE_FIXTURE(Fixture, "variable_with_a_class_type_should_not_have_class_entry_kind_2")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local function foo(player: Instance)
+            local x = p|
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "player");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Variable);
+}
+
 TEST_SUITE_END();

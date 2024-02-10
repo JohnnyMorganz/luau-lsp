@@ -17,7 +17,8 @@ Fixture::Fixture()
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
 
     workspace.initialize();
-    loadDefinition(R"BUILTIN_SRC(
+    // TODO: we should make definitions load as part of the workspace initialise setup
+    auto definitions = R"BUILTIN_SRC(
         declare class Enum
             function GetEnumItems(self): { any }
         end
@@ -97,7 +98,9 @@ Fixture::Fixture()
         declare Instance: {
             new: (("Part") -> Part) & (("TextLabel") -> TextLabel)
         }
-    )BUILTIN_SRC");
+    )BUILTIN_SRC";
+    loadDefinition(definitions);
+    loadDefinition(definitions, /* forAutocomplete= */ true);
 
     ClientConfiguration config;
     config.sourcemap.enabled = false;
@@ -189,11 +192,13 @@ Luau::TypeId Fixture::requireType(const std::string& name)
     return Luau::follow(*ty);
 }
 
-Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source)
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source, bool forAutocomplete)
 {
-    Luau::unfreeze(workspace.frontend.globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, workspace.frontend.globals, source);
-    Luau::freeze(workspace.frontend.globals.globalTypes);
+    auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
+
+    Luau::unfreeze(globals.globalTypes);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, forAutocomplete);
+    Luau::freeze(globals.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");
     return result;

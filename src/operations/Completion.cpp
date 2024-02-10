@@ -461,8 +461,6 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
             if (ttv->name && ttv->name.value() == "RBXScriptSignal")
                 return lsp::CompletionItemKind::Event;
         }
-        else if (Luau::get<Luau::ClassType>(id))
-            return lsp::CompletionItemKind::Class;
     }
 
     if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
