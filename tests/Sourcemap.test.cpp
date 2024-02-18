@@ -23,8 +23,8 @@ TEST_CASE("getScriptFilePath returns toml file if node is populated by TOML")
 {
     SourceNode node;
     node.className = "ModuleScript";
-    node.filePaths = {"toml.json"};
-    CHECK_EQ(node.getScriptFilePath(), "toml.json");
+    node.filePaths = {"test.toml"};
+    CHECK_EQ(node.getScriptFilePath(), "test.toml");
 }
 
 TEST_CASE("getScriptFilePath doesn't pick .meta.json")
