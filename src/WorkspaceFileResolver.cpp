@@ -5,6 +5,7 @@
 #include "Luau/Ast.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
+#include "toml11/toml.hpp"
 
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
@@ -162,7 +163,24 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     }
     else
     {
-        source = readFile(realFileName);
+        if (realFileName.extension() == ".toml")
+        {
+            try
+            {
+                source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(realFileName));
+            }
+            catch (const std::exception& e)
+            {
+                // TODO: display diagnostic?
+                std::cerr << "Failed to load TOML module: " << realFileName.generic_string() << " - " << e.what() << '\n';
+                return std::nullopt;
+            }
+        }
+        else
+        {
+            source = readFile(realFileName);
+        }
+
         if (source && realFileName.extension() == ".json")
         {
             try

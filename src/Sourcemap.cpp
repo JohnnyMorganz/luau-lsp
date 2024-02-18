@@ -2,6 +2,8 @@
 #include <filesystem>
 #include "LSP/Sourcemap.hpp"
 #include "LSP/Utils.hpp"
+#include "toml11/toml.hpp"
+using tomlValue = toml::value;
 
 bool SourceNode::isScript()
 {
@@ -20,6 +22,10 @@ std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
             return path;
         }
         else if (path.extension() == ".json" && isScript() && !endsWith(path.filename().generic_string(), ".meta.json"))
+        {
+            return path;
+        }
+        else if (path.extension() == ".toml" && isScript())
         {
             return path;
         }
@@ -107,7 +113,6 @@ std::string jsonValueToLuau(const json& val)
     else if (val.is_object())
     {
         std::string out = "{";
-
         for (auto& [key, value] : val.items())
         {
             out += "[\"" + key + "\"] = ";
@@ -118,6 +123,48 @@ std::string jsonValueToLuau(const json& val)
         out += "}";
         return out;
     }
+    else
+    {
+        return ""; // TODO: should we error here?
+    }
+}
+
+std::string tomlValueToLuau(const tomlValue& val)
+{
+    if (val.is_string() || val.is_integer() || val.is_floating() || val.is_boolean())
+    {
+        return toml::format(val);
+    }
+    else if (val.is_uninitialized())
+    {
+        return "nil";
+    }
+    else if (val.is_array())
+    {
+        std::string out = "{";
+        for (auto& val : val.as_array())
+        {
+            out += tomlValueToLuau(val);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    else if (val.is_table())
+    {
+        std::string out = "{";
+        for (auto& [key, value] : val.as_table())
+        {
+            out += "[\"" + key + "\"] = ";
+            out += tomlValueToLuau(value);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    // TODO: support datetime?
     else
     {
         return ""; // TODO: should we error here?

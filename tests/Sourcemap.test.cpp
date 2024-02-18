@@ -19,6 +19,14 @@ TEST_CASE("getScriptFilePath returns json file if node is populated by JSON")
     CHECK_EQ(node.getScriptFilePath(), "test.json");
 }
 
+TEST_CASE("getScriptFilePath returns toml file if node is populated by TOML")
+{
+    SourceNode node;
+    node.className = "ModuleScript";
+    node.filePaths = {"toml.json"};
+    CHECK_EQ(node.getScriptFilePath(), "toml.json");
+}
+
 TEST_CASE("getScriptFilePath doesn't pick .meta.json")
 {
     SourceNode node;
