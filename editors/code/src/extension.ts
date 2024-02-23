@@ -242,7 +242,10 @@ export async function activate(context: vscode.ExtensionContext) {
               vscode.commands.executeCommand("luau-lsp.reloadServer");
             }
           });
-      } else if (e.affectsConfiguration("luau-lsp.types") || e.affectsConfiguration("luau-lsp.platform")) {
+      } else if (
+        e.affectsConfiguration("luau-lsp.types") ||
+        e.affectsConfiguration("luau-lsp.platform")
+      ) {
         vscode.window
           .showInformationMessage(
             "Luau type definitions have been changed, reload server for this to take effect.",

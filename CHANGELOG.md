@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.type`
 - Deprecated `luau-lsp.completion.imports.suggestServices` setting in favour of `luau-lsp.platform.roblox.suggestServices`
 - Deprecated `luau-lsp.sourcemap.*` settings in favour of `luau-lsp.platform.roblox.sourcemap.*`
+- Deprecated `luau-lsp.plugin.*` settings in favour of `luau-lsp.platform.roblox.plugin.*`
+- Deprecated `luau-lsp.types.robloxSecurityLevel` setting in favour of `luau-lsp.platform.roblox.typesSecurityLevel`
 
 ### Added
 

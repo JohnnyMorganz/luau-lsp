@@ -194,11 +194,23 @@ const startSourcemapGeneration = async (
   workspaceFolder: vscode.WorkspaceFolder
 ) => {
   stopSourcemapGeneration(workspaceFolder);
-  const config = vscode.workspace.getConfiguration(
+
+  const configDeprecated = vscode.workspace.getConfiguration(
     "luau-lsp.sourcemap",
     workspaceFolder
   );
-  if (!config.get<boolean>("enabled") || !config.get<boolean>("autogenerate")) {
+
+  const config = vscode.workspace.getConfiguration(
+    "luau-lsp.platform.roblox.sourcemap",
+    workspaceFolder
+  );
+
+  if (
+    !config.get<boolean>("enabled") ||
+    !config.get<boolean>("autogenerate") ||
+    !configDeprecated.get<boolean>("enabled") ||
+    !configDeprecated.get<boolean>("autogenerate")
+  ) {
     return;
   }
 
@@ -216,7 +228,10 @@ const startSourcemapGeneration = async (
   );
 
   const workspacePath = workspaceFolder.uri.fsPath;
-  const rojoPath = config.get<string>("rojoPath") ?? "rojo";
+  const rojoPath =
+    config.get<string>("rojoPath") ??
+    configDeprecated.get<string>("rojoPath") ??
+    "rojo";
   const args = [
     "sourcemap",
     projectFile,
@@ -224,7 +239,11 @@ const startSourcemapGeneration = async (
     "--output",
     "sourcemap.json",
   ];
-  if (config.get<boolean>("includeNonScripts")) {
+
+  if (
+    config.get<boolean>("includeNonScripts") &&
+    configDeprecated.get<boolean>("includeNonScripts")
+  ) {
     args.push("--include-non-scripts");
   }
 
@@ -273,7 +292,7 @@ const startSourcemapGeneration = async (
         } else if (value === "Configure Settings") {
           vscode.commands.executeCommand(
             "workbench.action.openSettings",
-            "luau-lsp.sourcemap"
+            "luau-lsp.platform.roblox.sourcemap"
           );
         }
       });
@@ -315,7 +334,9 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     res.sendStatus(200);
   });
 
-  const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
+  const port = vscode.workspace
+    .getConfiguration("luau-lsp.platform.roblox.plugin")
+    .get("port");
   pluginServer = app.listen(port);
 
   vscode.window.showInformationMessage(
@@ -373,16 +394,27 @@ export const onActivate = async (
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("luau-lsp.sourcemap")) {
+      if (
+        e.affectsConfiguration("luau-lsp.sourcemap") ||
+        e.affectsConfiguration("luau-lsp.platform.roblox.sourcemap")
+      ) {
         if (vscode.workspace.workspaceFolders) {
           for (const folder of vscode.workspace.workspaceFolders) {
-            const config = vscode.workspace.getConfiguration(
+            const configDeprecated = vscode.workspace.getConfiguration(
               "luau-lsp.sourcemap",
               folder
             );
+
+            const config = vscode.workspace.getConfiguration(
+              "luau-lsp.platform.roblox.sourcemap",
+              folder
+            );
+
             if (
               !config.get<boolean>("enabled") ||
-              !config.get<boolean>("autogenerate")
+              !config.get<boolean>("autogenerate") ||
+              !configDeprecated.get<boolean>("enabled") ||
+              !configDeprecated.get<boolean>("autogenerate")
             ) {
               stopSourcemapGeneration(folder);
             } else {
@@ -390,10 +422,16 @@ export const onActivate = async (
             }
           }
         }
-      } else if (e.affectsConfiguration("luau-lsp.plugin")) {
+      } else if (
+        e.affectsConfiguration("luau-lsp.plugin") ||
+        e.affectsConfiguration("luau-lsp.platform.roblox.plugin")
+      ) {
         if (
           vscode.workspace
             .getConfiguration("luau-lsp.plugin")
+            .get<boolean>("enabled") ||
+          vscode.workspace
+            .getConfiguration("luau-lsp.platform.roblox.plugin")
             .get<boolean>("enabled")
         ) {
           stopPluginServer(true);
@@ -415,9 +453,15 @@ export const preLanguageServerStart = async (
 ) => {
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
-  if (typesConfig.get<boolean>("roblox")) {
+  const platformConfig = vscode.workspace.getConfiguration("luau-lsp.platform");
+  if (
+    typesConfig.get<boolean>("roblox") ||
+    platformConfig.get<string>("type") === "roblox"
+  ) {
     const securityLevel =
-      typesConfig.get<string>("robloxSecurityLevel") ?? "PluginSecurity";
+      vscode.workspace
+        .getConfiguration("luau-lsp.platform.roblox")
+        .get<string>("typesSecurityLevel") ?? "PluginSecurity";
     await updateApiInfo(context);
     addArg(
       `--definitions=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
@@ -436,6 +480,9 @@ export const postLanguageServerStart = async (
   _: vscode.ExtensionContext
 ) => {
   if (
+    vscode.workspace
+      .getConfiguration("luau-lsp.platform.roblox.plugin")
+      .get<boolean>("enabled") ||
     vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")
   ) {
     startPluginServer(platformContext.client);

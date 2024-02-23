@@ -313,6 +313,20 @@
             "LocalUserSecurity",
             "PluginSecurity",
             "RobloxScriptSecurity"
+          ],
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.roblox.typesSecurityLevel#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.roblox.typesSecurityLevel instead."
+        },
+        "luau-lsp.platform.roblox.typesSecurityLevel": {
+          "markdownDescription": "Security Level to use in the Roblox API definitions",
+          "type": "string",
+          "default": "PluginSecurity",
+          "scope": "window",
+          "enum": [
+            "None",
+            "LocalUserSecurity",
+            "PluginSecurity",
+            "RobloxScriptSecurity"
           ]
         },
         "luau-lsp.inlayHints.parameterNames": {
@@ -481,17 +495,33 @@
           "default": true,
           "scope": "resource"
         },
-        "luau-lsp.plugin.enabled": {
+        "luau-lsp.platform.roblox.plugin.enabled": {
           "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
           "type": "boolean",
           "default": false,
           "scope": "window"
         },
-        "luau-lsp.plugin.port": {
+        "luau-lsp.platform.roblox.plugin.port": {
           "markdownDescription": "Port number to connect to the Studio Plugin",
           "type": "number",
           "default": 3667,
           "scope": "window"
+        },
+        "luau-lsp.plugin.enabled": {
+          "markdownDescription": "Use Roblox Studio Plugin to provide DataModel information",
+          "type": "boolean",
+          "default": false,
+          "scope": "window",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.roblox.plugin.enabled#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.roblox.plugin.enabled instead."
+        },
+        "luau-lsp.plugin.port": {
+          "markdownDescription": "Port number to connect to the Studio Plugin",
+          "type": "number",
+          "default": 3667,
+          "scope": "window",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.roblox.plugin.port#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.roblox.plugin.port instead."
         },
         "luau-lsp.require.mode": {
           "markdownDescription": "How string requires should be interpreted",
