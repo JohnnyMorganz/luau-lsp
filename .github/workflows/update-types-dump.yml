@@ -4,10 +4,15 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "10 0 * * *" # Runs at 00:10 UTC every day
+  push:
+    branches:
+      - "main"
+    paths:
+      - "scripts/dumpRobloxTypes.py"
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Generate App Token
         id: generate_token

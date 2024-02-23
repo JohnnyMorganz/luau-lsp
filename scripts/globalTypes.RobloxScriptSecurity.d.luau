@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "AnalyticsService", "Animation", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationRigData", "Animator", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFlanger", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioReverb", "AudioSearchParams", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "BubbleChatMessageProperties", "Camera", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CylinderMesh", "EditableMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EditableImage", "EulerRotationCurve", "ExperienceInviteOptions", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "ScrollingFrame", "TextBox", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "IKControl", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "BuoyancySensor", "ControllerPartSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "UserNotification", "UserNotificationPayload", "UserNotificationPayloadAnalyticsData", "UserNotificationPayloadJoinExperience", "UserNotificationPayloadParameterValue", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "Vector3Curve", "VirtualInputManager", "WeldConstraint", "Wire"], "SERVICES": ["AccountService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "Chat", "ChatbotUIService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommandService", "ConfigureServerService", "ContentProvider", "ContextActionService", "ControllerService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EngineAPICloudProcessingService", "EventIngestService", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "FaceAnimatorService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GamepadService", "Geometry", "GeometryService", "GoogleAnalyticsConfiguration", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LiveScriptingService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaWebService", "LuauScriptAnalyzerService", "MarketplaceService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PatchBundlerFileWatch", "PathfindingService", "PermissionsService", "PhysicsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerEmulatorService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "ReflectionService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkService", "RtMessagingService", "RunService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionService", "SharedTableRegistry", "ShorelineUpgraderService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SpawnerService", "StarterPack", "StarterPlayer", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioWidgetsService", "StylingService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationMeshHandler", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UnvalidatedAssetService", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "VisibilityService", "Visit", "VoiceChatInternal", "VoiceChatService"]}
+--#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "AnalyticsService", "Animation", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationRigData", "Animator", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFlanger", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioReverb", "AudioSearchParams", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "BubbleChatMessageProperties", "Camera", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CylinderMesh", "EditableMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EditableImage", "RobloxEditableImage", "EulerRotationCurve", "ExperienceInviteOptions", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "ScrollingFrame", "TextBox", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "IKControl", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "BuoyancySensor", "ControllerPartSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "UserNotification", "UserNotificationPayload", "UserNotificationPayloadAnalyticsData", "UserNotificationPayloadJoinExperience", "UserNotificationPayloadParameterValue", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "Vector3Curve", "VirtualInputManager", "WeldConstraint", "Wire"], "SERVICES": ["AccountService", "ActivityHistoryService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "Chat", "ChatbotUIService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommandService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "ConversationalAIAcceptanceService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EngineAPICloudProcessingService", "EventIngestService", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "FaceAnimatorService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GamepadService", "Geometry", "GeometryService", "GoogleAnalyticsConfiguration", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LiveScriptingService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaWebService", "LuauScriptAnalyzerService", "MarketplaceService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PatchBundlerFileWatch", "PathfindingService", "PermissionsService", "PhysicsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerEmulatorService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProjectFolderService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "ReflectionService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkService", "RtMessagingService", "RunService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionService", "SharedTableRegistry", "ShorelineUpgraderService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SpawnerService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioWidgetsService", "StylingService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationMeshHandler", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UnvalidatedAssetService", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VoiceChatInternal", "VoiceChatService"]}
 
 
 type Content = string
@@ -9,6 +9,7 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type Path2DControlPoint = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -191,12 +192,6 @@ declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
 	Processing: EnumAnimationClipFromVideoStatus
 	Success: EnumAnimationClipFromVideoStatus
 	Timeout: EnumAnimationClipFromVideoStatus
-end
-declare class EnumAnimationCompositorMode extends EnumItem end
-declare class EnumAnimationCompositorMode_INTERNAL extends Enum
-	Default: EnumAnimationCompositorMode
-	Disabled: EnumAnimationCompositorMode
-	Enabled: EnumAnimationCompositorMode
 end
 declare class EnumAnimationPriority extends EnumItem end
 declare class EnumAnimationPriority_INTERNAL extends Enum
@@ -1093,6 +1088,12 @@ declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
 	TranslatePlaneOrLine: EnumDragDetectorDragStyle
 	TranslateViewPlane: EnumDragDetectorDragStyle
 end
+declare class EnumDragDetectorPermissionPolicy extends EnumItem end
+declare class EnumDragDetectorPermissionPolicy_INTERNAL extends Enum
+	Everybody: EnumDragDetectorPermissionPolicy
+	Nobody: EnumDragDetectorPermissionPolicy
+	Scriptable: EnumDragDetectorPermissionPolicy
+end
 declare class EnumDragDetectorResponseStyle extends EnumItem end
 declare class EnumDragDetectorResponseStyle_INTERNAL extends Enum
 	Custom: EnumDragDetectorResponseStyle
@@ -1160,6 +1161,12 @@ declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
 	Craters: EnumExplosionType
 	NoCraters: EnumExplosionType
+end
+declare class EnumFACSDataLod extends EnumItem end
+declare class EnumFACSDataLod_INTERNAL extends Enum
+	LOD0: EnumFACSDataLod
+	LOD1: EnumFACSDataLod
+	LODCount: EnumFACSDataLod
 end
 declare class EnumFacialAnimationStreamingState extends EnumItem end
 declare class EnumFacialAnimationStreamingState_INTERNAL extends Enum
@@ -1491,13 +1498,6 @@ declare class EnumHumanoidRigType extends EnumItem end
 declare class EnumHumanoidRigType_INTERNAL extends Enum
 	R15: EnumHumanoidRigType
 	R6: EnumHumanoidRigType
-end
-declare class EnumHumanoidStateMachineMode extends EnumItem end
-declare class EnumHumanoidStateMachineMode_INTERNAL extends Enum
-	Default: EnumHumanoidStateMachineMode
-	Legacy: EnumHumanoidStateMachineMode
-	LuaStateMachine: EnumHumanoidStateMachineMode
-	NoStateMachine: EnumHumanoidStateMachineMode
 end
 declare class EnumHumanoidStateType extends EnumItem end
 declare class EnumHumanoidStateType_INTERNAL extends Enum
@@ -2071,6 +2071,14 @@ declare class EnumModelStreamingMode_INTERNAL extends Enum
 	Persistent: EnumModelStreamingMode
 	PersistentPerPlayer: EnumModelStreamingMode
 end
+declare class EnumModerationStatus extends EnumItem end
+declare class EnumModerationStatus_INTERNAL extends Enum
+	Invalid: EnumModerationStatus
+	NotApplicable: EnumModerationStatus
+	NotReviewed: EnumModerationStatus
+	ReviewedApproved: EnumModerationStatus
+	ReviewedRejected: EnumModerationStatus
+end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
 	Alt: EnumModifierKey
@@ -2108,6 +2116,12 @@ declare class EnumNetworkOwnership_INTERNAL extends Enum
 	Automatic: EnumNetworkOwnership
 	Manual: EnumNetworkOwnership
 	OnContact: EnumNetworkOwnership
+end
+declare class EnumNetworkStatus extends EnumItem end
+declare class EnumNetworkStatus_INTERNAL extends Enum
+	Connected: EnumNetworkStatus
+	Disconnected: EnumNetworkStatus
+	Unknown: EnumNetworkStatus
 end
 declare class EnumNormalId extends EnumItem end
 declare class EnumNormalId_INTERNAL extends Enum
@@ -3602,7 +3616,6 @@ type ENUM_LIST = {
 	AnalyticsLogLevel: EnumAnalyticsLogLevel_INTERNAL,
 	AnalyticsProgressionStatus: EnumAnalyticsProgressionStatus_INTERNAL,
 	AnimationClipFromVideoStatus: EnumAnimationClipFromVideoStatus_INTERNAL,
-	AnimationCompositorMode: EnumAnimationCompositorMode_INTERNAL,
 	AnimationPriority: EnumAnimationPriority_INTERNAL,
 	AnimatorRetargetingMode: EnumAnimatorRetargetingMode_INTERNAL,
 	AppShellActionType: EnumAppShellActionType_INTERNAL,
@@ -3698,6 +3711,7 @@ type ENUM_LIST = {
 	DominantAxis: EnumDominantAxis_INTERNAL,
 	DraftStatusCode: EnumDraftStatusCode_INTERNAL,
 	DragDetectorDragStyle: EnumDragDetectorDragStyle_INTERNAL,
+	DragDetectorPermissionPolicy: EnumDragDetectorPermissionPolicy_INTERNAL,
 	DragDetectorResponseStyle: EnumDragDetectorResponseStyle_INTERNAL,
 	DraggerCoordinateSpace: EnumDraggerCoordinateSpace_INTERNAL,
 	DraggerMovementMode: EnumDraggerMovementMode_INTERNAL,
@@ -3708,6 +3722,7 @@ type ENUM_LIST = {
 	EnviromentalPhysicsThrottle: EnumEnviromentalPhysicsThrottle_INTERNAL,
 	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
 	ExplosionType: EnumExplosionType_INTERNAL,
+	FACSDataLod: EnumFACSDataLod_INTERNAL,
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
@@ -3746,7 +3761,6 @@ type ENUM_LIST = {
 	HumanoidDisplayDistanceType: EnumHumanoidDisplayDistanceType_INTERNAL,
 	HumanoidHealthDisplayType: EnumHumanoidHealthDisplayType_INTERNAL,
 	HumanoidRigType: EnumHumanoidRigType_INTERNAL,
-	HumanoidStateMachineMode: EnumHumanoidStateMachineMode_INTERNAL,
 	HumanoidStateType: EnumHumanoidStateType_INTERNAL,
 	IKCollisionsMode: EnumIKCollisionsMode_INTERNAL,
 	IKControlConstraintSupport: EnumIKControlConstraintSupport_INTERNAL,
@@ -3786,12 +3800,14 @@ type ENUM_LIST = {
 	ModelLevelOfDetail: EnumModelLevelOfDetail_INTERNAL,
 	ModelStreamingBehavior: EnumModelStreamingBehavior_INTERNAL,
 	ModelStreamingMode: EnumModelStreamingMode_INTERNAL,
+	ModerationStatus: EnumModerationStatus_INTERNAL,
 	ModifierKey: EnumModifierKey_INTERNAL,
 	MouseBehavior: EnumMouseBehavior_INTERNAL,
 	MoveState: EnumMoveState_INTERNAL,
 	MuteState: EnumMuteState_INTERNAL,
 	NameOcclusion: EnumNameOcclusion_INTERNAL,
 	NetworkOwnership: EnumNetworkOwnership_INTERNAL,
+	NetworkStatus: EnumNetworkStatus_INTERNAL,
 	NormalId: EnumNormalId_INTERNAL,
 	OperationType: EnumOperationType_INTERNAL,
 	OrientationAlignmentMode: EnumOrientationAlignmentMode_INTERNAL,
@@ -4154,6 +4170,7 @@ declare class Random
 	function NextNumber(self): number
 	function NextNumber(self, min: number, max: number): number
 	function NextUnitVector(self): Vector3
+	function Shuffle(self, table: { any })
 end
 
 declare class Ray
@@ -4250,6 +4267,7 @@ declare class Vector2
 	function Min(self, ...: (Vector2)): Vector2
 	function __add(self, other: Vector2): Vector2
 	function __div(self, other: Vector2 | number): Vector2
+	function __idiv(self, other: Vector2 | number): Vector2
 	function __mul(self, other: Vector2 | number): Vector2
 	function __sub(self, other: Vector2): Vector2
 	function __unm(self): Vector2
@@ -4280,6 +4298,7 @@ declare class Vector3
 	function Min(self, ...: (Vector3)): Vector3
 	function __add(self, other: Vector3): Vector3
 	function __div(self, other: Vector3 | number): Vector3
+	function __idiv(self, other: Vector3 | number): Vector3
 	function __mul(self, other: Vector3 | number): Vector3
 	function __sub(self, other: Vector3): Vector3
 	function __unm(self): Vector3
@@ -4430,6 +4449,7 @@ end
 declare class AccountService extends Instance
 	function DeviceIntegrityAvailable(self): boolean
 	function GetDeviceIntegrityToken(self, data: string): string
+	function GetDeviceIntegrityTokenYield(self, data: string): string
 end
 
 declare class Accoutrement extends Instance
@@ -4446,6 +4466,10 @@ end
 
 
 
+declare class ActivityHistoryService extends Instance
+	onEventNotificationReceived: RBXScriptSignal<>
+end
+
 declare class AdPortal extends Instance
 	PortalInvalidReason: string
 	PortalVersion: number
@@ -4458,8 +4482,10 @@ declare class AdService extends Instance
 	AdTeleportEnded: RBXScriptSignal<>
 	AdTeleportInitiated: RBXScriptSignal<>
 	PortalPrompt: RBXScriptSignal<number, Instance, boolean>
+	ShowStaticEudsaDisclosure: RBXScriptSignal<>
 	function GetAdTeleportInfo(self): any
 	function GetReportAdInfo(self): { any }
+	function HideEudsaDisclosure(self): nil
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 end
 
@@ -4519,6 +4545,7 @@ end
 
 declare class AnimationStreamTrack extends Instance
 	Animation: TrackerStreamAnimation
+	FACSDataLod: EnumFACSDataLod
 	IsPlaying: boolean
 	Priority: EnumAnimationPriority
 	Stopped: RBXScriptSignal<>
@@ -4570,6 +4597,7 @@ declare class Animator extends Instance
 	function LoadStreamAnimationForSelfieView_deprecated(self, animation: TrackerStreamAnimation, player: Player): AnimationStreamTrack
 	function RegisterEvaluationParallelCallback(self, callback: ((...any) -> ...any)): nil
 	function StepAnimations(self, deltaTime: number): nil
+	function SynchronizeWith(self, otherAnimator: Animator): nil
 end
 
 declare class AppUpdateService extends Instance
@@ -4607,11 +4635,12 @@ declare class AssetImportSession extends Instance
 	function ApplySettings(self): nil
 	function Cancel(self): nil
 	function CreatePresetFromData(self, importData: Instance): { [any]: any }
-	function GetCurrentStatusTable(self): { [any]: any }
+	function GetCurrentStatusTable_DEPRECATED(self): { [any]: any }
 	function GetFilename(self): string
 	function GetImportTree(self): Instance
 	function GetInstance(self, nodeId: number): Instance
-	function GetRigVisualization(self): Instance
+	function GetRigVisualization(self, importDataInstance: Instance): Instance
+	function GetStatuses(self): { [any]: any }
 	function HasAnimation(self): boolean
 	function IsAvatar(self): boolean
 	function IsGltf(self): boolean
@@ -4636,6 +4665,7 @@ declare class AssetManagerService extends Instance
 	function HasUnpublishedChangesForLinkedSource(self, aliasName: string): boolean
 	function InsertAudio(self, assetId: number, assetName: string): nil
 	function InsertImage(self, assetId: number): nil
+	function InsertImages(self, assetIds: { any }): nil
 	function InsertLinkedSourceAsLocalScript(self, aliasName: string): nil
 	function InsertLinkedSourceAsModuleScript(self, aliasName: string): nil
 	function InsertLinkedSourceAsScript(self, aliasName: string): nil
@@ -4670,10 +4700,12 @@ declare class AssetService extends Instance
 	function CreateEditableImageAsync(self, textureId: Content): EditableImage
 	function CreateEditableMeshAsync(self, meshId: Content): EditableMesh
 	function CreateEditableMeshFromPartAsync(self, meshPart: Instance): EditableMesh
+	function CreateEditableMeshStripSkinningAsync(self, meshId: Content): EditableMesh
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
 	function DeserializeInstance(self, serializedInstance: string): Instance
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
+	function GetAudioMetadataAsync(self, idList: { any }): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
 	function GetBundleDetailsSync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
@@ -4862,6 +4894,8 @@ declare class AvatarChatService extends Instance
 end
 
 declare class AvatarCreationService extends Instance
+	UgcValidationFailure: RBXScriptSignal<string, string>
+	UgcValidationSuccess: RBXScriptSignal<string, string>
 	function PromptCreateAvatarAsync(self, player: Player, humanoidDescription: HumanoidDescription): any
 end
 
@@ -4893,13 +4927,13 @@ declare class AvatarEditorService extends Instance
 	function GetOutfits(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
 	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
 	function GetRecommendedBundles(self, bundleId: number): { any }
-	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string): boolean
+	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string, gearAssetId: number?): boolean
 	function NoPromptDeleteOutfit(self, outfitId: number): boolean
 	function NoPromptRenameOutfit(self, outfitId: number, name: string): boolean
 	function NoPromptSaveAvatar(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, saveDict: { [any]: any }, gearAssetId: number?): boolean
 	function NoPromptSaveAvatarThumbnailCustomization(self, thumbnailType: EnumAvatarThumbnailCustomizationType, emoteAssetId: number, cameraDistanceScale: number, yRotDeg: number, fieldOfViewDeg: number?): boolean
 	function NoPromptSetFavorite(self, itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean): boolean
-	function NoPromptUpdateOutfit(self, outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType): boolean
+	function NoPromptUpdateOutfit(self, outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, gearAssetId: number?): boolean
 	function PerformCreateOutfitWithDescription(self, humanoidDescription: HumanoidDescription, name: string): nil
 	function PerformDeleteOutfit(self): nil
 	function PerformRenameOutfit(self, name: string): nil
@@ -4955,6 +4989,7 @@ declare class BaseImportData extends Instance
 	StatusRemoved: RBXScriptSignal<{ [any]: any }>
 	StatusReported: RBXScriptSignal<{ [any]: any }>
 	function CreatePresetFromData(self): { [any]: any }
+	function GetPreview(self): Instance
 	function GetStatuses(self): { [any]: any }
 	function GetStatuses_DEPRECATED(self): { [any]: any }
 end
@@ -5018,6 +5053,7 @@ declare class RootImportData extends BaseImportData
 	InvertNegativeFaces: boolean
 	MergeMeshes: boolean
 	PolygonCount: number
+	PreferredUploadId: number
 	RestPose: EnumRestPose
 	RigScale: EnumRigScale
 	RigType: EnumRigType
@@ -5302,9 +5338,11 @@ declare class CaptureService extends Instance
 	CaptureEnded: RBXScriptSignal<>
 	CaptureSaved: RBXScriptSignal<{ [any]: any }>
 	OpenSaveCapturesPrompt: RBXScriptSignal<number, { any }>
-	OpenShareCapturePrompt: RBXScriptSignal<number, Content, string, string>
+	OpenShareCapturePrompt: RBXScriptSignal<number, Content, string>
 	UserCaptureSaved: RBXScriptSignal<Content>
+	function CaptureScreenshot(self, onCaptureReady: ((...any) -> ...any)): nil
 	function DeleteCapture(self, capturePath: string): nil
+	function GetCaptureFilePathAsync(self, captureContentId: Content): string
 	function GetCaptureSizeAsync(self, captureContentId: Content): Vector2
 	function OnCaptureBegan(self): nil
 	function OnCaptureEnded(self): nil
@@ -5434,6 +5472,7 @@ declare class DragDetector extends ClickDetector
 	MinDragAngle: number
 	MinDragTranslation: Vector3
 	Orientation: Vector3
+	PermissionPolicy: EnumDragDetectorPermissionPolicy
 	ReferenceInstance: Instance
 	ResponseStyle: EnumDragDetectorResponseStyle
 	Responsiveness: number
@@ -5448,6 +5487,7 @@ declare class DragDetector extends ClickDetector
 	function GetReferenceFrame(self): CFrame
 	function RestartDrag(self): nil
 	function SetDragStyleFunction(self, func: ((...any) -> ...any)): nil
+	function SetPermissionPolicyFunction(self, func: ((...any) -> ...any)): nil
 end
 
 declare class Clouds extends Instance
@@ -5465,11 +5505,22 @@ declare class Collaborator extends Instance
 	CollaboratorColor: number
 	CurDocGUID: string
 	CurScriptLineNumber: number
+	IsIdle: boolean
+	Status: EnumCollaboratorStatus
 	UserId: number
 	Username: string
 end
 
 declare class CollaboratorsService extends Instance
+	CollaboratorIdleUpdate: RBXScriptSignal<number, boolean>
+	CollaboratorInstanceCreatedSignal: RBXScriptSignal<number>
+	CollaboratorInstanceDestroyedSignal: RBXScriptSignal<number>
+	CollaboratorStatusUpdatedSignal: RBXScriptSignal<number, EnumCollaboratorStatus>
+	function GetCollaboratorsList(self): { Instance }
+	function GetSelectionHighlightsEnabled(self): boolean
+	function RequestFlyToCollaborator(self, collaboratorId: number): nil
+	function ToggleSelectionHighlights(self, showHighlights: boolean): nil
+	function ToggleTeamCreate(self, on: boolean): nil
 end
 
 declare class CollectionService extends Instance
@@ -5509,6 +5560,11 @@ declare class Configuration extends Instance
 end
 
 declare class ConfigureServerService extends Instance
+end
+
+declare class ConnectivityService extends Instance
+	NetworkStatus: EnumNetworkStatus
+	function IsNetworkStateAvailable(self): boolean
 end
 
 declare class Constraint extends Instance
@@ -5587,7 +5643,6 @@ declare class HingeConstraint extends Constraint
 	Radius: number
 	Restitution: number
 	ServoMaxTorque: number
-	SoftlockServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 end
@@ -5656,7 +5711,6 @@ declare class SlidingBallConstraint extends Constraint
 	Restitution: number
 	ServoMaxForce: number
 	Size: number
-	SoftlockServoUponReachingTarget: boolean
 	Speed: number
 	TargetPosition: number
 	UpperLimit: number
@@ -5677,7 +5731,6 @@ declare class CylindricalConstraint extends SlidingBallConstraint
 	MotorMaxTorque: number
 	RotationAxisVisible: boolean
 	ServoMaxTorque: number
-	SoftlockAngularServoUponReachingTarget: boolean
 	TargetAngle: number
 	UpperAngle: number
 	WorldRotationAxis: Vector3
@@ -5857,9 +5910,16 @@ declare class ControllerManager extends Instance
 	GroundSensor: ControllerSensor
 	MovingDirection: Vector3
 	RootPart: BasePart
+	UpDirection: Vector3
 end
 
 declare class ControllerService extends Instance
+end
+
+declare class ConversationalAIAcceptanceService extends Instance
+	function AlternativeAssetSelected(self, requestId: string, previousAssetId: number, assetId: number): nil
+	function AssetInserted(self, requestId: string, assetId: number): nil
+	function InstanceInserted(self, requestId: string): nil
 end
 
 declare class CookiesService extends Instance
@@ -5900,7 +5960,6 @@ end
 
 
 declare class EditableMesh extends DataModelMesh
-	MeshVersion: number
 	function AddTriangle(self, vertexId0: number, vertexId1: number, vertexId2: number): number
 	function AddVertex(self, p: Vector3): number
 	function CreateMeshPartAsync(self, collisionFidelity: EnumCollisionFidelity): MeshPart
@@ -5946,8 +6005,6 @@ declare class DataModelSession extends Instance
 	CurrentDataModelType: EnumStudioDataModelType
 	CurrentDataModelTypeAboutToChange: RBXScriptSignal<EnumStudioDataModelType>
 	CurrentDataModelTypeChanged: RBXScriptSignal<>
-	DataModelCreated: RBXScriptSignal<EnumStudioDataModelType>
-	DataModelWillBeDestroyed: RBXScriptSignal<EnumStudioDataModelType>
 	SessionId: string
 end
 
@@ -6168,6 +6225,7 @@ declare class DraftsService extends Instance
 	function RestoreScripts(self, scripts: { Instance }): nil
 	function ShowDiffsAgainstBase(self, scripts: { Instance }): nil
 	function ShowDiffsAgainstServer(self, scripts: { Instance }): nil
+	function ShowSourceDiffsAgainstCurrent(self, sources: { any }, scripts: { Instance }): nil
 	function UpdateToLatestVersion(self, scripts: { Instance }): nil
 end
 
@@ -6210,6 +6268,9 @@ declare class EditableImage extends Instance
 	function Resize(self, size: Vector2): nil
 	function Rotate(self, degrees: number, changeSize: boolean): nil
 	function WritePixels(self, position: Vector2, size: Vector2, pixels: { any }): nil
+end
+
+declare class RobloxEditableImage extends EditableImage
 end
 
 declare class EngineAPICloudProcessingService extends Instance
@@ -6789,6 +6850,7 @@ declare class VideoFrame extends GuiObject
 	Volume: number
 	function Pause(self): nil
 	function Play(self): nil
+	function SetStudioPreview(self, isPreview: boolean): nil
 end
 
 declare class ViewportFrame extends GuiObject
@@ -6960,6 +7022,7 @@ declare class WireframeHandleAdornment extends HandleAdornment
 	function AddLine(self, from: Vector3, to: Vector3): nil
 	function AddLines(self, points: { any }): nil
 	function AddPath(self, points: { any }, loop: boolean): nil
+	function AddText(self, point: Vector3, text: string, size: number?): nil
 	function Clear(self): nil
 end
 
@@ -7016,20 +7079,28 @@ end
 
 
 declare class Path2D extends GuiBase
-	AbsoluteSize: Vector2
 	Color: Color3
+	ControlPointLeftTangent: UDim2
+	ControlPointPosition: UDim2
+	ControlPointRightTangent: UDim2
 	Position: UDim2
 	SelectedControlPoint: number
 	Thickness: number
 	Transparency: number
 	Visible: boolean
+	ZIndex: number
+	function GetBoundingRect2D(self): Rect
+	function GetControlPoint(self, index: number): Path2DControlPoint
 	function GetControlPoints(self): { any }
 	function GetPositionOnCurve(self, t: number): UDim2
 	function GetPositionOnCurveArcLength(self, t: number): UDim2
 	function GetSegmentCount(self): number
 	function GetTangentOnCurve(self, t: number): Vector2
 	function GetTangentOnCurveArcLength(self, t: number): Vector2
+	function InsertControlPoint(self, index: number, point: Path2DControlPoint): nil
+	function RemoveControlPoint(self, index: number): nil
 	function SetControlPoints(self, controlPoints: { any }): nil
+	function UpdateControlPoint(self, index: number, point: Path2DControlPoint): nil
 end
 
 declare class GuiService extends Instance
@@ -7732,8 +7803,6 @@ end
 
 declare class MaterialGenerationService extends Instance
 	function GenerateMaterialVariantsAsync(self, prompt: string, samples: number): { Instance }
-	function GetAccountingBalanceAsync(self): number
-	function RefillAccountingBalanceAsync(self): number
 	function StartSession(self): MaterialGenerationSession
 	function UploadMaterialVariantsAsync(self, materialVaraints: { Instance }): nil
 end
@@ -7936,6 +8005,7 @@ declare class ClientReplicator extends NetworkReplicator
 	RCCProfilerDataComplete: RBXScriptSignal<boolean, string>
 	StatsReceived: RBXScriptSignal<{ [any]: any }>
 	function RequestRCCProfilerData(self, frameRate: number, timeFrame: number): nil
+	function RequestServerLuauHeapData(self): nil
 	function RequestServerScriptProfiling(self, start: boolean, frequency: number?): nil
 	function RequestServerScriptProfilingData(self): nil
 	function RequestServerStats(self, request: boolean): nil
@@ -8354,7 +8424,7 @@ declare class PackageUIService extends Instance
 	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function GetPackageInfo(self, packageAssetId: number): { [any]: any }
-	function PublishPackage(self, packageInstance: Instance): nil
+	function PublishPackage(self, packageInstance: Instance, addUndoWayPoint: boolean): nil
 	function SetPackageVersion(self, packageInstance: Instance, versionNumber: number): Instance
 end
 
@@ -8543,9 +8613,14 @@ declare class PhysicsSettings extends Instance
 	AreWorldCoordsShown: boolean
 	DisableCSGv2: boolean
 	DisableCSGv3ForPlugins: boolean
+	DrawConstraintsNetForce: boolean
+	DrawContactsNetForce: boolean
+	DrawTotalNetForce: boolean
+	EnableForceVisualizationSmoothing: boolean
 	FluidForceDrawScale: number
 	ForceCSGv2: boolean
 	ForceDrawScale: number
+	ForceVisualizationSmoothingSteps: number
 	IsInterpolationThrottleShown: boolean
 	IsReceiveAgeShown: boolean
 	IsTreeShown: boolean
@@ -8555,6 +8630,7 @@ declare class PhysicsSettings extends Instance
 	SolverConvergenceMetricType: EnumSolverConvergenceMetricType
 	SolverConvergenceVisualizationMode: EnumSolverConvergenceVisualizationMode
 	ThrottleAdjustTime: number
+	TorqueDrawScale: number
 	UseCSGv2: boolean
 end
 
@@ -8655,6 +8731,7 @@ declare class Player extends Instance
 	function SetAccountAge(self, accountAge: number): nil
 	function SetBlockListInitialized(self): nil
 	function SetCharacterAppearanceJson(self, jsonBlob: string): nil
+	function SetChatTranslationSettingsLocaleId(self, locale: string): nil
 	function SetExperienceSettingsLocaleId(self, locale: string): nil
 	function SetMembershipType(self, membershipType: EnumMembershipType): nil
 	function SetModerationAccessKey(self, moderationAccessKey: string): nil
@@ -8693,6 +8770,9 @@ end
 
 declare class PlayerViewService extends Instance
 	function GetDeviceCameraCFrame(self, player: Player?): CFrame
+	function GetDeviceCameraCFrameForSelfView(self): CFrame
+	function OnCameraCFrameReplicationRequest(self): nil
+	function UpdateDeviceCFrame(self, player: Player?, cframe: CFrame?, timestamp: number?): nil
 end
 
 declare class Players extends Instance
@@ -8923,6 +9003,9 @@ declare class SunRaysEffect extends PostEffect
 end
 
 declare class ProcessInstancePhysicsService extends Instance
+end
+
+declare class ProjectFolderService extends Instance
 end
 
 declare class ProximityPrompt extends Instance
@@ -9157,10 +9240,12 @@ declare class RunService extends Instance
 	PreRender: RBXScriptSignal<number>
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
+	RobloxGuiFocusedChanged: RBXScriptSignal<boolean>
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
+	function GetRobloxGuiFocused(self): boolean
 	function GetRobloxVersion(self): string
 	function IsClient(self): boolean
 	function IsEdit(self): boolean
@@ -9232,10 +9317,12 @@ declare class ScriptContext extends Instance
 	ScriptsDisabled: boolean
 	function AddCoreScriptLocal(self, name: string, parent: Instance): nil
 	function ClearScriptProfilingData(self): nil
-	function DeserializeScriptProfilerString(self, jsonString: string): { [any]: any }
+	function DeserializeScriptProfilerString(self, jsonString: string?): { [any]: any }
 	function GetCoverageStats(self): { any }
+	function GetLuauHeapInstanceReferenceReport(self, target: string): { [any]: any }
+	function GetLuauHeapMemoryReport(self, target: string): { [any]: any }
 	function GetScriptProfilingData(self): string
-	function SaveScriptProfilingData(self, filename: string): nil
+	function SaveScriptProfilingData(self, jsonString: string, filename: string): string
 	function SetTimeout(self, seconds: number): nil
 	function StartScriptProfiling(self, frequency: number?): nil
 	function StopScriptProfiling(self): string
@@ -9350,7 +9437,7 @@ declare class ControllerPartSensor extends ControllerSensor
 	HitFrame: CFrame
 	HitNormal: Vector3
 	SearchDistance: number
-	SensedPart: BasePart
+	SensedPart: BasePart?
 	SensorMode: EnumSensorMode
 end
 
@@ -9692,7 +9779,6 @@ end
 
 declare class StarterPlayer extends Instance
 	AllowCustomAnimations: boolean
-	AnimationCompositorMode: EnumAnimationCompositorMode
 	AutoJumpEnabled: boolean
 	AvatarJointUpgrade: EnumAvatarJointUpgrade
 	CameraMaxZoomDistance: number
@@ -9729,7 +9815,6 @@ declare class StarterPlayer extends Instance
 	GameSettingsScaleRangeProportion: NumberRange
 	GameSettingsScaleRangeWidth: NumberRange
 	HealthDisplayDistance: number
-	HumanoidStateMachineMode: EnumHumanoidStateMachineMode
 	LoadCharacterAppearance: boolean
 	LuaCharacterController: EnumCharacterControlMode
 	NameDisplayDistance: number
@@ -9742,6 +9827,10 @@ declare class StarterPlayerScripts extends Instance
 end
 
 declare class StarterCharacterScripts extends StarterPlayerScripts
+end
+
+declare class StartupMessageService extends Instance
+	function GetStartupMessage(self): any
 end
 
 declare class Stats extends Instance
@@ -9798,6 +9887,7 @@ declare class StreamingService extends Instance
 	function RegisterCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
 	function RegisterContextCollector(self, collectorName: string, func: ((...any) -> ...any)?): nil
 	function RegisterSequentialCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
+	function RunSandboxedCode(self, code: string): any
 	function SetEphemeralVariable(self, key: string, value: any, timeToLive: number?): nil
 	function SetPluginInfoCallback(self, func: ((...any) -> ...any)?): nil
 	function UnregisterCommand(self, commandName: string): nil
@@ -9811,6 +9901,17 @@ declare class Studio extends Instance
 	DefaultScriptFileDir: QDir
 	DeprecatedObjectsShown: boolean
 	DisplayLanguage: string
+	DraggerActiveColor: Color3
+	DraggerMajorGridIncrement: number
+	DraggerMaxSoftSnaps: number
+	DraggerPassiveColor: Color3
+	DraggerShowHoverRuler: boolean
+	DraggerShowMeasurement: boolean
+	DraggerShowTargetSnap: boolean
+	DraggerSoftSnapMarginFactor: number
+	DraggerSummonMarginFactor: number
+	DraggerTiltRotateDuration: number
+	EnableCodeAssist: boolean
 	EnableIndentationRulers: boolean
 	EnableOnTypeAutocomplete: boolean
 	Font: QFont
@@ -10015,11 +10116,11 @@ declare class StudioPublishService extends Instance
 	GameNameUpdated: RBXScriptSignal<string>
 	GamePublishCancelled: RBXScriptSignal<>
 	GamePublishFinished: RBXScriptSignal<boolean, number, string, EnumStudioPlaceUpdateFailureReason>
-	OnPublishAttempt: RBXScriptSignal<>
+	OnPublishAttempt: RBXScriptSignal<boolean>
 	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 	PublishLocked: boolean
 	function ClearUploadNames(self): nil
-	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any): nil
+	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any, willRetryOnConflict: boolean?): nil
 	function PublishThenTurnOnTeamCreate(self): nil
 	function RefreshDocumentDisplayName(self): nil
 	function SetTeamCreateOnPublishInfo(self, shouldTurnOnTcOnPublish: boolean, newPlaceName: string): nil
@@ -10396,8 +10497,8 @@ declare class TextFilterTranslatedResult extends Instance
 end
 
 declare class TextService extends Instance
-	function FilterAndTranslateStringAsync(self, stringToFilter: string, fromUserId: number, targetLocales: { any }, textContext: EnumTextFilterContext?): Instance
-	function FilterStringAsync(self, stringToFilter: string, fromUserId: number, textContext: EnumTextFilterContext?): Instance
+	function FilterAndTranslateStringAsync(self, stringToFilter: string, fromUserId: number, targetLocales: { any }, textContext: EnumTextFilterContext?): TextFilterTranslatedResult
+	function FilterStringAsync(self, stringToFilter: string, fromUserId: number, textContext: EnumTextFilterContext?): TextFilterResult
 	function GetFamilyInfoAsync(self, assetId: Content): { [any]: any }
 	function GetFontMemoryData(self): { [any]: any }
 	function GetTextBoundsAsync(self, params: GetTextBoundsParams): Vector2
@@ -10412,6 +10513,15 @@ end
 
 declare class TextureGenerationMeshHandler extends Instance
 	function PrepareInstancesForTexturingAsync(self, instances: { Instance }, unwrapMode: EnumTextureGenerationMeshHandlerUnwrapMode): string
+end
+
+declare class TextureGenerationService extends Instance
+	GenerationNotificationSignal: RBXScriptSignal<{ [any]: any }>
+	PreviewNotificationSignal: RBXScriptSignal<{ [any]: any }>
+	function CancelGenerationRequestAsync(self, jobUuid: string): nil
+	function GenerateTextureAsync(self, previewUuid: string): { [any]: any }
+	function GetQuotasAsync(self): { [any]: any }
+	function PreviewTextureAsync(self, meshObj: string, prompt: string, options: { [any]: any }): { [any]: any }
 end
 
 declare class ThirdPartyUserService extends Instance
@@ -10549,9 +10659,11 @@ declare class UGCValidationService extends Instance
 	function GetTextureSize(self, textureId: string): Vector2
 	function RegisterUGCValidationFunction(self, setFunction: ((...any) -> ...any)): nil
 	function ResetCollisionFidelity(self, meshPart: Instance, collisionFidelity: EnumCollisionFidelity?): nil
+	function ResetCollisionFidelityWithEditableMeshDataLua(self, meshPart: MeshPart, editableMesh: EditableMesh, collisionFidelity: EnumCollisionFidelity?): nil
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
 	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
 	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
+	function ValidateCageUVCoincident(self, meshId: string): boolean
 	function ValidateCageUVTriangleArea(self, meshId: string): boolean
 	function ValidateDynamicHeadEditableMesh(self, editableMesh: EditableMesh): boolean
 	function ValidateDynamicHeadMesh(self, meshId: string): boolean
@@ -10560,6 +10672,7 @@ declare class UGCValidationService extends Instance
 	function ValidateEditableMeshBounds(self, editableMesh: EditableMesh, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
 	function ValidateEditableMeshCageMeshIntersection(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh): any
 	function ValidateEditableMeshCageNonManifoldAndHoles(self, editableMesh: EditableMesh): any
+	function ValidateEditableMeshCageUVCoincident(self, editableMesh: EditableMesh): boolean
 	function ValidateEditableMeshCageUVTriangleArea(self, editableMesh: EditableMesh): boolean
 	function ValidateEditableMeshFullBodyCageDeletion(self, editableMesh: EditableMesh): boolean
 	function ValidateEditableMeshMisMatchUV(self, innerCage: EditableMesh, outerCage: EditableMesh): boolean
@@ -10721,12 +10834,14 @@ declare class UserGameSettings extends Instance
 	CameraYInverted: boolean
 	ChatTranslationEnabled: boolean
 	ChatTranslationFTUXShown: boolean
+	ChatTranslationLocale: string
 	ChatTranslationToggleEnabled: boolean
 	ChatVisible: boolean
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode
 	ComputerMovementMode: EnumComputerMovementMode
 	ControlMode: EnumControlMode
 	DefaultCameraID: string
+	FramerateCap: number
 	Fullscreen: boolean
 	FullscreenChanged: RBXScriptSignal<boolean>
 	GamepadCameraSensitivity: number
@@ -10893,6 +11008,7 @@ end
 
 declare class VRService extends Instance
 	AutomaticScaling: EnumVRScaling
+	AvatarGestures: boolean
 	DidPointerHit: boolean
 	FadeOutViewOnCollision: boolean
 	GuiInputUserCFrame: EnumUserCFrame
@@ -11054,9 +11170,6 @@ declare class VirtualUser extends Instance
 end
 
 declare class VisibilityCheckDispatcher extends Instance
-end
-
-declare class VisibilityService extends Instance
 end
 
 declare class Visit extends Instance
@@ -11293,7 +11406,7 @@ end
 
 declare SharedTable: {
     new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
+    new: (t: { [any]: any }?) -> SharedTable,
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,

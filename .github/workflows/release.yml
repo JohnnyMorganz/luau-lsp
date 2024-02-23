@@ -8,7 +8,7 @@ on:
 jobs:
   create-release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -25,7 +25,7 @@ jobs:
   build-plugin:
     needs: ["create-release"]
     name: Build Roblox Studio Plugin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: ok-nick/setup-aftman@v0.4.2
@@ -58,13 +58,13 @@ jobs:
           - os: windows-latest
             artifact-name: luau-lsp-win64
             code-target: [win32-x64]
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             artifact-name: luau-lsp-linux-arm64
             code-target: [linux-arm64]
-          - os: macos-latest
+          - os: ubuntu-20.04
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
 

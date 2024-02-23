@@ -236,6 +236,7 @@ const stopSourcemapGeneration = async (
 const startSourcemapGeneration = async (
   workspaceFolder: vscode.WorkspaceFolder
 ) => {
+  stopSourcemapGeneration(workspaceFolder);
   const config = vscode.workspace.getConfiguration(
     "luau-lsp.sourcemap",
     workspaceFolder
@@ -250,7 +251,7 @@ const startSourcemapGeneration = async (
     return;
   }
 
-  const loggingFunc = client ? client.info : console.log;
+  const loggingFunc = client ? client.info.bind(client) : console.log;
   loggingFunc(
     `Starting sourcemap generation for ${
       workspaceFolder.name
@@ -272,8 +273,6 @@ const startSourcemapGeneration = async (
 
   const childProcess = spawn(rojoPath, args, {
     cwd: workspacePath,
-    env: process.env,
-    shell: true,
   });
 
   sourcemapGeneratorProcesses.set(workspaceFolder, childProcess);

@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.27.0",
+  "version": "1.27.1",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -417,6 +417,12 @@
           "markdownDescription": "Fill parameter names in an autocompleted function call, which can be tabbed through. Requires `#luau-lsp.completion.addParentheses#` to be enabled",
           "type": "boolean",
           "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.showPropertiesOnMethodCall": {
+          "markdownDescription": "Whether to show non-function properties when performing a method call with a colon (e.g., `foo:bar`)",
+          "type": "boolean",
+          "default": false,
           "scope": "resource"
         },
         "luau-lsp.completion.suggestImports": {

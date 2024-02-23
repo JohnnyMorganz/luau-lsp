@@ -17,10 +17,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
 - Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
 
+### Changed
+
+- Sync to upstream Luau 0.612
+- Non-function properties will now no longer be shown by default when autocompleting a method call (e.g., `foo:bar`).
+  To revert back to the original behaviour, enable `luau-lsp.completion.showPropertiesOnMethodCall`
+- Support Ubuntu 20.04
+
+### Fixed
+
+- Autocompletion of variables that hold a class type will now correctly have a kind of "variable" rather than "class"
+- Introduced a fix for orphaned `rojo` processes after VSCode has closed
+
+## [1.27.1] - 2024-01-20
+
+### Changed
+
+- Sync to upstream Luau 0.609
+
 ### Fixed
 
 - Switched to memory-efficient implementation of workspace diagnostics (currently behind FFlag `LuauStacklessTypeClone3`)
 - Improved handling of configuration info received from non-VSCode clients
+- Functions with explicitly defined `self` parameters are correctly marked with the `method` semantic token
 
 ## [1.27.0] - 2023-12-25
 

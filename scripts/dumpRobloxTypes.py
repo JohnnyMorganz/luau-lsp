@@ -253,6 +253,9 @@ IGNORED_MEMBERS = {
     "Vector3": [
         "Angle",
     ],
+    "ControllerPartSensor": [
+        "SensedPart",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -264,12 +267,14 @@ EXTRA_MEMBERS = {
         "function __mul(self, other: Vector3 | number): Vector3",
         "function __div(self, other: Vector3 | number): Vector3",
         "function __unm(self): Vector3",
+        "function __idiv(self, other: Vector3 | number): Vector3",
     ],
     "Vector2": [
         "function __add(self, other: Vector2): Vector2",
         "function __sub(self, other: Vector2): Vector2",
         "function __mul(self, other: Vector2 | number): Vector2",
         "function __div(self, other: Vector2 | number): Vector2",
+        "function __idiv(self, other: Vector2 | number): Vector2",
         "function __unm(self): Vector2",
     ],
     "Vector3int16": [
@@ -301,6 +306,9 @@ EXTRA_MEMBERS = {
         "function __sub(self, other: Vector3): CFrame",
         "function __mul(self, other: CFrame): CFrame",
         "function __mul(self, other: Vector3): Vector3",
+    ],
+    "Random": [
+        "function Shuffle(self, table: { any })",
     ],
     "UserSettings": [
         "GameSettings: UserGameSettings",
@@ -510,6 +518,9 @@ EXTRA_MEMBERS = {
         "Attachment0: Attachment?",
         "Attachment1: Attachment?",
     ],
+    "ControllerPartSensor": [
+        "SensedPart: BasePart?",
+    ],
 }
 
 # Hardcoded types
@@ -523,6 +534,7 @@ type QFont = string
 type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
+type Path2DControlPoint = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -636,7 +648,7 @@ end
 
 declare SharedTable: {
     new: () -> SharedTable,
-    new: (t: { [any]: any }) -> SharedTable,
+    new: (t: { [any]: any }?) -> SharedTable,
     clear: (st: SharedTable) -> (),
     clone: (st: SharedTable, deep: boolean?) -> SharedTable,
     cloneAndFreeze: (st: SharedTable, deep: boolean?) -> SharedTable,

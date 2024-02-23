@@ -1,19 +1,34 @@
 #include "doctest.h"
+#include "Fixture.h"
 #include "LSP/SemanticTokens.hpp"
+
 TEST_SUITE_BEGIN("SemanticTokens");
 
-// TEST_CASE_FIXTURE(Fixture, "function_definition_name")
-// {
-//     check(R"(
-//         function foo() end
-//     )");
+std::optional<SemanticToken> getSemanticToken(const std::vector<SemanticToken>& tokens, const Luau::Position& start)
+{
+    for (const auto& token : tokens)
+        if (token.start == start)
+            return token;
+    return std::nullopt;
+}
 
-//     auto tokens = getSemanticTokens(getMainModule(), getMainSourceModule());
-//     REQUIRE(!tokens.empty());
+TEST_CASE_FIXTURE(Fixture, "explicit_self_method_has_method_semantic_token")
+{
+    check(R"(
+        type myClass = {
+            foo: (self: myClass) -> ()
+        }
+        local a: myClass = nil
+        a:foo()
+    )");
 
-//     auto token = *tokens.begin();
-//     CHECK_EQ(token.tokenType, lsp::SemanticTokenTypes::Function);
-//     CHECK_EQ(token.tokenModifiers, lsp::SemanticTokenModifiers::None);
-// }
+    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
+    REQUIRE(!tokens.empty());
+
+    auto token = getSemanticToken(tokens, Luau::Position{5, 10});
+    REQUIRE(token);
+    CHECK_EQ(token->tokenType, lsp::SemanticTokenTypes::Method);
+    CHECK_EQ(token->tokenModifiers, lsp::SemanticTokenModifiers::None);
+}
 
 TEST_SUITE_END();

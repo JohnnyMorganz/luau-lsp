@@ -12,9 +12,6 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
-LUAU_FASTFLAG(LuauClipExtraHasEndProps);
-LUAU_FASTFLAG(LuauAutocompleteDoEnd);
-
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -54,61 +51,34 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
 
     auto unclosedBlock = false;
-    if (FFlag::LuauClipExtraHasEndProps)
+    for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
     {
-        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
+        if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
         {
-            if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
+            bool hasEnd = statIf->thenbody->hasEnd;
+            if (statIf->elsebody)
             {
-                bool hasEnd = statIf->thenbody->hasEnd;
-                if (statIf->elsebody)
-                {
-                    if (auto* elseBlock = statIf->elsebody->as<Luau::AstStatBlock>())
-                        hasEnd = elseBlock->hasEnd;
-                }
+                if (auto* elseBlock = statIf->elsebody->as<Luau::AstStatBlock>())
+                    hasEnd = elseBlock->hasEnd;
+            }
 
-                if (!hasEnd)
-                    unclosedBlock = true;
-            }
-            else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
-                unclosedBlock = true;
-            else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
-                unclosedBlock = true;
-            if (FFlag::LuauAutocompleteDoEnd)
-            {
-                if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
-                    unclosedBlock = true;
-
-                // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
-                if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
-                    unclosedBlock = false;
-            }
-        }
-    }
-    else
-    {
-        for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
-        {
-            if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statIf = (*it)->as<Luau::AstStatIf>(); statIf && !statIf->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->DEPRECATED_hasEnd)
-                unclosedBlock = true;
-            if (FFlag::LuauAutocompleteDoEnd)
-            {
-                if (auto* statBlock = (*it)->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
-                    unclosedBlock = true;
-            }
-            if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->DEPRECATED_hasEnd)
+            if (!hasEnd)
                 unclosedBlock = true;
         }
+        else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
+            unclosedBlock = true;
+        else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
+            unclosedBlock = true;
+        if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
+            unclosedBlock = true;
+
+        // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
+        if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
+            unclosedBlock = false;
     }
 
     // TODO: we could potentially extend this further that just `hasEnd`
@@ -240,8 +210,6 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
         // Try to infer more type info about the entry to provide better suggestion info
         if (Luau::get<Luau::FunctionType>(id))
             return lsp::CompletionItemKind::Function;
-        else if (Luau::get<Luau::ClassType>(id))
-            return lsp::CompletionItemKind::Class;
     }
 
     if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
@@ -451,6 +419,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     for (auto& [name, entry] : result.entryMap)
     {
+        // If this entry is a non-function property, and we are autocompleting after a `:`
+        // then hide it if configured to do so
+        if (!config.completion.showPropertiesOnMethodCall && entry.kind == Luau::AutocompleteEntryKind::Property && entry.indexedWithSelf &&
+            !(Luau::get<Luau::FunctionType>(*entry.type) || Luau::isOverloadedFunction(*entry.type)))
+            continue;
+
         lsp::CompletionItem item;
         item.label = name;
 
