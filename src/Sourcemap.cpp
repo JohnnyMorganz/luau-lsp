@@ -2,8 +2,6 @@
 #include <filesystem>
 #include "LSP/Sourcemap.hpp"
 #include "LSP/Utils.hpp"
-#include "toml11/toml.hpp"
-using tomlValue = toml::value;
 
 bool SourceNode::isScript()
 {
@@ -142,9 +140,9 @@ std::string tomlValueToLuau(const tomlValue& val)
     else if (val.is_array())
     {
         std::string out = "{";
-        for (auto& val : val.as_array())
+        for (auto& elem : val.as_array())
         {
-            out += tomlValueToLuau(val);
+            out += tomlValueToLuau(elem);
             out += ";";
         }
 
