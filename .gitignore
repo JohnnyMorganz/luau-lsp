@@ -3,6 +3,7 @@
 /.vs
 .cache
 .idea
+.DS_Store
 cmake-build-debug/
 cmake-build-release/
 cmake-build-relwithdebinfo/

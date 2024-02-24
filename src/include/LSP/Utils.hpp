@@ -7,9 +7,10 @@
 #include <unordered_map>
 #include <map>
 #include <algorithm>
+#include <LSP/Sourcemap.hpp>
 
 std::optional<std::string> getParentPath(const std::string& path);
-std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName);
+std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode);
 std::string convertToScriptPath(const std::string& path);
 std::string codeBlock(const std::string& language, const std::string& code);
 std::optional<std::string> readFile(const std::filesystem::path& filePath);
