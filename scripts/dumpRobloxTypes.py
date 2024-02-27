@@ -64,6 +64,7 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
+    "RaycastResult", # Redefined using generics
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -256,6 +257,9 @@ IGNORED_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart",
     ],
+    "StudioService": [
+        "GizmoRaycast",
+    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -376,7 +380,10 @@ EXTRA_MEMBERS = {
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
     ],
     "WorldRoot": [
-        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<BasePart>?",
+        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
+        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
+        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
         "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
         "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
         "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
@@ -521,6 +528,9 @@ EXTRA_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart: BasePart?",
     ],
+    "StudioService": [
+        "function GizmoRaycast(origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint>?"
+    ],
 }
 
 # Hardcoded types
@@ -605,6 +615,14 @@ export type RBXScriptSignal<T... = ...any> = {
     Connect: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
     Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+}
+
+export type RaycastResult<T = Instance> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Distance: number,
+    Material: Enum.Material,
 }
 
 type HttpRequestOptions = {
