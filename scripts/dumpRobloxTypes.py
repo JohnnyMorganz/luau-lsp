@@ -529,7 +529,7 @@ EXTRA_MEMBERS = {
         "SensedPart: BasePart?",
     ],
     "StudioService": [
-        "function GizmoRaycast(origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint>?"
+        "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint>?"
     ],
 }
 
