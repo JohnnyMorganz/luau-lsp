@@ -1,31 +1,51 @@
 #include "doctest.h"
 #include "LSP/Utils.hpp"
+#include "LSP/Sourcemap.hpp"
 
 TEST_SUITE_BEGIN("UtilsTest");
 
 TEST_CASE("getAncestorPath finds ancestor from given name")
 {
-    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "Module"), "game/ReplicatedStorage/Module");
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{});
+
+    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "Module", sourceNode), "game/ReplicatedStorage/Module");
 }
 
 TEST_CASE("getAncestorPath handles when ancestor is not found")
 {
-    CHECK_FALSE(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "NonExistent").has_value());
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{});
+
+    CHECK_FALSE(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "NonExistent", sourceNode).has_value());
 }
 
-TEST_CASE("getAncestorPath handles when ancestor is root")
+TEST_CASE("getAncestorPath handles when ancestor is root of DataModel node")
 {
-    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "game"), "game");
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{});
+
+    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "game", sourceNode), "game");
+}
+
+TEST_CASE("getAncestorPath handles when ancestor is root of non-DataModel node")
+{
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{
+        .name = "Foo",
+    });
+
+    CHECK_EQ(getAncestorPath("ProjectRoot/Bar", "Foo", sourceNode), "ProjectRoot");
 }
 
 TEST_CASE("getAncestorPath returns nothing when ancestorName == current name, and no ancestor of name found")
 {
-    CHECK_FALSE(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "Foo").has_value());
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{});
+
+    CHECK_FALSE(getAncestorPath("game/ReplicatedStorage/Module/Child/Foo", "Foo", sourceNode).has_value());
 }
 
 TEST_CASE("getAncestorPath handles when ancestor name is the same as current name")
 {
-    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Module", "Module"), "game/ReplicatedStorage/Module");
+    auto sourceNode = std::make_shared<SourceNode>(SourceNode{});
+
+    CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Module", "Module", sourceNode), "game/ReplicatedStorage/Module");
 }
 
 TEST_CASE("convertToScriptPath handles when path is empty")

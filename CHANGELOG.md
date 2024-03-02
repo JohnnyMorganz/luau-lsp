@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- Fixed `FindFirstAncestor` in non-DataModel projects 
+
 ### Changed
 
-- Sync to upstream Luau 0.615
+- Sync to upstream Luau 0.612
 - Non-function properties will now no longer be shown by default when autocompleting a method call (e.g., `foo:bar`).
   To revert back to the original behaviour, enable `luau-lsp.completion.showPropertiesOnMethodCall`
 - Support Ubuntu 20.04
