@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-- Fixed `FindFirstAncestor` in non-DataModel projects 
-
 ### Changed
 
 - Sync to upstream Luau 0.615
@@ -19,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Autocompletion of variables that hold a class type will now correctly have a kind of "variable" rather than "class"
 - Introduced a fix for orphaned `rojo` processes after VSCode has closed
+- `FindFirstAncestor` method in non-DataModel projects 
 
 ## [1.27.1] - 2024-01-20
 
