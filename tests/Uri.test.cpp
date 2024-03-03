@@ -87,20 +87,19 @@ TEST_CASE("http#toString, encode=FALSE")
     CHECK_EQ(Uri("http", "a-test-site.com", "/", "", "test=true").toString(true), "http://a-test-site.com/#test=true");
     CHECK_EQ(Uri("http", "", "/api/files/test.me", "t=1234").toString(true), "http:/api/files/test.me?t=1234");
 
-    // DEVIATION: currently no unicode support
-    // auto value = Uri::parse("file://shares/pröjects/c%23/#l12");
-    // CHECK_EQ(value.authority, "shares");
-    // CHECK_EQ(value.path, "/pröjects/c#/");
-    // CHECK_EQ(value.fragment, "l12");
-    // CHECK_EQ(value.toString(), "file://shares/pr%C3%B6jects/c%23/#l12");
-    // CHECK_EQ(value.toString(true), "file://shares/pröjects/c%23/#l12");
+    auto value = Uri::parse("file://shares/pröjects/c%23/#l12");
+    CHECK_EQ(value.authority, "shares");
+    CHECK_EQ(value.path, "/pröjects/c#/");
+    CHECK_EQ(value.fragment, "l12");
+    CHECK_EQ(value.toString(), "file://shares/pr%C3%B6jects/c%23/#l12");
+    CHECK_EQ(value.toString(true), "file://shares/pröjects/c%23/#l12");
 
-    // auto uri2 = Uri::parse(value.toString(true));
-    // auto uri3 = Uri::parse(value.toString());
-    // CHECK_EQ(uri2.authority, uri3.authority);
-    // CHECK_EQ(uri2.path, uri3.path);
-    // CHECK_EQ(uri2.query, uri3.query);
-    // CHECK_EQ(uri2.fragment, uri3.fragment);
+    auto uri2 = Uri::parse(value.toString(true));
+    auto uri3 = Uri::parse(value.toString());
+    CHECK_EQ(uri2.authority, uri3.authority);
+    CHECK_EQ(uri2.path, uri3.path);
+    CHECK_EQ(uri2.query, uri3.query);
+    CHECK_EQ(uri2.fragment, uri3.fragment);
 }
 
 // DEVIATION: with testcases removed - NOT REQUIRED
@@ -222,14 +221,13 @@ TEST_CASE("URI#file, win-speciale")
     CHECK_EQ(value.path, "/c:/test/drive");
     CHECK_EQ(value.toString(), "file:///c%3A/test/drive");
 
-    // DEVIATION: currently no unicode support
-    // value = Uri::file("\\\\shäres\\path\\c#\\plugin.json");
-    // CHECK_EQ(value.scheme, "file");
-    // CHECK_EQ(value.authority, "shäres");
-    // CHECK_EQ(value.path, "/path/c#/plugin.json");
-    // CHECK_EQ(value.fragment, "");
-    // CHECK_EQ(value.query, "");
-    // CHECK_EQ(value.toString(), "file://sh%C3%A4res/path/c%23/plugin.json");
+    value = Uri::file("\\\\shäres\\path\\c#\\plugin.json");
+    CHECK_EQ(value.scheme, "file");
+    CHECK_EQ(value.authority, "shäres");
+    CHECK_EQ(value.path, "/path/c#/plugin.json");
+    CHECK_EQ(value.fragment, "");
+    CHECK_EQ(value.query, "");
+    CHECK_EQ(value.toString(), "file://sh%C3%A4res/path/c%23/plugin.json");
 
     value = Uri::file("\\\\localhost\\c$\\GitDevelopment\\express");
     CHECK_EQ(value.scheme, "file");
@@ -293,19 +291,17 @@ TEST_CASE("URI#file, always slash")
     CHECK_EQ(value.toString(), "file:///a.file");
 }
 
-// DEVIATION: currently no unicode support
-// TEST_CASE("URI.toString, only scheme and query")
-// {
-//     auto value = Uri::parse("stuff:?qüery");
-//     CHECK_EQ(value.toString(), "stuff:?q%C3%BCery");
-// };
+TEST_CASE("URI.toString, only scheme and query")
+{
+    auto value = Uri::parse("stuff:?qüery");
+    CHECK_EQ(value.toString(), "stuff:?q%C3%BCery");
+};
 
-// DEVIATION: currently no unicode support
-// TEST_CASE("URI#toString, upper-case percent espaces")
-// {
-//     auto value = Uri::parse("file://sh%c3%a4res/path");
-//     CHECK_EQ(value.toString(), "file://sh%C3%A4res/path");
-// };
+TEST_CASE("URI#toString, upper-case percent espaces")
+{
+    auto value = Uri::parse("file://sh%c3%a4res/path");
+    CHECK_EQ(value.toString(), "file://sh%C3%A4res/path");
+};
 
 TEST_CASE("URI#toString, lower-case windows drive letter")
 {
@@ -313,21 +309,19 @@ TEST_CASE("URI#toString, lower-case windows drive letter")
     CHECK_EQ(Uri::parse("untitled:C:/Users/jrieken/Code/abc.txt").toString(), "untitled:c%3A/Users/jrieken/Code/abc.txt");
 }
 
-// DEVIATION: currently no unicode support
-// TEST_CASE("URI#toString, escape all the bits")
-// {
-//     auto value = Uri::file(std::string("/Users/jrieken/Code/_samples/18500/Mödel + Other Thîngß/model.js"));
-//     CHECK_EQ(value.toString(), "file:///Users/jrieken/Code/_samples/18500/M%C3%B6del%20%2B%20Other%20Th%C3%AEng%C3%9F/model.js");
-// };
+TEST_CASE("URI#toString, escape all the bits")
+{
+    auto value = Uri::file(std::string("/Users/jrieken/Code/_samples/18500/Mödel + Other Thîngß/model.js"));
+    CHECK_EQ(value.toString(), "file:///Users/jrieken/Code/_samples/18500/M%C3%B6del%20%2B%20Other%20Th%C3%AEng%C3%9F/model.js");
+};
 
 TEST_CASE("URI#toString, don\'t encode port")
 {
     auto value = Uri::parse("http://localhost:8080/far");
     CHECK_EQ(value.toString(), "http://localhost:8080/far");
 
-    // DEVIATION: currently no unicode support
-    // value = Uri("http", "löcalhost:8080", "/far");
-    // CHECK_EQ(value.toString(), "http://l%C3%B6calhost:8080/far");
+    value = Uri("http", "löcalhost:8080", "/far");
+    CHECK_EQ(value.toString(), "http://l%C3%B6calhost:8080/far");
 }
 
 TEST_CASE("URI#toString, user information in authority")
@@ -344,9 +338,8 @@ TEST_CASE("URI#toString, user information in authority")
     value = Uri::parse("http://foo@localhost:8080/far");
     CHECK_EQ(value.toString(), "http://foo@localhost:8080/far");
 
-    // DEVIATION: currently no unicode support
-    // value = Uri("http", "föö:bör@löcalhost:8080", "/far");
-    // CHECK_EQ(value.toString(), "http://f%C3%B6%C3%B6:b%C3%B6r@l%C3%B6calhost:8080/far");
+    value = Uri("http", "föö:bör@löcalhost:8080", "/far");
+    CHECK_EQ(value.toString(), "http://f%C3%B6%C3%B6:b%C3%B6r@l%C3%B6calhost:8080/far");
 }
 
 TEST_CASE("correctFileUriToFilePath2")
@@ -361,10 +354,9 @@ TEST_CASE("correctFileUriToFilePath2")
     };
 
     test("file:///c:/alex.txt", IF_WINDOWS("c:\\alex.txt", "c:/alex.txt"));
-    // DEVIATION: currently no unicode support
-    // test("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/resources/app/plugins",
-    //     IF_WINDOWS("c:\\Source\\Zürich or Zurich (ˈzjʊərɪk,\\Code\\resources\\app\\plugins",
-    //         "c:/Source/Zürich or Zurich (ˈzjʊərɪk,/Code/resources/app/plugins"));
+    test("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/resources/app/plugins",
+        IF_WINDOWS("c:\\Source\\Zürich or Zurich (ˈzjʊərɪk,\\Code\\resources\\app\\plugins",
+            "c:/Source/Zürich or Zurich (ˈzjʊərɪk,/Code/resources/app/plugins"));
     test("file://monacotools/folder/isi.txt",
         "//monacotools/folder/isi.txt"); // DEVIATION: IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt")
     test("file://monacotools1/certificates/SSL/",
@@ -382,15 +374,14 @@ TEST_CASE("URI - http, query & toString'")
     CHECK_EQ(uri2.query, "LinkId=518008");
     CHECK_EQ(uri2.query, uri.query);
 
-    // DEVIATION: currently no unicode support
-    // uri = Uri::parse("https://go.microsoft.com/fwlink/?LinkId=518008&foö&ké¥=üü");
-    // CHECK_EQ(uri.query, "LinkId=518008&foö&ké¥=üü");
-    // CHECK_EQ(uri.toString(true), "https://go.microsoft.com/fwlink/?LinkId=518008&foö&ké¥=üü");
-    // CHECK_EQ(uri.toString(), "https://go.microsoft.com/fwlink/?LinkId%3D518008%26fo%C3%B6%26k%C3%A9%C2%A5%3D%C3%BC%C3%BC");
+    uri = Uri::parse("https://go.microsoft.com/fwlink/?LinkId=518008&foö&ké¥=üü");
+    CHECK_EQ(uri.query, "LinkId=518008&foö&ké¥=üü");
+    CHECK_EQ(uri.toString(true), "https://go.microsoft.com/fwlink/?LinkId=518008&foö&ké¥=üü");
+    CHECK_EQ(uri.toString(), "https://go.microsoft.com/fwlink/?LinkId%3D518008%26fo%C3%B6%26k%C3%A9%C2%A5%3D%C3%BC%C3%BC");
 
-    // uri2 = Uri::parse(uri.toString());
-    // CHECK_EQ(uri2.query, "LinkId=518008&foö&ké¥=üü");
-    // CHECK_EQ(uri2.query, uri.query);
+    uri2 = Uri::parse(uri.toString());
+    CHECK_EQ(uri2.query, "LinkId=518008&foö&ké¥=üü");
+    CHECK_EQ(uri2.query, uri.query);
 
     // #24849
     uri = Uri::parse("https://twitter.com/search?src=typd&q=%23tag");
@@ -440,21 +431,22 @@ TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
     CHECK_EQ(uri.path, uri2.path);
 }
 
-// TODO: fix
+// TODO: DEVIATION - the following test cases are broken
+// They could be resolved, however for our current use cases it doesn't really matter
+
 // TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
-// {
+//{
 //     CHECK_EQ(Uri::parse("file://some/%.txt").toString(), "file://some/%25.txt");
 //     CHECK_EQ(Uri::parse("file://some/%A0.txt").toString(), "file://some/%25A0.txt");
 // };
-
-// TODO: fix
+//
 // TEST_CASE("Links in markdown are broken if url contains encoded parameters #79474'")
-// {
+//{
 //     std::string strIn = "https://myhost.com/Redirect?url=http%3A%2F%2Fwww.bing.com%3Fsearch%3Dtom";
 //     auto uri1 = Uri::parse(strIn);
 //     auto strOut = uri1.toString();
 //     auto uri2 = Uri::parse(strOut);
-
+//
 //     CHECK_EQ(uri1.scheme, uri2.scheme);
 //     CHECK_EQ(uri1.authority, uri2.authority);
 //     CHECK_EQ(uri1.path, uri2.path);
@@ -462,16 +454,15 @@ TEST_CASE("Unable to open \'%A0.txt\': URI malformed #76506'")
 //     CHECK_EQ(uri1.fragment, uri2.fragment);
 //     CHECK_EQ(strIn, strOut);
 // };
-
-// TODO: fix
+//
 // TEST_CASE("Uri#parse can break path-component #45515'")
-// {
+//{
 //     std::string strIn = "https://firebasestorage.googleapis.com/v0/b/brewlangerie.appspot.com/o/"
 //                         "products%2FzVNZkudXJyq8bPGTXUxx%2FBetterave-Sesame.jpg?alt=media&token=0b2310c4-3ea6-4207-bbde-9c3710ba0437";
 //     auto uri1 = Uri::parse(strIn);
 //     auto strOut = uri1.toString();
 //     auto uri2 = Uri::parse(strOut);
-
+//
 //     CHECK_EQ(uri1.scheme, uri2.scheme);
 //     CHECK_EQ(uri1.authority, uri2.authority);
 //     CHECK_EQ(uri1.path, uri2.path);
@@ -485,8 +476,7 @@ TEST_CASE("URI - (de)serialize'")
     auto values = {
         Uri::parse("http://localhost:8080/far"),
         Uri::file("c:\\test with %25\\c#code"),
-        // DEVIATION: currently no unicode support
-        // Uri::file("\\\\shäres\\path\\c#\\plugin.json"),
+        Uri::file("\\\\shäres\\path\\c#\\plugin.json"),
         Uri::parse("http://api/files/test.me?t=1234"),
         Uri::parse("http://api/files/test.me?t=1234#fff"),
         Uri::parse("http://api/files/test.me#fff"),
@@ -505,6 +495,16 @@ TEST_CASE("URI - (de)serialize'")
         CHECK_EQ(clone.fsPath(), value.fsPath());
         CHECK_EQ(clone.toString(), value.toString());
     }
+}
+
+TEST_CASE("luau-lsp custom: encodeURIComponent #555")
+{
+    auto uri = Uri::file(IF_WINDOWS("c:\\Users\\leoni\\OneDrive\\Рабочий стол\\Creations\\RobloxProjects\\Nelsk",
+        "/home/leoni/OneDrive/Рабочий стол/Creations/RobloxProjects/Nelsk"));
+    CHECK_EQ(uri.toString(),
+        IF_WINDOWS(
+            "file:///c%3A/Users/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk",
+            "file:///home/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk"));
 }
 
 TEST_SUITE_END();
