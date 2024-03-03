@@ -16,14 +16,17 @@ std::string codeBlock(const std::string& language, const std::string& code);
 std::optional<std::string> readFile(const std::filesystem::path& filePath);
 std::optional<std::filesystem::path> getHomeDirectory();
 std::filesystem::path resolvePath(const std::filesystem::path& path);
+bool isDataModel(const std::string& path);
 void trim_start(std::string& str);
 void trim_end(std::string& str);
 void trim(std::string& str);
 std::string& toLower(std::string& str);
 std::string_view getFirstLine(const std::string_view& str);
+bool startsWith(const std::string_view& str, const std::string_view& prefix);
 bool endsWith(const std::string_view& str, const std::string_view& suffix);
 bool replace(std::string& str, const std::string& from, const std::string& to);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
+std::vector<std::string> split(const std::string& str, char delimiter);
 
 template<typename V>
 inline bool contains(const std::vector<V>& vec, const V& value)

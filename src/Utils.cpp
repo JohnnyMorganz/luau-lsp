@@ -32,7 +32,23 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     auto parentPathWithSlash = *parentPath + "/";
 
     // If the ancestor is the project root we need to rename it, applies only to non-DataModel projects
-    auto normalizedAncestorName = ancestorName == rootSourceNode->name ? "ProjectRoot" : ancestorName;
+    auto normalizedAncestorName = ancestorName;
+    if (rootSourceNode && !isDataModel(parentPathWithSlash) && ancestorName == rootSourceNode->name)
+    {
+        normalizedAncestorName = "ProjectRoot";
+
+        // Set normalizedAncestorName back to ancestorName if it's found in the parentPath before root
+        auto ancestors = split(parentPathWithSlash, '/');
+        for (int i = ancestors.size() - 1; i > 0; i--)
+        {
+            auto ancestor = ancestors[i];
+            if (ancestor == ancestorName)
+            {
+                normalizedAncestorName = ancestor;
+                break;
+            }
+        }
+    }
 
     auto ancestor = parentPathWithSlash.rfind(normalizedAncestorName + "/");
     if (ancestor != std::string::npos)
@@ -136,6 +152,11 @@ std::filesystem::path resolvePath(const std::filesystem::path& path)
         return path;
 }
 
+bool isDataModel(const std::string& path)
+{
+    return startsWith(path, "game/");
+}
+
 
 void trim_start(std::string& str)
 {
@@ -172,6 +193,11 @@ std::string_view getFirstLine(const std::string_view& str)
     return str.substr(0, eol_char);
 }
 
+bool startsWith(const std::string_view& str, const std::string_view& prefix)
+{
+    return str.size() >= prefix.size() && 0 == str.rfind(prefix, 0);
+}
+
 bool endsWith(const std::string_view& str, const std::string_view& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
@@ -196,4 +222,18 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
         str.replace(start_pos, from.length(), to);
         start_pos += to.length();
     }
+}
+
+std::vector<std::string> split(const std::string& str, char delimiter)
+{
+    std::istringstream tokenStream(str);
+    std::vector<std::string> tokens;
+    std::string token;
+
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        tokens.push_back(token);
+    }
+
+    return tokens;
 }
