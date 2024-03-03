@@ -64,7 +64,7 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
-    "RaycastResult", # Redefined using generics
+    "RaycastResult",  # Redefined using generics
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -622,7 +622,7 @@ export type RaycastResult<T = Instance> = {
     Position: Vector3,
     Normal: Vector3,
     Distance: number,
-    Material: Enum.Material,
+    Material: EnumMaterial,
 }
 
 type HttpRequestOptions = {
@@ -1168,9 +1168,9 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                                     else otherParam["Type"]["Name"]
                                                 )
                                                 if "Generic" in param["Type"]:
-                                                    otherParam["Type"][
-                                                        "Generic"
-                                                    ] = param["Type"]["Generic"]
+                                                    otherParam["Type"]["Generic"] = (
+                                                        param["Type"]["Generic"]
+                                                    )
                                             if "Default" in param:
                                                 otherParam["Default"] = param["Default"]
 
