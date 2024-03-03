@@ -202,7 +202,7 @@ static std::vector<lsp::Location> processReferences(WorkspaceFileResolver& fileR
         }
         else
         {
-            if (auto filePath = fileResolver.resolveToRealPath(reference.moduleName))
+            if (auto filePath = fileResolver.platform->resolveToRealPath(reference.moduleName))
             {
                 if (auto source = fileResolver.readSource(reference.moduleName))
                 {

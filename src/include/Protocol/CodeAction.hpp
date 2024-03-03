@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 
+#include "LSP/Utils.hpp"
 #include "Protocol/Diagnostics.hpp"
 #include "Protocol/Structures.hpp"
 
@@ -153,6 +154,10 @@ struct CodeActionContext
      */
     // TODO: this is technicall optional, but it causes build issues
     CodeActionTriggerKind triggerKind = CodeActionTriggerKind::Invoked;
+
+    [[nodiscard]] bool wants(lsp::CodeActionKind kind) const {
+        return only.empty() || contains(only, kind);
+    }
 };
 NLOHMANN_DEFINE_OPTIONAL(CodeActionContext, diagnostics, only, triggerKind)
 

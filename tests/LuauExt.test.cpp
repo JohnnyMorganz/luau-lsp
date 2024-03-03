@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "LSP/LuauExt.hpp"
+#include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("Luau Extensions");
 
@@ -11,7 +12,7 @@ TEST_CASE_FIXTURE(Fixture, "FindImports service location 1")
     )");
     REQUIRE(block);
 
-    FindImportsVisitor visitor;
+    RobloxFindImportsVisitor visitor;
     visitor.visit(block);
 
     CHECK_EQ(visitor.findBestLineForService("CollectionService", 0), 1);
@@ -26,7 +27,7 @@ TEST_CASE_FIXTURE(Fixture, "FindImports service location 2")
     )");
     REQUIRE(block);
 
-    FindImportsVisitor visitor;
+    RobloxFindImportsVisitor visitor;
     visitor.visit(block);
 
     CHECK_EQ(visitor.findBestLineForService("CollectionService", 0), 1);
@@ -42,7 +43,7 @@ TEST_CASE_FIXTURE(Fixture, "FindImports service location 3")
     )");
     REQUIRE(block);
 
-    FindImportsVisitor visitor;
+    RobloxFindImportsVisitor visitor;
     visitor.visit(block);
 
     CHECK_EQ(visitor.findBestLineForService("Workspace", 0), 3);

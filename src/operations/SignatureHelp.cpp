@@ -2,6 +2,8 @@
 #include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
+#include "Luau/Normalize.h"
+#include "Luau/Unifier.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
@@ -212,7 +214,10 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             if (auto candidateFunctionType = Luau::get<Luau::FunctionType>(part))
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
-    return lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
+    lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
+    platform->handleSignatureHelp(*textDocument, *sourceModule, position, help);
+
+    return help;
 }
 
 std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)

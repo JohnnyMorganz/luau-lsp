@@ -9,11 +9,12 @@ struct ClientDiagnosticsConfiguration
     /// Whether to compute diagnostics for a whole workspace
     bool workspace = false;
     /// Whether to use expressive DM types in the diagnostics typechecker
+    /// DEPRECATED: USE `platform.roblox.diagnostics.strictDatamodelTypes`
     bool strictDatamodelTypes = false;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes)
 
-struct ClientSourcemapConfiguration
+struct ClientRobloxSourcemapConfiguration
 {
     /// Whether Rojo sourcemap-related features are enabled
     bool enabled = true;
@@ -24,11 +25,12 @@ struct ClientSourcemapConfiguration
     /// Whether non script instances should be included in the generated sourcemap
     bool includeNonScripts = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts);
 
 struct ClientTypesConfiguration
 {
     /// Whether Roblox-related definitions should be supported
+    /// DEPRECATED: USE `platform.type` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
     std::vector<std::filesystem::path> definitionFiles{};
@@ -97,6 +99,7 @@ struct ClientCompletionImportsConfiguration
     /// Whether we should suggest automatic imports in completions
     bool enabled = false;
     /// Whether services should be suggested in auto-import
+    /// DEPRECATED: USE `platform.roblox.suggestServices` INSTEAD
     bool suggestServices = true;
     /// Whether requires should be suggested in auto-import
     bool suggestRequires = true;
@@ -194,6 +197,41 @@ struct ClientBytecodeConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, vectorLib, vectorCtor, vectorType)
 
+enum struct LSPPlatformConfig
+{
+    Standard,
+    Roblox
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(LSPPlatformConfig, {
+                                                    {LSPPlatformConfig::Standard, "standard"},
+                                                    {LSPPlatformConfig::Roblox, "roblox"},
+                                                })
+
+struct ClientRobloxDiagnosticsConfiguration
+{
+    /// Whether to use expressive DM types in the diagnostics typechecker
+    bool strictDatamodelTypes = false;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxDiagnosticsConfiguration, strictDatamodelTypes);
+
+struct ClientRobloxPlatformConfiguration
+{
+    /// Whether services should be suggested in auto-import
+    bool suggestServices = true;
+    ClientRobloxSourcemapConfiguration sourcemap{};
+    ClientRobloxDiagnosticsConfiguration diagnostics{};
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices, sourcemap, diagnostics);
+
+struct ClientPlatformConfiguration
+{
+    LSPPlatformConfig type = LSPPlatformConfig::Roblox;
+    ClientRobloxPlatformConfiguration roblox;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, type, roblox);
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
@@ -203,7 +241,9 @@ struct ClientConfiguration
     /// DEPRECATED: Use completion.autocompleteEnd instead
     bool autocompleteEnd = false;
     std::vector<std::string> ignoreGlobs{};
-    ClientSourcemapConfiguration sourcemap{};
+    ClientPlatformConfiguration platform{};
+    /// DEPRECATED: Use platform.roblox.sourcemap instead
+    ClientRobloxSourcemapConfiguration sourcemap{};
     ClientDiagnosticsConfiguration diagnostics{};
     ClientTypesConfiguration types{};
     ClientInlayHintsConfiguration inlayHints{};
@@ -215,5 +255,5 @@ struct ClientConfiguration
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, sourcemap, diagnostics, types, inlayHints, hover,
-    completion, signatureHelp, require, index, fflags, bytecode);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);

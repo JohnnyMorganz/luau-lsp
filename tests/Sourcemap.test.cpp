@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "LSP/Sourcemap.hpp"
+#include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 

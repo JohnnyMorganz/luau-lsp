@@ -49,7 +49,7 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
         if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *require.require))
         {
             // Resolve the module info to a URI
-            auto realName = fileResolver.resolveToRealPath(moduleInfo->name);
+            auto realName = platform->resolveToRealPath(moduleInfo->name);
             if (realName)
             {
                 lsp::DocumentLink link;

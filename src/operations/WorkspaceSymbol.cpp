@@ -120,7 +120,7 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
         }
         else
         {
-            if (auto filePath = fileResolver.resolveToRealPath(moduleName))
+            if (auto filePath = platform->resolveToRealPath(moduleName))
             {
                 if (auto source = fileResolver.readSource(moduleName))
                 {
