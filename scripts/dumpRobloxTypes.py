@@ -617,14 +617,6 @@ export type RBXScriptSignal<T... = ...any> = {
     Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-export type RaycastResult<T = Instance> = {
-    Instance: T,
-    Position: Vector3,
-    Normal: Vector3,
-    Distance: number,
-    Material: EnumMaterial,
-}
-
 type HttpRequestOptions = {
     Url: string,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
@@ -674,6 +666,14 @@ declare SharedTable: {
     isFrozen: (st: SharedTable) -> boolean,
     size: (st: SharedTable) -> number,
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
+}
+
+export type RaycastResult<T = Instance> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Distance: number,
+    Material: EnumMaterial,
 }
 
 declare game: DataModel
