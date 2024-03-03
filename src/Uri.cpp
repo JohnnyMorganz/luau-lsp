@@ -111,7 +111,7 @@ static std::string encodeURIComponent(const std::string& value)
     for (std::string::value_type c : value)
     {
         // Keep alphanumeric and other accepted characters intact
-        if ((c >= -1 && c <= 255 && std::isalnum(c)) || c == '-' || c == '_' || c == '.' || c == '~')
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~')
         {
             escaped << c;
             continue;

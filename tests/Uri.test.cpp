@@ -499,9 +499,12 @@ TEST_CASE("URI - (de)serialize'")
 
 TEST_CASE("luau-lsp custom: encodeURIComponent #555")
 {
-    auto uri = Uri::file("c:\\Users\\leoni\\OneDrive\\Рабочий стол\\Creations\\RobloxProjects\\Nelsk");
+    auto uri = Uri::file(IF_WINDOWS("c:\\Users\\leoni\\OneDrive\\Рабочий стол\\Creations\\RobloxProjects\\Nelsk",
+        "/home/leoni/OneDrive/Рабочий стол/Creations/RobloxProjects/Nelsk"));
     CHECK_EQ(uri.toString(),
-        "file:///c%3A/Users/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk");
+        IF_WINDOWS(
+            "file:///c%3A/Users/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk",
+            "file://home/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk"));
 }
 
 TEST_SUITE_END();
