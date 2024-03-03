@@ -93,13 +93,21 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
 
     // Find a list of files to compute diagnostics for
     std::vector<Uri> files{};
-    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath()), end; next != end; ++next)
+    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
+         next != end; ++next)
     {
-        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+        try
         {
-            auto ext = next->path().extension();
-            if (ext == ".lua" || ext == ".luau")
-                files.push_back(Uri::file(next->path()));
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+            {
+                auto ext = next->path().extension();
+                if (ext == ".lua" || ext == ".luau")
+                    files.push_back(Uri::file(next->path()));
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
         }
     }
 

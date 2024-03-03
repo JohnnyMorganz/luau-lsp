@@ -116,7 +116,7 @@ Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleNam
     if (!FFlag::LuauStacklessTypeClone3)
         return frontend.check(
             moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ runLintChecks});
-    
+
     try
     {
         return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, runLintChecks});
@@ -160,7 +160,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
     size_t indexCount = 0;
 
-    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath()), end; next != end; ++next)
+    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
+         next != end; ++next)
     {
         if (indexCount >= config.index.maxFiles)
         {
@@ -170,20 +171,27 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             break;
         }
 
-        if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
-            !isIgnoredFile(next->path(), config))
+        try
         {
-            auto ext = next->path().extension();
-            if (ext == ".lua" || ext == ".luau")
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
+                !isIgnoredFile(next->path(), config))
             {
-                auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
+                auto ext = next->path().extension();
+                if (ext == ".lua" || ext == ".luau")
+                {
+                    auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
 
-                // Parse the module to infer require data
-                // We do not perform any type checking here
-                frontend.parse(moduleName);
+                    // Parse the module to infer require data
+                    // We do not perform any type checking here
+                    frontend.parse(moduleName);
 
-                indexCount += 1;
+                    indexCount += 1;
+                }
             }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to index file: ") + e.what());
         }
     }
 

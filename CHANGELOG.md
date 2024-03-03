@@ -6,8 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added
-- Support for TOML files
+## [1.28.0] - 2024-03-03
 
 ### Changed
 
@@ -20,8 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Autocompletion of variables that hold a class type will now correctly have a kind of "variable" rather than "class"
 - Introduced a fix for orphaned `rojo` processes after VSCode has closed
-- `FindFirstAncestor` method now correctly finds the project root in non-DataModel projects 
+- `FindFirstAncestor` method now correctly finds the project root in non-DataModel projects
 - Fixed bad handling of unicode in filesystem paths causing crashes on server startup
+- Gracefully handle filesystem errors when visiting directories for indexing / workspace diagnostics
 
 ## [1.27.1] - 2024-01-20
 
