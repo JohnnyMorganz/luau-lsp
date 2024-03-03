@@ -1,4 +1,4 @@
-// Based off https://github.com/microsoft/vscode-uri/blob/main/src/uri.ts
+// Based off https://github.com/microsoft/vscode-uri/blob/6dec22d7dcc6c63c30343d3a8d56050d0078cb6a/src/uri.ts
 #include <filesystem>
 #include <regex>
 #include <optional>
@@ -6,7 +6,7 @@
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
 
-static std::string percentDecode(const std::string& str)
+static std::string decodeURIComponent(const std::string& str)
 {
     std::string res;
     res.reserve(str.length());
@@ -30,6 +30,22 @@ static std::string percentDecode(const std::string& str)
         }
     }
     return res;
+}
+
+static std::string percentDecode(const std::string& str)
+{
+    const std::regex REGEX_EXPR(R"((%[0-9A-Za-z][0-9A-Za-z])+)");
+    std::string out;
+    auto it = str.cbegin();
+    auto end = str.cend();
+
+    for (std::smatch match; std::regex_search(it, end, match, REGEX_EXPR); it = match[0].second)
+    {
+        out += match.prefix();
+        out += decodeURIComponent(match.str());
+    }
+    out.append(it, end);
+    return out;
 }
 
 static std::optional<std::string> encode(char c)
@@ -92,10 +108,10 @@ static std::string encodeURIComponent(const std::string& value)
     escaped.fill('0');
     escaped << std::hex;
 
-    for (char c : value)
+    for (std::string::value_type c : value)
     {
         // Keep alphanumeric and other accepted characters intact
-        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        if ((c >= -1 && c <= 255 && std::isalnum(c)) || c == '-' || c == '_' || c == '.' || c == '~')
         {
             escaped << c;
             continue;
@@ -110,7 +126,7 @@ static std::string encodeURIComponent(const std::string& value)
     return escaped.str();
 }
 
-static std::string encodeURIComponentFast(const std::string& uriComponent, bool allowSlash = false)
+static std::string encodeURIComponentFast(const std::string& uriComponent, bool isPath, bool isAuthority)
 {
     std::optional<std::string> res = std::nullopt;
     size_t nativeEncodePos = std::string::npos;
@@ -120,7 +136,9 @@ static std::string encodeURIComponentFast(const std::string& uriComponent, bool 
         auto code = uriComponent.at(pos);
 
         // unreserved characters: https://tools.ietf.org/html/rfc3986#section-2.3
-        if (iswalpha(code) || iswdigit(code) || code == '-' || code == '.' || code == '_' || code == '~' || (allowSlash && code == '/'))
+        if ((code >= 'a' && code <= 'z') || (code >= 'A' && code <= 'Z') || (code >= '0' && code <= '9') || code == '-' || code == '.' ||
+            code == '_' || code == '~' || (isPath && code == '/') || (isAuthority && code == '[') || (isAuthority && code == ']') ||
+            (isAuthority && code == ':'))
         {
             // check if we are delaying native encode
             if (nativeEncodePos != std::string::npos)
@@ -173,7 +191,7 @@ static std::string encodeURIComponentFast(const std::string& uriComponent, bool 
     return res.has_value() ? res.value() : uriComponent;
 }
 
-static std::string encodeURIComponentMinimal(const std::string& path, bool = false)
+static std::string encodeURIComponentMinimal(const std::string& path, bool, bool)
 {
     std::optional<std::string> res;
     for (size_t pos = 0; pos < path.length(); pos++)
@@ -287,30 +305,30 @@ std::string Uri::toStringUncached(bool skipEncoding) const
             // <user>@<auth>
             auto userinfo = mutAuthority.substr(0, idx);
             mutAuthority = mutAuthority.substr(idx + 1);
-            idx = userinfo.find(':');
+            idx = userinfo.rfind(':');
             if (idx == std::string::npos)
             {
-                res += encoder(userinfo, false);
+                res += encoder(userinfo, false, false);
             }
             else
             {
                 // <user>:<pass>@<auth>
-                res += encoder(userinfo.substr(0, idx), false);
+                res += encoder(userinfo.substr(0, idx), false, false);
                 res += ':';
-                res += encoder(userinfo.substr(idx + 1), false);
+                res += encoder(userinfo.substr(idx + 1), false, true);
             }
             res += '@';
         }
         toLower(mutAuthority);
-        idx = mutAuthority.find(':');
+        idx = mutAuthority.rfind(':');
         if (idx == std::string::npos)
         {
-            res += encoder(mutAuthority, false);
+            res += encoder(mutAuthority, false, true);
         }
         else
         {
             // <auth>:<port>
-            res += encoder(mutAuthority.substr(0, idx), false);
+            res += encoder(mutAuthority.substr(0, idx), false, true);
             res += mutAuthority.substr(idx);
         }
     }
@@ -335,17 +353,17 @@ std::string Uri::toStringUncached(bool skipEncoding) const
             }
         }
         // encode the rest of the path
-        res += encoder(mutPath, true);
+        res += encoder(mutPath, true, false);
     }
     if (!query.empty())
     {
         res += '?';
-        res += encoder(query, false);
+        res += encoder(query, false, false);
     }
     if (!fragment.empty())
     {
         res += '#';
-        res += !skipEncoding ? encodeURIComponentFast(fragment, false) : fragment;
+        res += !skipEncoding ? encodeURIComponentFast(fragment, false, false) : fragment;
     }
     return res;
 }
