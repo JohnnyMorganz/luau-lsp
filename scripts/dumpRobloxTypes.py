@@ -64,7 +64,7 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
-    "RaycastResult", # Redefined using generics
+    "RaycastResult",  # Redefined using generics
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -617,14 +617,6 @@ export type RBXScriptSignal<T... = ...any> = {
     Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-export type RaycastResult<T = Instance> = {
-    Instance: T,
-    Position: Vector3,
-    Normal: Vector3,
-    Distance: number,
-    Material: Enum.Material,
-}
-
 type HttpRequestOptions = {
     Url: string,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
@@ -674,6 +666,14 @@ declare SharedTable: {
     isFrozen: (st: SharedTable) -> boolean,
     size: (st: SharedTable) -> number,
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
+}
+
+export type RaycastResult<T = Instance> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Distance: number,
+    Material: EnumMaterial,
 }
 
 declare game: DataModel
@@ -1168,9 +1168,9 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                                     else otherParam["Type"]["Name"]
                                                 )
                                                 if "Generic" in param["Type"]:
-                                                    otherParam["Type"][
-                                                        "Generic"
-                                                    ] = param["Type"]["Generic"]
+                                                    otherParam["Type"]["Generic"] = (
+                                                        param["Type"]["Generic"]
+                                                    )
                                             if "Default" in param:
                                                 otherParam["Default"] = param["Default"]
 
