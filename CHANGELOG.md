@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Introduced a fix for orphaned `rojo` processes after VSCode has closed
 - `FindFirstAncestor` method now correctly finds the project root in non-DataModel projects 
 - Fixed bad handling of unicode in filesystem paths causing crashes on server startup
+- Gracefully handle filesystem errors when visiting directories for indexing / workspace diagnostics
 
 ## [1.27.1] - 2024-01-20
 
