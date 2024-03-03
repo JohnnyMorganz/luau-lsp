@@ -85,6 +85,32 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive
     CHECK_FALSE(resolved.has_value());
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
+{
+    SourceNode sourceNode;
+    sourceNode.name = "Foo";
+
+    WorkspaceFileResolver fileResolver;
+    fileResolver.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
+
+    Luau::ModuleInfo baseContext{"ProjectRoot/Bar"};
+
+    Luau::AstStatBlock* block = parse(R"(
+        local t = node:FindFirstAncestor("Foo")
+    )");
+    REQUIRE(block != nullptr);
+    REQUIRE(block->body.size > 0);
+
+    Luau::AstStatLocal* local = block->body.data[0]->as<Luau::AstStatLocal>();
+    REQUIRE(local != nullptr);
+    REQUIRE_EQ(1, local->values.size);
+
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(resolved->name, "ProjectRoot");
+}
+
 TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
 {
     std::unordered_map<std::string, std::string> directoryAliases{

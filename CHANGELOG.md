@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Autocompletion of variables that hold a class type will now correctly have a kind of "variable" rather than "class"
 - Introduced a fix for orphaned `rojo` processes after VSCode has closed
+- `FindFirstAncestor` method now correctly finds the project root in non-DataModel projects 
+- Fixed bad handling of unicode in filesystem paths causing crashes on server startup
 
 ## [1.27.1] - 2024-01-20
 
