@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "LSP/Sourcemap.hpp"
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
 
 bool SourceNode::isScript()
 {
@@ -129,12 +130,18 @@ std::string jsonValueToLuau(const json& val)
 
 std::string tomlValueToLuau(const tomlValue& val)
 {
-    if (val.is_string() || val.is_integer() || val.is_floating() || val.is_boolean())
+    if (val.is_string())
+    {
+        std::string str = val.as_string();
+        return '"' + Luau::escape(str) + '"';
+    }
+    else if (val.is_integer() || val.is_floating() || val.is_boolean())
     {
         return toml::format(val);
     }
     else if (val.is_uninitialized())
     {
+        // unreachable
         return "nil";
     }
     else if (val.is_array())
@@ -154,7 +161,7 @@ std::string tomlValueToLuau(const tomlValue& val)
         std::string out = "{";
         for (auto& [key, value] : val.as_table())
         {
-            out += "[\"" + key + "\"] = ";
+            out += "[\"" + Luau::escape(key) + "\"] = ";
             out += tomlValueToLuau(value);
             out += ";";
         }
