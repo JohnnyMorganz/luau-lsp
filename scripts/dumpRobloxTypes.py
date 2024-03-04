@@ -8,9 +8,9 @@ import json
 import sys
 
 # API Endpoints
-DATA_TYPES_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json"
+DATA_TYPES = open("DataTypes.json","r")
+CORRECTIONS = open("Corrections.json","r")
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
-CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/Corrections.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
@@ -1217,14 +1217,14 @@ brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
 
 # Print global types
-dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
+dataTypes: DataTypesDump = json.load(DATA_TYPES)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
 
 # Load services and creatable instances
 loadClassesIntoStructures(dump)
 
 # Apply any corrections on the dump
-corrections: CorrectionsDump = json.loads(requests.get(CORRECTIONS_URL).text)
+corrections: CorrectionsDump = json.load(CORRECTIONS)
 applyCorrections(dump, corrections)
 
 printJsonPrologue()
