@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.28.1] - 2024-03-04
+
 ### Fixed
 
 - Fixed macos release build
