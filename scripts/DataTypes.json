@@ -796,6 +796,40 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "fromEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "order",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "Angles",
                     "Parameters": [
                         {
@@ -942,6 +976,34 @@
                         },
                         {
                             "Name": "target",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "up",
+                            "Default": "(0, 1, 0)",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lookAlong",
+                    "Parameters": [
+                        {
+                            "Name": "at",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "direction",
                             "Type": {
                                 "Name": "Vector3"
                             }
@@ -2935,6 +2997,31 @@
                     "MemberType": "Function",
                     "Name": "ToEulerAnglesYXZ",
                     "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "order",
+                            "Default":"XYZ",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
                     "TupleReturns": [
                         {
                             "Name": "number"
