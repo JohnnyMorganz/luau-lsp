@@ -2503,6 +2503,63 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Angle",
+                    "Parameters": [
+                        {
+                            "Name":"other",
+                            "Type":{
+                                "Name":"Vector2"
+                            }
+                        },
+                        {
+                            "Name":"isSigned",
+                            "Type":{
+                                "Name":"bool"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "Max",
                     "Parameters": [
                         {

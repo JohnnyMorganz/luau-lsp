@@ -637,6 +637,16 @@ type HumanoidDescriptionAccessory = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare Vector2: {
+	zero: Vector2,
+	one: Vector2,
+	xAxis: Vector2,
+	yAxis: Vector2,
+	new: ((x: number?, y: number?) -> Vector2),
+	max: ((...Vector2) -> Vector2),
+	min: ((...Vector2) -> Vector2),
+}
+
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
