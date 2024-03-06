@@ -591,6 +591,33 @@
                     "ReturnType": {
                         "Name": "PhysicalProperties"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
                 }
             ],
             "Name": "PhysicalProperties"
