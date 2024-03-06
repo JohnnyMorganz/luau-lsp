@@ -542,6 +542,12 @@ declare class EnumButtonStyle_INTERNAL extends Enum
 	RobloxRoundDefaultButton: EnumButtonStyle
 	RobloxRoundDropdownButton: EnumButtonStyle
 end
+declare class EnumCSGAsyncDynamicCollision extends EnumItem end
+declare class EnumCSGAsyncDynamicCollision_INTERNAL extends Enum
+	Default: EnumCSGAsyncDynamicCollision
+	Disabled: EnumCSGAsyncDynamicCollision
+	Experimental: EnumCSGAsyncDynamicCollision
+end
 declare class EnumCageType extends EnumItem end
 declare class EnumCageType_INTERNAL extends Enum
 	Inner: EnumCageType
@@ -1218,6 +1224,10 @@ declare class EnumFont_INTERNAL extends Enum
 	ArialBold: EnumFont
 	Bangers: EnumFont
 	Bodoni: EnumFont
+	BuilderSans: EnumFont
+	BuilderSansBold: EnumFont
+	BuilderSansExtraBold: EnumFont
+	BuilderSansMedium: EnumFont
 	Cartoon: EnumFont
 	Code: EnumFont
 	Creepster: EnumFont
@@ -2609,6 +2619,12 @@ declare class EnumRunContext_INTERNAL extends Enum
 	Plugin: EnumRunContext
 	Server: EnumRunContext
 end
+declare class EnumRunState extends EnumItem end
+declare class EnumRunState_INTERNAL extends Enum
+	Paused: EnumRunState
+	Running: EnumRunState
+	Stopped: EnumRunState
+end
 declare class EnumRuntimeUndoBehavior extends EnumItem end
 declare class EnumRuntimeUndoBehavior_INTERNAL extends Enum
 	Aggregate: EnumRuntimeUndoBehavior
@@ -3667,6 +3683,7 @@ type ENUM_LIST = {
 	BundleType: EnumBundleType_INTERNAL,
 	Button: EnumButton_INTERNAL,
 	ButtonStyle: EnumButtonStyle_INTERNAL,
+	CSGAsyncDynamicCollision: EnumCSGAsyncDynamicCollision_INTERNAL,
 	CageType: EnumCageType_INTERNAL,
 	CameraMode: EnumCameraMode_INTERNAL,
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
@@ -3887,6 +3904,7 @@ type ENUM_LIST = {
 	RotationType: EnumRotationType_INTERNAL,
 	RtlTextSupport: EnumRtlTextSupport_INTERNAL,
 	RunContext: EnumRunContext_INTERNAL,
+	RunState: EnumRunState_INTERNAL,
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior_INTERNAL,
 	SafeAreaCompatibility: EnumSafeAreaCompatibility_INTERNAL,
 	SalesTypeFilter: EnumSalesTypeFilter_INTERNAL,
@@ -4209,7 +4227,13 @@ declare class RaycastParams
 	function AddToFilter(self, instances: Instance | { Instance }): nil
 end
 
-
+declare class RaycastResult
+	Distance: number
+	Instance: Instance
+	Material: EnumMaterial
+	Normal: Vector3
+	Position: Vector3
+end
 
 declare class Rect
 	Height: number
@@ -4823,6 +4847,7 @@ end
 
 declare class BadgeService extends Instance
 	function AwardBadge(self, userId: number, badgeId: number): boolean
+	function CheckUserBadgesAsync(self, userId: number, badgeIds: { any }): { any }
 	function GetBadgeInfoAsync(self, badgeId: number): { [any]: any }
 	function UserHasBadgeAsync(self, userId: number, badgeId: number): boolean
 end
@@ -5932,7 +5957,10 @@ declare class ExperienceInviteOptions extends Instance
 end
 
 declare class ExperienceNotificationService extends Instance
+	OptInPromptClosed: RBXScriptSignal<>
+	function CanPromptOptInAsync(self): boolean
 	function CreateUserNotificationAsync(self, userId: string, userNotification: UserNotification): Instance
+	function PromptOptIn(self): nil
 end
 
 declare class ExperienceService extends Instance
@@ -7110,7 +7138,6 @@ end
 
 declare class LuaSourceContainer extends Instance
 	CurrentEditor: Instance
-	RuntimeSource: string
 end
 
 declare class BaseScript extends LuaSourceContainer
@@ -7621,23 +7648,24 @@ end
 declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
 	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult
-	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?
+	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
 	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
 	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
 	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
-	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<BasePart>?
+	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult
-	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?
+	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult
-	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?
+	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 end
 
 declare class Workspace extends WorldRoot
 	AirDensity: number
 	AllowThirdPartySales: boolean
 	AvatarUnificationMode: EnumAvatarUnificationMode
+	CSGAsyncDynamicCollision: EnumCSGAsyncDynamicCollision
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
@@ -9011,7 +9039,7 @@ declare class StudioService extends Instance
 	UseLocalSpace: boolean
 	function GetClassIcon(self, className: string): { [any]: any }
 	function GetUserId(self): number
-	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint>?
+	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult
 	function PromptImportFile(self, fileTypeFilter: { any }?): Instance
 	function PromptImportFiles(self, fileTypeFilter: { any }?): { Instance }
 end
@@ -9312,6 +9340,9 @@ declare class TextureGenerationPartGroup extends Instance
 end
 
 declare class TextureGenerationService extends Instance
+end
+
+declare class TextureGenerationUnwrappingRequest extends Instance
 end
 
 declare class ThirdPartyUserService extends Instance
@@ -9991,14 +10022,6 @@ declare SharedTable: {
     isFrozen: (st: SharedTable) -> boolean,
     size: (st: SharedTable) -> number,
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
-}
-
-export type RaycastResult<T = Instance> = {
-    Instance: T,
-    Position: Vector3,
-    Normal: Vector3,
-    Distance: number,
-    Material: EnumMaterial,
 }
 
 declare game: DataModel
