@@ -647,6 +647,21 @@ declare Vector2: {
 	min: ((...Vector2) -> Vector2),
 }
 
+declare Vector3: {
+	zero: Vector3,
+	one: Vector3,
+	xAxis: Vector3,
+	yAxis: Vector3,
+	zAxis: Vector3,
+	fromNormalId: ((normal: EnumNormalId) -> Vector3),
+	fromAxis: ((axis: EnumAxis) -> Vector3),
+	FromNormalId: ((normal: EnumNormalId) -> Vector3),
+	FromAxis: ((axis: EnumAxis) -> Vector3),
+	new: ((x: number?, y: number?, z: number?) -> Vector3),
+    max: ((...Vector3) -> Vector3),
+	min: ((...Vector3) -> Vector3),
+}
+
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings

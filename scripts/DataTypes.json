@@ -3816,6 +3816,42 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "FuzzyEq",
                     "Parameters": [
                         {
