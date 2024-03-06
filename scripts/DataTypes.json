@@ -1293,6 +1293,15 @@
                     "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Rect"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
                         {
                             "Name": "min",
                             "Type": {
