@@ -2263,7 +2263,12 @@
                 }
             ],
             "Name": "SharedTable"
+        },
+        {
+            "Members":[],
+            "Name": "Secret"
         }
+
     ],
     "DataTypes": [
         {
@@ -4920,6 +4925,41 @@
                 }
             ],
             "Name": "SharedTable"
+        },
+        {
+            "Members":[
+                {
+                    "MemberType": "Function",
+                    "Name": "AddPrefix",
+                    "Parameters": [
+                        {
+                            "Name": "prefix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "AddSuffix",
+                    "Parameters": [
+                        {
+                            "Name": "suffix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                }
+            ],
+            "Name": "Secret"
         }
     ]
 }
