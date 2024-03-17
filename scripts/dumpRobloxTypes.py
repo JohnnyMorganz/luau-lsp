@@ -637,31 +637,6 @@ type HumanoidDescriptionAccessory = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
-declare Vector2: {
-	zero: Vector2,
-	one: Vector2,
-	xAxis: Vector2,
-	yAxis: Vector2,
-	new: ((x: number?, y: number?) -> Vector2),
-	max: ((...Vector2) -> Vector2),
-	min: ((...Vector2) -> Vector2),
-}
-
-declare Vector3: {
-	zero: Vector3,
-	one: Vector3,
-	xAxis: Vector3,
-	yAxis: Vector3,
-	zAxis: Vector3,
-	fromNormalId: ((normal: EnumNormalId) -> Vector3),
-	fromAxis: ((axis: EnumAxis) -> Vector3),
-	FromNormalId: ((normal: EnumNormalId) -> Vector3),
-	FromAxis: ((axis: EnumAxis) -> Vector3),
-	new: ((x: number?, y: number?, z: number?) -> Vector3),
-    max: ((...Vector3) -> Vector3),
-	min: ((...Vector3) -> Vector3),
-}
-
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
@@ -908,6 +883,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if "Tuple" in type and type["Tuple"] is not None:
         subtype = resolveType(type["Tuple"])
         return f"...({subtype})"
+    if "Variadic" in type and type["Variadic"] is not None:
+        subtype = resolveType(type["Variadic"])
+        return f"...{subtype}"
 
     name, category = (
         type["Name"],
@@ -929,6 +907,9 @@ def resolveParameter(param: ApiParameter):
     isVariadic = paramType.startswith("...")
     if isVariadic:
         actualType = paramType[3:]
+        if "Variadic" in param["Type"] and  param["Type"]["Variadic"] is not None:
+            return f"...{actualType}"
+        
         return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 

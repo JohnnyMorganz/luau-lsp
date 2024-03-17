@@ -344,6 +344,40 @@
                     "ValueType": {
                         "Name": "Vector2"
                     }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
+                    }
                 }
             ],
             "Name": "Vector2"
@@ -1486,6 +1520,40 @@
                     "Name": "zAxis",
                     "ValueType": {
                         "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
                     }
                 }
             ],
