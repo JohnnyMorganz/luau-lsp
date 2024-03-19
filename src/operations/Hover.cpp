@@ -65,7 +65,7 @@ struct DocumentationLocation
     Luau::Location location;
 };
 
-std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
+std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params, std::optional<std::unordered_map<std::string, std::string>> loadedAssetUrls)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -292,6 +292,27 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         }
         else
             typeString = codeBlock("luau", "string");
+
+        if (config.inlayHints.images) {
+            if (loadedAssetUrls.has_value()) {
+                std::string asset = std::string(string->value.data, string->value.size);
+                std::string assetLead = "rbxassetid://";
+
+                size_t start = asset.find(assetLead);
+                
+                if (start != std::string::npos) {
+                    size_t length = assetLead.length();
+                    std::string assetId = asset.substr(length);
+
+                    for (auto [name, url] : loadedAssetUrls.value()) {
+                        if (strcmp(name.c_str(), assetId.c_str()) == 0) {
+                            typeString = "![Icon](" + url + ")";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
     else
     {
@@ -324,5 +345,5 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
+    return workspace->hover(params, workspace->loadedAssetUrls);
 }
