@@ -76,6 +76,13 @@ struct InlayHintVisitor : public Luau::AstVisitor
         if (start != std::string::npos) {
             size_t length = assetLead.length();
             std::string assetId = asset.substr(length);
+
+            if (!std::all_of(assetId.begin(), assetId.end(), [](char c){ return std::isdigit(c); })) {
+                // malformed asset id
+                // it should contain all numbers
+                return true;
+            }
+
             size_t id = std::stoull(assetId.c_str());
 
             if (std::find(loadedAssets.begin(), loadedAssets.end(), id) != loadedAssets.end()) {
