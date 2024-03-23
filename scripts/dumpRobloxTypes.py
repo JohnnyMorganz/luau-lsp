@@ -883,6 +883,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if "Tuple" in type and type["Tuple"] is not None:
         subtype = resolveType(type["Tuple"])
         return f"...({subtype})"
+    if "Variadic" in type and type["Variadic"] is not None:
+        subtype = resolveType(type["Variadic"])
+        return f"...{subtype}"
 
     name, category = (
         type["Name"],
@@ -904,6 +907,9 @@ def resolveParameter(param: ApiParameter):
     isVariadic = paramType.startswith("...")
     if isVariadic:
         actualType = paramType[3:]
+        if "Variadic" in param["Type"] and  param["Type"]["Variadic"] is not None:
+            return f"...{actualType}"
+        
         return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 

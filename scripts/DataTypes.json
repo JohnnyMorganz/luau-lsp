@@ -112,6 +112,13 @@
                                 "Category": "Enum",
                                 "Name": "PathWaypointAction"
                             }
+                        },
+                        {
+                            "Name": "label",
+                            "Default": "",
+                            "Type": {
+                                "Name": "string"
+                            }
                         }
                     ],
                     "ReturnType": {
@@ -336,6 +343,40 @@
                     "Name": "yAxis",
                     "ValueType": {
                         "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
                     }
                 }
             ],
@@ -584,6 +625,33 @@
                     "ReturnType": {
                         "Name": "PhysicalProperties"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
                 }
             ],
             "Name": "PhysicalProperties"
@@ -796,6 +864,40 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "fromEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "order",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "Angles",
                     "Parameters": [
                         {
@@ -942,6 +1044,34 @@
                         },
                         {
                             "Name": "target",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "up",
+                            "Default": "(0, 1, 0)",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lookAlong",
+                    "Parameters": [
+                        {
+                            "Name": "at",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "direction",
                             "Type": {
                                 "Name": "Vector3"
                             }
@@ -1197,6 +1327,15 @@
                     "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Rect"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
                         {
                             "Name": "min",
                             "Type": {
@@ -1381,6 +1520,40 @@
                     "Name": "zAxis",
                     "ValueType": {
                         "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
                     }
                 }
             ],
@@ -2158,7 +2331,12 @@
                 }
             ],
             "Name": "SharedTable"
+        },
+        {
+            "Members":[],
+            "Name": "Secret"
         }
+
     ],
     "DataTypes": [
         {
@@ -2251,6 +2429,13 @@
                     "ValueType": {
                         "Category": "Enum",
                         "Name": "PathWaypointAction"
+                    }
+                },
+                {
+                    "MemberType":"Property",
+                    "Name":"Label",
+                    "ValueType":{
+                        "Name":"string"
                     }
                 }
             ],
@@ -2382,6 +2567,63 @@
                     ],
                     "ReturnType": {
                         "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Angle",
+                    "Parameters": [
+                        {
+                            "Name":"other",
+                            "Type":{
+                                "Name":"Vector2"
+                            }
+                        },
+                        {
+                            "Name":"isSigned",
+                            "Type":{
+                                "Name":"bool"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
                     }
                 },
                 {
@@ -2935,6 +3177,31 @@
                     "MemberType": "Function",
                     "Name": "ToEulerAnglesYXZ",
                     "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "order",
+                            "Default":"XYZ",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
                     "TupleReturns": [
                         {
                             "Name": "number"
@@ -3610,6 +3877,42 @@
                                 "Name": "Vector3"
                             }
                         }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
@@ -4783,6 +5086,41 @@
                 }
             ],
             "Name": "SharedTable"
+        },
+        {
+            "Members":[
+                {
+                    "MemberType": "Function",
+                    "Name": "AddPrefix",
+                    "Parameters": [
+                        {
+                            "Name": "prefix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "AddSuffix",
+                    "Parameters": [
+                        {
+                            "Name": "suffix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                }
+            ],
+            "Name": "Secret"
         }
     ]
 }
