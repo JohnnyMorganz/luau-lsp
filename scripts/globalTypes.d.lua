@@ -11431,6 +11431,7 @@ declare CFrame: {
 	fromOrientation: ((rx: number, ry: number, rz: number) -> CFrame),
 	fromEulerAnglesXYZ: ((rx: number, ry: number, rz: number) -> CFrame),
 	lookAt: ((at: Vector3, target: Vector3, up: Vector3?) -> CFrame),
+	lookAlong: ((at: Vector3, direction: Vector3, up: Vector3?) -> CFrame),
 	new: (() -> CFrame) & ((pos: Vector3) -> CFrame) & ((pos: Vector3, lookAt: Vector3) -> CFrame) & ((x: number, y: number, z: number) -> CFrame) & ((x: number, y: number, z: number, qX: number, qY: number, qZ: number, qW: number) -> CFrame) & ((x: number, y: number, z: number, R00: number, R01: number, R02: number, R10: number, R11: number, R12: number, R20: number, R21: number, R22: number) -> CFrame),
 }
 
@@ -11554,4 +11555,3 @@ declare plugin: Plugin
 declare script: LuaSourceContainer
 declare function settings(): GlobalSettings
 declare function UserSettings(): UserSettings
-
