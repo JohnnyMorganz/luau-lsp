@@ -10080,3 +10080,4 @@ declare plugin: Plugin
 declare script: LuaSourceContainer
 declare function settings(): GlobalSettings
 declare function UserSettings(): UserSettings
+
