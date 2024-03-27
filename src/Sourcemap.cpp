@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "LSP/Sourcemap.hpp"
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
 
 bool SourceNode::isScript()
 {
@@ -20,6 +21,10 @@ std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
             return path;
         }
         else if (path.extension() == ".json" && isScript() && !endsWith(path.filename().generic_string(), ".meta.json"))
+        {
+            return path;
+        }
+        else if (path.extension() == ".toml" && isScript())
         {
             return path;
         }
@@ -107,7 +112,6 @@ std::string jsonValueToLuau(const json& val)
     else if (val.is_object())
     {
         std::string out = "{";
-
         for (auto& [key, value] : val.items())
         {
             out += "[\"" + key + "\"] = ";
@@ -118,6 +122,54 @@ std::string jsonValueToLuau(const json& val)
         out += "}";
         return out;
     }
+    else
+    {
+        return ""; // TODO: should we error here?
+    }
+}
+
+std::string tomlValueToLuau(const tomlValue& val)
+{
+    if (val.is_string())
+    {
+        std::string str = val.as_string();
+        return '"' + Luau::escape(str) + '"';
+    }
+    else if (val.is_integer() || val.is_floating() || val.is_boolean())
+    {
+        return toml::format(val);
+    }
+    else if (val.is_uninitialized())
+    {
+        // unreachable
+        return "nil";
+    }
+    else if (val.is_array())
+    {
+        std::string out = "{";
+        for (auto& elem : val.as_array())
+        {
+            out += tomlValueToLuau(elem);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    else if (val.is_table())
+    {
+        std::string out = "{";
+        for (auto& [key, value] : val.as_table())
+        {
+            out += "[\"" + Luau::escape(key) + "\"] = ";
+            out += tomlValueToLuau(value);
+            out += ";";
+        }
+
+        out += "}";
+        return out;
+    }
+    // TODO: support datetime?
     else
     {
         return ""; // TODO: should we error here?

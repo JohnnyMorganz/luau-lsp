@@ -6,8 +6,10 @@
 #include "Luau/TypeInfer.h"
 #include "Luau/GlobalTypes.h"
 #include "nlohmann/json.hpp"
+#include "toml11/toml.hpp"
 #include "LSP/PluginDataModel.hpp"
 using json = nlohmann::json;
+using tomlValue = toml::value;
 
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 
@@ -52,3 +54,4 @@ static void from_json(const json& j, SourceNode& p)
 }
 Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& requirePath);
 std::string jsonValueToLuau(const json& val);
+std::string tomlValueToLuau(const tomlValue& val);
