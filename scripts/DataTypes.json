@@ -390,12 +390,14 @@
                     "Parameters": [
                         {
                             "Name": "x",
+                            "Default": "0",
                             "Type": {
                                 "Name": "number"
                             }
                         },
                         {
                             "Name": "y",
+                            "Default": "0",
                             "Type": {
                                 "Name": "number"
                             }
