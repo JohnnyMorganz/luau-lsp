@@ -9931,7 +9931,7 @@ declare Vector2: {
 }
 
 declare Vector2int16: {
-	new: ((x: number, y: number) -> Vector2int16),
+	new: ((x: number?, y: number?) -> Vector2int16),
 }
 
 declare Color3: {
