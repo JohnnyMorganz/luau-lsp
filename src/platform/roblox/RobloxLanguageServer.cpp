@@ -20,7 +20,7 @@ void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 
 void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
 {
-    if (config.sourcemap.enabled && config.platform.roblox.sourcemap.enabled)
+    if (config.sourcemap.enabled)
     {
         workspaceFolder->client->sendTrace("workspace: sourcemap enabled");
         if (!workspaceFolder->isNullWorkspace() && !updateSourceMap())

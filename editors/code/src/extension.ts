@@ -244,7 +244,7 @@ export async function activate(context: vscode.ExtensionContext) {
           });
       } else if (
         e.affectsConfiguration("luau-lsp.types") ||
-        e.affectsConfiguration("luau-lsp.platform")
+        e.affectsConfiguration("luau-lsp.platform.type")
       ) {
         vscode.window
           .showInformationMessage(

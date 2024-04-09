@@ -1,6 +1,6 @@
 #include "doctest.h"
 #include "LSP/Utils.hpp"
-#include "LSP/Sourcemap.hpp"
+#include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("UtilsTest");
 

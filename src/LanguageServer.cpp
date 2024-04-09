@@ -353,7 +353,10 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         if (msg.is_request())
         {
             if (isInitialized && !allWorkspacesConfigured())
+            {
                 configPostponedMessages.emplace_back(msg);
+                return;
+            }
 
             onRequest(msg.id.value(), msg.method.value(), msg.params);
         }

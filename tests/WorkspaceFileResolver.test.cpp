@@ -102,7 +102,10 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
     sourceNode.name = "Foo";
 
     WorkspaceFileResolver fileResolver;
-    fileResolver.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
+
+    platform.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
 
     Luau::ModuleInfo baseContext{"ProjectRoot/Bar"};
 

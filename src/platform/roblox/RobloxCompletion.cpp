@@ -283,7 +283,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
     RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(module.root);
 
-    if (config.platform.roblox.suggestServices && config.completion.imports.suggestServices && !completingTypeReferencePrefix)
+    if (config.completion.imports.suggestServices && !completingTypeReferencePrefix)
     {
         std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
 

@@ -104,7 +104,7 @@ Fixture::Fixture()
     loadDefinition(definitions, /* forAutocomplete= */ true);
 
     ClientConfiguration config;
-    config.platform.roblox.sourcemap.enabled = false;
+    config.sourcemap.enabled = false;
     config.index.enabled = false;
     workspace.setupWithConfiguration(config);
 

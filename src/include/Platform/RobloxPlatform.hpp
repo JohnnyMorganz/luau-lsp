@@ -128,9 +128,6 @@ private:
     // Plugin-provided DataModel information
     PluginNodePtr pluginInfo;
 
-    // The root source node from a parsed Rojo source map
-    SourceNodePtr rootSourceNode;
-
     mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
 
@@ -143,6 +140,9 @@ private:
     void writePathsToMap(const SourceNodePtr& node, const std::string& base);
 
 public:
+    // The root source node from a parsed Rojo source map
+    SourceNodePtr rootSourceNode;
+
     Luau::TypeArena instanceTypes;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;

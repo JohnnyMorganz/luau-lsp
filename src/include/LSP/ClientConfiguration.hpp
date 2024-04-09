@@ -215,23 +215,12 @@ struct ClientRobloxDiagnosticsConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxDiagnosticsConfiguration, strictDatamodelTypes);
 
-struct ClientRobloxPlatformConfiguration
-{
-    /// Whether services should be suggested in auto-import
-    bool suggestServices = true;
-    ClientRobloxSourcemapConfiguration sourcemap{};
-    ClientRobloxDiagnosticsConfiguration diagnostics{};
-};
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxPlatformConfiguration, suggestServices, sourcemap, diagnostics);
-
 struct ClientPlatformConfiguration
 {
     LSPPlatformConfig type = LSPPlatformConfig::Roblox;
-    ClientRobloxPlatformConfiguration roblox;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, type, roblox);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, type);
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings

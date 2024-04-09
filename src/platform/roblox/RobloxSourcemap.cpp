@@ -181,7 +181,7 @@ bool RobloxPlatform::updateSourceMap()
         updateSourceNodeMap(sourceMapContents.value());
 
         auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-        bool expressiveTypes = config.diagnostics.strictDatamodelTypes && config.platform.roblox.diagnostics.strictDatamodelTypes;
+        bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
 
         // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
         // We pass the same setting even when we are registering autocomplete globals since

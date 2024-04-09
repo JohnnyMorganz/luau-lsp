@@ -1,5 +1,6 @@
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
+#include "Platform/RobloxPlatform.hpp"
 #include <algorithm>
 #include <fstream>
 
