@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.27.1",
+  "version": "1.28.1",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -627,7 +627,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "express": "^4.18.1",
+    "express": "^4.19.2",
     "node-fetch": "^3.2.4",
     "vscode-languageclient": "^8.1.0-next.6"
   }

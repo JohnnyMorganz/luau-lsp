@@ -172,15 +172,23 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
             if (std::filesystem::is_directory(path))
             {
-                for (std::filesystem::recursive_directory_iterator next(path), end; next != end; ++next)
+                for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
+                     next != end; ++next)
                 {
-                    if (next->is_regular_file() && next->path().has_extension())
+                    try
                     {
-                        auto ext = next->path().extension();
-                        if (ext == ".lua" || ext == ".luau")
+                        if (next->is_regular_file() && next->path().has_extension())
                         {
-                            files.push_back(next->path());
+                            auto ext = next->path().extension();
+                            if (ext == ".lua" || ext == ".luau")
+                            {
+                                files.push_back(next->path());
+                            }
                         }
+                    }
+                    catch (const std::filesystem::filesystem_error& e)
+                    {
+                        std::cerr << "warning: Failed to visit directory: " << e.what() << "\n";
                     }
                 }
             }

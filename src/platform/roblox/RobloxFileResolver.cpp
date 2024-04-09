@@ -185,7 +185,7 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::Module
             }
             else if (func == "FindFirstAncestor")
             {
-                auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size));
+                auto ancestorName = getAncestorPath(context->name, std::string(index->value.data, index->value.size), rootSourceNode);
                 if (ancestorName)
                     return Luau::ModuleInfo{*ancestorName, context->optional};
             }

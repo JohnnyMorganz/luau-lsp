@@ -8,9 +8,9 @@ import json
 import sys
 
 # API Endpoints
-DATA_TYPES_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json"
+DATA_TYPES = open("DataTypes.json","r")
+CORRECTIONS = open("Corrections.json","r")
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
-CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/Corrections.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
@@ -377,6 +377,9 @@ EXTRA_MEMBERS = {
     ],
     "WorldRoot": [
         "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?",
+        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?",
+        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?",
         "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
         "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
         "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
@@ -880,6 +883,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if "Tuple" in type and type["Tuple"] is not None:
         subtype = resolveType(type["Tuple"])
         return f"...({subtype})"
+    if "Variadic" in type and type["Variadic"] is not None:
+        subtype = resolveType(type["Variadic"])
+        return f"...{subtype}"
 
     name, category = (
         type["Name"],
@@ -901,6 +907,9 @@ def resolveParameter(param: ApiParameter):
     isVariadic = paramType.startswith("...")
     if isVariadic:
         actualType = paramType[3:]
+        if "Variadic" in param["Type"] and  param["Type"]["Variadic"] is not None:
+            return f"...{actualType}"
+        
         return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
@@ -1150,9 +1159,9 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                                     else otherParam["Type"]["Name"]
                                                 )
                                                 if "Generic" in param["Type"]:
-                                                    otherParam["Type"][
-                                                        "Generic"
-                                                    ] = param["Type"]["Generic"]
+                                                    otherParam["Type"]["Generic"] = (
+                                                        param["Type"]["Generic"]
+                                                    )
                                             if "Default" in param:
                                                 otherParam["Default"] = param["Default"]
 
@@ -1199,14 +1208,14 @@ brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
 
 # Print global types
-dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
+dataTypes: DataTypesDump = json.load(DATA_TYPES)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
 
 # Load services and creatable instances
 loadClassesIntoStructures(dump)
 
 # Apply any corrections on the dump
-corrections: CorrectionsDump = json.loads(requests.get(CORRECTIONS_URL).text)
+corrections: CorrectionsDump = json.load(CORRECTIONS)
 applyCorrections(dump, corrections)
 
 printJsonPrologue()

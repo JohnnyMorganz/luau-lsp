@@ -21,7 +21,7 @@ std::optional<std::string> getParentPath(const std::string& path)
 
 /// Returns a path at the ancestor point.
 /// i.e., for game/ReplicatedStorage/Module/Child/Foo, and ancestor == Module, returns game/ReplicatedStorage/Module
-std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName)
+std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode)
 {
     // We want to remove the child from the path name in case the ancestor has the same name as the child
     auto parentPath = getParentPath(path);
@@ -30,7 +30,6 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
 
     // Append a "/" to the end of the parentPath to make searching easier
     auto parentPathWithSlash = *parentPath + "/";
-
 
     auto ancestor = parentPathWithSlash.rfind(ancestorName + "/");
     if (ancestor != std::string::npos)
@@ -41,6 +40,13 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
         {
             return parentPathWithSlash.substr(0, ancestor + ancestorName.size());
         }
+    }
+
+    // At this point we know there is definitely no ancestor with the same name within the path
+    // We can return ProjectRoot if project is not a DataModel and rootSourceNode.name == ancestorName
+    if (rootSourceNode && !isDataModel(parentPathWithSlash) && ancestorName == rootSourceNode->name)
+    {
+        return "ProjectRoot";
     }
 
     return std::nullopt;
@@ -132,6 +138,11 @@ std::filesystem::path resolvePath(const std::filesystem::path& path)
     }
     else
         return path;
+}
+
+bool isDataModel(const std::string& path)
+{
+    return Luau::startsWith(path, "game/");
 }
 
 

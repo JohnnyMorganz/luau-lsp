@@ -71,6 +71,11 @@ jobs:
           cmake ..
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
+      - name: Regenerate Types
+        run: |
+          cd scripts
+          python dumpRobloxTypes.py > globalTypes.d.luau
+
       - name: Test types
         run: |
           touch test.lua

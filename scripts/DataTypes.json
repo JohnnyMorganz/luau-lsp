@@ -1,0 +1,5128 @@
+{
+    "Constructors": [
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "className",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        },
+                        {
+                            "Default": "nil",
+                            "Name": "parent",
+                            "Type": {
+                                "Name": "Instance"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Instance"
+                    }
+                }
+            ],
+            "Name": "Instance"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "Origin",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "Direction",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Ray"
+                    }
+                }
+            ],
+            "Name": "Ray"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberRange"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberRange"
+                    }
+                }
+            ],
+            "Name": "NumberRange"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "position",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "action",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "PathWaypointAction"
+                            }
+                        },
+                        {
+                            "Name": "label",
+                            "Default": "",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PathWaypoint"
+                    }
+                }
+            ],
+            "Name": "PathWaypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "Red",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Yellow",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Blue",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Gray",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "DarkGray",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "White",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "random",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Green",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Black",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "palette",
+                    "Parameters": [
+                        {
+                            "Name": "paletteValue",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "val",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "r",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "g",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "b",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "val",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "color",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                }
+            ],
+            "Name": "BrickColor"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "zero",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "one",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "xAxis",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "yAxis",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector2"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector2"
+                    }
+                }
+            ],
+            "Name": "Vector2"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2int16"
+                    }
+                }
+            ],
+            "Name": "Vector2int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "fromRGB",
+                    "Parameters": [
+                        {
+                            "Default": "0",
+                            "Name": "red",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "green",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "blue",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromHSV",
+                    "Parameters": [
+                        {
+                            "Name": "hue",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "saturation",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "toHSV",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "color",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        }
+                    ],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Default": "0",
+                            "Name": "red",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "green",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "blue",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromHex",
+                    "Parameters": [
+                        {
+                            "Name": "hex",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                }
+            ],
+            "Name": "Color3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "Scale",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "Offset",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim"
+                    }
+                }
+            ],
+            "Name": "UDim"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "material",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "Material"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "frictionWeight",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticityWeight",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
+                }
+            ],
+            "Name": "PhysicalProperties"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "axes",
+                            "Type": {
+                                "Name": "Tuple"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Axes"
+                    }
+                }
+            ],
+            "Name": "Axes"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Region3"
+                    }
+                }
+            ],
+            "Name": "Region3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "Vector3int16"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "Vector3int16"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Region3int16"
+                    }
+                }
+            ],
+            "Name": "Region3int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "fromScale",
+                    "Parameters": [
+                        {
+                            "Name": "xScale",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "yScale",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromOffset",
+                    "Parameters": [
+                        {
+                            "Name": "xOffset",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "yOffset",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Type": {
+                                "Name": "UDim"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Type": {
+                                "Name": "UDim"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "xScale",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "xOffset",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "yScale",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "yOffset",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim2"
+                    }
+                }
+            ],
+            "Name": "UDim2"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "fromEulerAnglesYXZ",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "order",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Angles",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromMatrix",
+                    "Parameters": [
+                        {
+                            "Name": "pos",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "vX",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "vY",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "vZ",
+                            "Type": {
+                                "Name": "Vector3"
+                            },
+                            "Default": "nil"
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromAxisAngle",
+                    "Parameters": [
+                        {
+                            "Name": "v",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "r",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromOrientation",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromEulerAnglesXYZ",
+                    "Parameters": [
+                        {
+                            "Name": "rx",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "ry",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "rz",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lookAt",
+                    "Parameters": [
+                        {
+                            "Name": "at",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "target",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "up",
+                            "Default": "(0, 1, 0)",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lookAlong",
+                    "Parameters": [
+                        {
+                            "Name": "at",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "direction",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "up",
+                            "Default": "(0, 1, 0)",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "pos",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "pos",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "lookAt",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "z",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "z",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "qX",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "qY",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "qZ",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "qW",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "x",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "y",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "z",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R00",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R01",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R02",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R10",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R11",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R12",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R20",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R21",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "R22",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "identity",
+                    "ValueType": {
+                        "Name": "CFrame"
+                    }
+                }
+            ],
+            "Name": "CFrame"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "normalIds",
+                            "Type": {
+                                "Name": "Tuple"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Faces"
+                    }
+                }
+            ],
+            "Name": "Faces"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Rect"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Rect"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "minX",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "minY",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "maxX",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "maxY",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Rect"
+                    }
+                }
+            ],
+            "Name": "Rect"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "fromNormalId",
+                    "Parameters": [
+                        {
+                            "Name": "normal",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "NormalId"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromAxis",
+                    "Parameters": [
+                        {
+                            "Name": "axis",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "Axis"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FromNormalId",
+                    "Deprecated": false,
+                    "Parameters": [
+                        {
+                            "Name": "normal",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "NormalId"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FromAxis",
+                    "Deprecated": false,
+                    "Parameters": [
+                        {
+                            "Name": "axis",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "Axis"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Default": "0",
+                            "Name": "x",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "y",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "z",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "zero",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "one",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "xAxis",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "yAxis",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "zAxis",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"min",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
+                    }
+                },
+                {
+                    "MemberType":"Function",
+                    "Name":"max",
+                    "Parameters": [
+                        {
+                        "Name": "other",
+                        "Type":{
+                            "Variadic":{
+                                "Name":"Vector3"
+                            }
+                        }
+                        }
+                    ],
+                    "ReturnType":{
+                        "Name":"Vector3"
+                    }
+                }
+            ],
+            "Name": "Vector3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Default": "0",
+                            "Name": "x",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "y",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "z",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3int16"
+                    }
+                }
+            ],
+            "Name": "Vector3int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "seed",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Random"
+                    }
+                }
+            ],
+            "Name": "Random"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Default": "1.0",
+                            "Name": "time",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "Quad",
+                            "Name": "easingStyle",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "EasingStyle"
+                            }
+                        },
+                        {
+                            "Default": "Out",
+                            "Name": "easingDirection",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "EasingDirection"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "repeatCount",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Default": "false",
+                            "Name": "reverses",
+                            "Type": {
+                                "Name": "bool"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "delayTime",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "TweenInfo"
+                    }
+                }
+            ],
+            "Name": "TweenInfo"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "now",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromUnixTimestamp",
+                    "Parameters": [
+                        {
+                            "Name": "unixTimestamp",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromUnixTimestampMillis",
+                    "Parameters": [
+                        {
+                            "Name": "unixTimestampMillis",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromUniversalTime",
+                    "Parameters": [
+                        {
+                            "Default": "1970",
+                            "Name": "year",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "1",
+                            "Name": "month",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "1",
+                            "Name": "day",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "hour",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "minute",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "second",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "millisecond",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromLocalTime",
+                    "Parameters": [
+                        {
+                            "Default": "1970",
+                            "Name": "year",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "1",
+                            "Name": "month",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "1",
+                            "Name": "day",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "hour",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "minute",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "second",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Default": "0",
+                            "Name": "millisecond",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromIsoDate",
+                    "Parameters": [
+                        {
+                            "Name": "isoDate",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DateTime"
+                    }
+                }
+            ],
+            "Name": "DateTime"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "n",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberSequence"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "n0",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "n1",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberSequence"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "keypoints",
+                            "Type": {
+                                "Name": "Array",
+                                "Generic": "NumberSequenceKeypoint"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberSequence"
+                    }
+                }
+            ],
+            "Name": "NumberSequence"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "c",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ColorSequence"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "c0",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        },
+                        {
+                            "Name": "c1",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ColorSequence"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "keypoints",
+                            "Type": {
+                                "Name": "Array",
+                                "Generic": "ColorSequenceKeypoint"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ColorSequence"
+                    }
+                }
+            ],
+            "Name": "ColorSequence"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "time",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name":  "number"
+                            }
+                        },
+                        {
+                            "Name": "envelop",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "NumberSequenceKeypoint"
+                    }
+                }
+            ],
+            "Name": "NumberSequenceKeypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "time",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "color",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ColorSequenceKeypoint"
+                    }
+                }
+            ],
+            "Name": "ColorSequenceKeypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "RaycastParams"
+                    }
+                }
+            ],
+            "Name": "RaycastParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "OverlapParams"
+                    }
+                }
+            ],
+            "Name": "OverlapParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "initDockState",
+                            "Default": "Right",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "InitialDockState"
+                            }
+                        },
+                        {
+                            "Name": "initEnabled",
+                            "Default": "false",
+                            "Type": {
+                                "Name": "boolean"
+                            }
+                        },
+                        {
+                            "Name": "overrideEnabledRestore",
+                            "Default": "false",
+                            "Type": {
+                                "Name": "boolean"
+                            }
+                        },
+                        {
+                            "Name": "floatXSize",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Name": "floatYSize",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Name": "minWidth",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Name": "minHeight",
+                            "Default": "0",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "DockWidgetPluginGuiInfo"
+                    }
+                }
+            ],
+            "Name": "DockWidgetPluginGuiInfo"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Category": "",
+                        "Name": "CatalogSearchParams"
+                    }
+                }
+            ],
+            "Name": "CatalogSearchParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "family",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        },
+                        {
+                            "Name": "weight",
+                            "Default": "Regular",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontWeight"
+                            }
+                        },
+                        {
+                            "Name": "style",
+                            "Default": "Normal",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontStyle"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Font"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromEnum",
+                    "Parameters": [
+                        {
+                            "Name": "font",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "Font"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Font"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromName",
+                    "Parameters": [
+                        {
+                            "Name": "name",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        },
+                        {
+                            "Name": "weight",
+                            "Default": "Regular",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontWeight"
+                            }
+                        },
+                        {
+                            "Name": "style",
+                            "Default": "Normal",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontStyle"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Font"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromId",
+                    "Parameters": [
+                        {
+                            "Name": "id",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "weight",
+                            "Default": "Regular",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontWeight"
+                            }
+                        },
+                        {
+                            "Name": "style",
+                            "Default": "Normal",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "FontStyle"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Font"
+                    }
+                }
+            ],
+            "Name": "Font"
+        },
+        {
+            "Members": [
+                    {
+                        "MemberType": "Function",
+                        "Name": "new",
+                        "Parameters": [
+                            {
+                                "Name": "time",
+                                "Type": {
+                                    "Name": "number"
+                                }
+                            },
+                            {
+                                "Name": "value",
+                                "Type": {
+                                    "Name": "number"
+                                }
+                            },
+                            {
+                                "Name": "Interpolation",
+                                "Type": {
+                                    "Category": "Enum",
+                                    "Name": "KeyInterpolationMode"
+                                }
+                            }
+                        ],
+                        "ReturnType": {
+                            "Name": "FloatCurveKey"
+                        }
+                    }
+            ],
+            "Name": "FloatCurveKey"
+        },
+        {
+            "Members": [
+                    {
+                        "MemberType": "Function",
+                        "Name": "new",
+                        "Parameters": [
+                            {
+                                "Name": "time",
+                                "Type": {
+                                    "Name": "number"
+                                }
+                            },
+                            {
+                                "Name": "value",
+                                "Type": {
+                                    "Name": "CFrame"
+                                }
+                            },
+                            {
+                                "Name": "Interpolation",
+                                "Type": {
+                                    "Category": "Enum",
+                                    "Name": "KeyInterpolationMode"
+                                }
+                            }
+                        ],
+                        "ReturnType": {
+                            "Name": "RotationCurveKey"
+                        }
+                    }
+            ],
+            "Name": "RotationCurveKey"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "SharedTable"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name": "table"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SharedTable"
+                    }
+                }
+            ],
+            "Name": "SharedTable"
+        },
+        {
+            "Members":[],
+            "Name": "Secret"
+        }
+
+    ],
+    "DataTypes": [
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "ClosestPoint",
+                    "Parameters": [
+                        {
+                            "Name": "point",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Origin",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Unit",
+                    "ValueType": {
+                        "Name": "Ray"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Distance",
+                    "Parameters": [
+                        {
+                            "Name": "point",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Direction",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                }
+            ],
+            "Name": "Ray"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Max",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Min",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "NumberRange"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Position",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Action",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "PathWaypointAction"
+                    }
+                },
+                {
+                    "MemberType":"Property",
+                    "Name":"Label",
+                    "ValueType":{
+                        "Name":"string"
+                    }
+                }
+            ],
+            "Name": "PathWaypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "r",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Name",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Number",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Color",
+                    "ValueType": {
+                        "Name": "Color3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "b",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "g",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "BrickColor"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Unit",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Magnitude",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Lerp",
+                    "Parameters": [
+                        {
+                            "Name": "v",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Cross",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Dot",
+                    "Parameters": [
+                        {
+                            "Name": "v",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Angle",
+                    "Parameters": [
+                        {
+                            "Name":"other",
+                            "Type":{
+                                "Name":"Vector2"
+                            }
+                        },
+                        {
+                            "Name":"isSigned",
+                            "Type":{
+                                "Name":"bool"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Max",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Tuple": {
+                                    "Name": "Vector2"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Min",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Tuple": {
+                                    "Name": "Vector2"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "y",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "x",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "unit",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "magnitude",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lerp",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "v",
+                            "Type": {
+                                "Name": "Vector2"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector2"
+                    }
+                }
+            ],
+            "Name": "Vector2"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "R",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "B",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "G",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToHSV",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToHex",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Lerp",
+                    "Parameters": [
+                        {
+                            "Name": "color",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "r",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "g",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "b",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lerp",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "color",
+                            "Type": {
+                                "Name": "Color3"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Color3"
+                    }
+                }
+            ],
+            "Name": "Color3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Scale",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Offset",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                }
+            ],
+            "Name": "UDim"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "ElasticityWeight",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Elasticity",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Density",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "FrictionWeight",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Friction",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "PhysicalProperties"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Z",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Top",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Left",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Right",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Bottom",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Front",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Back",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                }
+            ],
+            "Name": "Axes"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "CFrame",
+                    "ValueType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ExpandToGrid",
+                    "Parameters": [
+                        {
+                            "Name": "Region",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Region3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Size",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                }
+            ],
+            "Name": "Region3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "UDim"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Lerp",
+                    "Parameters": [
+                        {
+                            "Name": "goal",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Height",
+                    "ValueType": {
+                        "Name": "UDim"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "UDim"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Width",
+                    "ValueType": {
+                        "Name": "UDim"
+                    }
+                }
+            ],
+            "Name": "UDim2"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Z",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "PointToObjectSpace",
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "YVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "XVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "ZVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Position",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Rotation",
+                    "ValueType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RightVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "VectorToWorldSpace",
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToAxisAngle",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "Vector3"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToOrientation",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToEulerAnglesYXZ",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToEulerAngles",
+                    "Parameters": [
+                        {
+                            "Name": "order",
+                            "Default":"XYZ",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "RotationOrder"
+                            }
+                        }
+                    ],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Inverse",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "UpVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Lerp",
+                    "Parameters": [
+                        {
+                            "Name": "goal",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "GetComponents",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "VectorToObjectSpace",
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "LookVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "PointToWorldSpace",
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToWorldSpace",
+                    "Parameters": [
+                        {
+                            "Name": "cf",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToObjectSpace",
+                    "Parameters": [
+                        {
+                            "Name": "cf",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToEulerAnglesXYZ",
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Orthonormalize",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "z",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "y",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "x",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "pointToObjectSpace",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "p",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "rightVector",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Deprecated": true,
+                    "Name": "vectorToWorldSpace",
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "toAxisAngle",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "Vector3"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "inverse",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "upVector",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lerp",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "goal",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "vectorToObjectSpace",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "lookVector",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "pointToWorldSpace",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "v3",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "toWorldSpace",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "cf",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "toObjectSpace",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "cf",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "toEulerAnglesXYZ",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "components",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "TupleReturns": [
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        },
+                        {
+                            "Name": "number"
+                        }
+                    ]
+                }
+            ],
+            "Name": "CFrame"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Bottom",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Top",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Front",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Left",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Right",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Back",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                }
+            ],
+            "Name": "Faces"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "IsA",
+                    "Parameters": [
+                        {
+                            "Name": "enumName",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "EnumType",
+                    "ValueType": {
+                        "Name": "Enum"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Value",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Name",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                }
+            ],
+            "Name": "EnumItem"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "GetEnumItems",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Array",
+                        "Generic": "EnumItem"
+                    }
+                }
+            ],
+            "Name": "Enum"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "GetEnums",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Array",
+                        "Generic": "Enum"
+                    }
+                }
+            ],
+            "Name": "Enums"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Max",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Min",
+                    "ValueType": {
+                        "Name": "Vector2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Height",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Width",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "Rect"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Z",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Unit",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Magnitude",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Dot",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Lerp",
+                    "Parameters": [
+                        {
+                            "Name": "goal",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Cross",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Abs",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Ceil",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Floor",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Sign",
+                    "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FuzzyEq",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "epsilon",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Angle",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "axis",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Max",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Tuple": {
+                                    "Name": "Vector3"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Min",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Tuple": {
+                                    "Name": "Vector3"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "lerp",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "goal",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "alpha",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "z",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "x",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "unit",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Deprecated": true,
+                    "Name": "magnitude",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "Vector3"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "NextInteger",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "int"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "NextNumber",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "NextNumber",
+                    "Parameters": [
+                        {
+                            "Name": "min",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "max",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "NextUnitVector",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Clone",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Random"
+                    }
+                }
+            ],
+            "Name": "Random"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "DelayTime",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Time",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "EasingDirection",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "EasingDirection"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RepeatCount",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "EasingStyle",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "EasingStyle"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Reverses",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                }
+            ],
+            "Name": "TweenInfo"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "Disconnect",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "void"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Connected",
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "disconnect",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "void"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "connected",
+                    "Deprecated": true,
+                    "ValueType": {
+                        "Name": "bool"
+                    }
+                }
+            ],
+            "Name": "RBXScriptConnection"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "Wait",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Variant"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Connect",
+                    "Parameters": [
+                        {
+                            "Name": "callback",
+                            "Type": {
+                                "Name": "function"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RBXScriptConnection"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Once",
+                    "Parameters": [
+                        {
+                            "Name": "callback",
+                            "Type": {
+                                "Name": "function"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RBXScriptConnection"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ConnectParallel",
+                    "Parameters": [
+                        {
+                            "Name": "callback",
+                            "Type": {
+                                "Name": "function"
+                            }
+                        }
+                    ],
+                    "Tags": [
+                        "Hidden"
+                    ],
+                    "ReturnType": {
+                        "Name": "RBXScriptConnection"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "wait",
+                    "Deprecated": true,
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Variant"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "connect",
+                    "Deprecated": true,
+                    "Parameters": [
+                        {
+                            "Name": "callback",
+                            "Type": {
+                                "Name": "function"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RBXScriptConnection"
+                    }
+                }
+            ],
+            "Name": "RBXScriptSignal"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "UnixTimestamp",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "UnixTimestampMillis",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToUniversalTime",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "table"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToLocalTime",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "table"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToIsoDate",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FormatUniversalTime",
+                    "Parameters": [
+                        {
+                            "Name": "format",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        },
+                        {
+                            "Name": "locale",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FormatLocalTime",
+                    "Parameters": [
+                        {
+                            "Name": "format",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        },
+                        {
+                            "Name": "locale",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "string"
+                    }
+                }
+            ],
+            "Name": "DateTime"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Keypoints",
+                    "ValueType": {
+                        "Name": "Array",
+                        "Generic": "NumberSequenceKeypoint"
+                    }
+                }
+            ],
+            "Name": "NumberSequence"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Keypoints",
+                    "ValueType": {
+                        "Name": "Array",
+                        "Generic": "ColorSequenceKeypoint"
+                    }
+                }
+            ],
+            "Name": "ColorSequence"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Envelope",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Time",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Value",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "NumberSequenceKeypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Time",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Value",
+                    "ValueType": {
+                        "Name": "Color3"
+                    }
+                }
+            ],
+            "Name": "ColorSequenceKeypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "FilterDescendantsInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "FilterType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "RaycastFilterType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IgnoreWater",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CollisionGroup",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RespectCanCollide",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "BruteForceAllSlow",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "AddToFilter",
+                    "Parameters": [
+                        {
+                            "Name": "instances",
+                            "Type": {
+                                "Union": [
+                                    {
+                                        "Name": "Instance"
+                                    },
+                                    {
+                                        "Name": "Objects"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "nil"
+                    }
+                }
+            ],
+            "Name": "RaycastParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "FilterDescendantsInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "FilterType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "RaycastFilterType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CollisionGroup",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "MaxParts",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RespectCanCollide",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "BruteForceAllSlow",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "AddToFilter",
+                    "Parameters": [
+                        {
+                            "Name": "instances",
+                            "Type": {
+                                "Union": [
+                                    {
+                                        "Name": "Instance"
+                                    },
+                                    {
+                                        "Name": "Objects"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "nil"
+                    }
+                }
+            ],
+            "Name": "OverlapParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Distance",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Instance",
+                    "ValueType": {
+                        "Name": "Instance"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Position",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Material",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "Material"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Normal",
+                    "ValueType": {
+                        "Name": "Vector3"
+                    }
+                }
+            ],
+            "Name": "RaycastResult"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "InitialEnabled",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "InitialEnabledShouldOverrideRestore",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "FloatingXSize",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "FloatingYSize",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "MinWidth",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "MinHeight",
+                    "ValueType": {
+                        "Name": "int"
+                    }
+                }
+            ],
+            "Name": "DockWidgetPluginGuiInfo"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "Vector2int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "X",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Y",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Z",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "Vector3int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Min",
+                    "ValueType": {
+                        "Name": "Vector3int16"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Max",
+                    "ValueType": {
+                        "Name": "Vector3int16"
+                    }
+                }
+            ],
+            "Name": "Region3int16"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "SearchKeyword",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "MinPrice",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "MaxPrice",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "SortType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CatalogSortType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CategoryFilter",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CatalogCategoryFilter"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "BundleType",
+                    "ValueType": {
+                        "Name": "Array",
+                        "Generic": "Enum.BundleType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "AssetTypes",
+                    "ValueType": {
+                        "Name": "Array",
+                        "Generic": "Enum.AssetType"
+                    }
+                }
+            ],
+            "Name": "CatalogSearchParams"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Family",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Bold",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Weight",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "FontWeight"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Style",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "FontStyle"
+                    }
+                }
+            ],
+            "Name": "Font"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Interpolation",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "KeyInterpolationMode"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Time",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Value",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RightTangent",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "LeftTangent",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "FloatCurveKey"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Interpolation",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "KeyInterpolationMode"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Time",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Value",
+                    "ValueType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RightTangent",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "LeftTangent",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                }
+            ],
+            "Name": "RotationCurveKey"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "clear",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "void"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "clone",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        },
+                        {
+                            "Name": "deep",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "boolean"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SharedTable"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "cloneAndFreeze",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        },
+                        {
+                            "Name": "deep",
+                            "Default": "nil",
+                            "Type": {
+                                "Name": "boolean"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SharedTable"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "increment",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        },
+                        {
+                            "Name": "key",
+                            "Type": {
+                                "Union": [
+                                    {
+                                        "Name": "string"
+                                    },
+                                    {
+                                        "Name": "number"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "Name": "delta",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "isFrozen",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "size",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "update",
+                    "Parameters": [
+                        {
+                            "Name": "st",
+                            "Type": {
+                                "Name": "SharedTable"
+                            }
+                        },
+                        {
+                            "Name": "key",
+                            "Type": {
+                                "Union": [
+                                    {
+                                        "Name": "string"
+                                    },
+                                    {
+                                        "Name": "number"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "Name": "f",
+                            "Type": {
+                                "Name": "function"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "void"
+                    }
+                }
+            ],
+            "Name": "SharedTable"
+        },
+        {
+            "Members":[
+                {
+                    "MemberType": "Function",
+                    "Name": "AddPrefix",
+                    "Parameters": [
+                        {
+                            "Name": "prefix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "AddSuffix",
+                    "Parameters": [
+                        {
+                            "Name": "suffix",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Secret"
+                    }
+                }
+            ],
+            "Name": "Secret"
+        }
+    ]
+}
