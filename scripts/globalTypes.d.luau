@@ -1401,6 +1401,13 @@ declare class EnumGameAvatarType_INTERNAL extends Enum
 	R15: EnumGameAvatarType
 	R6: EnumGameAvatarType
 end
+declare class EnumGamepadType extends EnumItem end
+declare class EnumGamepadType_INTERNAL extends Enum
+	PS4: EnumGamepadType
+	PS5: EnumGamepadType
+	Unknown: EnumGamepadType
+	XboxOne: EnumGamepadType
+end
 declare class EnumGearGenreSetting extends EnumItem end
 declare class EnumGearGenreSetting_INTERNAL extends Enum
 	AllGenres: EnumGearGenreSetting
@@ -1454,6 +1461,7 @@ end
 declare class EnumGuiType extends EnumItem end
 declare class EnumGuiType_INTERNAL extends Enum
 	Core: EnumGuiType
+	CoreBillboards: EnumGuiType
 	Custom: EnumGuiType
 	CustomBillboards: EnumGuiType
 	PlayerNameplates: EnumGuiType
@@ -3863,6 +3871,7 @@ type ENUM_LIST = {
 	FriendStatus: EnumFriendStatus_INTERNAL,
 	FunctionalTestResult: EnumFunctionalTestResult_INTERNAL,
 	GameAvatarType: EnumGameAvatarType_INTERNAL,
+	GamepadType: EnumGamepadType_INTERNAL,
 	GearGenreSetting: EnumGearGenreSetting_INTERNAL,
 	GearType: EnumGearType_INTERNAL,
 	Genre: EnumGenre_INTERNAL,
@@ -5522,6 +5531,7 @@ declare class CaptureService extends Instance
 	CaptureBegan: RBXScriptSignal<>
 	CaptureEnded: RBXScriptSignal<>
 	CaptureSaved: RBXScriptSignal<{ [any]: any }>
+	CaptureSavedInternal: RBXScriptSignal<{ [any]: any }>
 	OpenSaveCapturesPrompt: RBXScriptSignal<number, { any }>
 	OpenShareCapturePrompt: RBXScriptSignal<number, Content, string>
 	UserCaptureSaved: RBXScriptSignal<Content>
@@ -6114,6 +6124,7 @@ declare class ConversationalAIAcceptanceService extends Instance
 	function CodeRunnerActivated(self, requestId: string, code: string): nil
 	function CodeRunnerCompleted(self, requestId: string, success: boolean, errorMessage: string): nil
 	function CodeRunnerUndone(self, requestId: string): nil
+	function DataModelHierarchyLatency(self, requestId: string, latency: number): nil
 	function InstanceInserted(self, requestId: string): nil
 	function RecordingActionEnded(self, requestId: string, waypointName: string): nil
 end
@@ -6518,6 +6529,8 @@ declare class ExperienceNotificationService extends Instance
 end
 
 declare class ExperienceService extends Instance
+	OnNewJoinAttempt: RBXScriptSignal<{ [any]: any }>
+	function GetPendingJoinAttempt(self): { [any]: any }
 	function LaunchExperience(self, params: { [any]: any }): string
 	function LaunchExperienceFromSource(self, params: { [any]: any }, source: string): string
 	function LaunchExperienceFromSourceWithCallback(self, params: { [any]: any }, source: string, callback: ((...any) -> ...any)): nil
@@ -7289,15 +7302,14 @@ end
 
 
 declare class Path2D extends GuiBase
-	Color: Color3
-	Position: UDim2
+	Color3: Color3
 	SelectedControlPoint: number
 	SelectedControlPointData: Path2DControlPoint
 	Thickness: number
 	Transparency: number
 	Visible: boolean
 	ZIndex: number
-	function GetBoundingRect2D(self): Rect
+	function GetBoundingRect(self): Rect
 	function GetControlPoint(self, index: number): Path2DControlPoint
 	function GetControlPoints(self): { any }
 	function GetLength(self): number
@@ -10136,7 +10148,7 @@ declare class StreamingService extends Instance
 	function RegisterCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
 	function RegisterContextCollector(self, collectorName: string, func: ((...any) -> ...any)?): nil
 	function RegisterSequentialCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
-	function RunSandboxedCode(self, code: string): any
+	function RunSandboxedCode(self, requestId: string, code: string): any
 	function SetEphemeralVariable(self, key: string, value: any, timeToLive: number?): nil
 	function SetPluginInfoCallback(self, func: ((...any) -> ...any)?): nil
 	function UnregisterCommand(self, commandName: string): nil
@@ -10373,6 +10385,8 @@ declare class StudioPublishService extends Instance
 	OnSaveOrPublishPlaceToRoblox: RBXScriptSignal<boolean, boolean, EnumStudioCloseMode>
 	PublishLocked: boolean
 	function ClearUploadNames(self): nil
+	function GetLocalFilePath(self): string
+	function GetPlaceDisplayName(self): string
 	function PublishAs(self, universeId: number, placeId: number, groupId: number, isPublish: boolean, publishParameters: any, willRetryOnConflict: boolean?, allowOpeningNewPlace: boolean?): nil
 	function PublishThenTurnOnTeamCreate(self): nil
 	function RefreshDocumentDisplayName(self): nil
