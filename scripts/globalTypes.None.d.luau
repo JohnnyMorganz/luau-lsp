@@ -1401,6 +1401,13 @@ declare class EnumGameAvatarType_INTERNAL extends Enum
 	R15: EnumGameAvatarType
 	R6: EnumGameAvatarType
 end
+declare class EnumGamepadType extends EnumItem end
+declare class EnumGamepadType_INTERNAL extends Enum
+	PS4: EnumGamepadType
+	PS5: EnumGamepadType
+	Unknown: EnumGamepadType
+	XboxOne: EnumGamepadType
+end
 declare class EnumGearGenreSetting extends EnumItem end
 declare class EnumGearGenreSetting_INTERNAL extends Enum
 	AllGenres: EnumGearGenreSetting
@@ -1454,6 +1461,7 @@ end
 declare class EnumGuiType extends EnumItem end
 declare class EnumGuiType_INTERNAL extends Enum
 	Core: EnumGuiType
+	CoreBillboards: EnumGuiType
 	Custom: EnumGuiType
 	CustomBillboards: EnumGuiType
 	PlayerNameplates: EnumGuiType
@@ -3863,6 +3871,7 @@ type ENUM_LIST = {
 	FriendStatus: EnumFriendStatus_INTERNAL,
 	FunctionalTestResult: EnumFunctionalTestResult_INTERNAL,
 	GameAvatarType: EnumGameAvatarType_INTERNAL,
+	GamepadType: EnumGamepadType_INTERNAL,
 	GearGenreSetting: EnumGearGenreSetting_INTERNAL,
 	GearType: EnumGearType_INTERNAL,
 	Genre: EnumGenre_INTERNAL,
@@ -6716,11 +6725,11 @@ end
 
 
 declare class Path2D extends GuiBase
-	Color: Color3
-	Position: UDim2
+	Color3: Color3
 	Thickness: number
 	Visible: boolean
 	ZIndex: number
+	function GetBoundingRect(self): Rect
 	function GetControlPoint(self, index: number): Path2DControlPoint
 	function GetControlPoints(self): { any }
 	function GetPositionOnCurve(self, t: number): UDim2
