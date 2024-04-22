@@ -6244,7 +6244,7 @@ declare class GetTextBoundsParams extends Instance
 end
 
 declare class GlobalDataStore extends Instance
-	function GetAsync(self, key: string): (any, DataStoreKeyInfo)
+	function GetAsync(self, key: string, options: DataStoreGetOptions): (any, DataStoreKeyInfo)
 	function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): (number, DataStoreKeyInfo)
 	function RemoveAsync(self, key: string): (any, DataStoreKeyInfo)
 	function SetAsync(self, key: string, value: any, userIds: { number }?, options: DataStoreSetOptions?): string
@@ -6259,7 +6259,7 @@ declare class DataStore extends GlobalDataStore
 end
 
 declare class OrderedDataStore extends GlobalDataStore
-	function GetAsync(self, key: string): (number?, DataStoreKeyInfo)
+	function GetAsync(self, key: string, options: DataStoreGetOptions): (number?, DataStoreKeyInfo)
 	function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages
 	function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)
 	function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string
