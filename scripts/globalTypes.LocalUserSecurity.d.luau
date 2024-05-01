@@ -2563,6 +2563,12 @@ declare class EnumRenderPriority_INTERNAL extends Enum
 	Input: EnumRenderPriority
 	Last: EnumRenderPriority
 end
+declare class EnumRenderingCacheOptimizationMode extends EnumItem end
+declare class EnumRenderingCacheOptimizationMode_INTERNAL extends Enum
+	Default: EnumRenderingCacheOptimizationMode
+	Disabled: EnumRenderingCacheOptimizationMode
+	Enabled: EnumRenderingCacheOptimizationMode
+end
 declare class EnumRenderingTestComparisonMethod extends EnumItem end
 declare class EnumRenderingTestComparisonMethod_INTERNAL extends Enum
 	diff: EnumRenderingTestComparisonMethod
@@ -3999,6 +4005,7 @@ type ENUM_LIST = {
 	RejectCharacterDeletions: EnumRejectCharacterDeletions_INTERNAL,
 	RenderFidelity: EnumRenderFidelity_INTERNAL,
 	RenderPriority: EnumRenderPriority_INTERNAL,
+	RenderingCacheOptimizationMode: EnumRenderingCacheOptimizationMode_INTERNAL,
 	RenderingTestComparisonMethod: EnumRenderingTestComparisonMethod_INTERNAL,
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting_INTERNAL,
 	ResamplerMode: EnumResamplerMode_INTERNAL,
@@ -4639,7 +4646,7 @@ declare class AdvancedDragger extends Instance
 end
 
 declare class AnalyticsService extends Instance
-	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, endingBalance: number, amount: number, transactionType: string, itemSku: string?, customFields: { [any]: any }?): nil
+	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string?, customFields: { [any]: any }?): nil
 	function LogFunnelStepEvent(self, player: Player, funnelName: string, funnelSessionId: string?, step: number?, stepName: string?, customFields: { [any]: any }?): nil
 	function LogOnboardingFunnelStepEvent(self, player: Player, step: number, stepName: string?, customFields: { [any]: any }?): nil
 	function LogProgressionCompleteEvent(self, player: Player, progressionPathName: string, level: number, levelName: string?, customFields: { [any]: any }?): nil
@@ -7768,6 +7775,7 @@ declare class Workspace extends WorldRoot
 	PlayerCharacterDestroyBehavior: EnumPlayerCharacterDestroyBehavior
 	PrimalPhysicsSolver: EnumPrimalPhysicsSolver
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
+	RenderingCacheOptimizations: EnumRenderingCacheOptimizationMode
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting
 	Retargeting: EnumAnimatorRetargetingMode
 	SignalBehavior: EnumSignalBehavior
@@ -9076,6 +9084,7 @@ declare class StylingService extends Instance
 end
 
 declare class SurfaceAppearance extends Instance
+	Color: Color3
 end
 
 declare class TaskScheduler extends Instance
