@@ -2563,6 +2563,12 @@ declare class EnumRenderPriority_INTERNAL extends Enum
 	Input: EnumRenderPriority
 	Last: EnumRenderPriority
 end
+declare class EnumRenderingCacheOptimizationMode extends EnumItem end
+declare class EnumRenderingCacheOptimizationMode_INTERNAL extends Enum
+	Default: EnumRenderingCacheOptimizationMode
+	Disabled: EnumRenderingCacheOptimizationMode
+	Enabled: EnumRenderingCacheOptimizationMode
+end
 declare class EnumRenderingTestComparisonMethod extends EnumItem end
 declare class EnumRenderingTestComparisonMethod_INTERNAL extends Enum
 	diff: EnumRenderingTestComparisonMethod
@@ -3999,6 +4005,7 @@ type ENUM_LIST = {
 	RejectCharacterDeletions: EnumRejectCharacterDeletions_INTERNAL,
 	RenderFidelity: EnumRenderFidelity_INTERNAL,
 	RenderPriority: EnumRenderPriority_INTERNAL,
+	RenderingCacheOptimizationMode: EnumRenderingCacheOptimizationMode_INTERNAL,
 	RenderingTestComparisonMethod: EnumRenderingTestComparisonMethod_INTERNAL,
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting_INTERNAL,
 	ResamplerMode: EnumResamplerMode_INTERNAL,
@@ -4660,7 +4667,7 @@ declare class AdvancedDragger extends Instance
 end
 
 declare class AnalyticsService extends Instance
-	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, endingBalance: number, amount: number, transactionType: string, itemSku: string?, customFields: { [any]: any }?): nil
+	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string?, customFields: { [any]: any }?): nil
 	function LogFunnelStepEvent(self, player: Player, funnelName: string, funnelSessionId: string?, step: number?, stepName: string?, customFields: { [any]: any }?): nil
 	function LogOnboardingFunnelStepEvent(self, player: Player, step: number, stepName: string?, customFields: { [any]: any }?): nil
 	function LogProgressionCompleteEvent(self, player: Player, progressionPathName: string, level: number, levelName: string?, customFields: { [any]: any }?): nil
@@ -6222,6 +6229,7 @@ declare class SpecialMesh extends FileMesh
 end
 
 declare class DataModelPatchService extends Instance
+	function GetLuaVersion(self, patchName: string): string
 	function GetPatch(self, patchName: string): Instance
 	function RegisterPatch(self, patchName: string, behaviorName: string, localConfigPath: string, userId: number): nil
 	function UpdatePatch(self, userId: number, patchName: string, callbackFunction: ((...any) -> ...any)): nil
@@ -6477,6 +6485,7 @@ declare class DraggerService extends Instance
 	JointsEnabled: boolean
 	LinearSnapEnabled: boolean
 	LinearSnapIncrement: number
+	PartSnapEnabled: boolean
 	PivotSnapToGeometry: boolean
 	ShowHover: boolean
 	ShowPivotIndicator: boolean
@@ -6767,7 +6776,16 @@ declare class GamepadService extends Instance
 end
 
 declare class GenericChallengeService extends Instance
+	ChallengeAbandonedEvent: RBXScriptSignal<string>
+	ChallengeCompletedEvent: RBXScriptSignal<string, string, string>
+	ChallengeInvalidatedEvent: RBXScriptSignal<string>
+	ChallengeLoadedEvent: RBXScriptSignal<string, boolean>
 	ChallengeRequiredEvent: RBXScriptSignal<string, string, string>
+	function SignalChallengeAbandoned(self, challengeID: string): nil
+	function SignalChallengeCompleted(self, challengeID: string, challengeType: string, challengeMetadata: string): nil
+	function SignalChallengeInvalidated(self, challengeID: string): nil
+	function SignalChallengeLoaded(self, challengeID: string, success: boolean): nil
+	function SignalChallengeRequired(self, challengeID: string, challengeType: string, challengeMetadata: string): nil
 end
 
 declare class Geometry extends Instance
@@ -8630,6 +8648,7 @@ declare class Workspace extends WorldRoot
 	PlayerCharacterDestroyBehavior: EnumPlayerCharacterDestroyBehavior
 	PrimalPhysicsSolver: EnumPrimalPhysicsSolver
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
+	RenderingCacheOptimizations: EnumRenderingCacheOptimizationMode
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting
 	Retargeting: EnumAnimatorRetargetingMode
 	SignalBehavior: EnumSignalBehavior
@@ -9104,6 +9123,7 @@ declare class Plugin extends Instance
 	function GetPluginComponent(self, name: string): { [any]: any }
 	function GetSelectedRibbonTool(self): EnumRibbonTool
 	function GetSetting(self, key: string): any
+	function GetUri(self): { [any]: any }
 	function ImportFbxAnimation(self, rigModel: Instance, isR15: boolean?): Instance
 	function ImportFbxRig(self, isR15: boolean?): Instance
 	function Intersect(self, objects: { Instance }): Instance
@@ -10449,6 +10469,7 @@ declare class StudioService extends Instance
 	PromptTransformPluginCheckEnable: RBXScriptSignal<>
 	RotateIncrement: number
 	SaveLocallyAsComplete: RBXScriptSignal<boolean>
+	Secrets: string
 	ShowConstraintDetails: boolean
 	StudioLocaleId: string
 	UseLocalSpace: boolean
@@ -10535,6 +10556,7 @@ end
 
 declare class SurfaceAppearance extends Instance
 	AlphaMode: EnumAlphaMode
+	Color: Color3
 	ColorMap: Content
 	MetalnessMap: Content
 	NormalMap: Content
@@ -11191,6 +11213,7 @@ declare class UserGameSettings extends Instance
 	VignetteEnabled: boolean
 	VignetteEnabledCustomOption: boolean
 	function GetCameraYInvertValue(self): number
+	function GetDefaultFramerateCap(self): number
 	function GetOnboardingCompleted(self, onboardingId: string): boolean
 	function GetTutorialState(self, tutorialId: string): boolean
 	function InFullScreen(self): boolean
