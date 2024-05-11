@@ -297,7 +297,9 @@ std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveStringRequire(cons
     }
 
     // URI-ify the file path so that its normalised (in particular, the drive letter)
-    return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+    auto uri = Uri::parse(Uri::file(filePath).toString());
+
+    return Luau::ModuleInfo{getModuleName(uri)};
 }
 
 std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)

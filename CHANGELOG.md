@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed autocompletion of strings with '/' characters causing the prefix to be duplicated rather than replaced ([#607](https://github.com/JohnnyMorganz/luau-lsp/issues/607))
+- Fixed bug with string requires where a required files types may not correctly update when the file contents changed
 
 ## [1.28.1] - 2024-03-04
 
