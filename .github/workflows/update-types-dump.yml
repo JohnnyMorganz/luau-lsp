@@ -22,7 +22,7 @@ jobs:
           private-key: ${{ secrets.TYPES_GENERATOR_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
@@ -39,7 +39,7 @@ jobs:
 
       - name: Create Pull Request
         id: create_pull_request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v6
         with:
           title: Update to latest types dump
           body: |
