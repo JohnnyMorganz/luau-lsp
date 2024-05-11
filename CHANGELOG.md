@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.29.0] - 2024-05-11
+
 ### Added
 
 - Bytecode display will now show type info information. Added setting `luau-lsp.bytecode.typeInfoLevel` (default: 1) to configure the [type info level](https://github.com/luau-lang/luau/blob/259e50903855d1b8be79edc40fc275fd04c9c892/Compiler/include/Luau/Compiler.h#L29-L33) shown.
