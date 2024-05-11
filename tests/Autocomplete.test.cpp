@@ -164,4 +164,37 @@ TEST_CASE_FIXTURE(Fixture, "variable_with_a_class_type_should_not_have_class_ent
     CHECK_EQ(item.kind, lsp::CompletionItemKind::Variable);
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_string")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local tbl = {
+            ["Item/Foo"] = 1,
+            ["Item/Bar"] = 2,
+            ["Item/Baz"] = 3,
+        }
+
+        tbl["Item/|"]
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    std::vector<std::string> labels{"Item/Foo", "Item/Bar", "Item/Baz"};
+    for (const auto& label : labels)
+    {
+        auto item = requireItem(result, label);
+        CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+        REQUIRE(item.textEdit);
+        CHECK_EQ(item.textEdit->range.start, lsp::Position{8, 13});
+        CHECK_EQ(item.textEdit->range.end, lsp::Position{8, 18});
+        CHECK_EQ(item.textEdit->newText, label);
+    }
+}
+
 TEST_SUITE_END();

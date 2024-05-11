@@ -902,6 +902,22 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             }
         }
 
+        // If autocompleting in a string and the autocompleting text contains a '/' character, then it won't replace correctly due to word boundaries
+        // Apply a complete text edit instead
+        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String)
+        {
+            auto lastAst = result.ancestry.back();
+            if (auto str = lastAst->as<Luau::AstExprConstantString>())
+            {
+                lsp::TextEdit textEdit;
+                textEdit.newText = name;
+                // Range is inside the quotes
+                textEdit.range = {textDocument->convertPosition(Luau::Position{str->location.begin.line, str->location.begin.column + 1}),
+                    textDocument->convertPosition(Luau::Position{str->location.end.line, str->location.end.column - 1})};
+                item.textEdit = textEdit;
+            }
+        }
+
         // Handle parentheses suggestions
         if (config.completion.addParentheses)
         {

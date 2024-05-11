@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.625
 - Improved memory usage of document and workspace diagnostics by no longer storing type graphs
 
+### Fixed
+
+- Fixed autocompletion of strings with '/' characters causing the prefix to be duplicated rather than replaced ([#607](https://github.com/JohnnyMorganz/luau-lsp/issues/607))
+
 ## [1.28.1] - 2024-03-04
 
 ### Fixed
