@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.618
+- Sync to upstream Luau 0.625
+- Improved memory usage of document and workspace diagnostics by no longer storing type graphs
 
 ## [1.28.1] - 2024-03-04
 
