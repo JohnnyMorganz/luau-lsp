@@ -188,11 +188,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enabl
 struct ClientBytecodeConfiguration
 {
     int debugLevel = 1;
+    int typeInfoLevel = 1;
     std::string vectorLib = "Vector3";
     std::string vectorCtor = "new";
     std::string vectorType = "Vector3";
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, vectorLib, vectorCtor, vectorType)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, typeInfoLevel, vectorLib, vectorCtor, vectorType)
 
 
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`

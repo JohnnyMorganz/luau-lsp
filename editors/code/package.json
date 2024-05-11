@@ -476,6 +476,14 @@
           "maximum": 2,
           "markdownDescription": "The `debugLevel` to use when compiling bytecode"
         },
+        "luau-lsp.bytecode.typeInfoLevel": {
+          "type": "number",
+          "default": 1,
+          "scope": "resource",
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "The `typeInfoLevel` to use when compiling bytecode"
+        },
         "luau-lsp.bytecode.vectorLib": {
           "type": "string",
           "default": "Vector3",
