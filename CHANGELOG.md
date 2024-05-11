@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.625
 - Improved memory usage of document and workspace diagnostics by no longer storing type graphs
+- Rewritten the Luau grammar syntax: https://github.com/JohnnyMorganz/Luau.tmLanguage
 
 ### Fixed
 
