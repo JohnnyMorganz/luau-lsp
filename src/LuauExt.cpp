@@ -1,4 +1,5 @@
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/ConstraintSolver.h"
 #include "Luau/ToString.h"
 #include "Luau/Transpiler.h"
 #include "LSP/LuauExt.hpp"
@@ -143,6 +144,25 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
 
                             return std::nullopt;
                         });
+                    Luau::attachDcrMagicFunction(findFirstAncestorFunction,
+                        [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+                        {
+                            if (context.callSite->args.size < 1)
+                                return false;
+
+                            auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+                            if (!str)
+                                return false;
+
+                            if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
+                            {
+                                asMutable(context.result)
+                                    ->ty.emplace<Luau::BoundTypePack>(
+                                        context.solver->arena->addTypePack({getSourcemapType(globals, arena, *ancestor)}));
+                                return true;
+                            }
+                            return false;
+                        });
                     ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
 
                     auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
@@ -161,6 +181,24 @@ Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena&
                                 return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
 
                             return std::nullopt;
+                        });
+                    Luau::attachDcrMagicFunction(findFirstChildFunction,
+                        [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+                        {
+                            if (context.callSite->args.size < 1)
+                                return false;
+
+                            auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+                            if (!str)
+                                return false;
+
+                            if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+                            {
+                                asMutable(context.result)
+                                    ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
+                                return true;
+                            }
+                            return false;
                         });
                     ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
                 }
@@ -206,6 +244,50 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceIsA(Lu
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
 
+
+
+static bool dcrMagicFunctionInstanceIsA(Luau::MagicFunctionCallContext context)
+{
+    if (context.callSite->args.size != 1)
+        return false;
+
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return false;
+
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+    if (!tfun)
+        context.solver->reportError(
+            Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+
+    return false;
+}
+
+void dcrMagicRefinementInstanceIsA(const Luau::MagicRefinementContext& context)
+{
+    if (context.callSite->args.size != 1 || context.discriminantTypes.empty())
+        return;
+
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return;
+
+    std::optional<Luau::TypeId> discriminantTy = context.discriminantTypes[0];
+    if (!discriminantTy)
+        return;
+
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.scope->lookupType(className);
+    if (!tfun)
+        return;
+
+    LUAU_ASSERT(Luau::get<Luau::BlockedType>(*discriminantTy));
+    asMutable(*discriminantTy)->ty.emplace<Luau::BoundType>(Luau::follow(tfun->type));
+}
+
 // Magic function for `instance:Clone()`, so that we return the exact subclass that `instance` is, rather than just a generic Instance
 std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
     const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
@@ -217,6 +299,21 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceClone(
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
     auto instanceType = typeChecker.checkExpr(scope, *index->expr);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
+}
+
+static bool dcrMagicFunctionInstanceClone(Luau::MagicFunctionCallContext context)
+{
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    if (!index)
+        return false;
+
+    // The cloned type is the self type, i.e. the first argument
+    auto selfTy = Luau::first(context.arguments);
+    if (!selfTy)
+        return false;
+
+    asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({*selfTy}));
+    return true;
 }
 
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
@@ -239,6 +336,26 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhic
     Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
     Luau::TypeId nillableClass = Luau::makeOption(typeChecker.builtinTypes, arena, type);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({nillableClass})};
+}
+
+static bool dcrMagicFunctionFindFirstXWhichIsA(Luau::MagicFunctionCallContext context)
+{
+    if (context.callSite->args.size < 1)
+        return false;
+
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return false;
+
+    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(std::string(str->value.data, str->value.size));
+    if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+        return false;
+
+    auto type = Luau::follow(tfun->type);
+
+    Luau::TypeId nillableClass = Luau::makeOption(context.solver->builtinTypes, *context.solver->arena, type);
+    asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({nillableClass}));
+    return true;
 }
 
 // Magic function for `EnumItem:IsA("EnumType")` predicate
@@ -272,6 +389,48 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionEnumItemIsA(Lu
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
 
+static bool dcrMagicFunctionEnumItemIsA(Luau::MagicFunctionCallContext context)
+{
+    if (context.callSite->args.size != 1)
+        return false;
+
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return false;
+
+    std::string enumItem(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupImportedType("Enum", enumItem);
+    if (!tfun)
+        context.solver->reportError(
+            Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownSymbol{enumItem, Luau::UnknownSymbol::Type}});
+
+    return false;
+}
+
+static void dcrMagicRefinementEnumItemIsA(const Luau::MagicRefinementContext& context)
+{
+    if (context.callSite->args.size != 1 || context.discriminantTypes.empty())
+        return;
+
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return;
+
+    std::optional<Luau::TypeId> discriminantTy = context.discriminantTypes[0];
+    if (!discriminantTy)
+        return;
+
+    std::string enumItem(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.scope->lookupImportedType("Enum", enumItem);
+    if (!tfun)
+        return;
+
+    LUAU_ASSERT(Luau::get<Luau::BlockedType>(*discriminantTy));
+    asMutable(*discriminantTy)->ty.emplace<Luau::BoundType>(Luau::follow(tfun->type));
+}
+
 // Magic function for `instance:GetPropertyChangedSignal()`, so that we can perform type checking on the provided property
 static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetPropertyChangedSignal(Luau::TypeChecker& typeChecker,
     const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
@@ -298,6 +457,34 @@ static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionGetProp
     }
 
     return std::nullopt;
+}
+
+static bool dcrMagicFunctionGetPropertyChangedSignal(Luau::MagicFunctionCallContext context)
+{
+    if (context.callSite->args.size != 1)
+        return false;
+
+    auto index = context.callSite->func->as<Luau::AstExprIndexName>();
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!index || !str)
+        return false;
+
+    // The cloned type is the self type, i.e. the first argument
+    auto selfTy = Luau::first(context.arguments);
+    if (!selfTy)
+        return false;
+
+    auto ctv = Luau::get<Luau::ClassType>(Luau::follow(selfTy));
+    if (!ctv)
+        return false;
+
+    std::string property(str->value.data, str->value.size);
+    if (!Luau::lookupClassProp(ctv, property))
+    {
+        context.solver->reportError(Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownProperty{*selfTy, property}});
+    }
+
+    return false;
 }
 
 void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
@@ -481,6 +668,43 @@ static auto createMagicFunctionTypeLookup(const std::vector<std::string>& lookup
     };
 }
 
+static auto createDcrMagicFunctionTypeLookup(const std::vector<std::string>& lookupList, const std::string& errorMessagePrefix)
+{
+    return [lookupList, errorMessagePrefix](Luau::MagicFunctionCallContext context) -> bool
+    {
+        if (context.callSite->args.size < 1)
+            return false;
+
+        if (auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>())
+        {
+            auto className = std::string(str->value.data, str->value.size);
+            if (contains(lookupList, className))
+            {
+                // TODO: only check the global scope?
+                std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+                if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+                {
+                    context.solver->reportError(
+                        Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+                    return false;
+                }
+
+                auto type = Luau::follow(tfun->type);
+                Luau::TypePackId classTypePack = context.solver->arena->addTypePack({type});
+                asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(classTypePack);
+                return true;
+            }
+            else
+            {
+                context.solver->reportError(
+                    Luau::TypeError{context.callSite->args.data[0]->location, Luau::GenericError{errorMessagePrefix + " '" + className + "'"}});
+            }
+        }
+
+        return false;
+    };
+}
+
 std::optional<DefinitionsFileMetadata> parseDefinitionsFileMetadata(const std::string& definitions)
 {
     auto firstLine = getFirstLine(definitions);
@@ -524,6 +748,12 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
     {
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
         {
+
+
+            //            ctv->props["Clone"] = Luau::makeProperty(Luau::makeFunction(arena, std::nullopt, {tabTy}, {tabTy}),
+            //            "@luau/global/table.clone");
+
+
             Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionInstanceIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
@@ -531,6 +761,15 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), types::magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["Clone"].type(), types::magicFunctionInstanceClone);
             Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
+
+            Luau::attachDcrMagicRefinement(ctv->props["IsA"].type(), types::dcrMagicRefinementInstanceIsA);
+            Luau::attachDcrMagicFunction(ctv->props["IsA"].type(), types::dcrMagicFunctionInstanceIsA);
+            Luau::attachDcrMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), types::dcrMagicFunctionFindFirstXWhichIsA);
+            Luau::attachDcrMagicFunction(ctv->props["FindFirstChildOfClass"].type(), types::dcrMagicFunctionFindFirstXWhichIsA);
+            Luau::attachDcrMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), types::dcrMagicFunctionFindFirstXWhichIsA);
+            Luau::attachDcrMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), types::dcrMagicFunctionFindFirstXWhichIsA);
+            Luau::attachDcrMagicFunction(ctv->props["Clone"].type(), types::dcrMagicFunctionInstanceClone);
+            Luau::attachDcrMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), types::dcrMagicFunctionGetPropertyChangedSignal);
 
             // Autocomplete ClassNames for :IsA("") and counterparts
             Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
@@ -571,6 +810,8 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
                     Luau::attachTag(newFunction->second.type(), "CreatableInstances");
                     Luau::attachMagicFunction(
                         newFunction->second.type(), createMagicFunctionTypeLookup(metadata->CREATABLE_INSTANCES, "Invalid class name"));
+                    Luau::attachDcrMagicFunction(
+                        newFunction->second.type(), createDcrMagicFunctionTypeLookup(metadata->CREATABLE_INSTANCES, "Invalid class name"));
                 }
 
     // Attach onto `game:GetService()`
@@ -581,6 +822,8 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
             {
                 Luau::attachTag(ctv->props["GetService"].type(), "Services");
                 Luau::attachMagicFunction(ctv->props["GetService"].type(), createMagicFunctionTypeLookup(metadata->SERVICES, "Invalid service name"));
+                Luau::attachDcrMagicFunction(
+                    ctv->props["GetService"].type(), createDcrMagicFunctionTypeLookup(metadata->SERVICES, "Invalid service name"));
             }
 
     // Move Enums over as imported type bindings
@@ -596,6 +839,8 @@ Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Lua
                 if (ctv->name == "EnumItem")
                 {
                     Luau::attachMagicFunction(ctv->props["IsA"].type(), types::magicFunctionEnumItemIsA);
+                    Luau::attachDcrMagicFunction(ctv->props["IsA"].type(), types::dcrMagicFunctionEnumItemIsA);
+                    Luau::attachDcrMagicRefinement(ctv->props["IsA"].type(), types::dcrMagicRefinementEnumItemIsA);
                     Luau::attachTag(ctv->props["IsA"].type(), "Enums");
                 }
                 else if (ctv->name != "Enum" && ctv->name != "Enums")
