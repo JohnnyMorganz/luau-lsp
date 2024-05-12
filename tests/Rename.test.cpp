@@ -42,6 +42,44 @@ static std::string applyEdit(const std::string& source, const std::vector<lsp::T
 
 TEST_SUITE_BEGIN("Rename");
 
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_empty")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "";
+
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "The new name must be a valid identifier", JsonRpcException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_does_not_start_as_valid_identifier")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "1234";
+
+    REQUIRE_THROWS_WITH_AS(
+        workspace.rename(params), "The new name must be a valid identifier starting with a character or underscore", JsonRpcException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_not_a_valid_identifier")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "testing123!";
+
+    REQUIRE_THROWS_WITH_AS(
+        workspace.rename(params), "The new name must be a valid identifier composed of characters, digits, and underscores only", JsonRpcException);
+}
+
 TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter")
 {
     // https://github.com/JohnnyMorganz/luau-lsp/issues/488
