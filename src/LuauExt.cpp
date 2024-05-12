@@ -1377,11 +1377,12 @@ struct FindSymbolReferences : public Luau::AstVisitor
 
     bool visitLocal(Luau::AstLocal* local) const
     {
-        if (Luau::Symbol(local) == symbol)
-        {
-            return true;
-        }
-        return false;
+        return Luau::Symbol(local) == symbol;
+    }
+
+    bool visitGlobal(const Luau::AstName& name) const
+    {
+        return Luau::Symbol(name) == symbol;
     }
 
     bool visit(Luau::AstStatLocalFunction* function) override
@@ -1410,6 +1411,15 @@ struct FindSymbolReferences : public Luau::AstVisitor
         if (visitLocal(local->local))
         {
             result.push_back(local->location);
+        }
+        return true;
+    }
+
+    bool visit(Luau::AstExprGlobal* global) override
+    {
+        if (visitGlobal(global->name))
+        {
+            result.push_back(global->location);
         }
         return true;
     }

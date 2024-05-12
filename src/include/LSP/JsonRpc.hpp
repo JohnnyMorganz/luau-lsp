@@ -33,6 +33,11 @@ public:
     lsp::ErrorCode code;
     std::string message;
     json data;
+
+    const char* what() const override
+    {
+        return message.c_str();
+    }
 };
 
 class JsonRpcMessage

@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Type aliases now show generics in the type hover ([#591](https://github.com/JohnnyMorganz/luau-lsp/issues/591))
+- Fixed 'find all references' not working for a global function declared in a file
+- Likewise, rename now supports global functions defined in a file ([#568](https://github.com/JohnnyMorganz/luau-lsp/issues/568))
 
 ## [1.29.0] - 2024-05-11
 

@@ -259,4 +259,49 @@ TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_also_rename_import
     )");
 }
 
+TEST_CASE_FIXTURE(Fixture, "rename_global_function_name")
+{
+    auto source = R"(
+        function Main()
+        end
+
+        Main()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 11};
+    params.newName = "Test";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        function Test()
+        end
+
+        Test()
+    )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "disallow_renaming_of_global_from_type_definition")
+{
+    auto source = R"(
+        local x = game:GetService("Foo")
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 19}; // 'game'
+    params.newName = "game2";
+
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "Cannot rename a global variable", JsonRpcException);
+}
+
 TEST_SUITE_END();
