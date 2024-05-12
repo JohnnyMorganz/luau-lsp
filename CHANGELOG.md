@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Type aliases now show generics in the type hover ([#591](https://github.com/JohnnyMorganz/luau-lsp/issues/591))
+
 ## [1.29.0] - 2024-05-11
 
 ### Added
