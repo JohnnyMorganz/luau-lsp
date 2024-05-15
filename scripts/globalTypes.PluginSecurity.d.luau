@@ -3501,6 +3501,20 @@ declare class EnumTweenStatus_INTERNAL extends Enum
 	Canceled: EnumTweenStatus
 	Completed: EnumTweenStatus
 end
+declare class EnumUIDragDetectorDragStyle extends EnumItem end
+declare class EnumUIDragDetectorDragStyle_INTERNAL extends Enum
+	Rotate: EnumUIDragDetectorDragStyle
+	Scriptable: EnumUIDragDetectorDragStyle
+	TranslateLine: EnumUIDragDetectorDragStyle
+	TranslatePlane: EnumUIDragDetectorDragStyle
+end
+declare class EnumUIDragDetectorResponseStyle extends EnumItem end
+declare class EnumUIDragDetectorResponseStyle_INTERNAL extends Enum
+	CustomOffset: EnumUIDragDetectorResponseStyle
+	CustomScale: EnumUIDragDetectorResponseStyle
+	Offset: EnumUIDragDetectorResponseStyle
+	Scale: EnumUIDragDetectorResponseStyle
+end
 declare class EnumUIFlexAlignment extends EnumItem end
 declare class EnumUIFlexAlignment_INTERNAL extends Enum
 	Fill: EnumUIFlexAlignment
@@ -4141,6 +4155,8 @@ type ENUM_LIST = {
 	TrackerPromptEvent: EnumTrackerPromptEvent_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
+	UIDragDetectorDragStyle: EnumUIDragDetectorDragStyle_INTERNAL,
+	UIDragDetectorResponseStyle: EnumUIDragDetectorResponseStyle_INTERNAL,
 	UIFlexAlignment: EnumUIFlexAlignment_INTERNAL,
 	UIFlexMode: EnumUIFlexMode_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
@@ -7400,6 +7416,7 @@ end
 
 declare class MarketplaceService extends Instance
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
+	PromptBulkPurchaseFinished: RBXScriptSignal<Instance, EnumMarketplaceBulkPurchasePromptStatus, { [any]: any }>
 	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
 	PromptGamePassPurchaseFinished: RBXScriptSignal<Player, number, boolean>
 	PromptPremiumPurchaseFinished: RBXScriptSignal<>
@@ -7415,6 +7432,7 @@ declare class MarketplaceService extends Instance
 	function GetUserSubscriptionStatusAsync(self, user: Player, subscriptionId: string): { [any]: any }
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
+	function PromptBulkPurchase(self, player: Player, lineItems: { any }, options: { [any]: any }): nil
 	function PromptBundlePurchase(self, player: Player, bundleId: number): nil
 	function PromptGamePassPurchase(self, player: Player, gamePassId: number): nil
 	function PromptPremiumPurchase(self, player: Player): nil
@@ -7960,6 +7978,9 @@ end
 declare class AudioPages extends Pages
 end
 
+declare class BanHistoryPages extends Pages
+end
+
 declare class CatalogPages extends Pages
 end
 
@@ -8244,6 +8265,7 @@ declare class Players extends Instance
 	function CreateHumanoidModelFromDescription(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	function CreateHumanoidModelFromUserId(self, userId: number): Model
 	function CreateLocalPlayer(self): Player
+	function GetBanHistoryAsync(self, userId: number): BanHistoryPages
 	function GetCharacterAppearanceInfoAsync(self, userId: number): { [any]: any }
 	function GetFriendsAsync(self, userId: number): FriendPages
 	function GetHumanoidDescriptionFromOutfitId(self, outfitId: number): HumanoidDescription
