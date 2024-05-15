@@ -3501,6 +3501,20 @@ declare class EnumTweenStatus_INTERNAL extends Enum
 	Canceled: EnumTweenStatus
 	Completed: EnumTweenStatus
 end
+declare class EnumUIDragDetectorDragStyle extends EnumItem end
+declare class EnumUIDragDetectorDragStyle_INTERNAL extends Enum
+	Rotate: EnumUIDragDetectorDragStyle
+	Scriptable: EnumUIDragDetectorDragStyle
+	TranslateLine: EnumUIDragDetectorDragStyle
+	TranslatePlane: EnumUIDragDetectorDragStyle
+end
+declare class EnumUIDragDetectorResponseStyle extends EnumItem end
+declare class EnumUIDragDetectorResponseStyle_INTERNAL extends Enum
+	CustomOffset: EnumUIDragDetectorResponseStyle
+	CustomScale: EnumUIDragDetectorResponseStyle
+	Offset: EnumUIDragDetectorResponseStyle
+	Scale: EnumUIDragDetectorResponseStyle
+end
 declare class EnumUIFlexAlignment extends EnumItem end
 declare class EnumUIFlexAlignment_INTERNAL extends Enum
 	Fill: EnumUIFlexAlignment
@@ -4141,6 +4155,8 @@ type ENUM_LIST = {
 	TrackerPromptEvent: EnumTrackerPromptEvent_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
+	UIDragDetectorDragStyle: EnumUIDragDetectorDragStyle_INTERNAL,
+	UIDragDetectorResponseStyle: EnumUIDragDetectorResponseStyle_INTERNAL,
 	UIFlexAlignment: EnumUIFlexAlignment_INTERNAL,
 	UIFlexMode: EnumUIFlexMode_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
@@ -5602,12 +5618,14 @@ declare class CaptureService extends Instance
 	function GetCaptureStorageSizeAsync(self, pathArr: { any }): number
 	function OnCaptureBegan(self): nil
 	function OnCaptureEnded(self): nil
+	function OnCaptureShared(self, capturePath: string): nil
 	function OnSavePromptFinished(self, promptId: number, results: { [any]: any }): nil
 	function OnSharePromptFinished(self, promptId: number, accepted: boolean): nil
 	function PromptSaveCapturesToGallery(self, contentIds: { any }, resultCallback: ((...any) -> ...any)): nil
 	function PromptShareCapture(self, contentId: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
 	function RetrieveCaptures(self): { any }
 	function SaveCaptureToExternalStorage(self, capturePath: string): nil
+	function SaveCapturesToExternalStorageAsync(self, pathArr: { any }): number
 	function SaveScreenshotCapture(self): nil
 end
 
@@ -8043,6 +8061,8 @@ declare class MarketplaceService extends Instance
 	NativePurchaseFinishedWithLocalPlayer: RBXScriptSignal<string, boolean>
 	PrepareCollectiblesPurchaseRequested: RBXScriptSignal<Instance, number, string, string, string, number>
 	ProcessReceipt: (receiptInfo: { [any]: any }) -> EnumProductPurchaseDecision
+	PromptBulkPurchaseFinished: RBXScriptSignal<Instance, EnumMarketplaceBulkPurchasePromptStatus, { [any]: any }>
+	PromptBulkPurchaseRequested: RBXScriptSignal<Instance, { any }, { [any]: any }, number, number, { [any]: any }>
 	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
 	PromptBundlePurchaseRequested: RBXScriptSignal<Instance, number>
 	PromptCollectibleBundlePurchaseRequested: RBXScriptSignal<Instance, number, string, string, string, number, string, string>
@@ -8069,6 +8089,7 @@ declare class MarketplaceService extends Instance
 	function GetUserSubscriptionDetailsAsync(self, user: Player, subscriptionId: string): { [any]: any }
 	function GetUserSubscriptionPaymentHistoryAsync(self, user: Player, subscriptionId: string): { any }
 	function GetUserSubscriptionStatusAsync(self, user: Player, subscriptionId: string): { [any]: any }
+	function PerformBulkPurchase(self, orderRequest: { [any]: any }, options: { [any]: any }): { [any]: any }
 	function PerformPurchase(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectibleItemId: string?, collectibleProductId: string?, idempotencyKey: string?, purchaseAuthToken: string?): { [any]: any }
 	function PerformPurchaseV2(self, infoType: EnumInfoType, productId: number, expectedPrice: number, requestId: string, isRobloxPurchase: boolean, collectiblesProductDetails: { [any]: any }): { [any]: any }
 	function PerformSubscriptionPurchase(self, subscriptionId: string): string
@@ -8077,6 +8098,7 @@ declare class MarketplaceService extends Instance
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
 	function PrepareCollectiblesPurchase(self, player: Instance, assetId: number, collectibleItemId: string, collectibleItemInstanceId: string, collectibleProductId: string, expectedPrice: number): nil
+	function PromptBulkPurchase(self, player: Player, lineItems: { any }, options: { [any]: any }): nil
 	function PromptBundlePurchase(self, player: Player, bundleId: number): nil
 	function PromptCollectiblesPurchase(self, player: Instance, assetId: number, collectibleItemId: string, collectibleItemInstanceId: string, collectibleProductId: string, expectedPrice: number): nil
 	function PromptGamePassPurchase(self, player: Player, gamePassId: number): nil
@@ -8093,6 +8115,7 @@ declare class MarketplaceService extends Instance
 	function SignalAssetTypePurchased(self, player: Instance, assetType: EnumAssetType): nil
 	function SignalClientPurchaseSuccess(self, ticket: string, playerId: number, productId: number): nil
 	function SignalMockPurchasePremium(self): nil
+	function SignalPromptBulkPurchaseFinished(self, status: EnumMarketplaceBulkPurchasePromptStatus, results: { [any]: any }): nil
 	function SignalPromptBundlePurchaseFinished(self, player: Instance, bundleId: number, success: boolean): nil
 	function SignalPromptGamePassPurchaseFinished(self, player: Instance, gamePassId: number, success: boolean): nil
 	function SignalPromptPremiumPurchaseFinished(self, didTryPurchasing: boolean): nil
@@ -8104,6 +8127,7 @@ declare class MarketplaceService extends Instance
 end
 
 declare class MaterialGenerationService extends Instance
+	function DEPRECATED_GenerateMaterialVariantsAync(self, prompt: string, samples: number): { Instance }
 	function GenerateMaterialVariantsAsync(self, prompt: string, samples: number): { Instance }
 	function StartSession(self): MaterialGenerationSession
 	function UploadMaterialVariantsAsync(self, materialVaraints: { Instance }): nil
@@ -8754,6 +8778,9 @@ end
 declare class AudioPages extends Pages
 end
 
+declare class BanHistoryPages extends Pages
+end
+
 declare class CatalogPages extends Pages
 end
 
@@ -9124,6 +9151,7 @@ declare class Players extends Instance
 	function CreateHumanoidModelFromDescription(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	function CreateHumanoidModelFromUserId(self, userId: number): Model
 	function CreateLocalPlayer(self): Player
+	function GetBanHistoryAsync(self, userId: number): BanHistoryPages
 	function GetCharacterAppearanceInfoAsync(self, userId: number): { [any]: any }
 	function GetFriendsAsync(self, userId: number): FriendPages
 	function GetHumanoidDescriptionFromOutfitId(self, outfitId: number): HumanoidDescription
@@ -10232,6 +10260,7 @@ declare class StreamingService extends Instance
 	RequestStarted: RBXScriptSignal<string, string>
 	SequentialCommandsFinished: RBXScriptSignal<string, boolean>
 	Stream: RBXScriptSignal<string, string>
+	function BindCodeToGuid(self, runCodeGuid: string, code: string): any
 	function ExecuteCommandAsync(self, requestId: string, commandName: string, arg: any): nil
 	function GetEphemeralVariable(self, key: string): any
 	function GetInstance(self, requestId: string, instanceId: string): Instance
@@ -10239,7 +10268,7 @@ declare class StreamingService extends Instance
 	function RegisterCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
 	function RegisterContextCollector(self, collectorName: string, func: ((...any) -> ...any)?): nil
 	function RegisterSequentialCommand(self, commandName: string, func: ((...any) -> ...any)?): nil
-	function RunSandboxedCode(self, requestId: string, runCodeGuid: string, defaultCode: string?): any
+	function RunSandboxedCode(self, runCodeGuid: string, requestId: string): any
 	function SetEphemeralVariable(self, key: string, value: any, timeToLive: number?): nil
 	function SetPluginInfoCallback(self, func: ((...any) -> ...any)?): nil
 	function UnregisterCommand(self, commandName: string): nil
