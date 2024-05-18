@@ -26,9 +26,8 @@ std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& n
     if (auto textDocument = fileResolver->getTextDocumentFromModuleName(name))
         return textDocument->getText();
 
-    auto source = readFile(path);
-    if (source && (path.extension() == ".lua" || path.extension() == ".luau"))
-        return source;
+    if (path.extension() == ".lua" || path.extension() == ".luau")
+        return readFile(path);
 
     return std::nullopt;
 }
