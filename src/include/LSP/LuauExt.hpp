@@ -12,14 +12,12 @@
 
 namespace types
 {
-std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className);
 std::optional<std::string> getTypeName(Luau::TypeId typeId);
 
 bool isMetamethod(const Luau::Name& name);
 
 std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions);
 
-Luau::MagicFunction createMagicFunctionTypeLookup(const std::vector<std::string>& lookupList, const std::string& errorMessagePrefix);
 Luau::LoadDefinitionFileResult registerDefinitions(
     Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
 

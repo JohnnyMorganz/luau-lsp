@@ -24,15 +24,15 @@ jobs:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20
 
       - name: Build Server
         run: |
@@ -88,7 +88,7 @@ jobs:
         run: npx vsce package -o "../../dist/${{ matrix.artifact-name }}.vsix"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: nightly-${{ matrix.artifact-name }}
           path: ./dist

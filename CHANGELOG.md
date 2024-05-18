@@ -17,7 +17,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.618
+- Sync to upstream Luau 0.626
+
+### Fixed
+
+- Type aliases now show generics in the type hover ([#591](https://github.com/JohnnyMorganz/luau-lsp/issues/591))
+- Fixed 'find all references' not working for a global function declared in a file
+- Likewise, rename now supports global functions defined in a file ([#568](https://github.com/JohnnyMorganz/luau-lsp/issues/568))
+
+## [1.29.0] - 2024-05-11
+
+### Added
+
+- Bytecode display will now show type info information. Added setting `luau-lsp.bytecode.typeInfoLevel` (default: 1) to configure the [type info level](https://github.com/luau-lang/luau/blob/259e50903855d1b8be79edc40fc275fd04c9c892/Compiler/include/Luau/Compiler.h#L29-L33) shown.
+- Added "magic functions / refinements" support under the New Solver (i.e., special handling of :IsA, :FindFirstChildWhichIsA, :Clone, etc.)
+
+### Changed
+
+- Sync to upstream Luau 0.625
+- Improved memory usage of document and workspace diagnostics by no longer storing type graphs
+- Rewritten the Luau grammar syntax: https://github.com/JohnnyMorganz/Luau.tmLanguage
+
+### Fixed
+
+- Fixed autocompletion of strings with '/' characters causing the prefix to be duplicated rather than replaced ([#607](https://github.com/JohnnyMorganz/luau-lsp/issues/607))
+- Fixed bug with string requires where a required files types may not correctly update when the file contents changed
 
 ## [1.28.1] - 2024-03-04
 

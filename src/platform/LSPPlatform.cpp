@@ -134,7 +134,9 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     }
 
     // URI-ify the file path so that its normalised (in particular, the drive letter)
-    return {{Uri::parse(Uri::file(filePath).toString()).fsPath().generic_string()}};
+    auto uri = Uri::parse(Uri::file(filePath).toString());
+
+    return Luau::ModuleInfo{fileResolver->getModuleName(uri)};
 }
 
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)

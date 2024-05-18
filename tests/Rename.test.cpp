@@ -42,6 +42,44 @@ static std::string applyEdit(const std::string& source, const std::vector<lsp::T
 
 TEST_SUITE_BEGIN("Rename");
 
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_empty")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "";
+
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "The new name must be a valid identifier", JsonRpcException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_does_not_start_as_valid_identifier")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "1234";
+
+    REQUIRE_THROWS_WITH_AS(
+        workspace.rename(params), "The new name must be a valid identifier starting with a character or underscore", JsonRpcException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_not_a_valid_identifier")
+{
+    auto uri = newDocument("foo.luau", "");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 0};
+    params.newName = "testing123!";
+
+    REQUIRE_THROWS_WITH_AS(
+        workspace.rename(params), "The new name must be a valid identifier composed of characters, digits, and underscores only", JsonRpcException);
+}
+
 TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter")
 {
     // https://github.com/JohnnyMorganz/luau-lsp/issues/488
@@ -257,6 +295,51 @@ TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_also_rename_import
 
         type Foo = ActualTypes.Foo
     )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "rename_global_function_name")
+{
+    auto source = R"(
+        function Main()
+        end
+
+        Main()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 11};
+    params.newName = "Test";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        function Test()
+        end
+
+        Test()
+    )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "disallow_renaming_of_global_from_type_definition")
+{
+    auto source = R"(
+        local x = game:GetService("Foo")
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 19}; // 'game'
+    params.newName = "game2";
+
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "Cannot rename a global variable", JsonRpcException);
 }
 
 TEST_SUITE_END();

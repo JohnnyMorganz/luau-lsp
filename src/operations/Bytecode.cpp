@@ -20,7 +20,7 @@ static uint32_t flagsForType(BytecodeOutputType type)
     {
     case BytecodeOutputType::Textual:
         return Luau::BytecodeBuilder::Dump_Code | Luau::BytecodeBuilder::Dump_Source | Luau::BytecodeBuilder::Dump_Locals |
-               Luau::BytecodeBuilder::Dump_Remarks;
+               Luau::BytecodeBuilder::Dump_Remarks | Luau::BytecodeBuilder::Dump_Types;
     case BytecodeOutputType::CompilerRemarks:
         return Luau::BytecodeBuilder::Dump_Source | Luau::BytecodeBuilder::Dump_Remarks;
     }
@@ -45,6 +45,7 @@ static std::string computeBytecodeOutput(const std::string& source, const Client
         Luau::CompileOptions options = {};
         options.optimizationLevel = optimizationLevel;
         options.debugLevel = config.bytecode.debugLevel;
+        options.typeInfoLevel = config.bytecode.typeInfoLevel;
         options.vectorLib = config.bytecode.vectorLib.empty() ? nullptr : config.bytecode.vectorLib.c_str();
         options.vectorCtor = config.bytecode.vectorCtor.empty() ? nullptr : config.bytecode.vectorCtor.c_str();
         options.vectorType = config.bytecode.vectorType.empty() ? nullptr : config.bytecode.vectorType.c_str();

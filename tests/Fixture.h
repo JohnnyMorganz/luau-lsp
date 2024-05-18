@@ -46,4 +46,23 @@ struct Fixture
     Luau::TypeId requireType(const std::string& name);
 
     std::vector<std::string> getComments(const Luau::Location& node);
+
+    void dumpErrors(std::ostream& os, const std::vector<Luau::TypeError>& errors);
+    std::string getErrors(const Luau::CheckResult& cr);
 };
+
+#define LUAU_LSP_REQUIRE_ERRORS(result) \
+    do \
+    { \
+        auto&& r = (result); \
+        REQUIRE(!r.errors.empty()); \
+    } while (false)
+
+#define LUAU_LSP_REQUIRE_ERROR_COUNT(count, result) \
+    do \
+    { \
+        auto&& r = (result); \
+        REQUIRE_MESSAGE(count == r.errors.size(), getErrors(r)); \
+    } while (false)
+
+#define LUAU_LSP_REQUIRE_NO_ERRORS(result) LUAU_LSP_REQUIRE_ERROR_COUNT(0, result)

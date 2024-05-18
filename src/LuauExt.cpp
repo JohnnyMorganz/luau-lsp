@@ -10,30 +10,6 @@
 
 namespace types
 {
-std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
-{
-    std::optional<Luau::TypeFun> baseType;
-    if (className.has_value())
-    {
-        baseType = globalScope->lookupType(className.value());
-    }
-    if (!baseType.has_value())
-    {
-        baseType = globalScope->lookupType("Instance");
-    }
-
-    if (baseType.has_value())
-    {
-        return baseType->type;
-    }
-    else
-    {
-        // If we reach this stage, we couldn't find the class name nor the "Instance" type
-        // This most likely means a valid definitions file was not provided
-        return std::nullopt;
-    }
-}
-
 std::optional<std::string> getTypeName(Luau::TypeId typeId)
 {
     std::optional<std::string> name = std::nullopt;
@@ -62,43 +38,6 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
         return name->substr(7, name->length() - 8);
     else
         return name;
-}
-
-Luau::MagicFunction createMagicFunctionTypeLookup(const std::vector<std::string>& lookupList, const std::string& errorMessagePrefix)
-{
-    return [lookupList, errorMessagePrefix](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-               const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
-    {
-        if (expr.args.size < 1)
-            return std::nullopt;
-
-        if (auto str = expr.args.data[0]->as<Luau::AstExprConstantString>())
-        {
-            auto className = std::string(str->value.data, str->value.size);
-            if (contains(lookupList, className))
-            {
-                std::optional<Luau::TypeFun> tfun = typeChecker.globalScope->lookupType(className);
-                if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
-                {
-                    typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
-                    return std::nullopt;
-                }
-
-                auto type = Luau::follow(tfun->type);
-
-                Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
-                Luau::TypePackId classTypePack = arena.addTypePack({type});
-                return Luau::WithPredicate<Luau::TypePackId>{classTypePack};
-            }
-            else
-            {
-                typeChecker.reportError(
-                    Luau::TypeError{expr.args.data[0]->location, Luau::GenericError{errorMessagePrefix + " '" + className + "'"}});
-            }
-        }
-
-        return std::nullopt;
-    };
 }
 
 std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions)
@@ -608,11 +547,12 @@ struct FindSymbolReferences : public Luau::AstVisitor
 
     bool visitLocal(Luau::AstLocal* local) const
     {
-        if (Luau::Symbol(local) == symbol)
-        {
-            return true;
-        }
-        return false;
+        return Luau::Symbol(local) == symbol;
+    }
+
+    bool visitGlobal(const Luau::AstName& name) const
+    {
+        return Luau::Symbol(name) == symbol;
     }
 
     bool visit(Luau::AstStatLocalFunction* function) override
@@ -641,6 +581,15 @@ struct FindSymbolReferences : public Luau::AstVisitor
         if (visitLocal(local->local))
         {
             result.push_back(local->location);
+        }
+        return true;
+    }
+
+    bool visit(Luau::AstExprGlobal* global) override
+    {
+        if (visitGlobal(global->name))
+        {
+            result.push_back(global->location);
         }
         return true;
     }
