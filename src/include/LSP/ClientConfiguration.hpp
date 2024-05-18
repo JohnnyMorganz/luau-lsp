@@ -9,7 +9,6 @@ struct ClientDiagnosticsConfiguration
     /// Whether to compute diagnostics for a whole workspace
     bool workspace = false;
     /// Whether to use expressive DM types in the diagnostics typechecker
-    /// DEPRECATED: USE `platform.roblox.diagnostics.strictDatamodelTypes`
     bool strictDatamodelTypes = false;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientDiagnosticsConfiguration, includeDependents, workspace, strictDatamodelTypes)
@@ -99,7 +98,6 @@ struct ClientCompletionImportsConfiguration
     /// Whether we should suggest automatic imports in completions
     bool enabled = false;
     /// Whether services should be suggested in auto-import
-    /// DEPRECATED: USE `platform.roblox.suggestServices` INSTEAD
     bool suggestServices = true;
     /// Whether requires should be suggested in auto-import
     bool suggestRequires = true;
@@ -208,14 +206,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(LSPPlatformConfig, {
                                                     {LSPPlatformConfig::Roblox, "roblox"},
                                                 })
 
-struct ClientRobloxDiagnosticsConfiguration
-{
-    /// Whether to use expressive DM types in the diagnostics typechecker
-    bool strictDatamodelTypes = false;
-};
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxDiagnosticsConfiguration, strictDatamodelTypes);
-
 struct ClientPlatformConfiguration
 {
     LSPPlatformConfig type = LSPPlatformConfig::Roblox;
@@ -232,7 +222,6 @@ struct ClientConfiguration
     bool autocompleteEnd = false;
     std::vector<std::string> ignoreGlobs{};
     ClientPlatformConfiguration platform{};
-    /// DEPRECATED: Use platform.roblox.sourcemap instead
     ClientRobloxSourcemapConfiguration sourcemap{};
     ClientDiagnosticsConfiguration diagnostics{};
     ClientTypesConfiguration types{};
