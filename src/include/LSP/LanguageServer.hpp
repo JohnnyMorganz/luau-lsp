@@ -24,6 +24,12 @@ inline lsp::PositionEncodingKind& positionEncoding()
     return encoding;
 }
 
+struct InitializationOptions
+{
+    std::unordered_map<std::string, std::string> fflags{};
+};
+NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
+
 class LanguageServer
 {
 private:

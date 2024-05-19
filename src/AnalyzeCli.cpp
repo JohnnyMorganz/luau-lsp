@@ -2,6 +2,7 @@
 #include "Analyze/AnalyzeCli.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Analyze/CliClient.hpp"
+#include "Flags.hpp"
 
 #include "LSP/ClientConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
@@ -253,7 +254,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             client.configuration = dottedToClientConfiguration(contents.value());
 
             // Process any fflags
-            registerFastFlags(client.configuration.fflags.override);
+            registerFastFlagsCLI(client.configuration.fflags.override);
             if (!client.configuration.fflags.enableByDefault)
                 std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "
                              "`--no-flags-enabled` to configure this.\n";

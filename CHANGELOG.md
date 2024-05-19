@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
 - Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
+- Added support for registering FFlags for the server via initializationOptions, rather than on the command line
 
 ### Fixed
 

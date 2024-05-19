@@ -21,6 +21,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
+        src/Flags.cpp
         src/CliConfigurationParser.cpp
         src/platform/LSPPlatform.cpp
         src/platform/roblox/RobloxCodeAction.cpp
@@ -74,6 +75,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/LuauExt.test.cpp
         tests/CliConfigurationParser.test.cpp
         tests/Hover.test.cpp
+        tests/LanguageServer.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging

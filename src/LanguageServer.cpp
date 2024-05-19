@@ -1,4 +1,5 @@
 #include "LSP/LanguageServer.hpp"
+#include "Flags.hpp"
 
 #include <string>
 #include <variant>
@@ -428,6 +429,32 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     client->sendTrace("client capabilities: " + json(params.capabilities).dump(), std::nullopt);
     client->capabilities = params.capabilities;
     client->traceMode = params.trace;
+
+    // Set FFlags
+    if (params.initializationOptions.has_value())
+    {
+        try
+        {
+            InitializationOptions options = params.initializationOptions.value();
+            if (!options.fflags.empty())
+            {
+                registerFastFlags(
+                    options.fflags,
+                    [this](const std::string& message)
+                    {
+                        client->sendLogMessage(lsp::MessageType::Error, message);
+                    },
+                    [this](const std::string& message)
+                    {
+                        client->sendLogMessage(lsp::MessageType::Info, message);
+                    });
+            }
+        }
+        catch (const json::exception& err)
+        {
+            client->sendLogMessage(lsp::MessageType::Error, std::string("Failed to parse initialization options: ") + err.what());
+        }
+    }
 
     // Configure workspaces
     if (params.workspaceFolders.has_value())

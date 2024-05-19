@@ -156,11 +156,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
-  // Pass FFlags as arguments
-  for (const [name, value] of Object.entries(fflags)) {
-    addArg(`--flag:${name}=${value}`);
-  }
-
   const run: Executable = {
     command: vscode.Uri.joinPath(
       context.extensionUri,
@@ -193,6 +188,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     diagnosticPullOptions: {
       onChange: true,
       onSave: true,
+    },
+    initializationOptions: {
+      fflags,
     },
   };
 
