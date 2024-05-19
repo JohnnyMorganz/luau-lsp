@@ -254,7 +254,10 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         createHint = false;
 
                     // If the name somewhat matches the arg name, we can skip the inlay hint
-                    if (Luau::equalsLower(Luau::toString(param), paramName))
+                    std::string stringifiedParam = Luau::toString(param);
+                    if (auto indexName = param->as<Luau::AstExprIndexName>())
+                        stringifiedParam = Luau::toString(indexName->index);
+                    if (Luau::equalsLower(stringifiedParam, paramName))
                         createHint = false;
                 }
 

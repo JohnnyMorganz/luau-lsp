@@ -527,6 +527,21 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_variable_matches_parameter_name")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_indexed_expression_matches_parameter_name")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    auto source = R"(
+        local function id(value: string)
+        end
+
+        local _ = { value = "testing"}
+        id(_.value)
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_configuration")
 {
     client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::Literals;

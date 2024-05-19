@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for registering FFlags for the server via initializationOptions, rather than on the command line
 - Added `luau-lsp.inlayHints.makeInsertable` (default: `true`) to configure whether inlay hint type annotations can be inserted by clicking
 
+### Changed
+
+- An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
+
 ### Fixed
 
 - Overloaded methods (typed as an intersection of function types with explicitly defined `self`) are now correctly marked with `method` semantic token ([#574](https://github.com/JohnnyMorganz/luau-lsp/issues/574))
