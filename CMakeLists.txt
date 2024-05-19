@@ -76,6 +76,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/CliConfigurationParser.test.cpp
         tests/Hover.test.cpp
         tests/LanguageServer.test.cpp
+        tests/InlayHints.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
