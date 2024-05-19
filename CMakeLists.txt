@@ -15,15 +15,23 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Uri.cpp
         src/WorkspaceFileResolver.cpp
         src/Workspace.cpp
-        src/Sourcemap.cpp
         src/TextDocument.cpp
         src/Client.cpp
         src/DocumentationParser.cpp
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/StudioPlugin.cpp
         src/CliConfigurationParser.cpp
+        src/platform/LSPPlatform.cpp
+        src/platform/roblox/RobloxCodeAction.cpp
+        src/platform/roblox/RobloxColorProvider.cpp
+        src/platform/roblox/RobloxCompletion.cpp
+        src/platform/roblox/RobloxFileResolver.cpp
+        src/platform/roblox/RobloxLanguageServer.cpp
+        src/platform/roblox/RobloxLuauExt.cpp
+        src/platform/roblox/RobloxSourcemap.cpp
+        src/platform/roblox/RobloxSourceNode.cpp
+        src/platform/roblox/RobloxStudioPlugin.cpp
         src/operations/Diagnostics.cpp
         src/operations/Completion.cpp
         src/operations/DocumentSymbol.cpp

@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <memory>
+#include "Platform/LSPPlatform.hpp"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Protocol/Structures.hpp"
@@ -26,13 +28,13 @@ class WorkspaceFolder
 {
 public:
     std::shared_ptr<Client> client;
+    std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
     bool isConfigured = false;
-    Luau::TypeArena instanceTypes;
-    std::optional<types::DefinitionsFileMetadata> definitionsFileMetadata;
+    std::optional<nlohmann::json> definitionsFileMetadata;
 
 public:
     WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
@@ -61,6 +63,8 @@ public:
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
+    void onDidChangeWatchedFiles(const lsp::FileEvent& change);
+
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
     /// Whether the file has been specified in the configuration as a definitions file
@@ -68,6 +72,8 @@ public:
 
     lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
+    void recomputeDiagnostics(const ClientConfiguration& config);
+    void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
 
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
@@ -79,9 +85,8 @@ public:
 private:
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
-        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool includeServices = true);
+        const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
-    lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
 
 public:
@@ -122,8 +127,6 @@ public:
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
-
-    bool updateSourceMap();
 
     bool isNullWorkspace() const
     {

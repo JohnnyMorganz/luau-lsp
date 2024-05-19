@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
 
@@ -9,6 +10,8 @@ TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 {
     WorkspaceFileResolver fileResolver;
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerScripts"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("PurchaseClient"), Luau::Location(), Luau::Position(0, 0), '.');
@@ -21,6 +24,8 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 {
     WorkspaceFileResolver fileResolver;
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerGui"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GuiScript"), Luau::Location(), Luau::Position(0, 0), '.');
@@ -33,6 +38,8 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 TEST_CASE("resolveModule handles LocalPlayer StarterGear")
 {
     WorkspaceFileResolver fileResolver;
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/StarterGear"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GearScript"), Luau::Location(), Luau::Position(0, 0), '.');
@@ -45,6 +52,8 @@ TEST_CASE("resolveModule handles LocalPlayer StarterGear")
 TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstChild")
 {
     WorkspaceFileResolver fileResolver;
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/ReplicatedStorage"};
 
@@ -67,6 +76,8 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstChild")
 TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive enabled")
 {
     WorkspaceFileResolver fileResolver;
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/ReplicatedStorage"};
 
@@ -91,7 +102,10 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
     sourceNode.name = "Foo";
 
     WorkspaceFileResolver fileResolver;
-    fileResolver.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
+    RobloxPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
+
+    platform.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
 
     Luau::ModuleInfo baseContext{"ProjectRoot/Bar"};
 
@@ -141,9 +155,11 @@ TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
 TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
     WorkspaceFileResolver fileResolver;
+    LSPPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{};
-    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.luau");
+    auto resolved = platform.resolveStringRequire(&baseContext, "Module.luau");
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "/Module.luau");
@@ -152,9 +168,11 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
 {
     WorkspaceFileResolver fileResolver;
+    LSPPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{};
-    auto resolved = fileResolver.resolveStringRequire(&baseContext, "Module.mod");
+    auto resolved = platform.resolveStringRequire(&baseContext, "Module.mod");
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "/Module.mod.lua");

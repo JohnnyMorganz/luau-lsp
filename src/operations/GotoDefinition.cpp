@@ -87,7 +87,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         {
             if (definitionModuleName)
             {
-                if (auto file = fileResolver.resolveToRealPath(*definitionModuleName))
+                if (auto file = platform->resolveToRealPath(*definitionModuleName))
                 {
                     auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
                     auto uri = document ? document->uri() : Uri::file(*file);
@@ -114,7 +114,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         {
             if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
             {
-                auto fileName = fileResolver.resolveToRealPath(*importedName);
+                auto fileName = platform->resolveToRealPath(*importedName);
                 if (!fileName)
                     return result;
                 uri = Uri::file(*fileName);
@@ -194,7 +194,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             {
                 if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
                 {
-                    auto fileName = fileResolver.resolveToRealPath(*importedName);
+                    auto fileName = platform->resolveToRealPath(*importedName);
                     if (!fileName)
                         return std::nullopt;
                     uri = Uri::file(*fileName);

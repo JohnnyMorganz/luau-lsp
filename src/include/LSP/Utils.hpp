@@ -7,7 +7,9 @@
 #include <unordered_map>
 #include <map>
 #include <algorithm>
-#include <LSP/Sourcemap.hpp>
+
+// TODO: must duplicate using to avoid cyclical includes
+using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 
 std::optional<std::string> getParentPath(const std::string& path);
 std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode);

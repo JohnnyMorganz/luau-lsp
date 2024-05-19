@@ -1,6 +1,7 @@
 #include <optional>
 #include <filesystem>
 
+#include "LSP/JsonRpc.hpp"
 #include "nlohmann/json.hpp"
 
 #include "Protocol/Structures.hpp"
@@ -13,6 +14,9 @@ using json = nlohmann::json;
 using namespace json_rpc;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
 using ClientPtr = std::shared_ptr<Client>;
+
+#define JSON_REQUIRED_PARAMS(params, method) \
+    (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
 
 inline lsp::PositionEncodingKind& positionEncoding()
 {
@@ -30,6 +34,8 @@ private:
     std::optional<Luau::Config> defaultConfig;
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
+
+    std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
     explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
@@ -52,11 +58,11 @@ public:
 
     // Dispatch handlers
 private:
+    bool allWorkspacesConfigured() const;
+    void handleMessage(const json_rpc::JsonRpcMessage& msg);
+
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
-
-    void pushDiagnostics(WorkspaceFolderPtr& workspace, const lsp::DocumentUri& uri, const size_t version);
-    void recomputeDiagnostics(WorkspaceFolderPtr& workspace, const ClientConfiguration& config);
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);
@@ -64,9 +70,6 @@ private:
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
-
-    void onStudioPluginFullChange(const PluginNode& dataModel);
-    void onStudioPluginClear();
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
