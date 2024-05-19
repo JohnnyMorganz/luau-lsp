@@ -55,6 +55,8 @@ struct ClientInlayHintsConfiguration
     bool parameterTypes = false;
     bool functionReturnTypes = false;
     size_t typeHintMaxLength = 50;
+    /// Whether type inlay hints should be made insertable
+    bool makeInsertable = true;
 
     inline bool operator==(const ClientInlayHintsConfiguration& rhs) const
     {
@@ -68,7 +70,7 @@ struct ClientInlayHintsConfiguration
     }
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength);
+    ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength, makeInsertable);
 
 struct ClientHoverConfiguration
 {

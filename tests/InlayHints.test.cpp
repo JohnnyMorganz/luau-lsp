@@ -4,7 +4,7 @@
 
 TEST_SUITE_BEGIN("InlayHints");
 
-lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string source)
+static lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string source)
 {
     auto uri = fixture->newDocument("foo.luau", source);
     lsp::InlayHintParams params;
@@ -126,6 +126,26 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_configuration_local_definitio
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration_local_definition")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.makeInsertable = false;
+    auto source = R"(
+        local x = 1
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 15});
+    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_in_for_loop")
 {
     client->globalConfig.inlayHints.variableTypes = true;
@@ -229,6 +249,37 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_configuration_for_loop")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration_for_loop")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.makeInsertable = false;
+    auto source = R"(
+        local _ = { "foo" }
+
+        for i, v in pairs(_) do
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{3, 13});
+    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+
+    CHECK_EQ(result[1].position, lsp::Position{3, 16});
+    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, false);
+    CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_type")
 {
     client->globalConfig.inlayHints.parameterTypes = true;
@@ -319,6 +370,30 @@ TEST_CASE_FIXTURE(Fixture, "respect_parameter_types_configuration")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "respect_parameter_types_make_insertable_configuration")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    client->globalConfig.inlayHints.makeInsertable = false;
+    auto source = R"(
+        local function id(_: string) end
+
+        local function foo(x)
+            id(x)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{3, 28});
+    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_return_type")
 {
     client->globalConfig.inlayHints.functionReturnTypes = true;
@@ -354,6 +429,28 @@ TEST_CASE_FIXTURE(Fixture, "respect_function_return_type_configuration")
 
     auto result = processInlayHint(this, source);
     REQUIRE_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "respect_function_return_type_make_insertable_configuration")
+{
+    client->globalConfig.inlayHints.functionReturnTypes = true;
+    client->globalConfig.inlayHints.makeInsertable = false;
+    auto source = R"(
+        local function example(value1: number, value2: number)
+            return value1 + value2
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 62});
+    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_name_in_call_with_literal_expr")

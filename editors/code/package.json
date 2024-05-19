@@ -297,6 +297,12 @@
           "minimum": 10,
           "scope": "resource"
         },
+        "luau-lsp.inlayHints.makeInsertable": {
+          "markdownDescription": "Whether type annotation inlay hints can be made insertable by clicking",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.hover.enabled": {
           "markdownDescription": "Enable hover",
           "type": "boolean",

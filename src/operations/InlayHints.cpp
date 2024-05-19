@@ -20,8 +20,11 @@ bool isNoOpFunction(const Luau::AstExprFunction* func)
 }
 
 // Adds a text edit onto the hint so that it can be inserted.
-void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
+void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Luau::TypeId ty)
 {
+    if (!config.inlayHints.makeInsertable)
+        return;
+
     Luau::ToStringOptions opts;
     auto result = Luau::toStringDetailed(ty, opts);
     if (result.invalid || result.truncated || result.error || result.cycle)
@@ -29,8 +32,11 @@ void makeInsertable(lsp::InlayHint& hint, Luau::TypeId ty)
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
 }
 
-void makeInsertable(lsp::InlayHint& hint, Luau::TypePackId ty)
+void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Luau::TypePackId ty)
 {
+    if (!config.inlayHints.makeInsertable)
+        return;
+
     auto result = types::toStringReturnTypeDetailed(ty);
     if (result.invalid || result.truncated || result.error || result.cycle)
         return;
@@ -96,7 +102,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     hint.kind = lsp::InlayHintKind::Type;
                     hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
-                    makeInsertable(hint, followedTy);
+                    makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
             }
@@ -139,7 +145,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     hint.kind = lsp::InlayHintKind::Type;
                     hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
-                    makeInsertable(hint, followedTy);
+                    makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
             }
@@ -166,7 +172,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     hint.kind = lsp::InlayHintKind::Type;
                     hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
                     hint.position = textDocument->convertPosition(func->argLocation->end);
-                    makeInsertable(hint, ftv->retTypes);
+                    makeInsertable(config, hint, ftv->retTypes);
                     hints.emplace_back(hint);
                 }
             }
@@ -194,7 +200,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         hint.kind = lsp::InlayHintKind::Type;
                         hint.label = ": " + Luau::toString(argType, stringOptions);
                         hint.position = textDocument->convertPosition(param->location.end);
-                        makeInsertable(hint, argType);
+                        makeInsertable(config, hint, argType);
                         hints.emplace_back(hint);
                     }
 
