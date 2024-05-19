@@ -63,16 +63,16 @@
     ],
     "semanticTokenScopes": [
       {
-        "language": "lua",
+        "language": "luau",
         "scopes": {
           "variable.defaultLibrary.readonly": [
-            "constant.language.global.lua"
+            "constant.language.global.luau"
           ],
           "property.defaultLibrary": [
-            "variable.language.lua"
+            "variable.language.luau"
           ],
           "enum.defaultLibrary": [
-            "constant.language.enum.lua"
+            "constant.language.enum.luau"
           ]
         }
       }
