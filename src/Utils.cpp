@@ -152,6 +152,13 @@ void trim_start(std::string& str)
     str.erase(0, str.find_first_not_of(" \n\r\t"));
 }
 
+std::string removePrefix(const std::string& str, const std::string& prefix)
+{
+    if (Luau::startsWith(str, prefix))
+        return str.substr(prefix.length());
+    return str;
+}
+
 
 void trim_end(std::string& str)
 {

@@ -32,7 +32,7 @@ void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Lua
     hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
 }
 
-void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Luau::TypePackId ty)
+void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Luau::TypePackId ty, bool removeLeadingEllipsis = false)
 {
     if (!config.inlayHints.makeInsertable)
         return;
@@ -40,7 +40,10 @@ void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Lua
     auto result = types::toStringReturnTypeDetailed(ty);
     if (result.invalid || result.truncated || result.error || result.cycle)
         return;
-    hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
+    auto name = result.name;
+    if (removeLeadingEllipsis)
+        name = removePrefix(name, "...");
+    hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + name});
 }
 struct InlayHintVisitor : public Luau::AstVisitor
 {
@@ -181,30 +184,44 @@ struct InlayHintVisitor : public Luau::AstVisitor
             if (config.inlayHints.parameterTypes)
             {
                 auto it = Luau::begin(ftv->argTypes);
-                if (it == Luau::end(ftv->argTypes))
-                    return true;
-
-                // Skip first item if it is self
-                if (isMethod(ftv))
-                    it++;
-
-                for (auto param : func->args)
+                if (it != Luau::end(ftv->argTypes))
                 {
-                    if (it == Luau::end(ftv->argTypes))
-                        break;
+                    // Skip first item if it is self
+                    if (isMethod(ftv))
+                        it++;
 
-                    auto argType = *it;
-                    if (!param->annotation && param->name != "_")
+                    for (auto param : func->args)
+                    {
+                        if (it == Luau::end(ftv->argTypes))
+                            break;
+
+                        auto argType = *it;
+                        if (!param->annotation && param->name != "_")
+                        {
+                            lsp::InlayHint hint;
+                            hint.kind = lsp::InlayHintKind::Type;
+                            hint.label = ": " + Luau::toString(argType, stringOptions);
+                            hint.position = textDocument->convertPosition(param->location.end);
+                            makeInsertable(config, hint, argType);
+                            hints.emplace_back(hint);
+                        }
+
+                        it++;
+                    }
+                }
+
+                if (func->vararg && it.tail())
+                {
+                    auto varargType = *it.tail();
+                    if (!func->varargAnnotation)
                     {
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + Luau::toString(argType, stringOptions);
-                        hint.position = textDocument->convertPosition(param->location.end);
-                        makeInsertable(config, hint, argType);
+                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
+                        hint.position = textDocument->convertPosition(func->varargLocation.end);
+                        makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
                         hints.emplace_back(hint);
                     }
-
-                    it++;
                 }
             }
         }

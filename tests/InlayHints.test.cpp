@@ -358,6 +358,64 @@ TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_method")
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{5, 24}, {5, 24}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_vararg")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        local function id(...)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 29});
+    CHECK_EQ(result[0].label, ": any");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": any");
+    CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{1, 29}, {1, 29}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_vararg_2")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        local function id(x: string, ...)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 40});
+    CHECK_EQ(result[0].label, ": any");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": any");
+    CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{1, 40}, {1, 40}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_on_vararg_with_type_annotation")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        local function id(...: string)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "respect_parameter_types_configuration")
 {
     client->globalConfig.inlayHints.parameterTypes = false;
