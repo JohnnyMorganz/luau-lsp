@@ -735,3 +735,26 @@ bool isMethod(const Luau::FunctionType* ftv)
 
     return false;
 }
+
+static bool isMethod(Luau::TypeId ty)
+{
+    auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(ty));
+    if (!ftv)
+        return false;
+
+    return isMethod(ftv);
+}
+
+bool isOverloadedMethod(Luau::TypeId ty)
+{
+    if (!Luau::get<Luau::IntersectionType>(Luau::follow(ty)))
+        return false;
+
+    auto isOverloadedMethod = [](Luau::TypeId part) -> bool
+    {
+        return isMethod(part);
+    };
+
+    std::vector<Luau::TypeId> parts = Luau::flattenIntersection(ty);
+    return std::all_of(parts.begin(), parts.end(), isOverloadedMethod);
+}

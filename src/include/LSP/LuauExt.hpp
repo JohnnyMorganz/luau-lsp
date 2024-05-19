@@ -67,6 +67,7 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
 bool isGetService(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
+bool isOverloadedMethod(Luau::TypeId ty);
 
 struct FindImportsVisitor : public Luau::AstVisitor
 {

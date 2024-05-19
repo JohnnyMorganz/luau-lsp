@@ -31,4 +31,23 @@ TEST_CASE_FIXTURE(Fixture, "explicit_self_method_has_method_semantic_token")
     CHECK_EQ(token->tokenModifiers, lsp::SemanticTokenModifiers::None);
 }
 
+TEST_CASE_FIXTURE(Fixture, "explicit_self_overloaded_method_has_method_semantic_token")
+{
+    check(R"(
+        type myClass = {
+            foo: ((self: myClass) -> ()) & ((self: myClass, myArg: boolean) -> ()),
+        }
+        local a: myClass = nil
+        a:foo()
+    )");
+
+    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
+    REQUIRE(!tokens.empty());
+
+    auto token = getSemanticToken(tokens, Luau::Position{5, 10});
+    REQUIRE(token);
+    CHECK_EQ(token->tokenType, lsp::SemanticTokenTypes::Method);
+    CHECK_EQ(token->tokenModifiers, lsp::SemanticTokenModifiers::None);
+}
+
 TEST_SUITE_END();

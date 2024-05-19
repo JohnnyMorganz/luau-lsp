@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
 - Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
 
+### Fixed
+
+- Overloaded methods (typed as an intersection of function types with explicitly defined `self`) are now correctly marked with `method` semantic token ([#574](https://github.com/JohnnyMorganz/luau-lsp/issues/574))
+
 ## [1.29.1] - 2024-05-19
 
 ### Changed
