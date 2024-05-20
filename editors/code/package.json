@@ -443,6 +443,12 @@
           "default": 3667,
           "scope": "window"
         },
+        "luau-lsp.plugin.maximumRequestBodySize": {
+          "markdownDescription": "The maximum request body size accepted from the plugin, in a string representation parse-able by the [bytes](https://www.npmjs.com/package/bytes) library",
+          "type": "string",
+          "default": "3mb",
+          "scope": "window"
+        },
         "luau-lsp.require.mode": {
           "markdownDescription": "How string requires should be interpreted",
           "type": "string",

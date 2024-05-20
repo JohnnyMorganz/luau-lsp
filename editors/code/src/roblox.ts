@@ -292,7 +292,9 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
   const app = express();
   app.use(
     express.json({
-      limit: "3mb",
+      limit: vscode.workspace
+        .getConfiguration("luau-lsp.plugin")
+        .get("maximumRequestBodySize", "3mb"),
     })
   );
 
