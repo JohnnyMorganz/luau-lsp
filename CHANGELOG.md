@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
 - Added support for registering FFlags for the server via initializationOptions, rather than on the command line ([#590](https://github.com/JohnnyMorganz/luau-lsp/issues/590))
 - Added `luau-lsp.inlayHints.makeInsertable` (default: `true`) to configure whether inlay hint type annotations can be inserted by clicking ([#620](https://github.com/JohnnyMorganz/luau-lsp/issues/620))
-- Added inlay hints for varargs parameter type
+- Added inlay hints for varargs parameter type ([#622](https://github.com/JohnnyMorganz/luau-lsp/issues/622))
 - Added setting `luau-lsp.plugin.maximumRequestBodySize` (default: `3mb`) to configure the maximum size of the payload accepted from the Studio Plugin
 
 ### Changed
