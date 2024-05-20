@@ -4557,6 +4557,7 @@ type HttpRequestOptions = {
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
     Headers: { [string]: string }?,
     Body: string?,
+    Compress: EnumHttpCompression
 }
 
 type HttpResponseData = {
