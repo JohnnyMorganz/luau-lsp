@@ -8,8 +8,8 @@ import json
 import sys
 
 # API Endpoints
-DATA_TYPES = open("DataTypes.json","r")
-CORRECTIONS = open("Corrections.json","r")
+DATA_TYPES = open("DataTypes.json", "r")
+CORRECTIONS = open("Corrections.json", "r")
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
@@ -616,6 +616,7 @@ type HttpRequestOptions = {
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
     Headers: { [string]: string }?,
     Body: string?,
+    Compress: EnumHttpCompression
 }
 
 type HttpResponseData = {
@@ -908,9 +909,9 @@ def resolveParameter(param: ApiParameter):
     isVariadic = paramType.startswith("...")
     if isVariadic:
         actualType = paramType[3:]
-        if "Variadic" in param["Type"] and  param["Type"]["Variadic"] is not None:
+        if "Variadic" in param["Type"] and param["Type"]["Variadic"] is not None:
             return f"...{actualType}"
-        
+
         return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
