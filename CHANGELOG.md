@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
+- Studio Plugin will now perform Gzip compression on sent requests
 
 ### Fixed
 

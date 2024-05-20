@@ -131,6 +131,7 @@ local function sendFullDMInfo()
 		Body = HttpService:JSONEncode({
 			tree = tree,
 		}),
+		Compress = Enum.HttpCompression.Gzip,
 	})
 
 	if not success then
