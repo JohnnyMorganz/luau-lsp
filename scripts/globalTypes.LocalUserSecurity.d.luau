@@ -2036,6 +2036,7 @@ declare class EnumMarketplaceItemPurchaseStatus_INTERNAL extends Enum
 	InsufficientRobux: EnumMarketplaceItemPurchaseStatus
 	NotAvailableForPurchaser: EnumMarketplaceItemPurchaseStatus
 	NotForSale: EnumMarketplaceItemPurchaseStatus
+	PlaceInvalid: EnumMarketplaceItemPurchaseStatus
 	PriceMismatch: EnumMarketplaceItemPurchaseStatus
 	PurchaserIsSeller: EnumMarketplaceItemPurchaseStatus
 	QuantityLimitExceeded: EnumMarketplaceItemPurchaseStatus
@@ -2851,12 +2852,6 @@ declare class EnumSensorUpdateType extends EnumItem end
 declare class EnumSensorUpdateType_INTERNAL extends Enum
 	Manual: EnumSensorUpdateType
 	OnRead: EnumSensorUpdateType
-end
-declare class EnumServerAudioBehavior extends EnumItem end
-declare class EnumServerAudioBehavior_INTERNAL extends Enum
-	Enabled: EnumServerAudioBehavior
-	Muted: EnumServerAudioBehavior
-	OnlineGame: EnumServerAudioBehavior
 end
 declare class EnumServerLiveEditingMode extends EnumItem end
 declare class EnumServerLiveEditingMode_INTERNAL extends Enum
@@ -4088,7 +4083,6 @@ type ENUM_LIST = {
 	SelfViewPosition: EnumSelfViewPosition_INTERNAL,
 	SensorMode: EnumSensorMode_INTERNAL,
 	SensorUpdateType: EnumSensorUpdateType_INTERNAL,
-	ServerAudioBehavior: EnumServerAudioBehavior_INTERNAL,
 	ServerLiveEditingMode: EnumServerLiveEditingMode_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
 	Severity: EnumSeverity_INTERNAL,
@@ -5005,6 +4999,7 @@ declare class AvatarCreationService extends Instance
 	function LoadAvatarModelAsync(self, id: string): Instance
 	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): EditableImage
 	function PromptCreateAvatarAsync(self, player: Player, humanoidDescription: HumanoidDescription): any
+	function SendAnalyticsEvent(self, eventName: string, params: { [any]: any }): nil
 end
 
 declare class AvatarEditorService extends Instance
@@ -6193,6 +6188,7 @@ declare class Explosion extends Instance
 	DestroyJointRadiusPercent: number
 	ExplosionType: EnumExplosionType
 	Hit: RBXScriptSignal<BasePart, number>
+	LocalTransparencyModifier: number
 	Position: Vector3
 	TimeScale: number
 	Visible: boolean
@@ -6253,6 +6249,7 @@ declare class Fire extends Instance
 	Color: Color3
 	Enabled: boolean
 	Heat: number
+	LocalTransparencyModifier: number
 	SecondaryColor: Color3
 	Size: number
 	TimeScale: number
@@ -7089,6 +7086,7 @@ end
 
 declare class InsertService extends Instance
 	AllowClientInsertModels: boolean
+	function CreateMeshPartAsync(self, meshId: Content, collisionFidelity: EnumCollisionFidelity, renderFidelity: EnumRenderFidelity): MeshPart
 	function GetCollection(self, categoryId: number): { any }
 	function GetFreeDecals(self, searchText: string, pageNum: number): { any }
 	function GetFreeModels(self, searchText: string, pageNum: number): { any }
@@ -8713,6 +8711,7 @@ end
 declare class Smoke extends Instance
 	Color: Color3
 	Enabled: boolean
+	LocalTransparencyModifier: number
 	Opacity: number
 	RiseVelocity: number
 	Size: number
@@ -8861,6 +8860,7 @@ end
 declare class Sparkles extends Instance
 	Color: Color3
 	Enabled: boolean
+	LocalTransparencyModifier: number
 	SparkleColor: Color3
 	TimeScale: number
 end
@@ -9040,7 +9040,6 @@ declare class Studio extends Instance
 	["Selected Text Color"]: Color3
 	["Selection Background Color"]: Color3
 	["Selection Color"]: Color3
-	["Server Audio Behavior"]: EnumServerAudioBehavior
 	["Set Pivot of Imported Parts"]: boolean
 	["Show Core GUI in Explorer while Playing"]: boolean
 	["Show Diagnostics Bar"]: boolean
