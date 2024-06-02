@@ -91,7 +91,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         }
     }
 
-    return std::nullopt;
+    return source;
 }
 
 /// Modify the context so that game/Players/LocalPlayer items point to the correct place
