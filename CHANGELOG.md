@@ -6,6 +6,68 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.type`
+
+### Added
+
+- Added `luau-lsp.platform.type` to separate platform-specific functionality from the main LSP
+- Added option `--platform` to analyze CLI to make configuring `luau-lsp.platform.type` more convenient
+- Added support for registering FFlags for the server via initializationOptions, rather than on the command line ([#590](https://github.com/JohnnyMorganz/luau-lsp/issues/590))
+- Added `luau-lsp.inlayHints.makeInsertable` (default: `true`) to configure whether inlay hint type annotations can be inserted by clicking ([#620](https://github.com/JohnnyMorganz/luau-lsp/issues/620))
+- Added inlay hints for varargs parameter type ([#622](https://github.com/JohnnyMorganz/luau-lsp/issues/622))
+- Added setting `luau-lsp.plugin.maximumRequestBodySize` (default: `3mb`) to configure the maximum size of the payload accepted from the Studio Plugin
+- Added support for requiring `.toml` files
+
+### Changed
+
+- Sync to upstream Luau 0.628
+- An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
+- Studio Plugin will now perform Gzip compression on sent requests
+
+### Fixed
+
+- Overloaded methods (typed as an intersection of function types with explicitly defined `self`) are now correctly marked with `method` semantic token ([#574](https://github.com/JohnnyMorganz/luau-lsp/issues/574))
+- Fixed semantic token highlighting overrides for global variables
+- Improved robustness for non-ASCII filesystem paths in file lookup and directory traversal
+
+## [1.29.1] - 2024-05-19
+
+### Changed
+
+- Sync to upstream Luau 0.626
+
+### Fixed
+
+- Type aliases now show generics in the type hover ([#591](https://github.com/JohnnyMorganz/luau-lsp/issues/591))
+- Fixed 'find all references' not working for a global function declared in a file
+- Likewise, rename now supports global functions defined in a file ([#568](https://github.com/JohnnyMorganz/luau-lsp/issues/568))
+
+## [1.29.0] - 2024-05-11
+
+### Added
+
+- Bytecode display will now show type info information. Added setting `luau-lsp.bytecode.typeInfoLevel` (default: 1) to configure the [type info level](https://github.com/luau-lang/luau/blob/259e50903855d1b8be79edc40fc275fd04c9c892/Compiler/include/Luau/Compiler.h#L29-L33) shown.
+- Added "magic functions / refinements" support under the New Solver (i.e., special handling of :IsA, :FindFirstChildWhichIsA, :Clone, etc.)
+
+### Changed
+
+- Sync to upstream Luau 0.625
+- Improved memory usage of document and workspace diagnostics by no longer storing type graphs
+- Rewritten the Luau grammar syntax: https://github.com/JohnnyMorganz/Luau.tmLanguage
+
+### Fixed
+
+- Fixed autocompletion of strings with '/' characters causing the prefix to be duplicated rather than replaced ([#607](https://github.com/JohnnyMorganz/luau-lsp/issues/607))
+- Fixed bug with string requires where a required files types may not correctly update when the file contents changed
+
+## [1.28.1] - 2024-03-04
+
+### Fixed
+
+- Fixed macos release build
+
 ## [1.28.0] - 2024-03-03
 
 ### Changed
