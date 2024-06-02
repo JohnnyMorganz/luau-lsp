@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added setting `luau-lsp.plugin.maximumRequestBodySize` (default: `3mb`) to configure the maximum size of the payload accepted from the Studio Plugin
 
 ### Changed
+
 - Sync to upstream Luau 0.628
 - An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
 - Studio Plugin will now perform Gzip compression on sent requests
@@ -28,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Overloaded methods (typed as an intersection of function types with explicitly defined `self`) are now correctly marked with `method` semantic token ([#574](https://github.com/JohnnyMorganz/luau-lsp/issues/574))
 - Fixed semantic token highlighting overrides for global variables
+- Improved robustness for non-ASCII filesystem paths in file lookup and directory traversal
 
 ## [1.29.1] - 2024-05-19
 

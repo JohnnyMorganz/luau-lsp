@@ -8,6 +8,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
+#include "LSP/FileUtils.h"
 
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
@@ -207,41 +208,38 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files");
 
     size_t indexCount = 0;
+    bool stopped = false;
 
-    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
-    {
-        if (indexCount >= config.index.maxFiles)
+    traverseDirectory(rootUri.fsPath().generic_string(),
+        [&](const std::string& filePath)
         {
-            client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
-                                                                     ") has been hit. This may cause some language features to only work partially "
-                                                                     "(Find All References, Rename). If necessary, consider increasing the limit");
-            break;
-        }
-
-        try
-        {
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
-                !isIgnoredFile(next->path(), config))
+            if (indexCount >= config.index.maxFiles)
             {
-                auto ext = next->path().extension();
-                if (ext == ".lua" || ext == ".luau")
-                {
-                    auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
+                if (!stopped)
+                    client->sendWindowMessage(
+                        lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                       ") has been hit. This may cause some language features to only work partially "
+                                                       "(Find All References, Rename). If necessary, consider increasing the limit");
 
-                    // Parse the module to infer require data
-                    // We do not perform any type checking here
-                    frontend.parse(moduleName);
-
-                    indexCount += 1;
-                }
+                stopped = true;
+                return;
             }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to index file: ") + e.what());
-        }
-    }
+
+            if (isDefinitionFile(filePath, config) || isIgnoredFile(filePath, config))
+                return;
+
+            auto ext = getExtension(filePath);
+            if (ext == ".lua" || ext == ".luau")
+            {
+                auto moduleName = fileResolver.getModuleName(Uri::file(filePath));
+
+                // Parse the module to infer require data
+                // We do not perform any type checking here
+                frontend.parse(moduleName);
+
+                indexCount += 1;
+            }
+        });
 
     client->sendTrace("workspace: indexing all files COMPLETED");
 }

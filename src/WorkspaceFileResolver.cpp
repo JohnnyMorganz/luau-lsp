@@ -5,6 +5,7 @@
 #include "Luau/Ast.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
+#include "LSP/FileUtils.h"
 
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {

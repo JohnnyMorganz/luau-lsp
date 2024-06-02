@@ -16,6 +16,7 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 #include "glob/glob.hpp"
+#include "LSP/FileUtils.h"
 #include <iostream>
 #include <filesystem>
 #include <memory>
@@ -173,25 +174,14 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
             if (std::filesystem::is_directory(path))
             {
-                for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
-                     next != end; ++next)
-                {
-                    try
+                traverseDirectory(path.generic_string(),
+                    [&](const std::string& name)
                     {
-                        if (next->is_regular_file() && next->path().has_extension())
-                        {
-                            auto ext = next->path().extension();
-                            if (ext == ".lua" || ext == ".luau")
-                            {
-                                files.push_back(next->path());
-                            }
-                        }
-                    }
-                    catch (const std::filesystem::filesystem_error& e)
-                    {
-                        std::cerr << "warning: Failed to visit directory: " << e.what() << "\n";
-                    }
-                }
+                        std::string ext = getExtension(name);
+
+                        if (ext == ".lua" || ext == ".luau")
+                            files.push_back(name);
+                    });
             }
             else
             {
