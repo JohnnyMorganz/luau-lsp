@@ -8,9 +8,9 @@ import json
 import sys
 
 # API Endpoints
-DATA_TYPES_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json"
+DATA_TYPES = open("DataTypes.json", "r")
+CORRECTIONS = open("Corrections.json", "r")
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
-CORRECTIONS_URL = "https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/Corrections.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
@@ -64,7 +64,6 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
-    "RaycastResult",  # Redefined using generics
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -257,9 +256,6 @@ IGNORED_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart",
     ],
-    "StudioService": [
-        "GizmoRaycast",
-    ],
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -380,10 +376,10 @@ EXTRA_MEMBERS = {
         "function CreateButton(self, id: string, toolTip: string, iconAsset: string, text: string?): PluginToolbarButton",
     ],
     "WorldRoot": [
-        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<BasePart>?",
-        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
-        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
-        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult<BasePart>?",
+        "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
+        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?",
+        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?",
+        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?",
         "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
         "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
         "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
@@ -468,7 +464,7 @@ EXTRA_MEMBERS = {
     "GuiService": ["SelectedObject: GuiObject?"],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
-        "function GetAsync(self, key: string): (any, DataStoreKeyInfo)",
+        "function GetAsync(self, key: string, options: DataStoreGetOptions): (any, DataStoreKeyInfo)",
         # IncrementAsync didn't have a second return value of DataStoreKeyInfo, and the first return value is always a number
         "function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): (number, DataStoreKeyInfo)",
         # RemoveAsync didn't have a second return value of DataStoreKeyInfo
@@ -483,7 +479,7 @@ EXTRA_MEMBERS = {
     # Trying to set the value in a OrderedDataStore to anything other than a number will error,
     # So we override the method's types to use numbers instead of any
     "OrderedDataStore": [
-        "function GetAsync(self, key: string): (number?, DataStoreKeyInfo)",
+        "function GetAsync(self, key: string, options: DataStoreGetOptions): (number?, DataStoreKeyInfo)",
         "function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages",
         "function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)",
         "function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string",
@@ -528,9 +524,6 @@ EXTRA_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart: BasePart?",
     ],
-    "StudioService": [
-        "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint>?",
-    ],
 }
 
 # Hardcoded types
@@ -562,6 +555,7 @@ declare debug: {
     traceback: ((string?, number?) -> string) & ((thread, string?, number?) -> string),
     profilebegin: (label: string) -> (),
     profileend: () -> (),
+    getmemorycategory: () -> string,
     setmemorycategory: (tag: string) -> (),
     resetmemorycategory: () -> (),
 }
@@ -622,6 +616,7 @@ type HttpRequestOptions = {
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
     Headers: { [string]: string }?,
     Body: string?,
+    Compress: EnumHttpCompression
 }
 
 type HttpResponseData = {
@@ -666,14 +661,6 @@ declare SharedTable: {
     isFrozen: (st: SharedTable) -> boolean,
     size: (st: SharedTable) -> number,
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
-}
-
-export type RaycastResult<T = Instance> = {
-    Instance: T,
-    Position: Vector3,
-    Normal: Vector3,
-    Distance: number,
-    Material: EnumMaterial,
 }
 
 declare game: DataModel
@@ -898,6 +885,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if "Tuple" in type and type["Tuple"] is not None:
         subtype = resolveType(type["Tuple"])
         return f"...({subtype})"
+    if "Variadic" in type and type["Variadic"] is not None:
+        subtype = resolveType(type["Variadic"])
+        return f"...{subtype}"
 
     name, category = (
         type["Name"],
@@ -919,6 +909,9 @@ def resolveParameter(param: ApiParameter):
     isVariadic = paramType.startswith("...")
     if isVariadic:
         actualType = paramType[3:]
+        if "Variadic" in param["Type"] and param["Type"]["Variadic"] is not None:
+            return f"...{actualType}"
+
         return f"...: {actualType}"
     return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
 
@@ -1217,14 +1210,14 @@ brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
 
 # Print global types
-dataTypes: DataTypesDump = json.loads(requests.get(DATA_TYPES_URL).text)
+dataTypes: DataTypesDump = json.load(DATA_TYPES)
 dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
 
 # Load services and creatable instances
 loadClassesIntoStructures(dump)
 
 # Apply any corrections on the dump
-corrections: CorrectionsDump = json.loads(requests.get(CORRECTIONS_URL).text)
+corrections: CorrectionsDump = json.load(CORRECTIONS)
 applyCorrections(dump, corrections)
 
 printJsonPrologue()

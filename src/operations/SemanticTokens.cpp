@@ -49,10 +49,10 @@ static lsp::SemanticTokenTypes inferTokenType(const Luau::TypeId ty, lsp::Semant
     }
     else if (Luau::get<Luau::IntersectionType>(followedTy))
     {
-        if (Luau::isOverloadedFunction(followedTy))
-        {
+        if (isOverloadedMethod(followedTy))
+            return lsp::SemanticTokenTypes::Method;
+        else if (Luau::isOverloadedFunction(followedTy))
             return lsp::SemanticTokenTypes::Function;
-        }
     }
     else if (auto ttv = Luau::get<Luau::TableType>(followedTy))
     {

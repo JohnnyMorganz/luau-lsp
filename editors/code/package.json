@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.28.0",
+  "version": "1.29.1",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -63,16 +63,16 @@
     ],
     "semanticTokenScopes": [
       {
-        "language": "lua",
+        "language": "luau",
         "scopes": {
           "variable.defaultLibrary.readonly": [
-            "constant.language.global.lua"
+            "constant.language.global.luau"
           ],
           "property.defaultLibrary": [
-            "variable.language.lua"
+            "variable.language.luau"
           ],
           "enum.defaultLibrary": [
-            "constant.language.enum.lua"
+            "constant.language.enum.luau"
           ]
         }
       }
@@ -137,6 +137,16 @@
             "**/_Index/**"
           ],
           "scope": "resource"
+        },
+        "luau-lsp.platform.type": {
+          "markdownDescription": "Platform-specific support features",
+          "type": "string",
+          "enum": [
+            "standard",
+            "roblox"
+          ],
+          "scope": "window",
+          "default": "roblox"
         },
         "luau-lsp.sourcemap.enabled": {
           "markdownDescription": "Whether Rojo sourcemap parsing is enabled",
@@ -235,7 +245,9 @@
           "scope": "window",
           "tags": [
             "usesOnlineServices"
-          ]
+          ],
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.platform.type#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.platform.type instead."
         },
         "luau-lsp.types.robloxSecurityLevel": {
           "markdownDescription": "Security Level to use in the Roblox API definitions",
@@ -283,6 +295,12 @@
           "type": "number",
           "default": 50,
           "minimum": 10,
+          "scope": "resource"
+        },
+        "luau-lsp.inlayHints.makeInsertable": {
+          "markdownDescription": "Whether type annotation inlay hints can be made insertable by clicking",
+          "type": "boolean",
+          "default": true,
           "scope": "resource"
         },
         "luau-lsp.hover.enabled": {
@@ -425,6 +443,12 @@
           "default": 3667,
           "scope": "window"
         },
+        "luau-lsp.plugin.maximumRequestBodySize": {
+          "markdownDescription": "The maximum request body size accepted from the plugin, in a string representation parse-able by the [bytes](https://www.npmjs.com/package/bytes) library",
+          "type": "string",
+          "default": "3mb",
+          "scope": "window"
+        },
         "luau-lsp.require.mode": {
           "markdownDescription": "How string requires should be interpreted",
           "type": "string",
@@ -475,6 +499,14 @@
           "minimum": 0,
           "maximum": 2,
           "markdownDescription": "The `debugLevel` to use when compiling bytecode"
+        },
+        "luau-lsp.bytecode.typeInfoLevel": {
+          "type": "number",
+          "default": 1,
+          "scope": "resource",
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "The `typeInfoLevel` to use when compiling bytecode"
         },
         "luau-lsp.bytecode.vectorLib": {
           "type": "string",
@@ -529,7 +561,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "express": "^4.18.1",
+    "express": "^4.19.2",
     "node-fetch": "^3.2.4",
     "vscode-languageclient": "^8.1.0-next.6"
   }

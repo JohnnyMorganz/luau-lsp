@@ -1,5 +1,7 @@
+#include "Flags.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/DocumentationParser.hpp"
+#include "LSP/FileUtils.h"
 #include "Analyze/AnalyzeCli.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Luau/ExperimentalFlags.h"
@@ -24,56 +26,6 @@ static void displayFlags()
     for (Luau::FValue<int>* flag = Luau::FValue<int>::list; flag; flag = flag->next)
     {
         printf("  %s=%d\n", flag->name, flag->value);
-    }
-}
-
-void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags)
-{
-    for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
-    {
-        if (fastFlags.find(flag->name) != fastFlags.end())
-        {
-            std::string valueStr = fastFlags.at(flag->name);
-
-            if (valueStr == "true" || valueStr == "True")
-                flag->value = true;
-            else if (valueStr == "false" || valueStr == "False")
-                flag->value = false;
-            else
-            {
-                std::cerr << "Bad flag option, expected a boolean 'True' or 'False' for flag " << flag->name << "\n";
-                std::exit(1);
-            }
-
-            fastFlags.erase(flag->name);
-        }
-    }
-
-    for (Luau::FValue<int>* flag = Luau::FValue<int>::list; flag; flag = flag->next)
-    {
-        if (fastFlags.find(flag->name) != fastFlags.end())
-        {
-            std::string valueStr = fastFlags.at(flag->name);
-
-            int value = 0;
-            try
-            {
-                value = std::stoi(valueStr);
-            }
-            catch (...)
-            {
-                std::cerr << "Bad flag option, expected an int for flag " << flag->name << "\n";
-                std::exit(1);
-            }
-
-            flag->value = value;
-            fastFlags.erase(flag->name);
-        }
-    }
-
-    for (auto& [key, _] : fastFlags)
-    {
-        std::cerr << "Unknown FFlag: " << key << "\n";
     }
 }
 
@@ -171,7 +123,7 @@ void processFFlags(const argparse::ArgumentParser& program)
             if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isFlagExperimental(flag->name))
                 flag->value = true;
     }
-    registerFastFlags(fastFlags);
+    registerFastFlagsCLI(fastFlags);
 
     // Manually enforce a LuauTarjanChildLimit increase
     // TODO: re-evaluate the necessity of this change
@@ -192,7 +144,7 @@ int main(int argc, char** argv)
         return 1;
     };
 
-    argparse::ArgumentParser program("luau-lsp", "1.28.0");
+    argparse::ArgumentParser program("luau-lsp", "1.29.1");
     program.set_assign_chars(":=");
 
     // Global arguments
@@ -249,6 +201,7 @@ int main(int argc, char** argv)
         .help("path to a .luaurc file which acts as the base default configuration")
         .action(file_path_parser)
         .metavar("PATH");
+    analyze_command.add_argument("--platform").help("platform-specific support features").choices("standard", "roblox");
     analyze_command.add_argument("--settings").help("path to LSP-style settings").action(file_path_parser).metavar("PATH");
     analyze_command.add_argument("files").help("files to perform analysis on").remaining();
 

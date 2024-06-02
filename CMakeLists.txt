@@ -15,15 +15,25 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Uri.cpp
         src/WorkspaceFileResolver.cpp
         src/Workspace.cpp
-        src/Sourcemap.cpp
         src/TextDocument.cpp
         src/Client.cpp
         src/DocumentationParser.cpp
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/StudioPlugin.cpp
+        src/FileUtils.cpp
+        src/Flags.cpp
         src/CliConfigurationParser.cpp
+        src/platform/LSPPlatform.cpp
+        src/platform/roblox/RobloxCodeAction.cpp
+        src/platform/roblox/RobloxColorProvider.cpp
+        src/platform/roblox/RobloxCompletion.cpp
+        src/platform/roblox/RobloxFileResolver.cpp
+        src/platform/roblox/RobloxLanguageServer.cpp
+        src/platform/roblox/RobloxLuauExt.cpp
+        src/platform/roblox/RobloxSourcemap.cpp
+        src/platform/roblox/RobloxSourceNode.cpp
+        src/platform/roblox/RobloxStudioPlugin.cpp
         src/operations/Diagnostics.cpp
         src/operations/Completion.cpp
         src/operations/DocumentSymbol.cpp
@@ -52,7 +62,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/main.cpp
         tests/Fixture.cpp
         tests/Autocomplete.test.cpp
-        tests/Diagnostics.test.cpp
+        tests/MagicFunctions.test.cpp
         tests/Documentation.test.cpp
         tests/TextDocument.test.cpp
         tests/Uri.test.cpp
@@ -66,6 +76,8 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/LuauExt.test.cpp
         tests/CliConfigurationParser.test.cpp
         tests/Hover.test.cpp
+        tests/LanguageServer.test.cpp
+        tests/InlayHints.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging

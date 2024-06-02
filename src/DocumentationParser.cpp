@@ -1,5 +1,6 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+#include "LSP/FileUtils.h"
 #include <regex>
 #include <algorithm>
 

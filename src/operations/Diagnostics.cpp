@@ -2,6 +2,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
+#include "LSP/FileUtils.h"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
@@ -45,7 +46,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
         }
         else
         {
-            auto fileName = fileResolver.resolveToRealPath(error.moduleName);
+            auto fileName = platform->resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
                 continue;
             auto textDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
@@ -83,6 +84,12 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
+    if (!isConfigured)
+    {
+        lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
+        throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);
+    }
+
     lsp::WorkspaceDiagnosticReport workspaceReport;
 
     // Don't compute any workspace diagnostics for null workspace
@@ -93,23 +100,16 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
 
     // Find a list of files to compute diagnostics for
     std::vector<Uri> files{};
-    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
-    {
-        try
+    traverseDirectory(this->rootUri.fsPath().generic_string(),
+        [&](const std::string& filePath)
         {
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
-            {
-                auto ext = next->path().extension();
-                if (ext == ".lua" || ext == ".luau")
-                    files.push_back(Uri::file(next->path()));
-            }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
-        }
-    }
+            if (isDefinitionFile(filePath, config))
+                return;
+
+            auto ext = getExtension(filePath);
+            if (ext == ".lua" || ext == ".luau")
+                files.push_back(Uri::file(filePath));
+        });
 
     for (auto uri : files)
     {
@@ -169,6 +169,57 @@ lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::Docu
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->documentDiagnostics(params);
+}
+
+void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t version)
+{
+    // Convert the diagnostics report into a series of diagnostics published for each relevant file
+    lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
+    auto diagnostics = documentDiagnostics(params);
+    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
+
+    if (!diagnostics.relatedDocuments.empty())
+    {
+        for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
+        {
+            if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+            {
+                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
+            }
+        }
+    }
+}
+
+/// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
+void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config)
+{
+    // Handle diagnostics if in push-mode
+    if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
+    {
+        // Recompute workspace diagnostics if requested
+        if (config.diagnostics.workspace)
+        {
+            auto diagnostics = workspaceDiagnostics({});
+            for (const auto& report : diagnostics.items)
+            {
+                if (report.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{report.uri, report.version, report.items});
+                }
+            }
+        }
+        // Recompute diagnostics for all currently opened files
+        else
+        {
+            for (const auto& [_, document] : fileResolver.managedFiles)
+                pushDiagnostics(document.uri(), document.version());
+        }
+    }
+    else
+    {
+        client->terminateWorkspaceDiagnostics();
+        client->refreshWorkspaceDiagnostics();
+    }
 }
 
 lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)

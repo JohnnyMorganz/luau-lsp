@@ -58,6 +58,41 @@ static std::optional<size_t> utflen(const char* s, size_t len)
     return n;
 }
 
+/// Construct the initial type description from a typeFun, i.e. Foo<T>
+static std::string toStringTypeFun(const std::string typeName, const Luau::TypeFun& typeFun)
+{
+    std::string output = typeName;
+    if (!typeFun.typeParams.empty() || !typeFun.typePackParams.empty())
+    {
+        output += "<";
+        bool addComma = false;
+        for (const auto& typeParam : typeFun.typeParams)
+        {
+            if (addComma)
+                output += ", ";
+            output += Luau::toString(Luau::follow(typeParam.ty));
+            if (typeParam.defaultValue)
+            {
+                output += " = " + Luau::toString(Luau::follow(typeParam.defaultValue.value()));
+            }
+            addComma = true;
+        }
+        for (const auto& typePack : typeFun.typePackParams)
+        {
+            if (addComma)
+                output += ", ";
+            output += Luau::toString(Luau::follow(typePack.tp));
+            if (typePack.defaultValue)
+            {
+                output += " = " + Luau::toString(Luau::follow(typePack.defaultValue.value()));
+            }
+            addComma = true;
+        }
+        output += ">";
+    }
+    return output;
+}
+
 
 struct DocumentationLocation
 {
@@ -89,19 +124,23 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (!sourceModule)
         return std::nullopt;
 
+    if (auto hover = platform->handleHover(*textDocument, *sourceModule, position))
+        return hover;
+
     auto exprOrLocal = Luau::findExprOrLocalAtPosition(*sourceModule, position);
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);
     if (!node || !scope)
         return std::nullopt;
 
-    std::string typeName;
+    std::optional<std::pair<std::string, Luau::TypeFun>> typeAliasInformation = std::nullopt;
     std::optional<Luau::TypeId> type = std::nullopt;
     std::optional<std::string> documentationSymbol = getDocumentationSymbolAtPosition(*sourceModule, *module, position);
     std::optional<DocumentationLocation> documentationLocation = std::nullopt;
 
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
+        std::string typeName;
         std::optional<Luau::TypeFun> typeFun;
         if (ref->prefix)
         {
@@ -115,14 +154,16 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         }
         if (!typeFun)
             return std::nullopt;
+        typeAliasInformation = std::make_pair(typeName, *typeFun);
         type = typeFun->type;
     }
     else if (auto alias = node->as<Luau::AstStatTypeAlias>())
     {
-        typeName = alias->name.value;
+        auto typeName = alias->name.value;
         auto typeFun = scope->lookupType(typeName);
         if (!typeFun)
             return std::nullopt;
+        typeAliasInformation = std::make_pair(typeName, *typeFun);
         type = typeFun->type;
     }
     else if (auto typeTable = node->as<Luau::AstTypeTable>())
@@ -244,9 +285,10 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     std::string typeString = Luau::toString(*type, opts);
 
     // If we have a function and its corresponding name
-    if (!typeName.empty())
+    if (typeAliasInformation)
     {
-        typeString = codeBlock("luau", "type " + typeName + " = " + typeString);
+        auto [typeName, typeFun] = typeAliasInformation.value();
+        typeString = codeBlock("luau", "type " + toStringTypeFun(typeName, typeFun) + " = " + typeString);
     }
     else if (auto ftv = Luau::get<Luau::FunctionType>(*type))
     {

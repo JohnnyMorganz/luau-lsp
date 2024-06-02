@@ -8,7 +8,7 @@ on:
 jobs:
   create-release:
     name: Create Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -25,16 +25,16 @@ jobs:
   build-plugin:
     needs: ["create-release"]
     name: Build Roblox Studio Plugin
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Build Plugin
         run: rojo build plugin --output Luau.rbxm
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Luau.rbxm
           path: Luau.rbxm
@@ -64,22 +64,22 @@ jobs:
           - os: ubuntu-20.04
             artifact-name: luau-lsp-linux-arm64
             code-target: [linux-arm64]
-          - os: ubuntu-20.04
+          - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20
 
       - name: Build Server
         run: |
@@ -128,7 +128,7 @@ jobs:
           cp LICENSE.md editors/code/LICENSE
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist-${{ matrix.artifact-name }}
           path: ./dist

@@ -1,23 +1,9 @@
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
+#include "Platform/RobloxPlatform.hpp"
 #include <algorithm>
 #include <fstream>
-
-std::optional<std::string> getParentPath(const std::string& path)
-{
-    if (path == "" || path == "." || path == "/")
-        return std::nullopt;
-
-    std::string::size_type slash = path.find_last_of("\\/", path.size() - 1);
-
-    if (slash == 0)
-        return "/";
-
-    if (slash != std::string::npos)
-        return path.substr(0, slash);
-
-    return "";
-}
+#include "LSP/FileUtils.h"
 
 /// Returns a path at the ancestor point.
 /// i.e., for game/ReplicatedStorage/Module/Child/Foo, and ancestor == Module, returns game/ReplicatedStorage/Module
@@ -89,41 +75,7 @@ std::string codeBlock(const std::string& language, const std::string& code)
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
-std::optional<std::string> readFile(const std::filesystem::path& filePath)
-{
-    std::ifstream fileContents;
-    fileContents.open(filePath);
 
-    std::string output;
-    std::stringstream buffer;
-
-    if (fileContents)
-    {
-        buffer << fileContents.rdbuf();
-        output = buffer.str();
-        return output;
-    }
-    else
-    {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::filesystem::path> getHomeDirectory()
-{
-    if (const char* home = getenv("HOME"))
-    {
-        return home;
-    }
-    else if (const char* userProfile = getenv("USERPROFILE"))
-    {
-        return userProfile;
-    }
-    else
-    {
-        return std::nullopt;
-    }
-}
 
 // Resolves a filesystem path, including any tilde expansion
 std::filesystem::path resolvePath(const std::filesystem::path& path)
@@ -149,6 +101,13 @@ bool isDataModel(const std::string& path)
 void trim_start(std::string& str)
 {
     str.erase(0, str.find_first_not_of(" \n\r\t"));
+}
+
+std::string removePrefix(const std::string& str, const std::string& prefix)
+{
+    if (Luau::startsWith(str, prefix))
+        return str.substr(prefix.length());
+    return str;
 }
 
 

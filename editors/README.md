@@ -47,10 +47,20 @@ documentation file.
 
 The Luau project makes use of FFlags to gate and dynamically enable new features when they are released.
 
-For the Luau Language Server, FFlags are defined on the command line:
+For the Luau Language Server, FFlags can be defined on the command line or by using [initialization options](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initializeParams):
 
 ```sh
 $ luau-lsp lsp --flag:NAME=VALUE
+```
+
+```json
+{
+  "initializationOptions": {
+    "fflags": {
+      "Foo": "True"
+    }
+  }
+}
 ```
 
 By default, all FFlags are enabled, apart from those that are [defined as experimental](https://github.com/luau-lang/luau/blob/master/Common/include/Luau/ExperimentalFlags.h).

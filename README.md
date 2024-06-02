@@ -29,7 +29,7 @@ looking for any specific features, please get in touch!
 ### For Rojo Users (requires `v7.3.0+`)
 
 By default, the latest Roblox type definitions and documentation are preloaded out of the box.
-This can be disabled by configuring `luau-lsp.types.roblox`.
+This can be disabled by configuring `luau-lsp.platform.type`.
 
 The language server uses Rojo-style sourcemaps to resolve DataModel instance trees for intellisense.
 This is done by running `rojo sourcemap --watch default.project.json --output sourcemap.json`.

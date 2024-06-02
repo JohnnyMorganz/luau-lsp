@@ -202,7 +202,7 @@ static std::vector<lsp::Location> processReferences(WorkspaceFileResolver& fileR
         }
         else
         {
-            if (auto filePath = fileResolver.resolveToRealPath(reference.moduleName))
+            if (auto filePath = fileResolver.platform->resolveToRealPath(reference.moduleName))
             {
                 if (auto source = fileResolver.readSource(reference.moduleName))
                 {
@@ -401,22 +401,24 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
 
     auto exprOrLocal = findExprOrLocalAtPositionClosed(*sourceModule, position);
-    Luau::Symbol localSymbol;
+    Luau::Symbol symbol;
     if (exprOrLocal.getLocal())
-        localSymbol = exprOrLocal.getLocal();
+        symbol = exprOrLocal.getLocal();
     else if (auto expr = exprOrLocal.getExpr())
     {
         if (auto local = expr->as<Luau::AstExprLocal>())
-            localSymbol = local->local;
+            symbol = local->local;
+        else if (auto global = expr->as<Luau::AstExprGlobal>())
+            symbol = global->name;
     }
 
     std::vector<lsp::Location> result{};
 
-    if (localSymbol)
+    if (symbol)
     {
-        // Search for a local binding
-        // TODO: what if this local binding is returned! need to handle that so we can find cross-file references
-        auto references = findSymbolReferences(*sourceModule, localSymbol);
+        // Search for usages of a local or global symbol
+        // TODO: what if this symbol is returned! need to handle that so we can find cross-file references
+        auto references = findSymbolReferences(*sourceModule, symbol);
 
         result.reserve(references.size());
         for (auto& location : references)
