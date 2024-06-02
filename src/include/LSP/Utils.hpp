@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <algorithm>
 
 // TODO: must duplicate using to avoid cyclical includes
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
