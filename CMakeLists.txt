@@ -23,6 +23,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Utils.cpp
         src/FileUtils.cpp
         src/Flags.cpp
+        src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
         src/platform/LSPPlatform.cpp
         src/platform/roblox/RobloxCodeAction.cpp
@@ -78,6 +79,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Hover.test.cpp
         tests/LanguageServer.test.cpp
         tests/InlayHints.test.cpp
+        tests/JsonTomlSyntaxParser.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
@@ -88,7 +90,7 @@ else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
 endif ()
 
-set(EXTERN_INCLUDES extern/json/include extern/glob/single_include extern/argparse/include)
+set(EXTERN_INCLUDES extern/json/include extern/glob/single_include extern/argparse/include extern/toml/include)
 
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})

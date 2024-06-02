@@ -19,6 +19,10 @@ std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
         {
             return path;
         }
+        else if (path.extension() == ".toml" && isScript())
+        {
+            return path;
+        }
     }
     return std::nullopt;
 }

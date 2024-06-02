@@ -1,5 +1,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/FileUtils.h"
+#include "LSP/JsonTomlSyntaxParser.hpp"
 
 std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::string& name) const
 {
@@ -52,55 +53,16 @@ Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesys
     return Luau::SourceCode::Type::Module;
 }
 
-static std::string jsonValueToLuau(const json& val)
-{
-    if (val.is_string() || val.is_number() || val.is_boolean())
-    {
-        return val.dump();
-    }
-    else if (val.is_null())
-    {
-        return "nil";
-    }
-    else if (val.is_array())
-    {
-        std::string out = "{";
-        for (auto& elem : val)
-        {
-            out += jsonValueToLuau(elem);
-            out += ";";
-        }
-
-        out += "}";
-        return out;
-    }
-    else if (val.is_object())
-    {
-        std::string out = "{";
-
-        for (auto& [key, value] : val.items())
-        {
-            out += "[\"" + key + "\"] = ";
-            out += jsonValueToLuau(value);
-            out += ";";
-        }
-
-        out += "}";
-        return out;
-    }
-    else
-    {
-        return ""; // TODO: should we error here?
-    }
-}
-
 std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const
 {
     if (auto parentResult = LSPPlatform::readSourceCode(name, path))
         return parentResult;
 
     auto source = readFile(path);
-    if (source && path.extension() == ".json")
+    if (!source)
+        return std::nullopt;
+
+    if (path.extension() == ".json")
     {
         try
         {
@@ -110,6 +72,21 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         {
             // TODO: display diagnostic?
             std::cerr << "Failed to load JSON module: " << path.generic_string() << " - " << e.what() << '\n';
+            return std::nullopt;
+        }
+    }
+    else if (path.extension() == ".toml")
+    {
+        try
+        {
+            std::string tomlSource(*source);
+            std::istringstream tomlSourceStream(tomlSource, std::ios_base::binary | std::ios_base::in);
+            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.generic_string()));
+        }
+        catch (const std::exception& e)
+        {
+            // TODO: display diagnostic?
+            std::cerr << "Failed to load TOML module: " << path.generic_string() << " - " << e.what() << '\n';
             return std::nullopt;
         }
     }

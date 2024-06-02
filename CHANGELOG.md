@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `luau-lsp.inlayHints.makeInsertable` (default: `true`) to configure whether inlay hint type annotations can be inserted by clicking ([#620](https://github.com/JohnnyMorganz/luau-lsp/issues/620))
 - Added inlay hints for varargs parameter type ([#622](https://github.com/JohnnyMorganz/luau-lsp/issues/622))
 - Added setting `luau-lsp.plugin.maximumRequestBodySize` (default: `3mb`) to configure the maximum size of the payload accepted from the Studio Plugin
+- Added support for requiring `.toml` files
 
 ### Changed
 
