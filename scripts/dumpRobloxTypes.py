@@ -464,7 +464,7 @@ EXTRA_MEMBERS = {
     "GuiService": ["SelectedObject: GuiObject?"],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
-        "function GetAsync(self, key: string, options: DataStoreGetOptions): (any, DataStoreKeyInfo)",
+        "function GetAsync(self, key: string, options: DataStoreGetOptions?): (any, DataStoreKeyInfo)",
         # IncrementAsync didn't have a second return value of DataStoreKeyInfo, and the first return value is always a number
         "function IncrementAsync(self, key: string, delta: number?, userIds: { number }?, options: DataStoreIncrementOptions?): (number, DataStoreKeyInfo)",
         # RemoveAsync didn't have a second return value of DataStoreKeyInfo
@@ -479,7 +479,7 @@ EXTRA_MEMBERS = {
     # Trying to set the value in a OrderedDataStore to anything other than a number will error,
     # So we override the method's types to use numbers instead of any
     "OrderedDataStore": [
-        "function GetAsync(self, key: string, options: DataStoreGetOptions): (number?, DataStoreKeyInfo)",
+        "function GetAsync(self, key: string, options: DataStoreGetOptions?): (number?, DataStoreKeyInfo)",
         "function GetSortedAsync(self, ascending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages",
         "function RemoveAsync(self, key: string): (number?, DataStoreKeyInfo)",
         "function SetAsync(self, key: string, value: number, userIds: { number }?, options: DataStoreSetOptions?): string",
