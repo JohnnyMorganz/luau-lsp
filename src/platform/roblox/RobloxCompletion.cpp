@@ -372,7 +372,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 }
             }
 
-            if (isRelative)
+            if (!isRelative)
             {
                 // Service will be the first part of the path
                 // If we haven't imported the service already, then we auto-import it
