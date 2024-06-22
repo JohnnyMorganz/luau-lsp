@@ -59,6 +59,16 @@
           "meta.template.expression string": "string",
           "meta.template.expression comment": "comment"
         }
+      },
+      {
+        "scopeName": "markdown.luau.codeblock",
+        "path": "./syntaxes/codeblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.luau": "luau"
+        }
       }
     ],
     "semanticTokenScopes": [
