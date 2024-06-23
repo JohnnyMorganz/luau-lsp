@@ -144,7 +144,7 @@ int main(int argc, char** argv)
         return 1;
     };
 
-    argparse::ArgumentParser program("luau-lsp", "1.29.1");
+    argparse::ArgumentParser program("luau-lsp", "1.30.0");
     program.set_assign_chars(":=");
 
     // Global arguments

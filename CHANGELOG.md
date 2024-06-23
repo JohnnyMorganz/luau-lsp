@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.30.0] - 2024-06-23
+
 ### Deprecated
 
 - Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.type`
