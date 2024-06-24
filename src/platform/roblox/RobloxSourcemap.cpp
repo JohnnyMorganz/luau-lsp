@@ -243,6 +243,8 @@ bool RobloxPlatform::updateSourceMap()
         workspaceFolder->frontend.clear();
         updateSourceNodeMap(sourceMapContents.value());
 
+        // Recreate instance types
+        instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
         auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
         bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
 
@@ -322,9 +324,6 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
         }
     }
-
-    // Recreate instance types
-    instanceTypes.clear();
 
     // Create a type for the root source node
     getSourcemapType(globals, instanceTypes, rootSourceNode);
