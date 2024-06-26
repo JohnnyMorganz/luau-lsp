@@ -317,6 +317,8 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     {
         isConfigured = true;
 
+        client->sendTrace("workspace: applying platform mutations on definitions");
+
         platform->mutateRegisteredDefinitions(frontend.globals, definitionsFileMetadata);
         platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
     }
@@ -324,5 +326,9 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     if (configuration.index.enabled)
         indexFiles(configuration);
 
+    client->sendTrace("workspace: apply platform-specific configuration");
+
     platform->setupWithConfiguration(configuration);
+
+    client->sendTrace("workspace: setting up with configuration COMPLETED");
 }
