@@ -355,7 +355,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         {
             if (isInitialized && !allWorkspacesConfigured())
             {
-                client->sendTrace("workspaces not configured, postponing message: " + msg.id.value());
+                client->sendTrace("workspaces not configured, postponing message: " + msg.method.value());
                 configPostponedMessages.emplace_back(msg);
                 return;
             }
