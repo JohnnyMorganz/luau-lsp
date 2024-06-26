@@ -240,6 +240,8 @@ bool RobloxPlatform::updateSourceMap()
     // TODO: we assume a sourcemap.json file in the workspace root
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
+        workspaceFolder->client->sendTrace("Sourcemap file read successfully");
+
         workspaceFolder->frontend.clear();
         updateSourceNodeMap(sourceMapContents.value());
 
@@ -264,6 +266,7 @@ bool RobloxPlatform::updateSourceMap()
     }
     else
     {
+        workspaceFolder->client->sendTrace("Sourcemap file failed to read");
         return false;
     }
 }
