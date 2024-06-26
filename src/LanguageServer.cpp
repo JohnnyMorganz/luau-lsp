@@ -355,6 +355,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         {
             if (isInitialized && !allWorkspacesConfigured())
             {
+                client->sendTrace("workspaces not configured, postponing message: " + msg.id.value());
                 configPostponedMessages.emplace_back(msg);
                 return;
             }
@@ -391,10 +392,12 @@ void LanguageServer::processInputLoop()
     {
         if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
         {
+            client->sendTrace("workspaces configured, handling postponed messages");
             for (const auto& msg : configPostponedMessages)
                 handleMessage(msg);
 
             configPostponedMessages.clear();
+            client->sendTrace("workspaces configured, handling postponed COMPLETED");
         }
 
         if (client->readRawMessage(jsonString))
