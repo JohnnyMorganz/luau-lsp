@@ -50,8 +50,8 @@ jobs:
           mkdir -p ./dist
           mkdir -p editors/code/bin
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp build/Release/luau-lsp.exe editors/code/bin/server.exe
-            cp build/Release/luau-lsp.pdb editors/code/bin/server.pdb
+            cp build/RelWithDebInfo/luau-lsp.exe editors/code/bin/server.exe
+            cp build/RelWithDebInfo/luau-lsp.pdb editors/code/bin/server.pdb
           else
             cp build/luau-lsp editors/code/bin/server
             chmod 777 editors/code/bin/server
