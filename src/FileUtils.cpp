@@ -19,7 +19,9 @@
 #include <sys/stat.h>
 #endif
 
-#include <string.h>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 #ifdef _WIN32
 static std::wstring fromUtf8(const std::string& path)
@@ -203,44 +205,24 @@ std::string resolvePath(std::string_view path, std::string_view baseFilePath)
     return resolvedPath;
 }
 
-std::optional<std::string> readFile(const std::string& name)
+std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
-#ifdef _WIN32
-    FILE* file = _wfopen(fromUtf8(name).c_str(), L"rb");
-#else
-    FILE* file = fopen(name.c_str(), "rb");
-#endif
+    std::ifstream fileContents;
+    fileContents.open(filePath);
 
-    if (!file)
-        return std::nullopt;
+    std::string output;
+    std::stringstream buffer;
 
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    if (length < 0)
+    if (fileContents)
     {
-        fclose(file);
+        buffer << fileContents.rdbuf();
+        output = buffer.str();
+        return output;
+    }
+    else
+    {
         return std::nullopt;
     }
-    fseek(file, 0, SEEK_SET);
-
-    std::string result(length, 0);
-
-    size_t read = fread(result.data(), 1, length, file);
-    fclose(file);
-
-    if (read != size_t(length))
-        return std::nullopt;
-
-    // Skip first line if it's a shebang
-    if (length > 2 && result[0] == '#' && result[1] == '!')
-        result.erase(0, result.find('\n'));
-
-    return result;
-}
-
-std::optional<std::string> readFile(const std::filesystem::path& path)
-{
-    return readFile(path.generic_string());
 }
 
 std::optional<std::string> readStdin()

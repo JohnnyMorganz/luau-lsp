@@ -14,7 +14,6 @@ std::optional<std::filesystem::path> getHomeDirectory();
 std::string normalizePath(std::string_view path);
 std::string resolvePath(std::string_view relativePath, std::string_view baseFilePath);
 
-std::optional<std::string> readFile(const std::string& name);
 std::optional<std::string> readFile(const std::filesystem::path& name);
 std::optional<std::string> readStdin();
 
