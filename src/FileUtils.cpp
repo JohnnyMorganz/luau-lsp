@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <sstream>
 
 #ifdef _WIN32
