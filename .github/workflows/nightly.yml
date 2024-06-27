@@ -62,7 +62,7 @@ jobs:
         run: |
           mkdir staging
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp "build/Release/luau-lsp.exe" staging/
+            cp "build/RelWithDebInfo/luau-lsp.exe" staging/
             cd staging
             7z a ../dist/server.zip *
           else
