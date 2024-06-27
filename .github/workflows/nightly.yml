@@ -37,7 +37,7 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLUAU_ENABLE_TIME_TRACE=ON -DLUAU_BUILD_ASAN=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLUAU_ENABLE_TIME_TRACE=ON -DLSP_BUILD_ASAN:BOOL=ON ..
           cmake --build . --config RelWithDebInfo --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build

@@ -3,7 +3,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 project(Luau.LanguageServer LANGUAGES CXX)
 
 option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
-option(LUAU_BUILD_ASAN "Build with ASAN" OFF)
+option(LSP_BUILD_ASAN "Build with ASAN" OFF)
 
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
@@ -91,7 +91,7 @@ else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
 endif ()
 
-if (LUAU_BUILD_ASAN)
+if (LSP_BUILD_ASAN)
     if (MSVC)
         add_compile_options(/fsanitize=address)
         add_link_options(/fsanitize=address)
