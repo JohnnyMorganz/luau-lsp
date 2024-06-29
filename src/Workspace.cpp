@@ -309,9 +309,6 @@ void WorkspaceFolder::initialize()
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
     client->sendTrace("workspace: setting up with configuration");
-    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
-
-    fileResolver.platform = platform.get();
 
     if (!isConfigured)
     {

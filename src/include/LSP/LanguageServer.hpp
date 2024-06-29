@@ -27,8 +27,9 @@ inline lsp::PositionEncodingKind& positionEncoding()
 struct InitializationOptions
 {
     std::unordered_map<std::string, std::string> fflags{};
+    std::unordered_map</* DocumentUri */ std::string, ClientConfiguration> config{};
 };
-NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
+NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags, config)
 
 class LanguageServer
 {
@@ -47,7 +48,7 @@ public:
     explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
         : client(std::move(aClient))
         , defaultConfig(std::move(aDefaultConfig))
-        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
+        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig, client->globalConfig))
     {
     }
 
@@ -64,9 +65,6 @@ public:
 
     // Dispatch handlers
 private:
-    bool allWorkspacesConfigured() const;
-    void handleMessage(const json_rpc::JsonRpcMessage& msg);
-
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
 

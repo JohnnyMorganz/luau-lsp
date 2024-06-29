@@ -28,16 +28,17 @@ class WorkspaceFolder
 {
 public:
     std::shared_ptr<Client> client;
-    std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
+    std::unique_ptr<LSPPlatform> platform;
     bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
 public:
-    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig,
+        const ClientConfiguration& startupClientConfig)
         : client(client)
         , name(std::move(name))
         , rootUri(uri)
@@ -47,9 +48,11 @@ public:
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ false}))
+        , platform(LSPPlatform::getPlatform(startupClientConfig, &fileResolver, this))
     {
         fileResolver.client = std::static_pointer_cast<BaseClient>(client);
         fileResolver.rootUri = uri;
+        fileResolver.platform = platform.get();
     }
 
     // Initialises the workspace folder
