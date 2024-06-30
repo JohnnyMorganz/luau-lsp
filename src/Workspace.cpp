@@ -325,12 +325,12 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
     }
 
-    if (configuration.index.enabled)
-        indexFiles(configuration);
-
     client->sendTrace("workspace: apply platform-specific configuration");
 
     platform->setupWithConfiguration(configuration);
+
+    if (configuration.index.enabled)
+        indexFiles(configuration);
 
     client->sendTrace("workspace: setting up with configuration COMPLETED");
 }
