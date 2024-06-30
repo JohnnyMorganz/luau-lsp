@@ -310,9 +310,14 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
 {
     client->sendTrace("workspace: setting up with configuration");
 
+    // Apply first-time configuration
     if (!isConfigured)
     {
         isConfigured = true;
+
+        client->sendTrace("workspace: first time configuration, setting appropriate platform");
+        platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
+        fileResolver.platform = platform.get();
 
         client->sendTrace("workspace: applying platform mutations on definitions");
 

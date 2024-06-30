@@ -13,7 +13,7 @@ static const char* mainModuleName = "MainModule";
 
 Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt, client->globalConfig)
+    , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");

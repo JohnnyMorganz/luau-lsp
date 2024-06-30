@@ -432,14 +432,12 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     {
         for (auto& folder : params.workspaceFolders.value())
         {
-            workspaceFolders.push_back(
-                std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, client->getConfiguration(folder.uri)));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         }
     }
     else if (params.rootUri.has_value())
     {
-        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(
-            client, "$ROOT", params.rootUri.value(), defaultConfig, client->getConfiguration(params.rootUri.value())));
+        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig));
     }
 
     isInitialized = true;
@@ -683,7 +681,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     for (auto& folder : params.event.added)
     {
         // TODO: platform is not handled correctly when new folder is added
-        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, client->globalConfig));
+        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         configItems.emplace_back(folder.uri);
     }
     client->requestConfiguration(configItems);

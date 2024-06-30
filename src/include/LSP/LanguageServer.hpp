@@ -48,7 +48,7 @@ public:
     explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
         : client(std::move(aClient))
         , defaultConfig(std::move(aDefaultConfig))
-        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig, client->globalConfig))
+        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
     {
     }
 

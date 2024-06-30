@@ -37,8 +37,7 @@ public:
     std::optional<nlohmann::json> definitionsFileMetadata;
 
 public:
-    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig,
-        const ClientConfiguration& startupClientConfig)
+    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
         , name(std::move(name))
         , rootUri(uri)
@@ -48,11 +47,9 @@ public:
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ false}))
-        , platform(LSPPlatform::getPlatform(startupClientConfig, &fileResolver, this))
     {
         fileResolver.client = std::static_pointer_cast<BaseClient>(client);
         fileResolver.rootUri = uri;
-        fileResolver.platform = platform.get();
     }
 
     // Initialises the workspace folder
