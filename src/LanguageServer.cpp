@@ -353,6 +353,7 @@ void LanguageServer::processInputLoop()
 
                 if (msg.is_request())
                 {
+                    client->sendTrace("handling request: " + msg.method.value());
                     onRequest(msg.id.value(), msg.method.value(), msg.params);
                 }
                 else if (msg.is_response())
@@ -361,6 +362,7 @@ void LanguageServer::processInputLoop()
                 }
                 else if (msg.is_notification())
                 {
+                    client->sendTrace("handling notification: " + msg.method.value());
                     onNotification(msg.method.value(), msg.params);
                 }
                 else
@@ -548,6 +550,8 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
 
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
 {
+    client->sendTrace("handling textDocument/didOpen notification");
+
     // Start managing the file in-memory
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->openTextDocument(params.textDocument.uri, params);
@@ -557,8 +561,11 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
     // however if a client doesn't yet support it, we push the diagnostics instead
     if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
     {
+        client->sendTrace("textDocument/didOpen: pushing diagnostics for file");
         workspace->pushDiagnostics(params.textDocument.uri, params.textDocument.version);
     }
+
+    client->sendTrace("handling textDocument/didOpen notification COMPLETED");
 }
 
 void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
@@ -680,7 +687,6 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     std::vector<lsp::DocumentUri> configItems{};
     for (auto& folder : params.event.added)
     {
-        // TODO: platform is not handled correctly when new folder is added
         workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         configItems.emplace_back(folder.uri);
     }
