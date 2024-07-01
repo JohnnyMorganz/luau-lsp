@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- Fixed `readFile` function causing crashes for some users
+- Fixed crashes occuring for users without the MSVC Redistributable installed due to introduced dependency on Windows headers ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
 
 ## [1.30.1] - 2024-06-27
 
