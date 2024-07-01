@@ -22,7 +22,6 @@ target_sources(Luau.LanguageServer PRIVATE
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/FileUtils.cpp
         src/Flags.cpp
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp

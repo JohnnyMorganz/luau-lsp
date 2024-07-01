@@ -1,5 +1,4 @@
 #include "Platform/RobloxPlatform.hpp"
-#include "LSP/FileUtils.h"
 #include "LSP/JsonTomlSyntaxParser.hpp"
 
 std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::string& name) const
@@ -106,8 +105,7 @@ static std::string mapContext(const std::string& context)
     return context;
 }
 
-std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
-{
+std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) {
 
     if (auto parentResult = LSPPlatform::resolveModule(context, node))
         return parentResult;

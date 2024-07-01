@@ -2,7 +2,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
-#include "LSP/FileUtils.h"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
@@ -100,16 +99,23 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
 
     // Find a list of files to compute diagnostics for
     std::vector<Uri> files{};
-    traverseDirectory(this->rootUri.fsPath().generic_string(),
-        [&](const std::string& filePath)
+    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
+         next != end; ++next)
+    {
+        try
         {
-            if (isDefinitionFile(filePath, config))
-                return;
-
-            auto ext = getExtension(filePath);
-            if (ext == ".lua" || ext == ".luau")
-                files.push_back(Uri::file(filePath));
-        });
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+            {
+                auto ext = next->path().extension();
+                if (ext == ".lua" || ext == ".luau")
+                    files.push_back(Uri::file(next->path()));
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
+        }
+    }
 
     for (auto uri : files)
     {
@@ -191,8 +197,7 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
 }
 
 /// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
-void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config)
-{
+void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config) {
     // Handle diagnostics if in push-mode
     if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
     {

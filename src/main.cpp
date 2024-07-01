@@ -1,7 +1,6 @@
 #include "Flags.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/DocumentationParser.hpp"
-#include "LSP/FileUtils.h"
 #include "Analyze/AnalyzeCli.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Luau/ExperimentalFlags.h"
