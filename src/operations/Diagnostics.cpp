@@ -6,8 +6,6 @@
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
-    client->sendTrace("handling textDocument diagnostics");
-
     if (!isConfigured)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
@@ -18,34 +16,24 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     lsp::DocumentDiagnosticReport report;
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics{};
 
-    client->sendTrace("[textDocument/diagnostic] retrieving text document");
-
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
-    client->sendTrace("[textDocument/diagnostic] running Luau typechecking");
-
     // Check the module. We do not need to store the type graphs
     Luau::CheckResult cr = checkSimple(moduleName, /* runLintChecks: */ true);
-
-    client->sendTrace("[textDocument/diagnostic] running Luau typechecking COMPLETED");
 
     // If there was an error retrieving the source module
     // Bail early with an empty report - it is likely that the file was closed
     if (!frontend.getSourceModule(moduleName))
         return report;
 
-    client->sendTrace("[textDocument/diagnostic] retrieving client configuration");
-
     auto config = client->getConfiguration(rootUri);
 
     // If the file is a definitions file, then don't display any diagnostics
     if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
         return report;
-
-    client->sendTrace("[textDocument/diagnostic] preparing reports");
 
     // Report Type Errors
     // Note that type errors can extend to related modules in the require graph - so we report related information here
@@ -90,8 +78,6 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     }
     for (auto& error : cr.lintResult.warnings)
         report.items.emplace_back(createLintDiagnostic(error, textDocument));
-
-    client->sendTrace("handling textDocument diagnostics COMPLETED");
 
     return report;
 }

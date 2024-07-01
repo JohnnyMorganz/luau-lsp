@@ -13,24 +13,17 @@
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
-    client->sendTrace("workspace: handling textDocument/didOpen");
     auto normalisedUri = fileResolver.normalisedUriString(uri);
-
-    client->sendTrace("workspace[textDocument/didOpen]: writing document to managed files");
 
     fileResolver.managedFiles.emplace(
         std::make_pair(normalisedUri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
 
     if (isConfigured)
     {
-        client->sendTrace("workspace[textDocument/didOpen]: marking file as dirty");
-
         // Mark the file as dirty as we don't know what changes were made to it
         auto moduleName = fileResolver.getModuleName(uri);
         frontend.markDirty(moduleName);
     }
-
-    client->sendTrace("workspace: handling textDocument/didOpen COMPLETED");
 }
 
 void WorkspaceFolder::updateTextDocument(
