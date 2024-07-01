@@ -100,6 +100,62 @@
                     "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "Position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "Position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "LeftTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "RightTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                }
+            ],
+            "Name": "Path2DControlPoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
                         {
                             "Name": "position",
                             "Type": {
