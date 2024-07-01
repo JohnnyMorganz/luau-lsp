@@ -317,7 +317,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         std::cerr << e.what() << '\n';
     }
 
-    workspaceFolder->client->sendTrace("sourcemap update COMPLETED");
+    workspaceFolder->client->sendTrace("sourcemap update COMPLETED")
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
