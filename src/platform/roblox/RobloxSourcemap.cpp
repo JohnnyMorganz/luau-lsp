@@ -304,7 +304,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         workspaceFolder->client->sendTrace("sourcemap update: parsing sourcemap contents");
         auto j = json::parse(sourceMapContents);
 
-        workspaceFolder->client->sendTrace("sourcemap update: converting JSON to sourcemap structs", j.dump());
+        workspaceFolder->client->sendTrace("sourcemap update: converting JSON to sourcemap structs");
         rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
 
         workspaceFolder->client->sendTrace("sourcemap update: caching sourcemap paths");
