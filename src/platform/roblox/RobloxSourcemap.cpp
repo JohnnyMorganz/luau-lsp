@@ -232,11 +232,14 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
 
 bool RobloxPlatform::updateSourceMap()
 {
-    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / "sourcemap.json";
+    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    std::string sourcemapFileName = config.sourcemap.sourcemapFile;
+
+    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / sourcemapFileName;
     workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
 
     // Read in the sourcemap
-    // TODO: we assume a sourcemap.json file in the workspace root
+    // TODO: we assume a sourcemap file in the workspace root
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
         workspaceFolder->client->sendTrace("Sourcemap file read successfully");
@@ -248,7 +251,6 @@ bool RobloxPlatform::updateSourceMap()
 
         // Recreate instance types
         instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
-        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
         bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
 
         // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!

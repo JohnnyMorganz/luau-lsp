@@ -504,25 +504,6 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         client->registerCapability("didChangeConfigurationCapability", "workspace/didChangeConfiguration", nullptr);
     }
 
-    // Dynamically register file watchers
-    if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
-        client->capabilities.workspace->didChangeWatchedFiles->dynamicRegistration)
-    {
-        client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
-
-        std::vector<lsp::FileSystemWatcher> watchers{};
-        watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
-        watchers.push_back(lsp::FileSystemWatcher{"**/sourcemap.json"});
-        watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
-        client->registerCapability(
-            "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
-    }
-    else
-    {
-        client->sendLogMessage(lsp::MessageType::Warning,
-            "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes will not be provided");
-    }
-
     // Initialise loaded workspaces
     // NOTE: we delay initialisation until AFTER we have sent of requests to the client to retrieve
     // configuration and register watchers. This is because initialisation can take a long time
