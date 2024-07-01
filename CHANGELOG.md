@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Sync to upstream Luau 0.632
 - Language clients are recommended to send configuration during intializationOptions (see https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md for details)
 - Removed need for postponing requests whilst waiting for platform configuration (relies on clients sending config in intializationOptions)
 
