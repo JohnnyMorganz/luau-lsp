@@ -85,6 +85,13 @@ void Client::registerCapability(const std::string& registrationId, const std::st
     sendRequest(nextRequestId++, "client/registerCapability", lsp::RegistrationParams{{registration}});
 }
 
+void Client::unregisterCapability(const std::string& registrationId, const std::string& method)
+{
+    lsp::Unregistration unregistration{registrationId, method};
+    // TODO: handle responses?
+    sendRequest(nextRequestId++, "client/unregisterCapability", lsp::UnregistrationParams{{unregistration}});
+}
+
 bool Client::hasConfiguration(const lsp::DocumentUri& uri)
 {
     return configStore.find(uri.toString()) != configStore.end();
