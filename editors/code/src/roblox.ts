@@ -422,9 +422,12 @@ export const preLanguageServerStart = async (
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
   const platformConfig = vscode.workspace.getConfiguration("luau-lsp.platform");
+
+  // TODO: Cleanup when deprecated luau-lsp.types.roblox is deleted
+  // We need to respect the new setting as well as the old setting. We check for "&&" since they are on by default
   if (
-    typesConfig.get<boolean>("roblox") ||
-    platformConfig.get<string>("type") === "roblox"
+    platformConfig.get<string>("type") === "roblox" &&
+    typesConfig.get<boolean>("roblox")
   ) {
     const securityLevel =
       typesConfig.get<string>("robloxSecurityLevel") ?? "PluginSecurity";
