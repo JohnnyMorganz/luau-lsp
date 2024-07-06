@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The binary on Windows now statically links to the MSVC Runtime to make it more portable ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
+
 ## [1.31.0] - 2024-07-01
 
 ### Changed
