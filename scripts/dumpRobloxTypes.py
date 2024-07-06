@@ -256,6 +256,14 @@ IGNORED_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart",
     ],
+    "CFrame": [
+        "ToWorldSpace",
+        "ToObjectSpace",
+        "PointToWorldSpace",
+        "PointToObjectSpace",
+        "VectorToWorldSpace",
+        "VectorToObjectSpace"
+    ]
 }
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -302,6 +310,12 @@ EXTRA_MEMBERS = {
         "function __unm(self): UDim",
     ],
     "CFrame": [
+        "function ToWorldSpace(self, ...: CFrame): ...CFrame",
+        "function ToObjectSpace(self, ...: CFrame): ...CFrame",
+        "function PointToWorldSpace(self, ...: Vector3): ...Vector3",
+        "function PointToObjectSpace(self, ...: Vector3): ...Vector3",
+        "function VectorToWorldSpace(self, ...: Vector3): ...Vector3",
+        "function VectorToObjectSpace(self, ...: Vector3): ...Vector3",
         "function __add(self, other: Vector3): CFrame",
         "function __sub(self, other: Vector3): CFrame",
         "function __mul(self, other: CFrame): CFrame",
