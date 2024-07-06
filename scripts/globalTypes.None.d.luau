@@ -4391,6 +4391,12 @@ declare class OverlapParams
 	function AddToFilter(self, instances: Instance | { Instance }): nil
 end
 
+declare class Path2DControlPoint
+	LeftTangent: UDim2
+	Position: UDim2
+	RightTangent: UDim2
+end
+
 declare class PathWaypoint
 	Action: EnumPathWaypointAction
 	Label: string
@@ -10103,6 +10109,10 @@ declare RotationCurveKey: {
 }
 
 declare Secret: {
+}
+
+declare Path2DControlPoint: {
+	new: (() -> Path2DControlPoint) & ((position: UDim2) -> Path2DControlPoint) & ((position: UDim2, leftTangent: UDim2, rightTangent: UDim2) -> Path2DControlPoint),
 }
 
 
