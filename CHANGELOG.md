@@ -6,14 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.31.1] - 2024-07-07
+
+### Fixed
+
+- The binary on Windows now statically links to the MSVC Runtime to make it more portable ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
+- Fixed Roblox types still showing when setting `luau-lsp.platform.type` to something other than `roblox`. ([#668](https://github.com/JohnnyMorganz/luau-lsp/issues/668))
+
+## [1.31.0] - 2024-07-01
+
 ### Changed
 
+- Sync to upstream Luau 0.632
 - Language clients are recommended to send configuration during intializationOptions (see https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md for details)
 - Removed need for postponing requests whilst waiting for platform configuration (relies on clients sending config in intializationOptions)
 
 ### Fixed
 
-- Fixed `readFile` function causing crashes for some users
+- Fixed crashes occuring for users without the MSVC Redistributable installed due to introduced dependency on Windows headers ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
 
 ## [1.30.1] - 2024-06-27
 

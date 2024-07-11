@@ -2,12 +2,9 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
-#include "LSP/FileUtils.h"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
-    client->sendTrace("handling textDocument diagnostics");
-
     if (!isConfigured)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
@@ -18,34 +15,24 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     lsp::DocumentDiagnosticReport report;
     std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics{};
 
-    client->sendTrace("[textDocument/diagnostic] retrieving text document");
-
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
-    client->sendTrace("[textDocument/diagnostic] running Luau typechecking");
-
     // Check the module. We do not need to store the type graphs
     Luau::CheckResult cr = checkSimple(moduleName, /* runLintChecks: */ true);
-
-    client->sendTrace("[textDocument/diagnostic] running Luau typechecking COMPLETED");
 
     // If there was an error retrieving the source module
     // Bail early with an empty report - it is likely that the file was closed
     if (!frontend.getSourceModule(moduleName))
         return report;
 
-    client->sendTrace("[textDocument/diagnostic] retrieving client configuration");
-
     auto config = client->getConfiguration(rootUri);
 
     // If the file is a definitions file, then don't display any diagnostics
     if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
         return report;
-
-    client->sendTrace("[textDocument/diagnostic] preparing reports");
 
     // Report Type Errors
     // Note that type errors can extend to related modules in the require graph - so we report related information here
@@ -91,8 +78,6 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     for (auto& error : cr.lintResult.warnings)
         report.items.emplace_back(createLintDiagnostic(error, textDocument));
 
-    client->sendTrace("handling textDocument diagnostics COMPLETED");
-
     return report;
 }
 
@@ -114,16 +99,23 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
 
     // Find a list of files to compute diagnostics for
     std::vector<Uri> files{};
-    traverseDirectory(this->rootUri.fsPath().generic_string(),
-        [&](const std::string& filePath)
+    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
+         next != end; ++next)
+    {
+        try
         {
-            if (isDefinitionFile(filePath, config))
-                return;
-
-            auto ext = getExtension(filePath);
-            if (ext == ".lua" || ext == ".luau")
-                files.push_back(Uri::file(filePath));
-        });
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+            {
+                auto ext = next->path().extension();
+                if (ext == ".lua" || ext == ".luau")
+                    files.push_back(Uri::file(next->path()));
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
+        }
+    }
 
     for (auto uri : files)
     {
@@ -205,8 +197,7 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
 }
 
 /// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
-void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config)
-{
+void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config) {
     // Handle diagnostics if in push-mode
     if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
     {

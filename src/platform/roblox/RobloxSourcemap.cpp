@@ -1,7 +1,6 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
-#include "LSP/FileUtils.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 
@@ -241,9 +240,8 @@ bool RobloxPlatform::updateSourceMap()
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
         workspaceFolder->client->sendTrace("Sourcemap file read successfully");
-        workspaceFolder->frontend.clear();
 
-        workspaceFolder->client->sendTrace("Updating source node map with sourcemap contents");
+        workspaceFolder->frontend.clear();
         updateSourceNodeMap(sourceMapContents.value());
 
         workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
@@ -295,19 +293,15 @@ void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::strin
 
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 {
-    workspaceFolder->client->sendTrace("sourcemap update: clearing all existing nodes");
     realPathsToSourceNodes.clear();
     virtualPathsToSourceNodes.clear();
 
     try
     {
-        workspaceFolder->client->sendTrace("sourcemap update: parsing sourcemap contents");
         auto j = json::parse(sourceMapContents);
-
-        workspaceFolder->client->sendTrace("sourcemap update: converting JSON to sourcemap structs", j.dump());
         rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
 
-        workspaceFolder->client->sendTrace("sourcemap update: caching sourcemap paths");
+        // Write paths
         std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
         writePathsToMap(rootSourceNode, base);
     }
@@ -316,8 +310,6 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         // TODO: log message?
         std::cerr << e.what() << '\n';
     }
-
-    workspaceFolder->client->sendTrace("sourcemap update COMPLETED");
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)

@@ -2,7 +2,6 @@
 
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/FileUtils.h"
 #include "Platform/RobloxPlatform.hpp"
 
 #include <memory>
@@ -117,14 +116,16 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     filePath = std::filesystem::weakly_canonical(filePath, ec);
 
     // Handle "init.luau" files in a directory
-    if (isDirectory(filePath.generic_string()))
+    if (std::filesystem::is_directory(filePath, ec))
+    {
         filePath /= "init";
+    }
 
     // Add file endings
     if (filePath.extension() != ".luau" && filePath.extension() != ".lua")
     {
         auto fullFilePath = filePath.string() + ".luau";
-        if (!readFile(fullFilePath))
+        if (!std::filesystem::exists(fullFilePath))
             // fall back to .lua if a module with .luau doesn't exist
             filePath = filePath.string() + ".lua";
         else

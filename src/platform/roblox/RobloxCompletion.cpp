@@ -2,7 +2,6 @@
 
 #include "LSP/Completion.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/FileUtils.h"
 
 static constexpr const char* COMMON_SERVICES[] = {
     "Players",

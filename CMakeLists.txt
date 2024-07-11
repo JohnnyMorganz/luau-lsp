@@ -22,7 +22,6 @@ target_sources(Luau.LanguageServer PRIVATE
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/FileUtils.cpp
         src/Flags.cpp
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
@@ -85,6 +84,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "") # Statically link to MSVCRT
     list(APPEND LUAU_LSP_OPTIONS /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
     list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
 else ()
