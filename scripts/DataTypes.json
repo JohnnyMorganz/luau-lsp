@@ -23,6 +23,21 @@
                     "ReturnType": {
                         "Name": "Instance"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromExisting",
+                    "Parameters": [
+                        {
+                            "Name": "existingInstance",
+                            "Type": {
+                                "Name": "Instance"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Instance"
+                    }
                 }
             ],
             "Name": "Instance"
