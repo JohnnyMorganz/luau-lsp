@@ -94,7 +94,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
             // Create the ClassType representing the instance
             std::string typeName = types::getTypeName(baseTypeId).value_or(node->name);
-            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
+            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox", {}};
             auto typeId = arena.addType(std::move(baseInstanceCtv));
 
             // Attach Parent and Children info

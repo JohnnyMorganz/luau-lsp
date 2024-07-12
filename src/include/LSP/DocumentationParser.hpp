@@ -13,6 +13,8 @@
 
 using json = nlohmann::json;
 
+const std::string kDocumentationBreaker = "\n----------\n";
+
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j);
 void parseDocumentation(
     const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client);

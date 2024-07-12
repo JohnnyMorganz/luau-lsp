@@ -74,8 +74,17 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
 
   // Load extra type definitions
-  const definitionFiles = typesConfig.get<string[]>("definitionFiles");
+  let definitionFiles = typesConfig.get<
+    { [packageName: string]: string } | string[]
+  >("definitionFiles");
   if (definitionFiles) {
+    if (Array.isArray(definitionFiles)) {
+      // Convert to a map structure
+      definitionFiles = Object.fromEntries(
+        definitionFiles.map((path, index) => ["roblox" + index, path])
+      );
+    }
+
     for (const definitionPath of definitionFiles) {
       let uri;
       if (vscode.workspace.workspaceFolders) {

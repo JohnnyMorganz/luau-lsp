@@ -9,14 +9,18 @@
 #include "doctest.h"
 #include <string_view>
 
+LUAU_FASTFLAG(LuauDeclarationExtraPropData)
+
 static const char* mainModuleName = "MainModule";
 
 Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
     , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
 {
+    FFlag::LuauDeclarationExtraPropData.value = true; // Needed for definition files doc comment tests
+
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
-    client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
+    client->definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
 
     workspace.initialize();
 
@@ -110,14 +114,14 @@ Luau::TypeId Fixture::requireType(const std::string& name)
     return Luau::follow(*ty);
 }
 
-Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source, bool forAutocomplete)
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete)
 {
     RobloxPlatform platform;
 
     auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
 
     Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, forAutocomplete);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, packageName, source, forAutocomplete);
     platform.mutateRegisteredDefinitions(globals, std::nullopt);
     Luau::freeze(globals.globalTypes);
 

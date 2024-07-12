@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for documentation in definitions files
+
+### Changed
+
+- Definitions files must now provide a name for the file in settings and command line: `--definitions:@roblox=path/to/globalTypes.d.luau`. Please update your LSP settings and command line arguments. Backwards compatibility has been temporarily preserved, with random names generated.
+
 ## [1.31.1] - 2024-07-07
 
 ### Fixed

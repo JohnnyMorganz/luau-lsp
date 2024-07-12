@@ -148,7 +148,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
     auto canonicalised = std::filesystem::weakly_canonical(path);
 
-    for (auto& file : config.types.definitionFiles)
+    for (const auto& [_, file] : client->definitionsFiles)
     {
         if (std::filesystem::weakly_canonical(file) == canonicalised)
         {
@@ -257,9 +257,9 @@ void WorkspaceFolder::initialize()
     if (client->definitionsFiles.empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
-    for (const auto& definitionsFile : client->definitionsFiles)
+    for (const auto& [packageName, definitionsFile] : client->definitionsFiles)
     {
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + packageName + " - " + definitionsFile.generic_string());
 
         auto definitionsContents = readFile(definitionsFile);
         if (!definitionsContents)
@@ -276,8 +276,10 @@ void WorkspaceFolder::initialize()
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
-        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
+        auto result =
+            types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        types::registerDefinitions(
+            frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         auto uri = Uri::file(definitionsFile);
@@ -286,6 +288,8 @@ void WorkspaceFolder::initialize()
         {
             // Clear any set diagnostics
             client->publishDiagnostics({uri, std::nullopt, {}});
+            TextDocument textDocument(Uri::file(definitionsFile), "luau", 0, *definitionsContents);
+            definitionsSourceModules.insert_or_assign(packageName, std::make_pair(textDocument, result.sourceModule));
         }
         else
         {

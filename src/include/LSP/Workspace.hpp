@@ -36,6 +36,9 @@ public:
     bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
+private:
+    std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
+
 public:
     WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
