@@ -26,8 +26,8 @@ jobs:
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
-          cmake --build . --target Luau.LanguageServer.CLI -j 3
+          cmake --debug-output .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake --debug-output --build . --target Luau.LanguageServer.CLI -j 3
 
   run_tests:
     strategy:
