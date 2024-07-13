@@ -1,4 +1,5 @@
 #include "doctest.h"
+#include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("SourcemapTests");
@@ -33,6 +34,66 @@ TEST_CASE("getScriptFilePath doesn't pick .meta.json")
     node.className = "ModuleScript";
     node.filePaths = {"init.meta.json", "init.lua"};
     CHECK_EQ(node.getScriptFilePath(), "init.lua");
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_access_children_via_dot_properties")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local template = game.TemplateR15
+        local head = template.Head
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Part");
+    CHECK(Luau::toString(requireType("head")) == "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_access_children_via_find_first_child")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local template = game:FindFirstChild("TemplateR15")
+        local head = template.Head
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Part");
+    CHECK(Luau::toString(requireType("head")) == "Part");
 }
 
 TEST_SUITE_END();
