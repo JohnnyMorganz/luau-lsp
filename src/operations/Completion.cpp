@@ -30,18 +30,22 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (ancestry.size() < 2)
         return;
 
-    // Search backwards for the first node that is not an Error node
-    size_t currentNodeIndex = ancestry.size() - 1;
-    while (ancestry.at(currentNodeIndex)->is<Luau::AstStatError>() || ancestry.at(currentNodeIndex)->is<Luau::AstExprError>())
-    {
-        currentNodeIndex--;
-        if (currentNodeIndex < 1)
-            return;
-    }
+    // Remove error nodes from end of ancestry chain
+    while (ancestry.size() > 0 && (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()))
+        ancestry.pop_back();
 
-    Luau::AstNode* currentNode = ancestry.at(currentNodeIndex);
-    if (!currentNode)
+    if (ancestry.size() == 0)
         return;
+
+    Luau::AstNode* currentNode = ancestry.back();
+
+    // TODO: https://github.com/luau-lang/luau/issues/1328 causes the ast ancestry to be shorter than expected
+    if (auto globalFunc = currentNode->as<Luau::AstStatFunction>())
+    {
+        ancestry.push_back(globalFunc->func);
+        ancestry.push_back(globalFunc->func->body);
+        currentNode = globalFunc->func->body;
+    }
 
     // We should only apply it if the line just above us is the start of the unclosed statement
     // Otherwise, we insert ends in weird places if theirs an unclosed stat a while away
