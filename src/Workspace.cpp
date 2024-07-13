@@ -150,7 +150,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (std::filesystem::weakly_canonical(file) == canonicalised)
+        if (std::filesystem::weakly_canonical(resolvePath(file)) == canonicalised)
         {
             return true;
         }
@@ -259,13 +259,14 @@ void WorkspaceFolder::initialize()
 
     for (const auto& definitionsFile : client->definitionsFiles)
     {
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
+        auto resolvedFilePath = resolvePath(definitionsFile);
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
 
-        auto definitionsContents = readFile(definitionsFile);
+        auto definitionsContents = readFile(resolvedFilePath);
         if (!definitionsContents)
         {
             client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
             continue;
         }
 
@@ -280,7 +281,7 @@ void WorkspaceFolder::initialize()
         types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
-        auto uri = Uri::file(definitionsFile);
+        auto uri = Uri::file(resolvedFilePath);
 
         if (result.success)
         {
@@ -290,7 +291,7 @@ void WorkspaceFolder::initialize()
         else
         {
             client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
 
             // Display relevant diagnostics
             std::vector<lsp::Diagnostic> diagnostics;
