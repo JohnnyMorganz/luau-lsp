@@ -197,7 +197,7 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
             }
         }
     }
-    catch (const JsonRpcException& e)
+    catch (const JsonRpcException&)
     {
         // Server is not yet configured to send diagnostic messages
     }
