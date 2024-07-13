@@ -11,6 +11,10 @@ if (LSP_STATIC_CRT)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif ()
 
+if (LUAU_ENABLE_TIME_TRACE)
+    add_definitions(-DLUAU_ENABLE_TIME_TRACE)
+endif ()
+
 project(Luau.LanguageServer LANGUAGES CXX)
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)

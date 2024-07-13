@@ -224,6 +224,11 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("luau-lsp.reloadServer", async () => {
       vscode.window.showInformationMessage("Reloading Language Server");
       await startLanguageServer(context);
+    }),
+    vscode.commands.registerCommand("luau-lsp.flushTimeTrace", async () => {
+      if (client) {
+        client.sendNotification("$/flushTimeTrace");
+      }
     })
   );
 

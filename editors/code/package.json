@@ -109,6 +109,10 @@
         "command": "luau-lsp.computeCompilerRemarks",
         "title": "Luau: Compute Compiler Remarks for file",
         "enablement": "resourceLangId == luau"
+      },
+      {
+        "command": "luau-lsp.flushTimeTrace",
+        "title": "Luau: Flush Time Trace Events to tracing.json"
       }
     ],
     "menus": {
