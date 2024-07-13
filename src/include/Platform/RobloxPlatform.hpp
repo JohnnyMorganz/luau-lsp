@@ -7,6 +7,8 @@ using json = nlohmann::json;
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 using PluginNodePtr = std::shared_ptr<struct PluginNode>;
 
+const std::string kSourcemapGeneratedTag = "@sourcemap-generated";
+
 struct RobloxDefinitionsFileMetadata
 {
     std::vector<std::string> CREATABLE_INSTANCES{};

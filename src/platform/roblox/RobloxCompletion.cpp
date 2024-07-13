@@ -170,6 +170,8 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                         continue;
                     else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
                         continue;
+                    else if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                        continue;
 
                     result.insert_or_assign(
                         propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,

@@ -208,7 +208,7 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
         // Clear out all the old registered children
         for (auto it = ctv->props.begin(); it != ctv->props.end();)
         {
-            if (hasTag(it->second, "@sourcemap-generated"))
+            if (hasTag(it->second, kSourcemapGeneratedTag))
                 it = ctv->props.erase(it);
             else
                 ++it;
@@ -223,7 +223,7 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
                 /* deprecated */ false,
                 /* deprecatedSuggestion */ {},
                 /* location */ std::nullopt,
-                /* tags */ {"@sourcemap-generated"},
+                /* tags */ {kSourcemapGeneratedTag},
                 /* documentationSymbol*/ std::nullopt,
             };
         }
