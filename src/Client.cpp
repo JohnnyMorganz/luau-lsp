@@ -85,11 +85,6 @@ void Client::registerCapability(const std::string& registrationId, const std::st
     sendRequest(nextRequestId++, "client/registerCapability", lsp::RegistrationParams{{registration}});
 }
 
-bool Client::hasConfiguration(const lsp::DocumentUri& uri)
-{
-    return configStore.find(uri.toString()) != configStore.end();
-}
-
 ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
 {
     auto key = uri.toString();

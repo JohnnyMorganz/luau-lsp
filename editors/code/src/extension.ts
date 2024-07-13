@@ -178,16 +178,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   const serverOptions: ServerOptions = { run, debug };
 
-  const config = {
-    default: vscode.workspace.getConfiguration("luau-lsp"),
-    ...Object.fromEntries(
-      vscode.workspace.workspaceFolders?.map((folder) => [
-        folder.uri,
-        vscode.workspace.getConfiguration("luau-lsp", folder),
-      ]) ?? []
-    ),
-  };
-
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
       { language: "lua", scheme: "file" },
@@ -201,7 +191,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     },
     initializationOptions: {
       fflags,
-      config,
     },
   };
 

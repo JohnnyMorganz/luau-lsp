@@ -336,11 +336,70 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
 }
 
+bool LanguageServer::allWorkspacesConfigured() const
+{
+    for (auto& workspace : workspaceFolders)
+    {
+        if (!workspace->isConfigured)
+            return false;
+    }
+
+    return true;
+}
+
+void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
+{
+    try
+    {
+        if (msg.is_request())
+        {
+            if (isInitialized && !allWorkspacesConfigured())
+            {
+                client->sendTrace("workspaces not configured, postponing message: " + msg.method.value());
+                configPostponedMessages.emplace_back(msg);
+                return;
+            }
+
+            onRequest(msg.id.value(), msg.method.value(), msg.params);
+        }
+        else if (msg.is_response())
+        {
+            client->handleResponse(msg);
+        }
+        else if (msg.is_notification())
+        {
+            onNotification(msg.method.value(), msg.params);
+        }
+        else
+        {
+            throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
+        }
+    }
+    catch (const JsonRpcException& e)
+    {
+        client->sendError(msg.id, e);
+    }
+    catch (const std::exception& e)
+    {
+        client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
+    }
+}
+
 void LanguageServer::processInputLoop()
 {
     std::string jsonString;
     while (std::cin)
     {
+        if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
+        {
+            client->sendTrace("workspaces configured, handling postponed messages");
+            for (const auto& msg : configPostponedMessages)
+                handleMessage(msg);
+
+            configPostponedMessages.clear();
+            client->sendTrace("workspaces configured, handling postponed COMPLETED");
+        }
+
         if (client->readRawMessage(jsonString))
         {
             // sendTrace(jsonString, std::nullopt);
@@ -351,34 +410,11 @@ void LanguageServer::processInputLoop()
                 auto msg = json_rpc::parse(jsonString);
                 id = msg.id;
 
-                if (msg.is_request())
-                {
-                    onRequest(msg.id.value(), msg.method.value(), msg.params);
-                }
-                else if (msg.is_response())
-                {
-                    client->handleResponse(msg);
-                }
-                else if (msg.is_notification())
-                {
-                    onNotification(msg.method.value(), msg.params);
-                }
-                else
-                {
-                    throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "invalid json-rpc message");
-                }
-            }
-            catch (const JsonRpcException& e)
-            {
-                client->sendError(id, e);
+                handleMessage(msg);
             }
             catch (const json::exception& e)
             {
                 client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
-            }
-            catch (const std::exception& e)
-            {
-                client->sendError(id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
             }
         }
     }
@@ -416,10 +452,6 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
                         client->sendLogMessage(lsp::MessageType::Info, message);
                     });
             }
-
-            client->configStore = options.config;
-            if (auto it = options.config.find("default"); it != options.config.end())
-                client->globalConfig = it->second;
         }
         catch (const json::exception& err)
         {
@@ -537,11 +569,8 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     {
         client->sendTrace("initializing workspace: " + folder->rootUri.toString());
         folder->initialize();
-        if (client->hasConfiguration(folder->rootUri))
-            // We received configuration during initializationOptions
-            folder->setupWithConfiguration(client->getConfiguration(folder->rootUri));
-        else if (!requestedConfiguration)
-            // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+        if (!requestedConfiguration)
             folder->setupWithConfiguration(client->globalConfig);
     }
 }
@@ -680,7 +709,6 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     std::vector<lsp::DocumentUri> configItems{};
     for (auto& folder : params.event.added)
     {
-        // TODO: platform is not handled correctly when new folder is added
         workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
         configItems.emplace_back(folder.uri);
     }

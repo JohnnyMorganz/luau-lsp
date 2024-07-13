@@ -28,11 +28,11 @@ class WorkspaceFolder
 {
 public:
     std::shared_ptr<Client> client;
+    std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
-    std::unique_ptr<LSPPlatform> platform;
     bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
