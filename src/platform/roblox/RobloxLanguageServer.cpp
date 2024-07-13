@@ -40,9 +40,7 @@ void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
             client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
 
             std::vector<lsp::FileSystemWatcher> watchers{};
-            watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
             watchers.push_back(lsp::FileSystemWatcher{"**/" + sourcemapFileName});
-            watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
             client->registerCapability(
                 "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
         }
