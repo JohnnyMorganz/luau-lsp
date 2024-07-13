@@ -219,7 +219,8 @@ const startSourcemapGeneration = async (
 
   const workspacePath = workspaceFolder.uri.fsPath;
   const rojoPath = config.get<string>("rojoPath") ?? "rojo";
-  const sourcemapFileName = config.get<string>("sourcemapFile") ?? "sourcemap.json";
+  const sourcemapFileName =
+    config.get<string>("sourcemapFile") ?? "sourcemap.json";
   const args = [
     "sourcemap",
     projectFile,
