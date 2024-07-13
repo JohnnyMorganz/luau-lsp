@@ -185,6 +185,29 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
             return result;
         }
     }
+    else if (tag == "Children")
+    {
+        if (ctx && ctx.value())
+        {
+            Luau::AutocompleteEntryMap result;
+            auto ctv = ctx.value();
+            while (ctv)
+            {
+                for (auto& [propName, prop] : ctv->props)
+                {
+                    if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                        result.insert_or_assign(
+                            propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
+                                          false, false, Luau::TypeCorrectKind::Correct});
+                }
+                if (ctv->parent)
+                    ctv = Luau::get<Luau::ClassType>(*ctv->parent);
+                else
+                    break;
+            }
+            return result;
+        }
+    }
     else if (tag == "Enums")
     {
         auto it = workspaceFolder->frontend.globals.globalScope->importedTypeBindings.find("Enum");

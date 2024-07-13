@@ -342,4 +342,82 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_childre
     checkStringCompletionExists(result, "ClassName");
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage"
+            },
+            {
+                "name": "StandardPart",
+                "className": "Part"
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:FindFirstChild("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "StandardPart");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "StandardPart",
+                "className": "Part",
+                "children": [
+                    {
+                        "name": "ChildA",
+                        "className": "Part"
+                    },
+                    {
+                        "name": "ChildB",
+                        "className": "Part"
+                    }
+                ]
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game.StandardPart:FindFirstChild("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ChildA");
+    checkStringCompletionExists(result, "ChildB");
+}
+
 TEST_SUITE_END();

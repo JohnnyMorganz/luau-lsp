@@ -93,6 +93,7 @@ static void injectFindFirstChildFunction(
             });
         ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
         Luau::attachTag(ctv->props["FindFirstChild"].type(), kSourcemapGeneratedTag);
+        Luau::attachTag(ctv->props["FindFirstChild"].type(), "Children");
     }
 }
 

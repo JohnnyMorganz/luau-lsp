@@ -9,7 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Support tilde expansion (`~`) to home directory for definition and documentation file paths
-- We now apply a datamodel-aware `FindFirstChild` function to the top level datamodel and service types
+- We now apply a datamodel-aware `FindFirstChild` function to the top level datamodel and service types ([#543](https://github.com/JohnnyMorganz/luau-lsp/issues/543))
+- Added autocompletion of children to `:FindFirstChild("")` ([#685](https://github.com/JohnnyMorganz/luau-lsp/issues/685))
 
 ### Changed
 
