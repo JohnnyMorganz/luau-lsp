@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fix static linking with MSVC Runtime for release binaries
+- Fixed clients that do not support pull diagnostics erroring with "server not yet received configuration for diagnostics"
 
 ## [1.31.1] - 2024-07-07
 
