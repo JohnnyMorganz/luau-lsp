@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a datamodel-aware `WaitForChild` function
 - We now apply a datamodel-aware `FindFirstChild` function to the top level datamodel and service types ([#543](https://github.com/JohnnyMorganz/luau-lsp/issues/543))
 - Added autocompletion of children to `:FindFirstChild("")` and `:WaitForChild("")` ([#685](https://github.com/JohnnyMorganz/luau-lsp/issues/685))
+- Attached magic function to `Instance.fromExisting` to allow it to operate similar to `inst:Clone`
 
 ### Changed
 
