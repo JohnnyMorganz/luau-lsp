@@ -96,4 +96,34 @@ TEST_CASE_FIXTURE(Fixture, "can_access_children_via_find_first_child")
     CHECK(Luau::toString(requireType("head")) == "Part");
 }
 
+TEST_CASE_FIXTURE(Fixture, "can_access_children_via_wait_for_child")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local template = game:WaitForChild("TemplateR15")
+        local head = template.Head
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Part");
+    CHECK(Luau::toString(requireType("head")) == "Part");
+}
+
 TEST_SUITE_END();
