@@ -197,4 +197,115 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
     }
 }
 
+static void checkStringCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+{
+    auto item = requireItem(items, label);
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Constant);
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_new_contains_creatable_instances")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Instance.new("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_service_contains_services")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:GetService("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 1);
+    checkStringCompletionExists(result, "ReplicatedStorage");
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Instance.new("Part"):IsA("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 6);
+    checkStringCompletionExists(result, "Instance");
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+    checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "ServiceProvider");
+    checkStringCompletionExists(result, "DataModel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "enum_is_a_contains_enum_items")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Enum.HumanoidRigType.R6:IsA("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 1);
+    checkStringCompletionExists(result, "HumanoidRigType");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_includes_properties")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = Instance.new("Part")
+        x:GetPropertyChangedSignal("| ")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
 TEST_SUITE_END();
