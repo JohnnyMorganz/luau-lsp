@@ -26,7 +26,7 @@ jobs:
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLUAU_STATIC_CRT:BOOL=ON
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
   run_tests:
