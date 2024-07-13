@@ -126,4 +126,43 @@ TEST_CASE_FIXTURE(Fixture, "can_access_children_via_wait_for_child")
     CHECK(Luau::toString(requireType("head")) == "Part");
 }
 
+TEST_CASE_FIXTURE(Fixture, "relative_and_absolute_types_are_consistent")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "ReplicatedStorage",
+                        "className": "ReplicatedStorage",
+                        "children": [
+                            {
+                                "name": "Shared",
+                                "className": "Part",
+                                "children": [{"name": "Part", "className": "Part"}, {"name": "Script", "className": "Instance"}]
+                            }
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local script: typeof(game.ReplicatedStorage.Shared.Script) -- mimic script
+        local absolutePart = game:GetService("ReplicatedStorage"):FindFirstChild("Shared"):FindFirstChild("Part")
+        local relativePart = script.Parent.Part
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    auto absoluteTy = requireType("absolutePart");
+    auto relativeTy = requireType("relativePart");
+    CHECK(Luau::toString(absoluteTy) == "Part");
+    CHECK(Luau::toString(relativeTy) == "Part");
+    CHECK((absoluteTy == relativeTy));
+}
+
 TEST_SUITE_END();
