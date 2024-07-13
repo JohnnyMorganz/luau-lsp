@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.634
 
+### Fixed
+
+- Fix static linking with MSVC Runtime for release binaries
+
 ## [1.31.1] - 2024-07-07
 
 ### Fixed
