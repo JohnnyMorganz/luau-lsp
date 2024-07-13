@@ -143,6 +143,23 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     return false;
 }
 
+bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+{
+    // We want to test globs against a relative path to workspace, since that's what makes most sense
+    auto relativePath = path.lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
+    for (auto& pattern : patterns)
+    {
+        if (glob::fnmatch_case(relativePath, pattern))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);

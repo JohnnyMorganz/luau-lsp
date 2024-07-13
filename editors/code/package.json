@@ -435,6 +435,17 @@
           "default": false,
           "scope": "resource"
         },
+        "luau-lsp.completion.imports.ignoreGlobs": {
+          "markdownDescription": "Files that match these globs will not be shown during auto-import",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/_Index/**"
+          ],
+          "scope": "resource"
+        },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",
           "type": "boolean",
