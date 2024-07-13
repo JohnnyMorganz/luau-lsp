@@ -26,7 +26,7 @@ static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source
         else
             column += 1;
 
-        if (i == marker)
+        if (i == marker - 1)
             break;
     }
 
@@ -207,7 +207,7 @@ TEST_CASE_FIXTURE(Fixture, "instance_new_contains_creatable_instances")
 {
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        Instance.new("| ")
+        Instance.new("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -227,7 +227,7 @@ TEST_CASE_FIXTURE(Fixture, "get_service_contains_services")
 {
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game:GetService("| ")
+        game:GetService("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -246,7 +246,7 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
 {
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        Instance.new("Part"):IsA("| ")
+        Instance.new("Part"):IsA("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -270,7 +270,7 @@ TEST_CASE_FIXTURE(Fixture, "enum_is_a_contains_enum_items")
 {
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        Enum.HumanoidRigType.R6:IsA("| ")
+        Enum.HumanoidRigType.R6:IsA("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -290,7 +290,7 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_includes_properties")
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = Instance.new("Part")
-        x:GetPropertyChangedSignal("| ")
+        x:GetPropertyChangedSignal("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -324,7 +324,7 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_childre
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game:GetPropertyChangedSignal("| ")
+        game:GetPropertyChangedSignal("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -362,7 +362,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game:FindFirstChild("| ")
+        game:FindFirstChild("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -404,7 +404,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game.StandardPart:FindFirstChild("| ")
+        game.StandardPart:FindFirstChild("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -440,7 +440,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game:WaitForChild("| ")
+        game:WaitForChild("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
@@ -482,7 +482,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
-        game.StandardPart:WaitForChild("| ")
+        game.StandardPart:WaitForChild("|")
     )");
 
     auto uri = newDocument("foo.luau", source);
