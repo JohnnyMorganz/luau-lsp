@@ -145,6 +145,9 @@ public:
 
     Luau::TypeArena instanceTypes;
 
+    // For testing only
+    bool updateSourceMapFromContents(const std::string& sourceMapContents);
+
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
     void onDidChangeWatchedFiles(const lsp::FileEvent& change) override;
@@ -191,6 +194,7 @@ public:
     void onStudioPluginFullChange(const PluginNode& dataModel);
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
+
 
     using LSPPlatform::LSPPlatform;
 };

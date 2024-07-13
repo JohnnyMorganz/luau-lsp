@@ -230,6 +230,33 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
     }
 }
 
+bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
+{
+    workspaceFolder->client->sendTrace("Sourcemap file read successfully");
+
+    workspaceFolder->frontend.clear();
+    updateSourceNodeMap(sourceMapContents);
+
+    workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
+
+    // Recreate instance types
+    instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
+    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
+
+    // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
+    // We pass the same setting even when we are registering autocomplete globals since
+    // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
+    workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
+    workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+
+    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
+
+    return true;
+}
+
 bool RobloxPlatform::updateSourceMap()
 {
     auto sourcemapPath = workspaceFolder->rootUri.fsPath() / "sourcemap.json";
@@ -239,29 +266,7 @@ bool RobloxPlatform::updateSourceMap()
     // TODO: we assume a sourcemap.json file in the workspace root
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
-        workspaceFolder->client->sendTrace("Sourcemap file read successfully");
-
-        workspaceFolder->frontend.clear();
-        updateSourceNodeMap(sourceMapContents.value());
-
-        workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
-
-        // Recreate instance types
-        instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
-        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-        bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
-
-        // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
-        // We pass the same setting even when we are registering autocomplete globals since
-        // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
-        workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
-        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
-        workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
-        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
-
-        workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
-
-        return true;
+        return updateSourceMapFromContents(sourceMapContents.value());
     }
     else
     {
