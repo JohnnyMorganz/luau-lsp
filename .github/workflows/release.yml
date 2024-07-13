@@ -84,7 +84,7 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLUAU_STATIC_CRT:BOOL=ON
           cmake --build . --config Release --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
