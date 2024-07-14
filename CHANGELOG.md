@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed autocomplete end not working for non-local functions ([#554](https://github.com/JohnnyMorganz/luau-lsp/issues/554))
 - Fixed extension failing to get types information on macOS with "'fetch' is not defined"
 - Fixed crashes under new type solver due to internal removal of different type inference for autocomplete/non-autocomplete contexts ([#692](https://github.com/JohnnyMorganz/luau-lsp/issues/692))
+- Fixed crashes where internally we fail to normalise a "virtual path" from a sourcemap to a real path, causing it to mismatch with the filepath understood by VSCode, leading to desync in internal file state. ([#645](https://github.com/JohnnyMorganz/luau-lsp/issues/645))
 
 ## [1.31.1] - 2024-07-07
 
