@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.32.0] - 2024-07-14
+
 ### Added
 
 - Support tilde expansion (`~`) to home directory for definition and documentation file paths
