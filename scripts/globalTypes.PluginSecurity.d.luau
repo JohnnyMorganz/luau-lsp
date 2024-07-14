@@ -4698,9 +4698,9 @@ declare class Instance
 	function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
 	function FindFirstDescendant(self, name: string): Instance?
 	function GetActor(self): Actor?
-	function GetAttribute(self, attribute: string): any
+	function GetAttribute(self, attribute: string): unknown?
 	function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
-	function GetAttributes(self): { [string]: any }
+	function GetAttributes(self): { [string]: unknown }
 	function GetChildren(self): { Instance }
 	function GetDebugId(self, scopeLength: number?): string
 	function GetDescendants(self): { Instance }
