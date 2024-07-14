@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added autocompletion of children to `:FindFirstChild("")` and `:WaitForChild("")` ([#685](https://github.com/JohnnyMorganz/luau-lsp/issues/685))
 - Attached magic function to `Instance.fromExisting` to allow it to operate similar to `inst:Clone` ([#678](https://github.com/JohnnyMorganz/luau-lsp/issues/678))
 - Added separate configuration `luau-lsp.completion.imports.ignoreGlobs` to filter out files for auto-importing. We no longer check `luau-lsp.ignoreGlobs`. ([#686](https://github.com/JohnnyMorganz/luau-lsp/issues/686))
+- Diagnostics will now refresh when the Studio plugin sends updated DataModel information ([#637](https://github.com/JohnnyMorganz/luau-lsp/issues/637))
 
 ### Changed
 

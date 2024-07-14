@@ -309,6 +309,12 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
 
     workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
 
+    if (expressiveTypes)
+    {
+        workspaceFolder->client->sendTrace("Refreshing diagnostics from sourcemap update as strictDatamodelTypes is enabled");
+        workspaceFolder->recomputeDiagnostics(config);
+    }
+
     return true;
 }
 
