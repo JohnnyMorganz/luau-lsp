@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Server } from "http";
 import express from "express";
-import fetch from "node-fetch";
+import { fetch } from "undici";
 import { spawn, ChildProcess } from "child_process";
 import { LanguageClient } from "vscode-languageclient/node";
 import { AddArgCallback, PlatformContext } from "./extension";
