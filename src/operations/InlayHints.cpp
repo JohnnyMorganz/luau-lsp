@@ -325,8 +325,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
-                                                    : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule || !module)
         return {};
 

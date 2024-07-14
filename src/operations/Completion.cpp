@@ -161,7 +161,7 @@ void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const L
     const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix)
 {
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return;
 
@@ -352,7 +352,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
         else
         {
             // TODO: there is not a nice way to get the containing table type from the entry, so we compute it ourselves
-            auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+            auto module = getModule(moduleName, /* forAutocomplete: */ true);
 
             if (module)
             {

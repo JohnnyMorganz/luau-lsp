@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Don't show children in autocomplete for `:GetPropertyChangedSignal("")`
 - Fixed autocomplete end not working for non-local functions
 - Fixed extension failing to get types information on macOS with "'fetch' is not defined"
+- Fixed crashes under new type solver due to internal removal of different type inference for autocomplete/non-autocomplete contexts ([#692](https://github.com/JohnnyMorganz/luau-lsp/issues/692))
 
 ## [1.31.1] - 2024-07-07
 

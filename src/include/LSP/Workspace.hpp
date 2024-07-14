@@ -83,6 +83,8 @@ public:
 
     Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks = false);
     void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
+    // TODO: Clip once new type solver is live
+    const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
 private:
     void endAutocompletion(const lsp::CompletionParams& params);

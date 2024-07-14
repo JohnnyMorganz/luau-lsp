@@ -73,7 +73,7 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     {
         // Run the typechecker over the dependency modules
         checkStrict(moduleName);
-        auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+        auto module = getModule(moduleName, /* forAutocomplete: */ true);
         if (!module)
             continue;
 
@@ -143,7 +143,7 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
 
     // Find the actual declaration location
     checkStrict(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!module)
         return {};
 
@@ -162,7 +162,7 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         // Run the typechecker over the dependency module
         checkStrict(dependencyModuleName);
         auto sourceModule = frontend.getSourceModule(dependencyModuleName);
-        auto module = frontend.moduleResolverForAutocomplete.getModule(dependencyModuleName);
+        auto module = getModule(dependencyModuleName, /* forAutocomplete: */ true);
         if (sourceModule)
         {
             // Find the import name used
@@ -431,7 +431,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     }
 
     // Search for a property
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (auto expr = exprOrLocal.getExpr())
     {
         if (auto indexName = expr->as<Luau::AstExprIndexName>())

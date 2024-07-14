@@ -9,6 +9,15 @@
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
+LUAU_FASTFLAG(DebugLuauDeferredConstraintResolution)
+
+const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const
+{
+    if (FFlag::DebugLuauDeferredConstraintResolution || !forAutocomplete)
+        return frontend.moduleResolver.getModule(moduleName);
+    else
+        return frontend.moduleResolverForAutocomplete.getModule(moduleName);
+}
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
@@ -206,7 +215,7 @@ void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAu
     // and then a call `Frontend::check(moduleName, { retainTypeGraphs: true })` will NOT actually
     // retain the type graph if the module is not marked dirty.
     // We do a manual check and dirty marking to fix this
-    auto module = forAutocomplete ? frontend.moduleResolverForAutocomplete.getModule(moduleName) : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, forAutocomplete);
     if (module && module->internalTypes.types.empty()) // If we didn't retain type graphs, then the internalTypes arena is empty
         frontend.markDirty(moduleName);
 
