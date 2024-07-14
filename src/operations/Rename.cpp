@@ -3,17 +3,17 @@
 
 #include "LSP/LuauExt.hpp"
 
-static bool isGlobalBinding(const Luau::Frontend& frontend, const WorkspaceFileResolver& fileResolver, const lsp::RenameParams& params)
+static bool isGlobalBinding(const WorkspaceFolder* workspaceFolder, const lsp::RenameParams& params)
 {
-    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
+    auto moduleName = workspaceFolder->fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = workspaceFolder->fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
     auto position = textDocument->convertPosition(params.position);
 
-    auto sourceModule = frontend.getSourceModule(moduleName);
+    auto sourceModule = workspaceFolder->frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = workspaceFolder->getModule(moduleName, /* forAutocomplete: */ true);
     auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
     if (binding)
         return binding->location.begin == Luau::Position{0, 0} && binding->location.end == Luau::Position{0, 0};
@@ -43,7 +43,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     if (!references)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to find symbol to rename");
 
-    if (isGlobalBinding(frontend, fileResolver, params))
+    if (isGlobalBinding(this, params))
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Cannot rename a global variable");
 
     lsp::WorkspaceEdit result{};

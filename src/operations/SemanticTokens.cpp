@@ -406,7 +406,7 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
     checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return std::nullopt;
 

@@ -1,6 +1,5 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
-#include "LSP/FileUtils.h"
 #include <regex>
 #include <algorithm>
 
@@ -48,7 +47,8 @@ void parseDocumentation(
 
     for (auto& documentationFile : documentationFiles)
     {
-        if (auto contents = readFile(documentationFile))
+        auto resolvedFilePath = resolvePath(documentationFile);
+        if (auto contents = readFile(resolvedFilePath))
         {
             try
             {
@@ -106,14 +106,14 @@ void parseDocumentation(
             catch (const std::exception& e)
             {
                 client->sendLogMessage(lsp::MessageType::Error,
-                    "Failed to load documentation database for " + documentationFile.generic_string() + ": " + std::string(e.what()));
+                    "Failed to load documentation database for " + resolvedFilePath.generic_string() + ": " + std::string(e.what()));
                 client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
             }
         }
         else
         {
             client->sendLogMessage(lsp::MessageType::Error,
-                "Failed to read documentation file for " + documentationFile.generic_string() + ". Documentation will not be provided");
+                "Failed to read documentation file for " + resolvedFilePath.generic_string() + ". Documentation will not be provided");
             client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
         }
     }

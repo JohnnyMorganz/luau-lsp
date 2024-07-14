@@ -1,5 +1,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "Flags.hpp"
+#include "Luau/TimeTrace.h"
 
 #include <string>
 #include <variant>
@@ -296,6 +297,12 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
         // NO-OP
         // TODO: support cancellation
     }
+    else if (method == "$/flushTimeTrace")
+    {
+#if defined(LUAU_ENABLE_TIME_TRACE)
+        Luau::TimeTrace::getThreadContext().flushEvents();
+#endif
+    }
     else if (method == "textDocument/didOpen")
     {
         onDidOpenTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didOpen"));
@@ -355,6 +362,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         {
             if (isInitialized && !allWorkspacesConfigured())
             {
+                client->sendTrace("workspaces not configured, postponing message: " + msg.method.value());
                 configPostponedMessages.emplace_back(msg);
                 return;
             }
@@ -391,10 +399,12 @@ void LanguageServer::processInputLoop()
     {
         if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
         {
+            client->sendTrace("workspaces configured, handling postponed messages");
             for (const auto& msg : configPostponedMessages)
                 handleMessage(msg);
 
             configPostponedMessages.clear();
+            client->sendTrace("workspaces configured, handling postponed COMPLETED");
         }
 
         if (client->readRawMessage(jsonString))

@@ -23,6 +23,21 @@
                     "ReturnType": {
                         "Name": "Instance"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromExisting",
+                    "Parameters": [
+                        {
+                            "Name": "existingInstance",
+                            "Type": {
+                                "Name": "Instance"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Instance"
+                    }
                 }
             ],
             "Name": "Instance"
@@ -2335,10 +2350,64 @@
             "Name": "SharedTable"
         },
         {
-            "Members":[],
+            "Members": [],
             "Name": "Secret"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "leftTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "rightTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                }
+            ],
+            "Name": "Path2DControlPoint"
         }
-
     ],
     "DataTypes": [
         {
@@ -5090,7 +5159,7 @@
             "Name": "SharedTable"
         },
         {
-            "Members":[
+            "Members": [
                 {
                     "MemberType": "Function",
                     "Name": "AddPrefix",
@@ -5123,6 +5192,35 @@
                 }
             ],
             "Name": "Secret"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Position",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "LeftTangent",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RightTangent",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                }
+            ],
+            "Name": "Path2DControlPoint"
         }
     ]
 }

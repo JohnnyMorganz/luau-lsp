@@ -88,6 +88,7 @@ end
 
 declare Instance: {
     new: ((className: string, parent: Instance?) -> Instance),
+    fromExisting: ((existingInstance: Instance) -> Instance),
 }
 
 declare game: DataModel

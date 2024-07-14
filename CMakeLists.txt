@@ -1,9 +1,21 @@
 cmake_minimum_required(VERSION 3.19)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-project(Luau.LanguageServer LANGUAGES CXX)
 
 option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
+option(LSP_BUILD_ASAN "Build with ASAN" OFF)
+option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 
+if (LSP_STATIC_CRT)
+    cmake_policy(SET CMP0091 NEW)
+    set(LUAU_STATIC_CRT ON)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
+
+if (LUAU_ENABLE_TIME_TRACE)
+    add_definitions(-DLUAU_ENABLE_TIME_TRACE)
+endif ()
+
+project(Luau.LanguageServer LANGUAGES CXX)
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
 add_executable(Luau.LanguageServer.CLI)
@@ -21,7 +33,6 @@ target_sources(Luau.LanguageServer PRIVATE
         src/LuauExt.cpp
         src/IostreamHelpers.cpp
         src/Utils.cpp
-        src/FileUtils.cpp
         src/Flags.cpp
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
@@ -88,6 +99,29 @@ if (MSVC)
     list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
 else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
+endif ()
+
+if (LSP_BUILD_ASAN)
+    if (MSVC)
+        list(APPEND LUAU_LSP_OPTIONS /fsanitize=address)
+        target_compile_options(Luau.Ast PRIVATE /fsanitize=address)
+        target_compile_options(Luau.Analysis PRIVATE /fsanitize=address)
+        target_compile_options(Luau.Compiler PRIVATE /fsanitize=address)
+        target_compile_options(Luau.Config PRIVATE /fsanitize=address)
+    else ()
+        list(APPEND LUAU_LSP_OPTIONS -fsanitize=address)
+        target_compile_options(Luau.Ast PRIVATE -fsanitize=address)
+        target_compile_options(Luau.Analysis PRIVATE -fsanitize=address)
+        target_compile_options(Luau.Compiler PRIVATE -fsanitize=address)
+        target_compile_options(Luau.Config PRIVATE -fsanitize=address)
+        target_link_options(Luau.LanguageServer PRIVATE -fsanitize=address)
+        target_link_options(Luau.LanguageServer.CLI PRIVATE -fsanitize=address)
+        target_link_options(Luau.LanguageServer.Test PRIVATE -fsanitize=address)
+        target_link_options(Luau.Ast PRIVATE -fsanitize=address)
+        target_link_options(Luau.Analysis PRIVATE -fsanitize=address)
+        target_link_options(Luau.Compiler PRIVATE -fsanitize=address)
+        target_link_options(Luau.Config PRIVATE -fsanitize=address)
+    endif ()
 endif ()
 
 set(EXTERN_INCLUDES extern/json/include extern/glob/single_include extern/argparse/include extern/toml/include)

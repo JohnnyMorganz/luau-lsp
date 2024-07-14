@@ -6,6 +6,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Support tilde expansion (`~`) to home directory for definition and documentation file paths
+- Added a datamodel-aware `WaitForChild` function
+- We now apply a datamodel-aware `FindFirstChild` function to the top level datamodel and service types ([#543](https://github.com/JohnnyMorganz/luau-lsp/issues/543))
+- Added autocompletion of children to `:FindFirstChild("")` and `:WaitForChild("")` ([#685](https://github.com/JohnnyMorganz/luau-lsp/issues/685))
+- Attached magic function to `Instance.fromExisting` to allow it to operate similar to `inst:Clone` ([#678](https://github.com/JohnnyMorganz/luau-lsp/issues/678))
+- Added separate configuration `luau-lsp.completion.imports.ignoreGlobs` to filter out files for auto-importing. We no longer check `luau-lsp.ignoreGlobs`. ([#686](https://github.com/JohnnyMorganz/luau-lsp/issues/686))
+
+### Changed
+
+- Sync to upstream Luau 0.634
+- Reverted "configuration in initializationOptions" and reintroduced messages postponing due to crashes in clients that do not send initial config
+
+### Fixed
+
+- Fix static linking with MSVC Runtime for release binaries
+- Fixed clients that do not support pull diagnostics erroring with "server not yet received configuration for diagnostics"
+- Don't show children in autocomplete for `:GetPropertyChangedSignal("")` ([#684](https://github.com/JohnnyMorganz/luau-lsp/issues/684))
+- Fixed autocomplete end not working for non-local functions ([#554](https://github.com/JohnnyMorganz/luau-lsp/issues/554))
+- Fixed extension failing to get types information on macOS with "'fetch' is not defined"
+- Fixed crashes under new type solver due to internal removal of different type inference for autocomplete/non-autocomplete contexts ([#692](https://github.com/JohnnyMorganz/luau-lsp/issues/692))
+
+## [1.31.1] - 2024-07-07
+
+### Fixed
+
+- The binary on Windows now statically links to the MSVC Runtime to make it more portable ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
+- Fixed Roblox types still showing when setting `luau-lsp.platform.type` to something other than `roblox`. ([#668](https://github.com/JohnnyMorganz/luau-lsp/issues/668))
+
+## [1.31.0] - 2024-07-01
+
+### Changed
+
+- Sync to upstream Luau 0.632
+- Language clients are recommended to send configuration during intializationOptions (see https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md for details)
+- Removed need for postponing requests whilst waiting for platform configuration (relies on clients sending config in intializationOptions)
+
+### Fixed
+
+- Fixed crashes occuring for users without the MSVC Redistributable installed due to introduced dependency on Windows headers ([#657](https://github.com/JohnnyMorganz/luau-lsp/issues/657))
+
+## [1.30.1] - 2024-06-27
+
+### Fixed
+
+- Fixed use-after-free when generating sourcemap types
+
+## [1.30.0] - 2024-06-23
+
 ### Deprecated
 
 - Deprecated `luau-lsp.types.roblox` setting in favour of `luau-lsp.platform.type`
@@ -19,10 +69,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added inlay hints for varargs parameter type ([#622](https://github.com/JohnnyMorganz/luau-lsp/issues/622))
 - Added setting `luau-lsp.plugin.maximumRequestBodySize` (default: `3mb`) to configure the maximum size of the payload accepted from the Studio Plugin
 - Added support for requiring `.toml` files
+- Added syntax highlighting for `luau` in markdown fenced codeblocks
 
 ### Changed
 
-- Sync to upstream Luau 0.628
+- Sync to upstream Luau 0.631
 - An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
 - Studio Plugin will now perform Gzip compression on sent requests
 

@@ -37,8 +37,8 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLUAU_ENABLE_TIME_TRACE=ON ..
-          cmake --build . --config Release --target Luau.LanguageServer.CLI -j 3
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLUAU_ENABLE_TIME_TRACE:BOOL=ON ..
+          cmake --build . --config RelWithDebInfo --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
         if: matrix.os == 'macos-latest'
@@ -50,7 +50,8 @@ jobs:
           mkdir -p ./dist
           mkdir -p editors/code/bin
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp build/Release/luau-lsp.exe editors/code/bin/server.exe
+            cp build/RelWithDebInfo/luau-lsp.exe editors/code/bin/server.exe
+            cp build/RelWithDebInfo/luau-lsp.pdb editors/code/bin/server.pdb
           else
             cp build/luau-lsp editors/code/bin/server
             chmod 777 editors/code/bin/server
@@ -61,7 +62,7 @@ jobs:
         run: |
           mkdir staging
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp "build/Release/luau-lsp.exe" staging/
+            cp "build/RelWithDebInfo/luau-lsp.exe" staging/
             cd staging
             7z a ../dist/server.zip *
           else

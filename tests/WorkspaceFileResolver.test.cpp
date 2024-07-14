@@ -1,7 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "LSP/WorkspaceFileResolver.hpp"
-#include "LSP/FileUtils.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"

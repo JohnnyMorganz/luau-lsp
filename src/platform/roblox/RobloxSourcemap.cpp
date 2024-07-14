@@ -1,7 +1,6 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
-#include "LSP/FileUtils.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 
@@ -47,6 +46,93 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
         // If we reach this stage, we couldn't find the class name nor the "Instance" type
         // This most likely means a valid definitions file was not provided
         return std::nullopt;
+    }
+}
+
+static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
+
+static void injectChildrenLookupFunctions(
+    const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ClassType* ctv, const Luau::TypeId& ty, const SourceNodePtr& node)
+{
+    if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
+    {
+        auto findFirstChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+        Luau::attachMagicFunction(findFirstChildFunction,
+            [node, &arena, &globals](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
+            {
+                if (expr.args.size < 1)
+                    return std::nullopt;
+
+                auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+                if (!str)
+                    return std::nullopt;
+
+                if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+                    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
+
+                return std::nullopt;
+            });
+        Luau::attachDcrMagicFunction(findFirstChildFunction,
+            [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+            {
+                if (context.callSite->args.size < 1)
+                    return false;
+
+                auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+                if (!str)
+                    return false;
+
+                if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+                {
+                    asMutable(context.result)
+                        ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
+                    return true;
+                }
+                return false;
+            });
+        ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
+        Luau::attachTag(ctv->props["FindFirstChild"].type(), kSourcemapGeneratedTag);
+        Luau::attachTag(ctv->props["FindFirstChild"].type(), "Children");
+
+        auto waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+        Luau::attachMagicFunction(waitForChildFunction,
+            [node, &arena, &globals](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+                const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
+            {
+                if (expr.args.size < 1)
+                    return std::nullopt;
+
+                auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+                if (!str)
+                    return std::nullopt;
+
+                if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+                    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
+
+                return std::nullopt;
+            });
+        Luau::attachDcrMagicFunction(waitForChildFunction,
+            [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+            {
+                if (context.callSite->args.size < 1)
+                    return false;
+
+                auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+                if (!str)
+                    return false;
+
+                if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+                {
+                    asMutable(context.result)
+                        ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
+                    return true;
+                }
+                return false;
+            });
+        ctv->props["WaitForChild"] = Luau::makeProperty(waitForChildFunction, "@roblox/globaltype/Instance.WaitForChild");
+        Luau::attachTag(ctv->props["WaitForChild"].type(), kSourcemapGeneratedTag);
+        Luau::attachTag(ctv->props["WaitForChild"].type(), "Children");
     }
 }
 
@@ -154,42 +240,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
                         });
                     ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
 
-                    auto findFirstChildFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
-                    Luau::attachMagicFunction(findFirstChildFunction,
-                        [node, &arena, &globals](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                            const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
-                        {
-                            if (expr.args.size < 1)
-                                return std::nullopt;
-
-                            auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
-                            if (!str)
-                                return std::nullopt;
-
-                            if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
-                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
-
-                            return std::nullopt;
-                        });
-                    Luau::attachDcrMagicFunction(findFirstChildFunction,
-                        [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
-                        {
-                            if (context.callSite->args.size < 1)
-                                return false;
-
-                            auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
-                            if (!str)
-                                return false;
-
-                            if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
-                            {
-                                asMutable(context.result)
-                                    ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
-                                return true;
-                            }
-                            return false;
-                        });
-                    ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
+                    injectChildrenLookupFunctions(globals, arena, ctv, typeId, node);
                 }
             }
 
@@ -209,7 +260,7 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
         // Clear out all the old registered children
         for (auto it = ctv->props.begin(); it != ctv->props.end();)
         {
-            if (hasTag(it->second, "@sourcemap-generated"))
+            if (hasTag(it->second, kSourcemapGeneratedTag))
                 it = ctv->props.erase(it);
             else
                 ++it;
@@ -224,11 +275,41 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
                 /* deprecated */ false,
                 /* deprecatedSuggestion */ {},
                 /* location */ std::nullopt,
-                /* tags */ {"@sourcemap-generated"},
+                /* tags */ {kSourcemapGeneratedTag},
                 /* documentationSymbol*/ std::nullopt,
             };
         }
+
+        // Add children lookup function
+        injectChildrenLookupFunctions(globals, arena, ctv, ty, node);
     }
+}
+
+bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
+{
+    workspaceFolder->client->sendTrace("Sourcemap file read successfully");
+
+    workspaceFolder->frontend.clear();
+    updateSourceNodeMap(sourceMapContents);
+
+    workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
+
+    // Recreate instance types
+    instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
+    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
+
+    // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
+    // We pass the same setting even when we are registering autocomplete globals since
+    // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
+    workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
+    workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+
+    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
+
+    return true;
 }
 
 bool RobloxPlatform::updateSourceMap()
@@ -240,22 +321,11 @@ bool RobloxPlatform::updateSourceMap()
     // TODO: we assume a sourcemap.json file in the workspace root
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
-        workspaceFolder->frontend.clear();
-        updateSourceNodeMap(sourceMapContents.value());
-
-        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-        bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
-
-        // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
-        // We pass the same setting even when we are registering autocomplete globals since
-        // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
-        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
-        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
-
-        return true;
+        return updateSourceMapFromContents(sourceMapContents.value());
     }
     else
     {
+        workspaceFolder->client->sendTrace("Sourcemap file failed to read");
         return false;
     }
 }
@@ -322,9 +392,6 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
         }
     }
-
-    // Recreate instance types
-    instanceTypes.clear();
 
     // Create a type for the root source node
     getSourcemapType(globals, instanceTypes, rootSourceNode);
