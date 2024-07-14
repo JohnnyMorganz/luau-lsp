@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed clients that do not support pull diagnostics erroring with "server not yet received configuration for diagnostics"
 - Don't show children in autocomplete for `:GetPropertyChangedSignal("")`
 - Fixed autocomplete end not working for non-local functions
+- Fixed extension failing to get types information on macOS with "'fetch' is not defined"
 
 ## [1.31.1] - 2024-07-07
 
