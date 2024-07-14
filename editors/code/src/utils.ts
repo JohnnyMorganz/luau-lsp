@@ -8,7 +8,7 @@ export const basenameUri = (uri: vscode.Uri): string => {
 export const exists = (uri: vscode.Uri): Thenable<boolean> => {
   return vscode.workspace.fs.stat(uri).then(
     () => true,
-    () => false
+    () => false,
   );
 };
 

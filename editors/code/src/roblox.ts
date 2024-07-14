@@ -29,19 +29,19 @@ const globalTypesEndpointForSecurityLevel = (securityLevel: string) => {
 const globalTypesUri = (
   context: vscode.ExtensionContext,
   securityLevel: string,
-  mode: "Prod" | "Debug"
+  mode: "Prod" | "Debug",
 ) => {
   if (mode === "Prod") {
     return vscode.Uri.joinPath(
       context.globalStorageUri,
-      `globalTypes.${securityLevel}.d.luau`
+      `globalTypes.${securityLevel}.d.luau`,
     );
   } else {
     return vscode.Uri.joinPath(
       context.extensionUri,
       "..",
       "..",
-      `scripts/globalTypes.${securityLevel}.d.luau`
+      `scripts/globalTypes.${securityLevel}.d.luau`,
     );
   }
 };
@@ -66,24 +66,24 @@ const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
               .then((data) =>
                 vscode.workspace.fs.writeFile(
                   globalTypesUri(context, level, "Prod"),
-                  new Uint8Array(data)
-                )
-              )
+                  new Uint8Array(data),
+                ),
+              ),
           ),
           fetch(API_DOCS)
             .then((r) => r.arrayBuffer())
             .then((data) =>
               vscode.workspace.fs.writeFile(
                 apiDocsUri(context),
-                new Uint8Array(data)
-              )
+                new Uint8Array(data),
+              ),
             ),
         ]);
-      }
+      },
     );
   } catch (err) {
     vscode.window.showErrorMessage(
-      "Failed to retrieve API information: " + err
+      "Failed to retrieve API information: " + err,
     );
   }
 };
@@ -91,18 +91,18 @@ const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
 const updateApiInfo = async (context: vscode.ExtensionContext) => {
   try {
     const latestVersion = await fetch(CURRENT_VERSION_TXT).then((r) =>
-      r.text()
+      r.text(),
     );
     const currentVersion = context.globalState.get<string>(
-      "current-api-version"
+      "current-api-version",
     );
     const mustUpdate =
       (
         await Promise.all(
           SECURITY_LEVELS.map(
             async (level) =>
-              await utils.exists(globalTypesUri(context, level, "Prod"))
-          )
+              await utils.exists(globalTypesUri(context, level, "Prod")),
+          ),
         )
       ).some((doesExist) => !doesExist) ||
       !(await utils.exists(apiDocsUri(context)));
@@ -113,14 +113,14 @@ const updateApiInfo = async (context: vscode.ExtensionContext) => {
     }
   } catch (err) {
     vscode.window.showWarningMessage(
-      "Failed to retrieve API information: " + err
+      "Failed to retrieve API information: " + err,
     );
   }
 };
 
 const getRojoProjectFile = async (
   workspaceFolder: vscode.WorkspaceFolder,
-  config: vscode.WorkspaceConfiguration
+  config: vscode.WorkspaceConfiguration,
 ) => {
   let projectFile =
     config.get<string>("rojoProjectFile") ?? "default.project.json";
@@ -132,12 +132,12 @@ const getRojoProjectFile = async (
 
   // Search if there is a *.project.json file present in this workspace.
   const foundProjectFiles = await vscode.workspace.findFiles(
-    new vscode.RelativePattern(workspaceFolder.uri, "*.project.json")
+    new vscode.RelativePattern(workspaceFolder.uri, "*.project.json"),
   );
 
   if (foundProjectFiles.length === 0) {
     vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. Please configure a file in settings`
+      `Unable to find project file ${projectFile}. Please configure a file in settings`,
     );
     return undefined;
   } else if (foundProjectFiles.length === 1) {
@@ -145,7 +145,7 @@ const getRojoProjectFile = async (
     const option = await vscode.window.showWarningMessage(
       `Unable to find project file ${projectFile}. We found ${fileName} available`,
       `Set project file to ${fileName}`,
-      "Cancel"
+      "Cancel",
     );
 
     if (option === `Set project file to ${fileName}`) {
@@ -158,7 +158,7 @@ const getRojoProjectFile = async (
     const option = await vscode.window.showWarningMessage(
       `Unable to find project file ${projectFile}. We found ${foundProjectFiles.length} files available`,
       "Select project file",
-      "Cancel"
+      "Cancel",
     );
     if (option === "Select project file") {
       const files = foundProjectFiles.map((file) => utils.basenameUri(file));
@@ -181,7 +181,7 @@ const sourcemapGeneratorProcesses: Map<vscode.WorkspaceFolder, ChildProcess> =
   new Map();
 
 const stopSourcemapGeneration = async (
-  workspaceFolder: vscode.WorkspaceFolder
+  workspaceFolder: vscode.WorkspaceFolder,
 ) => {
   const process = sourcemapGeneratorProcesses.get(workspaceFolder);
   if (process) {
@@ -192,13 +192,13 @@ const stopSourcemapGeneration = async (
 
 const startSourcemapGeneration = async (
   client: LanguageClient | undefined,
-  workspaceFolder: vscode.WorkspaceFolder
+  workspaceFolder: vscode.WorkspaceFolder,
 ) => {
   stopSourcemapGeneration(workspaceFolder);
 
   const config = vscode.workspace.getConfiguration(
     "luau-lsp.sourcemap",
-    workspaceFolder
+    workspaceFolder,
   );
 
   if (!config.get<boolean>("enabled") || !config.get<boolean>("autogenerate")) {
@@ -215,7 +215,7 @@ const startSourcemapGeneration = async (
   loggingFunc(
     `Starting sourcemap generation for ${
       workspaceFolder.name
-    } (${workspaceFolder.uri.toString(true)})`
+    } (${workspaceFolder.uri.toString(true)})`,
   );
 
   const workspacePath = workspaceFolder.uri.fsPath;
@@ -277,7 +277,7 @@ const startSourcemapGeneration = async (
         } else if (value === "Configure Settings") {
           vscode.commands.executeCommand(
             "workbench.action.openSettings",
-            "luau-lsp.sourcemap"
+            "luau-lsp.sourcemap",
           );
         }
       });
@@ -296,7 +296,7 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
       limit: vscode.workspace
         .getConfiguration("luau-lsp.plugin")
         .get("maximumRequestBodySize", "3mb"),
-    })
+    }),
   );
 
   app.post("/full", (req, res) => {
@@ -325,7 +325,7 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
   pluginServer = app.listen(port);
 
   vscode.window.showInformationMessage(
-    `Luau Language Server Studio Plugin is now listening on port ${port}`
+    `Luau Language Server Studio Plugin is now listening on port ${port}`,
   );
 };
 
@@ -336,7 +336,7 @@ const stopPluginServer = async (isDeactivating = false) => {
 
     if (!isDeactivating) {
       vscode.window.showInformationMessage(
-        `Luau Language Server Studio Plugin has disconnected`
+        `Luau Language Server Studio Plugin has disconnected`,
       );
     }
   }
@@ -344,7 +344,7 @@ const stopPluginServer = async (isDeactivating = false) => {
 
 export const onActivate = async (
   platformContext: PlatformContext,
-  context: vscode.ExtensionContext
+  context: vscode.ExtensionContext,
 ) => {
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
@@ -352,14 +352,14 @@ export const onActivate = async (
       vscode.window
         .showInformationMessage(
           "API Types have been updated, reload server to take effect.",
-          "Reload Language Server"
+          "Reload Language Server",
         )
         .then((command) => {
           if (command === "Reload Language Server") {
             vscode.commands.executeCommand("luau-lsp.reloadServer");
           }
         });
-    })
+    }),
   );
 
   const startSourcemapGenerationForAllFolders = () => {
@@ -373,8 +373,8 @@ export const onActivate = async (
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "luau-lsp.regenerateSourcemap",
-      startSourcemapGenerationForAllFolders
-    )
+      startSourcemapGenerationForAllFolders,
+    ),
   );
 
   context.subscriptions.push(
@@ -384,7 +384,7 @@ export const onActivate = async (
           for (const folder of vscode.workspace.workspaceFolders) {
             const config = vscode.workspace.getConfiguration(
               "luau-lsp.sourcemap",
-              folder
+              folder,
             );
 
             if (
@@ -409,7 +409,7 @@ export const onActivate = async (
           stopPluginServer();
         }
       }
-    })
+    }),
   );
 
   startSourcemapGenerationForAllFolders();
@@ -418,7 +418,7 @@ export const onActivate = async (
 export const preLanguageServerStart = async (
   _: PlatformContext,
   context: vscode.ExtensionContext,
-  addArg: AddArgCallback
+  addArg: AddArgCallback,
 ) => {
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
@@ -435,11 +435,11 @@ export const preLanguageServerStart = async (
     await updateApiInfo(context);
     addArg(
       `--definitions=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
-      "Prod"
+      "Prod",
     );
     addArg(
       `--definitions=${globalTypesUri(context, securityLevel, "Debug").fsPath}`,
-      "Debug"
+      "Debug",
     );
     addArg(`--docs=${apiDocsUri(context).fsPath}`);
   }
@@ -447,7 +447,7 @@ export const preLanguageServerStart = async (
 
 export const postLanguageServerStart = async (
   platformContext: PlatformContext,
-  _: vscode.ExtensionContext
+  _: vscode.ExtensionContext,
 ) => {
   if (
     vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")
@@ -459,7 +459,7 @@ export const postLanguageServerStart = async (
 export const onDeactivate = () => {
   return [
     ...Array.from(sourcemapGeneratorProcesses.keys()).map((workspace) =>
-      stopSourcemapGeneration(workspace)
+      stopSourcemapGeneration(workspace),
     ),
     stopPluginServer(true),
   ];
