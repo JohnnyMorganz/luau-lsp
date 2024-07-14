@@ -127,6 +127,8 @@ jobs:
       - run: npm test
         working-directory: editors/code
         if: runner.os != 'Linux'
+      - run: npx @vscode/vsce package
+        working-directory: editors/code
 
   build_plugin:
     name: Verify and Build Roblox Studio Plugin
