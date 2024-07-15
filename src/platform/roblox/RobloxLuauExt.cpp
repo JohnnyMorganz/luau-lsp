@@ -105,6 +105,31 @@ static bool dcrMagicFunctionInstanceClone(Luau::MagicFunctionCallContext context
     return true;
 }
 
+static std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionInstanceFromExisting(Luau::TypeChecker& typeChecker,
+    const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    auto instanceType = typeChecker.checkExpr(scope, *expr.args.data[0]);
+    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
+}
+
+static bool dcrMagicFunctionInstanceFromExisting(Luau::MagicFunctionCallContext context)
+{
+    if (context.callSite->args.size < 1)
+        return false;
+
+    // The cloned type is the first argument
+    auto clonedTy = Luau::first(context.arguments);
+    if (!clonedTy)
+        return false;
+
+    asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({*clonedTy}));
+    return true;
+}
+
 // Magic function for `Instance:FindFirstChildWhichIsA("ClassName")` and friends
 std::optional<Luau::WithPredicate<Luau::TypePackId>> magicFunctionFindFirstXWhichIsA(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
     const Luau::AstExprCall& expr, const Luau::WithPredicate<Luau::TypePackId>& withPredicate)
@@ -443,10 +468,11 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
 
     std::optional<RobloxDefinitionsFileMetadata> robloxMetadata = metadata;
 
-    // Attach onto Instance.new()
+    // Attach onto Instance.new() and Instance.fromExisting()
     if (robloxMetadata.has_value() && !robloxMetadata->CREATABLE_INSTANCES.empty())
         if (auto instanceGlobal = globals.globalScope->lookup(Luau::AstName("Instance")))
             if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
+            {
                 if (auto newFunction = ttv->props.find("new");
                     newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
                 {
@@ -457,6 +483,14 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
                     Luau::attachDcrMagicFunction(
                         newFunction->second.type(), createDcrMagicFunctionTypeLookup(robloxMetadata->CREATABLE_INSTANCES, "Invalid class name"));
                 }
+
+                if (auto newFunction = ttv->props.find("fromExisting");
+                    newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+                {
+                    Luau::attachMagicFunction(newFunction->second.type(), magicFunctionInstanceFromExisting);
+                    Luau::attachDcrMagicFunction(newFunction->second.type(), dcrMagicFunctionInstanceFromExisting);
+                }
+            }
 
     // Attach onto `game:GetService()`
     if (robloxMetadata.has_value() && !robloxMetadata->SERVICES.empty())

@@ -53,9 +53,9 @@ declare class Instance
     function FindFirstChildOfClass(self, className: string): Instance?
     function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
     function FindFirstDescendant(self, name: string): Instance?
-    function GetAttribute(self, attribute: string): any
+    function GetAttribute(self, attribute: string): unknown?
     function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
-    function GetAttributes(self): { [string]: any }
+    function GetAttributes(self): { [string]: unknown }
     function GetChildren(self): { Instance }
     function GetDescendants(self): { Instance }
     function GetFullName(self): string
@@ -88,6 +88,7 @@ end
 
 declare Instance: {
     new: ((className: string, parent: Instance?) -> Instance),
+    fromExisting: ((existingInstance: Instance) -> Instance),
 }
 
 declare game: DataModel

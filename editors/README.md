@@ -81,28 +81,6 @@ To view all available FFlags, run:
 $ luau-lsp --show-flags
 ```
 
-## Configuration in `initializationOptions`
-
-Similar to [rust-analyzer](https://github.com/rust-lang/rust-analyzer/blob/master/docs/dev/lsp-extensions.md#configuration-in-initializationoptions),
-it is highly recommended to pass the `luau-lsp` configuration as part of initialization options, in the following format:
-
-```json
-{
-  "initializationOptions": {
-    "config": {
-      "default": { ... }
-      [workspaceFolder.uri]: {
-        ...
-      }
-    }
-  }
-}
-```
-
-This is primarily used to configure the `platform` used for the language server. If not provided, the language server
-will default to a standard Luau configuration, then update once configuration is received normally via the server.
-This may mean erroneous diagnostics or other intellisense are sent during this window (which is typically short).
-
 ## Optional: Custom `$/command` definition
 
 The Luau Language Server relies on a custom defined LSP notification: `$/command`.

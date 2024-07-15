@@ -26,7 +26,7 @@ static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source
         else
             column += 1;
 
-        if (i == marker)
+        if (i == marker - 1)
             break;
     }
 
@@ -195,6 +195,307 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
         CHECK_EQ(item.textEdit->range.end, lsp::Position{8, 18});
         CHECK_EQ(item.textEdit->newText, label);
     }
+}
+
+static void checkStringCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+{
+    auto item = requireItem(items, label);
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Constant);
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_new_contains_creatable_instances")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Instance.new("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_service_contains_services")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:GetService("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 1);
+    checkStringCompletionExists(result, "ReplicatedStorage");
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Instance.new("Part"):IsA("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 6);
+    checkStringCompletionExists(result, "Instance");
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+    checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "ServiceProvider");
+    checkStringCompletionExists(result, "DataModel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "enum_is_a_contains_enum_items")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        Enum.HumanoidRigType.R6:IsA("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 1);
+    checkStringCompletionExists(result, "HumanoidRigType");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_includes_properties")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = Instance.new("Part")
+        x:GetPropertyChangedSignal("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_children_from_sourcemap")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage"
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:GetPropertyChangedSignal("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 3);
+    CHECK_EQ(getItem(result, "ReplicatedStorage"), std::nullopt);
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+    checkStringCompletionExists(result, "ClassName");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage"
+            },
+            {
+                "name": "StandardPart",
+                "className": "Part"
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:FindFirstChild("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "StandardPart");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "StandardPart",
+                "className": "Part",
+                "children": [
+                    {
+                        "name": "ChildA",
+                        "className": "Part"
+                    },
+                    {
+                        "name": "ChildB",
+                        "className": "Part"
+                    }
+                ]
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game.StandardPart:FindFirstChild("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ChildA");
+    checkStringCompletionExists(result, "ChildB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage"
+            },
+            {
+                "name": "StandardPart",
+                "className": "Part"
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game:WaitForChild("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "StandardPart");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "StandardPart",
+                "className": "Part",
+                "children": [
+                    {
+                        "name": "ChildA",
+                        "className": "Part"
+                    },
+                    {
+                        "name": "ChildB",
+                        "className": "Part"
+                    }
+                ]
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game.StandardPart:WaitForChild("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "ChildA");
+    checkStringCompletionExists(result, "ChildB");
 }
 
 TEST_SUITE_END();

@@ -84,7 +84,7 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON
           cmake --build . --config Release --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
@@ -148,7 +148,7 @@ jobs:
 
       - name: Publish Extension
         working-directory: editors/code
-        run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+        run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
 
       - name: Publish OpenVSX Extension
         working-directory: editors/code

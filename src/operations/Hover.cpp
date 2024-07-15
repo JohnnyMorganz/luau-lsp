@@ -119,8 +119,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
-                                                    : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule)
         return std::nullopt;
 

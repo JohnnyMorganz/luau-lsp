@@ -142,3 +142,8 @@ std::string Fixture::getErrors(const Luau::CheckResult& cr)
     dumpErrors(ss, cr.errors);
     return ss.str();
 }
+
+void Fixture::loadSourcemap(const std::string& contents)
+{
+    dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
+}

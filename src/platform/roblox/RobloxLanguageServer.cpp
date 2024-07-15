@@ -5,16 +5,10 @@
 void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 {
     auto filePath = change.uri.fsPath();
-    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-
-    // Flag sourcemap changes
     if (filePath.filename() == "sourcemap.json")
     {
         workspaceFolder->client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspaceFolder->name);
         updateSourceMap();
-
-        // Recompute diagnostics
-        workspaceFolder->recomputeDiagnostics(config);
     }
 }
 

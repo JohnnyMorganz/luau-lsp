@@ -21,7 +21,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return result;
 
@@ -120,8 +120,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 uri = Uri::file(*fileName);
 
                 // TODO: fix "forAutocomplete"
-                if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
-                    importedModule && importedModule->hasModuleScope())
+                if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true); importedModule && importedModule->hasModuleScope())
                     scope = importedModule->getModuleScope();
                 else
                     return result;
@@ -170,7 +169,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return std::nullopt;
 
@@ -200,7 +199,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
                     uri = Uri::file(*fileName);
 
                     // TODO: fix "forAutocomplete"
-                    if (auto importedModule = frontend.moduleResolverForAutocomplete.getModule(*importedName);
+                    if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
                         importedModule && importedModule->hasModuleScope())
                         scope = importedModule->getModuleScope();
                     else

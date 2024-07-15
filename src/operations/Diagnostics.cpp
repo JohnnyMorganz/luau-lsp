@@ -181,23 +181,31 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
 {
     // Convert the diagnostics report into a series of diagnostics published for each relevant file
     lsp::DocumentDiagnosticParams params{lsp::TextDocumentIdentifier{uri}};
-    auto diagnostics = documentDiagnostics(params);
-    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
 
-    if (!diagnostics.relatedDocuments.empty())
+    try
     {
-        for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
+        auto diagnostics = documentDiagnostics(params);
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
+        if (!diagnostics.relatedDocuments.empty())
         {
-            if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+            for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
             {
-                client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
+                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
+                }
             }
         }
+    }
+    catch (const JsonRpcException&)
+    {
+        // Server is not yet configured to send diagnostic messages
     }
 }
 
 /// Recompute all necessary diagnostics when we detect a configuration (or sourcemap) change
-void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config) {
+void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config)
+{
     // Handle diagnostics if in push-mode
     if ((!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic))
     {

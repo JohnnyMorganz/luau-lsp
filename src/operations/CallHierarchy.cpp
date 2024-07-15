@@ -122,7 +122,7 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     checkStrict(moduleName);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
 
@@ -215,7 +215,7 @@ std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomi
 
     // Find the definition of the original function, to determine the appropriate TypeId to lookup
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
     auto node = Luau::findExprAtPosition(*sourceModule, position);
@@ -238,7 +238,7 @@ std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomi
     for (const auto& dependentModuleName : dependents)
     {
         auto dependentSourceModule = frontend.getSourceModule(dependentModuleName);
-        auto dependentModule = frontend.moduleResolverForAutocomplete.getModule(dependentModuleName);
+        auto dependentModule = getModule(dependentModuleName, /* forAutocomplete: */ true);
         if (!dependentSourceModule || !dependentModule)
             continue;
 
@@ -330,7 +330,7 @@ std::vector<lsp::CallHierarchyOutgoingCall> WorkspaceFolder::callHierarchyOutgoi
 
     // Find the original function in the file
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
     auto node = Luau::findExprAtPosition(*sourceModule, position);

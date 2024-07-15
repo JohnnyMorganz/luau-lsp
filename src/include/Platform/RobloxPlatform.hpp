@@ -7,6 +7,8 @@ using json = nlohmann::json;
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
 using PluginNodePtr = std::shared_ptr<struct PluginNode>;
 
+const std::string kSourcemapGeneratedTag = "@sourcemap-generated";
+
 struct RobloxDefinitionsFileMetadata
 {
     std::vector<std::string> CREATABLE_INSTANCES{};
@@ -145,6 +147,9 @@ public:
 
     Luau::TypeArena instanceTypes;
 
+    // For testing only
+    bool updateSourceMapFromContents(const std::string& sourceMapContents);
+
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
     void onDidChangeWatchedFiles(const lsp::FileEvent& change) override;
@@ -191,6 +196,7 @@ public:
     void onStudioPluginFullChange(const PluginNode& dataModel);
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
+
 
     using LSPPlatform::LSPPlatform;
 };

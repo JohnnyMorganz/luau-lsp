@@ -74,6 +74,16 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_clone", {
     CHECK(Luau::toString(requireType("y")) == "Part");
 })
 
+LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_from_existing", {
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = Instance.fromExisting(x)
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("y")) == "Part");
+})
+
 LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "find_first_x_which_is_a", {
     auto result = check(R"(
         local x: Instance = Instance.new("Part")
