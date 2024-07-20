@@ -358,9 +358,9 @@ int startAnalyze(const argparse::ArgumentParser& program)
             if (auto sourceMapContents = readFile(*sourcemapPath))
             {
                 robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
-
-                robloxPlatform->handleSourcemapUpdate(
-                    frontend, frontend.globals, !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
+                robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals);
+                robloxPlatform->applyStrictDataModelTypesConfiguration(
+                    !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
             }
         }
         else

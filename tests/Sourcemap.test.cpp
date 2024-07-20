@@ -36,6 +36,39 @@ TEST_CASE("getScriptFilePath doesn't pick .meta.json")
     CHECK_EQ(node.getScriptFilePath(), "init.lua");
 }
 
+TEST_CASE_FIXTURE(Fixture, "datamodel_entry_points_typed_as_any_when_strict_datamodel_types_is_off_no_sourcemap")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = false;
+    auto result = check(R"(
+        --!strict
+        local x = game
+        local y = workspace
+        local z = script
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("x")) == "any");
+    CHECK(Luau::toString(requireType("y")) == "any");
+    CHECK(Luau::toString(requireType("z")) == "any");
+}
+
+TEST_CASE_FIXTURE(Fixture, "datamodel_entry_points_typed_as_any_when_strict_datamodel_types_is_off_with_sourcemap")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = false;
+    loadSourcemap(R"({"name": "Game", "className": "DataModel", "children": []})");
+    auto result = check(R"(
+        --!strict
+        local x = game
+        local y = workspace
+        local z = script
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("x")) == "any");
+    CHECK(Luau::toString(requireType("y")) == "any");
+    CHECK(Luau::toString(requireType("z")) == "any");
+}
+
 TEST_CASE_FIXTURE(Fixture, "can_access_children_via_dot_properties")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;

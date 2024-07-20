@@ -124,6 +124,8 @@ static void from_json(const json& j, PluginNode& p)
     }
 }
 
+Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
+
 class RobloxPlatform : public LSPPlatform
 {
 private:
@@ -173,7 +175,9 @@ public:
 
     void updateSourceNodeMap(const std::string& sourceMapContents);
 
-    void handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes);
+    void handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals);
+
+    void applyStrictDataModelTypesConfiguration(bool expressiveTypes);
 
     std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ClassType*> ctx,
         std::optional<std::string> contents, const Luau::ModuleName& moduleName) override;

@@ -86,9 +86,17 @@ end
 declare class DataModel extends ServiceProvider
 end
 
+declare class Workspace extends Instance
+end
+
+declare class LuaSourceContainer extends Instance
+end
+
 declare Instance: {
     new: ((className: string, parent: Instance?) -> Instance),
     fromExisting: ((existingInstance: Instance) -> Instance),
 }
 
 declare game: DataModel
+declare workspace: Workspace
+declare script: LuaSourceContainer
