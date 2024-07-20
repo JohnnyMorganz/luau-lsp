@@ -100,16 +100,13 @@ static void injectChildrenLookupFunctions(
                     }
                     return false;
                 });
+            Luau::attachTag(lookupFuncTy, kSourcemapGeneratedTag);
+            Luau::attachTag(lookupFuncTy, "Children");
         }
 
         ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
-        Luau::attachTag(ctv->props["FindFirstChild"].type(), kSourcemapGeneratedTag);
-        Luau::attachTag(ctv->props["FindFirstChild"].type(), "Children");
-
         ctv->props["WaitForChild"] = Luau::makeProperty(
             Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
-        Luau::attachTag(ctv->props["WaitForChild"].type(), kSourcemapGeneratedTag);
-        Luau::attachTag(ctv->props["WaitForChild"].type(), "Children");
     }
 }
 

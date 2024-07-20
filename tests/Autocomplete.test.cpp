@@ -420,7 +420,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children
     checkStringCompletionExists(result, "ChildB");
 }
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
+TEST_CASE_FIXTURE(Fixture, "wait_for_child_on_datamodel_contains_children")
 {
     loadSourcemap(R"(
     {
@@ -456,7 +456,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
     checkStringCompletionExists(result, "StandardPart");
 }
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children")
+TEST_CASE_FIXTURE(Fixture, "wait_for_child_on_sourcemap_type_contains_children")
 {
     loadSourcemap(R"(
     {
