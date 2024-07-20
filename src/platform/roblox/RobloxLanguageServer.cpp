@@ -57,6 +57,6 @@ void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
         client->unregisterCapability(
             "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles");
         client->sendLogMessage(lsp::MessageType::Info,
-            "sourcemap is disabled - automatic updating on sourcemap/config changes disabled");
+            "sourcemap is disabled - automatic updating on sourcemap changes disabled");
     }
 }
