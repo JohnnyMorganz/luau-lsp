@@ -21,7 +21,7 @@ export type BytecodeParams = {
 };
 
 export const BytecodeRequest = new RequestType<BytecodeParams, string, void>(
-  "luau-lsp/bytecode"
+  "luau-lsp/bytecode",
 );
 
 export type CompilerRemarksParams = {
@@ -58,16 +58,16 @@ export const getOptimizationLevel = async (): Promise<OptimizationLevel> => {
     {
       title: "Select Optimization Level",
       placeHolder: "Select optimization level",
-    }
+    },
   );
 
   return optimizationLevel?.label === "None"
     ? OptimizationLevel.None
     : optimizationLevel?.label === "O1"
-    ? OptimizationLevel.O1
-    : optimizationLevel?.label === "O2"
-    ? OptimizationLevel.O2
-    : OptimizationLevel.O1;
+      ? OptimizationLevel.O1
+      : optimizationLevel?.label === "O2"
+        ? OptimizationLevel.O2
+        : OptimizationLevel.O1;
 };
 
 let optimizationLevel = OptimizationLevel.O2;
@@ -97,7 +97,11 @@ const getBytecodeInfo = (
   command: string,
   scheme: string,
   fileName: string,
-  requestType: RequestType<CompilerRemarksParams | BytecodeParams, string, void>
+  requestType: RequestType<
+    CompilerRemarksParams | BytecodeParams,
+    string,
+    void
+  >,
 ) => {
   const tdcp = new (class implements vscode.TextDocumentContentProvider {
     readonly uri = vscode.Uri.parse(`${scheme}://bytecode/${fileName}.luau`);
@@ -107,12 +111,12 @@ const getBytecodeInfo = (
       vscode.workspace.onDidChangeTextDocument(
         this.onDidChangeTextDocument,
         this,
-        context.subscriptions
+        context.subscriptions,
       );
       vscode.window.onDidChangeActiveTextEditor(
         this.onDidChangeActiveTextEditor,
         this,
-        context.subscriptions
+        context.subscriptions,
       );
     }
 
@@ -137,7 +141,7 @@ const getBytecodeInfo = (
 
       const params = {
         textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(
-          editor.document
+          editor.document,
         ),
         optimizationLevel,
       };
@@ -165,14 +169,14 @@ const getBytecodeInfo = (
             preserveFocus: true,
           });
         }
-      }
+      },
     ),
   ];
 };
 
 export const registerComputeBytecode = (
   context: vscode.ExtensionContext,
-  client: LanguageClient
+  client: LanguageClient,
 ): vscode.Disposable[] => {
   return getBytecodeInfo(
     context,
@@ -180,13 +184,13 @@ export const registerComputeBytecode = (
     "luau-lsp.computeBytecode",
     BYTECODE_SCHEME,
     "bytecode",
-    BytecodeRequest
+    BytecodeRequest,
   );
 };
 
 export const registerComputeCompilerRemarks = (
   context: vscode.ExtensionContext,
-  client: LanguageClient
+  client: LanguageClient,
 ): vscode.Disposable[] => {
   return getBytecodeInfo(
     context,
@@ -194,6 +198,6 @@ export const registerComputeCompilerRemarks = (
     "luau-lsp.computeCompilerRemarks",
     COMPILER_REMARKS_SCHEME,
     "compiler-remarks",
-    ComputeCompilerRemarksRequest
+    ComputeCompilerRemarksRequest,
   );
 };

@@ -70,7 +70,6 @@ public:
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);
 
-    bool hasConfiguration(const lsp::DocumentUri& uri);
     ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override;
     void removeConfiguration(const lsp::DocumentUri& uri);
     // TODO: this function only supports getting requests for workspaces

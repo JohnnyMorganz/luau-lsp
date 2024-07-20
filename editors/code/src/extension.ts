@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as os from "os";
-import fetch from "node-fetch";
+import { fetch } from "undici";
 import {
   Executable,
   ServerOptions,
@@ -19,7 +19,7 @@ import * as utils from "./utils";
 export type PlatformContext = { client: LanguageClient | undefined };
 export type AddArgCallback = (
   argument: string,
-  mode?: "All" | "Prod" | "Debug"
+  mode?: "All" | "Prod" | "Debug",
 ) => void;
 
 let client: LanguageClient | undefined = undefined;
@@ -42,7 +42,7 @@ const getFFlags = async () => {
     () =>
       fetch(CURRENT_FFLAGS)
         .then((r) => r.json() as Promise<FFlagsEndpoint>)
-        .then((r) => r.applicationSettings)
+        .then((r) => r.applicationSettings),
   );
 };
 
@@ -76,12 +76,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Load extra type definitions
   const definitionFiles = typesConfig.get<string[]>("definitionFiles");
   if (definitionFiles) {
-    for (const definitionPath of definitionFiles) {
+    for (let definitionPath of definitionFiles) {
+      definitionPath = utils.resolvePath(definitionPath);
       let uri;
       if (vscode.workspace.workspaceFolders) {
         uri = utils.resolveUri(
           vscode.workspace.workspaceFolders[0].uri,
-          definitionPath
+          definitionPath,
         );
       } else {
         uri = vscode.Uri.file(definitionPath);
@@ -90,7 +91,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
         addArg(`--definitions=${uri.fsPath}`);
       } else {
         vscode.window.showWarningMessage(
-          `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`
+          `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`,
         );
       }
     }
@@ -99,12 +100,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Load extra documentation files
   const documentationFiles = typesConfig.get<string[]>("documentationFiles");
   if (documentationFiles) {
-    for (const documentationPath of documentationFiles) {
+    for (let documentationPath of documentationFiles) {
+      documentationPath = utils.resolvePath(documentationPath);
       let uri;
       if (vscode.workspace.workspaceFolders) {
         uri = utils.resolveUri(
           vscode.workspace.workspaceFolders[0].uri,
-          documentationPath
+          documentationPath,
         );
       } else {
         uri = vscode.Uri.file(documentationPath);
@@ -113,7 +115,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
         addArg(`--docs=${uri.fsPath}`);
       } else {
         vscode.window.showWarningMessage(
-          `Documentations file at ${documentationPath} does not exist`
+          `Documentations file at ${documentationPath} does not exist`,
         );
       }
     }
@@ -140,7 +142,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       }
     } catch (err) {
       vscode.window.showWarningMessage(
-        "Failed to fetch current Luau FFlags: " + err
+        "Failed to fetch current Luau FFlags: " + err,
       );
     }
   }
@@ -160,7 +162,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     command: vscode.Uri.joinPath(
       context.extensionUri,
       "bin",
-      os.platform() === "win32" ? "server.exe" : "server"
+      os.platform() === "win32" ? "server.exe" : "server",
     ).fsPath,
     args,
   };
@@ -171,22 +173,12 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       context.extensionUri,
       "..",
       "..",
-      process.env["SERVER_PATH"] ?? "unknown.exe"
+      process.env["SERVER_PATH"] ?? "unknown.exe",
     ).fsPath,
     args: debugArgs,
   };
 
   const serverOptions: ServerOptions = { run, debug };
-
-  const config = {
-    default: vscode.workspace.getConfiguration("luau-lsp"),
-    ...Object.fromEntries(
-      vscode.workspace.workspaceFolders?.map((folder) => [
-        folder.uri,
-        vscode.workspace.getConfiguration("luau-lsp", folder),
-      ]) ?? []
-    ),
-  };
 
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
@@ -201,7 +193,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     },
     initializationOptions: {
       fflags,
-      config,
     },
   };
 
@@ -209,7 +200,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     "luau",
     "Luau Language Server",
     serverOptions,
-    clientOptions
+    clientOptions,
   );
 
   platformContext.client = client;
@@ -235,7 +226,12 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("luau-lsp.reloadServer", async () => {
       vscode.window.showInformationMessage("Reloading Language Server");
       await startLanguageServer(context);
-    })
+    }),
+    vscode.commands.registerCommand("luau-lsp.flushTimeTrace", async () => {
+      if (client) {
+        client.sendNotification("$/flushTimeTrace");
+      }
+    }),
   );
 
   context.subscriptions.push(
@@ -244,7 +240,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window
           .showInformationMessage(
             "Luau FFlags have been changed, reload server for this to take effect.",
-            "Reload Language Server"
+            "Reload Language Server",
           )
           .then((command) => {
             if (command === "Reload Language Server") {
@@ -258,7 +254,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window
           .showInformationMessage(
             "Luau type definitions have been changed, reload server for this to take effect.",
-            "Reload Language Server"
+            "Reload Language Server",
           )
           .then((command) => {
             if (command === "Reload Language Server") {
@@ -266,7 +262,7 @@ export async function activate(context: vscode.ExtensionContext) {
             }
           });
       }
-    })
+    }),
   );
 
   await startLanguageServer(context);

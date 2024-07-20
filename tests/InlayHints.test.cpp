@@ -638,4 +638,95 @@ TEST_CASE_FIXTURE(Fixture, "respect_parameter_names_configuration")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        local Class = {}
+        function Class:foo(bar)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{2, 30});
+    CHECK_EQ(result[0].label, ": a");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": a");
+    CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{2, 30}, {2, 30}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        type Class = {
+            foo: (self: Class, bar: string) -> ()
+        }
+        local Class = {} :: Class
+
+        function Class:foo(bar)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{6, 30});
+    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": string");
+    CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{6, 30}, {6, 30}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_function_definitions")
+{
+    client->globalConfig.inlayHints.parameterTypes = true;
+    auto source = R"(
+        type Class = {
+            foo: (self: Class, bar: string) -> ()
+        }
+        local Class = {} :: Class
+
+        function Class.foo(self, bar)
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{6, 31});
+    CHECK_EQ(result[0].label, ": Class");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": Class");
+    CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{6, 31}, {6, 31}});
+
+    CHECK_EQ(result[1].position, lsp::Position{6, 36});
+    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, false);
+
+    REQUIRE(result[1].textEdits.size() == 1);
+    CHECK_EQ(result[1].textEdits[0].newText, ": string");
+    CHECK_EQ(result[1].textEdits[0].range, lsp::Range{{6, 36}, {6, 36}});
+}
+
 TEST_SUITE_END();

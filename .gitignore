@@ -44,3 +44,6 @@ CMakeFiles
 *.exe
 *.out
 *.app
+
+# Python venvs
+.venv

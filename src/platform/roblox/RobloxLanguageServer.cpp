@@ -13,9 +13,6 @@ void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
     {
         workspaceFolder->client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspaceFolder->name);
         updateSourceMap();
-
-        // Recompute diagnostics
-        workspaceFolder->recomputeDiagnostics(config);
     }
 }
 

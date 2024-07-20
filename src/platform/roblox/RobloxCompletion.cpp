@@ -170,6 +170,8 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                         continue;
                     else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
                         continue;
+                    else if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                        continue;
 
                     result.insert_or_assign(
                         propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
@@ -179,6 +181,21 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                     ctv = Luau::get<Luau::ClassType>(*ctv->parent);
                 else
                     break;
+            }
+            return result;
+        }
+    }
+    else if (tag == "Children")
+    {
+        if (auto ctv = ctx.value())
+        {
+            Luau::AutocompleteEntryMap result;
+            for (auto& [propName, prop] : ctv->props)
+            {
+                if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                    result.insert_or_assign(
+                        propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
+                                      false, false, Luau::TypeCorrectKind::Correct});
             }
             return result;
         }
@@ -323,7 +340,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
             if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                 continue;
-            if (auto scriptFilePath = getRealPathFromSourceNode(node); scriptFilePath && workspaceFolder->isIgnoredFile(*scriptFilePath, config))
+            if (auto scriptFilePath = getRealPathFromSourceNode(node);
+                scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
                 continue;
 
             std::string requirePath;

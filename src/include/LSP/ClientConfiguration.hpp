@@ -110,9 +110,11 @@ struct ClientCompletionImportsConfiguration
     ImportRequireStyle requireStyle = ImportRequireStyle::Auto;
     /// Whether services and requires should be separated by an empty line
     bool separateGroupsWithLine = false;
+    /// Files that match these globs will not be shown during auto-import
+    std::vector<std::string> ignoreGlobs{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle, separateGroupsWithLine);
+    ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle, separateGroupsWithLine, ignoreGlobs);
 
 struct ClientCompletionConfiguration
 {

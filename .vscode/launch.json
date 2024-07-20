@@ -16,7 +16,12 @@
       "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
       "preLaunchTask": "npm: compile",
       "env": {
-        "SERVER_PATH": "${input:binaryPath}"
+        "SERVER_PATH": "${input:binaryPath}/luau-lsp"
+      },
+      "windows": {
+        "env": {
+          "SERVER_PATH": "${input:binaryPath}/luau-lsp.exe"
+        }
       }
     },
     {
@@ -56,15 +61,15 @@
     {
       "id": "binaryPath",
       "type": "pickString",
-      "description": "Path to server binary",
-      "default": "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
+      "description": "Path to build folder containing 'luau-lsp'",
+      "default": "cmake-build-relwithdebinfo-visual-studio",
       "options": [
-        "cmake-build-debug-visual-studio/luau-lsp.exe",
-        "cmake-build-release-visual-studio/luau-lsp.exe",
-        "cmake-build-relwithdebinfo-visual-studio/luau-lsp.exe",
-        "cmake-build-debug/luau-lsp.exe",
-        "cmake-build-release/luau-lsp.exe",
-        "cmake-build-relwithdebinfo/luau-lsp.exe"
+        "cmake-build-debug-visual-studio",
+        "cmake-build-release-visual-studio",
+        "cmake-build-relwithdebinfo-visual-studio",
+        "cmake-build-debug",
+        "cmake-build-release",
+        "cmake-build-relwithdebinfo"
       ]
     }
   ]

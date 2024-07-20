@@ -187,7 +187,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 if (it != Luau::end(ftv->argTypes))
                 {
                     // Skip first item if it is self
-                    if (isMethod(ftv))
+                    if (func->self && isMethod(ftv))
                         it++;
 
                     for (auto param : func->args)
@@ -325,8 +325,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
-                                                    : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule || !module)
         return {};
 

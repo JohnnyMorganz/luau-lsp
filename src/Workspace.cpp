@@ -9,6 +9,15 @@
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
+LUAU_FASTFLAG(DebugLuauDeferredConstraintResolution)
+
+const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const
+{
+    if (FFlag::DebugLuauDeferredConstraintResolution || !forAutocomplete)
+        return frontend.moduleResolver.getModule(moduleName);
+    else
+        return frontend.moduleResolverForAutocomplete.getModule(moduleName);
+}
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
@@ -143,6 +152,23 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     return false;
 }
 
+bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+{
+    // We want to test globs against a relative path to workspace, since that's what makes most sense
+    auto relativePath = path.lexically_relative(rootUri.fsPath()).generic_string(); // HACK: we convert to generic string so we get '/' separators
+
+    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
+    for (auto& pattern : patterns)
+    {
+        if (glob::fnmatch_case(relativePath, pattern))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
@@ -150,7 +176,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (std::filesystem::weakly_canonical(file) == canonicalised)
+        if (std::filesystem::weakly_canonical(resolvePath(file)) == canonicalised)
         {
             return true;
         }
@@ -189,7 +215,7 @@ void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAu
     // and then a call `Frontend::check(moduleName, { retainTypeGraphs: true })` will NOT actually
     // retain the type graph if the module is not marked dirty.
     // We do a manual check and dirty marking to fix this
-    auto module = forAutocomplete ? frontend.moduleResolverForAutocomplete.getModule(moduleName) : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, forAutocomplete);
     if (module && module->internalTypes.types.empty()) // If we didn't retain type graphs, then the internalTypes arena is empty
         frontend.markDirty(moduleName);
 
@@ -259,13 +285,14 @@ void WorkspaceFolder::initialize()
 
     for (const auto& definitionsFile : client->definitionsFiles)
     {
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + definitionsFile.generic_string());
+        auto resolvedFilePath = resolvePath(definitionsFile);
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
 
-        auto definitionsContents = readFile(definitionsFile);
+        auto definitionsContents = readFile(resolvedFilePath);
         if (!definitionsContents)
         {
             client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
             continue;
         }
 
@@ -280,7 +307,7 @@ void WorkspaceFolder::initialize()
         types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
-        auto uri = Uri::file(definitionsFile);
+        auto uri = Uri::file(resolvedFilePath);
 
         if (result.success)
         {
@@ -290,7 +317,7 @@ void WorkspaceFolder::initialize()
         else
         {
             client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + definitionsFile.generic_string() + ". Extended types will not be provided");
+                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
 
             // Display relevant diagnostics
             std::vector<lsp::Diagnostic> diagnostics;
@@ -311,6 +338,9 @@ void WorkspaceFolder::initialize()
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
     client->sendTrace("workspace: setting up with configuration");
+    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
+
+    fileResolver.platform = platform.get();
 
     // Apply first-time configuration
     if (!isConfigured)
