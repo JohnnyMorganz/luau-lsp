@@ -68,9 +68,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Unregistration, id, method)
 
 struct UnregistrationParams
 {
-    std::vector<Unregistration> unregistrations{};
+    std::vector<Unregistration> unregisterations{};
 };
-NLOHMANN_DEFINE_OPTIONAL(UnregistrationParams, unregistrations)
+NLOHMANN_DEFINE_OPTIONAL(UnregistrationParams, unregisterations)
 
 struct InitializeParams
 {
