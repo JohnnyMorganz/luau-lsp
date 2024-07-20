@@ -175,13 +175,17 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
             }
 
             // Point the metatable to the metatable of "Instance" so that we allow equality
-            std::optional<Luau::TypeId> instanceMetaIdentity;
-            if (auto* ctv = Luau::get<Luau::ClassType>(instanceTy->type))
-                instanceMetaIdentity = ctv->metatable;
+            auto* instanceCtv = Luau::get<Luau::ClassType>(instanceTy->type);
+            if (!instanceCtv)
+            {
+                ltv.unwrapped = globals.builtinTypes->anyType;
+                return;
+            }
+            std::optional<Luau::TypeId> instanceMetaIdentity = instanceCtv->metatable;
 
             // Create the ClassType representing the instance
             std::string typeName = types::getTypeName(baseTypeId).value_or(node->name);
-            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, "@roblox"};
+            Luau::ClassType baseInstanceCtv{typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, instanceCtv->definitionModuleName, instanceCtv->definitionLocation};
             auto typeId = arena.addType(std::move(baseInstanceCtv));
 
             // Attach Parent and Children info
