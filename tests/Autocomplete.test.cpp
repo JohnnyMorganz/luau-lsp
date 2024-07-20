@@ -342,6 +342,41 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_childre
     checkStringCompletionExists(result, "ClassName");
 }
 
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_children_from_sourcemap_second_level_getsourcemaptype_ty")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [{"name": "Part", "className": "Part"}]
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game.ReplicatedStorage:GetPropertyChangedSignal("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 3);
+    CHECK_EQ(getItem(result, "Part"), std::nullopt);
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+    checkStringCompletionExists(result, "ClassName");
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
 {
     loadSourcemap(R"(

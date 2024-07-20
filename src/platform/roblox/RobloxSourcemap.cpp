@@ -172,7 +172,14 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
                 // Add children as properties
                 for (const auto& child : node->children)
-                    ctv->props[child->name] = Luau::makeProperty(getSourcemapType(globals, arena, child));
+                    ctv->props[child->name] = ctv->props[child->name] = Luau::Property{
+                        getSourcemapType(globals, arena, child),
+                        /* deprecated */ false,
+                        /* deprecatedSuggestion */ {},
+                        /* location */ std::nullopt,
+                        /* tags */ {kSourcemapGeneratedTag},
+                        /* documentationSymbol*/ std::nullopt,
+                    };
 
                 // Add FindFirstAncestor and FindFirstChild
                 if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
