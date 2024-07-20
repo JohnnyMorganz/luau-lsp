@@ -187,7 +187,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 if (it != Luau::end(ftv->argTypes))
                 {
                     // Skip first item if it is self
-                    if (isMethod(ftv))
+                    if (func->self && isMethod(ftv))
                         it++;
 
                     for (auto param : func->args)
