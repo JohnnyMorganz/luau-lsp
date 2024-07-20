@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed `:WaitForChild()` not supporting a number "timeout" 2nd parameter on DataModel types ([#704](https://github.com/JohnnyMorganz/luau-lsp/issues/704))
 - Fixed inlay hint off-by-one on a function definition with an explicit self (i.e., `function Class.foo(self, param)`) ([#702](https://github.com/JohnnyMorganz/luau-lsp/issues/702))
 - Fixed `:GetPropertyChangedSignal()` still showing children in autocomplete for DataModel types ([#699](https://github.com/JohnnyMorganz/luau-lsp/issues/699))
+- Fixed grandparent's children showing up in autocomplete of FindFirstChild
 
 ## [1.32.0] - 2024-07-14
 

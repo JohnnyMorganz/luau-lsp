@@ -187,23 +187,15 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
     }
     else if (tag == "Children")
     {
-        if (ctx && ctx.value())
+        if (auto ctv = ctx.value())
         {
             Luau::AutocompleteEntryMap result;
-            auto ctv = ctx.value();
-            while (ctv)
+            for (auto& [propName, prop] : ctv->props)
             {
-                for (auto& [propName, prop] : ctv->props)
-                {
-                    if (Luau::hasTag(prop, kSourcemapGeneratedTag))
-                        result.insert_or_assign(
-                            propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
-                                          false, false, Luau::TypeCorrectKind::Correct});
-                }
-                if (ctv->parent)
-                    ctv = Luau::get<Luau::ClassType>(*ctv->parent);
-                else
-                    break;
+                if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                    result.insert_or_assign(
+                        propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
+                                      false, false, Luau::TypeCorrectKind::Correct});
             }
             return result;
         }

@@ -455,6 +455,45 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children
     checkStringCompletionExists(result, "ChildB");
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_first_child_on_sourcemap_type_contains_children_second_level")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "StandardPart",
+                "className": "Part",
+                "children": [
+                    {
+                        "name": "ChildA",
+                        "className": "Part",
+                        "children": [{"name": "GrandChildA", "className": "Part"}, {"name": "GrandChildB", "className": "Part"}]
+                    }
+                ]
+            }
+        ]
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        game.StandardPart.ChildA:FindFirstChild("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    checkStringCompletionExists(result, "GrandChildA");
+    checkStringCompletionExists(result, "GrandChildB");
+}
+
 TEST_CASE_FIXTURE(Fixture, "wait_for_child_on_datamodel_contains_children")
 {
     loadSourcemap(R"(
