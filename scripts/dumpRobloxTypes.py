@@ -541,6 +541,7 @@ type RotationCurveKey = any
 type Secret = any
 type Path2DControlPoint = any
 type UniqueId = any
+type SecurityCapabilities = any
 
 declare class Enum
     function GetEnumItems(self): { any }
