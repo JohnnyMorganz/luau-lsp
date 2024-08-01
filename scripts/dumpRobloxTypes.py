@@ -766,7 +766,7 @@ ApiFunction = TypedDict(
         "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": Union[ApiValueType | List[ApiValueType]],
+        "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Security": str,
