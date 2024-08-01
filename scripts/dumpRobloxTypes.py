@@ -141,11 +141,19 @@ IGNORED_MEMBERS = {
         "GetEquippedEmotes",
         "SetEquippedEmotes",
     ],
+    "TeleportOptions": [
+        "GetTeleportData",
+        "SetTeleportData",
+    ],
     "TeleportService": [
+        "GetLocalPlayerTeleportData",
         "GetPlayerPlaceInstanceAsync",
+        "Teleport",
         "TeleportAsync",
         "TeleportPartyAsync",
+        "TeleportToPlaceInstance",
         "TeleportToPrivateServer",
+        "TeleportToSpawnByName",
         "ReserveServer",
         "LocalPlayerArrivedFromTeleport",
         "TeleportInitFailed",
@@ -182,6 +190,7 @@ IGNORED_MEMBERS = {
     "Player": [
         "Character",
         "Chatted",
+        "GetJoinData",
     ],
     "InstanceAdornment": ["Adornee"],
     "BasePart": [
@@ -400,13 +409,21 @@ EXTRA_MEMBERS = {
         "function SetEquippedEmotes(self, equippedEmotes: { string } | { Slot: number, Name: string }): ()",
     ],
     "TeleportService": [
+        "function GetLocalPlayerTeleportData(self): TeleportData?",
         "function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)",
+        "function Teleport(self, placeId: number, player: Player?, teleportData: TeleportData?, customLoadingScreen: GuiObject?)",
         "function TeleportAsync(self, placeId: number, players: { Player }, teleportOptions: TeleportOptions?): TeleportAsyncResult",
-        "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: any, customLoadingScreen: GuiObject?): string",
-        "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: any, customLoadingScreen: GuiObject?): nil",
+        "function TeleportPartyAsync(self, placeId: number, players: { Player }, teleportData: TeleportData?, customLoadingScreen: GuiObject?): string",
+        "function TeleportToPlaceInstance(self, placeId: number, instanceId: string, player: Player?, spawnName: string?, teleportData: TeleportData?, customLoadingScreen: GuiObject?)",
+        "function TeleportToPrivateServer(self, placeId: number, reservedServerAccessCode: string, players: { Player }, spawnName: string?, teleportData: TeleportData?, customLoadingScreen: GuiObject?): nil",
+        "function TeleportToSpawnByName(self, placeId: number, spawnName: string, player: Player?, teleportData: TeleportData?, customLoadingScreen: GuiObject?)",
         "function ReserveServer(self, placeId: number): (string, string)",
         "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
         "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
+    ],
+    "TeleportOptions": [
+        "function GetTeleportData(self): TeleportData?",
+        "function SetTeleportData(self, teleportData: TeleportData)",
     ],
     "UserService": [
         "function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }"
@@ -442,6 +459,7 @@ EXTRA_MEMBERS = {
     "Player": [
         "Character: Model?",
         "Chatted: RBXScriptSignal<string, Player?>",
+        "function GetJoinData(self): { LaunchData: string?, Members: {number}?, SourceGameId: number?, SourcePlaceId: number?, TeleportData: TeleportData? }",
     ],
     "InstanceAdornment": ["Adornee: Instance?"],
     "BasePart": [
@@ -542,6 +560,7 @@ type Secret = any
 type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
+type TeleportData = "boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}"
 
 declare class Enum
     function GetEnumItems(self): { any }
