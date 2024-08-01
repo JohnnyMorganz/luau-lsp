@@ -342,19 +342,19 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (std::optional<std::string> docs;
         documentationSymbol && (docs = printDocumentation(client->documentation, *documentationSymbol)) && docs && !docs->empty())
     {
-        typeString += "\n----------\n";
+        typeString += kDocumentationBreaker;
         typeString += *docs;
     }
     else if (auto documentation = getDocumentationForType(*type); documentation && !documentation->empty())
     {
-        typeString += "\n----------\n";
+        typeString += kDocumentationBreaker;
         typeString += *documentation;
     }
     else if (documentationLocation)
     {
         if (auto text = printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location)); !text.empty())
         {
-            typeString += "\n----------\n";
+            typeString += kDocumentationBreaker;
             typeString += text;
         }
     }

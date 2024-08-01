@@ -2080,22 +2080,6 @@
         {
             "Members": [
                 {
-                    "Name": "GetBoundingBox",
-                    "TupleReturns": [
-                        {
-                            "Name": "CFrame"
-                        },
-                        {
-                            "Name": "Vector3"
-                        }
-                    ]
-                }
-            ],
-            "Name": "Model"
-        },
-        {
-            "Members": [
-                {
                     "Name": "FindPartOnRay",
                     "TupleReturns": [
                         {
