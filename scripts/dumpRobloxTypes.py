@@ -560,6 +560,7 @@ type RotationCurveKey = any
 type Secret = any
 type Path2DControlPoint = any
 type UniqueId = any
+type SecurityCapabilities = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -784,7 +785,7 @@ ApiFunction = TypedDict(
         "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": ApiValueType,
+        "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Security": str,
@@ -812,7 +813,7 @@ ApiCallback = TypedDict(
         "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": ApiValueType,
+        "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Security": str,
@@ -944,6 +945,9 @@ def resolveParameterList(params: List[ApiParameter]):
 def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
     if "TupleReturns" in member and member["TupleReturns"] is not None:
         types = [resolveType(ret) for ret in member["TupleReturns"]]
+        return "(" + ", ".join(types) + ")"
+    elif isinstance(member["ReturnType"], list):
+        types = [resolveType(ret) for ret in member["ReturnType"]]
         return "(" + ", ".join(types) + ")"
     else:
         return resolveType(member["ReturnType"])
