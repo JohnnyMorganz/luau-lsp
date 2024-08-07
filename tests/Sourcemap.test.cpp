@@ -376,8 +376,13 @@ TEST_CASE_FIXTURE(Fixture, "relative_and_absolute_types_are_consistent")
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subchild_with_lower_case_drive_letter")
 {
+#ifdef _WIN32
     workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
     workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+#else
+    workspace.rootUri = Uri::parse("/home/project");
+    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+#endif
     loadSourcemap(R"(
             {
                 "name": "RootNode",
@@ -398,8 +403,13 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
 {
+#ifdef _WIN32
     workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
     workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+#else
+    workspace.rootUri = Uri::parse("/home/project");
+    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+#endif
     client->globalConfig.completion.imports.ignoreGlobs = {"**/_Index/**"};
     loadSourcemap(R"(
             {
