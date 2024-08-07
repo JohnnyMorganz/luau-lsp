@@ -23,8 +23,11 @@ struct ClientRobloxSourcemapConfiguration
     std::string rojoProjectFile = "default.project.json";
     /// Whether non script instances should be included in the generated sourcemap
     bool includeNonScripts = true;
+    // The sourcemap file name
+    std::string sourcemapFile = "sourcemap.json";
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRobloxSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    ClientRobloxSourcemapConfiguration, enabled, autogenerate, rojoProjectFile, includeNonScripts, sourcemapFile);
 
 struct ClientTypesConfiguration
 {

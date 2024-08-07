@@ -48,6 +48,30 @@ struct RegistrationParams
 };
 NLOHMANN_DEFINE_OPTIONAL(RegistrationParams, registrations)
 
+/**
+ * General parameters to unregister a capability.
+ */
+struct Unregistration
+{
+    /**
+     * The id used to unregister the request or notification. Usually an id
+     * provided during the register request.
+     */
+    std::string id;
+
+    /**
+     * The method / capability to unregister for.
+     */
+    std::string method;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Unregistration, id, method)
+
+struct UnregistrationParams
+{
+    std::vector<Unregistration> unregisterations{};
+};
+NLOHMANN_DEFINE_OPTIONAL(UnregistrationParams, unregisterations)
+
 struct InitializeParams
 {
     struct ClientInfo
