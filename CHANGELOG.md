@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.637
 
+### Fixed
+
+- Fixed a regression in 1.32.0 causing `luau-lsp.ignoreGlobs` and `luau-lsp.completion.imports.ignoreGlobs` to not work ([#719](https://github.com/JohnnyMorganz/luau-lsp/issues/719))
+
 ## [1.32.1] - 2024-07-23
 
 ### Changed

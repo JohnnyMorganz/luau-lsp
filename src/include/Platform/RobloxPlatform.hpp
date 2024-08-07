@@ -135,7 +135,7 @@ private:
 
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
-    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
+
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
 
     bool updateSourceMap();
@@ -149,6 +149,7 @@ public:
 
     // For testing only
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
+    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 

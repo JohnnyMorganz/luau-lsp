@@ -147,3 +147,10 @@ void Fixture::loadSourcemap(const std::string& contents)
 {
     dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
 }
+
+SourceNodePtr Fixture::getRootSourceNode()
+{
+    auto sourceNode = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->rootSourceNode;
+    REQUIRE(sourceNode);
+    return sourceNode;
+}
