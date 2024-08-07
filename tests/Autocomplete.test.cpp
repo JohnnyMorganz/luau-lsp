@@ -257,13 +257,15 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 6);
+    CHECK_EQ(result.size(), 8);
     checkStringCompletionExists(result, "Instance");
     checkStringCompletionExists(result, "Part");
     checkStringCompletionExists(result, "TextLabel");
     checkStringCompletionExists(result, "ReplicatedStorage");
     checkStringCompletionExists(result, "ServiceProvider");
     checkStringCompletionExists(result, "DataModel");
+    checkStringCompletionExists(result, "Workspace");
+    checkStringCompletionExists(result, "LuaSourceContainer");
 }
 
 TEST_CASE_FIXTURE(Fixture, "enum_is_a_contains_enum_items")

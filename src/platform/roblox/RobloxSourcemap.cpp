@@ -49,8 +49,6 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
     }
 }
 
-static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
-
 static void injectChildrenLookupFunctions(
     const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ClassType* ctv, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
@@ -112,7 +110,7 @@ static void injectChildrenLookupFunctions(
 
 // Retrieves the corresponding Luau type for a Sourcemap node
 // If it does not yet exist, the type is produced
-static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node)
+Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node)
 {
     // Gets the type corresponding to the sourcemap node if it exists
     // Make sure to use the correct ty version (base typeChecker vs autocomplete typeChecker)
@@ -283,19 +281,15 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
     // Recreate instance types
     instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-    bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
 
-    // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
-    // We pass the same setting even when we are registering autocomplete globals since
-    // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
     workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
-    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals);
     workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
-    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete);
 
     workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
 
-    if (expressiveTypes)
+    if (config.diagnostics.strictDatamodelTypes)
     {
         workspaceFolder->client->sendTrace("Refreshing diagnostics from sourcemap update as strictDatamodelTypes is enabled");
         workspaceFolder->recomputeDiagnostics(config);
@@ -360,10 +354,8 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     }
 }
 
-// TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
-// to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
-// Remove this once Luau has improved
-void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes)
+
+void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals)
 {
     if (!rootSourceNode)
         return;
@@ -444,24 +436,6 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             }
         }
     }
-
-    // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
-    frontend.prepareModuleScope = [this, &frontend, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
-    {
-        Luau::GlobalTypes& globals = forAutocomplete ? frontend.globalsForAutocomplete : frontend.globals;
-
-        // TODO: we hope to remove these in future!
-        if (!expressiveTypes && !forAutocomplete)
-        {
-            scope->bindings[Luau::AstName("script")] = Luau::Binding{globals.builtinTypes->anyType};
-            scope->bindings[Luau::AstName("workspace")] = Luau::Binding{globals.builtinTypes->anyType};
-            scope->bindings[Luau::AstName("game")] = Luau::Binding{globals.builtinTypes->anyType};
-        }
-
-        if (expressiveTypes || forAutocomplete)
-            if (auto node = isVirtualPath(name) ? getSourceNodeFromVirtualPath(name) : getSourceNodeFromRealPath(name))
-                scope->bindings[Luau::AstName("script")] = Luau::Binding{getSourcemapType(globals, instanceTypes, node.value())};
-    };
 }
 
 std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
