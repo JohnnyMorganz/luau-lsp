@@ -118,6 +118,8 @@ public:
 
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::PrepareRenameResult prepareRename(const lsp::PrepareRenameParams& params);
+    lsp::DocumentHighlightResult documentHighlight(const lsp::DocumentHighlightParams& params);
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
     std::vector<lsp::FoldingRange> foldingRange(const lsp::FoldingRangeParams& params);
 

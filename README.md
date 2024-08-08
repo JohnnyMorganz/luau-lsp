@@ -69,6 +69,7 @@ Install the binary and run `luau-lsp --help` for more information.
 - [x] Go To Definition
 - [x] Go To Type Definition
 - [x] Find References
+- [x] Document Highlight
 - [x] Document Link
 - [x] Document Symbol
 - [x] Color Provider
@@ -87,7 +88,6 @@ They can be investigated at a later time:
 - [ ] Go To Declaration (do not apply)
 - [ ] Go To Implementation (do not apply)
 - [ ] Code Lens (not necessary)
-- [ ] Document Highlight (not necessary - editor highlighting is sufficient)
 - [ ] Selection Range (not necessary - editor selection is sufficient)
 - [ ] Inline Value (applies for debuggers only)
 - [ ] Moniker

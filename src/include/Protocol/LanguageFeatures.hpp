@@ -51,6 +51,39 @@ NLOHMANN_DEFINE_OPTIONAL(RenameParams, textDocument, position, newName)
 
 using RenameResult = std::optional<WorkspaceEdit>;
 
+struct PrepareRenameParams : TextDocumentPositionParams
+{
+};
+
+struct PrepareRenameRangePlaceholderResult
+{
+    Range range;
+    std::string placeholder;
+};
+NLOHMANN_DEFINE_OPTIONAL(PrepareRenameRangePlaceholderResult, range, placeholder)
+
+using PrepareRenameResult = std::optional<PrepareRenameRangePlaceholderResult>;
+
+struct DocumentHighlightParams : TextDocumentPositionParams
+{
+};
+
+enum struct DocumentHighlightKind
+{
+    Text = 1,
+    Read = 2,
+    Write = 3,
+};
+
+struct DocumentHighlight
+{
+    Range range;
+    DocumentHighlightKind kind;
+};
+NLOHMANN_DEFINE_OPTIONAL(DocumentHighlight, range, kind)
+
+using DocumentHighlightResult = std::optional<std::vector<DocumentHighlight>>;
+
 struct DocumentLinkParams
 {
     TextDocumentIdentifier textDocument;
