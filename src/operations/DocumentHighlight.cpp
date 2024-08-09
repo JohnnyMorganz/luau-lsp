@@ -106,7 +106,7 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
     {
         auto [locations, kinds] = findSymbolReferencesWithKinds(*sourceModule, symbol);
 
-        std::vector<lsp::DocumentHighlight> highlights{}; // TODO: Do I need the `{}`?
+        std::vector<lsp::DocumentHighlight> highlights{};
         highlights.reserve(locations.size());
         for (size_t i = 0; i < locations.size(); ++i)
         {
@@ -162,13 +162,13 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
         if (handleIfTypeReferenceByPosition(
                 typeDefinition, typeDefinition->generics, typeDefinition->genericPacks, position, highlights, textDocument))
         {
-            return highlights; // TODO: Is this safe or do I need to zero-init highlights?
+            return highlights;
         }
 
         // Include all usages of the type
         auto references = findTypeReferences(*sourceModule, typeDefinition->name.value, std::nullopt);
         highlights.reserve(references.size() + 1);
-        for (auto& location : references) // TODO: what's the difference between auto& location and auto location?
+        for (auto& location : references)
             highlights.emplace_back(createHighlight(*textDocument, location, lsp::DocumentHighlightKind::Read));
 
         // Include the type definition

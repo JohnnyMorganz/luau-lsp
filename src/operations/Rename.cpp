@@ -84,7 +84,6 @@ static std::optional<Luau::Location> findTypeReferenceLocation(
     return std::nullopt;
 }
 
-// TODO: Make sure this is correct.
 lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRenameParams& params)
 {
     if (isGlobalBinding(this, params))
