@@ -48,6 +48,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/platform/roblox/RobloxStudioPlugin.cpp
         src/operations/Diagnostics.cpp
         src/operations/Completion.cpp
+        src/operations/DocumentHighlight.cpp
         src/operations/DocumentSymbol.cpp
         src/operations/DocumentLink.cpp
         src/operations/ColorProvider.cpp

@@ -73,6 +73,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.implementationProvider = false; // TODO: does this apply to Luau?
     // Find References Provider
     capabilities.referencesProvider = true;
+    // Document Highlight Provider
+    capabilities.documentHighlightProvider = true;
     // Document Symbol Provider
     capabilities.documentSymbolProvider = true;
     // Color Provider
@@ -82,7 +84,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Code Action Provider
     capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
     // Rename Provider
-    capabilities.renameProvider = true;
+    capabilities.renameProvider = {true};
     // Folding Range Provider
     capabilities.foldingRangeProvider = true;
     // Inlay Hint Provider
@@ -159,6 +161,14 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     else if (method == "textDocument/rename")
     {
         response = rename(JSON_REQUIRED_PARAMS(baseParams, "textDocument/rename"));
+    }
+    else if (method == "textDocument/prepareRename")
+    {
+        response = prepareRename(JSON_REQUIRED_PARAMS(baseParams, "textDocument/prepareRename"));
+    }
+    else if (method == "textDocument/documentHighlight")
+    {
+        response = documentHighlight(JSON_REQUIRED_PARAMS(baseParams, "textDocument/documentHighlight"));
     }
     else if (method == "textDocument/documentSymbol")
     {

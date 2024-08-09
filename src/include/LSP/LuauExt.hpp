@@ -47,7 +47,20 @@ Luau::AstNode* findNodeOrTypeAtPosition(const Luau::SourceModule& source, Luau::
 Luau::AstNode* findNodeOrTypeAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos);
 Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& source, Luau::Position pos);
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol);
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findSymbolReferencesWithKinds(
+    const Luau::SourceModule& source, Luau::Symbol symbol);
+std::vector<Luau::Location> findPropertyReferences(
+    const Luau::SourceModule& source, const Luau::Name& property, Luau::TypeId ty, Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes);
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findPropertyReferencesWithKinds(
+    const Luau::SourceModule& source, const Luau::Name& property, Luau::TypeId ty, Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes);
 std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source, const Luau::Name& typeName, std::optional<const Luau::Name> prefix);
+std::vector<Luau::Location> findTypeParameterUsages(Luau::AstNode& node, Luau::AstName name);
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findTypeParameterUsagesWithKinds(
+    Luau::AstNode& node, Luau::AstName name);
+std::optional<Luau::AstName> findTypeReferenceName(
+    Luau::Position pos, Luau::AstArray<Luau::AstGenericType> generics, Luau::AstArray<Luau::AstGenericTypePack> genericPacks);
+std::optional<std::pair<Luau::AstLocal*, Luau::AstExpr*>> findClosestAncestorModuleImport(
+    const Luau::SourceModule& source, const Luau::AstName name, const Luau::Position pos);
 
 std::optional<Luau::Location> getLocation(Luau::TypeId type);
 
@@ -68,6 +81,8 @@ bool isGetService(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
+bool isSameTable(Luau::TypeId a, Luau::TypeId b);
+bool isTypeReference(Luau::AstName name, Luau::AstArray<Luau::AstGenericType> generics, Luau::AstArray<Luau::AstGenericTypePack> genericPacks);
 
 struct FindImportsVisitor : public Luau::AstVisitor
 {

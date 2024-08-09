@@ -528,18 +528,43 @@ Luau::ExprOrLocal findExprOrLocalAtPositionClosed(const Luau::SourceModule& sour
 struct FindSymbolReferences : public Luau::AstVisitor
 {
     Luau::Symbol symbol;
-    std::vector<Luau::Location> result{};
+    std::optional<std::vector<lsp::DocumentHighlightKind>> kinds;
+    std::vector<Luau::Location> locations{};
+    bool isModuleImport = false;
+    bool isWrite = false;
+    bool shouldExitCurrentScope = false;
+    size_t symbolDepth = 0;
 
-    explicit FindSymbolReferences(Luau::Symbol symbol)
+    explicit FindSymbolReferences(Luau::Symbol symbol, bool withKinds)
         : symbol(symbol)
+        , kinds(withKinds ? std::optional(std::vector<lsp::DocumentHighlightKind>()) : std::nullopt)
     {
+    }
+
+    void addResult(Luau::Location location, lsp::DocumentHighlightKind kind)
+    {
+        locations.push_back(location);
+        if (kinds)
+            kinds.value().push_back(kind);
     }
 
     bool visit(Luau::AstStatBlock* block) override
     {
+        if (symbol.local && block->location.encloses(symbol.local->location))
+            // It's important that this gets incremented whenever the symbol is potentially a module import
+            symbolDepth += 1;
+        auto depth = symbolDepth;
         for (Luau::AstStat* stat : block->body)
         {
             stat->visit(this);
+            if (shouldExitCurrentScope)
+            {
+                shouldExitCurrentScope = false;
+                break;
+            }
+            if (depth != symbolDepth)
+                // This scope is an ancestor of the one in which the local is defined, so we won't find any references here
+                break;
         }
 
         return false;
@@ -559,7 +584,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitLocal(function->name))
         {
-            result.push_back(function->name->location);
+            addResult(function->name->location, lsp::DocumentHighlightKind::Write);
         }
         return true;
     }
@@ -568,9 +593,25 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         for (size_t i = 0; i < al->vars.size; ++i)
         {
-            if (visitLocal(al->vars.data[i]))
+            auto var = al->vars.data[i];
+            auto isSymbol = visitLocal(var);
+            if (symbol.local && i < al->values.size)
             {
-                result.push_back(al->vars.data[i]->location);
+                if (symbol.local->name == var->name && isRequire(al->values.data[i]))
+                {
+                    if (isSymbol)
+                        isModuleImport = true;
+                    else if (symbol.local->location.begin < var->location.begin)
+                    {
+                        // Stop processing this scope because the symbol got shadowed by a module import
+                        shouldExitCurrentScope = true;
+                        return false;
+                    }
+                }
+            }
+            if (isSymbol)
+            {
+                addResult(var->location, lsp::DocumentHighlightKind::Write);
             }
         }
         return true;
@@ -580,7 +621,13 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitLocal(local->local))
         {
-            result.push_back(local->location);
+            auto kind = lsp::DocumentHighlightKind::Read;
+            if (isWrite)
+            {
+                kind = lsp::DocumentHighlightKind::Write;
+                isWrite = false;
+            }
+            addResult(local->location, kind);
         }
         return true;
     }
@@ -589,9 +636,39 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitGlobal(global->name))
         {
-            result.push_back(global->location);
+            auto kind = lsp::DocumentHighlightKind::Read;
+            if (isWrite)
+            {
+                kind = lsp::DocumentHighlightKind::Write;
+                isWrite = false;
+            }
+            addResult(global->location, kind);
         }
         return true;
+    }
+
+    bool visit(Luau::AstStatAssign* assign) override
+    {
+        for (auto var : assign->vars)
+        {
+            isWrite = true;
+            var->visit(this);
+            isWrite = false;
+        }
+
+        for (auto expr : assign->values)
+            expr->visit(this);
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatCompoundAssign* compoundAssign) override
+    {
+        isWrite = true;
+        compoundAssign->var->visit(this);
+        isWrite = false;
+        compoundAssign->value->visit(this);
+        return false;
     }
 
     bool visit(Luau::AstExprFunction* fn) override
@@ -600,8 +677,13 @@ struct FindSymbolReferences : public Luau::AstVisitor
         {
             if (visitLocal(fn->args.data[i]))
             {
-                result.push_back(fn->args.data[i]->location);
+                addResult(fn->args.data[i]->location, lsp::DocumentHighlightKind::Write);
             }
+        }
+        if (symbol.local && fn->argLocation && fn->argLocation->encloses(symbol.local->location))
+        {
+            // The symbol isn't declared in the statement block so we need to increment here
+            symbolDepth += 1;
         }
         return true;
     }
@@ -610,7 +692,11 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitLocal(forStat->var))
         {
-            result.push_back(forStat->var->location);
+            addResult(forStat->var->location, lsp::DocumentHighlightKind::Write);
+        }
+        if (symbol.local && forStat->location.encloses(symbol.local->location))
+        {
+            symbolDepth += 1;
         }
         return true;
     }
@@ -621,8 +707,12 @@ struct FindSymbolReferences : public Luau::AstVisitor
         {
             if (visitLocal(var))
             {
-                result.push_back(var->location);
+                addResult(var->location, lsp::DocumentHighlightKind::Write);
             }
+        }
+        if (symbol.local && forIn->location.encloses(symbol.local->location))
+        {
+            symbolDepth += 1;
         }
         return true;
     }
@@ -634,19 +724,189 @@ struct FindSymbolReferences : public Luau::AstVisitor
 
     bool visit(Luau::AstTypeReference* typeReference) override
     {
-        // TODO: this is not *completely* correct in the case of shadowing, as it is just a name comparison
-        // Upstream issue: https://github.com/luau-lang/luau/issues/1108
-        if (typeReference->prefix && symbol.local && typeReference->prefix.value() == symbol.astName())
-            result.push_back(typeReference->prefixLocation.value());
+        if (typeReference->prefix && isModuleImport && typeReference->prefix.value() == symbol.local->name)
+        {
+            addResult(typeReference->prefixLocation.value(), lsp::DocumentHighlightKind::Read);
+        }
         return true;
     }
 };
 
 std::vector<Luau::Location> findSymbolReferences(const Luau::SourceModule& source, Luau::Symbol symbol)
 {
-    FindSymbolReferences finder(symbol);
+    FindSymbolReferences finder(symbol, false);
     source.root->visit(&finder);
-    return std::move(finder.result);
+    return std::move(finder.locations);
+}
+
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findSymbolReferencesWithKinds(
+    const Luau::SourceModule& source, Luau::Symbol symbol)
+{
+    FindSymbolReferences finder(symbol, true);
+    source.root->visit(&finder);
+    return {std::move(finder.locations), std::move(finder.kinds.value())};
+}
+
+struct FindClosestAncestorModuleImportSymbol : public Luau::AstVisitor
+{
+    const Luau::AstName name;
+    const Luau::Position pos;
+    Luau::AstLocal* local;
+    Luau::AstExpr* argExpr;
+
+    explicit FindClosestAncestorModuleImportSymbol(const Luau::AstName name, const Luau::Position pos)
+        : name(name)
+        , pos(pos)
+    {
+    }
+
+    bool visit(Luau::AstStatBlock* block) override
+    {
+        if (!block->location.contains(pos))
+            // We only allow module imports that are declared with a local statement, and those can only be within statement blocks
+            return false;
+
+        for (auto stat : block->body)
+        {
+            if (stat->location.begin > pos)
+                break;
+            stat->visit(this);
+        }
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatLocal* al) override
+    {
+        for (size_t i = 0; i < al->vars.size && i < al->values.size; ++i)
+        {
+            auto var = al->vars.data[i];
+            auto value = al->values.data[i];
+            auto call = value->as<Luau::AstExprCall>();
+            if (!call)
+                continue;
+            if (var->name == name && isRequire(value))
+            {
+                local = var;
+                argExpr = call->args.data[0];
+            }
+        }
+        return false;
+    }
+};
+
+// Returns the local for the binding and the expr which is passed as the one and only argument to require
+std::optional<std::pair<Luau::AstLocal*, Luau::AstExpr*>> findClosestAncestorModuleImport(
+    const Luau::SourceModule& source, const Luau::AstName name, const Luau::Position pos)
+{
+    FindClosestAncestorModuleImportSymbol finder(name, pos);
+    source.root->visit(&finder);
+    return {{finder.local, finder.argExpr}};
+}
+
+struct FindPropertyReferences : public Luau::AstVisitor
+{
+    Luau::Name property;
+    Luau::TypeId ty;
+    Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes;
+    std::optional<std::vector<lsp::DocumentHighlightKind>> kinds;
+    std::vector<Luau::Location> locations{};
+
+    explicit FindPropertyReferences(
+        Luau::Name property, Luau::TypeId ty, Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes, bool withKinds)
+        : property(property)
+        , ty(ty)
+        , astTypes(astTypes)
+        , kinds(withKinds ? std::optional(std::vector<lsp::DocumentHighlightKind>()) : std::nullopt)
+    {
+    }
+
+    void addResult(Luau::Location location, lsp::DocumentHighlightKind kind)
+    {
+        locations.push_back(location);
+        if (kinds)
+            kinds.value().push_back(kind);
+    }
+
+    bool visitIndexName(Luau::AstExprIndexName* indexName)
+    {
+        if (indexName->index.value != property)
+            return false;
+        auto possibleParentTy = astTypes.find(indexName->expr);
+        if (!possibleParentTy || !isSameTable(ty, Luau::follow(*possibleParentTy)))
+            return false;
+        return true;
+    }
+
+    bool visit(Luau::AstStatAssign* assign)
+    {
+        for (auto var : assign->vars)
+        {
+            auto indexName = var->as<Luau::AstExprIndexName>();
+            if (indexName && visitIndexName(indexName))
+                addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+            else
+                var->visit(this);
+        }
+
+        for (auto value : assign->values)
+            value->visit(this);
+
+        return false;
+    }
+
+    bool visit(Luau::AstStatCompoundAssign* compoundAssign)
+    {
+        auto indexName = compoundAssign->var->as<Luau::AstExprIndexName>();
+        if (indexName && visitIndexName(indexName))
+            addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+        else
+            compoundAssign->var->visit(this);
+        compoundAssign->value->visit(this);
+        return false;
+    }
+
+    bool visit(Luau::AstExprIndexName* indexName)
+    {
+        if (visitIndexName(indexName))
+            addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Read);
+        return true;
+    }
+
+    bool visit(Luau::AstExprTable* table)
+    {
+        auto referencedTy = astTypes.find(table->asExpr());
+        if (!referencedTy || !isSameTable(ty, Luau::follow(*referencedTy)))
+            return true;
+        for (const auto& item : table->items)
+        {
+            item.value->visit(this);
+            if (!item.key)
+                continue;
+            item.key->visit(this);
+            auto propName = item.key->as<Luau::AstExprConstantString>();
+            if (!propName || propName->value.data != property)
+                continue;
+            addResult(item.key->location, lsp::DocumentHighlightKind::Write);
+        }
+        return false;
+    }
+};
+
+std::vector<Luau::Location> findPropertyReferences(
+    const Luau::SourceModule& source, const Luau::Name& property, Luau::TypeId ty, Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes)
+{
+    FindPropertyReferences finder(property, ty, astTypes, false);
+    source.root->visit(&finder);
+    return std::move(finder.locations);
+}
+
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findPropertyReferencesWithKinds(
+    const Luau::SourceModule& source, const Luau::Name& property, Luau::TypeId ty, Luau::DenseHashMap<const Luau::AstExpr*, Luau::TypeId> astTypes)
+{
+    FindPropertyReferences finder(property, ty, astTypes, true);
+    source.root->visit(&finder);
+    return {std::move(finder.locations), std::move(finder.kinds.value())};
 }
 
 struct FindTypeReferences : public Luau::AstVisitor
@@ -682,6 +942,134 @@ std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source,
     return std::move(finder.result);
 }
 
+struct FindTypeParameterUsages : public Luau::AstVisitor
+{
+    Luau::AstName name;
+    bool initialNode = true;
+    std::vector<Luau::Location> locations{};
+    std::optional<std::vector<lsp::DocumentHighlightKind>> kinds;
+
+    FindTypeParameterUsages(Luau::AstName name, bool withKinds)
+        : name(name)
+        , kinds(withKinds ? std::optional(std::vector<lsp::DocumentHighlightKind>()) : std::nullopt)
+    {
+    }
+
+    void addResult(Luau::Location location, lsp::DocumentHighlightKind kind)
+    {
+        locations.push_back(location);
+        if (kinds)
+            kinds.value().push_back(kind);
+    }
+
+    bool visit(class Luau::AstType* node) override
+    {
+        return true;
+    }
+
+    bool visit(class Luau::AstTypeReference* node) override
+    {
+        if (node->name == name)
+            addResult(node->nameLocation, lsp::DocumentHighlightKind::Read);
+        initialNode = false;
+        return true;
+    }
+
+    bool visit(class Luau::AstTypeFunction* node) override
+    {
+        // Check to see the type parameter has not been redefined
+        for (auto t : node->generics)
+        {
+            if (t.name == name)
+            {
+                if (initialNode)
+                    addResult(t.location, lsp::DocumentHighlightKind::Write);
+                else
+                    return false;
+            }
+        }
+        for (auto t : node->genericPacks)
+        {
+            if (t.name == name)
+            {
+                if (initialNode)
+                    addResult(t.location, lsp::DocumentHighlightKind::Write);
+                else
+                    return false;
+            }
+        }
+        initialNode = false;
+        return true;
+    }
+
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return true;
+    }
+
+    bool visit(class Luau::AstTypePackGeneric* node) override
+    {
+        if (node->genericName == name)
+            // node location also consists of the three dots "...", so we need to remove them
+            addResult(
+                Luau::Location{node->location.begin, {node->location.end.line, node->location.end.column - 3}}, lsp::DocumentHighlightKind::Read);
+        initialNode = false;
+        return true;
+    }
+
+    bool visit(class Luau::AstStatTypeAlias* node) override
+    {
+        for (auto t : node->generics)
+            if (t.name == name)
+                addResult(t.location, lsp::DocumentHighlightKind::Write);
+        for (auto t : node->genericPacks)
+            if (t.name == name)
+                addResult(t.location, lsp::DocumentHighlightKind::Write);
+        initialNode = false;
+        return true;
+    }
+
+    bool visit(class Luau::AstExprFunction* node) override
+    {
+        for (auto t : node->generics)
+            if (t.name == name)
+                addResult(t.location, lsp::DocumentHighlightKind::Write);
+        for (auto t : node->genericPacks)
+            if (t.name == name)
+                addResult(t.location, lsp::DocumentHighlightKind::Write);
+        initialNode = false;
+        return true;
+    }
+};
+
+std::vector<Luau::Location> findTypeParameterUsages(Luau::AstNode& node, Luau::AstName name)
+{
+    FindTypeParameterUsages finder(name, false);
+    node.visit(&finder);
+    return std::move(finder.locations);
+}
+
+std::pair<std::vector<Luau::Location>, std::vector<lsp::DocumentHighlightKind>> findTypeParameterUsagesWithKinds(
+    Luau::AstNode& node, Luau::AstName name)
+{
+    FindTypeParameterUsages finder(name, true);
+    node.visit(&finder);
+    return {std::move(finder.locations), std::move(finder.kinds.value())};
+}
+
+// Returns the AST name for the type referenced at the given position, if any, or else std::nullopt
+std::optional<Luau::AstName> findTypeReferenceName(
+    Luau::Position position, Luau::AstArray<Luau::AstGenericType> generics, Luau::AstArray<Luau::AstGenericTypePack> genericPacks)
+{
+    for (const auto t : generics)
+        if (t.location.containsClosed(position))
+            return t.name;
+    for (const auto t : genericPacks)
+        if (t.location.containsClosed(position))
+            return t.name;
+    return std::nullopt;
+}
+
 std::optional<Luau::Location> getLocation(Luau::TypeId type)
 {
     type = follow(type);
@@ -709,7 +1097,7 @@ bool isGetService(const Luau::AstExpr* expr)
 
 bool isRequire(const Luau::AstExpr* expr)
 {
-    if (auto call = expr->as<Luau::AstExprCall>())
+    if (auto call = expr->as<Luau::AstExprCall>(); call && call->args.size == 1)
     {
         if (auto funcAsGlobal = call->func->as<Luau::AstExprGlobal>(); funcAsGlobal && funcAsGlobal->name == "require")
             return true;
@@ -757,4 +1145,36 @@ bool isOverloadedMethod(Luau::TypeId ty)
 
     std::vector<Luau::TypeId> parts = Luau::flattenIntersection(ty);
     return std::all_of(parts.begin(), parts.end(), isOverloadedMethod);
+}
+
+bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
+{
+    if (a == b)
+        return true;
+
+    // TODO: in some cases, the table in the first module doesnt point to the same ty as the table in the second
+    // for example, in the first module (the one being required), the table may be unsealed
+    // we check for location equality in these cases
+    if (auto ttv1 = Luau::get<Luau::TableType>(a))
+        if (auto ttv2 = Luau::get<Luau::TableType>(b))
+            return !ttv1->definitionModuleName.empty() && ttv1->definitionModuleName == ttv2->definitionModuleName &&
+                   ttv1->definitionLocation == ttv2->definitionLocation;
+
+    return false;
+}
+
+// Determines whether the name matches a type reference in one of the provided generics
+bool isTypeReference(Luau::AstName name, Luau::AstArray<Luau::AstGenericType> generics, Luau::AstArray<Luau::AstGenericTypePack> genericPacks)
+{
+    for (const auto& t : generics)
+    {
+        if (t.name == name)
+            return true;
+    }
+    for (const auto& t : genericPacks)
+    {
+        if (t.name == name)
+            return true;
+    }
+    return false;
 }
