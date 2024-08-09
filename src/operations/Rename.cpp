@@ -113,14 +113,15 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
     auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (auto expr = exprOrLocal.getExpr())
     {
+        // Run the type checker to ensure we are up to date
+        // We check for autocomplete here since autocomplete has stricter types
+        checkStrict(moduleName);
+
         if (auto indexName = expr->as<Luau::AstExprIndexName>())
         {
             auto possibleParentTy = module->astTypes.find(indexName->expr);
             if (possibleParentTy)
             {
-                // Run the type checker to ensure we are up to date
-                // We check for autocomplete here since autocomplete has stricter types
-                checkStrict(moduleName);
                 auto parentTy = Luau::follow(*possibleParentTy);
                 auto ttv = Luau::get<Luau::TableType>(Luau::follow(parentTy));
                 if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName[0] == '@')
@@ -136,7 +137,7 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
             if (ancestry.size() > 1)
             {
                 auto parent = ancestry.at(ancestry.size() - 2);
-                if (parent->as<Luau::AstExprTable>())
+                if (auto tbl = parent->as<Luau::AstExprTable>(); tbl && module->astTypes.find(tbl))
                     return createRangePlaceholder(*textDocument, constantString->location);
             }
         }

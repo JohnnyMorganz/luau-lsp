@@ -68,7 +68,7 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
         {
             auto locations = findPropertyReferences(*sourceModule, property.value(), ty, module->astTypes);
             references.reserve(locations.size());
-            for (auto location : locations)
+            for (auto& location : locations)
                 references.push_back(Reference{moduleName, location});
         }
         else
