@@ -43,11 +43,9 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     ty = Luau::follow(ty);
     auto ttv = Luau::get<Luau::TableType>(ty);
 
-    // When the definition module name is equal to luauName, `LUAU_ASSERT(!buildQueueItems.empty());` in Frontend.cpp fails, after we call checkStrict
-    // below
-    const char* luauName = "@luau";
-
-    if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName == luauName)
+    // When the definition module name is starts with '@', e.g. "@luau" or "@roblox", `LUAU_ASSERT(!buildQueueItems.empty());` in Frontend.cpp fails,
+    // after we call checkStrict below
+    if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName[0] == '@')
         return {};
 
     std::vector<Reference> references;

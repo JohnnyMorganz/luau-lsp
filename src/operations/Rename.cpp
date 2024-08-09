@@ -118,13 +118,12 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
             auto possibleParentTy = module->astTypes.find(indexName->expr);
             if (possibleParentTy)
             {
-                const char* luauName = "@luau";
                 // Run the type checker to ensure we are up to date
                 // We check for autocomplete here since autocomplete has stricter types
                 checkStrict(moduleName);
                 auto parentTy = Luau::follow(*possibleParentTy);
                 auto ttv = Luau::get<Luau::TableType>(Luau::follow(parentTy));
-                if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName == luauName)
+                if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName[0] == '@')
                     // Find references returns nothing in this case so we disallow it in prepareRename too
                     throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Cannot rename a property of a global");
                 return createRangePlaceholder(*textDocument, indexName->indexLocation);
