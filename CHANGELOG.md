@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for textDocument/prepareRename
+- Added support for textDocument/documentHighlight
+
 ### Changed
 
 - Sync to upstream Luau 0.637
@@ -13,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed a regression in 1.32.0 causing `luau-lsp.ignoreGlobs` and `luau-lsp.completion.imports.ignoreGlobs` to not work ([#719](https://github.com/JohnnyMorganz/luau-lsp/issues/719))
+- Fixed property references in assignments not being found (i.e. `bar` in `foo.bar = baz` wouldn't be recognized as a reference to `foo.bar`)
+- Fixed references to required files in types not being accurate with variable shadowing
 
 ## [1.32.1] - 2024-07-23
 

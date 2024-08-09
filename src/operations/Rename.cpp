@@ -136,7 +136,7 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
             if (ancestry.size() > 1)
             {
                 auto parent = ancestry.at(ancestry.size() - 2);
-                if (auto tbl = parent->as<Luau::AstExprTable>())
+                if (parent->as<Luau::AstExprTable>())
                     return createRangePlaceholder(*textDocument, constantString->location);
             }
         }
