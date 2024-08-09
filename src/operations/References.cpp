@@ -43,7 +43,11 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     ty = Luau::follow(ty);
     auto ttv = Luau::get<Luau::TableType>(ty);
 
-    if (!ttv || ttv->definitionModuleName.empty())
+    // When the definition module name is equal to luauName, `LUAU_ASSERT(!buildQueueItems.empty());` in Frontend.cpp fails, after we call checkStrict
+    // below
+    const char* luauName = "@luau";
+
+    if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName == luauName)
         return {};
 
     std::vector<Reference> references;

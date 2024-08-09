@@ -96,10 +96,6 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
     auto position = textDocument->convertPosition(params.position);
 
-    // Run the type checker to ensure we are up to date
-    // We check for autocomplete here since autocomplete has stricter types
-    // checkStrict(moduleName);
-
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
@@ -119,7 +115,22 @@ lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRename
     if (auto expr = exprOrLocal.getExpr())
     {
         if (auto indexName = expr->as<Luau::AstExprIndexName>())
-            return createRangePlaceholder(*textDocument, indexName->indexLocation);
+        {
+            auto possibleParentTy = module->astTypes.find(indexName->expr);
+            if (possibleParentTy)
+            {
+                const char* luauName = "@luau";
+                // Run the type checker to ensure we are up to date
+                // We check for autocomplete here since autocomplete has stricter types
+                checkStrict(moduleName);
+                auto parentTy = Luau::follow(*possibleParentTy);
+                auto ttv = Luau::get<Luau::TableType>(Luau::follow(parentTy));
+                if (!ttv || ttv->definitionModuleName.empty() || ttv->definitionModuleName == luauName)
+                    // Find references returns nothing in this case so we disallow it in prepareRename too
+                    throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Cannot rename a property of a global");
+                return createRangePlaceholder(*textDocument, indexName->indexLocation);
+            }
+        }
         else if (auto constantString = expr->as<Luau::AstExprConstantString>())
         {
             // Potentially a property defined inside of a table
