@@ -124,6 +124,10 @@ static void from_json(const json& j, PluginNode& p)
     }
 }
 
+size_t computeMinimumLineNumberForRequire(const RobloxFindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
+size_t computeBestLineForRequire(
+    const RobloxFindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
+
 class RobloxPlatform : public LSPPlatform
 {
 private:

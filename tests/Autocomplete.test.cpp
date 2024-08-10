@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "Platform/RobloxPlatform.hpp"
 
 static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
 {
@@ -570,6 +571,46 @@ TEST_CASE_FIXTURE(Fixture, "wait_for_child_on_sourcemap_type_contains_children")
     CHECK_EQ(result.size(), 2);
     checkStringCompletionExists(result, "ChildA");
     checkStringCompletionExists(result, "ChildB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_when_adding_new_require_before")
+{
+    auto source = R"(
+        local _ =
+            require(script.Parent.d)
+    )";
+    auto astRoot = parse(source);
+    auto uri = newDocument("foo.luau", source);
+    auto textDocument = workspace.fileResolver.getTextDocument(uri);
+    REQUIRE(textDocument);
+
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(astRoot);
+
+    auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
+    auto insertedLineNumber = computeBestLineForRequire(importsVisitor, *textDocument, "script.Parent.c", minimumLineNumber);
+
+    CHECK_EQ(insertedLineNumber, 1);
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_when_adding_new_require_after")
+{
+    auto source = R"(
+        local _ =
+            require(script.Parent.d)
+    )";
+    auto astRoot = parse(source);
+    auto uri = newDocument("foo.luau", source);
+    auto textDocument = workspace.fileResolver.getTextDocument(uri);
+    REQUIRE(textDocument);
+
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(astRoot);
+
+    auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
+    auto insertedLineNumber = computeBestLineForRequire(importsVisitor, *textDocument, "script.Parent.e", minimumLineNumber);
+
+    CHECK_EQ(insertedLineNumber, 3);
 }
 
 TEST_SUITE_END();
