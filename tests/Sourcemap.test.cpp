@@ -379,17 +379,24 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
 #ifdef _WIN32
     workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
     workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    loadSourcemap(R"(
+        {
+            "name": "RootNode",
+            "className": "ModuleScript",
+            "filePaths": ["Packages\\_Index\\example_package\\Test.luau"]
+        }
+    )");
 #else
     workspace.rootUri = Uri::parse("/home/project");
     workspace.fileResolver.rootUri = Uri::parse("/home/project");
-#endif
     loadSourcemap(R"(
-            {
-                "name": "RootNode",
-                "className": "ModuleScript",
-                "filePaths": ["Packages\\_Index\\example_package\\Test.luau"]
-            }
-        )");
+        {
+            "name": "RootNode",
+            "className": "ModuleScript",
+            "filePaths": ["Packages/_Index/example_package/Test.luau"]
+        }
+    )");
+#endif
 
     auto rootNode = getRootSourceNode();
     auto filePath = rootNode->getScriptFilePath();
@@ -406,18 +413,26 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
 #ifdef _WIN32
     workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
     workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    loadSourcemap(R"(
+        {
+            "name": "RootNode",
+            "className": "ModuleScript",
+            "filePaths": ["Packages\\_Index\\example_package\\Test.luau"]
+        }
+    )");
 #else
     workspace.rootUri = Uri::parse("/home/project");
     workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    loadSourcemap(R"(
+        {
+            "name": "RootNode",
+            "className": "ModuleScript",
+            "filePaths": ["Packages/_Index/example_package/Test.luau"]
+        }
+    )");
 #endif
     client->globalConfig.completion.imports.ignoreGlobs = {"**/_Index/**"};
-    loadSourcemap(R"(
-            {
-                "name": "RootNode",
-                "className": "ModuleScript",
-                "filePaths": ["Packages\\_Index\\example_package\\Test.luau"]
-            }
-        )");
+
 
     auto rootNode = getRootSourceNode();
     auto filePath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);

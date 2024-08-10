@@ -283,18 +283,19 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
     }
 }
 
-std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+// Returns [base, property] - base is important during intersections
+std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
     if (auto ctv = Luau::get<Luau::ClassType>(parentType))
     {
         if (auto prop = Luau::lookupClassProp(ctv, name))
-            return *prop;
+            return std::make_pair(parentType, *prop);
     }
     else if (auto tbl = Luau::get<Luau::TableType>(parentType))
     {
         if (tbl->props.find(name) != tbl->props.end())
         {
-            return tbl->props.at(name);
+            return std::make_pair(parentType, tbl->props.at(name));
         }
     }
     else if (auto mt = Luau::get<Luau::MetatableType>(parentType))
@@ -317,21 +318,23 @@ std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const L
             }
         }
 
-        if (auto mtBaseTable = Luau::get<Luau::TableType>(Luau::follow(mt->table)))
+        auto baseTableTy = Luau::follow(mt->table);
+        if (auto mtBaseTable = Luau::get<Luau::TableType>(baseTableTy))
         {
             if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
             {
-                return mtBaseTable->props.at(name);
+                return std::make_pair(baseTableTy, mtBaseTable->props.at(name));
             }
         }
     }
-    // else if (auto i = get<Luau::IntersectionType>(parentType))
-    // {
-    //     for (Luau::TypeId ty : i->parts)
-    //     {
-    //         // TODO: find the corresponding ty
-    //     }
-    // }
+    else if (auto i = Luau::get<Luau::IntersectionType>(parentType))
+    {
+        for (Luau::TypeId ty : i->parts)
+        {
+            if (auto prop = lookupProp(Luau::follow(ty), name))
+                return prop;
+        }
+    }
     // else if (auto u = get<Luau::UnionType>(parentType))
     // {
     //     // Find the corresponding ty

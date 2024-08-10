@@ -84,11 +84,15 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     // If its a property, include its original declaration location if not yet found
     if (property)
     {
-        if (auto prop = lookupProp(ty, *property); prop && prop->location)
+        if (auto propInformation = lookupProp(ty, *property))
         {
-            auto reference = Reference{ttv->definitionModuleName, prop->location.value()};
-            if (!contains(references, reference))
-                references.push_back(reference);
+            auto [baseTy, prop] = propInformation.value();
+            if (prop.location)
+            {
+                auto reference = Reference{Luau::getDefinitionModuleName(baseTy).value_or(ttv->definitionModuleName), prop.location.value()};
+                if (!contains(references, reference))
+                    references.push_back(reference);
+            }
         }
     }
 
