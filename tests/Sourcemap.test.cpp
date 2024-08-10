@@ -374,6 +374,62 @@ TEST_CASE_FIXTURE(Fixture, "relative_and_absolute_types_are_consistent")
     CHECK((absoluteTy == relativeTy));
 }
 
+TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
+{
+#ifdef _WIN32
+    workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    loadSourcemap(R"(
+        {
+            "name": "Game",
+            "className": "DataModel",
+            "children": [{"name": "MainScript", "className": "ModuleScript", "filePaths": ["Foo\\Test.luau"]}]
+        }
+    )");
+#else
+    workspace.rootUri = Uri::parse("/home/project");
+    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    loadSourcemap(R"(
+        {
+            "name": "Game",
+            "className": "DataModel",
+            "children": [{"name": "MainScript", "className": "ModuleScript", "filePaths": ["Foo/Test.luau"]}]
+        }
+    )");
+#endif
+
+    auto uri = Uri::file(workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+
+    CHECK_EQ(workspace.fileResolver.getModuleName(uri), "game/MainScript");
+}
+
+TEST_CASE_FIXTURE(Fixture, "get_real_path_from_virtual_name")
+{
+#ifdef _WIN32
+    workspace.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///c%3A/Users/Development/project");
+    loadSourcemap(R"(
+        {
+            "name": "Game",
+            "className": "DataModel",
+            "children": [{"name": "MainScript", "className": "ModuleScript", "filePaths": ["Foo\\Test.luau"]}]
+        }
+    )");
+#else
+    workspace.rootUri = Uri::parse("/home/project");
+    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    loadSourcemap(R"(
+        {
+            "name": "Game",
+            "className": "DataModel",
+            "children": [{"name": "MainScript", "className": "ModuleScript", "filePaths": ["Foo/Test.luau"]}]
+        }
+    )");
+#endif
+
+    CHECK_EQ(workspace.platform->resolveToRealPath("game/MainScript"), workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subchild_with_lower_case_drive_letter")
 {
 #ifdef _WIN32
