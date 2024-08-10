@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed a regression in 1.32.0 causing `luau-lsp.ignoreGlobs` and `luau-lsp.completion.imports.ignoreGlobs` to not work ([#719](https://github.com/JohnnyMorganz/luau-lsp/issues/719))
 - Fixed auto-imports injecting a require in the middle of a multi-line require when introducing a require with lower lexicographical ordering ([#725](https://github.com/JohnnyMorganz/luau-lsp/issues/725))
+- Fixed documentation not showing for properties of an intersected type table in Hover and Autocomplete ([#715](https://github.com/JohnnyMorganz/luau-lsp/issues/715))
 
 ## [1.32.1] - 2024-07-23
 
