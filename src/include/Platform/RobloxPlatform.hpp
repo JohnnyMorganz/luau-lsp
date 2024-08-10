@@ -38,15 +38,16 @@ public:
         return lineNumber;
     }
 
-    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line) override
+    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
     {
         if (!isGetService(expr))
             return false;
 
-        firstServiceDefinitionLine =
-            !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
+        firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
+                                         ? startLine
+                                         : firstServiceDefinitionLine.value();
         lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= line ? line : lastServiceDefinitionLine.value();
+            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
         serviceLineMap.emplace(std::string(localName->name.value), local);
 
         return true;
