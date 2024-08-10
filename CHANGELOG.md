@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.32.3] - 2024-08-10
+
 ### Fixed
 
 - Fixed a regression in 1.32.2 breaking resolution of virtual paths from real paths, particularly around `script` and relative usages of it. ([#734](https://github.com/JohnnyMorganz/luau-lsp/issues/734), [#735](https://github.com/JohnnyMorganz/luau-lsp/issues/735))
