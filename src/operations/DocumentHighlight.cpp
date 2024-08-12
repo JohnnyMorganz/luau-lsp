@@ -165,6 +165,9 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
             return highlights;
         }
 
+        if (!typeDefinition->nameLocation.containsClosed(position))
+            return std::nullopt;
+
         // Include all usages of the type
         auto references = findTypeReferences(*sourceModule, typeDefinition->name.value, std::nullopt);
         highlights.reserve(references.size() + 1);
@@ -184,11 +187,9 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
             if (!requireInfo)
                 return std::nullopt;
 
-            auto requireSymbol = requireInfo.value().first;
-
             if (reference->prefixLocation.value().containsClosed(position))
             {
-                auto [locations, kinds] = findSymbolReferencesWithKinds(*sourceModule, requireSymbol);
+                auto [locations, kinds] = findSymbolReferencesWithKinds(*sourceModule, requireInfo.value().first);
                 highlights.reserve(locations.size());
 
                 for (size_t i = 0; i < locations.size(); ++i)
@@ -198,6 +199,9 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
             }
             else
             {
+                if (!reference->nameLocation.containsClosed(position))
+                    return std::nullopt;
+
                 auto references = findTypeReferences(*sourceModule, reference->name.value, reference->prefix.value().value);
                 highlights.reserve(references.size());
 
@@ -240,6 +244,9 @@ lsp::DocumentHighlightResult WorkspaceFolder::documentHighlight(const lsp::Docum
                     break;
                 }
             }
+
+            if (!reference->nameLocation.containsClosed(position))
+                return std::nullopt;
 
             auto references = findTypeReferences(*sourceModule, reference->name.value, std::nullopt);
             highlights.reserve(references.size() + 1);

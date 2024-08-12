@@ -84,6 +84,8 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/SemanticTokens.test.cpp
         tests/Sourcemap.test.cpp
         tests/References.test.cpp
+        tests/DocumentHighlight.test.cpp
+        tests/PrepareRename.test.cpp
         tests/Rename.test.cpp
         tests/ColorProvider.test.cpp
         tests/LuauExt.test.cpp

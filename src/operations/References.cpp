@@ -321,6 +321,9 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             return result;
         }
 
+        if (!typeDefinition->nameLocation.containsClosed(position))
+            return std::nullopt;
+
         if (typeDefinition->exported)
         {
             // Type may potentially be used in other files, so we need to handle this globally
@@ -370,6 +373,9 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             }
             else
             {
+                if (!reference->nameLocation.containsClosed(position))
+                    return std::nullopt;
+
                 auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(module->name, *requireExpr);
                 if (!moduleInfo)
                     return std::nullopt;
@@ -407,6 +413,9 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                     break;
                 }
             }
+
+            if (!reference->nameLocation.containsClosed(position))
+                return std::nullopt;
 
             auto references = findTypeReferences(*sourceModule, reference->name.value, std::nullopt);
             result.reserve(references.size() + 1);

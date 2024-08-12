@@ -534,7 +534,6 @@ struct FindSymbolReferences : public Luau::AstVisitor
     std::optional<std::vector<lsp::DocumentHighlightKind>> kinds;
     std::vector<Luau::Location> locations{};
     bool isModuleImport = false;
-    bool isWrite = false;
     bool shouldExitCurrentScope = false;
     size_t symbolDepth = 0;
 
@@ -554,7 +553,6 @@ struct FindSymbolReferences : public Luau::AstVisitor
     bool visit(Luau::AstStatBlock* block) override
     {
         if (symbol.local && block->location.encloses(symbol.local->location))
-            // It's important that this gets incremented whenever the symbol is potentially a module import
             symbolDepth += 1;
         auto depth = symbolDepth;
         for (Luau::AstStat* stat : block->body)
@@ -583,6 +581,15 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return Luau::Symbol(name) == symbol;
     }
 
+    bool visitWriteExpr(Luau::AstExpr* expr) const
+    {
+        if (auto local = expr->as<Luau::AstExprLocal>(); local && visitLocal(local->local))
+            return true;
+        else if (auto global = expr->as<Luau::AstExprGlobal>(); global && visitGlobal(global->name))
+            return true;
+        return false;
+    }
+
     bool visit(Luau::AstStatLocalFunction* function) override
     {
         if (visitLocal(function->name))
@@ -590,6 +597,17 @@ struct FindSymbolReferences : public Luau::AstVisitor
             addResult(function->name->location, lsp::DocumentHighlightKind::Write);
         }
         return true;
+    }
+
+    bool visit(Luau::AstStatFunction* function) override
+    {
+        auto name = function->name;
+        if (visitWriteExpr(name))
+            addResult(name->location, lsp::DocumentHighlightKind::Write);
+        else
+            name->visit(this);
+        function->func->visit(this);
+        return false;
     }
 
     bool visit(Luau::AstStatLocal* al) override
@@ -624,13 +642,7 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitLocal(local->local))
         {
-            auto kind = lsp::DocumentHighlightKind::Read;
-            if (isWrite)
-            {
-                kind = lsp::DocumentHighlightKind::Write;
-                isWrite = false;
-            }
-            addResult(local->location, kind);
+            addResult(local->location, lsp::DocumentHighlightKind::Read);
         }
         return true;
     }
@@ -639,24 +651,20 @@ struct FindSymbolReferences : public Luau::AstVisitor
     {
         if (visitGlobal(global->name))
         {
-            auto kind = lsp::DocumentHighlightKind::Read;
-            if (isWrite)
-            {
-                kind = lsp::DocumentHighlightKind::Write;
-                isWrite = false;
-            }
-            addResult(global->location, kind);
+            addResult(global->location, lsp::DocumentHighlightKind::Read);
         }
         return true;
     }
 
     bool visit(Luau::AstStatAssign* assign) override
     {
+
         for (auto var : assign->vars)
         {
-            isWrite = true;
-            var->visit(this);
-            isWrite = false;
+            if (visitWriteExpr(var))
+                addResult(var->location, lsp::DocumentHighlightKind::Write);
+            else
+                var->visit(this);
         }
 
         for (auto expr : assign->values)
@@ -667,9 +675,10 @@ struct FindSymbolReferences : public Luau::AstVisitor
 
     bool visit(Luau::AstStatCompoundAssign* compoundAssign) override
     {
-        isWrite = true;
-        compoundAssign->var->visit(this);
-        isWrite = false;
+        if (visitWriteExpr(compoundAssign->var))
+            addResult(compoundAssign->var->location, lsp::DocumentHighlightKind::Write);
+        else
+            compoundAssign->var->visit(this);
         compoundAssign->value->visit(this);
         return false;
     }
@@ -681,12 +690,8 @@ struct FindSymbolReferences : public Luau::AstVisitor
             if (visitLocal(fn->args.data[i]))
             {
                 addResult(fn->args.data[i]->location, lsp::DocumentHighlightKind::Write);
+                symbolDepth += 1;
             }
-        }
-        if (symbol.local && fn->argLocation && fn->argLocation->encloses(symbol.local->location))
-        {
-            // The symbol isn't declared in the statement block so we need to increment here
-            symbolDepth += 1;
         }
         return true;
     }
@@ -696,9 +701,6 @@ struct FindSymbolReferences : public Luau::AstVisitor
         if (visitLocal(forStat->var))
         {
             addResult(forStat->var->location, lsp::DocumentHighlightKind::Write);
-        }
-        if (symbol.local && forStat->location.encloses(symbol.local->location))
-        {
             symbolDepth += 1;
         }
         return true;
@@ -711,11 +713,8 @@ struct FindSymbolReferences : public Luau::AstVisitor
             if (visitLocal(var))
             {
                 addResult(var->location, lsp::DocumentHighlightKind::Write);
+                symbolDepth += 1;
             }
-        }
-        if (symbol.local && forIn->location.encloses(symbol.local->location))
-        {
-            symbolDepth += 1;
         }
         return true;
     }
@@ -754,8 +753,7 @@ struct FindClosestAncestorModuleImportSymbol : public Luau::AstVisitor
 {
     const Luau::AstName name;
     const Luau::Position pos;
-    Luau::AstLocal* local;
-    Luau::AstExpr* argExpr;
+    std::optional<std::pair<Luau::AstLocal*, Luau::AstExpr*>> result = std::nullopt;
 
     explicit FindClosestAncestorModuleImportSymbol(const Luau::AstName name, const Luau::Position pos)
         : name(name)
@@ -789,10 +787,7 @@ struct FindClosestAncestorModuleImportSymbol : public Luau::AstVisitor
             if (!call)
                 continue;
             if (var->name == name && isRequire(value))
-            {
-                local = var;
-                argExpr = call->args.data[0];
-            }
+                result = {{var, call->args.data[0]}};
         }
         return false;
     }
@@ -804,7 +799,7 @@ std::optional<std::pair<Luau::AstLocal*, Luau::AstExpr*>> findClosestAncestorMod
 {
     FindClosestAncestorModuleImportSymbol finder(name, pos);
     source.root->visit(&finder);
-    return {{finder.local, finder.argExpr}};
+    return finder.result;
 }
 
 struct FindPropertyReferences : public Luau::AstVisitor
@@ -841,13 +836,30 @@ struct FindPropertyReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstStatFunction* function)
+    {
+        if (auto indexName = function->name->as<Luau::AstExprIndexName>())
+        {
+            if (visitIndexName(indexName))
+                addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+            indexName->expr->visit(this);
+        }
+        else
+            function->name->visit(this);
+        function->func->visit(this);
+        return false;
+    }
+
     bool visit(Luau::AstStatAssign* assign)
     {
         for (auto var : assign->vars)
         {
-            auto indexName = var->as<Luau::AstExprIndexName>();
-            if (indexName && visitIndexName(indexName))
-                addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+            if (auto indexName = var->as<Luau::AstExprIndexName>())
+            {
+                if (visitIndexName(indexName))
+                    addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+                indexName->expr->visit(this);
+            }
             else
                 var->visit(this);
         }
@@ -860,9 +872,12 @@ struct FindPropertyReferences : public Luau::AstVisitor
 
     bool visit(Luau::AstStatCompoundAssign* compoundAssign)
     {
-        auto indexName = compoundAssign->var->as<Luau::AstExprIndexName>();
-        if (indexName && visitIndexName(indexName))
-            addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+        if (auto indexName = compoundAssign->var->as<Luau::AstExprIndexName>())
+        {
+            if (visitIndexName(indexName))
+                addResult(indexName->indexLocation, lsp::DocumentHighlightKind::Write);
+            indexName->expr->visit(this);
+        }
         else
             compoundAssign->var->visit(this);
         compoundAssign->value->visit(this);
