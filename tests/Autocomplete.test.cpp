@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "Platform/RobloxPlatform.hpp"
 
 static std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
 {
@@ -73,6 +74,44 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
     trim(item.documentation->value);
     CHECK_EQ(item.documentation->value, "This is a function documentation comment");
+}
+
+TEST_CASE_FIXTURE(Fixture, "interesected_type_table_property_has_documentation")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        type A = {
+            --- Example sick number
+            Hello: number
+        }
+
+        type B = {
+            --- Example sick string
+            Heya: string
+        } & A
+
+        local item: B = nil
+        item.|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    auto item = requireItem(result, "Hello");
+    REQUIRE(item.documentation);
+    CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item.documentation->value);
+    CHECK_EQ(item.documentation->value, "Example sick number");
+
+    auto item2 = requireItem(result, "Heya");
+    REQUIRE(item2.documentation);
+    CHECK_EQ(item2.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item2.documentation->value);
+    CHECK_EQ(item2.documentation->value, "Example sick string");
 }
 
 TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_to_autocomplete_entry")
@@ -570,6 +609,46 @@ TEST_CASE_FIXTURE(Fixture, "wait_for_child_on_sourcemap_type_contains_children")
     CHECK_EQ(result.size(), 2);
     checkStringCompletionExists(result, "ChildA");
     checkStringCompletionExists(result, "ChildB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_when_adding_new_require_before")
+{
+    auto source = R"(
+        local _ =
+            require(script.Parent.d)
+    )";
+    auto astRoot = parse(source);
+    auto uri = newDocument("foo.luau", source);
+    auto textDocument = workspace.fileResolver.getTextDocument(uri);
+    REQUIRE(textDocument);
+
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(astRoot);
+
+    auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
+    auto insertedLineNumber = computeBestLineForRequire(importsVisitor, *textDocument, "script.Parent.c", minimumLineNumber);
+
+    CHECK_EQ(insertedLineNumber, 1);
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_when_adding_new_require_after")
+{
+    auto source = R"(
+        local _ =
+            require(script.Parent.d)
+    )";
+    auto astRoot = parse(source);
+    auto uri = newDocument("foo.luau", source);
+    auto textDocument = workspace.fileResolver.getTextDocument(uri);
+    REQUIRE(textDocument);
+
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(astRoot);
+
+    auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
+    auto insertedLineNumber = computeBestLineForRequire(importsVisitor, *textDocument, "script.Parent.e", minimumLineNumber);
+
+    CHECK_EQ(insertedLineNumber, 3);
 }
 
 TEST_SUITE_END();

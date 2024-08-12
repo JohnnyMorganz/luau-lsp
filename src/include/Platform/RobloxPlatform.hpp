@@ -38,15 +38,16 @@ public:
         return lineNumber;
     }
 
-    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line) override
+    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
     {
         if (!isGetService(expr))
             return false;
 
-        firstServiceDefinitionLine =
-            !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
+        firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
+                                         ? startLine
+                                         : firstServiceDefinitionLine.value();
         lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= line ? line : lastServiceDefinitionLine.value();
+            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
         serviceLineMap.emplace(std::string(localName->name.value), local);
 
         return true;
@@ -124,6 +125,10 @@ static void from_json(const json& j, PluginNode& p)
     }
 }
 
+size_t computeMinimumLineNumberForRequire(const RobloxFindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
+size_t computeBestLineForRequire(
+    const RobloxFindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
+
 class RobloxPlatform : public LSPPlatform
 {
 private:
@@ -135,7 +140,7 @@ private:
 
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
-    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
+
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
 
     bool updateSourceMap();
@@ -149,6 +154,7 @@ public:
 
     // For testing only
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
+    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
