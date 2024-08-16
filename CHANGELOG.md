@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a regression in 1.30.0 breaking type definitions files that rely on mutations like `Enum.Foo`
+([#658](https://github.com/JohnnyMorganz/luau-lsp/issues/658))
+
 ## [1.32.3] - 2024-08-10
 
 ### Fixed

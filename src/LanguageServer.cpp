@@ -570,12 +570,10 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     // causing us to fall back to the global configuration. Sending the request for configuration
     // first means we receive the user config before processing the first LSP events
     client->sendTrace("initializing null workspace");
-    nullWorkspace->initialize();
     nullWorkspace->setupWithConfiguration(client->globalConfig);
     for (auto& folder : workspaceFolders)
     {
         client->sendTrace("initializing workspace: " + folder->rootUri.toString());
-        folder->initialize();
         // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
         if (!requestedConfiguration)
             folder->setupWithConfiguration(client->globalConfig);

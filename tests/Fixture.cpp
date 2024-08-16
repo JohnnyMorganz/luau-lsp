@@ -18,8 +18,6 @@ Fixture::Fixture()
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
 
-    workspace.initialize();
-
     ClientConfiguration config;
     config.sourcemap.enabled = false;
     config.index.enabled = false;
