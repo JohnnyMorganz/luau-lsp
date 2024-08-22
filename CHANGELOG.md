@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.32.3] - 2024-08-10
+
+### Fixed
+
+- Fixed a regression in 1.32.2 breaking resolution of virtual paths from real paths, particularly around `script` and relative usages of it. ([#734](https://github.com/JohnnyMorganz/luau-lsp/issues/734), [#735](https://github.com/JohnnyMorganz/luau-lsp/issues/735))
+
+## [1.32.2] - 2024-08-10
+
+### Changed
+
+- Sync to upstream Luau 0.638
+
+### Fixed
+
+- Fixed a regression in 1.32.0 causing `luau-lsp.ignoreGlobs` and `luau-lsp.completion.imports.ignoreGlobs` to not work ([#719](https://github.com/JohnnyMorganz/luau-lsp/issues/719))
+- Fixed auto-imports injecting a require in the middle of a multi-line require when introducing a require with lower lexicographical ordering ([#725](https://github.com/JohnnyMorganz/luau-lsp/issues/725))
+- Fixed documentation not showing for properties of an intersected type table in Hover and Autocomplete ([#715](https://github.com/JohnnyMorganz/luau-lsp/issues/715))
+
+## [1.32.1] - 2024-07-23
+
 ### Changed
 
 - Sync to upstream Luau 0.635
