@@ -2466,6 +2466,7 @@ declare class EnumPlatform_INTERNAL extends Enum
 	DOS: EnumPlatform
 	IOS: EnumPlatform
 	Linux: EnumPlatform
+	MetaOS: EnumPlatform
 	NX: EnumPlatform
 	None: EnumPlatform
 	OSX: EnumPlatform
@@ -3726,6 +3727,14 @@ declare class EnumVRControllerModelMode_INTERNAL extends Enum
 	Disabled: EnumVRControllerModelMode
 	Transparent: EnumVRControllerModelMode
 end
+declare class EnumVRDeviceType extends EnumItem end
+declare class EnumVRDeviceType_INTERNAL extends Enum
+	HTCVive: EnumVRDeviceType
+	OculusQuest: EnumVRDeviceType
+	OculusRift: EnumVRDeviceType
+	Unknown: EnumVRDeviceType
+	ValveIndex: EnumVRDeviceType
+end
 declare class EnumVRLaserPointerMode extends EnumItem end
 declare class EnumVRLaserPointerMode_INTERNAL extends Enum
 	Disabled: EnumVRLaserPointerMode
@@ -4321,6 +4330,7 @@ type ENUM_LIST = {
 	UserInputType: EnumUserInputType_INTERNAL,
 	VRComfortSetting: EnumVRComfortSetting_INTERNAL,
 	VRControllerModelMode: EnumVRControllerModelMode_INTERNAL,
+	VRDeviceType: EnumVRDeviceType_INTERNAL,
 	VRLaserPointerMode: EnumVRLaserPointerMode_INTERNAL,
 	VRSafetyBubbleMode: EnumVRSafetyBubbleMode_INTERNAL,
 	VRScaling: EnumVRScaling_INTERNAL,
