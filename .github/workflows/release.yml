@@ -153,6 +153,7 @@ jobs:
         working-directory: editors/code
         run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
 
+      # TODO: uncomment
       # - name: Publish OpenVSX Extension
       #   working-directory: editors/code
       #   run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
