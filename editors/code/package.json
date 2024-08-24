@@ -3,7 +3,7 @@
   "displayName": "Luau Language Server",
   "description": "A Language Server Client for Luau",
   "author": "JohnnyMorganz",
-  "publisher": "HowManySmall",
+  "publisher": "JohnnyMorganz",
   "license": "MIT",
   "icon": "assets/icon.png",
   "homepage": "https://github.com/JohnnyMorganz/luau-lsp",
@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.32.9",
+  "version": "1.32.3",
   "engines": {
     "vscode": "^1.67.0"
   },
