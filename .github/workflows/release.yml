@@ -57,10 +57,7 @@ jobs:
         include:
           - os: windows-latest
             artifact-name: luau-lsp-win64
-            code-target: [win32-x64]
-          - os: windows-latest
-            artifact-name: luau-lsp-win-arm64
-            code-target: [win32-arm64]
+            code-target: [win32-x64, win32-arm64]
           - os: ubuntu-20.04
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
