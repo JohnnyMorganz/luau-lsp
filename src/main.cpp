@@ -5,6 +5,7 @@
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Luau/ExperimentalFlags.h"
 #include "argparse/argparse.hpp"
+#include "LSP/Client.hpp"
 
 #ifdef _WIN32
 #include <io.h>
@@ -70,10 +71,9 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     }
 
     // Setup client
-    auto client = std::make_shared<Client>();
-    client->definitionsFiles = definitionsFiles;
-    client->documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client->documentation, client);
+    auto io = std::make_shared<ServerIOStd>();
+    auto defsPtr = std::make_shared<std::vector<std::filesystem::path>>(std::move(definitionsFiles));
+    auto client = std::make_shared<Client>(io, defsPtr, documentationFiles);
 
     // Parse LSP Settings
     auto settingsPath = program.present<std::filesystem::path>("--settings");
@@ -87,12 +87,18 @@ int startLanguageServer(const argparse::ArgumentParser& program)
             return 1;
         }
     }
-
-    LanguageServer server(client, defaultConfig);
+    // TODO - figure out a better strategy for the parameterization of definition file package names.
+    LanguageServer server(client, defaultConfig, "@roblox");
+    std::string jsonString;
 
     // Begin input loop
-    server.processInputLoop();
-
+    while (std::cin)
+    {
+        if (io->readRawMessage(jsonString))
+        {
+            server.processInput(jsonString);
+        }
+    }
     // If we received a shutdown request before exiting, exit normally. Otherwise, it is an abnormal exit
     return server.requestedShutdown() ? 0 : 1;
 }

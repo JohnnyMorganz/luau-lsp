@@ -286,10 +286,10 @@ void WorkspaceFolder::initialize()
 
     Luau::attachTag(Luau::getGlobalBinding(frontend.globalsForAutocomplete, "require"), "Require");
 
-    if (client->definitionsFiles.empty())
+    if (client->definitionsFiles->empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
-    for (const auto& definitionsFile : client->definitionsFiles)
+    for (const auto& definitionsFile : *client->definitionsFiles)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
@@ -309,8 +309,8 @@ void WorkspaceFolder::initialize()
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
-        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
+        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, packageName, /* typeCheckForAutocomplete = */ false);
+        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, packageName, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         auto uri = Uri::file(resolvedFilePath);
@@ -345,6 +345,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
 {
     client->sendTrace("workspace: setting up with configuration");
     platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
+    client->sendLogMessage(lsp::MessageType::Info, "workspace: using platform " + platform->getName());
 
     fileResolver.platform = platform.get();
 

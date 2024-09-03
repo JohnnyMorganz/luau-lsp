@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "LSP/LanguageServer.hpp"
 #include "Protocol/Lifecycle.hpp"
+#include "Fixture.h"
 
 TEST_SUITE_BEGIN("LanguageServer");
 
@@ -8,7 +9,7 @@ LUAU_FASTFLAG(DebugLuauDeferredConstraintResolution);
 
 TEST_CASE("language_server_handles_fflags_in_initialization_options")
 {
-    auto client = std::make_shared<Client>();
+    auto client = Fixture::makeClient();
     LanguageServer server(client, std::nullopt);
 
     InitializationOptions initializationOptions{};

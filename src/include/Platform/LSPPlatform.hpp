@@ -113,6 +113,9 @@ public:
         return false;
     }
 
+    virtual std::string getName() { return "LSPPlatform"; }
+
+    static void forcePlatform(std::function<std::unique_ptr<LSPPlatform>(const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)> overload);
     static std::unique_ptr<LSPPlatform> getPlatform(
         const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder = nullptr);
 
@@ -126,6 +129,7 @@ public:
 
 private:
     [[nodiscard]] std::filesystem::path getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
+    static inline std::optional<std::function<std::unique_ptr<LSPPlatform>(const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)>> getPlatformOverload;
 };
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(

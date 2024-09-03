@@ -52,10 +52,9 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
 }
 
 Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, const std::string& packageName, bool typeCheckForAutocomplete)
 {
-    // TODO: packageName shouldn't just be "@roblox"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ false, typeCheckForAutocomplete);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;

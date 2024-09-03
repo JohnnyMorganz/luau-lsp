@@ -203,6 +203,7 @@ public:
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
 
+    std::string getName() override { return "RobloxPlatform"; }
 
     using LSPPlatform::LSPPlatform;
 };

@@ -392,38 +392,21 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
     }
 }
 
-void LanguageServer::processInputLoop()
+void LanguageServer::processInput(const std::string &jsonString)
 {
-    std::string jsonString;
-    while (std::cin)
+    // sendTrace(jsonString, std::nullopt);
+    std::optional<id_type> id = std::nullopt;
+    try
     {
-        if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
-        {
-            client->sendTrace("workspaces configured, handling postponed messages");
-            for (const auto& msg : configPostponedMessages)
-                handleMessage(msg);
+        // Parse the input
+        auto msg = json_rpc::parse(jsonString);
+        id = msg.id;
 
-            configPostponedMessages.clear();
-            client->sendTrace("workspaces configured, handling postponed COMPLETED");
-        }
-
-        if (client->readRawMessage(jsonString))
-        {
-            // sendTrace(jsonString, std::nullopt);
-            std::optional<id_type> id = std::nullopt;
-            try
-            {
-                // Parse the input
-                auto msg = json_rpc::parse(jsonString);
-                id = msg.id;
-
-                handleMessage(msg);
-            }
-            catch (const json::exception& e)
-            {
-                client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
-            }
-        }
+        handleMessage(msg);
+    }
+    catch (const json::exception& e)
+    {
+        client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
     }
 }
 
@@ -471,12 +454,12 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     {
         for (auto& folder : params.workspaceFolders.value())
         {
-            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, packageName));
         }
     }
     else if (params.rootUri.has_value())
     {
-        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig));
+        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig, packageName));
     }
 
     isInitialized = true;
@@ -511,6 +494,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
 
         // Update the workspace setup with the new configuration
         workspace->setupWithConfiguration(config);
+        checkAndDispatchSuspendedRequests();
 
         // Refresh diagnostics
         workspace->recomputeDiagnostics(config);
@@ -580,6 +564,20 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         if (!requestedConfiguration)
             folder->setupWithConfiguration(client->globalConfig);
     }
+
+    checkAndDispatchSuspendedRequests();
+}
+
+void LanguageServer::checkAndDispatchSuspendedRequests() {
+    if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
+    {
+        client->sendTrace("workspaces configured, handling postponed messages");
+        for (const auto& msg : configPostponedMessages)
+            handleMessage(msg);
+
+        configPostponedMessages.clear();
+        client->sendTrace("workspaces configured, handling postponed COMPLETED");
+    }
 }
 
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
@@ -627,7 +625,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
                 auto filePath = workspace->platform->resolveToRealPath(module);
                 if (filePath)
                 {
-                    auto uri = Uri::file(*filePath);
+                    auto uri = Uri::parse(*filePath);
                     if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()) &&
                         !workspace->isIgnoredFile(*filePath, config))
                     {
@@ -636,6 +634,14 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
                             lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
                         diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
                     }
+                    else
+                    {
+                        client->sendTrace("LanguageServer ignoring " + uri.toString() + " with params.textDocument.uri=" + params.textDocument.uri.toString() + " and isRelated=" + std::to_string(contains(diagnostics.relatedDocuments, uri.toString())) + " and isIgnoredFile=" + std::to_string(workspace->isIgnoredFile(*filePath, config)));
+                    }
+                }
+                else
+                {
+                    client->sendTrace("LanguageServer ignoring " + module + " because it does not resolve to a real path");
                 }
             }
         }
@@ -716,7 +722,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     std::vector<lsp::DocumentUri> configItems{};
     for (auto& folder : params.event.added)
     {
-        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
+        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, packageName));
         configItems.emplace_back(folder.uri);
     }
     client->requestConfiguration(configItems);

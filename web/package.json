@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "name": "luau-lsp-monaco-demo",
+  "version": "0.1.0",
+  "description": "A simple demonstration of using luau-lsp with emscripten and monaco",
+  "author": "Kyle Rudy",
+  "license": "MIT",
+  "source": "index.html",
+  "dependencies": {
+    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^8.0.1",
+    "monaco-languageclient": "^8.8.1",
+    "vscode": "npm:@codingame/monaco-vscode-api@^8.0.1",
+    "vscode-jsonrpc": "8.2.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.92.0",
+    "buffer": "^6.0.3",
+    "parcel": "^2.12.0",
+    "process": "^0.11.10",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1"
+  }
+}

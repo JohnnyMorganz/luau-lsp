@@ -46,7 +46,7 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
 const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const Luau::ModuleName& name) const
 {
     // Handle untitled: files
-    if (Luau::startsWith(name, "untitled:"))
+    if (Luau::startsWith(name, "untitled:") || Luau::startsWith(name, "inmemory:"))
         return getTextDocument(Uri::parse(name));
 
     if (auto filePath = platform->resolveToRealPath(name))

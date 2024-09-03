@@ -325,7 +325,8 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        // TODO - parameterize package name for additional definitions.
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, "@roblox", /* typeCheckForAutocomplete = */ false);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

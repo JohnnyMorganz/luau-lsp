@@ -8,21 +8,35 @@
 
 #include "doctest.h"
 #include <string_view>
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <memory>
 
 static const char* mainModuleName = "MainModule";
 
+std::shared_ptr<Client> Fixture::makeClient() {
+    const char* standardDefinitionsFile = "./tests/testdata/standard_definitions.d.luau";
+    const auto defFilePath = std::filesystem::path(standardDefinitionsFile);
+    const auto pathsPtr = std::make_shared<std::vector<std::filesystem::path>>(std::vector<std::filesystem::path>{defFilePath});
+    const auto docsVec = std::vector<std::filesystem::path>();
+    return std::make_shared<Client>(
+        std::make_shared<ServerIOStd>(),
+        pathsPtr,
+        docsVec);
+}
+
 Fixture::Fixture()
-    : client(std::make_shared<Client>(Client{}))
+    : client(makeClient())
     , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
-    client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
-
     workspace.initialize();
 
     ClientConfiguration config;
     config.sourcemap.enabled = false;
     config.index.enabled = false;
+
     workspace.setupWithConfiguration(config);
 
     Luau::setPrintLine([](auto s) {});
@@ -117,7 +131,8 @@ Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source
     auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
 
     Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, forAutocomplete);
+    // TODO - parameterize package name for additional definitions.
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, "@roblox", forAutocomplete);
     platform.mutateRegisteredDefinitions(globals, std::nullopt);
     Luau::freeze(globals.globalTypes);
 

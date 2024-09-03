@@ -3,6 +3,7 @@
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Workspace.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "Platform/MonacoPlatform.hpp"
 
 #include <memory>
 
@@ -12,12 +13,19 @@ LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* w
 {
 }
 
+void LSPPlatform::forcePlatform(std::function<std::unique_ptr<LSPPlatform>(const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)> overload) {
+    LSPPlatform::getPlatformOverload = overload;
+}
+
 std::unique_ptr<LSPPlatform> LSPPlatform::getPlatform(
     const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
 {
-    if (config.types.roblox && config.platform.type == LSPPlatformConfig::Roblox)
+    if(LSPPlatform::getPlatformOverload.has_value())
+        return LSPPlatform::getPlatformOverload.value()(config, fileResolver, workspaceFolder);
+    else if (config.types.roblox && config.platform.type == LSPPlatformConfig::Roblox)
         return std::make_unique<RobloxPlatform>(fileResolver, workspaceFolder);
-
+    else if(config.platform.type == LSPPlatformConfig::Monaco)
+        return std::make_unique<MonacoPlatform>(fileResolver, workspaceFolder);
     return std::make_unique<LSPPlatform>(fileResolver, workspaceFolder);
 }
 
