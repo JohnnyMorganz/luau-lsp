@@ -331,7 +331,7 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
 }
 
 std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
-    const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
+    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
 {
     if (entry.documentationSymbol)
         if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
@@ -366,7 +366,13 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                 }
 
                 if (parentTy)
-                    definitionModuleName = Luau::getDefinitionModuleName(*parentTy);
+                {
+                    // parentTy might be an intersected type, find the actual base ttv
+                    if (auto propInformation = lookupProp(*parentTy, name))
+                        definitionModuleName = Luau::getDefinitionModuleName(propInformation->first);
+                    else
+                        definitionModuleName = Luau::getDefinitionModuleName(*parentTy);
+                }
             }
         }
 
@@ -432,7 +438,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
 
-        if (auto documentationString = getDocumentationForAutocompleteEntry(entry, result.ancestry, moduleName))
+        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, moduleName))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);

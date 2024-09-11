@@ -618,7 +618,7 @@ export type RBXScriptSignal<T... = ...any> = {
 type HttpRequestOptions = {
     Url: string,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
-    Headers: { [string]: string }?,
+    Headers: { [string]: string | Secret }?,
     Body: string?,
     Compress: EnumHttpCompression
 }
