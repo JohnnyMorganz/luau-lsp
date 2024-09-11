@@ -52,7 +52,7 @@ std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source,
 std::optional<Luau::Location> getLocation(Luau::TypeId type);
 
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
-std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
+std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name);
 
 // Converts a UTF-8 position to a UTF-16 position, using the provided text document if available
@@ -78,7 +78,7 @@ public:
     std::optional<size_t> firstRequireLine = std::nullopt;
     std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
 
-    virtual bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line)
+    virtual bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine)
     {
         return false;
     }
@@ -112,21 +112,22 @@ public:
         if (!localName || !expr)
             return false;
 
-        auto line = expr->location.end.line;
+        auto startLine = local->location.begin.line;
+        auto endLine = local->location.end.line;
 
-        if (handleLocal(local, localName, expr, line))
+        if (handleLocal(local, localName, expr, startLine, endLine))
             return false;
 
         if (isRequire(expr))
         {
-            firstRequireLine = !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
+            firstRequireLine = !firstRequireLine.has_value() || firstRequireLine.value() >= startLine ? startLine : firstRequireLine.value();
 
             // If the requires are too many lines away, treat it as a new group
-            if (previousRequireLine && line - previousRequireLine.value() > 1)
+            if (previousRequireLine && startLine - previousRequireLine.value() > 1)
                 requiresMap.emplace_back(); // Construct a new group
 
             requiresMap.back().emplace(std::string(localName->name.value), local);
-            previousRequireLine = line;
+            previousRequireLine = endLine;
         }
 
         return false;

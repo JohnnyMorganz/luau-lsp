@@ -240,6 +240,34 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_member_of_a_type_table_
     CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "This is a member bar\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_member_of_an_intersected_type_table_when_hovering_over_property")
+{
+    auto source = R"(
+        type A = {
+            --- Example sick number
+            Hello: number
+        }
+
+        type B = {
+            --- Example sick string
+            Heya: string
+        } & A
+
+        local item: B = nil
+        print(item.Heya)
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{12, 21};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "Example sick string\n");
+}
+
 TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function")
 {
     auto source = R"(

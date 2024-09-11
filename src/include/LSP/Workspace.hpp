@@ -96,8 +96,8 @@ private:
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
     std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
-    std::optional<std::string> getDocumentationForAutocompleteEntry(
-        const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName);
+    std::optional<std::string> getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
+        const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName);
     std::vector<Reference> findAllReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
     std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 

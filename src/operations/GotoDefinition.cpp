@@ -73,13 +73,14 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             for (auto it = keys.rbegin(); it != keys.rend(); ++it)
             {
                 auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
-                auto prop = lookupProp(base, *it);
-                if (!prop)
+                auto propInformation = lookupProp(base, *it);
+                if (!propInformation)
                     return result;
 
-                definitionModuleName = Luau::getDefinitionModuleName(base);
-                location = prop->location;
-                properties.push_back(*prop);
+                auto [baseTy, prop] = propInformation.value();
+                definitionModuleName = Luau::getDefinitionModuleName(baseTy);
+                location = prop.location;
+                properties.push_back(prop);
             }
         }
 

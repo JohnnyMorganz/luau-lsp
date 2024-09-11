@@ -181,7 +181,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                         documentationLocation = {definitionModuleName.value(), prop.location};
                     auto resolvedProperty = lookupProp(parentType, prop.name.value);
                     if (resolvedProperty)
-                        type = resolvedProperty->type();
+                        type = resolvedProperty->second.type();
                     break;
                 }
             }
@@ -229,16 +229,16 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             {
                 auto parentType = Luau::follow(*parentIt);
                 auto indexName = index->index.value;
-                auto prop = lookupProp(parentType, indexName);
-                if (prop)
+                if (auto propInformation = lookupProp(parentType, indexName))
                 {
-                    type = prop->type();
-                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
+                    auto [baseTy, prop] = propInformation.value();
+                    type = prop.type();
+                    if (auto definitionModuleName = Luau::getDefinitionModuleName(baseTy))
                     {
-                        if (prop->location)
-                            documentationLocation = {definitionModuleName.value(), prop->location.value()};
-                        else if (prop->typeLocation)
-                            documentationLocation = {definitionModuleName.value(), prop->typeLocation.value()};
+                        if (prop.location)
+                            documentationLocation = {definitionModuleName.value(), prop.location.value()};
+                        else if (prop.typeLocation)
+                            documentationLocation = {definitionModuleName.value(), prop.typeLocation.value()};
                     }
                 }
             }
