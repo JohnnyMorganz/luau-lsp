@@ -16,6 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed property references in assignments not being found (i.e. `bar` in `foo.bar = baz` wouldn't be recognized as a reference to `foo.bar`)
 - Fixed references to required files in types prefixes not being accurate with variable shadowing or separate scopes
 
+## [1.32.4] - 2024-09-11
+
+### Changed
+
+- Sync to upstream Luau 0.642
+
 ## [1.32.3] - 2024-08-10
 
 ### Fixed

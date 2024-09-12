@@ -9,11 +9,11 @@
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
 
-LUAU_FASTFLAG(DebugLuauDeferredConstraintResolution)
+LUAU_FASTFLAG(LuauSolverV2)
 
 const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const
 {
-    if (FFlag::DebugLuauDeferredConstraintResolution || !forAutocomplete)
+    if (FFlag::LuauSolverV2 || !forAutocomplete)
         return frontend.moduleResolver.getModule(moduleName);
     else
         return frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -140,7 +140,8 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativeFsPath = path.lexically_relative(rootUri.fsPath());
     if (relativeFsPath == std::filesystem::path())
-        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed");
+        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed when constructing " +
+                                                                  path.string() + " against " + rootUri.fsPath().string());
     auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
@@ -241,7 +242,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     size_t indexCount = 0;
 
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
+        next != end; ++next)
     {
         if (indexCount >= config.index.maxFiles)
         {
