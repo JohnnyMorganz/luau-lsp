@@ -90,6 +90,86 @@ TEST_CASE_FIXTURE(Fixture, "handle_type_prefix")
     REQUIRE(result.value().range == lsp::Range{{2, 18}, {2, 24}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "handle_type_definition")
+{
+    auto source = R"(
+        local Module = require("")
+        type Ty = Module.Ty
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 14}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "Ty");
+    REQUIRE(result.value().range == lsp::Range{{2, 13}, {2, 15}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_type_reference_without_prefix")
+{
+    auto source = R"(
+        type T = number
+        type Ty = T
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 18}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "T");
+    REQUIRE(result.value().range == lsp::Range{{2, 18}, {2, 19}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_type_reference_with_prefix")
+{
+    auto source = R"(
+        local Module = require("")
+        type Ty = Module.Ty
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 25}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "Ty");
+    REQUIRE(result.value().range == lsp::Range{{2, 25}, {2, 27}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_type_ref_in_local_var")
+{
+    auto source = R"(
+        type Ty = number
+        local t: Ty = 4
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 19}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "Ty");
+    REQUIRE(result.value().range == lsp::Range{{2, 17}, {2, 19}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_type_ref_in_local_var_cast")
+{
+    auto source = R"(
+        type Ty = number
+        local t = 4 :: Ty
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 25}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "Ty");
+    REQUIRE(result.value().range == lsp::Range{{2, 23}, {2, 25}});
+}
+
 TEST_CASE_FIXTURE(Fixture, "handle_local_symbol")
 {
     auto source = R"(
@@ -139,6 +219,23 @@ TEST_CASE_FIXTURE(Fixture, "handle_local_symbol_3")
     REQUIRE(result);
     REQUIRE(result.value().placeholder == "v");
     REQUIRE(result.value().range == lsp::Range{{3, 14}, {3, 15}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_function_name")
+{
+    auto source = R"(
+        local function fun<T>(a: T): T
+            error("unimplemented")
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::PrepareRenameParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{1, 26}};
+    auto result = workspace.prepareRename(params);
+    REQUIRE(result);
+    REQUIRE(result.value().placeholder == "fun");
+    REQUIRE(result.value().range == lsp::Range{{1, 23}, {1, 26}});
 }
 
 TEST_CASE_FIXTURE(Fixture, "handle_function_generic")

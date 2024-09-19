@@ -167,5 +167,29 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
     CHECK_EQ(lsp::Range{{2, 18}, {2, 22}}, result->at(1).range);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_of_assigned_property")
+{
+    auto source = R"(
+        local tbl = {
+            foo = "bar"
+        }
+        tbl.foo = "baz"
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 12};
+
+    auto result = workspace.references(params);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 15}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{4, 12}, {4, 15}}, result->at(1).range);
+}
 
 TEST_SUITE_END();

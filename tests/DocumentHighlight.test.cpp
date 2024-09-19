@@ -490,6 +490,29 @@ TEST_CASE_FIXTURE(Fixture, "find_highlights_of_table_with_assigment")
     REQUIRE(highlights[1].kind == lsp::DocumentHighlightKind::Read);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_highlights_of_assigned_property")
+{
+    auto source = R"(
+        local tbl = {
+            foo = "bar"
+        }
+        tbl.foo = "baz"
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::DocumentHighlightParams params = {lsp::TextDocumentIdentifier{uri}, lsp::Position{2, 12}};
+    auto result = workspace.documentHighlight(params);
+    REQUIRE(result);
+    auto highlights = result.value();
+
+    REQUIRE(highlights.size() == 2);
+    REQUIRE(highlights[0].range == lsp::Range{{2, 12}, {2, 15}});
+    REQUIRE(highlights[0].kind == lsp::DocumentHighlightKind::Write);
+    REQUIRE(highlights[1].range == lsp::Range{{4, 12}, {4, 15}});
+    REQUIRE(highlights[1].kind == lsp::DocumentHighlightKind::Write);
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_highlights_of_recursive_property")
 {
     auto source = R"(
