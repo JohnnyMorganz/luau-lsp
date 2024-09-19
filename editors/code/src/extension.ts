@@ -76,7 +76,8 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Load extra type definitions
   const definitionFiles = typesConfig.get<string[]>("definitionFiles");
   if (definitionFiles) {
-    for (const definitionPath of definitionFiles) {
+    for (let definitionPath of definitionFiles) {
+      definitionPath = utils.resolvePath(definitionPath);
       let uri;
       if (vscode.workspace.workspaceFolders) {
         uri = utils.resolveUri(
@@ -99,7 +100,8 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Load extra documentation files
   const documentationFiles = typesConfig.get<string[]>("documentationFiles");
   if (documentationFiles) {
-    for (const documentationPath of documentationFiles) {
+    for (let documentationPath of documentationFiles) {
+      documentationPath = utils.resolvePath(documentationPath);
       let uri;
       if (vscode.workspace.workspaceFolders) {
         uri = utils.resolveUri(

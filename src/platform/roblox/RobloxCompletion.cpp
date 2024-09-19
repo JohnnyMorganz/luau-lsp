@@ -187,23 +187,15 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
     }
     else if (tag == "Children")
     {
-        if (ctx && ctx.value())
+        if (auto ctv = ctx.value())
         {
             Luau::AutocompleteEntryMap result;
-            auto ctv = ctx.value();
-            while (ctv)
+            for (auto& [propName, prop] : ctv->props)
             {
-                for (auto& [propName, prop] : ctv->props)
-                {
-                    if (Luau::hasTag(prop, kSourcemapGeneratedTag))
-                        result.insert_or_assign(
-                            propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
-                                          false, false, Luau::TypeCorrectKind::Correct});
-                }
-                if (ctv->parent)
-                    ctv = Luau::get<Luau::ClassType>(*ctv->parent);
-                else
-                    break;
+                if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                    result.insert_or_assign(
+                        propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
+                                      false, false, Luau::TypeCorrectKind::Correct});
             }
             return result;
         }
@@ -301,6 +293,51 @@ std::optional<lsp::CompletionItemKind> RobloxPlatform::handleEntryKind(const Lua
     return std::nullopt;
 }
 
+size_t computeMinimumLineNumberForRequire(const RobloxFindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber)
+{
+    size_t minimumLineNumber = hotCommentsLineNumber;
+    size_t visitorMinimumLine = importsVisitor.getMinimumRequireLine();
+
+    if (visitorMinimumLine > minimumLineNumber)
+        minimumLineNumber = visitorMinimumLine;
+
+    if (importsVisitor.firstRequireLine)
+        minimumLineNumber = *importsVisitor.firstRequireLine >= minimumLineNumber ? (*importsVisitor.firstRequireLine) : minimumLineNumber;
+    return minimumLineNumber;
+}
+
+size_t computeBestLineForRequire(
+    const RobloxFindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber)
+{
+    size_t lineNumber = minimumLineNumber;
+    size_t bestLength = 0;
+    for (auto& group : importsVisitor.requiresMap)
+    {
+        for (auto& [_, stat] : group)
+        {
+            auto line = stat->location.end.line;
+
+            // HACK: We read the text of the require argument to sort the lines
+            // Note: requires may be in the form `require(path) :: any`, so we need to handle that too
+            auto* call = stat->values.data[0]->as<Luau::AstExprCall>();
+            if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
+                call = assertion->expr->as<Luau::AstExprCall>();
+            if (!call)
+                continue;
+
+            auto location = call->args.data[0]->location;
+            auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
+            auto argText = textDocument.getText(range);
+            auto length = getLengthEqual(argText, require);
+
+            if (length > bestLength && argText < require && line >= lineNumber)
+                lineNumber = line + 1;
+        }
+    }
+
+    return lineNumber;
+}
+
 void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
     size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
@@ -332,14 +369,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
     if (config.completion.imports.suggestRequires)
     {
-        size_t minimumLineNumber = hotCommentsLineNumber;
-        size_t visitorMinimumLine = importsVisitor.getMinimumRequireLine();
-
-        if (visitorMinimumLine > minimumLineNumber)
-            minimumLineNumber = visitorMinimumLine;
-
-        if (importsVisitor.firstRequireLine)
-            minimumLineNumber = *importsVisitor.firstRequireLine >= minimumLineNumber ? (*importsVisitor.firstRequireLine) : minimumLineNumber;
+        size_t minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
         for (auto& [path, node] : virtualPathsToSourceNodes)
         {
@@ -371,31 +401,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
             auto require = convertToScriptPath(requirePath);
 
-            size_t lineNumber = minimumLineNumber;
-            size_t bestLength = 0;
-            for (auto& group : importsVisitor.requiresMap)
-            {
-                for (auto& [_, stat] : group)
-                {
-                    auto line = stat->location.end.line;
-
-                    // HACK: We read the text of the require argument to sort the lines
-                    // Note: requires may be in the form `require(path) :: any`, so we need to handle that too
-                    Luau::AstExprCall* call = stat->values.data[0]->as<Luau::AstExprCall>();
-                    if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
-                        call = assertion->expr->as<Luau::AstExprCall>();
-                    if (!call)
-                        continue;
-
-                    auto location = call->args.data[0]->location;
-                    auto range = lsp::Range{{location.begin.line, location.begin.column}, {location.end.line, location.end.column}};
-                    auto argText = textDocument.getText(range);
-                    auto length = getLengthEqual(argText, require);
-
-                    if (length > bestLength && argText < require && line >= lineNumber)
-                        lineNumber = line + 1;
-                }
-            }
+            size_t lineNumber = computeBestLineForRequire(importsVisitor, textDocument, require, minimumLineNumber);
 
             if (!isRelative)
             {
@@ -404,13 +410,14 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 auto service = requirePath.substr(0, requirePath.find('/'));
                 if (!contains(importsVisitor.serviceLineMap, service))
                 {
-                    auto lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
+                    auto serviceLineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
                     bool appendNewline = false;
                     // If there is no firstRequireLine, then the require that we insert will become the first require,
-                    // so we use `.value_or(lineNumber)` to ensure it equals 0 and a newline is added
-                    if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine.value_or(lineNumber) - lineNumber == 0)
+                    // so we use `.value_or(serviceLineNumber)` to ensure it equals 0 and a newline is added
+                    if (config.completion.imports.separateGroupsWithLine &&
+                        importsVisitor.firstRequireLine.value_or(serviceLineNumber) - serviceLineNumber == 0)
                         appendNewline = true;
-                    textEdits.emplace_back(createServiceTextEdit(service, lineNumber, appendNewline));
+                    textEdits.emplace_back(createServiceTextEdit(service, serviceLineNumber, appendNewline));
                 }
             }
 

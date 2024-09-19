@@ -119,7 +119,7 @@ local function cleanup()
 	connected.Value = false
 end
 
-local function sendFullDMInfo()
+local function sendFullDMInfo(isSilent)
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
@@ -142,6 +142,9 @@ local function sendFullDMInfo()
 		cleanup()
 	else
 		connected.Value = true
+		if not isSilent then
+			print(`[Luau Language Server] Successfully sent full DataModel info`)
+		end
 	end
 end
 
@@ -160,7 +163,7 @@ local function watchChanges(isSilent)
 			task.cancel(sendTask)
 		end
 		sendTask = task.delay(0.5, function()
-			sendFullDMInfo()
+			sendFullDMInfo(isSilent)
 			sendTask = nil
 		end)
 	end
@@ -177,7 +180,7 @@ local function watchChanges(isSilent)
 
 	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
 	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
-	sendFullDMInfo()
+	sendFullDMInfo(isSilent)
 end
 
 function connectServer(isSilent: boolean?)

@@ -126,9 +126,9 @@ TEST_CASE_FIXTURE(Fixture, "attach_comments_to_props_1")
     auto indexName = index->index.value;
     auto prop = lookupProp(parentTy, indexName);
     REQUIRE(prop);
-    REQUIRE(prop->location);
+    REQUIRE(prop->second.location);
 
-    auto comments = getCommentLocations(getMainSourceModule(), prop->location.value());
+    auto comments = getCommentLocations(getMainSourceModule(), prop->second.location.value());
     CHECK_EQ(1, comments.size());
 }
 

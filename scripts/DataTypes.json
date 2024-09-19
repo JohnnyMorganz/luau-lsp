@@ -4862,7 +4862,7 @@
                 },
                 {
                     "MemberType": "Property",
-                    "Name": "BundleType",
+                    "Name": "BundleTypes",
                     "ValueType": {
                         "Name": "Array",
                         "Generic": "Enum.BundleType"

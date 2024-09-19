@@ -540,6 +540,8 @@ type FloatCurveKey = any
 type RotationCurveKey = any
 type Secret = any
 type Path2DControlPoint = any
+type UniqueId = any
+type SecurityCapabilities = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -616,7 +618,7 @@ export type RBXScriptSignal<T... = ...any> = {
 type HttpRequestOptions = {
     Url: string,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
-    Headers: { [string]: string }?,
+    Headers: { [string]: string | Secret }?,
     Body: string?,
     Compress: EnumHttpCompression
 }
@@ -764,7 +766,7 @@ ApiFunction = TypedDict(
         "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": ApiValueType,
+        "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Security": str,
@@ -792,7 +794,7 @@ ApiCallback = TypedDict(
         "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": ApiValueType,
+        "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": Optional[List[str]],  # TODO: stricter type?
         "Security": str,
@@ -851,10 +853,9 @@ DataTypesDump = TypedDict(
     {"DataTypes": List[DataType], "Constructors": List[DataTypesConstructor]},
 )
 
-
 chosenSecurityLevel = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SECURITY_LEVEL
 assert (
-    chosenSecurityLevel in SECURITY_LEVELS
+        chosenSecurityLevel in SECURITY_LEVELS
 ), f"Unknown security level: {chosenSecurityLevel}"
 
 
@@ -926,18 +927,21 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
     if "TupleReturns" in member and member["TupleReturns"] is not None:
         types = [resolveType(ret) for ret in member["TupleReturns"]]
         return "(" + ", ".join(types) + ")"
+    elif isinstance(member["ReturnType"], list):
+        types = [resolveType(ret) for ret in member["ReturnType"]]
+        return "(" + ", ".join(types) + ")"
     else:
         return resolveType(member["ReturnType"])
 
 
 def filterMember(klassName: str, member: ApiMember):
     if not INCLUDE_DEPRECATED_METHODS and (
-        (
-            "Tags" in member
-            and member["Tags"] is not None
-            and "Deprecated" in member["Tags"]
-        )
-        or ("Deprecated" in member and member["Deprecated"])
+            (
+                    "Tags" in member
+                    and member["Tags"] is not None
+                    and "Deprecated" in member["Tags"]
+            )
+            or ("Deprecated" in member and member["Deprecated"])
     ):
         return False
     if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
@@ -945,13 +949,13 @@ def filterMember(klassName: str, member: ApiMember):
     if "Security" in member:
         if isinstance(member["Security"], str):
             if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
-                chosenSecurityLevel
+                    chosenSecurityLevel
             ):
                 return False
         else:
             if min(
-                SECURITY_LEVELS.index(member["Security"]["Read"]),
-                SECURITY_LEVELS.index(member["Security"]["Write"]),
+                    SECURITY_LEVELS.index(member["Security"]["Read"]),
+                    SECURITY_LEVELS.index(member["Security"]["Write"]),
             ) > SECURITY_LEVELS.index(chosenSecurityLevel):
                 return False
 
@@ -960,11 +964,11 @@ def filterMember(klassName: str, member: ApiMember):
 
 def shouldExcludeAsDeprecated(klass: ApiClass):
     return (
-        not INCLUDE_DEPRECATED_METHODS
-        and "Tags" in klass
-        and klass["Tags"] is not None
-        and "Deprecated" in klass["Tags"]
-        and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+            not INCLUDE_DEPRECATED_METHODS
+            and "Tags" in klass
+            and klass["Tags"] is not None
+            and "Deprecated" in klass["Tags"]
+            and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
     )
 
 
@@ -1076,10 +1080,10 @@ def printDataTypeConstructors(types: DataTypesDump):
         for member in members:
             if member["MemberType"] == "Function":
                 if (
-                    name == "BrickColor"
-                    and member["Name"] == "new"
-                    and len(member["Parameters"]) == 1
-                    and member["Parameters"][0]["Type"]["Name"] == "string"
+                        name == "BrickColor"
+                        and member["Name"] == "new"
+                        and len(member["Parameters"]) == 1
+                        and member["Parameters"][0]["Type"]["Name"] == "string"
                 ):
                     isBrickColorNew = True
                     continue
@@ -1150,8 +1154,8 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                     ]["Generic"]
 
                             if (
-                                "Parameters" in member
-                                and member["Parameters"] is not None
+                                    "Parameters" in member
+                                    and member["Parameters"] is not None
                             ):
                                 for param in member["Parameters"]:
                                     for otherParam in otherMember["Parameters"]:
@@ -1181,9 +1185,9 @@ def loadClassesIntoStructures(dump: ApiDump):
         isCreatable = True
         if "Tags" in klass and klass["Tags"] is not None:
             if (
-                "Deprecated" in klass
-                and not INCLUDE_DEPRECATED_METHODS
-                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+                    "Deprecated" in klass
+                    and not INCLUDE_DEPRECATED_METHODS
+                    and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
             ):
                 continue
             if "Service" in klass["Tags"]:
