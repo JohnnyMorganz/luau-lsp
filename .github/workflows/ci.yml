@@ -71,6 +71,12 @@ jobs:
           cmake ..
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
+      - name: Checkout creator-docs
+        uses: actions/checkout@v4
+        with:
+          repository: "Roblox/creator-docs"
+          path: "scripts"
+
       - name: Regenerate Types
         run: |
           cd scripts

@@ -6,9 +6,12 @@ from collections import defaultdict
 import requests
 import json
 import sys
+import yaml
+import os
+from dataclasses import dataclass
 
 # API Endpoints
-DATA_TYPES = open("DataTypes.json", "r")
+DOCUMENTATION_DIRECTORY = "creator-docs/content/en-us/reference/engine"
 CORRECTIONS = open("Corrections.json", "r")
 API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
@@ -63,7 +66,6 @@ IGNORED_INSTANCES: List[str] = [
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
-    "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
 ]
 
 # Methods / Properties ignored in classes. Commonly used to add corrections
@@ -260,9 +262,6 @@ IGNORED_MEMBERS = {
         "Attachment0",
         "Attachment1",
     ],
-    "Vector3": [
-        "Angle",
-    ],
     "ControllerPartSensor": [
         "SensedPart",
     ],
@@ -270,56 +269,6 @@ IGNORED_MEMBERS = {
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
 EXTRA_MEMBERS = {
-    "Vector3": [
-        "function Angle(self, other: Vector3, axis: Vector3?): number",
-        "function __add(self, other: Vector3): Vector3",
-        "function __sub(self, other: Vector3): Vector3",
-        "function __mul(self, other: Vector3 | number): Vector3",
-        "function __div(self, other: Vector3 | number): Vector3",
-        "function __unm(self): Vector3",
-        "function __idiv(self, other: Vector3 | number): Vector3",
-    ],
-    "Vector2": [
-        "function __add(self, other: Vector2): Vector2",
-        "function __sub(self, other: Vector2): Vector2",
-        "function __mul(self, other: Vector2 | number): Vector2",
-        "function __div(self, other: Vector2 | number): Vector2",
-        "function __idiv(self, other: Vector2 | number): Vector2",
-        "function __unm(self): Vector2",
-    ],
-    "Vector3int16": [
-        "function __add(self, other: Vector3int16): Vector3int16",
-        "function __sub(self, other: Vector3int16): Vector3int16",
-        "function __mul(self, other: Vector3int16 | number): Vector3int16",
-        "function __div(self, other: Vector3int16 | number): Vector3int16",
-        "function __unm(self): Vector3int16",
-    ],
-    "Vector2int16": [
-        "function __add(self, other: Vector2int16): Vector2int16",
-        "function __sub(self, other: Vector2int16): Vector2int16",
-        "function __mul(self, other: Vector2int16 | number): Vector2int16",
-        "function __div(self, other: Vector2int16 | number): Vector2int16",
-        "function __unm(self): Vector2int16",
-    ],
-    "UDim2": [
-        "function __add(self, other: UDim2): UDim2",
-        "function __sub(self, other: UDim2): UDim2",
-        "function __unm(self): UDim2",
-    ],
-    "UDim": [
-        "function __add(self, other: UDim): UDim",
-        "function __sub(self, other: UDim): UDim",
-        "function __unm(self): UDim",
-    ],
-    "CFrame": [
-        "function __add(self, other: Vector3): CFrame",
-        "function __sub(self, other: Vector3): CFrame",
-        "function __mul(self, other: CFrame): CFrame",
-        "function __mul(self, other: Vector3): Vector3",
-    ],
-    "Random": [
-        "function Shuffle(self, table: { any })",
-    ],
     "UserSettings": [
         "GameSettings: UserGameSettings",
         'function GetService(self, service: "UserGameSettings"): UserGameSettings',
@@ -549,19 +498,6 @@ EXTRA_MEMBERS = {
 # Hardcoded types
 # These will go before anything else, and are useful to define for other tools
 START_BASE = """
-type Content = string
-type ProtectedString = string
-type BinaryString = string
-type QDir = string
-type QFont = string
-type FloatCurveKey = any
-type RotationCurveKey = any
-type Secret = any
-type Path2DControlPoint = any
-type UniqueId = any
-type SecurityCapabilities = any
-type TeleportData = "boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}"
-
 declare class Enum
     function GetEnumItems(self): { any }
 end
@@ -604,19 +540,6 @@ declare utf8: {
     nfdnormalize: (string) -> string,
     offset: (string, number, number?) -> number?,
 }
-
-declare shared: any
-
-declare function collectgarbage(mode: "count"): number
-declare function warn<T...>(...: T...)
-declare function tick(): number
-declare function time(): number
-declare function elapsedTime(): number
-declare function wait(seconds: number?): (number, number)
-declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
-declare function spawn<T...>(callback: (T...) -> ())
-declare function version(): string
-declare function printidentity(prefix: string?)
 """
 
 POST_DATATYPES_BASE = """
@@ -685,192 +608,92 @@ declare SharedTable: {
     size: (st: SharedTable) -> number,
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
 }
-
-declare game: DataModel
-declare workspace: Workspace
-declare plugin: Plugin
-declare script: LuaSourceContainer
-declare function settings(): GlobalSettings
-declare function UserSettings(): UserSettings
 """
 
-CLASSES = {}  # All loaded classes from the API Dump, including corrections
 SERVICES: List[str] = []  # All available services name
 CREATABLE: List[str] = []  # All creatable instances
 BRICK_COLORS: Set[str] = set()
 
-# Type Hints
+@dataclass
+class Parameter:
+    name: str
+    type: str
+    default: Optional[str]
 
-CorrectionsValueType = TypedDict(
-    "CorrectionsValueType",
-    {
-        "Name": str,
-        "Category": None,
-        "Default": Optional[str],
-        "Generic": Optional[str],
-        "Tuple": Optional["CorrectionsValueType"],
-        "Union": Optional[List["CorrectionsValueType"]],
-    },
-)
 
-CorrectionsParameter = TypedDict(
-    "CorrectionsParameter",
-    {
-        "Name": str,
-        "Type": CorrectionsValueType,
-    },
-)
+@dataclass
+class Constructor:
+    name: str
+    tags: list[str]
+    parameters: list[Parameter]
 
-CorrectionsMember = TypedDict(
-    "CorrectionsMember",
-    {
-        "Name": str,
-        "ValueType": Optional[CorrectionsValueType],
-        "Parameters": Optional[List[CorrectionsParameter]],
-        "ReturnType": Optional[CorrectionsValueType],
-        "TupleReturns": Optional[List[CorrectionsValueType]],
-    },
-)
 
-CorrectionsClass = TypedDict(
-    "CorrectionsClass", {"Name": str, "Members": List[CorrectionsMember]}
-)
+@dataclass
+class Property:
+    name: str
+    type: str
+    tags: list[str]
 
-CorrectionsDump = TypedDict("CorrectionsDump", {"Classes": List[CorrectionsClass]})
 
-ApiValueType = TypedDict(
-    "ApiValueType",
-    {
-        "Name": str,
-        "Category": Union[
-            Literal["Primitive"],
-            Literal["Class"],
-            Literal["DataType"],
-            Literal["Enum"],
-            Literal["Group"],  # Name = "Tuple"
-        ],
-    },
-)
+@dataclass
+class Function:
+    name: str
+    parameters: list[Parameter]
+    returns: list[str]
+    tags: list[str]
 
-ApiParameter = TypedDict(
-    "ApiParameter",
-    {
-        "Name": str,
-        "Type": ApiValueType,
-        "Default": Optional[str],
-    },
-)
 
-ApiPropertySecurityLevel = TypedDict("PropertySecurity", {"Read": str, "Write": str})
+@dataclass
+class MathOperation:
+    operation: str
+    type_a: str
+    type_b: str
+    return_type: str
+    tags: list[str]
 
-ApiProperty = TypedDict(
-    "ApiProperty",
-    {
-        "Name": str,
-        "MemberType": Literal["Property"],
-        "Deprecated": Optional[bool],
-        "Description": Optional[str],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Category": str,  # TODO: stricter type?
-        "ValueType": ApiValueType,
-        "Security": ApiPropertySecurityLevel,
-    },
-)
 
-ApiFunction = TypedDict(
-    "ApiFunction",
-    {
-        "Name": str,
-        "MemberType": Literal["Function"],
-        "Deprecated": Optional[bool],
-        "Description": Optional[str],
-        "Parameters": List[ApiParameter],
-        "ReturnType": Union[ApiValueType, List[ApiValueType]],
-        "TupleReturns": Optional[List[CorrectionsValueType]],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
-    },
-)
+@dataclass
+class DataType:
+    name: str
+    tags: list[str]
+    constructors: list[Constructor]
+    properties: list[Property]
+    constants: list[Property]
+    methods: list[Function]
+    functions: list[Function]
+    math_operations: list[MathOperation]
 
-ApiEvent = TypedDict(
-    "ApiEvent",
-    {
-        "Name": str,
-        "MemberType": Literal["Event"],
-        "Deprecated": Optional[bool],
-        "Description": Optional[str],
-        "Parameters": List[ApiParameter],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
-    },
-)
 
-ApiCallback = TypedDict(
-    "ApiCallback",
-    {
-        "Name": str,
-        "MemberType": Literal["Callback"],
-        "Deprecated": Optional[bool],
-        "Description": Optional[str],
-        "Parameters": List[ApiParameter],
-        "ReturnType": Union[ApiValueType, List[ApiValueType]],
-        "TupleReturns": Optional[List[CorrectionsValueType]],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
-    },
-)
+@dataclass
+class Event:
+    name: str
+    parameters: list[Parameter]
+    tags: list[str]
 
-ApiMember = Union[ApiProperty, ApiFunction, ApiEvent, ApiCallback]
 
-ApiClass = TypedDict(
-    "ApiClass",
-    {
-        "Name": str,
-        "Description": Optional[str],
-        "MemoryCategory": str,  # TODO: stricter type?
-        "Superclass": str,
-        "Members": List[ApiMember],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-    },
-)
+@dataclass
+class EngineClass:
+    name: str
+    inherits: Optional[str]
+    tags: list[str]
+    properties: list[Property]
+    methods: list[Function]
+    events: list[Event]
+    callbacks: list[Function]
 
-ApiEnumItem = TypedDict(
-    "ApiEnumItem",
-    {
-        "Name": str,
-        "Value": int,
-        "Description": Optional[str],
-    },
-)
+@dataclass
+class EnumItem:
+    name: str
+    tags: list[str]
 
-ApiEnum = TypedDict(
-    "ApiEnum",
-    {
-        "Name": str,
-        "Description": Optional[str],
-        "Items": List[ApiEnumItem],
-    },
-)
+@dataclass
+class Enum:
+    name: str
+    tags: list[str]
+    items: list[EnumItem]
 
-ApiDump = TypedDict(
-    "ApiDump",
-    {
-        "Version": int,
-        "Classes": List[ApiClass],
-        "Enums": List[ApiEnum],
-    },
-)
 
-DataType = TypedDict("DataType", {"Name": str, "Members": List[ApiMember]})
-
-DataTypesConstructor = TypedDict(
-    "DataTypesConstructor", {"Name": str, "Members": List[ApiMember]}
-)
-
-DataTypesDump = TypedDict(
-    "DataTypesDump",
-    {"DataTypes": List[DataType], "Constructors": List[DataTypesConstructor]},
-)
+ENUMS: list[Enum] = []
 
 chosenSecurityLevel = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SECURITY_LEVEL
 assert (
@@ -892,141 +715,129 @@ def escapeName(name: str):
     return name
 
 
-def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
-    if "Generic" in type and type["Generic"] is not None:
-        name = type["Generic"]
-        if name.startswith("Enum."):
-            name = "Enum" + name[5:]
-        return "{ " + name + " }"
+def resolveType(type: str) -> str:
+    type = type.strip()
 
-    if "Union" in type and type["Union"] is not None:
-        unions = type["Union"]
-        parts = [resolveType(part) for part in unions]
-        return " | ".join(parts)
+    if "|" in type:
+        return " | ".join([resolveType(ty) for ty in type.split("|")])
 
-    if "Tuple" in type and type["Tuple"] is not None:
-        subtype = resolveType(type["Tuple"])
-        return f"...({subtype})"
-    if "Variadic" in type and type["Variadic"] is not None:
-        subtype = resolveType(type["Variadic"])
-        return f"...{subtype}"
+    if any(enum.name == type for enum in ENUMS):
+        return "Enum" + type
 
-    name, category = (
-        type["Name"],
-        type["Category"] if "Category" in type else "Primitive",
-    )
+    if type.startswith("Array<") and type.endswith(">"):
+        return "{ " + resolveType(type.removeprefix("Array<").removesuffix(">")) + " }"
 
-    if name[-1] == "?":
-        return resolveType({"Name": name[:-1], "Category": category}) + "?"
+    if type.startswith("Tuple<") and type.endswith(">"):
+        return "..." + resolveType(type.removeprefix("Tuple<").removesuffix(">"))
 
-    if category == "Enum":
-        return "Enum" + name
+    return TYPE_INDEX.get(type, type)
+    # if "Generic" in type and type["Generic"] is not None:
+    #     name = type["Generic"]
+    #     if name.startswith("Enum."):
+    #         name = "Enum" + name[5:]
+    #     return "{ " + name + " }"
+
+    # if "Tuple" in type and type["Tuple"] is not None:
+    #     subtype = resolveType(type["Tuple"])
+    #     return f"...({subtype})"
+    # if "Variadic" in type and type["Variadic"] is not None:
+    #     subtype = resolveType(type["Variadic"])
+    #     return f"...{subtype}"
+
+    # name, category = (
+    #     type["Name"],
+    #     type["Category"] if "Category" in type else "Primitive",
+    # )
+
+
+def resolveParameter(param: Parameter):
+    if param.name == "...":
+        return f"...: {resolveType(param.type.removeprefix("Tuple<").removesuffix(">"))}"
+
+    return f"{escapeName(param.name)}: {resolveType(param.type)}{'?' if param.default else ''}"
+
+
+def resolveReturnType(returns: list[str]) -> str:
+    if len(returns) > 1:
+        return_details = ", ".join([resolveType(ret) for ret in returns])
+        return f"({return_details})"
+    elif len(returns) == 0:
+        return "()"
     else:
-        return TYPE_INDEX[name] if name in TYPE_INDEX else name
+        return resolveType(returns[0])
 
 
-def resolveParameter(param: ApiParameter):
-    paramType = resolveType(param["Type"])
-    isOptional = paramType[-1] == "?"
-    isVariadic = paramType.startswith("...")
-    if isVariadic:
-        actualType = paramType[3:]
-        if "Variadic" in param["Type"] and param["Type"]["Variadic"] is not None:
-            return f"...{actualType}"
-
-        return f"...: {actualType}"
-    return f"{escapeName(param['Name'])}: {paramType}{'?' if 'Default' in param and not isOptional else ''}"
-
-
-def resolveParameterList(params: List[ApiParameter]):
-    return ", ".join(map(resolveParameter, params))
-
-
-def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
-    if "TupleReturns" in member and member["TupleReturns"] is not None:
-        types = [resolveType(ret) for ret in member["TupleReturns"]]
-        return "(" + ", ".join(types) + ")"
-    elif isinstance(member["ReturnType"], list):
-        types = [resolveType(ret) for ret in member["ReturnType"]]
-        return "(" + ", ".join(types) + ")"
-    else:
-        return resolveType(member["ReturnType"])
-
-
-def filterMember(klassName: str, member: ApiMember):
-    if not INCLUDE_DEPRECATED_METHODS and (
-        (
-            "Tags" in member
-            and member["Tags"] is not None
-            and "Deprecated" in member["Tags"]
-        )
-        or ("Deprecated" in member and member["Deprecated"])
-    ):
+def filterMember(klassName: str, member: Function):
+    if not INCLUDE_DEPRECATED_METHODS and "Deprecated" in member.tags:
         return False
-    if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
+    if klassName in IGNORED_MEMBERS and member.name in IGNORED_MEMBERS[klassName]:
         return False
-    if "Security" in member:
-        if isinstance(member["Security"], str):
-            if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
-                chosenSecurityLevel
-            ):
-                return False
-        else:
-            if min(
-                SECURITY_LEVELS.index(member["Security"]["Read"]),
-                SECURITY_LEVELS.index(member["Security"]["Write"]),
-            ) > SECURITY_LEVELS.index(chosenSecurityLevel):
-                return False
+    # TODO:
+    # if "Security" in member:
+    #     if isinstance(member["Security"], str):
+    #         if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
+    #             chosenSecurityLevel
+    #         ):
+    #             return False
+    #     else:
+    #         if min(
+    #             SECURITY_LEVELS.index(member["Security"]["Read"]),
+    #             SECURITY_LEVELS.index(member["Security"]["Write"]),
+    #         ) > SECURITY_LEVELS.index(chosenSecurityLevel):
+    #             return False
 
     return True
 
 
-def shouldExcludeAsDeprecated(klass: ApiClass):
+def shouldExcludeAsDeprecated(klass: EngineClass):
     return (
         not INCLUDE_DEPRECATED_METHODS
-        and "Tags" in klass
-        and klass["Tags"] is not None
-        and "Deprecated" in klass["Tags"]
-        and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+        and "Deprecated" in klass.tags
+        and not klass.name in OVERRIDE_DEPRECATED_REMOVAL
     )
 
+def declareProperty(property: Property):
+    return (
+            f"\t{escapeName(property.name)}: {resolveType(property.type)}\n"
+        )
 
-def declareClass(klass: ApiClass) -> str:
-    if klass["Name"] in IGNORED_INSTANCES:
+def declareMethod(function: Function):
+    parameter_details = ["self"] + [resolveParameter(param) for param in function.parameters]
+    return f"\tfunction {escapeName(function.name)}({", ".join(parameter_details)}): {resolveReturnType(function.returns)}\n"
+
+def declareEvent(event: Event):
+    parameters = ", ".join([resolveType(parameter.type) for parameter in event.parameters])
+    return f"\t{escapeName(event.name)}: RBXScriptSignal<{parameters}>\n"
+
+def declareCallback(callback: Function):
+    parameter_details = [resolveParameter(param) for param in callback.parameters]
+    return f"\t{escapeName(callback.name)}: ({", ".join(parameter_details)}) -> {resolveReturnType(callback.returns)}\n"
+
+def declareClass(engineClass: EngineClass) -> str:
+    if engineClass.name in IGNORED_INSTANCES:
         return ""
 
-    if shouldExcludeAsDeprecated(klass):
+    if shouldExcludeAsDeprecated(engineClass):
         return ""
 
-    out = "declare class " + klass["Name"]
-    if "Superclass" in klass and klass["Superclass"] != "<<<ROOT>>>":
-        out += " extends " + klass["Superclass"]
+    out = "declare class " + engineClass.name
+    if engineClass.inherits:
+        out += " extends " + engineClass.inherits
     out += "\n"
 
-    def declareMember(member: ApiMember):
-        if member["MemberType"] == "Property":
-            return (
-                f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            )
-        elif member["MemberType"] == "Function":
-            return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
-        elif member["MemberType"] == "Event":
-            parameters = ", ".join(
-                map(lambda x: resolveType(x["Type"]), member["Parameters"])
-            )
-            return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
-        elif member["MemberType"] == "Callback":
-            return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
-        else:
-            assert False, "Unhandled member type: " + member["MemberType"]
-
     memberDefinitions = [
-        declareMember(m) for m in klass["Members"] if filterMember(klass["Name"], m)
+        declareProperty(p) for p in engineClass.properties if filterMember(engineClass.name, p)
+    ] + [
+        declareMethod(m) for m in engineClass.methods  if filterMember(engineClass.name, m)
+    ] + [
+        declareEvent(e) for e in engineClass.events if filterMember(engineClass.name, e)
+    ] + [
+        declareCallback(c) for c in engineClass.callbacks if filterMember(engineClass.name, c)
     ]
 
-    if klass["Name"] in EXTRA_MEMBERS:
+    if engineClass.name in EXTRA_MEMBERS:
         memberDefinitions += [
-            f"\t{member}\n" for member in EXTRA_MEMBERS[klass["Name"]]
+            f"\t{member}\n" for member in EXTRA_MEMBERS[engineClass.name]
         ]
 
     out += "".join(sorted(memberDefinitions))
@@ -1035,22 +846,16 @@ def declareClass(klass: ApiClass) -> str:
     return out
 
 
-def printEnums(dump: ApiDump):
-    enums: dict[str, List[str]] = {}
-    for enum in dump["Enums"]:
-        enums[enum["Name"]] = []
-        for item in enum["Items"]:
-            enums[enum["Name"]].append(item["Name"])
-
+def printEnums(enums: list[Enum]):
     # Declare each enum individually
     out = ""
-    for enum, items in enums.items():
+    for enum in enums:
         # Declare an atom for the enum
-        out += f"declare class Enum{enum} extends EnumItem end\n"
-        out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
-        items.sort()
+        out += f"declare class Enum{enum.name} extends EnumItem end\n"
+        out += f"declare class Enum{enum.name}_INTERNAL extends Enum\n"
+        items = sorted(enum.items, key=lambda x: x.name)
         for item in items:
-            out += f"\t{escapeName(item)}: Enum{enum}\n"
+            out += f"\t{escapeName(item.name)}: Enum{enum.name}\n"
         out += "end\n"
     print(out)
     print()
@@ -1058,165 +863,109 @@ def printEnums(dump: ApiDump):
     # Declare enums as a whole
     out = "type ENUM_LIST = {\n"
     for enum in enums:
-        out += f"\t{enum}: Enum{enum}_INTERNAL,\n"
+        out += f"\t{enum.name}: Enum{enum.name}_INTERNAL,\n"
     out += "} & { GetEnums: (self: ENUM_LIST) -> { Enum } }\n"
     out += "declare Enum: ENUM_LIST"
     print(out)
     print()
 
 
-def printClasses(klasses: list[ApiClass]):
+def printClasses(klasses: list[EngineClass]):
     # Forward declare "deprecated" classes in case they are still used
     for klass in klasses:
         if shouldExcludeAsDeprecated(klass):
-            print(f"export type {klass['Name']} = any")
+            print(f"export type {klass.name} = any")
 
     for klass in klasses:
-        if klass["Name"] in IGNORED_INSTANCES:
+        if klass.name in IGNORED_INSTANCES:
             continue
 
         print(declareClass(klass))
         print()
+
+def metamethod(operator: str):
+    if operator == "+":
+        return "__add"
+    elif operator == "-":
+        return "__sub"
+    elif operator == "*":
+        return "__mul"
+    elif operator == "/":
+        return "__div"
+    elif operator == "//":
+        return "__idiv"
+    assert False, operator
 
 
 def printDataTypes(types: List[DataType]):
-    for klass in types:
-        print(declareClass(klass))
+    for dataType in types:
+        math_operations = [
+            Function(metamethod(operation.operation) , [Parameter("other", operation.type_b, None)], [operation.return_type], [])
+            for operation in dataType.math_operations
+        ]
+
+        print(declareClass(EngineClass(dataType.name, None, dataType.tags, dataType.properties, dataType.methods + math_operations, [], [])))
         print()
 
 
-def printDataTypeConstructors(types: DataTypesDump):
-    for klass in types["Constructors"]:
-        if klass["Name"] in IGNORED_INSTANCES:
+def printDataTypeConstructors(types: List[DataType]):
+    for klass in types:
+        if klass.name in IGNORED_INSTANCES:
             continue
-        name = klass["Name"]
-        members = klass["Members"]
 
         isBrickColorNew = False
 
         # Handle overloadable functions
-        functions: defaultdict[str, List[ApiFunction]] = defaultdict(list)
-        for member in members:
-            if member["MemberType"] == "Function":
-                if (
-                    name == "BrickColor"
-                    and member["Name"] == "new"
-                    and len(member["Parameters"]) == 1
-                    and member["Parameters"][0]["Type"]["Name"] == "string"
-                ):
-                    isBrickColorNew = True
-                    continue
-                functions[member["Name"]].append(member)
+        functions: defaultdict[str, List[Function]] = defaultdict(list)
+        for member in klass.constructors:
+            if klass.name == "BrickColor" and member.name == "new" and len(member.parameters) == 1 and member.parameters[0].type == "string":
+                isBrickColorNew = True
+                continue
 
-        out = "declare " + name + ": {\n"
-        for member in members:
-            if member["MemberType"] == "Property":
-                out += f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])},\n"
-            elif member["MemberType"] == "Function":
-                pass
-            elif member["MemberType"] == "Event":
-                out += f"\t{escapeName(member['Name'])}: RBXScriptSignal,\n"  # TODO: type this
+            functions[member.name].append(Function(member.name, member.parameters, [klass.name], member.tags))
+
+        for member in klass.functions:
+            functions[member.name].append(member)
+
+        if len(klass.constants) + len(functions) == 0:
+            continue
+
+        out = "declare " + klass.name + ": {\n"
+
+        memberDefinitions = [
+            f"\t{escapeName(constant.name)}: {resolveType(constant.type)},\n"
+            for constant in klass.constants
+        ]
 
         # Special case string BrickColor new
         if isBrickColorNew:
             colors = " | ".join(map(lambda c: f'"{c}"', sorted(BRICK_COLORS)))
 
-            functions["new"].append(
-                {
-                    "Parameters": [{"Name": "name", "Type": {"Name": colors}}],
-                    "ReturnType": {"Name": "BrickColor", "Category": "DataType"},
-                    "Name": "new",
-                }
-            )
+            functions["new"].append(Function("new", [Parameter("name", colors, None)], ["BrickColor"], []))
 
         for function, overloads in functions.items():
-            overloads = map(
-                lambda member: f"(({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)})",
-                overloads,
-            )
-            out += f"\t{escapeName(function)}: {' & '.join(overloads)},\n"
+            overloads = [f"(({", ".join([resolveParameter(parameter) for parameter in member.parameters])}) -> {resolveReturnType(member.returns)})" for member in overloads]
+            memberDefinitions.append(f"\t{escapeName(function)}: {' & '.join(overloads)},\n")
 
+        out += "".join(sorted(memberDefinitions))
         out += "}"
         print(out)
         print()
 
 
-def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
-    for klass in corrections["Classes"]:
-        for otherClass in dump["Classes"]:
-            if otherClass["Name"] == klass["Name"]:
-                for member in klass["Members"]:
-                    for otherMember in otherClass["Members"]:
-                        if otherMember["Name"] == member["Name"]:
-                            if "TupleReturns" in member:
-                                del otherMember["ReturnType"]
-                                otherMember["TupleReturns"] = member["TupleReturns"]
-                            elif "ReturnType" in member:
-                                otherMember["ReturnType"]["Name"] = (
-                                    member["ReturnType"]["Name"]
-                                    if "Name" in member["ReturnType"]
-                                    else otherMember["ReturnType"]["Name"]
-                                )
-                                if "Generic" in member["ReturnType"]:
-                                    otherMember["ReturnType"]["Generic"] = member[
-                                        "ReturnType"
-                                    ]["Generic"]
-                            elif "ValueType" in member:
-                                otherMember["ValueType"]["Name"] = (
-                                    member["ValueType"]["Name"]
-                                    if "Name" in member["ValueType"]
-                                    else otherMember["ValueType"]["Name"]
-                                )
-                                if "Generic" in member["ValueType"]:
-                                    otherMember["ValueType"]["Generic"] = member[
-                                        "ValueType"
-                                    ]["Generic"]
-
-                            if (
-                                "Parameters" in member
-                                and member["Parameters"] is not None
-                            ):
-                                for param in member["Parameters"]:
-                                    for otherParam in otherMember["Parameters"]:
-                                        if otherParam["Name"] == param["Name"]:
-                                            if "Type" in param:
-                                                otherParam["Type"]["Name"] = (
-                                                    param["Type"]["Name"]
-                                                    if "Name" in param["Type"]
-                                                    else otherParam["Type"]["Name"]
-                                                )
-                                                if "Generic" in param["Type"]:
-                                                    otherParam["Type"]["Generic"] = (
-                                                        param["Type"]["Generic"]
-                                                    )
-                                            if "Default" in param:
-                                                otherParam["Default"] = param["Default"]
-
-                            break
-                break
-
-
-def loadClassesIntoStructures(dump: ApiDump):
-    for klass in dump["Classes"]:
-        if klass["Name"] in IGNORED_INSTANCES:
+def loadClassesIntoStructures(engineClasses: list[EngineClass]):
+    for klass in engineClasses:
+        if klass.name in IGNORED_INSTANCES:
             continue
 
-        isCreatable = True
-        if "Tags" in klass and klass["Tags"] is not None:
-            if (
-                "Deprecated" in klass
-                and not INCLUDE_DEPRECATED_METHODS
-                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
-            ):
-                continue
-            if "Service" in klass["Tags"]:
-                SERVICES.append(klass["Name"])
-            if "NotCreatable" in klass["Tags"]:
-                isCreatable = False
-        if isCreatable:
-            CREATABLE.append(klass["Name"])
+        if "Deprecated" in klass.tags and not INCLUDE_DEPRECATED_METHODS and not klass.name in OVERRIDE_DEPRECATED_REMOVAL:
+            continue
 
-        CLASSES[klass["Name"]] = klass
+        if "Service" in klass.tags:
+            SERVICES.append(klass.name)
+
+        if "NotCreatable" not in klass.tags:
+            CREATABLE.append(klass.name)
 
 
 def processBrickColors(colors):
@@ -1234,22 +983,177 @@ def printJsonPrologue():
 brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
 
-# Print global types
-dataTypes: DataTypesDump = json.load(DATA_TYPES)
-dump: ApiDump = json.loads(requests.get(API_DUMP_URL).text)
+CLASSES_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "classes")
+DATATYPES_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "datatypes")
+ENUMS_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "enums")
+
+
+def parse_parameter(info) -> Parameter:
+    return Parameter(info["name"], info["type"], info["default"])
+
+
+def parse_constructor(info) -> Constructor:
+    _class_name, constructor_name = info["name"].split(".")
+    parameters = (
+        [parse_parameter(param) for param in info["parameters"]]
+        if info["parameters"]
+        else []
+    )
+    return Constructor(constructor_name, info["tags"], parameters)
+
+
+def parse_property(info, is_global = False) -> Property:
+    if is_global:
+        property_name = info["name"]
+    else:
+        _class_name, property_name = info["name"].split(".")
+    return Property(property_name, info["type"], info["tags"])
+
+
+def parse_method(info) -> Function:
+    _class_name, method_name = info["name"].split(":")
+    parameters = (
+        [parse_parameter(param) for param in info["parameters"]]
+        if info["parameters"]
+        else []
+    )
+    returns = [ret["type"] for ret in info["returns"]]
+    return Function(method_name, parameters, returns, info["tags"])
+
+
+def parse_function(info, is_global = False) -> Function:
+    if is_global:
+        function_name = info["name"]
+    else:
+        _class_name, function_name = info["name"].split(".")
+    parameters = [parse_parameter(param) for param in info["parameters"]] if info["parameters"] else []
+    returns = [ret["type"] for ret in info["returns"]]
+    return Function(function_name, parameters, returns, info["tags"])
+
+def parse_event(info) -> Function:
+    _class_name, event_name = info["name"].split(".")
+    parameters = [parse_parameter(param) for param in info["parameters"]] if info["parameters"] else []
+    return Event(event_name, parameters, info["tags"])
+
+
+def parse_math_operation(info) -> MathOperation:
+    return MathOperation(
+        info["operation"],
+        info["type_a"],
+        info["type_b"],
+        info["return_type"],
+        info["tags"],
+    )
+
+def parse_enum_item(info) -> EnumItem:
+    return EnumItem(
+        info["name"],
+        info["tags"]
+    )
+
+
+DATATYPES: list[DataType] = []
+CLASSES: list[EngineClass] = []
+GLOBAL_VALUES: list[Property] = []
+GLOBAL_FUNCTIONS: list[Function] = []
+
+for file in os.listdir(DATATYPES_DIRECTORY):
+    with open(os.path.join(DATATYPES_DIRECTORY, file)) as file:
+        decoded = yaml.safe_load(file)
+        assert decoded["type"] == "datatype"
+
+        name = decoded["name"]
+        tags = decoded["tags"]
+        constructors = decoded["constructors"] or []
+        properties = decoded["properties"] or []
+        methods = decoded["methods"] or []
+        functions = decoded["functions"] or []
+        math_operations = decoded["math_operations"] or []
+        constants = decoded["constants"] or []
+
+        DATATYPES.append(
+            DataType(
+                name,
+                tags,
+                [parse_constructor(constructor) for constructor in constructors],
+                [parse_property(property) for property in properties],
+                [parse_property(constant) for constant in constants],
+                [parse_method(method) for method in methods],
+                [parse_function(function) for function in functions],
+                [
+                    parse_math_operation(math_operation)
+                    for math_operation in math_operations
+                ],
+            )
+        )
+
+for file in os.listdir(CLASSES_DIRECTORY):
+    with open(os.path.join(CLASSES_DIRECTORY, file)) as file:
+        decoded = yaml.safe_load(file)
+        assert decoded["type"] == "class"
+
+        name = decoded["name"]
+        inherits = decoded["inherits"]
+        tags = decoded["tags"]
+        properties = decoded["properties"] or []
+        methods = decoded["methods"] or []
+        events = decoded["events"] or []
+        callbacks = decoded["callbacks"] or []
+
+        if inherits:
+            assert len(inherits) == 1
+            inherits = inherits[0]
+
+        CLASSES.append(
+            EngineClass(
+                name,
+                inherits,
+                tags,
+                [parse_property(property) for property in properties],
+                [parse_method(method) for method in methods],
+                [parse_event(event) for event in events],
+                [parse_function(function) for function in callbacks],
+            )
+        )
+
+
+for file in os.listdir(ENUMS_DIRECTORY):
+    with open(os.path.join(ENUMS_DIRECTORY, file)) as file:
+        decoded = yaml.safe_load(file)
+        assert decoded["type"] == "enum"
+
+        name = decoded["name"]
+        tags = decoded["tags"]
+        items = decoded["items"] or []
+
+        ENUMS.append(
+            Enum(
+                name,
+                tags,
+                [parse_enum_item(enum_item) for enum_item in items]
+            )
+        )
+
+with open(os.path.join(DOCUMENTATION_DIRECTORY, "globals", "RobloxGlobals.yaml")) as file:
+    decoded = yaml.safe_load(file)
+
+    GLOBAL_VALUES = [parse_property(property, is_global=True) for property in decoded.get("properties", [])]
+    GLOBAL_FUNCTIONS = [parse_function(function, is_global=True) for function in decoded.get("functions", [])]
 
 # Load services and creatable instances
-loadClassesIntoStructures(dump)
-
-# Apply any corrections on the dump
-corrections: CorrectionsDump = json.load(CORRECTIONS)
-applyCorrections(dump, corrections)
+loadClassesIntoStructures(CLASSES)
 
 printJsonPrologue()
 print(START_BASE)
-printEnums(dump)
-printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]))
+printEnums(sorted(ENUMS, key=lambda x: x.name))
+printDataTypes(sorted(DATATYPES, key=lambda x: x.name))
 print(POST_DATATYPES_BASE)
-printClasses(sorted(dump["Classes"], key=lambda x: x["Name"]))
-printDataTypeConstructors(dataTypes)
+printClasses(sorted(CLASSES, key=lambda x: x.name))
+printDataTypeConstructors(sorted(DATATYPES, key=lambda x: x.name))
+
+for value in sorted(GLOBAL_VALUES, key=lambda x: x.name):
+    print(f"declare {escapeName(value.name)}: {resolveType(value.type)}")
+for value in sorted(GLOBAL_FUNCTIONS, key=lambda x: x.name):
+    print(f"declare function {escapeName(value.name)}({", ".join([resolveParameter(param) for param in value.parameters])}): {resolveReturnType(value.returns)}")
+
 print(END_BASE)

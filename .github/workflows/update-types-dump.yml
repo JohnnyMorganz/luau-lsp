@@ -27,6 +27,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
 
+      - name: Checkout creator-docs
+        uses: actions/checkout@v4
+        with:
+          repository: "Roblox/creator-docs"
+          path: "scripts"
+
       - name: Update types dump
         run: |
           cd scripts
