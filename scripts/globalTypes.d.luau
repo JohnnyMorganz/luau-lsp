@@ -5123,7 +5123,6 @@ end
 
 declare class AudioEmitter extends Instance
 	AudioInteractionGroup: string
-	DistanceAttenuation: BinaryString
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetDistanceAttenuation(self): { [any]: any }
 	function GetInteractingListeners(self): { Instance }
@@ -5167,7 +5166,6 @@ end
 
 declare class AudioListener extends Instance
 	AudioInteractionGroup: string
-	DistanceAttenuation: BinaryString
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetDistanceAttenuation(self): { [any]: any }
 	function GetInteractingEmitters(self): { Instance }
@@ -5390,7 +5388,6 @@ declare class BaseWrap extends Instance
 	CageMeshId: Content
 	CageOrigin: CFrame
 	CageOriginWorld: CFrame
-	HSRAssetId: Content
 	ImportOrigin: CFrame
 	ImportOriginWorld: CFrame
 end
@@ -6978,7 +6975,6 @@ declare class Instance
 	Parent: Instance?
 	RobloxLocked: boolean
 	Sandboxed: boolean
-	UniqueId: UniqueId
 	function AddTag(self, tag: string): nil
 	function ClearAllChildren(self): nil
 	function Clone(self): Instance
@@ -7237,47 +7233,7 @@ declare class MarketplaceService extends Instance
 end
 
 declare class MaterialService extends Instance
-	AsphaltName: string
-	BasaltName: string
-	BrickName: string
-	CardboardName: string
-	CarpetName: string
-	CeramicTilesName: string
-	ClayRoofTilesName: string
-	CobblestoneName: string
-	ConcreteName: string
-	CorrodedMetalName: string
-	CrackedLavaName: string
-	DiamondPlateName: string
-	FabricName: string
-	FoilName: string
-	GlacierName: string
-	GraniteName: string
-	GrassName: string
-	GroundName: string
-	IceName: string
-	LeafyGrassName: string
-	LeatherName: string
-	LimestoneName: string
-	MarbleName: string
-	MetalName: string
-	MudName: string
-	PavementName: string
-	PebbleName: string
-	PlasterName: string
-	PlasticName: string
-	RockName: string
-	RoofShinglesName: string
-	RubberName: string
-	SaltName: string
-	SandName: string
-	SandstoneName: string
-	SlateName: string
-	SmoothPlasticName: string
-	SnowName: string
 	Use2022Materials: boolean
-	WoodName: string
-	WoodPlanksName: string
 	function GetBaseMaterialOverride(self, material: EnumMaterial): string
 	function GetMaterialVariant(self, material: EnumMaterial, name: string): MaterialVariant
 	function SetBaseMaterialOverride(self, material: EnumMaterial, name: string): nil
@@ -8406,8 +8362,6 @@ declare class ServiceProvider extends Instance
 end
 
 declare class ServiceVisibilityService extends Instance
-	HiddenServices: BinaryString
-	VisibleServices: BinaryString
 end
 
 declare class SharedTableRegistry extends Instance
@@ -8750,8 +8704,6 @@ declare class Studio extends Instance
 	PermissionLevelShown: EnumPermissionLevelShown
 	PluginDebuggingEnabled: boolean
 	PluginsDir: QDir
-	ReloadBuiltinPluginsOnChange: boolean
-	ReloadLocalPluginsOnChange: boolean
 	Rulers: string
 	RuntimeUndoBehavior: EnumRuntimeUndoBehavior
 	ScriptTimeoutLength: number
@@ -8807,8 +8759,6 @@ declare class Studio extends Instance
 	["Highlight Current Line"]: boolean
 	["Highlight Occurances"]: boolean
 	["Hover Animate Speed"]: EnumHoverAnimateSpeed
-	["Hover Box Thickness"]: number
-	["Hover Line Thickness"]: number
 	["Hover Over Color"]: Color3
 	["Indent Using Spaces"]: boolean
 	["Keyword Color"]: Color3
@@ -8825,7 +8775,6 @@ declare class Studio extends Instance
 	["Output Font"]: QFont
 	["Output Layout Mode"]: EnumOutputLayoutMode
 	["Physical Draggers Select Scope By Default"]: boolean
-	["Pivot Snap To Geometry Color"]: Color3
 	["Primary Text Color"]: Color3
 	["Property Color"]: Color3
 	["Respect Studio shortcuts when game has focus"]: boolean
@@ -8840,9 +8789,7 @@ declare class Studio extends Instance
 	["Selected Menu Item Background Color"]: Color3
 	["Selected Text Color"]: Color3
 	["Selection Background Color"]: Color3
-	["Selection Box Thickness"]: number
 	["Selection Color"]: Color3
-	["Selection Line Thickness"]: number
 	["Set Pivot of Imported Parts"]: boolean
 	["Show Core GUI in Explorer while Playing"]: boolean
 	["Show Diagnostics Bar"]: boolean
@@ -8939,7 +8886,6 @@ declare class SurfaceAppearance extends Instance
 	MetalnessMap: Content
 	NormalMap: Content
 	RoughnessMap: Content
-	TexturePack: Content
 end
 
 declare class SurfaceGui extends SurfaceGuiBase

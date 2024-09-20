@@ -1,7 +1,7 @@
 # Script to pull in API Dump and export it into a definition file
 # Based off https://gist.github.com/HawDevelopment/97f2411149e24d8e7a712016114d55ff
 import re
-from typing import List, Literal, Optional, Set, Union, TypedDict
+from typing import List, Optional, Set
 from collections import defaultdict
 import requests
 import json
@@ -12,8 +12,6 @@ from dataclasses import dataclass
 
 # API Endpoints
 DOCUMENTATION_DIRECTORY = "creator-docs/content/en-us/reference/engine"
-CORRECTIONS = open("Corrections.json", "r")
-API_DUMP_URL = "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
 INCLUDE_DEPRECATED_METHODS = False
@@ -615,6 +613,11 @@ CREATABLE: List[str] = []  # All creatable instances
 BRICK_COLORS: Set[str] = set()
 
 @dataclass
+class Security:
+    read: str
+    write: str
+
+@dataclass
 class Parameter:
     name: str
     type: str
@@ -633,6 +636,7 @@ class Property:
     name: str
     type: str
     tags: list[str]
+    security: Security
 
 
 @dataclass
@@ -641,6 +645,7 @@ class Function:
     parameters: list[Parameter]
     returns: list[str]
     tags: list[str]
+    security: Security
 
 
 @dataclass
@@ -669,6 +674,7 @@ class Event:
     name: str
     parameters: list[Parameter]
     tags: list[str]
+    security: Security
 
 
 @dataclass
@@ -772,19 +778,9 @@ def filterMember(klassName: str, member: Function):
         return False
     if klassName in IGNORED_MEMBERS and member.name in IGNORED_MEMBERS[klassName]:
         return False
-    # TODO:
-    # if "Security" in member:
-    #     if isinstance(member["Security"], str):
-    #         if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
-    #             chosenSecurityLevel
-    #         ):
-    #             return False
-    #     else:
-    #         if min(
-    #             SECURITY_LEVELS.index(member["Security"]["Read"]),
-    #             SECURITY_LEVELS.index(member["Security"]["Write"]),
-    #         ) > SECURITY_LEVELS.index(chosenSecurityLevel):
-    #             return False
+    if member.security:
+        if min(SECURITY_LEVELS.index(member.security.read), SECURITY_LEVELS.index(member.security.write)) > SECURITY_LEVELS.index(chosenSecurityLevel):
+            return False
 
     return True
 
@@ -900,7 +896,7 @@ def metamethod(operator: str):
 def printDataTypes(types: List[DataType]):
     for dataType in types:
         math_operations = [
-            Function(metamethod(operation.operation) , [Parameter("other", operation.type_b, None)], [operation.return_type], [])
+            Function(metamethod(operation.operation) , [Parameter("other", operation.type_b, None)], [operation.return_type], [], Security("None", "None"))
             for operation in dataType.math_operations
         ]
 
@@ -922,7 +918,7 @@ def printDataTypeConstructors(types: List[DataType]):
                 isBrickColorNew = True
                 continue
 
-            functions[member.name].append(Function(member.name, member.parameters, [klass.name], member.tags))
+            functions[member.name].append(Function(member.name, member.parameters, [klass.name], member.tags, Security("None", "None")))
 
         for member in klass.functions:
             functions[member.name].append(member)
@@ -941,7 +937,7 @@ def printDataTypeConstructors(types: List[DataType]):
         if isBrickColorNew:
             colors = " | ".join(map(lambda c: f'"{c}"', sorted(BRICK_COLORS)))
 
-            functions["new"].append(Function("new", [Parameter("name", colors, None)], ["BrickColor"], []))
+            functions["new"].append(Function("new", [Parameter("name", colors, None)], ["BrickColor"], [], Security("None", "None")))
 
         for function, overloads in functions.items():
             overloads = [f"(({", ".join([resolveParameter(parameter) for parameter in member.parameters])}) -> {resolveReturnType(member.returns)})" for member in overloads]
@@ -987,6 +983,14 @@ CLASSES_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "classes")
 DATATYPES_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "datatypes")
 ENUMS_DIRECTORY = os.path.join(DOCUMENTATION_DIRECTORY, "enums")
 
+def parse_security(info) -> Security:
+    security = info.get("security", None)
+    if not security:
+        return Security("None", "None")
+    if isinstance(security, str):
+        return Security(security, security)
+    else:
+        return Security(security["read"], security["write"])
 
 def parse_parameter(info) -> Parameter:
     return Parameter(info["name"], info["type"], info["default"])
@@ -1007,7 +1011,7 @@ def parse_property(info, is_global = False) -> Property:
         property_name = info["name"]
     else:
         _class_name, property_name = info["name"].split(".")
-    return Property(property_name, info["type"], info["tags"])
+    return Property(property_name, info["type"], info["tags"], parse_security(info))
 
 
 def parse_method(info) -> Function:
@@ -1018,7 +1022,7 @@ def parse_method(info) -> Function:
         else []
     )
     returns = [ret["type"] for ret in info["returns"]]
-    return Function(method_name, parameters, returns, info["tags"])
+    return Function(method_name, parameters, returns, info["tags"], parse_security(info))
 
 
 def parse_function(info, is_global = False) -> Function:
@@ -1028,12 +1032,12 @@ def parse_function(info, is_global = False) -> Function:
         _class_name, function_name = info["name"].split(".")
     parameters = [parse_parameter(param) for param in info["parameters"]] if info["parameters"] else []
     returns = [ret["type"] for ret in info["returns"]]
-    return Function(function_name, parameters, returns, info["tags"])
+    return Function(function_name, parameters, returns, info["tags"], parse_security(info))
 
-def parse_event(info) -> Function:
+def parse_event(info) -> Event:
     _class_name, event_name = info["name"].split(".")
     parameters = [parse_parameter(param) for param in info["parameters"]] if info["parameters"] else []
-    return Event(event_name, parameters, info["tags"])
+    return Event(event_name, parameters, info["tags"], parse_security(info))
 
 
 def parse_math_operation(info) -> MathOperation:
