@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "Roblox/creator-docs"
-          path: "scripts"
+          path: "scripts/creator-docs"
 
       - name: Update types dump
         run: |
