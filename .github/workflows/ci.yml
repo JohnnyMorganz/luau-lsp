@@ -77,6 +77,10 @@ jobs:
           repository: "Roblox/creator-docs"
           path: "scripts/creator-docs"
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Regenerate Types
         run: |
           cd scripts

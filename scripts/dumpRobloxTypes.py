@@ -757,10 +757,10 @@ def resolveType(type: str) -> str:
 
 
 def resolveParameter(param: Parameter):
-    if param.name == "...":
+    if param.name == "..." or param.name.endswith("..."):
         return f"...: {resolveType(param.type.removeprefix("Tuple<").removesuffix(">"))}"
 
-    return f"{escapeName(param.name)}: {resolveType(param.type)}{'?' if param.default else ''}"
+    return f"{escapeName(param.name)}: {resolveType(param.type)}{'?' if param.default is not None else ''}"
 
 
 def resolveReturnType(returns: list[str]) -> str:

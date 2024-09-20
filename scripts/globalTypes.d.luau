@@ -4672,15 +4672,15 @@ declare class Vector2
 	X: number
 	Y: number
 	function Abs(self): Vector2
-	function Angle(self, other: Vector2, isSigned: boolean): number
+	function Angle(self, other: Vector2, isSigned: boolean?): number
 	function Ceil(self): Vector2
 	function Cross(self, other: Vector2): number
 	function Dot(self, v: Vector2): number
 	function Floor(self): Vector2
 	function FuzzyEq(self, other: Vector2, epsilon: number?): boolean
 	function Lerp(self, v: Vector2, alpha: number): Vector2
-	function Max(self, ["others..."]: any): Vector2
-	function Min(self, ["others..."]: any): Vector2
+	function Max(self, ...: any): Vector2
+	function Min(self, ...: any): Vector2
 	function Sign(self): Vector2
 	function __add(self, other: Vector2): Vector2
 	function __div(self, other: Vector2): Vector2
@@ -4916,13 +4916,13 @@ end
 
 declare class AnalyticsService extends Instance
 	function LogCustomEvent(self, player: Player, eventName: string, value: number?, customFields: { [any]: any }?): nil
-	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string, customFields: { [any]: any }?): nil
-	function LogFunnelStepEvent(self, player: Player, funnelName: string, funnelSessionId: string, step: number?, stepName: string, customFields: { [any]: any }?): nil
-	function LogOnboardingFunnelStepEvent(self, player: Player, step: number, stepName: string, customFields: { [any]: any }?): nil
-	function LogProgressionCompleteEvent(self, player: Player, progressionPathName: string, level: number, levelName: string, customFields: { [any]: any }?): nil
-	function LogProgressionEvent(self, player: Player, progressionPathName: string, status: EnumAnalyticsProgressionType, level: number, levelName: string, customFields: { [any]: any }?): nil
-	function LogProgressionFailEvent(self, player: Player, progressionPathName: string, level: number, levelName: string, customFields: { [any]: any }?): nil
-	function LogProgressionStartEvent(self, player: Player, progressionPathName: string, level: number, levelName: string, customFields: { [any]: any }?): nil
+	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string?, customFields: { [any]: any }?): nil
+	function LogFunnelStepEvent(self, player: Player, funnelName: string, funnelSessionId: string?, step: number?, stepName: string?, customFields: { [any]: any }?): nil
+	function LogOnboardingFunnelStepEvent(self, player: Player, step: number, stepName: string?, customFields: { [any]: any }?): nil
+	function LogProgressionCompleteEvent(self, player: Player, progressionPathName: string, level: number, levelName: string?, customFields: { [any]: any }?): nil
+	function LogProgressionEvent(self, player: Player, progressionPathName: string, status: EnumAnalyticsProgressionType, level: number, levelName: string?, customFields: { [any]: any }?): nil
+	function LogProgressionFailEvent(self, player: Player, progressionPathName: string, level: number, levelName: string?, customFields: { [any]: any }?): nil
+	function LogProgressionStartEvent(self, player: Player, progressionPathName: string, level: number, levelName: string?, customFields: { [any]: any }?): nil
 end
 
 declare class AngularVelocity extends Constraint
@@ -5022,8 +5022,8 @@ declare class AssetService extends Instance
 	function CreateEditableMeshAsync(self, meshId: Content): EditableMesh
 	function CreateEditableMeshFromPartAsync(self, meshPart: Instance): EditableMesh
 	function CreateMeshPartAsync(self, meshId: Content, options: { [any]: any }?): MeshPart
-	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string): number
-	function CreatePlaceInPlayerInventoryAsync(self, player: Instance, placeName: string, templatePlaceID: number, description: string): number
+	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
+	function CreatePlaceInPlayerInventoryAsync(self, player: Instance, placeName: string, templatePlaceID: number, description: string?): number
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetAudioMetadataAsync(self, idList: { any }): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
@@ -5258,7 +5258,7 @@ declare class AvatarEditorService extends Instance
 	function GetItemDetails(self, itemId: number, itemType: EnumAvatarItemType): { [any]: any }
 	function GetOutfitDetails(self, outfitId: number): { [any]: any }
 	function GetOutfits(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
-	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number): { any }
+	function GetRecommendedAssets(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
 	function GetRecommendedBundles(self, bundleId: number): { any }
 	function PromptAllowInventoryReadAccess(self): nil
 	function PromptCreateOutfit(self, outfit: HumanoidDescription, rigType: EnumHumanoidRigType): nil
@@ -5413,7 +5413,7 @@ declare class Beam extends Instance
 	Width0: number
 	Width1: number
 	ZOffset: number
-	function SetTextureOffset(self, offset: number): nil
+	function SetTextureOffset(self, offset: number?): nil
 end
 
 
@@ -5609,9 +5609,9 @@ declare class Camera extends Instance
 	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
 	function GetRenderCFrame(self): CFrame
 	function GetRoll(self): number
-	function ScreenPointToRay(self, x: number, y: number, depth: number): Ray
+	function ScreenPointToRay(self, x: number, y: number, depth: number?): Ray
 	function SetRoll(self, rollAngle: number): nil
-	function ViewportPointToRay(self, x: number, y: number, depth: number): Ray
+	function ViewportPointToRay(self, x: number, y: number, depth: number?): Ray
 	function WorldToScreenPoint(self, worldPoint: Vector3): any
 	function WorldToViewportPoint(self, worldPoint: Vector3): any
 	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
@@ -5991,8 +5991,8 @@ end
 
 declare class DataStore extends GlobalDataStore
 	function GetVersionAsync(self, key: string, version: string): any
-	function ListKeysAsync(self, prefix: string, pageSize: number, cursor: string, excludeDeleted: boolean): DataStoreKeyPages
-	function ListVersionsAsync(self, key: string, sortDirection: EnumSortDirection?, minDate: number, maxDate: number, pageSize: number): DataStoreVersionPages
+	function ListKeysAsync(self, prefix: string?, pageSize: number?, cursor: string?, excludeDeleted: boolean?): DataStoreKeyPages
+	function ListVersionsAsync(self, key: string, sortDirection: EnumSortDirection?, minDate: number?, maxDate: number?, pageSize: number?): DataStoreVersionPages
 	function RemoveVersionAsync(self, key: string, version: string): nil
 end
 
@@ -6051,7 +6051,7 @@ declare class DataStoreService extends Instance
 	function GetGlobalDataStore(self): DataStore
 	function GetOrderedDataStore(self, name: string, scope: string?): OrderedDataStore
 	function GetRequestBudgetForRequestType(self, requestType: EnumDataStoreRequestType): number
-	function ListDataStoresAsync(self, prefix: string, pageSize: number, cursor: string): DataStoreListingPages
+	function ListDataStoresAsync(self, prefix: string?, pageSize: number?, cursor: string?): DataStoreListingPages
 end
 
 declare class DataStoreSetOptions extends Instance
@@ -6601,9 +6601,9 @@ declare class GuiObject extends GuiBase2d
 	Transparency: number
 	Visible: boolean
 	ZIndex: number
-	function TweenPosition(self, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean, callback: ((...any) -> ...any)?): boolean
-	function TweenSize(self, endSize: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean, callback: ((...any) -> ...any)?): boolean
-	function TweenSizeAndPosition(self, endSize: UDim2, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean, callback: ((...any) -> ...any)?): boolean
+	function TweenPosition(self, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: ((...any) -> ...any)?): boolean
+	function TweenSize(self, endSize: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: ((...any) -> ...any)?): boolean
+	function TweenSizeAndPosition(self, endSize: UDim2, endPosition: UDim2, easingDirection: EnumEasingDirection?, easingStyle: EnumEasingStyle?, time: number?, override: boolean?, callback: ((...any) -> ...any)?): boolean
 end
 
 declare class GuiService extends Instance
@@ -6736,11 +6736,11 @@ end
 declare class HttpService extends Instance
 	HttpEnabled: boolean
 	function GenerateGUID(self, wrapInCurlyBraces: boolean?): string
-	function GetAsync(self, url: any, nocache: boolean, headers: any): string
+	function GetAsync(self, url: any, nocache: boolean?, headers: any): string
 	function GetSecret(self, key: string): Secret
 	function JSONDecode(self, input: string): any
 	function JSONEncode(self, input: any): string
-	function PostAsync(self, url: any, data: string, content_type: EnumHttpContentType?, compress: boolean, headers: any): string
+	function PostAsync(self, url: any, data: string, content_type: EnumHttpContentType?, compress: boolean?, headers: any): string
 	function RequestAsync(self, options: HttpRequestOptions): HttpResponseData
 	function UrlEncode(self, input: string): string
 end
@@ -6809,7 +6809,7 @@ declare class Humanoid extends Instance
 	function GetMoveVelocity(self): Vector3
 	function GetState(self): EnumHumanoidStateType
 	function GetStateEnabled(self, state: EnumHumanoidStateType): boolean
-	function Move(self, moveDirection: Vector3, relativeToCamera: boolean): nil
+	function Move(self, moveDirection: Vector3, relativeToCamera: boolean?): nil
 	function MoveTo(self, location: Vector3, part: Instance?): nil
 	function PlayEmote(self, emoteName: string): boolean
 	function RemoveAccessories(self): nil
@@ -7269,8 +7269,8 @@ declare class MemoryStoreHashMapPages extends Pages
 end
 
 declare class MemoryStoreQueue extends Instance
-	function AddAsync(self, value: any, expiration: number, priority: number): nil
-	function ReadAsync(self, count: number, allOrNothing: boolean, waitTimeout: number?): any
+	function AddAsync(self, value: any, expiration: number, priority: number?): nil
+	function ReadAsync(self, count: number, allOrNothing: boolean?, waitTimeout: number?): any
 	function RemoveAsync(self, id: string): nil
 end
 
@@ -7739,11 +7739,11 @@ declare class Player extends Instance
 	function IsFriendsWith(self, userId: number): boolean
 	function IsInGroup(self, groupId: number): boolean
 	function IsVerified(self): boolean
-	function Kick(self, message: string): nil
+	function Kick(self, message: string?): nil
 	function LoadCharacter(self): nil
 	function LoadCharacterWithHumanoidDescription(self, humanoidDescription: HumanoidDescription): nil
-	function Move(self, walkDirection: Vector3, relativeToCamera: boolean): nil
-	function RequestStreamAroundAsync(self, position: Vector3, timeOut: number): nil
+	function Move(self, walkDirection: Vector3, relativeToCamera: boolean?): nil
+	function RequestStreamAroundAsync(self, position: Vector3, timeOut: number?): nil
 	function SetAccountAge(self, accountAge: number): nil
 	function SetSuperSafeChat(self, value: boolean): nil
 end
@@ -7813,8 +7813,8 @@ declare class Plugin extends Instance
 	Unloading: RBXScriptSignal<>
 	function Activate(self, exclusiveMouse: boolean): nil
 	function CreateDockWidgetPluginGui(self, pluginGuiId: string, dockWidgetPluginGuiInfo: DockWidgetPluginGuiInfo): DockWidgetPluginGui
-	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string, allowBinding: boolean?): PluginAction
-	function CreatePluginMenu(self, id: string, title: string, icon: string): PluginMenu
+	function CreatePluginAction(self, actionId: string, text: string, statusTip: string, iconName: string?, allowBinding: boolean?): PluginAction
+	function CreatePluginMenu(self, id: string, title: string?, icon: string?): PluginMenu
 	function CreateToolbar(self, name: string): PluginToolbar
 	function Deactivate(self): nil
 	function GetJoinMode(self): EnumJointCreationMode
@@ -7830,7 +7830,7 @@ declare class Plugin extends Instance
 	function OpenScript(self, script: LuaSourceContainer, lineNumber: number?): nil
 	function OpenWikiPage(self, url: string): nil
 	function PromptForExistingAssetId(self, assetType: string): number
-	function PromptSaveSelection(self, suggestedFileName: string): boolean
+	function PromptSaveSelection(self, suggestedFileName: string?): boolean
 	function SaveSelectedToRoblox(self): nil
 	function SelectRibbonTool(self, tool: EnumRibbonTool, position: UDim2): nil
 	function Separate(self, objects: { Instance }): { Instance }
@@ -7880,13 +7880,13 @@ declare class PluginManagementService extends Instance
 end
 
 declare class PluginManager extends Instance
-	function ExportPlace(self, filePath: string): nil
-	function ExportSelection(self, filePath: string): nil
+	function ExportPlace(self, filePath: string?): nil
+	function ExportSelection(self, filePath: string?): nil
 end
 
 declare class PluginManagerInterface extends Instance
-	function ExportPlace(self, filePath: string): nil
-	function ExportSelection(self, filePath: string): nil
+	function ExportPlace(self, filePath: string?): nil
+	function ExportSelection(self, filePath: string?): nil
 end
 
 declare class PluginMenu extends Instance
@@ -7894,7 +7894,7 @@ declare class PluginMenu extends Instance
 	Title: string
 	function AddAction(self, action: Instance): nil
 	function AddMenu(self, menu: Instance): nil
-	function AddNewAction(self, actionId: string, text: string, icon: string): Instance
+	function AddNewAction(self, actionId: string, text: string, icon: string?): Instance
 	function AddSeparator(self): nil
 	function Clear(self): nil
 	function ShowAsync(self): Instance
@@ -8444,7 +8444,7 @@ declare class SocialService extends Instance
 	OnCallInviteInvoked: (tag: string, callParticipantIds: { any }) -> Instance
 	PhoneBookPromptClosed: RBXScriptSignal<Instance>
 	function CanSendCallInviteAsync(self, player: Instance): boolean
-	function CanSendGameInviteAsync(self, player: Instance, recipientId: number): boolean
+	function CanSendGameInviteAsync(self, player: Instance, recipientId: number?): boolean
 	function HideSelfView(self): nil
 	function PromptGameInvite(self, player: Instance, experienceInviteOptions: Instance?): nil
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
@@ -9050,16 +9050,16 @@ declare class TestService extends Instance
 	TestCount: number
 	Timeout: number
 	WarnCount: number
-	function Check(self, condition: boolean, description: string, source: Instance?, line: number): nil
-	function Checkpoint(self, text: string, source: Instance?, line: number): nil
+	function Check(self, condition: boolean, description: string, source: Instance?, line: number?): nil
+	function Checkpoint(self, text: string, source: Instance?, line: number?): nil
 	function Done(self): nil
-	function Error(self, description: string, source: Instance?, line: number): nil
-	function Fail(self, description: string, source: Instance?, line: number): nil
-	function Message(self, text: string, source: Instance?, line: number): nil
-	function Require(self, condition: boolean, description: string, source: Instance?, line: number): nil
+	function Error(self, description: string, source: Instance?, line: number?): nil
+	function Fail(self, description: string, source: Instance?, line: number?): nil
+	function Message(self, text: string, source: Instance?, line: number?): nil
+	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function Run(self): nil
 	function ScopeTime(self): { [any]: any }
-	function Warn(self, condition: boolean, description: string, source: Instance?, line: number): nil
+	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function isFeatureEnabled(self, name: string): boolean
 end
 
@@ -9099,7 +9099,7 @@ declare class TextBox extends GuiObject
 	TextYAlignment: EnumTextYAlignment
 	function CaptureFocus(self): nil
 	function IsFocused(self): boolean
-	function ReleaseFocus(self, submitted: boolean): nil
+	function ReleaseFocus(self, submitted: boolean?): nil
 end
 
 declare class TextBoxService extends Instance
@@ -9136,8 +9136,8 @@ declare class TextChannel extends Instance
 	OnIncomingMessage: (message: TextChatMessage) -> any
 	ShouldDeliverCallback: (message: TextChatMessage, textSource: TextSource) -> any
 	function AddUserAsync(self, userId: number): any
-	function DisplaySystemMessage(self, systemMessage: string, metadata: string): TextChatMessage
-	function SendAsync(self, message: string, metadata: string): TextChatMessage
+	function DisplaySystemMessage(self, systemMessage: string, metadata: string?): TextChatMessage
+	function SendAsync(self, message: string, metadata: string?): TextChatMessage
 end
 
 declare class TextChatCommand extends Instance
@@ -9938,8 +9938,8 @@ declare CFrame: {
 declare Color3: {
 	fromHSV: ((hue: number, saturation: number, value: number) -> Color3),
 	fromHex: ((hex: string) -> Color3),
-	fromRGB: ((red: number, green: number, blue: number) -> Color3),
-	new: ((red: number, green: number, blue: number) -> Color3),
+	fromRGB: ((red: number?, green: number?, blue: number?) -> Color3),
+	new: ((red: number?, green: number?, blue: number?) -> Color3),
 	toHSV: ((color: Color3) -> (number, number, number)),
 }
 
@@ -9953,19 +9953,19 @@ declare ColorSequenceKeypoint: {
 
 declare DateTime: {
 	fromIsoDate: ((isoDate: string) -> DateTime),
-	fromLocalTime: ((year: number?, month: number?, day: number?, hour: number, minute: number, second: number, millisecond: number) -> DateTime),
-	fromUniversalTime: ((year: number?, month: number?, day: number?, hour: number, minute: number, second: number, millisecond: number) -> DateTime),
+	fromLocalTime: ((year: number?, month: number?, day: number?, hour: number?, minute: number?, second: number?, millisecond: number?) -> DateTime),
+	fromUniversalTime: ((year: number?, month: number?, day: number?, hour: number?, minute: number?, second: number?, millisecond: number?) -> DateTime),
 	fromUnixTimestamp: ((unixTimestamp: number) -> DateTime),
 	fromUnixTimestampMillis: ((unixTimestampMillis: number) -> DateTime),
 	now: (() -> DateTime),
 }
 
 declare DockWidgetPluginGuiInfo: {
-	new: ((initDockState: EnumInitialDockState?, initEnabled: boolean, overrideEnabledRestore: boolean, floatXSize: number, floatYSize: number, minWidth: number, minHeight: number) -> DockWidgetPluginGuiInfo),
+	new: ((initDockState: EnumInitialDockState?, initEnabled: boolean?, overrideEnabledRestore: boolean?, floatXSize: number?, floatYSize: number?, minWidth: number?, minHeight: number?) -> DockWidgetPluginGuiInfo),
 }
 
 declare Faces: {
-	new: ((["normalIds..."]: any) -> Faces),
+	new: ((...: any) -> Faces),
 }
 
 declare FloatCurveKey: {
@@ -10005,7 +10005,7 @@ declare Path2DControlPoint: {
 }
 
 declare PathWaypoint: {
-	new: ((position: Vector3?, action: EnumPathWaypointAction?, label: string) -> PathWaypoint),
+	new: ((position: Vector3?, action: EnumPathWaypointAction?, label: string?) -> PathWaypoint),
 }
 
 declare PhysicalProperties: {
@@ -10042,8 +10042,8 @@ declare RotationCurveKey: {
 
 declare SharedTable: {
 	clear: ((st: SharedTable) -> nil),
-	clone: ((st: SharedTable, deep: boolean?) -> SharedTable),
-	cloneAndFreeze: ((st: SharedTable, deep: boolean?) -> SharedTable),
+	clone: ((st: SharedTable, deep: boolean??) -> SharedTable),
+	cloneAndFreeze: ((st: SharedTable, deep: boolean??) -> SharedTable),
 	increment: ((st: SharedTable, key: string | number, delta: number) -> number),
 	isFrozen: ((st: SharedTable) -> boolean),
 	new: (() -> SharedTable) & ((t: { any }) -> SharedTable),
@@ -10052,7 +10052,7 @@ declare SharedTable: {
 }
 
 declare TweenInfo: {
-	new: ((time: number?, easingStyle: EnumEasingStyle?, easingDirection: EnumEasingDirection?, repeatCount: number, reverses: boolean, delayTime: number) -> TweenInfo),
+	new: ((time: number?, easingStyle: EnumEasingStyle?, easingDirection: EnumEasingDirection?, repeatCount: number?, reverses: boolean?, delayTime: number?) -> TweenInfo),
 }
 
 declare UDim: {
@@ -10060,9 +10060,9 @@ declare UDim: {
 }
 
 declare UDim2: {
-	fromOffset: ((xOffset: number, yOffset: number) -> UDim2),
-	fromScale: ((xScale: number, yScale: number) -> UDim2),
-	new: (() -> UDim2) & ((xScale: number, xOffset: number, yScale: number, yOffset: number) -> UDim2) & ((x: UDim, y: UDim) -> UDim2),
+	fromOffset: ((xOffset: number?, yOffset: number?) -> UDim2),
+	fromScale: ((xScale: number?, yScale: number?) -> UDim2),
+	new: (() -> UDim2) & ((xScale: number?, xOffset: number?, yScale: number?, yOffset: number?) -> UDim2) & ((x: UDim, y: UDim) -> UDim2),
 }
 
 declare Vector2: {
@@ -10080,7 +10080,7 @@ declare Vector2int16: {
 declare Vector3: {
 	FromAxis: ((axis: EnumAxis) -> Vector3),
 	FromNormalId: ((normal: EnumNormalId) -> Vector3),
-	new: ((x: number, y: number, z: number) -> Vector3),
+	new: ((x: number?, y: number?, z: number?) -> Vector3),
 	one: Vector3,
 	xAxis: Vector3,
 	yAxis: Vector3,
