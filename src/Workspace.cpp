@@ -8,6 +8,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/TimeTrace.h"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -231,6 +232,7 @@ void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAu
 
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::indexFiles", "LSP");
     if (!config.index.enabled)
         return;
 
@@ -281,6 +283,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
 void WorkspaceFolder::initialize()
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
     client->sendTrace("workspace initialization: registering Luau globals");
     Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
     Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
@@ -344,6 +347,7 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
     platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
 
