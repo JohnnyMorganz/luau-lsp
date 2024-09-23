@@ -2,9 +2,11 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
+#include "Luau/TimeTrace.h"
 
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
     if (!isConfigured)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
@@ -83,6 +85,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::workspaceDiagnostics", "LSP");
     if (!isConfigured)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
@@ -100,7 +103,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     // Find a list of files to compute diagnostics for
     std::vector<Uri> files{};
     for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
+        next != end; ++next)
     {
         try
         {

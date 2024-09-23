@@ -1,0 +1,17 @@
+name: Generate new release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New Version (without leading v)"
+        required: true
+        type: string
+
+jobs:
+  generate-release:
+    name: Generate new release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: "scripts/release.py ${{ github.event.inputs.version }})"

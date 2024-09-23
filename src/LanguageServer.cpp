@@ -112,6 +112,9 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
 
 void LanguageServer::onRequest(const id_type& id, const std::string& method, std::optional<json> baseParams)
 {
+    LUAU_TIMETRACE_SCOPE("LanguageServer::onRequest", "LSP");
+    LUAU_TIMETRACE_ARGUMENT("method", method.c_str());
+
     // Handle request
     // If a request has been sent before the server is initialized, we should error
     if (!isInitialized && method != "initialize")
@@ -283,6 +286,9 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
 
 void LanguageServer::onNotification(const std::string& method, std::optional<json> params)
 {
+    LUAU_TIMETRACE_SCOPE("LanguageServer::onNotification", "LSP");
+    LUAU_TIMETRACE_ARGUMENT("method", method.c_str());
+
     // Handle notification
     // If a notification is sent before the server is initialized or after a shutdown is requested (unless its exit), we should
     // drop it
@@ -445,6 +451,8 @@ bool LanguageServer::requestedShutdown()
 // Dispatch handlers
 lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& params)
 {
+    LUAU_TIMETRACE_SCOPE("LanguageServer::onInitialize", "LSP");
+
     // Set provided settings
     client->sendTrace("client capabilities: " + json(params.capabilities).dump(), std::nullopt);
     client->capabilities = params.capabilities;
@@ -510,6 +518,8 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
 
 void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams& params)
 {
+    LUAU_TIMETRACE_SCOPE("LanguageServer::onInitialized", "LSP");
+
     // Client received result of initialize
     client->sendLogMessage(lsp::MessageType::Info, "server initialized!");
     client->sendLogMessage(lsp::MessageType::Info, "trace level: " + json(client->traceMode).dump());
