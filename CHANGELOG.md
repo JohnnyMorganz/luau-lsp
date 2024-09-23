@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.643
+- Sync to upstream Luau 0.644
 - The VSCode extension will now sync flags beginning with `FIntLuau`, `DFFlagLuau` and `DFIntLuau` (previously it would only sync `FFlagLuau`)
 
 ## [1.32.4] - 2024-09-11
