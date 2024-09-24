@@ -14,4 +14,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: "scripts/release.py ${{ github.event.inputs.version }})"
+      - run: "scripts/release.py ${{ github.event.inputs.version }}"
