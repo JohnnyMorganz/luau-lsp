@@ -354,9 +354,6 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
-    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
-
-    fileResolver.platform = platform.get();
 
     // Apply first-time configuration
     if (!isConfigured)
