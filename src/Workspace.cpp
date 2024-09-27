@@ -281,7 +281,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-void WorkspaceFolder::initialize()
+void WorkspaceFolder::registerTypes()
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
     client->sendTrace("workspace initialization: registering Luau globals");
@@ -308,7 +308,8 @@ void WorkspaceFolder::initialize()
 
         // Parse definitions file metadata
         client->sendTrace("workspace initialization: parsing definitions file metadata");
-        if (auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents))
+        auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents);
+        if (!definitionsFileMetadata)
             definitionsFileMetadata = metadata;
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
@@ -316,6 +317,10 @@ void WorkspaceFolder::initialize()
         auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
         types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
+
+        client->sendTrace("workspace: applying platform mutations on definitions");
+        platform->mutateRegisteredDefinitions(frontend.globals, metadata);
+        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, metadata);
 
         auto uri = Uri::file(resolvedFilePath);
 
@@ -362,10 +367,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
         fileResolver.platform = platform.get();
 
-        client->sendTrace("workspace: applying platform mutations on definitions");
-
-        platform->mutateRegisteredDefinitions(frontend.globals, definitionsFileMetadata);
-        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
+        registerTypes();
     }
 
     client->sendTrace("workspace: apply platform-specific configuration");

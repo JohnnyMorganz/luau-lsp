@@ -11,19 +11,31 @@
 
 static const char* mainModuleName = "MainModule";
 
+namespace Luau::LanguageServer
+{
+ClientConfiguration defaultTestClientConfiguration()
+{
+    ClientConfiguration config;
+    config.sourcemap.enabled = false;
+    config.index.enabled = false;
+    return config;
+}
+
+Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source)
+{
+    Uri uri("file", "", name);
+    workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
+    return uri;
+}
+} // namespace Luau::LanguageServer
+
 Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
     , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
-
-    workspace.initialize();
-
-    ClientConfiguration config;
-    config.sourcemap.enabled = false;
-    config.index.enabled = false;
-    workspace.setupWithConfiguration(config);
+    workspace.setupWithConfiguration(Luau::LanguageServer::defaultTestClientConfiguration());
 
     Luau::setPrintLine([](auto s) {});
 }
@@ -40,9 +52,7 @@ Luau::ModuleName fromString(std::string_view name)
 
 Uri Fixture::newDocument(const std::string& name, const std::string& source)
 {
-    Uri uri("file", "", name);
-    workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
-    return uri;
+    return Luau::LanguageServer::newDocument(workspace, name, source);
 }
 
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
