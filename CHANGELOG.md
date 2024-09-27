@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added configuration option `luau-lsp.sourcemap.sourcemapFile` to specify a different name to use for the sourcemap
+
 ### Fixed
 
 - Fixed a regression in 1.30.0 breaking type definitions files that rely on mutations like `Enum.Foo`
