@@ -92,11 +92,6 @@ void Client::unregisterCapability(const std::string& registrationId, const std::
     sendRequest(nextRequestId++, "client/unregisterCapability", lsp::UnregistrationParams{{unregistration}});
 }
 
-bool Client::hasConfiguration(const lsp::DocumentUri& uri)
-{
-    return configStore.find(uri.toString()) != configStore.end();
-}
-
 ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
 {
     auto key = uri.toString();
