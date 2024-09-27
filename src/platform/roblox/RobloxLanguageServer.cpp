@@ -2,6 +2,8 @@
 
 #include <LSP/Workspace.hpp>
 
+static const char* kSourcemapWatchingRegistrationId = "sourcemapWatching";
+
 void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 {
     auto filePath = change.uri.fsPath();
@@ -36,24 +38,23 @@ void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
         {
             client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
 
+            // Unregister previous watching if it exists
+            client->unregisterCapability(kSourcemapWatchingRegistrationId, "workspace/didChangeWatchedFiles");
+
             std::vector<lsp::FileSystemWatcher> watchers{};
             watchers.push_back(lsp::FileSystemWatcher{"**/" + sourcemapFileName});
             client->registerCapability(
-                "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
+                kSourcemapWatchingRegistrationId, "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
         }
         else
         {
-            client->unregisterCapability(
-                "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles");
             client->sendLogMessage(lsp::MessageType::Warning,
-                "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes disabled");
+                "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap changes disabled");
         }
     }
     else
     {
-        client->unregisterCapability(
-            "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles");
-        client->sendLogMessage(lsp::MessageType::Info,
-            "sourcemap is disabled - automatic updating on sourcemap changes disabled");
+        client->unregisterCapability(kSourcemapWatchingRegistrationId, "workspace/didChangeWatchedFiles");
+        client->sendLogMessage(lsp::MessageType::Info, "sourcemap is disabled - automatic updating on sourcemap changes disabled");
     }
 }
