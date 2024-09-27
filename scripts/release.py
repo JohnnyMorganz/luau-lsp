@@ -58,6 +58,9 @@ with open(PACKAGE_JSON_FILE, "r") as t:
 with open(PACKAGE_JSON_FILE, "w") as t:
     json.dump(package_json_data, t)
 
+# Update lockfile
+subprocess.run(["npm", "install", "--package-locked"], cwd="editors/code", check=True)
+
 # Run prettier
 subprocess.run(
     ["npx", "prettier", "--write", CHANGELOG_FILE, PACKAGE_JSON_FILE], check=True
