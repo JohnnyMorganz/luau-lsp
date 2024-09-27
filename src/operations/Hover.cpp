@@ -162,6 +162,18 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         auto typeFun = scope->lookupType(typeName);
         if (!typeFun)
             return std::nullopt;
+
+        // TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
+        // Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
+        if (FFlag::LuauSolverV2 && typeFun->type)
+        {
+            auto followedType = Luau::follow(typeFun->type);
+            auto name = lookupTypeDefinitionModule(followedType);
+            auto location = lookupTypeDefinitionModuleLocation(followedType, module);
+            if (name && location)
+                documentationLocation = {name.value(), location.value()};
+        }
+
         typeAliasInformation = std::make_pair(typeName, *typeFun);
         type = typeFun->type;
     }
@@ -177,7 +189,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                 if (prop.location.containsClosed(position))
                 {
                     auto parentType = Luau::follow(*tableTy);
-                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
+                    if (auto definitionModuleName = lookupTypeDefinitionModule(parentType))
                         documentationLocation = {definitionModuleName.value(), prop.location};
                     auto resolvedProperty = lookupProp(parentType, prop.name.value);
                     if (resolvedProperty)
@@ -197,7 +209,20 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     else if (auto local = exprOrLocal.getLocal()) // TODO: can we just use node here instead of also calling exprOrLocal?
     {
         type = scope->lookup(local);
-        documentationLocation = {moduleName, local->location};
+        // TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
+        // Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
+        if (FFlag::LuauSolverV2 && type)
+        {
+            auto followedType = Luau::follow(*type);
+            auto name = lookupTypeDefinitionModule(followedType);
+            auto location = lookupTypeDefinitionModuleLocation(followedType, module);
+            if (name && location)
+                documentationLocation = {name.value(), location.value()};
+            else
+                documentationLocation = {moduleName, local->location};
+        }
+        else
+            documentationLocation = {moduleName, local->location};
     }
     else if (auto expr = exprOrLocal.getExpr())
     {
@@ -233,7 +258,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                 {
                     auto [baseTy, prop] = propInformation.value();
                     type = prop.type();
-                    if (auto definitionModuleName = Luau::getDefinitionModuleName(baseTy))
+                    if (auto definitionModuleName = lookupTypeDefinitionModule(baseTy))
                     {
                         if (prop.location)
                             documentationLocation = {definitionModuleName.value(), prop.location.value()};

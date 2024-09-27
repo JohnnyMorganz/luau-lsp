@@ -11,6 +11,8 @@
 
 static const char* mainModuleName = "MainModule";
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 namespace Luau::LanguageServer
 {
 ClientConfiguration defaultTestClientConfiguration()
@@ -124,10 +126,11 @@ Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source
 {
     RobloxPlatform platform;
 
+    forAutocomplete = forAutocomplete && !FFlag::LuauSolverV2;
     auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
 
     Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, forAutocomplete);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source);
     platform.mutateRegisteredDefinitions(globals, std::nullopt);
     Luau::freeze(globals.globalTypes);
 

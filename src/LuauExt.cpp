@@ -1,5 +1,7 @@
+#include <optional>
 #include <utility>
 
+#include "Luau/Type.h"
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
@@ -51,11 +53,10 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
     return std::nullopt;
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions)
 {
     // TODO: packageName shouldn't just be "@roblox"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
@@ -426,6 +427,39 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
     diagnostic.range = {toUTF16(textDocument, error.getLocation().begin), toUTF16(textDocument, error.getLocation().end)};
     diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
     return diagnostic;
+}
+
+// TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
+// Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
+std::optional<Luau::ModuleName> lookupTypeDefinitionModule(Luau::TypeId type)
+{
+    if (!FFlag::LuauSolverV2)
+    {
+        return Luau::getDefinitionModuleName(type);
+    }
+
+    type = Luau::follow(type);
+    if (auto ttv = Luau::get<Luau::TableType>(type); ttv && ttv->definitionModuleName.empty())
+    {
+        if (type->owningArena && type->owningArena->owningModule)
+            return type->owningArena->owningModule->name;
+    }
+
+    return Luau::getDefinitionModuleName(type);
+}
+
+std::optional<Luau::Location> lookupTypeDefinitionModuleLocation(Luau::TypeId type, Luau::ModulePtr module)
+{
+    type = Luau::follow(type);
+    auto types = module->astResolvedTypes;
+    for (auto it = types.begin(); it != types.end(); ++it)
+    {
+        if (it->second == type)
+        {
+            return it->first->location;
+        }
+    }
+    return std::nullopt;
 }
 
 // Based on upstream, except we use containsClosed

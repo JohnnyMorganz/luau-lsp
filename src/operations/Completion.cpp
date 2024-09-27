@@ -13,6 +13,8 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -256,8 +258,8 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
         return SortText::AutoImports;
 
     // If the entry is `loadstring`, deprioritise it
-    if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
-        it != frontend.globalsForAutocomplete.globalScope->bindings.end())
+    auto& completionGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
+    if (auto it = completionGlobals.globalScope->bindings.find(Luau::AstName("loadstring")); it != completionGlobals.globalScope->bindings.end())
     {
         if (entry.type == it->second.typeId)
             return SortText::Deprioritized;
@@ -371,10 +373,21 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                 if (parentTy)
                 {
                     // parentTy might be an intersected type, find the actual base ttv
-                    if (auto propInformation = lookupProp(*parentTy, name))
+                    auto followedTy = Luau::follow(*parentTy);
+                    if (auto propInformation = lookupProp(followedTy, name))
                         definitionModuleName = Luau::getDefinitionModuleName(propInformation->first);
                     else
-                        definitionModuleName = Luau::getDefinitionModuleName(*parentTy);
+                        definitionModuleName = Luau::getDefinitionModuleName(followedTy);
+
+                    // TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
+                    // Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
+                    if (FFlag::LuauSolverV2 && !definitionModuleName)
+                    {
+                        if (followedTy->owningArena && followedTy->owningArena->owningModule)
+                        {
+                            definitionModuleName = followedTy->owningArena->owningModule->name;
+                        }
+                    }
                 }
             }
         }
