@@ -5,6 +5,7 @@
 #include "Luau/Autocomplete.h"
 #include "Luau/TxnLog.h"
 #include "Luau/TypeUtils.h"
+#include "Luau/TimeTrace.h"
 
 #include "LSP/Completion.hpp"
 #include "LSP/LanguageServer.hpp"
@@ -393,6 +394,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
 
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::completion", "LSP");
     auto config = client->getConfiguration(rootUri);
 
     if (!config.completion.enabled)

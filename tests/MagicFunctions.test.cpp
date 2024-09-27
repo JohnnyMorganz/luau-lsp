@@ -5,12 +5,12 @@
 #define LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(x, name, body) \
     TEST_CASE_FIXTURE(x, name) \
     { \
-        ScopedFastFlag sff{FFlag::DebugLuauDeferredConstraintResolution, false}; \
+        ScopedFastFlag sff{FFlag::LuauSolverV2, false}; \
         body \
     } \
     TEST_CASE_FIXTURE(x, "dcr_" name) \
     { \
-        ScopedFastFlag sff{FFlag::DebugLuauDeferredConstraintResolution, true}; \
+        ScopedFastFlag sff{FFlag::LuauSolverV2, true}; \
         body \
     }
 

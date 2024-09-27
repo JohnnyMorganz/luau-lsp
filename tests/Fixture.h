@@ -21,6 +21,13 @@
 
 #include <optional>
 
+// TODO: the rest should be part of this namespace...
+namespace Luau::LanguageServer
+{
+ClientConfiguration defaultTestClientConfiguration();
+Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source);
+} // namespace Luau::LanguageServer
+
 struct Fixture
 {
     std::unique_ptr<Luau::SourceModule> sourceModule;

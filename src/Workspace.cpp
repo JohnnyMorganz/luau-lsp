@@ -8,12 +8,13 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/glob.hpp"
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/TimeTrace.h"
 
-LUAU_FASTFLAG(DebugLuauDeferredConstraintResolution)
+LUAU_FASTFLAG(LuauSolverV2)
 
 const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const
 {
-    if (FFlag::DebugLuauDeferredConstraintResolution || !forAutocomplete)
+    if (FFlag::LuauSolverV2 || !forAutocomplete)
         return frontend.moduleResolver.getModule(moduleName);
     else
         return frontend.moduleResolverForAutocomplete.getModule(moduleName);
@@ -140,7 +141,8 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativeFsPath = path.lexically_relative(rootUri.fsPath());
     if (relativeFsPath == std::filesystem::path())
-        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed");
+        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed when constructing " +
+                                                                  path.string() + " against " + rootUri.fsPath().string());
     auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
@@ -230,6 +232,7 @@ void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAu
 
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::indexFiles", "LSP");
     if (!config.index.enabled)
         return;
 
@@ -241,7 +244,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     size_t indexCount = 0;
 
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
+        next != end; ++next)
     {
         if (indexCount >= config.index.maxFiles)
         {
@@ -278,8 +281,9 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-void WorkspaceFolder::initialize()
+void WorkspaceFolder::registerTypes()
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
     client->sendTrace("workspace initialization: registering Luau globals");
     Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
     Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
@@ -304,7 +308,8 @@ void WorkspaceFolder::initialize()
 
         // Parse definitions file metadata
         client->sendTrace("workspace initialization: parsing definitions file metadata");
-        if (auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents))
+        auto metadata = types::parseDefinitionsFileMetadata(*definitionsContents);
+        if (!definitionsFileMetadata)
             definitionsFileMetadata = metadata;
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
@@ -312,6 +317,10 @@ void WorkspaceFolder::initialize()
         auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
         types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
+
+        client->sendTrace("workspace: applying platform mutations on definitions");
+        platform->mutateRegisteredDefinitions(frontend.globals, metadata);
+        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, metadata);
 
         auto uri = Uri::file(resolvedFilePath);
 
@@ -343,10 +352,8 @@ void WorkspaceFolder::initialize()
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
-    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
-
-    fileResolver.platform = platform.get();
 
     // Apply first-time configuration
     if (!isConfigured)
@@ -357,10 +364,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
         fileResolver.platform = platform.get();
 
-        client->sendTrace("workspace: applying platform mutations on definitions");
-
-        platform->mutateRegisteredDefinitions(frontend.globals, definitionsFileMetadata);
-        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, definitionsFileMetadata);
+        registerTypes();
     }
 
     client->sendTrace("workspace: apply platform-specific configuration");
