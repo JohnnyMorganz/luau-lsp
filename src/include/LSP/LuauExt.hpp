@@ -18,8 +18,7 @@ bool isMetamethod(const Luau::Name& name);
 
 std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions);
 
-Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
@@ -68,6 +67,9 @@ bool isGetService(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
+
+std::optional<Luau::ModuleName> lookupTypeDefinitionModule(Luau::TypeId type);
+std::optional<Luau::Location> lookupTypeDefinitionModuleLocation(Luau::TypeId type, Luau::ModulePtr module);
 
 struct FindImportsVisitor : public Luau::AstVisitor
 {

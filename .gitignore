@@ -1,6 +1,7 @@
 /build
 .vscode/settings.json
 /.vs
+out/
 .cache
 .idea
 .DS_Store

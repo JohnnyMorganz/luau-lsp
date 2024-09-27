@@ -1,6 +1,9 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "LSP/IostreamHelpers.hpp"
+#include "Luau/Common.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 TEST_SUITE_BEGIN("InlayHints");
 
@@ -651,14 +654,20 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{2, 30});
-    CHECK_EQ(result[0].label, ": a");
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(result[0].label, ": unknown");
+    else
+        CHECK_EQ(result[0].label, ": a");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
     CHECK_EQ(result[0].paddingRight, false);
 
     REQUIRE(result[0].textEdits.size() == 1);
-    CHECK_EQ(result[0].textEdits[0].newText, ": a");
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(result[0].textEdits[0].newText, ": unknown");
+    else
+        CHECK_EQ(result[0].textEdits[0].newText, ": a");
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{2, 30}, {2, 30}});
 }
 

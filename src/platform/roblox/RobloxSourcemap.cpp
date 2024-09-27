@@ -4,6 +4,8 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 static void mutateSourceNodeWithPluginInfo(SourceNode& sourceNode, const PluginNodePtr& pluginInstance)
 {
     // We currently perform purely additive changes where we add in new children
@@ -283,15 +285,18 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
     // Recreate instance types
     instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-    bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
+    bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 
     // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
     // We pass the same setting even when we are registering autocomplete globals since
     // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
     workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
     handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
-    workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
-    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+    if (!FFlag::LuauSolverV2)
+    {
+        workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
+        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+    }
 
     workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
 
@@ -448,10 +453,10 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
     // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
     frontend.prepareModuleScope = [this, &frontend, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
     {
-        Luau::GlobalTypes& globals = forAutocomplete ? frontend.globalsForAutocomplete : frontend.globals;
+        Luau::GlobalTypes& globals = (forAutocomplete && !FFlag::LuauSolverV2) ? frontend.globalsForAutocomplete : frontend.globals;
 
         // TODO: we hope to remove these in future!
-        if (!expressiveTypes && !forAutocomplete)
+        if (!expressiveTypes && !forAutocomplete && !FFlag::LuauSolverV2)
         {
             scope->bindings[Luau::AstName("script")] = Luau::Binding{globals.builtinTypes->anyType};
             scope->bindings[Luau::AstName("workspace")] = Luau::Binding{globals.builtinTypes->anyType};

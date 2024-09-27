@@ -53,8 +53,11 @@ jobs:
           cmake ..
           cmake --build . --target Luau.LanguageServer.Test -j 3
 
-      - name: Run Tests
+      - name: Run Tests (Old Solver)
         run: ${{ matrix.test-path }}
+
+      - name: Run Tests (New Solver)
+        run: ${{ matrix.test-path }} --new-solver
 
   types_smoketest:
     name: Types Smoketest
