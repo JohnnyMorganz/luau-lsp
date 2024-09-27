@@ -23,8 +23,8 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
           submodules: true
-      #   - name: Configure git details
-      #     run: |
-      #       git config user.name "github-actions[bot]"
-      #       git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Configure git details
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: "scripts/release.py ${{ github.event.inputs.version }}"
