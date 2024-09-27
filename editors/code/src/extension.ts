@@ -28,6 +28,7 @@ const clientDisposables: vscode.Disposable[] = [];
 
 const CURRENT_FFLAGS =
   "https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCDesktopClient";
+const FFLAG_KINDS = ["FFlag", "FInt", "DFFlag", "DFInt"];
 
 type FFlags = Record<string, string>;
 type FFlagsEndpoint = { applicationSettings: FFlags };
@@ -135,8 +136,11 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       const currentFlags = await getFFlags();
       if (currentFlags) {
         for (const [name, value] of Object.entries(currentFlags)) {
-          if (name.startsWith("FFlagLuau")) {
-            fflags[name.substring(5)] = value; // Remove the "FFlag" part from the name
+          for (const kind of FFLAG_KINDS) {
+            if (name.startsWith(`${kind}Luau`)) {
+              // Remove the "FFlag" part from the name
+              fflags[name.substring(kind.length)] = value;
+            }
           }
         }
       }
