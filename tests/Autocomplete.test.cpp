@@ -76,7 +76,7 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->value, "This is a function documentation comment");
 }
 
-TEST_CASE_FIXTURE(Fixture, "xternal_module_intersected_type_table_property_has_documentation")
+TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_documentation")
 {
     std::string typeSource = R"(
         export type A = {
