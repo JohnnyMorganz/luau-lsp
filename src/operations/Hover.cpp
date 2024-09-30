@@ -296,20 +296,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         return std::nullopt;
     type = Luau::follow(*type);
 
-    // TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
-    // Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
-    /*auto typeVal = type.value();
-    if (auto ttv = Luau::get<Luau::TableType>(*type); ttv && ttv->definitionModuleName.empty() && FFlag::LuauSolverV2)
-    {
-        auto name = ttv->name;
-        if (typeVal->owningArena && typeVal->owningArena->owningModule)
-            documentationLocation = {typeVal->owningArena->owningModule->name, node->location};
-
-        auto locations = scope->typeAliasLocations;
-        if (name && (locations.find(name.value()) != locations.end()))
-            documentationLocation = {moduleName, locations.at(name.value())};
-    }*/
-
     if (!documentationSymbol)
         documentationSymbol = type.value()->documentationSymbol;
 
