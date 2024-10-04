@@ -52,9 +52,6 @@ public:
         fileResolver.rootUri = uri;
     }
 
-    // Initialises the workspace folder
-    void initialize();
-
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
@@ -87,6 +84,7 @@ public:
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
 private:
+    void registerTypes();
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);

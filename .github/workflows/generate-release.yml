@@ -13,5 +13,18 @@ jobs:
     name: Generate new release
     runs-on: ubuntu-latest
     steps:
+      - name: Generate App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TYPES_GENERATOR_APP_ID }}
+          private-key: ${{ secrets.TYPES_GENERATOR_PRIVATE_KEY }}
       - uses: actions/checkout@v4
-      - run: "scripts/release.py ${{ github.event.inputs.version }})"
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          submodules: true
+      - name: Configure git details
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: "scripts/release.py ${{ github.event.inputs.version }}"
