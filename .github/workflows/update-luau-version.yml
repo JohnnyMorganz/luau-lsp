@@ -25,7 +25,9 @@ jobs:
 
       - name: Update Luau Version
         id: update_luau_version
-        run: echo "LUAU_VERSION=$(scripts/update_luau_and_changelog.py)" >> $GITHUB_OUTPUT
+        run: |
+          version=$(scripts/update_luau_and_changelog.py | tr '\n' ' ')
+          echo "LUAU_VERSION=$version" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         id: create_pull_request
