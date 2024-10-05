@@ -21,6 +21,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
+          fetch-depth: 0
 
       - name: Update Luau Version
         run: echo "LUAU_VERSION=$(scripts/update_luau_and_changelog.py)" >> $GITHUB_ENV
