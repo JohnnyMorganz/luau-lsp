@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.33.1] - 2024-10-05
+
 ### Changed
 
 - Sync to upstream Luau 0.646
@@ -13,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed a regression in 1.30.0 breaking type definitions files that rely on mutations like `Enum.Foo`
-([#658](https://github.com/JohnnyMorganz/luau-lsp/issues/658))
+  ([#658](https://github.com/JohnnyMorganz/luau-lsp/issues/658))
 
 ## [1.33.0] - 2024-09-27
 
