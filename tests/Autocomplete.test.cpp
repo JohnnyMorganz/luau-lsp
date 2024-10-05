@@ -76,7 +76,52 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->value, "This is a function documentation comment");
 }
 
-TEST_CASE_FIXTURE(Fixture, "interesected_type_table_property_has_documentation")
+TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_documentation")
+{
+    std::string typeSource = R"(
+        export type A = {
+            --- Example sick number
+            Hello: number
+        }
+
+        export type B = {
+            --- Example sick string
+            Heya: string
+        } & A
+    )";
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local bar = require("/bar.luau")
+        local item: bar.B = nil
+        item.|
+    )");
+
+    auto typesUri = newDocument("bar.luau", typeSource);
+    workspace.checkStrict(workspace.fileResolver.getModuleName((typesUri)));
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    auto item = requireItem(result, "Hello");
+    REQUIRE(item.documentation);
+    CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item.documentation->value);
+    CHECK_EQ(item.documentation->value, "Example sick number");
+
+    auto item2 = requireItem(result, "Heya");
+    REQUIRE(item2.documentation);
+    CHECK_EQ(item2.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item2.documentation->value);
+    CHECK_EQ(item2.documentation->value, "Example sick string");
+}
+
+
+TEST_CASE_FIXTURE(Fixture, "intersected_type_table_property_has_documentation")
 {
     auto [source, marker] = sourceWithMarker(R"(
         type A = {

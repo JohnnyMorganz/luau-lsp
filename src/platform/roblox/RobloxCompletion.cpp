@@ -3,6 +3,8 @@
 #include "LSP/Completion.hpp"
 #include "LSP/Workspace.hpp"
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 static constexpr const char* COMMON_SERVICES[] = {
     "Players",
     "ReplicatedStorage",
@@ -254,7 +256,8 @@ const char* RobloxPlatform::handleSortText(
             return SortText::PrioritisedSuggestion;
 
     // If calling a property on ServiceProvider, then prioritise these properties
-    if (auto dataModelType = frontend.globalsForAutocomplete.globalScope->lookupType("ServiceProvider");
+    auto& completionGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
+    if (auto dataModelType = completionGlobals.globalScope->lookupType("ServiceProvider");
         dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
         Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
     {
@@ -264,9 +267,9 @@ const char* RobloxPlatform::handleSortText(
     }
 
     // If calling a property on an Instance, then prioritise these properties
-    else if (auto instanceType = frontend.globalsForAutocomplete.globalScope->lookupType("Instance");
-             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+    else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
+        instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))

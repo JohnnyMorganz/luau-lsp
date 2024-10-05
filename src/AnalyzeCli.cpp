@@ -22,6 +22,7 @@
 #include <vector>
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
+LUAU_FASTFLAG(LuauSolverV2)
 
 enum class ReportFormat
 {
@@ -174,7 +175,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             if (std::filesystem::is_directory(path))
             {
                 for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
-                     next != end; ++next)
+                    next != end; ++next)
                 {
                     try
                     {
@@ -307,8 +308,9 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
     Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 
-    Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
-    Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
+    Luau::registerBuiltinGlobals(frontend, frontend.globals);
+    if (!FFlag::LuauSolverV2)
+        Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
 
     for (auto& definitionsPath : definitionsPaths)
     {
@@ -325,7 +327,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");
@@ -359,8 +361,9 @@ int startAnalyze(const argparse::ArgumentParser& program)
             {
                 robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
 
-                robloxPlatform->handleSourcemapUpdate(
-                    frontend, frontend.globals, !program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes);
+                bool expressiveTypes =
+                    (program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes) || FFlag::LuauSolverV2;
+                robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals, expressiveTypes);
             }
         }
         else
@@ -371,7 +374,8 @@ int startAnalyze(const argparse::ArgumentParser& program)
     }
 
     Luau::freeze(frontend.globals.globalTypes);
-    Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 
     int failed = 0;
 

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.645
+- Fixed inlay hints, autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
 
 ### Fixed
 
