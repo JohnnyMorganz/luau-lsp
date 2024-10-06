@@ -3,7 +3,7 @@
 
 #include "LSP/LuauExt.hpp"
 
-static bool isGlobalBinding(const WorkspaceFolder* workspaceFolder, const lsp::RenameParams& params)
+static bool isGlobalBinding(const WorkspaceFolder* workspaceFolder, const lsp::TextDocumentPositionParams& params)
 {
     auto moduleName = workspaceFolder->fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = workspaceFolder->fileResolver.getTextDocument(params.textDocument.uri);
@@ -12,6 +12,8 @@ static bool isGlobalBinding(const WorkspaceFolder* workspaceFolder, const lsp::R
     auto position = textDocument->convertPosition(params.position);
 
     auto sourceModule = workspaceFolder->frontend.getSourceModule(moduleName);
+    if (!sourceModule)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
     // TODO: fix "forAutocomplete"
     auto module = workspaceFolder->getModule(moduleName, /* forAutocomplete: */ true);
     auto binding = Luau::findBindingAtPosition(*module, *sourceModule, position);
@@ -63,4 +65,134 @@ lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     return workspace->rename(params);
+}
+
+static lsp::PrepareRenameRangePlaceholderResult createRangePlaceholder(const TextDocument& textDocument, Luau::Location location)
+{
+    lsp::Range range = {textDocument.convertPosition(location.begin), textDocument.convertPosition(location.end)};
+    auto text = textDocument.getText(range);
+    return {range, /* placeholder: */ text};
+}
+
+static std::optional<Luau::Location> findTypeReferenceLocation(
+    Luau::Position position, Luau::AstArray<Luau::AstGenericType> generics, Luau::AstArray<Luau::AstGenericTypePack> genericPacks)
+{
+    for (const auto t : generics)
+        if (t.location.containsClosed(position))
+            return t.location;
+    for (const auto t : genericPacks)
+        if (t.location.containsClosed(position))
+            return t.location;
+    return std::nullopt;
+}
+
+lsp::PrepareRenameResult WorkspaceFolder::prepareRename(const lsp::PrepareRenameParams& params)
+{
+    auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
+    if (!textDocument)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+    auto position = textDocument->convertPosition(params.position);
+
+    // Run the type checker to ensure we are up to date
+    // We check for autocomplete here since autocomplete has stricter types
+    checkStrict(moduleName);
+
+    auto sourceModule = frontend.getSourceModule(moduleName);
+    if (!sourceModule)
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to read source code");
+
+    if (isGlobalBinding(this, params))
+        throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Cannot rename a global variable");
+
+    auto exprOrLocal = findExprOrLocalAtPositionClosed(*sourceModule, position);
+    if (exprOrLocal.getLocal())
+        return createRangePlaceholder(*textDocument, exprOrLocal.getLocal()->location);
+    else if (auto expr = exprOrLocal.getExpr())
+    {
+        if (auto local = expr->as<Luau::AstExprLocal>())
+            return createRangePlaceholder(*textDocument, local->location);
+        else if (auto global = expr->as<Luau::AstExprGlobal>())
+            return createRangePlaceholder(*textDocument, global->location);
+    }
+
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
+    if (auto expr = exprOrLocal.getExpr())
+    {
+        if (auto indexName = expr->as<Luau::AstExprIndexName>())
+        {
+            auto possibleParentTy = module->astTypes.find(indexName->expr);
+            if (possibleParentTy)
+            {
+                auto parentTy = Luau::follow(*possibleParentTy);
+                auto ttv = Luau::get<Luau::TableType>(Luau::follow(parentTy));
+
+                // Find references returns nothing in these case so we disallow it in prepareRename too
+                if (!ttv || ttv->definitionModuleName.empty())
+                    throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Definition module not found");
+                if (ttv->definitionModuleName[0] == '@')
+                    throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Cannot rename a property of a global");
+                return createRangePlaceholder(*textDocument, indexName->indexLocation);
+            }
+        }
+        else if (auto constantString = expr->as<Luau::AstExprConstantString>())
+        {
+            // Potentially a property defined inside of a table
+            auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes = */ false);
+            if (ancestry.size() > 1)
+            {
+                auto parent = ancestry.at(ancestry.size() - 2);
+                if (auto tbl = parent->as<Luau::AstExprTable>(); tbl && module->astTypes.find(tbl))
+                    return createRangePlaceholder(*textDocument, constantString->location);
+            }
+        }
+    }
+
+    // Search for a type reference
+    auto node = findNodeOrTypeAtPositionClosed(*sourceModule, position);
+    if (!node)
+        return std::nullopt;
+
+    if (auto typeDefinition = node->as<Luau::AstStatTypeAlias>())
+    {
+        if (auto location = findTypeReferenceLocation(position, typeDefinition->generics, typeDefinition->genericPacks))
+            return createRangePlaceholder(*textDocument, location.value());
+
+        if (!typeDefinition->nameLocation.containsClosed(position))
+            return std::nullopt;
+
+        return createRangePlaceholder(*textDocument, typeDefinition->nameLocation);
+    }
+    else if (auto reference = node->as<Luau::AstTypeReference>())
+    {
+        if (auto prefix = reference->prefix)
+        {
+            auto requireInfo = findClosestAncestorModuleImport(*sourceModule, reference->prefix.value(), reference->prefixLocation->begin);
+            if (!requireInfo)
+                return std::nullopt;
+            if (reference->prefixLocation.value().containsClosed(position))
+                return createRangePlaceholder(*textDocument, reference->prefixLocation.value());
+        }
+        if (!reference->nameLocation.containsClosed(position))
+            return std::nullopt;
+        return createRangePlaceholder(*textDocument, reference->nameLocation);
+    }
+    else if (auto typeFunction = node->as<Luau::AstTypeFunction>())
+    {
+        if (auto location = findTypeReferenceLocation(position, typeFunction->generics, typeFunction->genericPacks))
+            return createRangePlaceholder(*textDocument, *location);
+    }
+    else if (auto func = node->as<Luau::AstExprFunction>())
+    {
+        if (auto location = findTypeReferenceLocation(position, func->generics, func->genericPacks))
+            return createRangePlaceholder(*textDocument, *location);
+    }
+
+    return std::nullopt;
+}
+
+lsp::PrepareRenameResult LanguageServer::prepareRename(const lsp::PrepareRenameParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    return workspace->prepareRename(params);
 }
