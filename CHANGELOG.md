@@ -6,7 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-
 ### Added
 
 - Added support for the prepare rename request
@@ -17,14 +16,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed property references in assignments not being found (i.e. `bar` in `foo.bar = baz` wouldn't be recognized as a reference to `foo.bar`)
 - Fixed references to required files in types prefixes not being accurate with variable shadowing or separate scopes
 
+## [1.33.1] - 2024-10-05
+
 ### Changed
 
-- Sync to upstream Luau 0.645
+- Sync to upstream Luau 0.646
 
 ### Fixed
 
 - Fixed a regression in 1.30.0 breaking type definitions files that rely on mutations like `Enum.Foo`
-([#658](https://github.com/JohnnyMorganz/luau-lsp/issues/658))
+  ([#658](https://github.com/JohnnyMorganz/luau-lsp/issues/658))
 
 ## [1.33.0] - 2024-09-27
 
