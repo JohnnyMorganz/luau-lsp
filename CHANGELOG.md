@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for the prepare rename request
+- Added support for document highlighting
+
+### Fixed
+
+- Fixed property references in assignments not being found (i.e. `bar` in `foo.bar = baz` wouldn't be recognized as a reference to `foo.bar`)
+- Fixed references to required files in types prefixes not being accurate with variable shadowing or separate scopes
+
 ## [1.33.1] - 2024-10-05
 
 ### Changed

@@ -90,6 +90,8 @@ private:
     lsp::ReferenceResult references(const lsp::ReferenceParams& params);
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::RenameResult rename(const lsp::RenameParams& params);
+    lsp::PrepareRenameResult prepareRename(const lsp::PrepareRenameParams& params);
+    lsp::DocumentHighlightResult documentHighlight(const lsp::DocumentHighlightParams& params);
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
     lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
