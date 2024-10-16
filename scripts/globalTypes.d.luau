@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "Animation", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationRigData", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioReverb", "AudioSearchParams", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "Camera", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CylinderMesh", "EditableMesh", "RobloxEditableMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EditableImage", "RobloxEditableImage", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilterInstance", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "ScrollingFrame", "TextBox", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "IKControl", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "Vector3Curve", "VideoDeviceInput", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire"], "SERVICES": ["AccountService", "AchievementService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppLifecycleObserverService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetService", "AudioFocusService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "Chat", "ChatbotUIService", "CloudCRUDService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommandService", "CommerceService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "ConversationalAIAcceptanceService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EventIngestService", "ExampleService", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "FaceAnimatorService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GamepadService", "GenericChallengeService", "Geometry", "GeometryService", "GoogleAnalyticsConfiguration", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HeatmapService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaWebService", "LuauScriptAnalyzerService", "MarketplaceService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PatchBundlerFileWatch", "PathfindingService", "PermissionsService", "PhysicsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "ReflectionService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkService", "RtMessagingService", "RunService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionService", "SharedTableRegistry", "ShorelineUpgraderService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioUserService", "StudioWidgetsService", "StylingService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UnvalidatedAssetService", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService"]}
+--#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "Animation", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationRigData", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioReverb", "AudioSearchParams", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "Camera", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CylinderMesh", "EditableMesh", "RobloxEditableMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EditableImage", "RobloxEditableImage", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilter", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "ScrollingFrame", "TextBox", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "IKControl", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "Vector3Curve", "VideoDeviceInput", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire"], "SERVICES": ["AccountService", "AchievementService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppLifecycleObserverService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetService", "AudioFocusService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "Chat", "ChatbotUIService", "CloudCRUDService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommandService", "CommerceService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "ConversationalAIAcceptanceService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EventIngestService", "ExampleService", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "FaceAnimatorService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GamepadService", "GenericChallengeService", "Geometry", "GeometryService", "GoogleAnalyticsConfiguration", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HeatmapService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaWebService", "LuauScriptAnalyzerService", "MarketplaceService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PatchBundlerFileWatch", "PathfindingService", "PermissionsService", "PhysicsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "ReflectionService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkService", "RtMessagingService", "RunService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionService", "SharedTableRegistry", "ShorelineUpgraderService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioUserService", "StudioWidgetsService", "StylingService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UnvalidatedAssetService", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService"]}
 
 
 type Content = string
@@ -4925,15 +4925,21 @@ export type Status = any
 export type PointsService = any
 export type DoubleConstrainedValue = any
 export type IntConstrainedValue = any
-declare class Instance
+declare class Object
+	Changed: RBXScriptSignal<string>
+	ClassName: string
+	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
+	function IsA(self, className: string): boolean
+	function isA(self, className: string): boolean
+end
+
+declare class Instance extends Object
 	AncestryChanged: RBXScriptSignal<Instance, Instance?>
 	Archivable: boolean
 	AttributeChanged: RBXScriptSignal<string>
 	Capabilities: SecurityCapabilities
-	Changed: RBXScriptSignal<string>
 	ChildAdded: RBXScriptSignal<Instance>
 	ChildRemoved: RBXScriptSignal<Instance>
-	ClassName: string
 	DescendantAdded: RBXScriptSignal<Instance>
 	DescendantRemoving: RBXScriptSignal<Instance>
 	Destroying: RBXScriptSignal<>
@@ -4965,7 +4971,6 @@ declare class Instance
 	function GetStyled(self, name: string): any
 	function GetTags(self): { any }
 	function HasTag(self, tag: string): boolean
-	function IsA(self, className: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
 	function IsPropertyModified(self, name: string): boolean
@@ -5293,7 +5298,9 @@ declare class AssetService extends Instance
 	AudioMetadataResponse: RBXScriptSignal<number, { any }>
 	OpenCreateResultModal: RBXScriptSignal<EnumPromptCreateAssetResult>
 	OpenPublishResultModal: RBXScriptSignal<EnumPromptPublishAssetResult>
+	function CreateEditableImage(self): EditableImage
 	function CreateEditableImageAsync(self, textureId: ContentId): EditableImage
+	function CreateEditableMesh(self): EditableMesh
 	function CreateEditableMeshAsync(self, meshId: ContentId): EditableMesh
 	function CreateEditableMeshFromPartAsync(self, meshPart: Instance): EditableMesh
 	function CreateEditableMeshStripSkinningAsync(self, meshId: ContentId): EditableMesh
@@ -5544,7 +5551,7 @@ end
 
 declare class AvatarCreationService extends Instance
 	UgcValidationFailure: RBXScriptSignal<string, string>
-	UgcValidationSuccess: RBXScriptSignal<string, string>
+	UgcValidationSuccess: RBXScriptSignal<string, string, number>
 	function GenerateAvatarAsync(self, sessionId: string, previewId: string): string
 	function GenerateAvatarModelAsync(self, player: Player, previewJobId: string, options: { [any]: any }, progressCallback: ((...any) -> ...any)): string
 	function GenerateAvatarPreviewAsync(self, player: Player, textPrompt: string, options: { [any]: any }, progressCallback: ((...any) -> ...any)): string
@@ -5555,7 +5562,7 @@ declare class AvatarCreationService extends Instance
 	function LoadAvatarHumanoidDescriptionAsync(self, id: string): HumanoidDescription
 	function LoadAvatarModelAsync(self, id: string): Instance
 	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): EditableImage
-	function PromptCreateAvatarAsync(self, player: Player, humanoidDescription: HumanoidDescription): any
+	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
 	function SendAnalyticsEvent(self, eventName: string, params: { [any]: any }): nil
@@ -5626,6 +5633,7 @@ declare class AvatarEditorService extends Instance
 	function SignalSetFavoritePermissionDenied(self): nil
 	function SignalUpdateOutfitFailed(self): nil
 	function SignalUpdateOutfitPermissionDenied(self): nil
+	function refreshAvatarThumbnails(self, thumbnailTypes: { any }): nil
 end
 
 declare class AvatarImportService extends Instance
@@ -5804,7 +5812,7 @@ end
 
 declare class WrapDeformer extends BaseWrap
 	function CreateEditableMeshAsync(self): EditableMesh
-	function GetDeformedCFrame(self, originalCFrame: CFrame): CFrame
+	function GetDeformedCFrameAsync(self, originalCFrame: CFrame): CFrame
 end
 
 declare class WrapLayer extends BaseWrap
@@ -6233,6 +6241,7 @@ end
 
 declare class CommerceService extends Instance
 	PromptCommerceProductPurchaseFinished: RBXScriptSignal<Player, number>
+	function GetCommerceProductInfoAsync(self, commerceProductId: number): { [any]: any }
 	function PromptCommerceProductPurchase(self, user: Player, commerceProductId: number): nil
 	function PromptRealWorldCommerceBrowser(self, player: Player, url: string): nil
 	function UserEligibleForRealWorldCommerceAsync(self): boolean
@@ -7063,18 +7072,18 @@ declare class ExperienceStateCaptureService extends Instance
 	function ToggleCaptureMode(self): nil
 end
 
-declare class ExplorerFilterAutocompleterInstance extends Instance
-	ReplaceRange: Vector2
-	RequiresOutsideContext: boolean
-	function GetSuggestions(self): { any }
-end
-
-declare class ExplorerFilterInstance extends Instance
-	function GetAutocompleter(self): ExplorerFilterAutocompleterInstance
+declare class ExplorerFilter extends Instance
+	function GetAutocompleter(self): ExplorerFilterAutocompleter
 	function GetErrors(self): { any }
 	function GetLexemes(self): { any }
 	function InstancePassesFilter(self, instance: Instance): boolean
 	function SetFilter(self, search: string): nil
+end
+
+declare class ExplorerFilterAutocompleter extends Instance
+	ReplaceRange: Vector2
+	RequiresOutsideContext: boolean
+	function GetSuggestions(self): { any }
 end
 
 declare class Explosion extends Instance
@@ -7447,6 +7456,7 @@ declare class ImageButton extends GuiButton
 	HoverImage: ContentId
 	Image: ContentId
 	ImageColor3: Color3
+	ImageContent: Content
 	ImageRectOffset: Vector2
 	ImageRectSize: Vector2
 	ImageTransparency: number
@@ -7496,6 +7506,7 @@ declare class ImageLabel extends GuiLabel
 	ContentImageSize: Vector2
 	Image: ContentId
 	ImageColor3: Color3
+	ImageContent: Content
 	ImageRectOffset: Vector2
 	ImageRectSize: Vector2
 	ImageTransparency: number
@@ -9081,8 +9092,10 @@ declare class MeshPart extends TriangleMeshPart
 	HasJointOffset: boolean
 	HasSkinnedMesh: boolean
 	JointOffset: Vector3
+	MeshContent: Content
 	MeshId: ContentId
 	RenderFidelity: EnumRenderFidelity
+	TextureContent: Content
 	TextureID: ContentId
 	function ApplyMesh(self, meshPart: MeshPart): nil
 end
@@ -11498,6 +11511,7 @@ declare class TextService extends Instance
 	function GetFontMemoryData(self): { [any]: any }
 	function GetTextBoundsAsync(self, params: GetTextBoundsParams): Vector2
 	function GetTextSize(self, string: string, fontSize: number, font: EnumFont, frameSize: Vector2): Vector2
+	function GetTextSizeOffsetAsync(self, fontSize: number, font: Font): number
 	function SetResolutionScale(self, scale: number): nil
 end
 
@@ -11642,8 +11656,10 @@ declare class UGCAvatarService extends Instance
 end
 
 declare class UGCValidationService extends Instance
+	function CalculateEditableMeshInsideMeshPercentage(self, editableMeshRoot: EditableMesh, editableMeshQuery: EditableMesh, meshQueryTransform: CFrame, meshQueryScale: Vector3): number
 	function CalculateEditableMeshTotalSurfaceArea(self, editableMesh: EditableMesh, meshScale: Vector3): number
 	function CalculateEditableMeshUniqueUVCount(self, editableMesh: EditableMesh): number
+	function CalculateMeshInsideMeshPercentage(self, meshIdRoot: string, meshIdQuery: string, meshqueryTransform: CFrame, meshQueryScale: Vector3): number
 	function CalculateTotalSurfaceArea(self, meshId: string, meshScale: Vector3): number
 	function CalculateUniqueUVCount(self, meshId: string): number
 	function CanLoadAsset(self, assetId: string): boolean
