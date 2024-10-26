@@ -1,3 +1,4 @@
+#include "Luau/TypeFwd.h"
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
@@ -62,7 +63,13 @@ static void injectChildrenLookupFunctions(
         auto findFirstChildFunction = Luau::makeFunction(arena, ty,
             {globals.builtinTypes->stringType, Luau::makeOption(globals.builtinTypes, arena, globals.builtinTypes->booleanType)},
             {"name", "recursive"}, {optionalInstanceType});
-        auto waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+
+        Luau::TypeId waitForChildFunction;
+        if (FFlag::LuauSolverV2)
+            waitForChildFunction = Luau::makeFunction(
+                arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->optionalNumberType}, {"name"}, {*instanceType});
+        else
+            waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
         auto waitForChildWithTimeoutFunction = Luau::makeFunction(
             arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->numberType}, {"name", "timeout"}, {optionalInstanceType});
 
@@ -85,7 +92,7 @@ static void injectChildrenLookupFunctions(
                     return std::nullopt;
                 });
             Luau::attachDcrMagicFunction(lookupFuncTy,
-                [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+                [node, &arena, &globals, optionalInstanceType, lookupFuncTy, waitForChildFunction](Luau::MagicFunctionCallContext context) -> bool
                 {
                     if (context.callSite->args.size < 1)
                         return false;
@@ -100,6 +107,13 @@ static void injectChildrenLookupFunctions(
                             ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
                         return true;
                     }
+
+                    if (context.callSite->args.size >= 2 && lookupFuncTy == waitForChildFunction)
+                    {
+                        asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({optionalInstanceType}));
+                        return true;
+                    }
+
                     return false;
                 });
             Luau::attachTag(lookupFuncTy, kSourcemapGeneratedTag);
@@ -107,8 +121,11 @@ static void injectChildrenLookupFunctions(
         }
 
         ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
-        ctv->props["WaitForChild"] = Luau::makeProperty(
-            Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
+        if (FFlag::LuauSolverV2)
+            ctv->props["WaitForChild"] = Luau::makeProperty(waitForChildFunction, "@roblox/globaltype/Instance.WaitForChild");
+        else
+            ctv->props["WaitForChild"] = Luau::makeProperty(
+                Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
     }
 }
 
