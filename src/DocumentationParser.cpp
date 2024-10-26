@@ -459,7 +459,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     {
         return printMoonwaveDocumentation(getComments(ftv->definition->definitionModuleName.value(), ftv->definition->definitionLocation));
     }
-    else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv)
+    else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv && !ttv->definitionModuleName.empty())
     {
         return printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
     }

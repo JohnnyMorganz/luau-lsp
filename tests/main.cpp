@@ -1,3 +1,4 @@
+#include <limits>
 #define DOCTEST_CONFIG_NO_UNPREFIXED_OPTIONS
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
@@ -15,7 +16,7 @@ int main(int argc, const char** argv)
         if (strcmp(argv[i], "--new-solver") == 0)
         {
             FFlag::LuauSolverV2.value = true;
-            DFInt::LuauTypeSolverRelease.value = 645;
+            DFInt::LuauTypeSolverRelease.value = std::numeric_limits<int>::max();
             break;
         }
     }
