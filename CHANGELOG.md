@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.647
+- Sync to upstream Luau 0.649
 
 ## [1.33.1] - 2024-10-05
 
