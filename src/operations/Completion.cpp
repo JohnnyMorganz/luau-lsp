@@ -375,19 +375,9 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                     // parentTy might be an intersected type, find the actual base ttv
                     auto followedTy = Luau::follow(*parentTy);
                     if (auto propInformation = lookupProp(followedTy, name))
-                        definitionModuleName = Luau::getDefinitionModuleName(propInformation->first);
+                        definitionModuleName = lookupTypeDefinitionModule(propInformation->first);
                     else
-                        definitionModuleName = Luau::getDefinitionModuleName(followedTy);
-
-                    // TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
-                    // Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
-                    if (FFlag::LuauSolverV2 && !definitionModuleName)
-                    {
-                        if (followedTy->owningArena && followedTy->owningArena->owningModule)
-                        {
-                            definitionModuleName = followedTy->owningArena->owningModule->name;
-                        }
-                    }
+                        definitionModuleName = lookupTypeDefinitionModule(followedTy);
                 }
             }
         }
