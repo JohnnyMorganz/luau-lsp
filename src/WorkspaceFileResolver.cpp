@@ -50,11 +50,11 @@ const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const L
         return getTextDocument(Uri::parse(name));
 
     if (auto filePath = platform->resolveToRealPath(name)) {
-	auto it = managedFiles.find(filePath->generic_string());
+        auto it = managedFiles.find(filePath->generic_string());
         if (it != managedFiles.end()) {
             return &it->second;
-	}
-	return getTextDocument(Uri::file(*filePath));
+        }
+        return getTextDocument(Uri::file(*filePath));
     }
 
     return nullptr;
