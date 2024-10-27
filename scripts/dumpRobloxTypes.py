@@ -49,6 +49,7 @@ TYPE_INDEX = {
     "void": "nil",
     "null": "nil",
     "Objects": "{ Instance }",
+    "Instances": "{ Instance }",
     "Dictionary": "{ [any]: any }",
     "Map": "{ [any]: any }",
     "Array": "{ any }",
