@@ -31,13 +31,18 @@ export type RBXScriptSignal<T... = ...any> = {
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-declare class Instance
+declare class Object
+	Changed: RBXScriptSignal<string>
+	ClassName: string
+	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
+	function IsA(self, className: string): boolean
+end
+
+declare class Instance extends Object
     AncestryChanged: RBXScriptSignal<Instance, Instance?>
     AttributeChanged: RBXScriptSignal<string>
-    Changed: RBXScriptSignal<string>
     ChildAdded: RBXScriptSignal<Instance>
     ChildRemoved: RBXScriptSignal<Instance>
-    ClassName: string
     DescendantAdded: RBXScriptSignal<Instance>
     DescendantRemoving: RBXScriptSignal<Instance>
     Destroying: RBXScriptSignal<>
@@ -59,8 +64,6 @@ declare class Instance
     function GetChildren(self): { Instance }
     function GetDescendants(self): { Instance }
     function GetFullName(self): string
-    function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
-    function IsA(self, className: string): boolean
     function IsAncestorOf(self, descendant: Instance): boolean
     function IsDescendantOf(self, ancestor: Instance): boolean
     function SetAttribute(self, attribute: string, value: any): nil

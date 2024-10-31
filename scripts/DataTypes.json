@@ -1107,6 +1107,27 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "fromRotationBetweenVectors",
+                    "Parameters": [
+                        {
+                            "Name": "from",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "to",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [],
                     "ReturnType": {
@@ -3668,6 +3689,27 @@
                             "Name": "number"
                         }
                     ]
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "FuzzyEq",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        },
+                        {
+                            "Name": "epsilon",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "bool"
+                    }
                 },
                 {
                     "MemberType": "Function",

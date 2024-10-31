@@ -417,36 +417,56 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     }
 
     // Extend Instance types
+    if (auto objectType = globals.globalScope->lookupType("Object"))
+    {
+        if (auto* ctv = Luau::getMutable<Luau::ClassType>(objectType->type))
+        {
+            Luau::attachMagicFunction(ctv->props["IsA"].type(), magicFunctionInstanceIsA);
+            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
+
+            Luau::attachDcrMagicRefinement(ctv->props["IsA"].type(), dcrMagicRefinementInstanceIsA);
+            Luau::attachDcrMagicFunction(ctv->props["IsA"].type(), dcrMagicFunctionInstanceIsA);
+            Luau::attachDcrMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), dcrMagicFunctionGetPropertyChangedSignal);
+
+            Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
+            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
+        }
+    }
+
     if (auto instanceType = globals.globalScope->lookupType("Instance"))
     {
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
         {
-            Luau::attachMagicFunction(ctv->props["IsA"].type(), magicFunctionInstanceIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["Clone"].type(), magicFunctionInstanceClone);
-            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
 
-            Luau::attachDcrMagicRefinement(ctv->props["IsA"].type(), dcrMagicRefinementInstanceIsA);
-            Luau::attachDcrMagicFunction(ctv->props["IsA"].type(), dcrMagicFunctionInstanceIsA);
+            // TODO: clip once Object type is used everywhere
+            if (ctv->props.find("IsA") != ctv->props.end()) {
+                Luau::attachMagicFunction(ctv->props["IsA"].type(), magicFunctionInstanceIsA);
+                Luau::attachDcrMagicRefinement(ctv->props["IsA"].type(), dcrMagicRefinementInstanceIsA);
+                Luau::attachDcrMagicFunction(ctv->props["IsA"].type(), dcrMagicFunctionInstanceIsA);
+                Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
+            }
+            if (ctv->props.find("GetPropertyChangedSignal") != ctv->props.end()) {
+                Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), magicFunctionGetPropertyChangedSignal);
+                Luau::attachDcrMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), dcrMagicFunctionGetPropertyChangedSignal);
+                Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
+            }
+
             Luau::attachDcrMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), dcrMagicFunctionFindFirstXWhichIsA);
             Luau::attachDcrMagicFunction(ctv->props["FindFirstChildOfClass"].type(), dcrMagicFunctionFindFirstXWhichIsA);
             Luau::attachDcrMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), dcrMagicFunctionFindFirstXWhichIsA);
             Luau::attachDcrMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), dcrMagicFunctionFindFirstXWhichIsA);
             Luau::attachDcrMagicFunction(ctv->props["Clone"].type(), dcrMagicFunctionInstanceClone);
-            Luau::attachDcrMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), dcrMagicFunctionGetPropertyChangedSignal);
 
             // Autocomplete ClassNames for :IsA("") and counterparts
-            Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
             Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type(), "ClassNames");
             Luau::attachTag(ctv->props["FindFirstChildOfClass"].type(), "ClassNames");
             Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type(), "ClassNames");
             Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type(), "ClassNames");
-
-            // Autocomplete Properties for :GetPropertyChangedSignal("")
-            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.

@@ -8,7 +8,12 @@ import sys
 CHANGELOG_FILE = "CHANGELOG.md"
 
 # Update submodule
-subprocess.run(["git", "submodule", "update", "--remote"], check=True)
+subprocess.run(
+    ["git", "submodule", "update", "--remote"],
+    check=True,
+    stdout=sys.stderr,
+    stderr=sys.stderr,
+)
 
 # Check for changes
 if not subprocess.check_output(["git", "status", "--porcelain", "-uno"]):

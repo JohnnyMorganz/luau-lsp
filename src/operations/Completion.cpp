@@ -238,6 +238,8 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
         return lsp::CompletionItemKind::Module;
     case Luau::AutocompleteEntryKind::GeneratedFunction:
         return lsp::CompletionItemKind::Function;
+    case Luau::AutocompleteEntryKind::RequirePath:
+        return lsp::CompletionItemKind::File;
     }
 
     return std::nullopt;

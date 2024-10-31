@@ -10,6 +10,7 @@ from datetime import datetime
 CHANGELOG_FILE = "CHANGELOG.md"
 MAIN_CPP_FILE = "src/main.cpp"
 PACKAGE_JSON_FILE = "editors/code/package.json"
+PACKAGE_LOCK_JSON_FILE = "editors/code/package-lock.json"
 
 assert len(sys.argv) == 2, "Usage: scripts/release.py <version number>"
 VERSION = sys.argv[1]
@@ -68,7 +69,15 @@ subprocess.run(
 
 # Commit
 subprocess.run(
-    ["git", "add", CHANGELOG_FILE, MAIN_CPP_FILE, PACKAGE_JSON_FILE], check=True
+    [
+        "git",
+        "add",
+        CHANGELOG_FILE,
+        MAIN_CPP_FILE,
+        PACKAGE_JSON_FILE,
+        PACKAGE_LOCK_JSON_FILE,
+    ],
+    check=True,
 )
 subprocess.run(["git", "commit", "-m", f"v{VERSION}"], check=True)
 
