@@ -375,9 +375,9 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                     // parentTy might be an intersected type, find the actual base ttv
                     auto followedTy = Luau::follow(*parentTy);
                     if (auto propInformation = lookupProp(followedTy, name))
-                        definitionModuleName = lookupTypeDefinitionModule(propInformation->first);
+                        definitionModuleName = Luau::getDefinitionModuleName(propInformation->first);
                     else
-                        definitionModuleName = lookupTypeDefinitionModule(followedTy);
+                        definitionModuleName = Luau::getDefinitionModuleName(followedTy);
                 }
             }
         }

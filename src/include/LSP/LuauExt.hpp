@@ -68,9 +68,6 @@ bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
 
-std::optional<Luau::ModuleName> lookupTypeDefinitionModule(Luau::TypeId type);
-std::optional<Luau::Location> lookupTypeDefinitionModuleLocation(Luau::TypeId type, Luau::ModulePtr module);
-
 struct FindImportsVisitor : public Luau::AstVisitor
 {
 private:

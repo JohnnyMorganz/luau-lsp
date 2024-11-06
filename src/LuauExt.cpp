@@ -429,39 +429,6 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
     return diagnostic;
 }
 
-// TODO: Dirty hack for invalid definitionModuleName on type aliases for solver v2!
-// Remove after https://github.com/luau-lang/luau/issues/1441 is closed!
-std::optional<Luau::ModuleName> lookupTypeDefinitionModule(Luau::TypeId type)
-{
-    if (!FFlag::LuauSolverV2)
-    {
-        return Luau::getDefinitionModuleName(type);
-    }
-
-    type = Luau::follow(type);
-    if (auto ttv = Luau::get<Luau::TableType>(type); ttv && ttv->definitionModuleName.empty())
-    {
-        if (type->owningArena && type->owningArena->owningModule)
-            return type->owningArena->owningModule->name;
-    }
-
-    return Luau::getDefinitionModuleName(type);
-}
-
-std::optional<Luau::Location> lookupTypeDefinitionModuleLocation(Luau::TypeId type, Luau::ModulePtr module)
-{
-    type = Luau::follow(type);
-    auto types = module->astResolvedTypes;
-    for (auto it = types.begin(); it != types.end(); ++it)
-    {
-        if (it->second == type)
-        {
-            return it->first->location;
-        }
-    }
-    return std::nullopt;
-}
-
 // Based on upstream, except we use containsClosed
 struct FindExprOrLocalClosed : public Luau::AstVisitor
 {

@@ -4,6 +4,10 @@
 
 #include <iostream>
 
+LUAU_FASTFLAG(LuauSolverV2)
+LUAU_FASTFLAG(LuauNewSolverPopulateTableLocations)
+LUAU_FASTFLAG(LuauNewSolverPrePopulateClasses)
+
 void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, ErrorCallback onError, ErrorCallback onWarning)
 {
     for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
@@ -49,6 +53,13 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, 
     for (auto& [key, _] : fastFlags)
     {
         onWarning(std::string("Unknown FFlag: ") + key);
+    }
+
+    // These are required flags for internal functionality.
+    if (FFlag::LuauSolverV2)
+    {
+        FFlag::LuauNewSolverPopulateTableLocations.value = true;
+        FFlag::LuauNewSolverPrePopulateClasses.value = true;
     }
 }
 
