@@ -5,6 +5,8 @@
 #include "Luau/Common.h"
 
 LUAU_FASTFLAG(LuauSolverV2)
+LUAU_FASTFLAG(LuauNewSolverPopulateTableLocations)
+LUAU_FASTFLAG(LuauNewSolverPrePopulateClasses)
 LUAU_DYNAMIC_FASTINT(LuauTypeSolverRelease)
 
 int main(int argc, const char** argv)
@@ -17,6 +19,10 @@ int main(int argc, const char** argv)
         {
             FFlag::LuauSolverV2.value = true;
             DFInt::LuauTypeSolverRelease.value = std::numeric_limits<int>::max();
+
+            // These are required flags for internal functionality.
+            FFlag::LuauNewSolverPopulateTableLocations.value = true;
+            FFlag::LuauNewSolverPrePopulateClasses.value = true;
             break;
         }
     }
