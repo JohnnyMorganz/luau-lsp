@@ -6,7 +6,6 @@
 #include "Luau/ToString.h"
 #include "Luau/Transpiler.h"
 #include "LSP/LuauExt.hpp"
-#include "Luau/TypeFwd.h"
 
 bool isLiteral(const Luau::AstExpr* expr)
 {
@@ -62,72 +61,6 @@ struct InlayHintVisitor : public Luau::AstVisitor
     {
         stringOptions.maxTableLength = 30;
         stringOptions.maxTypeLength = config.inlayHints.typeHintMaxLength;
-    }
-
-    void inlayHintForFuncType(Luau::AstExprFunction* func, Luau::TypeId* ty)
-    {
-        auto followedTy = Luau::follow(*ty);
-        if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
-        {
-            // Add return type annotation
-            if (config.inlayHints.functionReturnTypes)
-            {
-                if (!func->returnAnnotation && func->argLocation && !isNoOpFunction(func))
-                {
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
-                    hint.position = textDocument->convertPosition(func->argLocation->end);
-                    makeInsertable(config, hint, ftv->retTypes);
-                    hints.emplace_back(hint);
-                }
-            }
-
-            // Parameter types hint
-            if (config.inlayHints.parameterTypes)
-            {
-                auto it = Luau::begin(ftv->argTypes);
-                if (it != Luau::end(ftv->argTypes))
-                {
-                    // Skip first item if it is self
-                    if (func->self && isMethod(ftv))
-                        it++;
-
-                    for (auto param : func->args)
-                    {
-                        if (it == Luau::end(ftv->argTypes))
-                            break;
-
-                        auto argType = *it;
-                        if (!param->annotation && param->name != "_")
-                        {
-                            lsp::InlayHint hint;
-                            hint.kind = lsp::InlayHintKind::Type;
-                            hint.label = ": " + Luau::toString(argType, stringOptions);
-                            hint.position = textDocument->convertPosition(param->location.end);
-                            makeInsertable(config, hint, argType);
-                            hints.emplace_back(hint);
-                        }
-
-                        it++;
-                    }
-                }
-
-                if (func->vararg && it.tail())
-                {
-                    auto varargType = *it.tail();
-                    if (!func->varargAnnotation)
-                    {
-                        lsp::InlayHint hint;
-                        hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
-                        hint.position = textDocument->convertPosition(func->varargLocation.end);
-                        makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
-                        hints.emplace_back(hint);
-                    }
-                }
-            }
-        }
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -224,32 +157,74 @@ struct InlayHintVisitor : public Luau::AstVisitor
         return true;
     }
 
-    bool visit(Luau::AstStatLocalFunction* funcStat) override
+    bool visit(Luau::AstExprFunction* func) override
     {
-        auto func = funcStat->func;
         auto ty = module->astTypes.find(func);
         if (!ty)
             return false;
 
-        inlayHintForFuncType(func, ty);
+        auto followedTy = Luau::follow(*ty);
+        if (auto ftv = Luau::get<Luau::FunctionType>(followedTy))
+        {
+            // Add return type annotation
+            if (config.inlayHints.functionReturnTypes)
+            {
+                if (!func->returnAnnotation && func->argLocation && !isNoOpFunction(func))
+                {
+                    lsp::InlayHint hint;
+                    hint.kind = lsp::InlayHintKind::Type;
+                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
+                    hint.position = textDocument->convertPosition(func->argLocation->end);
+                    makeInsertable(config, hint, ftv->retTypes);
+                    hints.emplace_back(hint);
+                }
+            }
 
-        return true;
-    }
+            // Parameter types hint
+            if (config.inlayHints.parameterTypes)
+            {
+                auto it = Luau::begin(ftv->argTypes);
+                if (it != Luau::end(ftv->argTypes))
+                {
+                    // Skip first item if it is self
+                    if (func->self && isMethod(ftv))
+                        it++;
 
-    bool visit(Luau::AstStatFunction* funcStat) override
-    {
-        auto func = funcStat->func;
-        Luau::AstExpr* lookupType = func;
+                    for (auto param : func->args)
+                    {
+                        if (it == Luau::end(ftv->argTypes))
+                            break;
 
-        // TODO: Remove me later if this is in fact not an intended feature in the new solver
-        if (auto iv = funcStat->name->as<Luau::AstExprIndexName>(); iv && FFlag::LuauSolverV2)
-            lookupType = iv;
+                        auto argType = *it;
+                        if (!param->annotation && param->name != "_")
+                        {
+                            lsp::InlayHint hint;
+                            hint.kind = lsp::InlayHintKind::Type;
+                            hint.label = ": " + Luau::toString(argType, stringOptions);
+                            hint.position = textDocument->convertPosition(param->location.end);
+                            makeInsertable(config, hint, argType);
+                            hints.emplace_back(hint);
+                        }
 
-        auto ty = module->astTypes.find(lookupType);
-        if (!ty)
-            return false;
+                        it++;
+                    }
+                }
 
-        inlayHintForFuncType(func, ty);
+                if (func->vararg && it.tail())
+                {
+                    auto varargType = *it.tail();
+                    if (!func->varargAnnotation)
+                    {
+                        lsp::InlayHint hint;
+                        hint.kind = lsp::InlayHintKind::Type;
+                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
+                        hint.position = textDocument->convertPosition(func->varargLocation.end);
+                        makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
+                        hints.emplace_back(hint);
+                    }
+                }
+            }
+        }
 
         return true;
     }
