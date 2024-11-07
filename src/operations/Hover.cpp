@@ -162,7 +162,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         auto typeFun = scope->lookupType(typeName);
         if (!typeFun)
             return std::nullopt;
-
         typeAliasInformation = std::make_pair(typeName, *typeFun);
         type = typeFun->type;
     }
