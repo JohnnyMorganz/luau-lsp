@@ -2062,6 +2062,57 @@
             "Members": [
                 {
                     "MemberType": "Function",
+                    "Name": "fromUri",
+                    "Parameters": [
+                        {
+                            "Name": "uri",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromObject",
+                    "Parameters": [
+                        {
+                            "Name": "object",
+                            "Type": {
+                                "Name": "Object"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromAssetId",
+                    "Parameters": [
+                        {
+                            "Name": "assetId",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                }
+            ],
+            "Name": "Content"
+        },
+
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [],
                     "ReturnType": {
@@ -4570,6 +4621,40 @@
                 }
             ],
             "Name": "ColorSequenceKeypoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "none",
+                    "ValueType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "SourceType",
+                    "ValueType": {
+                       "Category": "Enum",
+                        "Name": "ContentSourceType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Uri",
+                    "ValueType": {
+                        "Name": "string?"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Object",
+                    "ValueType": {
+                        "Name": "Object?"
+                    }
+                } 
+            ],
+            "Name": "Content"
         },
         {
             "Members": [
