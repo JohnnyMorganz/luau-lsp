@@ -6,14 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-
 ### Changed
 
-- Sync to upstream Luau 0.650
+- Sync to upstream Luau 0.651
 
 ### Fixed
 
-- Fixed inlay hints, autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
+- Fixed autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
 
 ## [1.34.0] - 2024-10-27
 
