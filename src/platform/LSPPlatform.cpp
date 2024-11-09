@@ -175,19 +175,18 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         else
             contentsString = contentsString.substr(0, separator + 1);
 
-        // Populate with custom file aliases
-        for (const auto& [aliasName, _] : config.require.fileAliases)
+        // Populate with custom aliases, if we are at the start of a string require
+        if (contentsString.empty())
         {
-            Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
-                Luau::TypeCorrectKind::Correct};
-            entry.tags.push_back("File");
-            entry.tags.push_back("Alias");
-            result.insert_or_assign(aliasName, entry);
-        }
+            for (const auto& [aliasName, _] : config.require.fileAliases)
+            {
+                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
+                    Luau::TypeCorrectKind::Correct};
+                entry.tags.push_back("File");
+                entry.tags.push_back("Alias");
+                result.insert_or_assign(aliasName, entry);
+            }
 
-        // Populate with custom directory aliases, if we are at the start of a string require
-        if (contentsString == "")
-        {
             for (const auto& [aliasName, _] : config.require.directoryAliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
