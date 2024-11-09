@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `luau-lsp.require.mode` in preparation for Luau's new require by string semantics. The default is now relative to the file the require is from.
+
 ### Added
 
 - Added bracket pairs colorization for `<>` for generic types

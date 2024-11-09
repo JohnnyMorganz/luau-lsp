@@ -58,41 +58,16 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
-/// Returns the base path to use in a string require.
-/// This depends on user configuration, whether requires are taken relative to file or workspace root, defaulting to the latter
-std::filesystem::path LSPPlatform::getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const
-{
-    if (!fileResolver->client)
-        return fileResolver->rootUri.fsPath();
-
-    auto config = fileResolver->client->getConfiguration(fileResolver->rootUri);
-    switch (config.require.mode)
-    {
-    case RequireModeConfig::RelativeToWorkspaceRoot:
-        return fileResolver->rootUri.fsPath();
-    case RequireModeConfig::RelativeToFile:
-    {
-        if (fileModuleName.has_value())
-        {
-            auto filePath = resolveToRealPath(*fileModuleName);
-            if (filePath)
-                return filePath->parent_path();
-            else
-                return fileResolver->rootUri.fsPath();
-        }
-        else
-        {
-            return fileResolver->rootUri.fsPath();
-        }
-    }
-    }
-
-    return fileResolver->rootUri.fsPath();
-}
-
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
 {
-    std::filesystem::path basePath = getRequireBasePath(context ? std::optional(context->name) : std::nullopt);
+    if (!context)
+        return std::nullopt;
+
+    auto contextPath = resolveToRealPath(context->name);
+    if (!contextPath)
+        return std::nullopt;
+
+    std::filesystem::path basePath = contextPath->parent_path();
     auto filePath = basePath / requiredString;
 
     // Check for custom require overrides
@@ -200,7 +175,7 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         // Check if it starts with a directory alias, otherwise resolve with require base path
         std::filesystem::path currentDirectory =
             resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
-                .value_or(getRequireBasePath(moduleName).append(contentsString));
+                .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()).append(contentsString));
 
         try
         {

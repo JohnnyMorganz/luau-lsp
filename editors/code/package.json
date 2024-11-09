@@ -478,19 +478,6 @@
           "default": "3mb",
           "scope": "window"
         },
-        "luau-lsp.require.mode": {
-          "markdownDescription": "How string requires should be interpreted",
-          "type": "string",
-          "default": "relativeToWorkspaceRoot",
-          "enum": [
-            "relativeToWorkspaceRoot",
-            "relativeToFile"
-          ],
-          "enumDescriptions": [
-            "String requires are interpreted relative to the root of the workspace",
-            "String requires are interpreted relative to the current file"
-          ]
-        },
         "luau-lsp.require.fileAliases": {
           "markdownDescription": "A mapping of custom require string aliases to file paths",
           "type": "object",

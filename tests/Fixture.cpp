@@ -82,9 +82,14 @@ Luau::CheckResult Fixture::check(const std::string& source)
     return check(Luau::Mode::Strict, source);
 }
 
+Luau::ModulePtr Fixture::getModule(const Luau::ModuleName& moduleName)
+{
+    return workspace.frontend.moduleResolver.getModule(moduleName);
+}
+
 Luau::ModulePtr Fixture::getMainModule()
 {
-    return workspace.frontend.moduleResolver.getModule(fromString(mainModuleName));
+    return getModule(mainModuleName);
 }
 
 Luau::SourceModule* Fixture::getMainSourceModule()
@@ -106,18 +111,17 @@ std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& 
         return std::nullopt;
 }
 
-std::optional<Luau::TypeId> Fixture::getType(const std::string& name)
+std::optional<Luau::TypeId> Fixture::getType(Luau::ModulePtr module, const std::string& name)
 {
-    Luau::ModulePtr module = getMainModule();
     REQUIRE(module);
     REQUIRE(module->hasModuleScope());
 
     return lookupName(module->getModuleScope(), name);
 }
 
-Luau::TypeId Fixture::requireType(const std::string& name)
+Luau::TypeId Fixture::requireType(Luau::ModulePtr module, const std::string& name)
 {
-    std::optional<Luau::TypeId> ty = getType(name);
+    std::optional<Luau::TypeId> ty = getType(module, name);
     REQUIRE_MESSAGE(bool(ty), "Unable to requireType \"" << name << "\"");
     return Luau::follow(*ty);
 }
