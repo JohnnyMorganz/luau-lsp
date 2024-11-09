@@ -626,6 +626,60 @@ TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_config
     CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "dont_show_inlay_hint_for_self_type_when_calling_with_colon")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    auto source = R"(
+        local t = {}
+        function t.id(t, value)
+        end
+
+        t:id("testing")
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 13});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_self_type_when_calling_with_dot")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    auto source = R"(
+        local t = {}
+        function t:id(value)
+        end
+
+        t.id(t, "testing")
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 13});
+    CHECK_EQ(result[0].label, "self:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+
+    CHECK_EQ(result[1].position, lsp::Position{5, 16});
+    CHECK_EQ(result[1].label, "value:");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, true);
+    CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "respect_parameter_names_configuration")
 {
     client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::None;

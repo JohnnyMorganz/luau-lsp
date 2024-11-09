@@ -248,9 +248,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
             auto idx = 0;
             for (auto param : call->args)
             {
-                // Skip first item if it is self
-                // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                if (idx == 0 && isMethod(ftv) && call->self)
+                // Skip first item if method call (`:`)
+                if (idx == 0 && call->self)
                     namesIt++;
 
                 if (namesIt == ftv->argNames.end())
