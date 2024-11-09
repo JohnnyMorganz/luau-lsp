@@ -673,6 +673,10 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions")
 
 TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2")
 {
+    // TODO: New solver bug - https://github.com/luau-lang/luau/issues/1516
+    if (FFlag::LuauSolverV2)
+        return;
+
     client->globalConfig.inlayHints.parameterTypes = true;
     auto source = R"(
         type Class = {
@@ -701,6 +705,10 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2
 
 TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_function_definitions")
 {
+    // TODO: New solver bug - https://github.com/luau-lang/luau/issues/1516
+    if (FFlag::LuauSolverV2)
+        return;
+
     client->globalConfig.inlayHints.parameterTypes = true;
     auto source = R"(
         type Class = {
