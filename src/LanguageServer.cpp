@@ -561,7 +561,6 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
 
         std::vector<lsp::FileSystemWatcher> watchers{};
         watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
-        watchers.push_back(lsp::FileSystemWatcher{"**/sourcemap.json"});
         watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
         client->registerCapability(
             "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});

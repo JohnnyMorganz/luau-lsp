@@ -328,11 +328,14 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
 
 bool RobloxPlatform::updateSourceMap()
 {
-    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / "sourcemap.json";
+    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    std::string sourcemapFileName = config.sourcemap.sourcemapFile;
+
+    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / sourcemapFileName;
     workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
 
     // Read in the sourcemap
-    // TODO: we assume a sourcemap.json file in the workspace root
+    // TODO: we assume a sourcemap file in the workspace root
     if (auto sourceMapContents = readFile(sourcemapPath))
     {
         return updateSourceMapFromContents(sourceMapContents.value());

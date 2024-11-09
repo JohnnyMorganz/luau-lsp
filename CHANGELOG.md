@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added bracket pairs colorization for `<>` for generic types
+- Added configuration option `luau-lsp.sourcemap.sourcemapFile` to specify a different name to use for the sourcemap
 
 ### Changed
 

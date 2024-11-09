@@ -196,6 +196,12 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.sourcemap.sourcemapFile": {
+          "markdownDescription": "The name of the sourcemap file",
+          "type": "string",
+          "default": "sourcemap.json",
+          "scope": "resource"
+        },
         "luau-lsp.fflags.enableByDefault": {
           "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
           "type": "boolean",
