@@ -637,7 +637,7 @@
         },
         {
           "match": "->",
-          "name": "keyword.operator.type.luau"
+          "name": "keyword.operator.type.function.luau"
         },
         {
           "match": "\\b(false)\\b",
@@ -678,12 +678,12 @@
           "end": "(>)",
           "beginCaptures": {
             "1": {
-              "name": "keyword.operator.type.luau"
+              "name": "punctuation.definition.typeparameters.begin.luau"
             }
           },
           "endCaptures": {
             "1": {
-              "name": "keyword.operator.type.luau"
+              "name": "punctuation.definition.typeparameters.end.luau"
             }
           },
           "patterns": [
