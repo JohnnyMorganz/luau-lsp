@@ -54,6 +54,10 @@
         "language": "luau",
         "scopeName": "source.luau",
         "path": "./syntaxes/Luau.tmLanguage.json",
+        "unbalancedBracketScopes": [
+          "keyword.operator.comparison",
+          "keyword.operator.type.function"
+        ],
         "tokenTypes": {
           "meta.template.expression": "other",
           "meta.template.expression string": "string",
