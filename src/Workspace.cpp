@@ -285,10 +285,12 @@ void WorkspaceFolder::registerTypes()
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
     client->sendTrace("workspace initialization: registering Luau globals");
-    Luau::registerBuiltinGlobals(frontend, frontend.globals, /* typeCheckForAutocomplete = */ false);
-    Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete, /* typeCheckForAutocomplete = */ true);
+    Luau::registerBuiltinGlobals(frontend, frontend.globals);
+    if (!FFlag::LuauSolverV2)
+        Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
 
-    Luau::attachTag(Luau::getGlobalBinding(frontend.globalsForAutocomplete, "require"), "Require");
+    auto& tagRegisterGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
+    Luau::attachTag(Luau::getGlobalBinding(tagRegisterGlobals, "require"), "Require");
 
     if (client->definitionsFiles.empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
@@ -314,8 +316,9 @@ void WorkspaceFolder::registerTypes()
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, /* typeCheckForAutocomplete = */ false);
-        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, /* typeCheckForAutocomplete = */ true);
+        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
+        if (!FFlag::LuauSolverV2)
+            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         client->sendTrace("workspace: applying platform mutations on definitions");
@@ -347,7 +350,8 @@ void WorkspaceFolder::registerTypes()
         }
     }
     Luau::freeze(frontend.globals.globalTypes);
-    Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 }
 
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)

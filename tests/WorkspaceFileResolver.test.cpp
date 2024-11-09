@@ -162,7 +162,7 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
     auto resolved = platform.resolveStringRequire(&baseContext, "Module.luau");
 
     REQUIRE(resolved.has_value());
-    CHECK_EQ(resolved->name, "/Module.luau");
+    CHECK(endsWith(resolved->name, "/Module.luau"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
@@ -175,7 +175,17 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extens
     auto resolved = platform.resolveStringRequire(&baseContext, "Module.mod");
 
     REQUIRE(resolved.has_value());
-    CHECK_EQ(resolved->name, "/Module.mod.lua");
+    CHECK(endsWith(resolved->name, "/Module.mod.lua"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
+{
+    auto moduleName = "tests/testdata/requires/relative_to_file/main.luau";
+    auto result = workspace.frontend.check(moduleName);
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    CHECK_EQ(Luau::toString(requireType(getModule(moduleName), "other")), "number");
 }
 
 TEST_SUITE_END();

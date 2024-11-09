@@ -1,49 +1,40 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "ScopedFlags.h"
-
-#define LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(x, name, body) \
-    TEST_CASE_FIXTURE(x, name) \
-    { \
-        ScopedFastFlag sff{FFlag::LuauSolverV2, false}; \
-        body \
-    } \
-    TEST_CASE_FIXTURE(x, "dcr_" name) \
-    { \
-        ScopedFastFlag sff{FFlag::LuauSolverV2, true}; \
-        body \
-    }
 
 TEST_SUITE_BEGIN("MagicFunctions");
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_new", {
+TEST_CASE_FIXTURE(Fixture, "instance_new")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
     )");
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("x")) == "Part");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "get_service", {
+TEST_CASE_FIXTURE(Fixture, "get_service")
+{
     auto result = check(R"(
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
     )");
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("ReplicatedStorage")) == "ReplicatedStorage");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "get_service_unknown_service", {
+TEST_CASE_FIXTURE(Fixture, "get_service_unknown_service")
+{
     auto result = check(R"(
         local ReplicatedStorage = game:GetService("Unknown")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
     CHECK(toString(result.errors[0]) == "Invalid service name 'Unknown'");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_is_a", {
+TEST_CASE_FIXTURE(Fixture, "instance_is_a")
+{
     auto result = check(R"(
         local x: Instance = Instance.new("Part")
         assert(x:IsA("TextLabel"))
@@ -52,9 +43,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_is_a", {
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("y")) == "TextLabel");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_is_a_unknown_class", {
+TEST_CASE_FIXTURE(Fixture, "instance_is_a_unknown_class")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
         local y = x:IsA("unknown_class")
@@ -62,9 +54,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_is_a_unknown_class", {
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
     CHECK(toString(result.errors[0]) == "Unknown type 'unknown_class'");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_clone", {
+TEST_CASE_FIXTURE(Fixture, "instance_clone")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
         local y = x:Clone()
@@ -72,9 +65,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_clone", {
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("y")) == "Part");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_from_existing", {
+TEST_CASE_FIXTURE(Fixture, "instance_from_existing")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
         local y = Instance.fromExisting(x)
@@ -82,9 +76,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "instance_from_existing", {
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("y")) == "Part");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "find_first_x_which_is_a", {
+TEST_CASE_FIXTURE(Fixture, "find_first_x_which_is_a")
+{
     auto result = check(R"(
         local x: Instance = Instance.new("Part")
 
@@ -99,18 +94,20 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "find_first_x_which_is_a", {
     CHECK(Luau::toString(requireType("b")) == "TextLabel?");
     CHECK(Luau::toString(requireType("c")) == "TextLabel?");
     CHECK(Luau::toString(requireType("d")) == "TextLabel?");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal", {
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
         local y = x:GetPropertyChangedSignal("Anchored")
     )");
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property", {
+TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property")
+{
     auto result = check(R"(
         local x = Instance.new("Part")
         local y = x:GetPropertyChangedSignal("unknown")
@@ -118,9 +115,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknow
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
     CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "enum_is_a", {
+TEST_CASE_FIXTURE(Fixture, "enum_is_a")
+{
     auto result = check(R"(
         local x: EnumItem = Enum.HumanoidRigType.R15
         assert(x:IsA("HumanoidRigType"))
@@ -129,9 +127,10 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "enum_is_a", {
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("y")) == "Enum.HumanoidRigType");
-})
+}
 
-LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "enum_is_a_unknown_enum", {
+TEST_CASE_FIXTURE(Fixture, "enum_is_a_unknown_enum")
+{
     auto result = check(R"(
         local x = Enum.HumanoidRigType.R15
         local y = x:IsA("unknown")
@@ -139,6 +138,18 @@ LUAU_BOTH_SOLVERS_TEST_CASE_FIXTURE(Fixture, "enum_is_a_unknown_enum", {
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
     CHECK(toString(result.errors[0]) == "Unknown type 'unknown'");
-})
+}
+
+TEST_CASE_FIXTURE(Fixture, "typeof_refines_for_instance")
+{
+    auto result = check(R"(
+        local obj: unknown = game
+        assert(typeof(obj) == "Instance")
+        local realObj = obj
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("realObj")) == "Instance");
+}
 
 TEST_SUITE_END();

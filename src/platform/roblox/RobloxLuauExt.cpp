@@ -437,6 +437,8 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     {
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
         {
+            Luau::attachTag(instanceType->type, Luau::kTypeofRootTag);
+
             Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), magicFunctionFindFirstXWhichIsA);
             Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), magicFunctionFindFirstXWhichIsA);

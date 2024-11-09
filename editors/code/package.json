@@ -54,6 +54,10 @@
         "language": "luau",
         "scopeName": "source.luau",
         "path": "./syntaxes/Luau.tmLanguage.json",
+        "unbalancedBracketScopes": [
+          "keyword.operator.comparison",
+          "keyword.operator.type.function"
+        ],
         "tokenTypes": {
           "meta.template.expression": "other",
           "meta.template.expression string": "string",
@@ -480,19 +484,6 @@
           "default": "3mb",
           "scope": "window"
         },
-        "luau-lsp.require.mode": {
-          "markdownDescription": "How string requires should be interpreted",
-          "type": "string",
-          "default": "relativeToWorkspaceRoot",
-          "enum": [
-            "relativeToWorkspaceRoot",
-            "relativeToFile"
-          ],
-          "enumDescriptions": [
-            "String requires are interpreted relative to the root of the workspace",
-            "String requires are interpreted relative to the current file"
-          ]
-        },
         "luau-lsp.require.fileAliases": {
           "markdownDescription": "A mapping of custom require string aliases to file paths",
           "type": "object",
@@ -590,7 +581,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "express": "^4.21.0",
+    "express": "^4.21.1",
     "undici": "^6.19.2",
     "vscode-languageclient": "^8.1.0-next.6"
   }

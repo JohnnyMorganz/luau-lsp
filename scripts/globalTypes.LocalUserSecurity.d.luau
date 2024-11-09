@@ -528,12 +528,6 @@ declare class EnumAvatarItemType_INTERNAL extends Enum
 	Asset: EnumAvatarItemType
 	Bundle: EnumAvatarItemType
 end
-declare class EnumAvatarJointUpgrade extends EnumItem end
-declare class EnumAvatarJointUpgrade_INTERNAL extends Enum
-	Default: EnumAvatarJointUpgrade
-	Disabled: EnumAvatarJointUpgrade
-	Enabled: EnumAvatarJointUpgrade
-end
 declare class EnumAvatarPromptResult extends EnumItem end
 declare class EnumAvatarPromptResult_INTERNAL extends Enum
 	Failed: EnumAvatarPromptResult
@@ -1241,6 +1235,12 @@ declare class EnumDraggerMovementMode extends EnumItem end
 declare class EnumDraggerMovementMode_INTERNAL extends Enum
 	Geometric: EnumDraggerMovementMode
 	Physical: EnumDraggerMovementMode
+end
+declare class EnumDraggingScrollBar extends EnumItem end
+declare class EnumDraggingScrollBar_INTERNAL extends Enum
+	Horizontal: EnumDraggingScrollBar
+	None: EnumDraggingScrollBar
+	Vertical: EnumDraggingScrollBar
 end
 declare class EnumEasingDirection extends EnumItem end
 declare class EnumEasingDirection_INTERNAL extends Enum
@@ -2686,6 +2686,7 @@ declare class EnumPromptCreateAvatarResult_INTERNAL extends Enum
 	ModeratedName: EnumPromptCreateAvatarResult
 	NoUserInput: EnumPromptCreateAvatarResult
 	PermissionDenied: EnumPromptCreateAvatarResult
+	PurchaseFailure: EnumPromptCreateAvatarResult
 	Success: EnumPromptCreateAvatarResult
 	Timeout: EnumPromptCreateAvatarResult
 	UGCValidationFailed: EnumPromptCreateAvatarResult
@@ -3462,6 +3463,12 @@ declare class EnumTableMajorAxis_INTERNAL extends Enum
 	ColumnMajor: EnumTableMajorAxis
 	RowMajor: EnumTableMajorAxis
 end
+declare class EnumTeamCreateErrorState extends EnumItem end
+declare class EnumTeamCreateErrorState_INTERNAL extends Enum
+	NoError: EnumTeamCreateErrorState
+	PlaceSizeApproachingLimit: EnumTeamCreateErrorState
+	PlaceSizeTooLarge: EnumTeamCreateErrorState
+end
 declare class EnumTechnology extends EnumItem end
 declare class EnumTechnology_INTERNAL extends Enum
 	Compatibility: EnumTechnology
@@ -4111,7 +4118,6 @@ type ENUM_LIST = {
 	AvatarContextMenuOption: EnumAvatarContextMenuOption_INTERNAL,
 	AvatarGenerationError: EnumAvatarGenerationError_INTERNAL,
 	AvatarItemType: EnumAvatarItemType_INTERNAL,
-	AvatarJointUpgrade: EnumAvatarJointUpgrade_INTERNAL,
 	AvatarPromptResult: EnumAvatarPromptResult_INTERNAL,
 	AvatarThumbnailCustomizationType: EnumAvatarThumbnailCustomizationType_INTERNAL,
 	AvatarUnificationMode: EnumAvatarUnificationMode_INTERNAL,
@@ -4195,6 +4201,7 @@ type ENUM_LIST = {
 	DragDetectorResponseStyle: EnumDragDetectorResponseStyle_INTERNAL,
 	DraggerCoordinateSpace: EnumDraggerCoordinateSpace_INTERNAL,
 	DraggerMovementMode: EnumDraggerMovementMode_INTERNAL,
+	DraggingScrollBar: EnumDraggingScrollBar_INTERNAL,
 	EasingDirection: EnumEasingDirection_INTERNAL,
 	EasingStyle: EnumEasingStyle_INTERNAL,
 	EditableStatus: EnumEditableStatus_INTERNAL,
@@ -4424,6 +4431,7 @@ type ENUM_LIST = {
 	SurfaceType: EnumSurfaceType_INTERNAL,
 	SwipeDirection: EnumSwipeDirection_INTERNAL,
 	TableMajorAxis: EnumTableMajorAxis_INTERNAL,
+	TeamCreateErrorState: EnumTeamCreateErrorState_INTERNAL,
 	Technology: EnumTechnology_INTERNAL,
 	TeleportMethod: EnumTeleportMethod_INTERNAL,
 	TeleportResult: EnumTeleportResult_INTERNAL,
@@ -4586,6 +4594,13 @@ end
 declare class ColorSequenceKeypoint
 	Time: number
 	Value: Color3
+end
+
+declare class Content
+	Object: Object?
+	SourceType: EnumContentSourceType
+	Uri: string?
+	none: Content
 end
 
 declare class DateTime
@@ -4935,7 +4950,6 @@ declare class Object
 	ClassName: string
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
 	function IsA(self, className: string): boolean
-	function isA(self, className: string): boolean
 end
 
 declare class EditableImage extends Object
@@ -4943,8 +4957,9 @@ declare class EditableImage extends Object
 	function Destroy(self): nil
 	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function DrawImage(self, position: Vector2, image: Object, combineType: EnumImageCombineType): nil
+	function DrawImageProjected(self, mesh: Object, projection: { [any]: any }, brushConfig: { [any]: any }): nil
+	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: Object, options: { [any]: any }?): nil
 	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
-	function DrawProjectionImage(self, mesh: Object, projection: { [any]: any }, brushConfig: { [any]: any }): nil
 	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function ReadPixelsBuffer(self, position: Vector2, size: Vector2): buffer
 	function WritePixelsBuffer(self, position: Vector2, size: Vector2, buffer: buffer): nil
@@ -4964,6 +4979,7 @@ declare class EditableMesh extends Object
 	function FindVerticesWithinSphere(self, center: Vector3, radius: number): { any }
 	function GetAdjacentFaces(self, faceId: number): { any }
 	function GetAdjacentVertices(self, vertexId: number): { any }
+	function GetCenter(self): Vector3
 	function GetColor(self, colorId: number): Color3?
 	function GetColorAlpha(self, colorId: number): number?
 	function GetColors(self): { any }
@@ -4976,6 +4992,7 @@ declare class EditableMesh extends Object
 	function GetNormal(self, normalId: number): Vector3?
 	function GetNormals(self): { any }
 	function GetPosition(self, vertexId: number): Vector3
+	function GetSize(self): Vector3
 	function GetUV(self, uvId: number): Vector2?
 	function GetUVs(self): { any }
 	function GetVertices(self): { any }
@@ -5319,6 +5336,7 @@ declare class AudioEcho extends Instance
 	DelayTime: number
 	DryLevel: number
 	Feedback: number
+	RampTime: number
 	WetLevel: number
 	function GetConnectedWires(self, pin: string): { Instance }
 end
@@ -8276,6 +8294,7 @@ declare class Workspace extends WorldRoot
 	StreamingMinRadius: number
 	StreamingTargetRadius: number
 	Terrain: Terrain
+	TouchEventsUseCollisionGroups: EnumRolloutState
 	TouchesUseCollisionGroups: boolean
 	function ExperimentalSolverIsEnabled(self): boolean
 	function GetNumAwakeParts(self): number
@@ -9347,7 +9366,7 @@ end
 declare class StarterPlayer extends Instance
 	AllowCustomAnimations: boolean
 	AutoJumpEnabled: boolean
-	AvatarJointUpgrade: EnumAvatarJointUpgrade
+	AvatarJointUpgrade: EnumRolloutState
 	CameraMaxZoomDistance: number
 	CameraMinZoomDistance: number
 	CameraMode: EnumCameraMode
@@ -9878,6 +9897,7 @@ declare class TextChatService extends Instance
 	SendingMessage: RBXScriptSignal<TextChatMessage>
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
+	function CanUsersDirectChatAsync(self, requesterUserId: number, userIds: { any }): { any }
 	function DisplayBubble(self, partOrCharacter: Instance, message: string): nil
 end
 
@@ -10209,6 +10229,7 @@ declare class UserInputService extends Instance
 	PointerAction: RBXScriptSignal<number, Vector2, number, boolean>
 	TextBoxFocusReleased: RBXScriptSignal<TextBox>
 	TextBoxFocused: RBXScriptSignal<TextBox>
+	TouchDrag: RBXScriptSignal<EnumSwipeDirection, number, boolean>
 	TouchEnabled: boolean
 	TouchEnded: RBXScriptSignal<InputObject, boolean>
 	TouchLongPress: RBXScriptSignal<{ Vector2 }, EnumUserInputState, boolean>
@@ -10572,6 +10593,12 @@ declare NumberSequenceKeypoint: {
 
 declare ColorSequenceKeypoint: {
 	new: ((time: number, color: Color3) -> ColorSequenceKeypoint),
+}
+
+declare Content: {
+	fromUri: ((uri: string) -> Content),
+	fromObject: ((object: Object) -> Content),
+	fromAssetId: ((assetId: number) -> Content),
 }
 
 declare RaycastParams: {

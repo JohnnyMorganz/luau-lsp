@@ -1,5 +1,7 @@
+#include <optional>
 #include <utility>
 
+#include "Luau/Type.h"
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
@@ -51,11 +53,10 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
     return std::nullopt;
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
+Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions)
 {
     // TODO: packageName shouldn't just be "@roblox"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;

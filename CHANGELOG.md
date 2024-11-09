@@ -6,9 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `luau-lsp.require.mode` in preparation for Luau's new require by string semantics. The default is now relative to the file the require is from.
+
 ### Added
 
+- Added bracket pairs colorization for `<>` for generic types
 - Added configuration option `luau-lsp.sourcemap.sourcemapFile` to specify a different name to use for the sourcemap
+
+### Changed
+
+- Sync to upstream Luau 0.650
+
+### Fixed
+
+- Fixed autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
+- Fixed the refinement for `typeof(inst) == "Instance"` since `Object` became the root class type ([#814](https://github.com/JohnnyMorganz/luau-lsp/issues/814))
+- Fixed inlay hints incorrectly showing for first parameter in static function when the function is called as a method (with `:`) ([#766](https://github.com/JohnnyMorganz/luau-lsp/issues/766))
+- Fixed bracket pair completion breaking inside of generic type parameter list ([#741](https://github.com/JohnnyMorganz/luau-lsp/issues/741))
+- Don't show aliases after a directory separator is seen in require string autocompletion ([#748](https://github.com/JohnnyMorganz/luau-lsp/issues/748))
 
 ## [1.34.0] - 2024-10-27
 
@@ -117,7 +134,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.632
-- Language clients are recommended to send configuration during intializationOptions (see https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md for details)
+- Language clients are recommended to send configuration during intializationOptions (see <https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md> for details)
 - Removed need for postponing requests whilst waiting for platform configuration (relies on clients sending config in intializationOptions)
 
 ### Fixed
@@ -150,7 +167,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.631
-- An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value: ` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
+- An indexed expression will no longer show an inlay hint if the index matches the parameter name (i.e., `call(other.value)` won't add `value:` inlay hint) ([#618](https://github.com/JohnnyMorganz/luau-lsp/issues/618))
 - Studio Plugin will now perform Gzip compression on sent requests
 
 ### Fixed
@@ -182,7 +199,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.625
 - Improved memory usage of document and workspace diagnostics by no longer storing type graphs
-- Rewritten the Luau grammar syntax: https://github.com/JohnnyMorganz/Luau.tmLanguage
+- Rewritten the Luau grammar syntax: <https://github.com/JohnnyMorganz/Luau.tmLanguage>
 
 ### Fixed
 
@@ -604,7 +621,7 @@ local DATA = {
 
 --- Doc comment
 type Contents = {
-	...
+ ...
 }
 ```
 
@@ -763,7 +780,7 @@ local y = tbl.data -- Should give "This is some special information"
 - Provide autocomplete for class names in `Instance:IsA("ClassName")` and errors when ClassName is unknown
 - Provide autocomplete for properties in `Instance:GetPropertyChangedSignal("Property")` and errors when Property is unknown
 - Provide autocomplete for enums in `EnumItem:IsA("enum")` and errors when Enum is unknown
-- Added support for moonwave-style documentation comments! Currently only supports comments attached to functions directly. See https://eryn.io/moonwave for how to write doc comments
+- Added support for moonwave-style documentation comments! Currently only supports comments attached to functions directly. See <https://eryn.io/moonwave> for how to write doc comments
 - Added command line flag `--ignore=GLOB` to `luau-lsp analyze` allowing you to provide glob patterns to ignore diagnostics, similar to `luau-lsp.ignoreGlobs`. Repeat the flag multiple times for multiple patterns
 
 ### Changed
@@ -981,7 +998,7 @@ local y = tbl.data -- Should give "This is some special information"
 - Fixed regression where diagnostics are not cleared when you close an ignored file
 - Fixed errors sometimes occuring when you index `script`/`workspace`/`game` for children
 - Fixed internal error caused by `:Clone()` calls when called on an expression which isn't an Lvalue (e.g., `inst:FindFirstChild(name):Clone()`)
-- Fixed bug where `_: ` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
+- Fixed bug where `_:` would not be removed as the name of function arguments. `function foo(_: number, _: number)` will now show as `function foo(number, number)`
 - Fixed analyze mode not exiting with a non-zero exit code when there are errors
 - Fixed excessive whitespace in document symbols for expr-named function defintions
 - Fixed hover for global functions and local variables
@@ -1147,7 +1164,7 @@ local y = tbl.data -- Should give "This is some special information"
 
 - Hover over definitions will now try to give more expressive types
 - `self` will now no longer show up in hover/signature help if it has already been implicitly provided
-- `_: ` will no longer show up in hover/signature help for unnamed function parameters
+- `_:` will no longer show up in hover/signature help for unnamed function parameters
 
 ### Fixed
 

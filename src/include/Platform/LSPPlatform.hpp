@@ -123,9 +123,6 @@ public:
 
     LSPPlatform(WorkspaceFileResolver* fileResolver = nullptr, WorkspaceFolder* workspaceFolder = nullptr);
     virtual ~LSPPlatform() = default;
-
-private:
-    [[nodiscard]] std::filesystem::path getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
 };
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(

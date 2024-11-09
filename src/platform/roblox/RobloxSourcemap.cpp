@@ -1,8 +1,11 @@
+#include "Luau/TypeFwd.h"
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 static void mutateSourceNodeWithPluginInfo(SourceNode& sourceNode, const PluginNodePtr& pluginInstance)
 {
@@ -60,7 +63,13 @@ static void injectChildrenLookupFunctions(
         auto findFirstChildFunction = Luau::makeFunction(arena, ty,
             {globals.builtinTypes->stringType, Luau::makeOption(globals.builtinTypes, arena, globals.builtinTypes->booleanType)},
             {"name", "recursive"}, {optionalInstanceType});
-        auto waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+
+        Luau::TypeId waitForChildFunction;
+        if (FFlag::LuauSolverV2)
+            waitForChildFunction = Luau::makeFunction(
+                arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->optionalNumberType}, {"name"}, {*instanceType});
+        else
+            waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
         auto waitForChildWithTimeoutFunction = Luau::makeFunction(
             arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->numberType}, {"name", "timeout"}, {optionalInstanceType});
 
@@ -83,7 +92,7 @@ static void injectChildrenLookupFunctions(
                     return std::nullopt;
                 });
             Luau::attachDcrMagicFunction(lookupFuncTy,
-                [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+                [node, &arena, &globals, optionalInstanceType, lookupFuncTy, waitForChildFunction](Luau::MagicFunctionCallContext context) -> bool
                 {
                     if (context.callSite->args.size < 1)
                         return false;
@@ -98,6 +107,13 @@ static void injectChildrenLookupFunctions(
                             ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
                         return true;
                     }
+
+                    if (context.callSite->args.size >= 2 && lookupFuncTy == waitForChildFunction)
+                    {
+                        asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({optionalInstanceType}));
+                        return true;
+                    }
+
                     return false;
                 });
             Luau::attachTag(lookupFuncTy, kSourcemapGeneratedTag);
@@ -105,8 +121,11 @@ static void injectChildrenLookupFunctions(
         }
 
         ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
-        ctv->props["WaitForChild"] = Luau::makeProperty(
-            Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
+        if (FFlag::LuauSolverV2)
+            ctv->props["WaitForChild"] = Luau::makeProperty(waitForChildFunction, "@roblox/globaltype/Instance.WaitForChild");
+        else
+            ctv->props["WaitForChild"] = Luau::makeProperty(
+                Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
     }
 }
 
@@ -184,7 +203,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
                 // Add FindFirstAncestor and FindFirstChild
                 if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
                 {
-                    auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+                    auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {Luau::makeOption(globals.builtinTypes, arena, *instanceType)});
 
                     Luau::attachMagicFunction(findFirstAncestorFunction,
                         [&arena, &globals, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
@@ -283,15 +302,18 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
     // Recreate instance types
     instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-    bool expressiveTypes = config.diagnostics.strictDatamodelTypes;
+    bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 
     // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
     // We pass the same setting even when we are registering autocomplete globals since
     // the setting impacts what happens to diagnostics (as both calls overwrite frontend.prepareModuleScope)
     workspaceFolder->client->sendTrace("Updating diagnostic types with sourcemap");
     handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globals, expressiveTypes);
-    workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
-    handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+    if (!FFlag::LuauSolverV2)
+    {
+        workspaceFolder->client->sendTrace("Updating autocomplete types with sourcemap");
+        handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
+    }
 
     workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
 
@@ -451,10 +473,10 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
     // Prepare module scope so that we can dynamically reassign the type of "script" to retrieve instance info
     frontend.prepareModuleScope = [this, &frontend, expressiveTypes](const Luau::ModuleName& name, const Luau::ScopePtr& scope, bool forAutocomplete)
     {
-        Luau::GlobalTypes& globals = forAutocomplete ? frontend.globalsForAutocomplete : frontend.globals;
+        Luau::GlobalTypes& globals = (forAutocomplete && !FFlag::LuauSolverV2) ? frontend.globalsForAutocomplete : frontend.globals;
 
         // TODO: we hope to remove these in future!
-        if (!expressiveTypes && !forAutocomplete)
+        if (!expressiveTypes && !forAutocomplete && !FFlag::LuauSolverV2)
         {
             scope->bindings[Luau::AstName("script")] = Luau::Binding{globals.builtinTypes->anyType};
             scope->bindings[Luau::AstName("workspace")] = Luau::Binding{globals.builtinTypes->anyType};

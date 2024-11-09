@@ -146,26 +146,15 @@ struct ClientSignatureHelpConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientSignatureHelpConfiguration, enabled);
 
-enum struct RequireModeConfig
-{
-    RelativeToWorkspaceRoot,
-    RelativeToFile,
-};
-NLOHMANN_JSON_SERIALIZE_ENUM(RequireModeConfig, {
-                                                    {RequireModeConfig::RelativeToWorkspaceRoot, "relativeToWorkspaceRoot"},
-                                                    {RequireModeConfig::RelativeToFile, "relativeToFile"},
-                                                });
-
 struct ClientRequireConfiguration
 {
-    RequireModeConfig mode = RequireModeConfig::RelativeToWorkspaceRoot;
     // A mapping of custom require strings to file paths
     std::unordered_map<std::string, std::string> fileAliases;
     // A mapping of custom require prefixes to directory paths
     std::unordered_map<std::string, std::string> directoryAliases;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, mode, fileAliases, directoryAliases);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases);
 
 struct ClientIndexConfiguration
 {

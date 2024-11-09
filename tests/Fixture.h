@@ -48,11 +48,15 @@ struct Fixture
     // Single file operations
     Luau::CheckResult check(Luau::Mode mode, std::string source);
     Luau::CheckResult check(const std::string& source);
+    Luau::ModulePtr getModule(const Luau::ModuleName& moduleName);
     Luau::ModulePtr getMainModule();
     Luau::SourceModule* getMainSourceModule();
 
-    std::optional<Luau::TypeId> getType(const std::string& name);
-    Luau::TypeId requireType(const std::string& name);
+    std::optional<Luau::TypeId> getType(Luau::ModulePtr module, const std::string& name);
+    Luau::TypeId requireType(Luau::ModulePtr module, const std::string& name);
+
+    std::optional<Luau::TypeId> getType(const std::string& name) { return getType(getMainModule(), name); }
+    Luau::TypeId requireType(const std::string& name) { return requireType(getMainModule(), name); }
 
     std::vector<std::string> getComments(const Luau::Location& node);
 

@@ -30,8 +30,14 @@
     ["`", "`"],
     ["<", ">"]
   ],
+  "colorizedBracketPairs": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["<", ">"]
+  ],
 
-  "autoCloseBefore": "}])",
+  "autoCloseBefore": ">}])",
 
   "indentationRules": {
     "increaseIndentPattern": "^((?!(\\-\\-)).)*((\\b(function|do|repeat)\\b((?!\\b(end|until)\\b).)*)|(\\{\\s*)|(\\b(then|else)\\b[;\\s]*))$",

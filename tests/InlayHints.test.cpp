@@ -1,6 +1,9 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "LSP/IostreamHelpers.hpp"
+#include "Luau/Common.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 TEST_SUITE_BEGIN("InlayHints");
 
@@ -623,6 +626,60 @@ TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_config
     CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "dont_show_inlay_hint_for_self_type_when_calling_with_colon")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    auto source = R"(
+        local t = {}
+        function t.id(t, value)
+        end
+
+        t:id("testing")
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 13});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_self_type_when_calling_with_dot")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    auto source = R"(
+        local t = {}
+        function t:id(value)
+        end
+
+        t.id(t, "testing")
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 13});
+    CHECK_EQ(result[0].label, "self:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+
+    CHECK_EQ(result[1].position, lsp::Position{5, 16});
+    CHECK_EQ(result[1].label, "value:");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, true);
+    CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "respect_parameter_names_configuration")
 {
     client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::None;
@@ -651,19 +708,29 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{2, 30});
-    CHECK_EQ(result[0].label, ": a");
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(result[0].label, ": unknown");
+    else
+        CHECK_EQ(result[0].label, ": a");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
     CHECK_EQ(result[0].paddingRight, false);
 
     REQUIRE(result[0].textEdits.size() == 1);
-    CHECK_EQ(result[0].textEdits[0].newText, ": a");
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(result[0].textEdits[0].newText, ": unknown");
+    else
+        CHECK_EQ(result[0].textEdits[0].newText, ": a");
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{2, 30}, {2, 30}});
 }
 
 TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2")
 {
+    // TODO: New solver bug - https://github.com/luau-lang/luau/issues/1516
+    if (FFlag::LuauSolverV2)
+        return;
+
     client->globalConfig.inlayHints.parameterTypes = true;
     auto source = R"(
         type Class = {
@@ -692,6 +759,10 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2
 
 TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_function_definitions")
 {
+    // TODO: New solver bug - https://github.com/luau-lang/luau/issues/1516
+    if (FFlag::LuauSolverV2)
+        return;
+
     client->globalConfig.inlayHints.parameterTypes = true;
     auto source = R"(
         type Class = {
