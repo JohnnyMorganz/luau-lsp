@@ -4596,6 +4596,13 @@ declare class ColorSequenceKeypoint
 	Value: Color3
 end
 
+declare class Content
+	Object: Object?
+	SourceType: EnumContentSourceType
+	Uri: string?
+	none: Content
+end
+
 declare class DateTime
 	UnixTimestamp: number
 	UnixTimestampMillis: number
@@ -10519,6 +10526,12 @@ declare NumberSequenceKeypoint: {
 
 declare ColorSequenceKeypoint: {
 	new: ((time: number, color: Color3) -> ColorSequenceKeypoint),
+}
+
+declare Content: {
+	fromUri: ((uri: string) -> Content),
+	fromObject: ((object: Object) -> Content),
+	fromAssetId: ((assetId: number) -> Content),
 }
 
 declare RaycastParams: {
