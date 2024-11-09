@@ -335,6 +335,83 @@ TEST_CASE_FIXTURE(Fixture, "wait_for_child_finds_direct_child_with_timeout_param
     CHECK(Luau::toString(requireType("template")) == "Part");
 }
 
+TEST_CASE_FIXTURE(Fixture, "can_access_ancestor_via_find_first_ancestor")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {
+                                "name": "Head",
+                                "className": "Part",
+                                "children": [{ "name": "Attachment", "className": "Part" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local head = game.TemplateR15.Head.Attachment
+        local template = head:FindFirstAncestor("TemplateR15")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("head")) == "Part");
+    CHECK(Luau::toString(requireType("template")) == "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_ancestor_handles_unknown_ancestor")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local head = game.TemplateR15.Head
+        local random = head:FindFirstAncestor("Unknown")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("head")) == "Part");
+    CHECK(Luau::toString(requireType("random")) == "Instance?");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_ancestor_works_without_sourcemap")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    auto result = check(R"(
+        --!strict
+        local template = game:FindFirstAncestor("Unknown")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Instance?");
+}
+
 TEST_CASE_FIXTURE(Fixture, "relative_and_absolute_types_are_consistent")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
