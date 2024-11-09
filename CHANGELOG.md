@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed inlay hints incorrectly showing for first parameter in static function when the function is called as a method (with `:`) ([#766](https://github.com/JohnnyMorganz/luau-lsp/issues/766))
 - Fixed bracket pair completion breaking inside of generic type parameter list ([#741](https://github.com/JohnnyMorganz/luau-lsp/issues/741))
 - Don't show aliases after a directory separator is seen in require string autocompletion ([#748](https://github.com/JohnnyMorganz/luau-lsp/issues/748))
+- Fixed crashing of overload resolution in signature help when new solver is enabled ([#823](https://github.com/JohnnyMorganz/luau-lsp/issues/823))
 
 ## [1.34.0] - 2024-10-27
 
