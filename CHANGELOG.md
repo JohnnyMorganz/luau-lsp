@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
 - Fixed the refinement for `typeof(inst) == "Instance"` since `Object` became the root class type ([#814](https://github.com/JohnnyMorganz/luau-lsp/issues/814))
 - Fixed inlay hints incorrectly showing for first parameter in static function when the function is called as a method (with `:`) ([#766](https://github.com/JohnnyMorganz/luau-lsp/issues/766))
+- Fixed bracket pair completion breaking inside of generic type parameter list ([#741](https://github.com/JohnnyMorganz/luau-lsp/issues/741))
 
 ## [1.34.0] - 2024-10-27
 
