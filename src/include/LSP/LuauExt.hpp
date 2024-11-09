@@ -67,6 +67,7 @@ bool isGetService(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
+std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type);
 
 struct FindImportsVisitor : public Luau::AstVisitor
 {

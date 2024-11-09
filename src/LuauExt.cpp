@@ -762,3 +762,24 @@ bool isOverloadedMethod(Luau::TypeId ty)
     std::vector<Luau::TypeId> parts = Luau::flattenIntersection(ty);
     return std::all_of(parts.begin(), parts.end(), isOverloadedMethod);
 }
+
+std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
+{
+    type = Luau::follow(type);
+
+    std::optional<Luau::TypeId> metatable;
+    if (const auto mtType = Luau::get<Luau::MetatableType>(type))
+        metatable = mtType->metatable;
+    else if (const auto classType = Luau::get<Luau::ClassType>(type))
+        metatable = classType->metatable;
+
+    if (!metatable)
+        return std::nullopt;
+
+    auto unwrapped = Luau::follow(*metatable);
+    if (auto prop = lookupProp(unwrapped, "__call")) {
+        return prop->second.type();
+    }
+
+    return std::nullopt;
+}

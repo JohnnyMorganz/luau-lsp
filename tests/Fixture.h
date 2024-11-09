@@ -79,3 +79,5 @@ struct Fixture
     } while (false)
 
 #define LUAU_LSP_REQUIRE_NO_ERRORS(result) LUAU_LSP_REQUIRE_ERROR_COUNT(0, result)
+
+std::pair<std::string, lsp::Position> sourceWithMarker(std::string source);

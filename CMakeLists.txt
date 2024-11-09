@@ -92,6 +92,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/InlayHints.test.cpp
         tests/JsonTomlSyntaxParser.test.cpp
         tests/Definitions.test.cpp
+        tests/SignatureHelp.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging

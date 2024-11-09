@@ -171,3 +171,35 @@ SourceNodePtr Fixture::getRootSourceNode()
     REQUIRE(sourceNode);
     return sourceNode;
 }
+
+std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
+{
+    auto marker = source.find('|');
+    REQUIRE(marker != std::string::npos);
+
+    source.replace(marker, 1, "");
+
+    size_t line = 0;
+    size_t column = 0;
+
+    for (size_t i = 0; i < source.size(); i++)
+    {
+        auto ch = source[i];
+        if (ch == '\r' || ch == '\n')
+        {
+            if (ch == '\r' && i + 1 < source.size() && source[i + 1] == '\n')
+            {
+                i++;
+            }
+            line += 1;
+            column = 0;
+        }
+        else
+            column += 1;
+
+        if (i == marker - 1)
+            break;
+    }
+
+    return std::make_pair(source, lsp::Position{line, column});
+}

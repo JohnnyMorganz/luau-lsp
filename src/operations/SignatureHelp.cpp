@@ -214,6 +214,11 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             if (auto candidateFunctionType = Luau::get<Luau::FunctionType>(part))
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
+    // Handle __call metamethod
+    if (const auto metamethod = findCallMetamethod(followedId))
+        if (auto ftv = Luau::get<Luau::FunctionType>(*metamethod))
+            addSignature(*metamethod, ftv);
+
     lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
     platform->handleSignatureHelp(*textDocument, *sourceModule, position, help);
 
