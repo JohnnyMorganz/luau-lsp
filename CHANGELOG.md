@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed autocompletion, type registration, hover types/documentation, and some crashes for cases where the new solver is enabled
+- Fixed the refinement for `typeof(inst) == "Instance"` since `Object` became the root class type ([#814](https://github.com/JohnnyMorganz/luau-lsp/issues/814))
 
 ## [1.34.0] - 2024-10-27
 

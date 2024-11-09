@@ -140,4 +140,16 @@ TEST_CASE_FIXTURE(Fixture, "enum_is_a_unknown_enum")
     CHECK(toString(result.errors[0]) == "Unknown type 'unknown'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "typeof_refines_for_instance")
+{
+    auto result = check(R"(
+        local obj: unknown = game
+        assert(typeof(obj) == "Instance")
+        local realObj = obj
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("realObj")) == "Instance");
+}
+
 TEST_SUITE_END();
