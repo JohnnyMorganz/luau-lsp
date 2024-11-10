@@ -47,6 +47,10 @@ const getFFlags = async () => {
   );
 };
 
+const isAlphanumericUnderscore = (str: string) => {
+  return /^[a-zA-Z0-9_]+$/.test(str);
+};
+
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
   for (const disposable of clientDisposables) {
     disposable.dispose();
@@ -154,7 +158,15 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Handle overrides
   const overridenFFlags = fflagsConfig.get<FFlags>("override");
   if (overridenFFlags) {
-    for (const [name, value] of Object.entries(overridenFFlags)) {
+    for (let [name, value] of Object.entries(overridenFFlags)) {
+      if (!isAlphanumericUnderscore(name)) {
+        vscode.window.showWarningMessage(
+          `Invalid FFlag name: '${name}'. It can only contain alphanumeric characters`
+        );
+      }
+
+      name = name.trim();
+      value = value.trim();
       // Validate that the name and value is valid
       if (name.length > 0 && value.length > 0) {
         fflags[name] = value;
