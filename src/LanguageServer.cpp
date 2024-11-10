@@ -1,5 +1,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "Flags.hpp"
+#include "Luau/Common.h"
 #include "Luau/TimeTrace.h"
 
 #include <string>
@@ -13,6 +14,11 @@
 #define ASSERT_PARAMS(params, method) \
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
+
+LUAU_FASTFLAG(LuauSolverV2)
+LUAU_FASTFLAG(LuauNewSolverPopulateTableLocations)
+LUAU_FASTFLAG(LuauNewSolverPrePopulateClasses)
+LUAU_DYNAMIC_FASTINT(LuauTypeSolverRelease)
 
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
@@ -454,6 +460,14 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
         try
         {
             InitializationOptions options = params.initializationOptions.value();
+            if (options.enableNewSolver)
+            {
+                FFlag::LuauSolverV2.value = true;
+                FFlag::LuauNewSolverPopulateTableLocations.value = true;
+                FFlag::LuauNewSolverPrePopulateClasses.value = true;
+                DFInt::LuauTypeSolverRelease.value = std::numeric_limits<int>::max();
+            }
+
             if (!options.fflags.empty())
             {
                 registerFastFlags(

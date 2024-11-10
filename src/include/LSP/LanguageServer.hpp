@@ -27,6 +27,7 @@ inline lsp::PositionEncodingKind& positionEncoding()
 struct InitializationOptions
 {
     std::unordered_map<std::string, std::string> fflags{};
+    bool enableNewSolver;
 };
 NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
 

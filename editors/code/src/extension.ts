@@ -155,6 +155,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
+  // Enable new solver
+  const enableNewSolver = !!fflagsConfig.get<boolean>("enableNewSolver");
+
   // Handle overrides
   const overridenFFlags = fflagsConfig.get<FFlags>("override");
   if (overridenFFlags) {
@@ -209,6 +212,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     },
     initializationOptions: {
       fflags,
+      enableNewSolver,
     },
   };
 
