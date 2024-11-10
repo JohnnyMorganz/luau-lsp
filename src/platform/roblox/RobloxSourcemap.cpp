@@ -353,6 +353,7 @@ bool RobloxPlatform::updateSourceMap()
 
 void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::string& base)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
     node->virtualPath = base;
     virtualPathsToSourceNodes[base] = node;
 
@@ -370,6 +371,7 @@ void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::strin
 
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceNodeMap", "LSP");
     realPathsToSourceNodes.clear();
     virtualPathsToSourceNodes.clear();
 
@@ -394,6 +396,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 // Remove this once Luau has improved
 void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::handleSourcemapUpdate", "LSP");
     if (!rootSourceNode)
         return;
 
