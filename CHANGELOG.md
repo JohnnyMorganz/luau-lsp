@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.35.0] - 2024-11-10
+
 ### Removed
 
 - Removed `luau-lsp.require.mode` in preparation for Luau's new require by string semantics. The default is now relative to the file the require is from.
