@@ -127,17 +127,13 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
 
     // Find a list of files to compute diagnostics for
     auto files = findFilesForWorkspaceDiagnostics(rootUri.fsPath(), config);
+    workspaceReport.items.reserve(files.size());
 
     for (auto uri : files)
     {
-        auto moduleName = fileResolver.getModuleName(uri);
-        auto document = fileResolver.getTextDocument(uri);
-
         lsp::WorkspaceDocumentDiagnosticReport documentReport;
         documentReport.uri = uri;
         documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-        if (document)
-            documentReport.version = document->version();
 
         // If we don't have workspace diagnostics enabled, or we are are ignoring this file
         // Then provide an empty report to clear the file diagnostics
@@ -147,6 +143,11 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
             continue;
         }
 
+        auto moduleName = fileResolver.getModuleName(uri);
+        auto document = fileResolver.getTextDocument(uri);
+        if (document)
+            documentReport.version = document->version();
+
         // Compute new check result
         Luau::CheckResult cr = checkSimple(moduleName, /* runLintChecks: */ true);
 
@@ -154,6 +155,8 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // TODO: should we file a diagnostic?
         if (!frontend.getSourceModule(moduleName))
             continue;
+
+        documentReport.items.reserve(cr.errors.size() + cr.lintResult.errors.size() + cr.lintResult.warnings.size());
 
         // Report Type Errors
         // Only report errors for the current file
