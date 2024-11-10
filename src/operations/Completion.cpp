@@ -163,6 +163,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
     const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::suggestImports", "LSP");
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)

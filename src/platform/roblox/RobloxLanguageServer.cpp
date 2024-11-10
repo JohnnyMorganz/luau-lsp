@@ -1,5 +1,7 @@
 #include <Platform/RobloxPlatform.hpp>
 
+#include "Luau/TimeTrace.h"
+
 #include <LSP/Workspace.hpp>
 
 static const char* kSourcemapWatchingRegistrationId = "sourcemapWatching";
@@ -20,6 +22,7 @@ void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 
 void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::setupWithConfiguration", "LSP");
     std::shared_ptr<Client>& client = workspaceFolder->client;
 
     if (config.sourcemap.enabled)

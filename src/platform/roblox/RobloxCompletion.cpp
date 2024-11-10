@@ -1,5 +1,7 @@
 #include "Platform/RobloxPlatform.hpp"
 
+#include "Luau/TimeTrace.h"
+
 #include "LSP/Completion.hpp"
 #include "LSP/Workspace.hpp"
 
@@ -268,8 +270,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-        instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
@@ -344,6 +346,8 @@ size_t computeBestLineForRequire(
 void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
     size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::handleSuggestImports", "LSP");
+
     // Find all import calls
     RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(module.root);

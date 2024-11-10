@@ -4,6 +4,7 @@
 #include "LSP/Workspace.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
+#include "Luau/TimeTrace.h"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -203,7 +204,8 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
                 // Add FindFirstAncestor and FindFirstChild
                 if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
                 {
-                    auto findFirstAncestorFunction = Luau::makeFunction(arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {Luau::makeOption(globals.builtinTypes, arena, *instanceType)});
+                    auto findFirstAncestorFunction = Luau::makeFunction(
+                        arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {Luau::makeOption(globals.builtinTypes, arena, *instanceType)});
 
                     Luau::attachMagicFunction(findFirstAncestorFunction,
                         [&arena, &globals, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
@@ -292,6 +294,7 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
 
 bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMapFromContents", "LSP");
     workspaceFolder->client->sendTrace("Sourcemap file read successfully");
 
     workspaceFolder->frontend.clear();
@@ -328,6 +331,7 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
 
 bool RobloxPlatform::updateSourceMap()
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMap", "LSP");
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 

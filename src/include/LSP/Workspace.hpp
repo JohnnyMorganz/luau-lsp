@@ -90,6 +90,7 @@ private:
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
+    std::vector<Uri> findFilesForWorkspaceDiagnostics(const std::filesystem::path& rootPath, const ClientConfiguration& config);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);

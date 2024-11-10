@@ -83,6 +83,31 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     return report;
 }
 
+std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::filesystem::path& rootPath, const ClientConfiguration& config)
+{
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::findFilesForWorkspaceDiagnostics", "LSP");
+
+    std::vector<Uri> files{};
+    for (std::filesystem::recursive_directory_iterator next(rootPath, std::filesystem::directory_options::skip_permission_denied), end; next != end;
+         ++next)
+    {
+        try
+        {
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+            {
+                auto ext = next->path().extension();
+                if (ext == ".lua" || ext == ".luau")
+                    files.push_back(Uri::file(next->path()));
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
+        }
+    }
+    return files;
+}
+
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::workspaceDiagnostics", "LSP");
@@ -101,24 +126,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     auto config = client->getConfiguration(rootUri);
 
     // Find a list of files to compute diagnostics for
-    std::vector<Uri> files{};
-    for (std::filesystem::recursive_directory_iterator next(this->rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-        next != end; ++next)
-    {
-        try
-        {
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
-            {
-                auto ext = next->path().extension();
-                if (ext == ".lua" || ext == ".luau")
-                    files.push_back(Uri::file(next->path()));
-            }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
-        }
-    }
+    auto files = findFilesForWorkspaceDiagnostics(rootUri.fsPath(), config);
 
     for (auto uri : files)
     {
