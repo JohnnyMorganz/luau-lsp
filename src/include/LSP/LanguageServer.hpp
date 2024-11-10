@@ -29,7 +29,7 @@ struct InitializationOptions
     std::unordered_map<std::string, std::string> fflags{};
     bool enableNewSolver;
 };
-NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
+NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags, enableNewSolver)
 
 class LanguageServer
 {
