@@ -161,7 +161,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     for (let [name, value] of Object.entries(overridenFFlags)) {
       if (!isAlphanumericUnderscore(name)) {
         vscode.window.showWarningMessage(
-          `Invalid FFlag name: '${name}'. It can only contain alphanumeric characters`
+          `Invalid FFlag name: '${name}'. It can only contain alphanumeric characters`,
         );
       }
 
