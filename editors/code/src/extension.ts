@@ -216,7 +216,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       onSave: true,
     },
     initializationOptions: {
-      fflags
+      fflags,
     },
   };
 
