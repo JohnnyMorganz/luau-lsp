@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added configuration option `luau-lsp.sourcemap.sourcemapFile` to specify a different name to use for the sourcemap
 - A function call on a table with a `__call` metamethod will now show Signature Help and documentation ([#724](https://github.com/JohnnyMorganz/luau-lsp/issues/724))
 - We now warn about non-alphanumeric FFlag names, and trim any leading/trailing whitespace in FFlag configuration on the VSCode extension ([#648](https://github.com/JohnnyMorganz/luau-lsp/issues/648))
+- Added a setting to enable the new solver without having to tinker with FFlags: `luau-lsp.fflags.enableNewSolver`.
 
 ### Changed
 
