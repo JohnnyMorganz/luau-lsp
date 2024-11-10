@@ -16,9 +16,6 @@ to setup your own client for a different editor
 
 The language server should be immediately usable for general Luau code after installation.
 String require support is provided for module paths, using `require("module")`.
-There are two options for resolving requires, which can be configured using `luau-lsp.require.mode`:
-`relativeToWorkspaceRoot` (the default - equivalent to the [command-line REPL](https://github.com/Roblox/luau#usage) `luau`)
-or `relativeToFile`.
 
 Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`, with corresponding
 documentation added using `luau-lsp.types.documentationFiles`.
