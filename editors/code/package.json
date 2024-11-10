@@ -209,7 +209,7 @@
           "scope": "window"
         },
         "luau-lsp.fflags.enableNewSolver": {
-          "markdownDescription": "Enables the flags required for Luau's new type solver. These flags can be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
+          "markdownDescription": "Enables the flags required for Luau's new type solver. These flags can be overriden by `#luau-lsp.fflags.override#`",
           "type": "boolean",
           "default": false,
           "scope": "window"
