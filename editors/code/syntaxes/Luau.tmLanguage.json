@@ -500,7 +500,7 @@
           "patterns": [
             {
               "name": "keyword.operator.other.luau",
-              "begin": "(```lua)\\s+",
+              "begin": "(```luau?)\\s+",
               "end": "(```)",
               "beginCaptures": {
                 "1": {
