@@ -20,16 +20,16 @@ local SettingsButton =
 
 --#region Settings
 
-local AnalyticsService = game:GetService("AnalyticsService")
+local LocalizationService = game:GetService("LocalizationService")
 
 local Settings = nil :: any
 
-local SettingsModule = AnalyticsService:FindFirstChild("LuauLSP_Settings") :: ModuleScript
+local SettingsModule = LocalizationService:FindFirstChild("LuauLSP_Settings") :: ModuleScript
 if not SettingsModule then
 	SettingsModule = (script :: any).DefaultSettings:Clone()
 	assert(SettingsModule, "Luau Typechecking")
 	SettingsModule.Name = "LuauLSP_Settings"
-	SettingsModule.Parent = AnalyticsService
+	SettingsModule.Parent = LocalizationService
 end
 assert(SettingsModule, "failed to create settings module")
 
