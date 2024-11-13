@@ -1,83 +1,49 @@
---!strict
+--!nocheck
 local HttpService = game:GetService("HttpService")
-assert(plugin, "This code must run inside of a plugin")
+local RunService = game:GetService("RunService")
+local ScriptEditorService = game:GetService("ScriptEditorService")
+local TestService = game:GetService("TestService")
 
-if game:GetService("RunService"):IsRunning() then
+local IsRunning = RunService:IsRunning()
+if IsRunning then
 	return
 end
+assert(plugin, "This code must run inside of a plugin")
 
-local toolbar = plugin:CreateToolbar("Luau")
+local SETTINGS_MODULE_NAME = "LuauLSP_Settings"
+local DEFAULT_SOURCE = [[
+return {
+    --// Should be unique to Rojo port (different).
+	Port = 3667,
 
-local ConnectButton = toolbar:CreateButton(
-	"Luau Language Server Setup",
-	"Toggle Menu",
-	"rbxassetid://11115506617",
-	"Luau Language Server"
-) :: PluginToolbarButton
+    --// Decides whether or not the companion plugin automatically starts listening on studio launch.
+	StartAutomatically = false,
 
-local SettingsButton =
-	toolbar:CreateButton("Settings", "Open Settings", "rbxassetid://13997395868") :: PluginToolbarButton
+    --// Setting to true will enable verbose error messages and warns. Currently does nothing.
+    DebugMode = false,
 
---#region Settings
+    --// List of instances who's descendants will be encoded and sent to VS Code.
+	Include = {
+		game:GetService("Workspace"),
+		game:GetService("Players"),
+		game:GetService("Lighting"),
+		game:GetService("ReplicatedFirst"),
+		game:GetService("ReplicatedStorage"),
+		game:GetService("ServerScriptService"),
+		game:GetService("ServerStorage"),
+		game:GetService("StarterGui"),
+		game:GetService("StarterPack"),
+		game:GetService("StarterPlayer"),
+		game:GetService("SoundService"),
+		game:GetService("Chat"),
+		game:GetService("LocalizationService"),
+		game:GetService("TestService"),
+	},
+}
+]]
 
-local AnalyticsService = game:GetService("AnalyticsService")
-
-local Settings = nil :: any
-
-local SettingsModule = AnalyticsService:FindFirstChild("LuauLSP_Settings") :: ModuleScript
-if not SettingsModule then
-	SettingsModule = (script :: any).DefaultSettings:Clone()
-	assert(SettingsModule, "Luau Typechecking")
-	SettingsModule.Name = "LuauLSP_Settings"
-	SettingsModule.Parent = AnalyticsService
-end
-assert(SettingsModule, "failed to create settings module")
-
-local function LoadSettings()
-	local result, parseError: any = loadstring(SettingsModule.Source)
-	if result == nil then
-		warn("[Luau Language Server] Could not load settings: " .. parseError)
-		Settings = nil
-		return
-	end
-	assert(result, "")
-	local _, err = pcall(function()
-		Settings = result()
-	end)
-	if err then
-		warn(err)
-	end
-	if type(Settings) ~= "table" then
-		Settings = nil
-		warn("[Luau Language Server] Could not load settings: invalid settings")
-	elseif type(Settings.port) ~= "number" then
-		Settings = nil
-		warn("[Luau Language Server] Could not load settings: invalid port")
-	elseif type(Settings.startAutomatically) ~= "boolean" then
-		Settings = nil
-		warn("[Luau Language Server] Could not load settings: invalid startAutomatically value")
-	elseif type(Settings.include) ~= "table" then
-		Settings = nil
-		warn("[Luau Language Server] Could not load settings: invalid include list")
-	end
-end
-
-LoadSettings()
-
---#endregion
-
---#region Connect
-
-local ConnectAction = plugin:CreatePluginAction(
-	"Luau Language Server Connect",
-	"Connect",
-	"Connects to Luau Language Server",
-	"rbxassetid://11115506617",
-	true
-)
-
-local connected = Instance.new("BoolValue")
-local connections = {}
+local Connections: { RBXScriptConnection } = {}
+local Connected = false
 
 type EncodedInstance = {
 	Name: string,
@@ -85,138 +51,168 @@ type EncodedInstance = {
 	Children: { EncodedInstance },
 }
 
-local wasConnected
-SettingsButton.Click:Connect(function()
-	plugin:OpenScript(SettingsModule)
-	wasConnected = connected.Value
-end)
+local Toolbar = plugin:CreateToolbar("Luau LSP Test")
+local ConnectAction =
+	plugin:CreatePluginAction("Luau LSP Connect", "Connect", "Connects to Luau LSP", "rbxassetid://11115506617", true)
+local ConnectButton = Toolbar:CreateButton("Luau LSP Setup", "Toggle Menu", "rbxassetid://11115506617", "Luau LSP")
+local SettingsButton = Toolbar:CreateButton("Settings", "Open Settings", "rbxassetid://13997395868")
 
-local function filterServices(child: Instance): boolean
-	return not not table.find(Settings.include, child)
+local function GetAndValidateSettingsModule()
+	local SettingsModule = (
+		TestService:FindFirstChild(SETTINGS_MODULE_NAME) or Instance.new("ModuleScript")
+	) :: ModuleScript
+	local SettingsModuleSource = ScriptEditorService:GetEditorSource(SettingsModule)
+	if SettingsModuleSource == "" or SettingsModuleSource == nil then
+		ScriptEditorService:UpdateSourceAsync(SettingsModule, function()
+			return DEFAULT_SOURCE
+		end)
+		warn("[Luau LSP] Could not load settings: Unable to find saved settings, reverting to default settings.")
+	end
+
+	--// No loss in not running a check here since Luau runs an internal validation for set
+	SettingsModule.Name = SETTINGS_MODULE_NAME
+	SettingsModule.Parent = TestService
+
+	local Settings = require(SettingsModule)
+	if typeof(Settings) ~= "table" then
+		error("[Luau LSP] Could not load settings: Settings module does not return a table.")
+	elseif typeof(Settings.Port) ~= "number" then
+		error("[Luau LSP] Could not load settings: Port is not a number.")
+	elseif type(Settings.StartAutomatically) ~= "boolean" then
+		error("[Luau LSP] Could not load settings: StartAutomatically is not a boolean.")
+	elseif type(Settings.Include) ~= "table" then
+		error("[Luau LSP] Could not load settings: Include list is not a table.")
+	end
+
+	return SettingsModule
 end
 
-local function encodeInstance(instance: Instance, childFilter: ((Instance) -> boolean)?): EncodedInstance
-	local encoded = {}
-	encoded.Name = instance.Name
-	encoded.ClassName = instance.ClassName
-	encoded.Children = {}
+local SettingsModule = GetAndValidateSettingsModule()
+local Settings = require(SettingsModule)
 
-	for _, child in instance:GetChildren() do
-		if childFilter and not childFilter(child) then
+local function FilterServices(Child: Instance): boolean
+	return not not table.find(Settings.Include, Child)
+end
+
+local function EncodeInstance(Instance: Instance, ChildFilter: (Instance) -> boolean?): EncodedInstance
+	local Encoded = {}
+	Encoded.Name = Instance.Name
+	Encoded.ClassName = Instance.ClassName
+	Encoded.Children = {}
+
+	for _, Child in Instance:GetChildren() do
+		if ChildFilter and not ChildFilter(Child) then
 			continue
 		end
 
-		table.insert(encoded.Children, encodeInstance(child))
+		table.insert(Encoded.Children, EncodeInstance(Child))
 	end
 
-	return encoded
+	return Encoded
 end
 
-local function cleanup()
-	for _, connection in pairs(connections) do
-		connection:Disconnect()
+local function CleanUpConnections()
+	local WasConnected = Connected
+	for _, Connection in Connections do
+		Connection:Disconnect()
 	end
-	connected.Value = false
+	Connected = false
+	ConnectButton.Icon = "rbxassetid://11115506617"
+
+	if WasConnected then
+		warn("[Luau LSP] No longer sending DataModel information.")
+	end
 end
 
-local function sendFullDMInfo(isSilent)
-	local tree = encodeInstance(game, filterServices)
+local function SendDataModelInfo()
+	local Tree = EncodeInstance(game, FilterServices)
 
-	local success, result = pcall(HttpService.RequestAsync, HttpService, {
+	local Success, Result = pcall(HttpService.RequestAsync, HttpService, {
 		Method = "POST" :: "POST",
-		Url = string.format("http://localhost:%s/full", Settings.port),
+		Url = string.format("http://localhost:%s/full", tostring(Settings.Port)),
 		Headers = {
 			["Content-Type"] = "application/json",
 		},
 		Body = HttpService:JSONEncode({
-			tree = tree,
+			tree = Tree,
 		}),
 		Compress = Enum.HttpCompression.Gzip,
 	})
 
-	if not success then
-		warn(`[Luau Language Server] Connecting to server failed: {result}`)
-		cleanup()
-	elseif not result.Success then
-		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)
-		cleanup()
+	if not Success then
+		warn(`[Luau LSP] Connecting to server failed: {Result}`)
+		CleanUpConnections()
+	elseif not Result.Success then
+		warn(`[Luau LSP] Sending DataModel info failed: {Result.StatusCode}: {Result.Body}`)
+		CleanUpConnections()
 	else
-		connected.Value = true
-		if not isSilent then
-			print(`[Luau Language Server] Successfully sent full DataModel info`)
-		end
+		Connected = true
+		ConnectButton.Icon = "rbxassetid://11116536087"
+		warn("[Luau LSP] Now sending DataModel information.")
 	end
 end
 
-local function watchChanges(isSilent)
-	local sendTask: thread?
-	if connected.Value or Settings == nil then
-		if not isSilent then
-			warn("[Luau Language Server] Connecting to server failed: invalid settings")
-		end
+local function WatchChanges()
+	local SendTask: thread?
+	if Connected or Settings == nil then
+		warn("[Luau LSP] Connecting to server failed: Already connected, or settings non-existent.")
 		return
 	end
-	cleanup()
+	CleanUpConnections()
 
-	local function deferSend()
-		if sendTask then
-			task.cancel(sendTask)
+	local function DeferSend()
+		if SendTask then
+			task.cancel(SendTask)
 		end
-		sendTask = task.delay(0.5, function()
-			sendFullDMInfo(isSilent)
-			sendTask = nil
+		SendTask = task.delay(0.5, function()
+			SendDataModelInfo()
+			SendTask = nil
 		end)
 	end
 
 	-- TODO: we should only send delta info if possible
-	local function descendantChanged(instance: Instance)
-		for _, service in Settings.include do
-			if instance:IsDescendantOf(service) then
-				deferSend()
+	local function DescendantChanged(Instance: Instance)
+		for _, Service in Settings.Include do
+			if Instance:IsDescendantOf(Service) then
+				DeferSend()
 				return
 			end
 		end
 	end
 
-	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
-	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
-	sendFullDMInfo(isSilent)
+	table.insert(Connections, game.DescendantAdded:Connect(DescendantChanged))
+	table.insert(Connections, game.DescendantRemoving:Connect(DescendantChanged))
+	SendDataModelInfo()
 end
 
-function connectServer(isSilent: boolean?)
-	if connected.Value then
-		if not isSilent then
-			print("[Luau Language Server] Disconnecting from DataModel changes")
-		end
-		cleanup()
+function ToggleServerConnection()
+	if Connected then
+		CleanUpConnections()
 	else
-		if not isSilent then
-			print("[Luau Language Server] Connecting to server")
-		end
-		watchChanges(isSilent)
+		WatchChanges()
 	end
 end
 
-ConnectButton.Click:Connect(connectServer)
+ConnectButton.Click:Connect(ToggleServerConnection)
+ConnectAction.Triggered:Connect(ToggleServerConnection)
 
-ConnectAction.Triggered:Connect(connectServer)
-
-connected.Changed:Connect(function()
-	ConnectButton.Icon = if connected.Value then "rbxassetid://11116536087" else "rbxassetid://11115506617"
+SettingsButton.Click:Connect(function()
+	plugin:OpenScript(SettingsModule)
 end)
 
-if Settings and Settings.startAutomatically then
-	connectServer()
+SettingsModule:GetPropertyChangedSignal("Source"):Connect(function()
+	local WasConnected = Connected
+	if Connected then
+		CleanUpConnections()
+	end
+	SettingsModule = GetAndValidateSettingsModule()
+	Settings = require(SettingsModule)
+
+	if WasConnected then
+		ToggleServerConnection()
+	end
+end)
+
+if Settings and Settings.StartAutomatically then
+	ToggleServerConnection()
 end
-
-SettingsModule.Changed:Connect(function()
-	if connected.Value then
-		cleanup()
-	end
-	LoadSettings()
-	if wasConnected then
-		connectServer(true) -- Silent mode
-	end
-end)
-
---#endregion
