@@ -37,7 +37,7 @@ std::optional<std::filesystem::path> resolveConfigAlias(const Luau::Config& conf
 {
     for (const auto& [alias, info] : config.aliases)
     {
-        if (Luau::startsWith(str, alias))
+        if (str.compare(1, info.value.length(), info.value) == 0)
         {
             std::filesystem::path directoryPath = info.value;
             std::filesystem::path configPath = info.configLocation;
