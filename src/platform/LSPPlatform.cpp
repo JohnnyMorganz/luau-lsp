@@ -60,7 +60,7 @@ std::optional<std::filesystem::path> resolveConfigAlias(const Luau::Config& conf
 }
 
 // Resolve the string using a directory alias from config if present
-std::optional<std::filesystem::path> resolveConfigDirectoryAlias(
+std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str)
 {
     for (const auto& [alias, path] : directoryAliases)
