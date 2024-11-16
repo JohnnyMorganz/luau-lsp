@@ -55,7 +55,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         if (std::optional<std::string> contents = readFile(*baseLuaurc))
         {
             defaultConfig = Luau::Config{};
-            std::optional<std::string> error = Luau::parseConfig(*contents, *defaultConfig);
+            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(*baseLuaurc, *contents, *defaultConfig);
             if (error)
             {
                 std::cerr << baseLuaurc->generic_string() << ": " << *error << "\n";

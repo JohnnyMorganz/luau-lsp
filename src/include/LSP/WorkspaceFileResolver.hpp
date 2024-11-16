@@ -113,6 +113,8 @@ public:
     const Luau::Config& getConfig(const Luau::ModuleName& name) const override;
     void clearConfigCache();
 
+    static std::optional<std::string> parseConfig(const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result);
+
 private:
     const Luau::Config& readConfigRec(const std::filesystem::path& path) const;
 };
