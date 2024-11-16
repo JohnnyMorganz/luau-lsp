@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added a setting to enable the new solver without having to tinker with FFlags: `luau-lsp.fflags.enableNewSolver`.
 - Support parsing and resolving aliases coming from `.luaurc` files in module resolution and autocomplete
+- Added two configuration options `luau-lsp.diagnostics.pullOnChange` and `luau-lsp.diagnostics.pullOnSave` to configure when document diagnostics updates for a file (default: `true`)
 
 ### Changed
 

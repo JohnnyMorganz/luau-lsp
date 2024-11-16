@@ -250,6 +250,18 @@
           "default": false,
           "scope": "resource"
         },
+        "luau-lsp.diagnostics.pullOnChange": {
+          "markdownDescription": "Whether to update document diagnostics whenever the text file changes",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.diagnostics.pullOnSave": {
+          "markdownDescription": "Whether to update document diagnostics whenever the text file is saved",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.types.definitionFiles": {
           "markdownDescription": "A list of paths to definition files to load in to the type checker. Note that definition file syntax is currently unstable and may change at any time",
           "type": "array",
