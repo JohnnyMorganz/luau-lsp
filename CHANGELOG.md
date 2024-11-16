@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Added support for loading require aliases from `.luaurc` files in a project ([#759](https://github.com/JohnnyMorganz/luau-lsp/issues/759))
 - `workspace/diagnostic` call is ~98% faster when `luau-lsp.diagnostics.workspace` is disabled on large projects ([#826](https://github.com/JohnnyMorganz/luau-lsp/issues/826))
 
 ## [1.35.0] - 2024-11-10
