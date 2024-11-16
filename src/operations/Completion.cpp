@@ -3,6 +3,9 @@
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/AutocompleteTypes.h"
+#include "Luau/Common.h"
+#include "Luau/FragmentAutocomplete.h"
 #include "Luau/TxnLog.h"
 #include "Luau/TypeUtils.h"
 #include "Luau/TimeTrace.h"
@@ -14,6 +17,9 @@
 #include "LSP/DocumentationParser.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
+LUAU_FASTFLAG(LuauAllowFragmentParsing)
+LUAU_FASTFLAG(LuauStoreDFGOnModule2)
+LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
@@ -424,13 +430,33 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     checkStrict(moduleName, /* forAutocomplete: */ true);
 
     auto position = textDocument->convertPosition(params.position);
-    auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
-            std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
-        {
-            tags.insert(tag);
-            return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-        });
+    Luau::AutocompleteResult result;
+    if (FFlag::LuauAllowFragmentParsing && FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete && FFlag::LuauStoreDFGOnModule2)
+    {
+        Luau::FrontendOptions options;
+        options.retainFullTypeGraphs = true;
+        options.runLintChecks = false;
+        if (!FFlag::LuauSolverV2)
+            options.forAutocomplete = true;
+
+        result = Luau::fragmentAutocomplete(frontend, textDocument->getText(), moduleName, position, options,
+            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+            {
+                tags.insert(tag);
+                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+            }).acResults;
+    }
+    else
+    {
+        result = Luau::autocomplete(frontend, moduleName, position,
+            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+            {
+                tags.insert(tag);
+                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+            });
+    }
 
 
     std::vector<lsp::CompletionItem> items{};
