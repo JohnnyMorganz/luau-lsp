@@ -160,7 +160,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauSolverV2"] = "true";
     fflags["LuauNewSolverPopulateTableLocations"] = "true";
     fflags["LuauNewSolverPrePopulateClasses"] = "true";
-    fflags["LuauTypeSolverRelease"] = "2147483647";
   }
 
   // Handle overrides
