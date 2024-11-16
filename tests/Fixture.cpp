@@ -165,6 +165,11 @@ void Fixture::loadSourcemap(const std::string& contents)
     dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
 }
 
+void Fixture::loadLuaurc(const std::string& source)
+{
+    REQUIRE(!WorkspaceFileResolver::parseConfig(std::filesystem::path(), source, workspace.fileResolver.defaultConfig).has_value());
+}
+
 SourceNodePtr Fixture::getRootSourceNode()
 {
     auto sourceNode = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->rootSourceNode;

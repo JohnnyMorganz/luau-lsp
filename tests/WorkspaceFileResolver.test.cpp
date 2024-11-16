@@ -152,6 +152,82 @@ TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
     CHECK_EQ(resolveDirectoryAlias("workspace/", directoryAliases, "@relative/foo.luau"), "workspace/src/client/foo.luau");
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_does_nothing_if_string_doesnt_start_with_@_symbol")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "test.lua"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("test", workspace.fileResolver.defaultConfig), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_variations_with_directory_separator")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "folder"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "folder");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "folder");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "folder/foo");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trailing_slash")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "folder/"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "folder/");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "folder/");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "folder/foo");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "C:/Users/test/folder"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "C:/Users/test/folder/foo");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "~/definitions"
+        }
+    }
+    )");
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), *home / "definitions");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), *home / "definitions");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), *home / "definitions" / "foo");
+}
+
 TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
     WorkspaceFileResolver fileResolver;

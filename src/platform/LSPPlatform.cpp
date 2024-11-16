@@ -32,7 +32,7 @@ std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& n
     return std::nullopt;
 }
 
-static std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config)
+std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config)
 {
     if (path.size() < 1 || path[0] != '@')
         return std::nullopt;
@@ -71,7 +71,7 @@ static std::optional<std::filesystem::path> resolveAlias(const std::string& path
         // absolute path
         remainder.erase(0, remainder.find_first_not_of("/\\"));
 
-        auto resolvedPath = std::filesystem::path(aliasInfo->configLocation) / aliasInfo->value;
+        auto resolvedPath = std::filesystem::path(aliasInfo->configLocation) / resolvePath(aliasInfo->value);
         if (remainder.empty())
             return resolvedPath;
         else
