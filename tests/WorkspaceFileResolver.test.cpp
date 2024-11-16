@@ -175,9 +175,9 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_variations_with_directory_sepa
     }
     )");
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "folder");
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "folder");
-    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "folder/foo");
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder/foo");
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trailing_slash")
@@ -190,20 +190,28 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trai
     }
     )");
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "folder/");
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "folder/");
-    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "folder/foo");
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder/");
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder/");
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), std::filesystem::current_path() / "folder/foo");
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
 {
-    loadLuaurc(R"(
-    {
-        "aliases": {
-            "test": "C:/Users/test/folder"
+#ifdef _WIN32
+    auto basePath = "C:/Users/test/folder";
+#else
+    auto basePath = "/home/folder";
+#endif
+
+    std::string source = R"(
+        {
+            "aliases": {
+                "test": "{basePath}"
+            }
         }
-    }
-    )");
+    )";
+    replace(source, "{basePath}", basePath);
+    loadLuaurc(source);
 
     CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
     CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
