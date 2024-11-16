@@ -189,6 +189,7 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
             return std::nullopt;
 
         auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+        auto luauConfig = fileResolver->getConfig(moduleName);
 
         Luau::AutocompleteEntryMap result;
 
@@ -208,6 +209,14 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         // Populate with custom aliases, if we are at the start of a string require
         if (contentsString.empty())
         {
+            for (const auto& [aliasName, _] : luauConfig.aliases)
+            {
+                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
+                    Luau::TypeCorrectKind::Correct};
+                entry.tags.push_back("Alias");
+                result.insert_or_assign("@" + aliasName, entry);
+            }
+            // DEPRECATED
             for (const auto& [aliasName, _] : config.require.fileAliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
@@ -216,7 +225,7 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
                 entry.tags.push_back("Alias");
                 result.insert_or_assign(aliasName, entry);
             }
-
+            // DEPRECATED
             for (const auto& [aliasName, _] : config.require.directoryAliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
@@ -229,8 +238,10 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
 
         // Check if it starts with a directory alias, otherwise resolve with require base path
         std::filesystem::path currentDirectory =
-            resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
-                .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()).append(contentsString));
+            resolveAlias(contentsString, luauConfig)
+                .value_or(resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
+                              .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()))
+                              .append(contentsString));
 
         try
         {
