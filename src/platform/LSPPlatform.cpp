@@ -2,6 +2,7 @@
 
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Workspace.hpp"
+#include "Luau/StringUtils.h"
 #include "Platform/RobloxPlatform.hpp"
 
 #include <memory>
@@ -37,11 +38,11 @@ std::optional<std::filesystem::path> resolveConfigAlias(const Luau::Config& conf
 {
     for (const auto& [alias, info] : config.aliases)
     {
-        if (str.compare(1, info.value.length(), info.value) == 0)
+        if (str.substr(1, alias.size()) == alias)
         {
             std::filesystem::path directoryPath = info.value;
             std::filesystem::path configPath = info.configLocation;
-            std::string remainder = str.substr(alias.length());
+            std::string remainder = str.substr(alias.length() + 1);
 
             // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
             // absolute path
@@ -100,11 +101,9 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
 
     // Check .luaurc aliases
     auto luauConfig = fileResolver->getConfig(context->name);
-    std::unordered_map<std::string, std::string> directoryAliases;
-    if (auto aliasedPath = resolveConfigAlias(luauConfig, requiredString))
-    {
-        filePath = aliasedPath.value();
-    }
+    if (requiredString.length() >= 2)
+        if (auto aliasedPath = resolveConfigAlias(luauConfig, requiredString))
+            filePath = aliasedPath.value();
 
     // Check for custom require overrides
     if (fileResolver->client)
