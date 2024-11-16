@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` are now deprecated in favour of aliases in `.luaurc` files. These settings will be removed in a future version.
+
 ### Added
 
 - Added a setting to enable the new solver without having to tinker with FFlags: `luau-lsp.fflags.enableNewSolver`.
+- Support parsing and resolving aliases coming from `.luaurc` files in module resolution and autocomplete
 
 ### Changed
 
