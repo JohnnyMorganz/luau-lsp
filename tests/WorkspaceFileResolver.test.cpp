@@ -213,9 +213,9 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
     replace(source, "{basePath}", basePath);
     loadLuaurc(source);
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), "C:/Users/test/folder");
-    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), "C:/Users/test/folder/foo");
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig), basePath);
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig), basePath);
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig), std::string(basePath) + "/foo");
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
