@@ -167,8 +167,8 @@ void Fixture::loadSourcemap(const std::string& contents)
 
 void Fixture::loadLuaurc(const std::string& source)
 {
-    REQUIRE(
-        !WorkspaceFileResolver::parseConfig(std::filesystem::path() / Luau::kConfigName, source, workspace.fileResolver.defaultConfig).has_value());
+    REQUIRE(!WorkspaceFileResolver::parseConfig(std::filesystem::current_path() / Luau::kConfigName, source, workspace.fileResolver.defaultConfig)
+                 .has_value());
 }
 
 SourceNodePtr Fixture::getRootSourceNode()
