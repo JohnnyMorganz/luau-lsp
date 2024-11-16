@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - `workspace/diagnostic` call is ~98% faster when `luau-lsp.diagnostics.workspace` is disabled on large projects ([#826](https://github.com/JohnnyMorganz/luau-lsp/issues/826))
+- Sync to upstream Luau 0.652
 
 ## [1.35.0] - 2024-11-10
 
