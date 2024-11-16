@@ -33,7 +33,34 @@ std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& n
 }
 
 // Resolve the string using a directory alias if present
-std::optional<std::filesystem::path> resolveDirectoryAlias(
+std::optional<std::filesystem::path> resolveConfigAlias(const Luau::Config& config, const std::string& str)
+{
+    for (const auto& [alias, info] : config.aliases)
+    {
+        if (Luau::startsWith(str, alias))
+        {
+            std::filesystem::path directoryPath = info.value;
+            std::filesystem::path configPath = info.configLocation;
+            std::string remainder = str.substr(alias.length());
+
+            // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
+            // absolute path
+            remainder.erase(0, remainder.find_first_not_of("/\\"));
+
+            auto filePath = resolvePath(remainder.empty() ? directoryPath : directoryPath / remainder);
+            auto configParent = configPath.parent_path();
+            if (!filePath.is_absolute())
+                filePath = configParent / filePath;
+
+            return filePath;
+        }
+    }
+
+    return std::nullopt;
+}
+
+// Resolve the string using a directory alias from config if present
+std::optional<std::filesystem::path> resolveConfigDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str)
 {
     for (const auto& [alias, path] : directoryAliases)
@@ -69,6 +96,15 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
 
     std::filesystem::path basePath = contextPath->parent_path();
     auto filePath = basePath / requiredString;
+    auto rootPath = workspaceFolder->rootUri.fsPath();
+
+    // Check .luaurc aliases
+    auto luauConfig = fileResolver->getConfig(context->name);
+    std::unordered_map<std::string, std::string> directoryAliases;
+    if (auto aliasedPath = resolveConfigAlias(luauConfig, requiredString))
+    {
+        filePath = aliasedPath.value();
+    }
 
     // Check for custom require overrides
     if (fileResolver->client)
@@ -81,7 +117,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
             filePath = resolvePath(it->second);
         }
         // Check directory aliases
-        else if (auto aliasedPath = resolveDirectoryAlias(fileResolver->rootUri.fsPath(), config.require.directoryAliases, requiredString))
+        else if (auto aliasedPath = resolveDirectoryAlias(rootPath, config.require.directoryAliases, requiredString))
         {
             filePath = aliasedPath.value();
         }

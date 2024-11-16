@@ -136,8 +136,15 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
 
     if (std::optional<std::string> contents = readFile(configPath))
     {
+        Luau::ConfigOptions::AliasOptions aliasOpts;
+        aliasOpts.configLocation = configPath.string();
+        aliasOpts.overwriteAliases = false;
+
+        Luau::ConfigOptions opts;
+        opts.aliasOptions = std::move(aliasOpts);
+
         auto configUri = Uri::file(configPath);
-        std::optional<std::string> error = Luau::parseConfig(*contents, result);
+        std::optional<std::string> error = Luau::parseConfig(*contents, result, opts);
         if (error)
         {
             if (client)

@@ -127,3 +127,4 @@ public:
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
+std::optional<std::filesystem::path> resolveConfigAlias(const Luau::Config& config, const std::string& str);
