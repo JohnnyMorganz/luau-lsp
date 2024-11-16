@@ -706,7 +706,10 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_luaurc_aliases")
 
 TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
 {
-    client->globalConfig.require.fileAliases = {{"@test1", "file1.luau"}, {"@test2", "file2.luau"}};
+    client->globalConfig.require.fileAliases = {
+        {"@test1", "file1.luau"},
+        {"@test2", "file2.luau"},
+    };
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
@@ -728,7 +731,10 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
 
 TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
 {
-    client->globalConfig.require.directoryAliases = {{"@dir1", "directory1"}, {"@dir2", "directory2"}};
+    client->globalConfig.require.directoryAliases = {
+        {"@dir1", "directory1"},
+        {"@dir2", "directory2"},
+    };
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
@@ -750,8 +756,22 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
 
 TEST_CASE_FIXTURE(Fixture, "require_doesnt_show_aliases_after_a_directory_separator_is_seen")
 {
-    client->globalConfig.require.fileAliases = {{"@test1", "file1.luau"}, {"@test2", "file2.luau"}};
-    client->globalConfig.require.directoryAliases = {{"@dir1", "directory1"}, {"@dir2", "directory2"}};
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "Roact": "roact",
+            "Fusion": "fusion"
+        }
+    })");
+
+    client->globalConfig.require.fileAliases = {
+        {"@test1", "file1.luau"},
+        {"@test2", "file2.luau"},
+    };
+    client->globalConfig.require.directoryAliases = {
+        {"@dir1", "directory1"},
+        {"@dir2", "directory2"},
+    };
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
