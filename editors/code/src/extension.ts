@@ -155,6 +155,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
+  // Enable new solver
+  if (fflagsConfig.get<boolean>("enableNewSolver")) {
+    fflags["LuauSolverV2"] = "true";
+    fflags["LuauNewSolverPopulateTableLocations"] = "true";
+    fflags["LuauNewSolverPrePopulateClasses"] = "true";
+  }
+
   // Handle overrides
   const overridenFFlags = fflagsConfig.get<FFlags>("override");
   if (overridenFFlags) {
