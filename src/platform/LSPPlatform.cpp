@@ -32,7 +32,57 @@ std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& n
     return std::nullopt;
 }
 
-// Resolve the string using a directory alias if present
+std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config)
+{
+    if (path.size() < 1 || path[0] != '@')
+        return std::nullopt;
+
+    // To ignore the '@' alias prefix when processing the alias
+    const size_t aliasStartPos = 1;
+
+    // If a directory separator was found, the length of the alias is the
+    // distance between the start of the alias and the separator. Otherwise,
+    // the whole string after the alias symbol is the alias.
+    size_t aliasLen = path.find_first_of("\\/");
+    if (aliasLen != std::string::npos)
+        aliasLen -= aliasStartPos;
+
+    std::string potentialAlias = path.substr(aliasStartPos, aliasLen);
+
+    // Not worth searching when potentialAlias cannot be an alias
+    if (!Luau::isValidAlias(potentialAlias))
+    {
+        // TODO: report error: "@" + potentialAlias + " is not a valid alias");
+        return std::nullopt;
+    }
+
+    // Luau aliases are case insensitive
+    std::transform(potentialAlias.begin(), potentialAlias.end(), potentialAlias.begin(),
+        [](unsigned char c)
+        {
+            return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
+        });
+
+    if (auto aliasInfo = config.aliases.find(potentialAlias))
+    {
+        auto remainder = path.substr(potentialAlias.size() + 1);
+
+        // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
+        // absolute path
+        remainder.erase(0, remainder.find_first_not_of("/\\"));
+
+        auto resolvedPath = std::filesystem::path(aliasInfo->configLocation) / resolvePath(aliasInfo->value);
+        if (remainder.empty())
+            return resolvedPath;
+        else
+            return resolvedPath / remainder;
+    }
+
+    // TODO: report error: "@" + potentialAlias + " is not a valid alias"
+    return std::nullopt;
+}
+
+// DEPRECATED: Resolve the string using a directory alias if present
 std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str)
 {
@@ -70,8 +120,13 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     std::filesystem::path basePath = contextPath->parent_path();
     auto filePath = basePath / requiredString;
 
-    // Check for custom require overrides
-    if (fileResolver->client)
+    auto luauConfig = fileResolver->getConfig(context->name);
+    if (auto aliasedPath = resolveAlias(requiredString, luauConfig))
+    {
+        filePath = aliasedPath.value();
+    }
+    // DEPRECATED: Check for custom require overrides
+    else if (fileResolver->client)
     {
         auto config = fileResolver->client->getConfiguration(fileResolver->rootUri);
 
@@ -81,9 +136,9 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
             filePath = resolvePath(it->second);
         }
         // Check directory aliases
-        else if (auto aliasedPath = resolveDirectoryAlias(fileResolver->rootUri.fsPath(), config.require.directoryAliases, requiredString))
+        else if (auto directoryAliasedPath = resolveDirectoryAlias(fileResolver->rootUri.fsPath(), config.require.directoryAliases, requiredString))
         {
-            filePath = aliasedPath.value();
+            filePath = directoryAliasedPath.value();
         }
     }
 
@@ -134,6 +189,7 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
             return std::nullopt;
 
         auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+        auto luauConfig = fileResolver->getConfig(moduleName);
 
         Luau::AutocompleteEntryMap result;
 
@@ -153,6 +209,14 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         // Populate with custom aliases, if we are at the start of a string require
         if (contentsString.empty())
         {
+            for (const auto& [aliasName, _] : luauConfig.aliases)
+            {
+                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
+                    Luau::TypeCorrectKind::Correct};
+                entry.tags.push_back("Alias");
+                result.insert_or_assign("@" + aliasName, entry);
+            }
+            // DEPRECATED
             for (const auto& [aliasName, _] : config.require.fileAliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
@@ -161,7 +225,7 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
                 entry.tags.push_back("Alias");
                 result.insert_or_assign(aliasName, entry);
             }
-
+            // DEPRECATED
             for (const auto& [aliasName, _] : config.require.directoryAliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
@@ -174,8 +238,10 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
 
         // Check if it starts with a directory alias, otherwise resolve with require base path
         std::filesystem::path currentDirectory =
-            resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
-                .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()).append(contentsString));
+            resolveAlias(contentsString, luauConfig)
+                .value_or(resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
+                              .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()))
+                              .append(contentsString));
 
         try
         {

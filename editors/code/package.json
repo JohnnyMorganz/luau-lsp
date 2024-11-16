@@ -497,7 +497,9 @@
           "additionalProperties": {
             "type": "string"
           },
-          "scope": "resource"
+          "scope": "resource",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `aliases` in a `.luaurc` file instead.",
+          "deprecationMessage": "Deprecated: Please use aliases in a .luaurc file instead."
         },
         "luau-lsp.require.directoryAliases": {
           "markdownDescription": "A mapping of custom require string prefixes to directory paths. The aliases should include trailing slashes",
@@ -506,7 +508,9 @@
           "additionalProperties": {
             "type": "string"
           },
-          "scope": "resource"
+          "scope": "resource",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `aliases` in a `.luaurc` file instead.",
+          "deprecationMessage": "Deprecated: Please use aliases in a .luaurc file instead."
         },
         "luau-lsp.index.enabled": {
           "type": "boolean",

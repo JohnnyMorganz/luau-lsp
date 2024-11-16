@@ -676,11 +676,39 @@ static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& 
     CHECK_EQ(item.kind, lsp::CompletionItemKind::Folder);
 }
 
+TEST_CASE_FIXTURE(Fixture, "require_contains_luaurc_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "Roact": "roact",
+            "Fusion": "fusion"
+        }
+    })");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    CHECK_EQ(result.size(), 2);
+    requireItem(result, "@roact");
+    requireItem(result, "@fusion");
+}
+
 TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
 {
     client->globalConfig.require.fileAliases = {
         {"@test1", "file1.luau"},
-        {"@test2", "file2.luau"}
+        {"@test2", "file2.luau"},
     };
 
     auto [source, marker] = sourceWithMarker(R"(
@@ -705,7 +733,7 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
 {
     client->globalConfig.require.directoryAliases = {
         {"@dir1", "directory1"},
-        {"@dir2", "directory2"}
+        {"@dir2", "directory2"},
     };
 
     auto [source, marker] = sourceWithMarker(R"(
@@ -728,13 +756,21 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
 
 TEST_CASE_FIXTURE(Fixture, "require_doesnt_show_aliases_after_a_directory_separator_is_seen")
 {
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "Roact": "roact",
+            "Fusion": "fusion"
+        }
+    })");
+
     client->globalConfig.require.fileAliases = {
         {"@test1", "file1.luau"},
-        {"@test2", "file2.luau"}
+        {"@test2", "file2.luau"},
     };
     client->globalConfig.require.directoryAliases = {
         {"@dir1", "directory1"},
-        {"@dir2", "directory2"}
+        {"@dir2", "directory2"},
     };
 
     auto [source, marker] = sourceWithMarker(R"(

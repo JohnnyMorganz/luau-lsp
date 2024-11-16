@@ -125,5 +125,7 @@ public:
     virtual ~LSPPlatform() = default;
 };
 
+std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config);
+
 std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);

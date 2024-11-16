@@ -175,7 +175,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             if (std::filesystem::is_directory(path))
             {
                 for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
-                    next != end; ++next)
+                     next != end; ++next)
                 {
                     try
                     {
@@ -276,7 +276,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
         Luau::Config result;
         if (std::optional<std::string> contents = readFile(*baseLuaurc))
         {
-            std::optional<std::string> error = Luau::parseConfig(*contents, result);
+            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(*baseLuaurc, *contents, result);
             if (error)
             {
                 fprintf(stderr, "%s: %s\n", baseLuaurc->generic_string().c_str(), error->c_str());

@@ -43,6 +43,7 @@ struct Fixture
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
     Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);
     void loadSourcemap(const std::string& source);
+    void loadLuaurc(const std::string& source);
     SourceNodePtr getRootSourceNode();
 
     // Single file operations
@@ -55,8 +56,14 @@ struct Fixture
     std::optional<Luau::TypeId> getType(Luau::ModulePtr module, const std::string& name);
     Luau::TypeId requireType(Luau::ModulePtr module, const std::string& name);
 
-    std::optional<Luau::TypeId> getType(const std::string& name) { return getType(getMainModule(), name); }
-    Luau::TypeId requireType(const std::string& name) { return requireType(getMainModule(), name); }
+    std::optional<Luau::TypeId> getType(const std::string& name)
+    {
+        return getType(getMainModule(), name);
+    }
+    Luau::TypeId requireType(const std::string& name)
+    {
+        return requireType(getMainModule(), name);
+    }
 
     std::vector<std::string> getComments(const Luau::Location& node);
 

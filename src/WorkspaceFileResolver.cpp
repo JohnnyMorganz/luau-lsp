@@ -125,6 +125,19 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
     return readConfigRec(realPath->parent_path());
 }
 
+std::optional<std::string> WorkspaceFileResolver::parseConfig(
+    const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result)
+{
+    Luau::ConfigOptions::AliasOptions aliasOpts;
+    aliasOpts.configLocation = configPath.parent_path().generic_string();
+    aliasOpts.overwriteAliases = true;
+
+    Luau::ConfigOptions opts;
+    opts.aliasOptions = std::move(aliasOpts);
+
+    return Luau::parseConfig(contents, result, opts);
+}
+
 const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::path& path) const
 {
     auto it = configCache.find(path.generic_string());
@@ -137,7 +150,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
     if (std::optional<std::string> contents = readFile(configPath))
     {
         auto configUri = Uri::file(configPath);
-        std::optional<std::string> error = Luau::parseConfig(*contents, result);
+        std::optional<std::string> error = parseConfig(configPath, *contents, result);
         if (error)
         {
             if (client)
