@@ -129,7 +129,7 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(
     const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result)
 {
     Luau::ConfigOptions::AliasOptions aliasOpts;
-    aliasOpts.configLocation = configPath.generic_string();
+    aliasOpts.configLocation = configPath.parent_path().generic_string();
     aliasOpts.overwriteAliases = true;
 
     Luau::ConfigOptions opts;
