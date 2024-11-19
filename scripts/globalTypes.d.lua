@@ -4971,9 +4971,9 @@ declare class EditableImage extends Object
 	Size: Vector2
 	function Destroy(self): nil
 	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
-	function DrawImage(self, position: Vector2, image: Object, combineType: EnumImageCombineType): nil
-	function DrawImageProjected(self, mesh: Object, projection: { [any]: any }, brushConfig: { [any]: any }): nil
-	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: Object, options: { [any]: any }?): nil
+	function DrawImage(self, position: Vector2, image: EditableImage, combineType: EnumImageCombineType): nil
+	function DrawImageProjected(self, mesh: EditableMesh, projection: { [any]: any }, brushConfig: { [any]: any }): nil
+	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: EditableImage, options: { [any]: any }?): nil
 	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function DrawTriangle(self, p1: Vector2, p2: Vector2, p3: Vector2, color: Color3, transparency: number): nil
@@ -5404,11 +5404,11 @@ declare class AssetService extends Instance
 	OpenCreateResultModal: RBXScriptSignal<EnumPromptCreateAssetResult>
 	OpenPublishResultModal: RBXScriptSignal<EnumPromptPublishAssetResult>
 	function CheckTextureAlphaAsync(self, textureId: ContentId): boolean
-	function CreateEditableImage(self, editableImageOptions: { [any]: any }?): Object
-	function CreateEditableImageAsync(self, content: Content, editableImageOptions: { [any]: any }?): Object
-	function CreateEditableMesh(self, editableMeshOptions: { [any]: any }?): Object
-	function CreateEditableMeshAsync(self, content: Content, editableMeshOptions: { [any]: any }?): Object
-	function CreateEditableMeshStripSkinningAsync(self, meshId: ContentId): Object
+	function CreateEditableImage(self, editableImageOptions: { [any]: any }?): EditableImage
+	function CreateEditableImageAsync(self, content: Content, editableImageOptions: { [any]: any }?): EditableImage
+	function CreateEditableMesh(self, editableMeshOptions: { [any]: any }?): EditableMesh
+	function CreateEditableMeshAsync(self, content: Content, editableMeshOptions: { [any]: any }?): EditableMesh
+	function CreateEditableMeshStripSkinningAsync(self, meshId: ContentId): EditableMesh
 	function CreateMeshPartAsync(self, meshContent: Content, options: { [any]: any }?): MeshPart
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
@@ -5673,7 +5673,7 @@ declare class AvatarCreationService extends Instance
 	function GetValidationRules(self): { [any]: any }
 	function LoadAvatarHumanoidDescriptionAsync(self, id: string): HumanoidDescription
 	function LoadAvatarModelAsync(self, id: string): Instance
-	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): Object
+	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): EditableImage
 	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
@@ -5924,7 +5924,7 @@ declare class BaseWrap extends Instance
 end
 
 declare class WrapDeformer extends BaseWrap
-	function CreateEditableMeshAsync(self): Object
+	function CreateEditableMeshAsync(self): EditableMesh
 	function GetDeformedCFrameAsync(self, originalCFrame: CFrame): CFrame
 	function SetCageMeshContent(self, content: Content): nil
 end
@@ -11750,29 +11750,29 @@ end
 
 declare class UGCValidationService extends Instance
 	function CalculateAverageCageMeshDistance(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string, innerTransform: CFrame, outerTransform: CFrame): number
-	function CalculateAverageEditableCageMeshDistance(self, innerCage: Object, outerCage: Object, refMesh: Object, innerTransform: CFrame, outerTransform: CFrame): number
-	function CalculateEditableMeshInsideMeshPercentage(self, editableMeshRoot: Object, editableMeshQuery: Object, meshQueryTransform: CFrame, meshQueryScale: Vector3): number
-	function CalculateEditableMeshTotalSurfaceArea(self, editableMesh: Object, meshScale: Vector3): number
-	function CalculateEditableMeshUniqueUVCount(self, editableMesh: Object): number
+	function CalculateAverageEditableCageMeshDistance(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh, innerTransform: CFrame, outerTransform: CFrame): number
+	function CalculateEditableMeshInsideMeshPercentage(self, editableMeshRoot: EditableMesh, editableMeshQuery: EditableMesh, meshQueryTransform: CFrame, meshQueryScale: Vector3): number
+	function CalculateEditableMeshTotalSurfaceArea(self, editableMesh: EditableMesh, meshScale: Vector3): number
+	function CalculateEditableMeshUniqueUVCount(self, editableMesh: EditableMesh): number
 	function CalculateMeshInsideMeshPercentage(self, meshIdRoot: string, meshIdQuery: string, meshqueryTransform: CFrame, meshQueryScale: Vector3): number
 	function CalculateTotalSurfaceArea(self, meshId: string, meshScale: Vector3): number
 	function CalculateUniqueUVCount(self, meshId: string): number
 	function CanLoadAsset(self, assetId: string): boolean
-	function CheckEditableMeshInCameraFrustum(self, editableMesh: Object, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
+	function CheckEditableMeshInCameraFrustum(self, editableMesh: EditableMesh, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
 	function CheckMeshInCameraFrustum(self, meshId: string, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
 	function CompareTextureOverlapByteString(self, byteStringBaseline: string, byteStringFollowup: string): { any }
 	function CompareTextureOverlapTextureId(self, textureIdBaseline: string, textureIdFollowup: string): { any }
 	function FetchAssetWithFormat(self, url: ContentId, assetFormat: string): { Instance }
 	function GetCagingRelevancyMetrics(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string, offsetInner: Vector3, offsetOuter: Vector3): any
-	function GetDynamicHeadEditableMeshInactiveControls(self, editableMesh: Object, controlNames: { any }): any
+	function GetDynamicHeadEditableMeshInactiveControls(self, editableMesh: EditableMesh, controlNames: { any }): any
 	function GetDynamicHeadMeshInactiveControls(self, meshId: string, controlNames: { any }): any
-	function GetEditableCagingRelevancyMetrics(self, innerCage: Object, outerCage: Object, refMesh: Object, offsetInner: Vector3, offsetOuter: Vector3): any
-	function GetEditableImageSize(self, editableImage: Object): Vector2
-	function GetEditableMeshMaxNearbyVerticesCollisions(self, editableMesh: Object, meshScale: Vector3): number
-	function GetEditableMeshTriCount(self, editableMesh: Object): number
-	function GetEditableMeshVertColors(self, editableMesh: Object): { any }
-	function GetEditableMeshVerticesSimilarityRate(self, editableMesh: Object, meshScale: Vector3): number
-	function GetEditableMeshVerts(self, editableMesh: Object): { any }
+	function GetEditableCagingRelevancyMetrics(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh, offsetInner: Vector3, offsetOuter: Vector3): any
+	function GetEditableImageSize(self, editableImage: EditableImage): Vector2
+	function GetEditableMeshMaxNearbyVerticesCollisions(self, editableMesh: EditableMesh, meshScale: Vector3): number
+	function GetEditableMeshTriCount(self, editableMesh: EditableMesh): number
+	function GetEditableMeshVertColors(self, editableMesh: EditableMesh): { any }
+	function GetEditableMeshVerticesSimilarityRate(self, editableMesh: EditableMesh, meshScale: Vector3): number
+	function GetEditableMeshVerts(self, editableMesh: EditableMesh): { any }
 	function GetImageTransparencyWithByteString(self, textureId: string): number
 	function GetImageTransparencyWithTextureID(self, textureId: string): number
 	function GetMaxNearbyVerticesCollisions(self, meshId: string, meshScale: Vector3): number
@@ -11782,35 +11782,35 @@ declare class UGCValidationService extends Instance
 	function GetMeshVerts(self, meshId: string): { any }
 	function GetPropertyValue(self, instance: Instance, property: string): any
 	function GetTextureSize(self, textureId: string): Vector2
-	function IsEditableMeshNumCoplanarIntersectionsOverLimit(self, editableMesh: Object, limit: number, meshScale: Vector3, intersectBackFaces: boolean): boolean
+	function IsEditableMeshNumCoplanarIntersectionsOverLimit(self, editableMesh: EditableMesh, limit: number, meshScale: Vector3, intersectBackFaces: boolean): boolean
 	function IsNumCoplanarIntersectionsOverLimit(self, meshId: string, limit: number, meshScale: Vector3, intersectBackFaces: boolean): boolean
 	function RegisterUGCValidationFunction(self, setFunction: ((...any) -> ...any)): nil
 	function ReportUGCValidationTelemetry(self, assetType: string, data: { [any]: any }): nil
 	function ResetCollisionFidelity(self, meshPart: Instance, collisionFidelity: EnumCollisionFidelity?): nil
-	function ResetCollisionFidelityWithEditableMeshDataLua(self, meshPart: MeshPart, editableMesh: Object, collisionFidelity: EnumCollisionFidelity?): nil
+	function ResetCollisionFidelityWithEditableMeshDataLua(self, meshPart: MeshPart, editableMesh: EditableMesh, collisionFidelity: EnumCollisionFidelity?): nil
 	function SetMeshIdBlocking(self, meshPart: Instance, meshId: string): nil
 	function ValidateCageMeshIntersection(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string): any
 	function ValidateCageNonManifoldAndHoles(self, meshId: string): any
 	function ValidateCageUVCoincident(self, meshId: string): boolean
 	function ValidateCageUVTriangleArea(self, meshId: string): boolean
-	function ValidateDynamicHeadEditableMesh(self, editableMesh: Object): boolean
+	function ValidateDynamicHeadEditableMesh(self, editableMesh: EditableMesh): boolean
 	function ValidateDynamicHeadMesh(self, meshId: string): boolean
-	function ValidateEditableImageNumTextureChannels(self, editableImage: Object, numTextureChannelsRequired: number): boolean
-	function ValidateEditableImageSize(self, editableImage: Object): boolean
-	function ValidateEditableMeshBounds(self, editableMesh: Object, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
-	function ValidateEditableMeshCageMeshIntersection(self, innerCage: Object, outerCage: Object, refMesh: Object): any
-	function ValidateEditableMeshCageNonManifoldAndHoles(self, editableMesh: Object): any
-	function ValidateEditableMeshCageUVCoincident(self, editableMesh: Object): boolean
-	function ValidateEditableMeshCageUVTriangleArea(self, editableMesh: Object): boolean
-	function ValidateEditableMeshFullBodyCageDeletion(self, editableMesh: Object): boolean
-	function ValidateEditableMeshMisMatchUV(self, innerCage: Object, outerCage: Object): boolean
-	function ValidateEditableMeshOverlappingVertices(self, editableMesh: Object): boolean
-	function ValidateEditableMeshTriangleArea(self, editableMesh: Object): boolean
-	function ValidateEditableMeshTriangles(self, editableMesh: Object): boolean
-	function ValidateEditableMeshUVSpace(self, editableMesh: Object): boolean
-	function ValidateEditableMeshUVValuesInReference(self, referenceValues: { any }, editableMesh: Object): boolean
-	function ValidateEditableMeshUniqueUVCount(self, editableMesh: Object, numRequired: number): boolean
-	function ValidateEditableMeshVertColors(self, editableMesh: Object, includeAlpha: boolean?): boolean
+	function ValidateEditableImageNumTextureChannels(self, editableImage: EditableImage, numTextureChannelsRequired: number): boolean
+	function ValidateEditableImageSize(self, editableImage: EditableImage): boolean
+	function ValidateEditableMeshBounds(self, editableMesh: EditableMesh, meshScale: Vector3, boundsOffset: Vector3, attachmentCF: CFrame, handleCF: CFrame): boolean
+	function ValidateEditableMeshCageMeshIntersection(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh): any
+	function ValidateEditableMeshCageNonManifoldAndHoles(self, editableMesh: EditableMesh): any
+	function ValidateEditableMeshCageUVCoincident(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshCageUVTriangleArea(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshFullBodyCageDeletion(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshMisMatchUV(self, innerCage: EditableMesh, outerCage: EditableMesh): boolean
+	function ValidateEditableMeshOverlappingVertices(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshTriangleArea(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshTriangles(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshUVSpace(self, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshUVValuesInReference(self, referenceValues: { any }, editableMesh: EditableMesh): boolean
+	function ValidateEditableMeshUniqueUVCount(self, editableMesh: EditableMesh, numRequired: number): boolean
+	function ValidateEditableMeshVertColors(self, editableMesh: EditableMesh, includeAlpha: boolean?): boolean
 	function ValidateFacialBounds(self, meshId: string, boundsScale: number, partSize: Vector3): boolean
 	function ValidateFacialExpressiveness(self, meshId: string, minDelta: number, partSize: Vector3): number
 	function ValidateFullBodyCageDeletion(self, meshId: string): boolean
@@ -11825,7 +11825,7 @@ declare class UGCValidationService extends Instance
 	function ValidateMisMatchUV(self, innerCageMeshId: string, outerCageMeshId: string): boolean
 	function ValidateNumTextureChannels(self, textureId: string, numChannelsRequired: number): boolean
 	function ValidateOverlappingVertices(self, meshId: string): boolean
-	function ValidateSkinnedEditableMesh(self, editableMesh: Object): boolean
+	function ValidateSkinnedEditableMesh(self, editableMesh: EditableMesh): boolean
 	function ValidateSkinnedMesh(self, meshId: string): boolean
 	function ValidateTextureAlpha(self, textureId: string, pixelWidth: number): boolean
 	function ValidateTextureAlphaByteString(self, byteString: string, pixelWidth: number): boolean

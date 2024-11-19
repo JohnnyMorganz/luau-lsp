@@ -4971,9 +4971,9 @@ declare class EditableImage extends Object
 	Size: Vector2
 	function Destroy(self): nil
 	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
-	function DrawImage(self, position: Vector2, image: Object, combineType: EnumImageCombineType): nil
-	function DrawImageProjected(self, mesh: Object, projection: { [any]: any }, brushConfig: { [any]: any }): nil
-	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: Object, options: { [any]: any }?): nil
+	function DrawImage(self, position: Vector2, image: EditableImage, combineType: EnumImageCombineType): nil
+	function DrawImageProjected(self, mesh: EditableMesh, projection: { [any]: any }, brushConfig: { [any]: any }): nil
+	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: EditableImage, options: { [any]: any }?): nil
 	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
 	function ReadPixelsBuffer(self, position: Vector2, size: Vector2): buffer
@@ -5251,10 +5251,10 @@ declare class AssetPatchSettings extends Instance
 end
 
 declare class AssetService extends Instance
-	function CreateEditableImage(self, editableImageOptions: { [any]: any }?): Object
-	function CreateEditableImageAsync(self, content: Content, editableImageOptions: { [any]: any }?): Object
-	function CreateEditableMesh(self, editableMeshOptions: { [any]: any }?): Object
-	function CreateEditableMeshAsync(self, content: Content, editableMeshOptions: { [any]: any }?): Object
+	function CreateEditableImage(self, editableImageOptions: { [any]: any }?): EditableImage
+	function CreateEditableImageAsync(self, content: Content, editableImageOptions: { [any]: any }?): EditableImage
+	function CreateEditableMesh(self, editableMeshOptions: { [any]: any }?): EditableMesh
+	function CreateEditableMeshAsync(self, content: Content, editableMeshOptions: { [any]: any }?): EditableMesh
 	function CreateMeshPartAsync(self, meshContent: Content, options: { [any]: any }?): MeshPart
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
@@ -5486,7 +5486,7 @@ declare class AvatarCreationService extends Instance
 	function GetValidationRules(self): { [any]: any }
 	function LoadAvatarHumanoidDescriptionAsync(self, id: string): HumanoidDescription
 	function LoadAvatarModelAsync(self, id: string): Instance
-	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): Object
+	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): EditableImage
 	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
@@ -5676,7 +5676,7 @@ declare class BaseWrap extends Instance
 end
 
 declare class WrapDeformer extends BaseWrap
-	function CreateEditableMeshAsync(self): Object
+	function CreateEditableMeshAsync(self): EditableMesh
 	function GetDeformedCFrameAsync(self, originalCFrame: CFrame): CFrame
 	function SetCageMeshContent(self, content: Content): nil
 end
