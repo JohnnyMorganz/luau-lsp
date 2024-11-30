@@ -91,6 +91,12 @@
         }
       }
     ],
+    "jsonValidation": [
+      {
+        "fileMatch": ".luaurc",
+        "url": "https://json.schemastore.org/luaurc"
+      }
+    ],
     "commands": [
       {
         "command": "luau-lsp.updateApi",
