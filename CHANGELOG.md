@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.36.0] - 2024-11-30
+
 ### Deprecated
 
 - `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` are now deprecated in favour of aliases in `.luaurc` files. These settings will be removed in a future version.
