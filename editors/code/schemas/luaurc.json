@@ -6,7 +6,7 @@
     "properties": {
         "languageMode": {
             "type": "string",
-            "enum": ["strict", "nonstrict", "noinfer", "nocheck"]
+            "enum": ["strict", "nonstrict", "nocheck"]
         },
         "lintErrors": { "type": "boolean" },
         "typeErrors": { "type": "boolean" },
