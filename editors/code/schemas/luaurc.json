@@ -18,7 +18,7 @@
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {
-                "^[^/\\.][a-zA-Z0-9._]*$": {
+                "^(?!\\.{1,2}$)(?!.*\\/)[a-zA-Z0-9\\-\\._]+$": {
                     "type": "string"
                 }
             }
