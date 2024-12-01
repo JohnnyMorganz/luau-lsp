@@ -94,7 +94,7 @@
     "jsonValidation": [
       {
         "fileMatch": ".luaurc",
-        "url": "https://json.schemastore.org/luaurc"
+        "url": "./schemas/luaurc.json"
       }
     ],
     "commands": [
