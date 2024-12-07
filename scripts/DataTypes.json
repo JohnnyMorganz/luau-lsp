@@ -2111,7 +2111,7 @@
                     "ValueType": {
                         "Name": "Content"
                     }
-                },
+                }
             ],
             "Name": "Content"
         },
@@ -4631,13 +4631,6 @@
         },
         {
             "Members": [
-                {
-                    "MemberType": "Property",
-                    "Name": "none",
-                    "ValueType": {
-                        "Name": "Content"
-                    }
-                },
                 {
                     "MemberType": "Property",
                     "Name": "SourceType",
