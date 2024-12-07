@@ -2104,7 +2104,14 @@
                     "ReturnType": {
                         "Name": "Content"
                     }
-                }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "none",
+                    "ValueType": {
+                        "Name": "Content"
+                    }
+                },
             ],
             "Name": "Content"
         },
