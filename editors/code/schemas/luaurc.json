@@ -60,7 +60,6 @@
         "lint": {
             "title": "Lints to enable",
             "description": "Points to an object that maps string literals that correspond to the names of linting rules (see https://luau-lang.org/lint), or \"*\" that means \"all rules\", to a boolean (to enable/disable the lint)",
-            "default": "nonstrict",
             "examples": [
                 { "*": false, "FormatString": true },
                 { "LocalShadow": false }
