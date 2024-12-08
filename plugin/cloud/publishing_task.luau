@@ -1,3 +1,4 @@
+--!strict
 --- Script to publish the Luau Language Server companion plugin to Roblox
 
 local AssetService = game:GetService("AssetService")
