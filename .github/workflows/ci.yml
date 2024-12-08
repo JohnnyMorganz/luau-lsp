@@ -144,11 +144,11 @@ jobs:
       - uses: ok-nick/setup-aftman@v0.4.2
 
       - name: Run selene
-        run: selene src
+        run: selene src cloud
         working-directory: plugin
 
       - name: Run stylua
-        run: stylua --check src
+        run: stylua --check src cloud
         working-directory: plugin
 
       - name: Generate sourcemap
@@ -161,8 +161,16 @@ jobs:
           cmake ..
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
-      - name: Run Luau Analyze
+      - name: Run Luau Analyze (Plugin Source)
         run: ../build/luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.luau src
+        working-directory: plugin
+
+      - name: Run Luau Analyze (Cloud Scripts)
+        run: |
+          lune setup
+          echo '{ "luau-lsp.require.directoryAliases": {"@lune/": "~/.lune/.typedefs/0.8.9/"} }' > settings.json
+          rojo sourcemap test.project.json --output test-sourcemap.json
+          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --settings=settings.json --flag:LuauFixIndexerSubtypingOrdering=True cloud
         working-directory: plugin
 
       - name: Build Plugin
