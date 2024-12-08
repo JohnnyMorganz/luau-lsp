@@ -5,16 +5,50 @@
     "type": "object",
     "properties": {
         "languageMode": {
+            "title": "Type checking mode",
+            "description": "A option that will affect which errors will be detected.",
+            "default": "nonstrict",
+            "examples": [
+                "strict"
+            ],
             "type": "string",
             "enum": ["strict", "nonstrict", "nocheck"]
         },
-        "lintErrors": { "type": "boolean" },
-        "typeErrors": { "type": "boolean" },
+        "lintErrors": {
+            "title": "Report lint errors",
+            "description": "A boolean that controls whether lint issues are reported as errors or warnings.",
+            "default": "false",
+            "examples": [
+                "true"
+            ],
+            "type": "boolean"
+        },
+        "typeErrors": {
+            "title": "Report type errors",
+            "description": "A boolean that controls whether type issues are reported as errors or warnings.",
+            "default": "true",
+            "examples": [
+                "false"
+            ],
+            "type": "boolean"
+        },
         "globals": {
+            "title": "Extra global values",
+            "description": "An array of strings where each string names a global that the type checker and linter must assume is valid and of type any.",
+            "examples": [
+                [ "describe", "it", "expect" ],
+                [ "warn" ]
+            ],
             "type": "array",
             "items": { "type": "string", "pattern": "^[a-zA-Z_]\\w*" }
         },
         "aliases": {
+            "title": "Require path aliases",
+            "description": "The path is resolved by first checking if the first word is an alias defined in a .luaurc file. If so, we perform a string substitution.",
+            "examples": [
+                { "Roact": "C:/LuauModules/Roact-v1.4.2" },
+                { "@lib": "packages/lib" }
+            ],
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {
@@ -24,6 +58,13 @@
             }
         },
         "lint": {
+            "title": "Lints to enable",
+            "description": "Points to an object that maps string literals that correspond to the names of linting rules (see https://luau-lang.org/lint), or \"*\" that means \"all rules\", to a boolean (to enable/disable the lint)",
+            "default": "nonstrict",
+            "examples": [
+                { "*": false, "FormatString": true },
+                { "LocalShadow": false }
+            ],
             "$comment": "source: https://github.com/luau-lang/luau/blob/master/Config/include/Luau/LinterConfig.h",
             "type": "object",
             "additionalProperties": false,
