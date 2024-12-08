@@ -133,6 +133,22 @@ jobs:
       - run: npx @vscode/vsce package
         working-directory: editors/code
 
+  selene:
+    name: Run selene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ok-nick/setup-aftman@v0.4.2
+      - run: selene .
+
+  stylua:
+    name: Run stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ok-nick/setup-aftman@v0.4.2
+      - run: stylua --check .
+
   build_plugin:
     name: Verify and Build Roblox Studio Plugin
     runs-on: ubuntu-latest
@@ -142,14 +158,6 @@ jobs:
           submodules: true
 
       - uses: ok-nick/setup-aftman@v0.4.2
-
-      - name: Run selene
-        run: selene src cloud
-        working-directory: plugin
-
-      - name: Run stylua
-        run: stylua --check src cloud
-        working-directory: plugin
 
       - name: Generate sourcemap
         run: rojo sourcemap default.project.json --output sourcemap.json
