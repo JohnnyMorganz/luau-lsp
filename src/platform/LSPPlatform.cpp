@@ -237,11 +237,17 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         }
 
         // Check if it starts with a directory alias, otherwise resolve with require base path
-        std::filesystem::path currentDirectory =
-            resolveAlias(contentsString, luauConfig)
-                .value_or(resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString)
-                              .value_or(resolveToRealPath(moduleName).value_or(workspaceFolder->rootUri.fsPath()))
-                              .append(contentsString));
+        std::filesystem::path currentDirectory;
+        if (auto luaurcAlias = resolveAlias(contentsString, luauConfig))
+            currentDirectory = luaurcAlias.value();
+        else if (auto DEPRECATED_directoryAlias =
+                     resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString))
+            currentDirectory = DEPRECATED_directoryAlias.value();
+        else if (auto realPath = resolveToRealPath(moduleName); realPath && realPath->has_parent_path())
+            currentDirectory = realPath->parent_path().append(contentsString);
+        else
+            // TODO: this is a weird fallback, maybe we should indicate an error somewhere
+            currentDirectory = workspaceFolder->rootUri.fsPath().append(contentsString);
 
         try
         {
