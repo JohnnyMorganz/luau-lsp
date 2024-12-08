@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "TempDir.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "LSP/IostreamHelpers.hpp"
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -676,8 +678,137 @@ static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& 
     CHECK_EQ(item.kind, lsp::CompletionItemKind::Folder);
 }
 
-TEST_CASE_FIXTURE(Fixture, "require_contains_luaurc_aliases")
+TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_files_in_current_directory")
 {
+    TempDir t("require_default");
+    t.write_child("first.luau", "return {}");
+    t.write_child("second.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("|")
+    )");
+
+    auto uri = newDocument(t.write_child("source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "source.luau");
+    checkFileCompletionExists(result, "first.luau");
+    checkFileCompletionExists(result, "second.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
+{
+    TempDir t("require_current_directory");
+    t.write_child("first.luau", "return {}");
+    t.write_child("second.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(t.write_child("source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "source.luau");
+    checkFileCompletionExists(result, "first.luau");
+    checkFileCompletionExists(result, "second.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
+{
+    TempDir t("require_parents");
+    t.write_child("parent_first.luau", "return {}");
+    t.write_child("parent_second.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("../|")
+    )");
+
+    auto uri = newDocument(t.write_child("nested/source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFolderCompletionExists(result, "nested");
+    checkFileCompletionExists(result, "parent_first.luau");
+    checkFileCompletionExists(result, "parent_second.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
+{
+    TempDir t("require_nested");
+    t.write_child("sibling.luau", "return {}");
+    t.write_child("nested/child.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./nested/|")
+    )");
+
+    auto uri = newDocument(t.touch_child("source.luau"), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "child.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_after_entering_then_exiting_child_folder")
+{
+    TempDir t("require_nested");
+    t.write_child("sibling.luau", "return {}");
+    t.write_child("nested/child.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./nested/../|")
+    )");
+
+    auto uri = newDocument(t.touch_child("source.luau"), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFolderCompletionExists(result, "nested");
+    checkFileCompletionExists(result, "source.luau");
+    checkFileCompletionExists(result, "sibling.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
+{
+    TempDir t("aliases");
     loadLuaurc(R"(
     {
         "aliases": {
@@ -691,7 +822,7 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_luaurc_aliases")
         local x = require("|")
     )");
 
-    auto uri = newDocument("foo.luau", source);
+    auto uri = newDocument(t.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -699,13 +830,16 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_luaurc_aliases")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 2);
+    CHECK_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "source.luau");
     requireItem(result, "@roact");
     requireItem(result, "@fusion");
 }
 
-TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
+TEST_CASE_FIXTURE(Fixture, "string_require_contains_file_aliases")
 {
+    TempDir t("file_aliases");
     client->globalConfig.require.fileAliases = {
         {"@test1", "file1.luau"},
         {"@test2", "file2.luau"},
@@ -716,7 +850,7 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
         local x = require("|")
     )");
 
-    auto uri = newDocument("foo.luau", source);
+    auto uri = newDocument(t.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -724,13 +858,16 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_file_aliases")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 2);
+    CHECK_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "source.luau");
     checkFileCompletionExists(result, "@test1");
     checkFileCompletionExists(result, "@test2");
 }
 
-TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
+TEST_CASE_FIXTURE(Fixture, "string_require_contains_directory_aliases")
 {
+    TempDir t("directory_aliases");
     client->globalConfig.require.directoryAliases = {
         {"@dir1", "directory1"},
         {"@dir2", "directory2"},
@@ -741,7 +878,7 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
         local x = require("|")
     )");
 
-    auto uri = newDocument("foo.luau", source);
+    auto uri = newDocument(t.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -749,12 +886,14 @@ TEST_CASE_FIXTURE(Fixture, "require_contains_directory_aliases")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 2);
+    CHECK_EQ(result.size(), 4);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "source.luau");
     checkFolderCompletionExists(result, "@dir1");
     checkFolderCompletionExists(result, "@dir2");
 }
 
-TEST_CASE_FIXTURE(Fixture, "require_doesnt_show_aliases_after_a_directory_separator_is_seen")
+TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory_separator_is_seen")
 {
     loadLuaurc(R"(
     {
@@ -787,6 +926,69 @@ TEST_CASE_FIXTURE(Fixture, "require_doesnt_show_aliases_after_a_directory_separa
     auto result = workspace.completion(params);
 
     CHECK_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_directory_alias")
+{
+    TempDir t("lune");
+    t.write_child("process.luau", "return {}");
+    t.write_child("net.luau", "return {}");
+
+    client->globalConfig.require.directoryAliases = {
+        {"@lune", t.path()},
+    };
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@lune/|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 3);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "process.luau");
+    checkFileCompletionExists(result, "net.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_alias")
+{
+    TempDir t("lune");
+    t.write_child("process.luau", "return {}");
+    t.write_child("net.luau", "return {}");
+
+    std::string luaurc = R"(
+    {
+        "aliases": {
+            "lune": "{PATH}",
+        }
+    })";
+    replace(luaurc, "{PATH}", t.path());
+    loadLuaurc(luaurc);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@lune/|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 3);
+    checkFolderCompletionExists(result, "..");
+    checkFileCompletionExists(result, "process.luau");
+    checkFileCompletionExists(result, "net.luau");
 }
 
 TEST_SUITE_END();

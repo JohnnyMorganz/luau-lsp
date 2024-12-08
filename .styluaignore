@@ -1,0 +1,3 @@
+luau/
+*.d.lua
+*.d.luau
