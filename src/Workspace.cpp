@@ -139,10 +139,20 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
-    auto relativeFsPath = path.lexically_relative(rootUri.fsPath());
+    std::filesystem::path normalizedPath;
+
+#ifdef WIN32
+    const auto pathStr = path.string();
+    const char driveLetter = static_cast<char>(std::toupper(pathStr.front()));
+    normalizedPath = std::filesystem::path(driveLetter + pathStr.substr(1));
+#else
+    normalizedPath = path
+#endif
+
+    auto relativeFsPath = normalizedPath.lexically_relative(rootUri.fsPath());
     if (relativeFsPath == std::filesystem::path())
         throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed when constructing " +
-                                                                  path.string() + " against " + rootUri.fsPath().string());
+                                                                  normalizedPath.string() + " against " + rootUri.fsPath().string());
     auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
