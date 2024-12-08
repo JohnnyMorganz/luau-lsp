@@ -170,7 +170,7 @@ jobs:
           lune setup
           echo '{ "luau-lsp.require.directoryAliases": {"@lune/": "~/.lune/.typedefs/0.8.9/"} }' > settings.json
           rojo sourcemap test.project.json --output test-sourcemap.json
-          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --settings=settings.json --fflag:LuauFixIndexerSubtypingOrdering=True cloud
+          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --settings=settings.json --flag:LuauFixIndexerSubtypingOrdering=True cloud
         working-directory: plugin
 
       - name: Build Plugin
