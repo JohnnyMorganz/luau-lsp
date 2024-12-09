@@ -4625,7 +4625,6 @@ declare class Content
 	Object: Object?
 	SourceType: EnumContentSourceType
 	Uri: string?
-	none: Content
 end
 
 declare class DateTime
@@ -10624,6 +10623,7 @@ declare ColorSequenceKeypoint: {
 }
 
 declare Content: {
+	none: Content,
 	fromUri: ((uri: string) -> Content),
 	fromObject: ((object: Object) -> Content),
 	fromAssetId: ((assetId: number) -> Content),
