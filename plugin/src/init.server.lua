@@ -1,4 +1,3 @@
---!nocheck
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local ScriptEditorService = game:GetService("ScriptEditorService")
@@ -10,7 +9,14 @@ if IsRunning then
 end
 assert(plugin, "This code must run inside of a plugin")
 
-local SETTINGS_MODULE_NAME = "LuauLSP_Settings"
+local SETTINGS_MODULE_NAME = "LuauLanguageServer_Settings"
+
+--// List of classes who's data will not be updated, due to lag more often then not.
+local CLASSES_EXCEPTION_LIST = {
+	"Camera", --(CFrame)
+	"Player", --(CloudEditCameraCoordinateFrame)
+}
+
 local DEFAULT_SOURCE = [[
 return {
     --// Should be unique to Rojo port (different).
@@ -39,8 +45,7 @@ return {
 		game:GetService("LocalizationService"),
 		game:GetService("TestService"),
 	},
-}
-]]
+}]]
 
 local Connections: { RBXScriptConnection } = {}
 local Connected = false
@@ -48,14 +53,38 @@ local Connected = false
 type EncodedInstance = {
 	Name: string,
 	ClassName: string,
-	Children: { EncodedInstance },
+	Children: { EncodedInstance? },
 }
 
-local Toolbar = plugin:CreateToolbar("Luau LSP Test")
-local ConnectAction =
-	plugin:CreatePluginAction("Luau LSP Connect", "Connect", "Connects to Luau LSP", "rbxassetid://11115506617", true)
-local ConnectButton = Toolbar:CreateButton("Luau LSP Setup", "Toggle Menu", "rbxassetid://11115506617", "Luau LSP")
+local Toolbar = plugin:CreateToolbar("Luau Language Server Test")
+local ConnectAction = plugin:CreatePluginAction(
+	"Luau Language Server Connect",
+	"Connect",
+	"Connects to Luau Language Server",
+	"rbxassetid://11115506617",
+	true
+)
+local ConnectButton = Toolbar:CreateButton(
+	"Luau Language Server Setup",
+	"Toggle Menu",
+	"rbxassetid://11115506617",
+	"Luau Language Server"
+)
 local SettingsButton = Toolbar:CreateButton("Settings", "Open Settings", "rbxassetid://13997395868")
+
+local DefaultSettingsModule = Instance.new("ModuleScript")
+DefaultSettingsModule.Name = SETTINGS_MODULE_NAME
+ScriptEditorService:UpdateSourceAsync(DefaultSettingsModule, function()
+	return DEFAULT_SOURCE
+end)
+local DefaultSettings: {
+	Port: number,
+	StartAutomatically: boolean,
+	DebugMode: boolean,
+	Include: boolean,
+} =
+	require(DefaultSettingsModule)
+--// Was just much easier to create a permanent reference for the default settings config
 
 local function GetAndValidateSettingsModule()
 	local SettingsModule = (
@@ -63,10 +92,10 @@ local function GetAndValidateSettingsModule()
 	) :: ModuleScript
 	local SettingsModuleSource = ScriptEditorService:GetEditorSource(SettingsModule)
 	if SettingsModuleSource == "" or SettingsModuleSource == nil then
-		ScriptEditorService:UpdateSourceAsync(SettingsModule, function()
-			return DEFAULT_SOURCE
-		end)
-		warn("[Luau LSP] Could not load settings: Unable to find saved settings, reverting to default settings.")
+		SettingsModule = DefaultSettingsModule:Clone()
+		warn(
+			"[Luau Language Server] Could not load settings: Unable to find saved settings, reverting to default settings."
+		)
 	end
 
 	--// No loss in not running a check here since Luau runs an internal validation for set
@@ -75,13 +104,25 @@ local function GetAndValidateSettingsModule()
 
 	local Settings = require(SettingsModule)
 	if typeof(Settings) ~= "table" then
-		error("[Luau LSP] Could not load settings: Settings module does not return a table.")
+		warn(
+			"[Luau Language Server] Could not load settings: Settings module does not return a table. Defaulting to default settings."
+		)
+		SettingsModule = DefaultSettingsModule:Clone()
 	elseif typeof(Settings.Port) ~= "number" then
-		error("[Luau LSP] Could not load settings: Port is not a number.")
+		warn(
+			`[Luau Language Server] Could not load settings: Port is not a number. Defaulting to {DefaultSettings.Port}.`
+		)
+		Settings.Port = DefaultSettings.Port
 	elseif type(Settings.StartAutomatically) ~= "boolean" then
-		error("[Luau LSP] Could not load settings: StartAutomatically is not a boolean.")
+		warn(
+			`[Luau Language Server] Could not load settings: StartAutomatically is not a boolean. Defaulting to {DefaultSettings.Port}.`
+		)
+		Settings.StartAutomatically = DefaultSettings.StartAutomatically
 	elseif type(Settings.Include) ~= "table" then
-		error("[Luau LSP] Could not load settings: Include list is not a table.")
+		warn(
+			`[Luau Language Server] Could not load settings: Include list is not a table. Defaulting to {DefaultSettings.Include}}.`
+		)
+		Settings.Include = DefaultSettings.Include
 	end
 
 	return SettingsModule
@@ -94,10 +135,10 @@ local function FilterServices(Child: Instance): boolean
 	return not not table.find(Settings.Include, Child)
 end
 
-local function EncodeInstance(Instance: Instance, ChildFilter: (Instance) -> boolean?): EncodedInstance
+local function EncodeInstance(Instance: Instance, ChildFilter: ((Instance) -> boolean)?): EncodedInstance
 	local Encoded = {}
-	Encoded.Name = Instance.Name
-	Encoded.ClassName = Instance.ClassName
+	Encoded.Name = Instance.Name or "EmptyName"
+	Encoded.ClassName = Instance.ClassName or "EmptyClassName"
 	Encoded.Children = {}
 
 	for _, Child in Instance:GetChildren() do
@@ -120,7 +161,7 @@ local function CleanUpConnections()
 	ConnectButton.Icon = "rbxassetid://11115506617"
 
 	if WasConnected then
-		warn("[Luau LSP] No longer sending DataModel information.")
+		warn("[Luau Language Server] No longer sending DataModel information.")
 	end
 end
 
@@ -136,31 +177,32 @@ local function SendDataModelInfo()
 		Body = HttpService:JSONEncode({
 			tree = Tree,
 		}),
+
 		Compress = Enum.HttpCompression.Gzip,
 	})
 
 	if not Success then
-		warn(`[Luau LSP] Connecting to server failed: {Result}`)
+		warn(`[Luau Language Server] Connecting to server failed: {Result}`)
 		CleanUpConnections()
 	elseif not Result.Success then
-		warn(`[Luau LSP] Sending DataModel info failed: {Result.StatusCode}: {Result.Body}`)
+		warn(`[Luau Language Server] Sending DataModel info failed: {Result.StatusCode}: {Result.Body}`)
 		CleanUpConnections()
 	else
 		Connected = true
 		ConnectButton.Icon = "rbxassetid://11116536087"
-		warn("[Luau LSP] Now sending DataModel information.")
+		warn("[Luau Language Server] Now sending DataModel information.")
 	end
 end
 
 local function WatchChanges()
 	local SendTask: thread?
 	if Connected or Settings == nil then
-		warn("[Luau LSP] Connecting to server failed: Already connected, or settings non-existent.")
+		warn("[Luau Language Server] Connecting to server failed: Already connected, or settings non-existent.")
 		return
 	end
 	CleanUpConnections()
 
-	local function DeferSend()
+	local function DeferSendDataModelInfo()
 		if SendTask then
 			task.cancel(SendTask)
 		end
@@ -170,18 +212,36 @@ local function WatchChanges()
 		end)
 	end
 
-	-- TODO: we should only send delta info if possible
-	local function DescendantChanged(Instance: Instance)
-		for _, Service in Settings.Include do
-			if Instance:IsDescendantOf(Service) then
-				DeferSend()
-				return
+	for _, Service: Instance in Settings.Include do
+		table.insert(
+			Connections,
+			Service.DescendantAdded:Connect(function(Descendant: Instance)
+				if table.find(CLASSES_EXCEPTION_LIST, Descendant.ClassName) ~= nil then
+					return
+				end
+				--print(`[Luau Language Server] {Descendant.Name} added to {Service.ClassName}`)
+				table.insert(
+					Connections,
+					Descendant.Changed:Connect(function(Property: string)
+						--print(`[Luau Language Server] {Property} changed on {Descendant.Name}`) Re enable for Verbose of some sort
+						DeferSendDataModelInfo()
+					end)
+				)
+			end)
+		)
+		for _, Descendant in Service:GetDescendants() do
+			if table.find(CLASSES_EXCEPTION_LIST, Descendant.ClassName) ~= nil then
+				continue
 			end
+			table.insert(
+				Connections,
+				Descendant.Changed:Connect(function(Property: string)
+					print(`{Property} changed on {Descendant.Name}`)
+					DeferSendDataModelInfo()
+				end)
+			)
 		end
 	end
-
-	table.insert(Connections, game.DescendantAdded:Connect(DescendantChanged))
-	table.insert(Connections, game.DescendantRemoving:Connect(DescendantChanged))
 	SendDataModelInfo()
 end
 
