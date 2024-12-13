@@ -1,3 +1,4 @@
+--!strict
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local ScriptEditorService = game:GetService("ScriptEditorService")
@@ -10,12 +11,6 @@ end
 assert(plugin, "This code must run inside of a plugin")
 
 local SETTINGS_MODULE_NAME = "LuauLanguageServer_Settings"
-
---// List of classes who's data will not be updated, due to lag more often then not.
-local CLASSES_EXCEPTION_LIST = {
-	"Camera", --(CFrame)
-	"Player", --(CloudEditCameraCoordinateFrame)
-}
 
 local DEFAULT_SOURCE = [[
 return {
@@ -56,7 +51,7 @@ type EncodedInstance = {
 	Children: { EncodedInstance? },
 }
 
-local Toolbar = plugin:CreateToolbar("Luau Language Server Test")
+local Toolbar = plugin:CreateToolbar("Luau Language Server")
 local ConnectAction = plugin:CreatePluginAction(
 	"Luau Language Server Connect",
 	"Connect",
@@ -83,7 +78,7 @@ local DefaultSettings: {
 	DebugMode: boolean,
 	Include: boolean,
 } =
-	require(DefaultSettingsModule)
+	require(DefaultSettingsModule) :: any
 --// Was just much easier to create a permanent reference for the default settings config
 
 local function GetAndValidateSettingsModule()
@@ -102,7 +97,8 @@ local function GetAndValidateSettingsModule()
 	SettingsModule.Name = SETTINGS_MODULE_NAME
 	SettingsModule.Parent = TestService
 
-	local Settings = require(SettingsModule)
+	local Settings = require(SettingsModule) :: any
+	print(Settings)
 	if typeof(Settings) ~= "table" then
 		warn(
 			"[Luau Language Server] Could not load settings: Settings module does not return a table. Defaulting to default settings."
@@ -129,7 +125,7 @@ local function GetAndValidateSettingsModule()
 end
 
 local SettingsModule = GetAndValidateSettingsModule()
-local Settings = require(SettingsModule)
+local Settings = require(SettingsModule) :: any
 
 local function FilterServices(Child: Instance): boolean
 	return not not table.find(Settings.Include, Child)
@@ -152,20 +148,15 @@ local function EncodeInstance(Instance: Instance, ChildFilter: ((Instance) -> bo
 	return Encoded
 end
 
-local function CleanUpConnections()
-	local WasConnected = Connected
+local function CleanUp()
 	for _, Connection in Connections do
 		Connection:Disconnect()
 	end
 	Connected = false
 	ConnectButton.Icon = "rbxassetid://11115506617"
-
-	if WasConnected then
-		warn("[Luau Language Server] No longer sending DataModel information.")
-	end
 end
 
-local function SendDataModelInfo()
+local function SendDataModelInfo(InternalUpdate: boolean?)
 	local Tree = EncodeInstance(game, FilterServices)
 
 	local Success, Result = pcall(HttpService.RequestAsync, HttpService, {
@@ -183,73 +174,88 @@ local function SendDataModelInfo()
 
 	if not Success then
 		warn(`[Luau Language Server] Connecting to server failed: {Result}`)
-		CleanUpConnections()
+		CleanUp()
 	elseif not Result.Success then
 		warn(`[Luau Language Server] Sending DataModel info failed: {Result.StatusCode}: {Result.Body}`)
-		CleanUpConnections()
+		CleanUp()
 	else
+		if not InternalUpdate then
+			warn("[Luau Language Server] Connected to server.")
+		end
 		Connected = true
 		ConnectButton.Icon = "rbxassetid://11116536087"
-		warn("[Luau Language Server] Now sending DataModel information.")
 	end
 end
 
-local function WatchChanges()
+local function WatchChanges(InternalUpdate: boolean?)
 	local SendTask: thread?
 	if Connected or Settings == nil then
-		warn("[Luau Language Server] Connecting to server failed: Already connected, or settings non-existent.")
+		warn("[Luau Language Server] Connecting to server failed: Already connected, or settings are blank.")
 		return
 	end
-	CleanUpConnections()
+	CleanUp()
 
 	local function DeferSendDataModelInfo()
 		if SendTask then
 			task.cancel(SendTask)
 		end
 		SendTask = task.delay(0.5, function()
-			SendDataModelInfo()
+			SendDataModelInfo(true)
 			SendTask = nil
 		end)
 	end
 
-	for _, Service: Instance in Settings.Include do
-		table.insert(
-			Connections,
-			Service.DescendantAdded:Connect(function(Descendant: Instance)
-				if table.find(CLASSES_EXCEPTION_LIST, Descendant.ClassName) ~= nil then
-					return
-				end
-				--print(`[Luau Language Server] {Descendant.Name} added to {Service.ClassName}`)
-				table.insert(
-					Connections,
-					Descendant.Changed:Connect(function(Property: string)
-						--print(`[Luau Language Server] {Property} changed on {Descendant.Name}`) Re enable for Verbose of some sort
-						DeferSendDataModelInfo()
-					end)
-				)
-			end)
-		)
-		for _, Descendant in Service:GetDescendants() do
-			if table.find(CLASSES_EXCEPTION_LIST, Descendant.ClassName) ~= nil then
-				continue
+	local function SetupListeners(Instance: Instance)
+		local NameChangedConnection: RBXScriptConnection = nil
+		NameChangedConnection = Instance:GetPropertyChangedSignal("Name"):Connect(function()
+			print(Settings.DebugMode)
+			if Settings.DebugMode then
+				print(`[Luau Language Server] Name changed on {Instance.Name}`)
 			end
-			table.insert(
-				Connections,
-				Descendant.Changed:Connect(function(Property: string)
-					print(`{Property} changed on {Descendant.Name}`)
-					DeferSendDataModelInfo()
-				end)
-			)
+			DeferSendDataModelInfo()
+		end)
+		table.insert(Connections, NameChangedConnection)
+
+		local ParentChangedConnection: RBXScriptConnection = nil
+		ParentChangedConnection = Instance:GetPropertyChangedSignal("Parent"):Connect(function()
+			if Instance.Parent == nil and Settings.DebugMode then
+				print(`[Luau Language Server] {Instance.Name} deleted from DataModel.`)
+			end
+
+			ParentChangedConnection:Disconnect()
+			NameChangedConnection:Disconnect()
+			DeferSendDataModelInfo()
+		end)
+	end
+
+	for _, Service: Instance in Settings.Include do
+		Service.DescendantAdded:Connect(function(Descendant: Instance)
+			if Settings.DebugMode then
+				print(`[Luau Language Server] {Descendant.Name} parented to {Descendant.Parent}`)
+			end
+			SetupListeners(Descendant)
+		end)
+
+		for _, Descendant in Service:GetDescendants() do
+			SetupListeners(Descendant)
 		end
 	end
-	SendDataModelInfo()
+	SendDataModelInfo(InternalUpdate)
 end
 
-function ToggleServerConnection()
+function ToggleServerConnection(InternalUpdate: boolean?)
+	SettingsModule = GetAndValidateSettingsModule()
+	Settings = require(SettingsModule) :: any
+
 	if Connected then
-		CleanUpConnections()
+		if not InternalUpdate then
+			warn("[Luau Language Server] Disconnected from server.")
+		elseif InternalUpdate and Settings.DebugMode then
+			warn("[Luau Language Server] Disconnected from server (internally).")
+		end
+		CleanUp()
 	else
-		WatchChanges()
+		WatchChanges(InternalUpdate)
 	end
 end
 
@@ -263,16 +269,21 @@ end)
 SettingsModule:GetPropertyChangedSignal("Source"):Connect(function()
 	local WasConnected = Connected
 	if Connected then
-		CleanUpConnections()
+		CleanUp()
 	end
 	SettingsModule = GetAndValidateSettingsModule()
-	Settings = require(SettingsModule)
+	Settings = require(SettingsModule) :: any
+	print(Settings)
 
 	if WasConnected then
-		ToggleServerConnection()
+		if Settings.DebugMode then
+			warn("[Luau Language Server] No longer sending DataModel information.")
+		end
+		ToggleServerConnection(true)
 	end
 end)
 
 if Settings and Settings.StartAutomatically then
+	warn("[Luau Language Server] Companion plugin automatically connecting.")
 	ToggleServerConnection()
 end
