@@ -28,4 +28,13 @@ struct CompilerRemarksParams
 NLOHMANN_DEFINE_OPTIONAL(CompilerRemarksParams, textDocument, optimizationLevel)
 
 using CompilerRemarksResult = std::string;
+
+struct CodegenParams
+{
+    TextDocumentIdentifier textDocument;
+    CompilerRemarksOptimizationLevel optimizationLevel = CompilerRemarksOptimizationLevel::O1;
+};
+NLOHMANN_DEFINE_OPTIONAL(CodegenParams, textDocument, optimizationLevel)
+
+using CodegenResult = std::string;
 } // namespace lsp

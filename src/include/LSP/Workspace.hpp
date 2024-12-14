@@ -130,6 +130,7 @@ public:
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
+    lsp::CodegenResult codeGen(const lsp::CodegenParams& params);
 
     bool isNullWorkspace() const
     {

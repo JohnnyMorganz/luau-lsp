@@ -8,6 +8,7 @@ import {
 
 export const BYTECODE_SCHEME = "luau-bytecode";
 export const COMPILER_REMARKS_SCHEME = "luau-remarks";
+export const CODEGEN_SCHEME = "luau-codegen";
 
 enum OptimizationLevel {
   None = 0,
@@ -34,6 +35,17 @@ export const ComputeCompilerRemarksRequest = new RequestType<
   string,
   void
 >("luau-lsp/compilerRemarks");
+
+export type CodeGenParams = {
+  textDocument: TextDocumentIdentifier;
+  optimizationLevel: OptimizationLevel;
+};
+
+export const ComputeCodeGenRequest = new RequestType<
+  CodeGenParams,
+  string,
+  void
+>("luau-lsp/codeGen");
 
 export const getOptimizationLevel = async (): Promise<OptimizationLevel> => {
   const optimizationLevel = await vscode.window.showQuickPick(
@@ -199,5 +211,19 @@ export const registerComputeCompilerRemarks = (
     COMPILER_REMARKS_SCHEME,
     "compiler-remarks",
     ComputeCompilerRemarksRequest,
+  );
+};
+
+export const registerComputeCodeGen = (
+  context: vscode.ExtensionContext,
+  client: LanguageClient,
+): vscode.Disposable[] => {
+  return getBytecodeInfo(
+    context,
+    client,
+    "luau-lsp.computeCodeGen",
+    CODEGEN_SCHEME,
+    "codeGen",
+    ComputeCodeGenRequest,
   );
 };
