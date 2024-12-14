@@ -13,6 +13,7 @@ cmake-build-release-visual-studio/
 cmake-build-relwithdebinfo-visual-studio/
 CMakeFiles
 sourcemap.json
+trace.json
 
 # Prerequisites
 *.d
