@@ -164,6 +164,9 @@ A custom LSP request message is implemented:
 
 - `luau-lsp/bytecode`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - textual bytecode output
 - `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
-- `luau-lsp/codeGen`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - annotated codegen instructions
+- `luau-lsp/codeGen`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number, codeGenTarget: string }`,
+  returns `string` - annotated codegen instructions
+
+`codeGenTarget` can be one of: `"host" | "a64" | "a64_nofeatures" | "x64_windows" | "x64_systemv"`
 
 You can implement this request via a custom command to surface this information in your editor

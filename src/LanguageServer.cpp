@@ -265,7 +265,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->compilerRemarks(params);
     }
-    else if (method == "luau-lsp/codegen")
+    else if (method == "luau-lsp/codeGen")
     {
         ASSERT_PARAMS(baseParams, "luau-lsp/codeGen")
         auto params = baseParams->get<lsp::CodegenParams>();

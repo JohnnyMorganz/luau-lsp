@@ -57,7 +57,25 @@ static uint32_t flagsForType(BytecodeOutputType type)
     return 0;
 }
 
-static std::string computeBytecodeOutput(const Luau::ModuleName& moduleName, const std::string& source, const ClientConfiguration& config, int optimizationLevel, BytecodeOutputType type)
+static Luau::CodeGen::AssemblyOptions::Target getCodeGenTarget(const lsp::CodeGenTarget& codeGenTarget)
+{
+    switch (codeGenTarget)
+    {
+    case lsp::CodeGenTarget::Host:
+        return Luau::CodeGen::AssemblyOptions::Target::Host;
+    case lsp::CodeGenTarget::A64:
+        return Luau::CodeGen::AssemblyOptions::Target::A64;
+    case lsp::CodeGenTarget::A64_NoFeatures:
+        return Luau::CodeGen::AssemblyOptions::Target::A64_NoFeatures;
+    case lsp::CodeGenTarget::X64_Windows:
+        return Luau::CodeGen::AssemblyOptions::Target::X64_Windows;
+    case lsp::CodeGenTarget::X64_SystemV:
+        return Luau::CodeGen::AssemblyOptions::Target::X64_SystemV;
+    }
+}
+
+static std::string computeBytecodeOutput(const Luau::ModuleName& moduleName, const std::string& source, const ClientConfiguration& config,
+    int optimizationLevel, BytecodeOutputType type, lsp::CodeGenTarget codeGenTarget = lsp::CodeGenTarget::Host)
 {
     try
     {
@@ -85,7 +103,7 @@ static std::string computeBytecodeOutput(const Luau::ModuleName& moduleName, con
         if (type == BytecodeOutputType::CodeGen)
         {
             Luau::CodeGen::AssemblyOptions assemblyOptions;
-            // TODO: assemblyOptions target
+            assemblyOptions.target = getCodeGenTarget(codeGenTarget);
             assemblyOptions.outputBinary = false;
             assemblyOptions.includeAssembly = true;
             assemblyOptions.includeIr = true;
@@ -143,5 +161,6 @@ lsp::CompilerRemarksResult WorkspaceFolder::codeGen(const lsp::CodegenParams& pa
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     auto config = client->getConfiguration(rootUri);
-    return computeBytecodeOutput(moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CodeGen);
+    return computeBytecodeOutput(
+        moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CodeGen, params.codeGenTarget);
 }
