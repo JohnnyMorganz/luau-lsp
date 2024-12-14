@@ -209,12 +209,12 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
         // Populate with custom aliases, if we are at the start of a string require
         if (contentsString.empty())
         {
-            for (const auto& [aliasName, _] : luauConfig.aliases)
+            for (const auto& [_, aliasInfo] : luauConfig.aliases)
             {
                 Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
                     Luau::TypeCorrectKind::Correct};
                 entry.tags.push_back("Alias");
-                result.insert_or_assign("@" + aliasName, entry);
+                result.insert_or_assign("@" + aliasInfo.originalCase, entry);
             }
             // DEPRECATED
             for (const auto& [aliasName, _] : config.require.fileAliases)

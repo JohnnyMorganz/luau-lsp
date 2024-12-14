@@ -833,8 +833,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
     CHECK_EQ(result.size(), 4);
     checkFolderCompletionExists(result, "..");
     checkFileCompletionExists(result, "source.luau");
-    requireItem(result, "@roact");
-    requireItem(result, "@fusion");
+    requireItem(result, "@Roact");
+    requireItem(result, "@Fusion");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_contains_file_aliases")

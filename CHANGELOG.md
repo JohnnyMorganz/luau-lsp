@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed `luau-lsp analyze --settings=...` crashing when a malformed settings JSON file is provided. Now, it will print the json error and continue assuming the settings did not exist
 - Fixed regression in require by string autocompletion failing to correctly autocomplete files under directories ([#851](https://github.com/JohnnyMorganz/luau-lsp/issues/851))
+- Autocompletion in string requires will now show aliases in their original case defined in `.luaurc`, rather than all lowercased
 
 ## [1.36.0] - 2024-11-30
 
