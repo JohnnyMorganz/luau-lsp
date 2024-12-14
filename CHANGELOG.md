@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- The VSCode extension now registers a JSON schema for `.luaurc` files, providing simple diagnostics and intellisense ([#850](https://github.com/JohnnyMorganz/luau-lsp/pull/850))
+
 ### Changed
 
 - Sync to upstream Luau 0.655
