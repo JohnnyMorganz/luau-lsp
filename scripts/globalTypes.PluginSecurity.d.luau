@@ -4898,6 +4898,7 @@ end
 
 declare class SharedTable
   [string | number]: any
+  function __iter(self): (any, number) -> (number, any)
 end
 
 export type OpenCloudModel = any
