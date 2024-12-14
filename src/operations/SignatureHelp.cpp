@@ -17,6 +17,7 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
 {
     Luau::InternalErrorReporter iceReporter;
     Luau::UnifierSharedState unifierState(&iceReporter);
+    Luau::SimplifierPtr simplifier = newSimplifier(Luau::NotNull{typeArena}, builtinTypes);
     Luau::Normalizer normalizer{typeArena, builtinTypes, Luau::NotNull{&unifierState}};
 
     if (FFlag::LuauSolverV2)
@@ -29,7 +30,7 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
         unifierState.counters.recursionLimit = FInt::LuauTypeInferRecursionLimit;
         unifierState.counters.iterationLimit = FInt::LuauTypeInferIterationLimit;
 
-        Luau::Subtyping subtyping{builtinTypes, Luau::NotNull{typeArena}, Luau::NotNull{&normalizer}, Luau::NotNull{&typeFunctionRuntime}, Luau::NotNull{&iceReporter}};
+        Luau::Subtyping subtyping{builtinTypes, Luau::NotNull{typeArena}, Luau::NotNull{simplifier.get()}, Luau::NotNull{&normalizer}, Luau::NotNull{&typeFunctionRuntime}, Luau::NotNull{&iceReporter}};
 
         // DEVIATION: the flip for superTp and subTp is expected
         // subTp is our custom created type pack, with a trailing ...any
