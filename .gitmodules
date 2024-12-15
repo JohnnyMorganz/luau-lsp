@@ -1,3 +1,6 @@
 [submodule "luau"]
 	path = luau
 	url = https://github.com/Roblox/luau.git
+[submodule "JetBrains"]
+	path = editors/jetbrains
+	url = https://github.com/Lordfirespeed/jetbrains-luau
