@@ -1,6 +1,8 @@
 return {
 	port = 3667,
 	startAutomatically = false,
+	silent = false,
+
 	include = {
 		game:GetService("Workspace"),
 		game:GetService("Players"),
