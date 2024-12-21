@@ -10,6 +10,7 @@ import {
 
 import {
   registerComputeBytecode,
+  registerComputeCodeGen,
   registerComputeCompilerRemarks,
 } from "./bytecode";
 
@@ -239,6 +240,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   clientDisposables.push(...registerComputeBytecode(context, client));
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
+  clientDisposables.push(...registerComputeCodeGen(context, client));
 
   console.log("LSP Setup");
   await client.start();

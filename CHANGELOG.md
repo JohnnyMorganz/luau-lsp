@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added command `Luau: Compute CodeGen instructions for file` to emit annotated codegen instructions, similar to the bytecode command. External editors can implement this by using the `luau-lsp/codeGen` request. ([#617](https://github.com/JohnnyMorganz/luau-lsp/issues/617))
+
 ## [1.37.0] - 2024-12-14
 
 ### Added
