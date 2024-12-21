@@ -5000,7 +5000,7 @@
                     "Name": "AssetTypes",
                     "ValueType": {
                         "Name": "Array",
-                        "Generic": "Enum.AssetType"
+                        "Generic": "Enum.AvatarAssetType"
                     }
                 }
             ],
