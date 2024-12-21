@@ -4594,7 +4594,7 @@ declare class CFrame
 end
 
 declare class CatalogSearchParams
-	AssetTypes: { EnumAssetType }
+	AssetTypes: { EnumAvatarAssetType }
 	BundleTypes: { EnumBundleType }
 	CategoryFilter: EnumCatalogCategoryFilter
 	MaxPrice: number
