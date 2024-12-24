@@ -389,9 +389,6 @@ EXTRA_MEMBERS = {
     ],
     "WorldRoot": [
         "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
-        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?",
-        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?",
-        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?",
         "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
         "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
         "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
