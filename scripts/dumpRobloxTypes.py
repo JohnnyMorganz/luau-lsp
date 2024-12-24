@@ -67,208 +67,6 @@ IGNORED_INSTANCES: List[str] = [
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
 ]
 
-# Methods / Properties ignored in classes. Commonly used to add corrections
-IGNORED_MEMBERS = {
-    "Instance": [
-        "Parent",
-        "FindFirstChild",
-        "FindFirstChildOfClass",
-        "FindFirstChildWhichIsA",
-        "FindFirstAncestor",
-        "FindFirstAncestorOfClass",
-        "FindFirstAncestorWhichIsA",
-        "FindFirstDescendant",
-        "GetActor",
-        "WaitForChild",
-        "GetAttribute",
-        "GetAttributes",
-        "AncestryChanged",
-        "GetAttributeChangedSignal",
-        "GetPropertyChangedSignal",
-    ],
-    "Model": ["PrimaryPart"],
-    "RemoteEvent": [
-        "FireAllClients",
-        "FireClient",
-        "FireServer",
-        "OnClientEvent",
-        "OnServerEvent",
-    ],
-    "UnreliableRemoteEvent": [
-        "FireAllClients",
-        "FireClient",
-        "FireServer",
-        "OnClientEvent",
-        "OnServerEvent",
-    ],
-    "RemoteFunction": [
-        "InvokeClient",
-        "InvokeServer",
-        "OnClientInvoke",
-        "OnServerInvoke",
-    ],
-    "BindableEvent": [
-        "Fire",
-        "Event",
-    ],
-    "BindableFunction": [
-        "Invoke",
-        "OnInvoke",
-    ],
-    "Players": [
-        "PlayerChatted",
-        "GetPlayerByUserId",
-        "GetPlayerFromCharacter",
-    ],
-    "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "Plugin": ["OpenScript"],
-    "PluginToolbar": [
-        "CreateButton",
-    ],
-    "WorldRoot": [
-        "Raycast",
-        "ArePartsTouchingOthers",
-        "BulkMoveTo",
-        "GetPartBoundsInBox",
-        "GetPartBoundsInRadius",
-        "GetPartsInPart",
-    ],
-    "HttpService": ["RequestAsync"],
-    "HumanoidDescription": [
-        "GetAccessories",
-        "SetAccessories",
-        "GetEmotes",
-        "SetEmotes",
-        "GetEquippedEmotes",
-        "SetEquippedEmotes",
-    ],
-    "TeleportOptions": [
-        "GetTeleportData",
-        "SetTeleportData",
-    ],
-    "TeleportService": [
-        "GetLocalPlayerTeleportData",
-        "GetPlayerPlaceInstanceAsync",
-        "Teleport",
-        "TeleportAsync",
-        "TeleportPartyAsync",
-        "TeleportToPlaceInstance",
-        "TeleportToPrivateServer",
-        "TeleportToSpawnByName",
-        "ReserveServer",
-        "LocalPlayerArrivedFromTeleport",
-        "TeleportInitFailed",
-    ],
-    "UserService": {"GetUserInfosByUserIdsAsync"},
-    "Studio": {"Theme"},
-    "BasePlayerGui": [
-        "GetGuiObjectsAtPosition",
-        "GetGuiObjectsInCircle",
-    ],
-    "Path": [
-        "GetWaypoints",
-    ],
-    "CollectionService": [
-        "GetAllTags",
-        "GetTags",
-        "GetInstanceAddedSignal",
-        "GetInstanceRemovedSignal",
-    ],
-    "UserInputService": [
-        "GetConnectedGamepads",
-        "GetGamepadState",
-        "GetKeysPressed",
-        "GetMouseButtonsPressed",
-        "GetNavigationGamepads",
-        "GetSupportedGamepadKeyCodes",
-    ],
-    "Humanoid": [
-        "RootPart",
-        "SeatPart",
-        "WalkToPart",
-        "GetAccessories",
-    ],
-    "Player": [
-        "Character",
-        "Chatted",
-        "GetJoinData",
-    ],
-    "InstanceAdornment": ["Adornee"],
-    "BasePart": [
-        "GetConnectedParts",
-        "GetJoints",
-        "GetNetworkOwner",
-        "GetTouchingParts",
-        "SubtractAsync",
-        "UnionAsync",
-    ],
-    "Team": ["GetPlayers"],
-    "Teams": ["GetTeams"],
-    "Camera": [
-        "CameraSubject",
-        "GetPartsObscuringTarget",
-    ],
-    "RunService": [
-        "BindToRenderStep",
-    ],
-    "GuiService": ["SelectedObject"],
-    "GlobalDataStore": [
-        "GetAsync",
-        "IncrementAsync",
-        "RemoveAsync",
-        "SetAsync",
-        "UpdateAsync",
-    ],
-    "OrderedDataStore": [
-        "GetAsync",
-        "GetSortedAsync",
-        "RemoveAsync",
-        "SetAsync",
-        "UpdateAsync",
-    ],
-    "Highlight": ["Adornee"],
-    "PartAdornment": ["Adornee"],
-    "JointInstance": [
-        "Part0",
-        "Part1",
-    ],
-    "ObjectValue": [
-        "Value",
-        "Changed",
-    ],
-    "Actor": [
-        "SendMessage",
-    ],
-    "Seat": [
-        "Occupant",
-    ],
-    "VehicleSeat": [
-        "Occupant",
-    ],
-    "Beam": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Trail": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Constraint": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "PathfindingLink": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Vector3": [
-        "Angle",
-    ],
-    "ControllerPartSensor": [
-        "SensedPart",
-    ],
-}
-
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
 EXTRA_MEMBERS = {
     "Vector3": [
@@ -953,6 +751,23 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
         return resolveType(member["ReturnType"])
 
 
+def classIgnoredMembers(klassName: str):
+    ignoredMembers = []
+
+    if klassName in EXTRA_MEMBERS:
+        for member in EXTRA_MEMBERS[klassName]:
+            if member.startswith("function "):
+                functionName = member.removeprefix("function ")
+                functionName = functionName[: functionName.find("(")]
+                ignoredMembers.append(functionName)
+            else:
+                colon = member.find(":")
+                assert colon != -1, member
+                ignoredMembers.append(member[:colon])
+
+    return ignoredMembers
+
+
 def filterMember(klassName: str, member: ApiMember):
     if not INCLUDE_DEPRECATED_METHODS and (
         (
@@ -963,7 +778,7 @@ def filterMember(klassName: str, member: ApiMember):
         or ("Deprecated" in member and member["Deprecated"])
     ):
         return False
-    if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
+    if member["Name"] in classIgnoredMembers(klassName):
         return False
     if "Security" in member:
         if isinstance(member["Security"], str):
