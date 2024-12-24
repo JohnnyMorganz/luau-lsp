@@ -8404,7 +8404,6 @@ end
 declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
 	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
 	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
 	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
@@ -8412,8 +8411,6 @@ declare class WorldRoot extends Model
 	function IKMoveTo(self, part: BasePart, target: CFrame, translateStiffness: number?, rotateStiffness: number?, collisionsMode: EnumIKCollisionsMode?): nil
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function StepPhysics(self, dt: number, parts: { Instance }?): nil
 end
