@@ -4,6 +4,11 @@
 #include "LSP/LuauExt.hpp"
 #include "Luau/TimeTrace.h"
 
+static bool supportsRelatedDocuments(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.textDocument && capabilities.textDocument->diagnostic && capabilities.textDocument->diagnostic->relatedDocumentSupport;
+}
+
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
@@ -45,7 +50,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
             report.items.emplace_back(diagnostic);
         }
-        else
+        else if (supportsRelatedDocuments(client->capabilities))
         {
             auto fileName = platform->resolveToRealPath(error.moduleName);
             if (!fileName || isIgnoredFile(*fileName, config))
@@ -59,7 +64,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     }
 
     // Convert the related diagnostics map into an equivalent report
-    if (!relatedDiagnostics.empty())
+    if (supportsRelatedDocuments(client->capabilities) && !relatedDiagnostics.empty())
     {
         for (auto& [uri, diagnostics] : relatedDiagnostics)
         {

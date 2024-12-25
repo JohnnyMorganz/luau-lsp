@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- The server no longer computes `relatedDocuments` in a `textDocument/diagnostic` request unnecessarily if the client
+  does not support related documents
+
 ## [1.37.0] - 2024-12-14
 
 ### Added

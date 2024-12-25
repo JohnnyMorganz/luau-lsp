@@ -33,7 +33,7 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
 
 Fixture::Fixture()
     : client(std::make_shared<Client>(Client{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
+    , workspace(client, "$TEST_WORKSPACE", Uri::file(std::filesystem::current_path()), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
@@ -55,6 +55,20 @@ Luau::ModuleName fromString(std::string_view name)
 Uri Fixture::newDocument(const std::string& name, const std::string& source)
 {
     return Luau::LanguageServer::newDocument(workspace, name, source);
+}
+
+/// A hacky way to get cross-module resolution working.
+/// We create a dummy sourcemap node for the particular Uri, which then allows
+/// requires to resolve. e.g. registering "game/Testing/A" will allow `require(game.Testing.A`) to work
+void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath)
+{
+    SourceNode dummySourceNode{};
+    dummySourceNode.className = "ModuleScript";
+    dummySourceNode.filePaths = {uri.fsPath()};
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    LUAU_ASSERT(platform);
+    platform->writePathsToMap(std::make_shared<SourceNode>(dummySourceNode), virtualPath);
 }
 
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)

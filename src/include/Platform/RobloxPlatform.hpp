@@ -144,7 +144,6 @@ private:
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
 
     bool updateSourceMap();
-    void writePathsToMap(const SourceNodePtr& node, const std::string& base);
 
 public:
     // The root source node from a parsed Rojo source map
@@ -152,8 +151,10 @@ public:
 
     Luau::TypeArena instanceTypes;
 
-    // For testing only
+    /// For testing only
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
+    /// For testing only
+    void writePathsToMap(const SourceNodePtr& node, const std::string& base);
     std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
