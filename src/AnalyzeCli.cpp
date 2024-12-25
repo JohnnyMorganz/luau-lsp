@@ -15,7 +15,7 @@
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
-#include "glob/glob.hpp"
+#include "glob/match.h"
 #include <iostream>
 #include <filesystem>
 #include <memory>
@@ -66,7 +66,7 @@ static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::f
         relativePath = path.generic_string();
 
     for (auto& pattern : ignoreGlobPatterns)
-        if (glob::fnmatch_case(relativePath, pattern))
+        if (glob::gitignore_glob_match(relativePath, pattern))
             return true;
 
     return false;

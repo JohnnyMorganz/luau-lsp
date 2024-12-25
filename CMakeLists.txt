@@ -63,6 +63,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
+        extern/glob/match.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE
@@ -96,6 +97,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/SignatureHelp.test.cpp
         tests/Diagnostics.test.cpp
         tests/GoToDefinition.test.cpp
+        tests/Glob.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
@@ -135,7 +137,7 @@ if (LSP_BUILD_ASAN)
     endif ()
 endif ()
 
-set(EXTERN_INCLUDES extern/json/include extern/glob/single_include extern/argparse/include extern/toml/include)
+set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include)
 
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})

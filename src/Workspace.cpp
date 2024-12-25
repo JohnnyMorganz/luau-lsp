@@ -6,7 +6,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
-#include "glob/glob.hpp"
+#include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/TimeTrace.h"
 
@@ -149,7 +149,7 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     std::vector<std::string> patterns = config.ignoreGlobs; // TODO: extend further?
     for (auto& pattern : patterns)
     {
-        if (glob::fnmatch_case(relativePathString, pattern))
+        if (glob::gitignore_glob_match(relativePathString, pattern))
         {
             return true;
         }
@@ -169,7 +169,7 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& p
     std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
     for (auto& pattern : patterns)
     {
-        if (glob::fnmatch_case(relativePathString, pattern))
+        if (glob::gitignore_glob_match(relativePathString, pattern))
         {
             return true;
         }

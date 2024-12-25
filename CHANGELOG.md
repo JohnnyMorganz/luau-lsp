@@ -13,6 +13,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Go To Definition on a cross-module function reference will now only resolve to the function definition, rather than
   also including the require statement
   `local func = require(path.to.function)` ([#878](https://github.com/JohnnyMorganz/luau-lsp/issues/878)).
+- Overhauled the globbing mechanism leading to significant performance improvements in indexing, workspace diagnostics,
+  and auto suggest requires, removing globbing as a bottleneck. Some results in example codebases ranging from 190 to
+  1900 KLoC:
+  - Initial indexing: ~3.32x to ~7.1x speedup (43.60s -> 13.12s and 9.42s ->
+    1.33s) ([#829](https://github.com/JohnnyMorganz/luau-lsp/issues/829))
+  - Workspace diagnostics: ~2.39x to ~4.75x speedup (164.93s -> 69.07s and 8.49s ->
+    1.79s)
+  - Auto-suggest requires: ~4.77x speedup (1.15s ->
+    0.24s) ([#749](https://github.com/JohnnyMorganz/luau-lsp/issues/749))
+  - These improvements heavily depend on the amount of code you have matching ignore globs. Workspace diagnostics
+    improvements depends on the performance of Luau typechecking.
 
 ## [1.37.0] - 2024-12-14
 
