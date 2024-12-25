@@ -203,6 +203,14 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "Random",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "Green",
                     "Parameters": [],
                     "ReturnType": {
