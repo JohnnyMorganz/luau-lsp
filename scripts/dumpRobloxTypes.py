@@ -757,7 +757,7 @@ def classIgnoredMembers(klassName: str):
     if klassName in EXTRA_MEMBERS:
         for member in EXTRA_MEMBERS[klassName]:
             if member.startswith("function "):
-                functionName = member.removeprefix("function ")
+                functionName = member[len("function ") :]
                 functionName = functionName[: functionName.find("(")]
                 ignoredMembers.append(functionName)
             else:
