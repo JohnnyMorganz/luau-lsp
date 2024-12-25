@@ -345,4 +345,62 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition")
     CHECK_EQ(result[0].range.end, lsp::Position{2, 32});
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_a_named_function_returns_the_underlying_definition_and_not_the_require_stmt")
+{
+    auto required = newDocument("required.luau", R"(
+        --!strict
+        local function useFunction(x: string)
+        end
+
+        return useFunction
+    )");
+    registerDocumentForVirtualPath(required, "game/Testing/useFunction");
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local useFunction = require(game.Testing.useFunction)
+
+        local y = useFu|nction("testing")
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, required);
+    CHECK_EQ(result[0].range.start, lsp::Position{2, 23});
+    CHECK_EQ(result[0].range.end, lsp::Position{2, 34});
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_an_anonymous_function_returns_the_underlying_definition_and_not_the_require_stmt")
+{
+    auto required = newDocument("required.luau", R"(
+        --!strict
+        return function(x: string)
+        end
+    )");
+    registerDocumentForVirtualPath(required, "game/Testing/useFunction");
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local useFunction = require(game.Testing.useFunction)
+
+        local y = useFu|nction("testing")
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, required);
+    CHECK_EQ(result[0].range.start, lsp::Position{2, 15});
+    CHECK_EQ(result[0].range.end, lsp::Position{2, 15});
+}
+
 TEST_SUITE_END();

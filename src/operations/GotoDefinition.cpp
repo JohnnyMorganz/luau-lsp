@@ -32,7 +32,20 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         if (binding->location.begin == Luau::Position{0, 0} && binding->location.end == Luau::Position{0, 0})
             return result;
 
-        // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
+        // Follow through the binding reference if it is a function type
+        // This is particularly useful for `local X = require(...)` where `X` is a function - we want the actual function definition
+        // TODO: Can we get further references for other types?
+        auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(binding->typeId));
+        if (ftv && ftv->definition && ftv->definition->definitionModuleName)
+        {
+            if (auto document = fileResolver.getOrCreateTextDocumentFromModuleName(ftv->definition->definitionModuleName.value()))
+            {
+                result.emplace_back(lsp::Location{document->uri(), lsp::Range{document->convertPosition(ftv->definition->originalNameLocation.begin),
+                                                                       document->convertPosition(ftv->definition->originalNameLocation.end)}});
+                return result;
+            }
+        }
+
         result.emplace_back(lsp::Location{params.textDocument.uri,
             lsp::Range{textDocument->convertPosition(binding->location.begin), textDocument->convertPosition(binding->location.end)}});
     }

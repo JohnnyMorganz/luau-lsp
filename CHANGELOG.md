@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The server no longer computes `relatedDocuments` in a `textDocument/diagnostic` request unnecessarily if the client
   does not support related documents
+- Go To Definition on a cross-module function reference will now only resolve to the function definition, rather than
+  also including the require statement
+  `local func = require(path.to.function)` ([#878](https://github.com/JohnnyMorganz/luau-lsp/issues/878)).
 
 ## [1.37.0] - 2024-12-14
 
