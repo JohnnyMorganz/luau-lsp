@@ -8580,7 +8580,7 @@ declare class Player extends Instance
 	NameDisplayDistance: number
 	Neutral: boolean
 	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
-	ReplicationFocus: Instance
+	ReplicationFocus: Instance?
 	RespawnLocation: SpawnLocation
 	Team: Team
 	TeamColor: BrickColor
@@ -10491,6 +10491,7 @@ declare BrickColor: {
 	DarkGray: (() -> BrickColor),
 	White: (() -> BrickColor),
 	random: (() -> BrickColor),
+	Random: (() -> BrickColor),
 	Green: (() -> BrickColor),
 	Black: (() -> BrickColor),
 	palette: ((paletteValue: number) -> BrickColor),
