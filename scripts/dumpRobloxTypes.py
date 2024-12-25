@@ -255,6 +255,7 @@ EXTRA_MEMBERS = {
     "Player": [
         "Character: Model?",
         "Chatted: RBXScriptSignal<string, Player?>",
+        "ReplicationFocus: Instance?",
         "function GetJoinData(self): { LaunchData: string?, Members: {number}?, SourceGameId: number?, SourcePlaceId: number?, TeleportData: TeleportData? }",
     ],
     "InstanceAdornment": ["Adornee: Instance?"],
