@@ -24,6 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     0.24s) ([#749](https://github.com/JohnnyMorganz/luau-lsp/issues/749))
   - These improvements heavily depend on the amount of code you have matching ignore globs. Workspace diagnostics
     improvements depends on the performance of Luau typechecking.
+- Optimised the resolution of relative string requires by remove filesystem
+  calls ([#856](https://github.com/JohnnyMorganz/luau-lsp/issues/856))
 
 ## [1.37.0] - 2024-12-14
 
