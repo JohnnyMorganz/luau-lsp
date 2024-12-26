@@ -135,11 +135,29 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const lsp::FileEvent& change)
     }
 }
 
+/// When using lexically_relative, if the root-dir does not match, it will return a default-constructed path.
+/// Commonly, this doesn't match due to difference in casing. On Windows, we force all drive letters to be lowercase to
+/// resolve this issue
+static std::filesystem::path normaliseDriveLetter(const std::filesystem::path& path)
+{
+#ifdef _WIN32
+    if (path.has_root_path())
+    {
+        auto root = path.root_path().generic_string();
+        if (root.size() >= 1 && isupper(root[0]))
+        {
+            return std::filesystem::path(std::string(1, tolower(root[0])) + path.generic_string().substr(1));
+        }
+    }
+#endif
+    return path;
+}
+
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
 bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
-    auto relativeFsPath = path.lexically_relative(rootUri.fsPath());
+    auto relativeFsPath = normaliseDriveLetter(path).lexically_relative(normaliseDriveLetter(rootUri.fsPath()));
     if (relativeFsPath == std::filesystem::path())
         throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed when constructing " +
                                                                   path.string() + " against " + rootUri.fsPath().string());
@@ -160,7 +178,7 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
 bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
-    auto relativeFsPath = path.lexically_relative(rootUri.fsPath());
+    auto relativeFsPath = normaliseDriveLetter(path).lexically_relative(normaliseDriveLetter(rootUri.fsPath()));
     if (relativeFsPath == std::filesystem::path())
         throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFileForAutoImports failed: relative path is default-constructed");
     auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
@@ -244,7 +262,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     size_t indexCount = 0;
 
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-        next != end; ++next)
+         next != end; ++next)
     {
         if (indexCount >= config.index.maxFiles)
         {

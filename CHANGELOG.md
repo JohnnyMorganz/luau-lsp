@@ -25,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - These improvements heavily depend on the amount of code you have matching ignore globs. Workspace diagnostics
     improvements depends on the performance of Luau typechecking.
 
+### Fixed
+
+- Fixed isIgnoredFile check failing due to mismatching case of drive letter on Windows ([#752](https://github.com/JohnnyMorganz/luau-lsp/issues/752))
+
 ## [1.37.0] - 2024-12-14
 
 ### Added
