@@ -22,7 +22,14 @@ local SettingsButton =
 
 local TestService = game:GetService("TestService")
 
-local Settings = nil :: any
+type Settings = {
+	port: number,
+	startAutomatically: boolean,
+	include: { Instance },
+	debug: boolean?,
+}
+
+local Settings = nil :: Settings?
 
 local SettingsModule = TestService:FindFirstChild("LuauLSP_Settings") :: ModuleScript
 if not SettingsModule then
@@ -91,7 +98,14 @@ SettingsButton.Click:Connect(function()
 	wasConnected = connected.Value
 end)
 
+local function debugPrint(...)
+	if Settings and Settings.debug then
+		print(...)
+	end
+end
+
 local function filterServices(child: Instance): boolean
+	assert(Settings ~= nil, "attempted to filterServices when settings are invalid")
 	return not not table.find(Settings.include, child)
 end
 
@@ -112,19 +126,30 @@ local function encodeInstance(instance: Instance, childFilter: ((Instance) -> bo
 	return encoded
 end
 
+local function untrackConnection(connection: RBXScriptConnection)
+	connection:Disconnect()
+	local index = table.find(connections, connection)
+	if index then
+		connections[index] = connections[#connections]
+		connections[#connections] = nil
+	end
+end
+
 local function cleanup()
-	for _, connection in pairs(connections) do
+	for i, connection in pairs(connections) do
 		connection:Disconnect()
+		connections[i] = nil
 	end
 	connected.Value = false
 end
 
 local function sendFullDMInfo(isSilent)
+	assert(Settings ~= nil, "attempted to sendFullDMInfo when settings are invalid")
 	local tree = encodeInstance(game, filterServices)
 
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
 		Method = "POST" :: "POST",
-		Url = string.format("http://localhost:%s/full", Settings.port),
+		Url = string.format("http://localhost:%d/full", Settings.port),
 		Headers = {
 			["Content-Type"] = "application/json",
 		},
@@ -169,17 +194,50 @@ local function watchChanges(isSilent)
 	end
 
 	-- TODO: we should only send delta info if possible
-	local function descendantChanged(instance: Instance)
+	local function isTrackedInstance(instance: Instance)
 		for _, service in Settings.include do
 			if instance:IsDescendantOf(service) then
-				deferSend()
-				return
+				return true
 			end
 		end
+		return false
 	end
 
-	table.insert(connections, game.DescendantAdded:Connect(descendantChanged))
-	table.insert(connections, game.DescendantRemoving:Connect(descendantChanged))
+	local function trackInstanceChanges(instance: Instance)
+		debugPrint("Now tracking", instance:GetFullName())
+		local nameConnection = instance:GetPropertyChangedSignal("Name"):Connect(function()
+			debugPrint("Recorded name change for", instance:GetFullName())
+			deferSend()
+		end)
+		local parentConnection
+		parentConnection = instance:GetPropertyChangedSignal("Parent"):Connect(function()
+			debugPrint("Recorded parent change for", instance:GetFullName())
+			deferSend()
+
+			if instance.Parent == nil then
+				debugPrint("Parent is now nil, disconnecting tracking events")
+				untrackConnection(nameConnection)
+				untrackConnection(parentConnection)
+			end
+		end)
+		table.insert(connections, nameConnection)
+		table.insert(connections, parentConnection)
+	end
+
+	table.insert(
+		connections,
+		game.DescendantAdded:Connect(function(instance)
+			if isTrackedInstance(instance) then
+				trackInstanceChanges(instance)
+				deferSend()
+			end
+		end)
+	)
+	for _, service in Settings.include do
+		for _, instance in service:GetDescendants() do
+			trackInstanceChanges(instance)
+		end
+	end
 	sendFullDMInfo(isSilent)
 end
 
