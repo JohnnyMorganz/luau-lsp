@@ -534,7 +534,7 @@ std::optional<std::filesystem::path> RobloxPlatform::getRealPathFromSourceNode(c
         if (ec.value() != 0)
             canonicalName = *filePath;
         // URI-ify the file path so that its normalised (in particular, the drive letter)
-        return Uri::parse(Uri::file(canonicalName).toString()).fsPath();
+        return Uri::file(canonicalName).fsPath();
     }
 
     return std::nullopt;
