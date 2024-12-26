@@ -242,6 +242,13 @@ Uri Uri::file(const std::filesystem::path& fsPath)
 // filename character, eg /f\oo/ba\r.txt
 #ifdef _WIN32
     std::replace(path.begin(), path.end(), '\\', '/');
+
+    // For legacy reasons, VSCode uses a lower-case driver letter for Windows paths
+    // We make it lower case here to normalise for all cases
+    if (path.length() >= 2 && path[1] == ':' && isupper(path[0]))
+    {
+        path = std::string(1, tolower(path[0])) + path.substr(1);
+    }
 #endif
 
     // check for authority as used in UNC shares

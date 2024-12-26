@@ -163,7 +163,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     }
 
     // URI-ify the file path so that its normalised (in particular, the drive letter)
-    auto uri = Uri::parse(Uri::file(filePath).toString());
+    auto uri = Uri::file(filePath);
 
     return Luau::ModuleInfo{fileResolver->getModuleName(uri)};
 }
