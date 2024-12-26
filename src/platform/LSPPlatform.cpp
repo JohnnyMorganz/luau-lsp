@@ -118,7 +118,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
         return std::nullopt;
 
     std::filesystem::path basePath = contextPath->parent_path();
-    auto filePath = workspaceFolder->rootUri.fsPath() / basePath / requiredString;
+    auto filePath = fileResolver->rootUri.fsPath() / basePath / requiredString;
 
     auto luauConfig = fileResolver->getConfig(context->name);
     if (auto aliasedPath = resolveAlias(requiredString, luauConfig))
