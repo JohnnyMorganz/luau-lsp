@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage"]}
+--#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage","ServerScriptService","Workspace"]}
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -80,6 +80,12 @@ declare class TextLabel extends Instance
 end
 
 declare class ReplicatedStorage extends Instance
+end
+
+declare class ServerScriptService extends Instance
+end
+
+declare class Workspace extends Instance
 end
 
 declare class ServiceProvider extends Instance
