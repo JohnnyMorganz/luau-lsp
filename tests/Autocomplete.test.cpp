@@ -292,8 +292,10 @@ TEST_CASE_FIXTURE(Fixture, "get_service_contains_services")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 1);
+    CHECK_EQ(result.size(), 3);
     checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "ServerScriptService");
+    checkStringCompletionExists(result, "Workspace");
 }
 
 TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
@@ -311,11 +313,13 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 6);
+    CHECK_EQ(result.size(), 8);
     checkStringCompletionExists(result, "Instance");
     checkStringCompletionExists(result, "Part");
     checkStringCompletionExists(result, "TextLabel");
     checkStringCompletionExists(result, "ReplicatedStorage");
+    checkStringCompletionExists(result, "ServerScriptService");
+    checkStringCompletionExists(result, "Workspace");
     checkStringCompletionExists(result, "ServiceProvider");
     checkStringCompletionExists(result, "DataModel");
 }
