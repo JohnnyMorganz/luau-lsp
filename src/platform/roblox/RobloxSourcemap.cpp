@@ -505,16 +505,12 @@ std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromVirtualPath(const 
 
 std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromRealPath(const std::string& name) const
 {
-    std::error_code ec;
-    auto canonicalName = std::filesystem::weakly_canonical(name, ec);
-    if (ec.value() != 0)
-        canonicalName = name;
+    auto canonicalName = normalizePath(name);
     // URI-ify the file path so that its normalised (in particular, the drive letter)
     canonicalName = Uri::parse(Uri::file(canonicalName).toString()).fsPath();
-    auto strName = canonicalName.generic_string();
-    if (realPathsToSourceNodes.find(strName) == realPathsToSourceNodes.end())
+    if (realPathsToSourceNodes.find(canonicalName) == realPathsToSourceNodes.end())
         return std::nullopt;
-    return realPathsToSourceNodes.at(strName);
+    return realPathsToSourceNodes.at(canonicalName);
 }
 
 Luau::ModuleName RobloxPlatform::getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode)
@@ -529,10 +525,7 @@ std::optional<std::filesystem::path> RobloxPlatform::getRealPathFromSourceNode(c
     // TODO: make sure this is correct once we make sourcemap.json generic
     if (auto filePath = sourceNode->getScriptFilePath())
     {
-        std::error_code ec;
-        auto canonicalName = std::filesystem::weakly_canonical(fileResolver->rootUri.fsPath() / *filePath, ec);
-        if (ec.value() != 0)
-            canonicalName = *filePath;
+        auto canonicalName = normalizePath((fileResolver->rootUri.fsPath() / *filePath).generic_string());
         // URI-ify the file path so that its normalised (in particular, the drive letter)
         return Uri::parse(Uri::file(canonicalName).toString()).fsPath();
     }
