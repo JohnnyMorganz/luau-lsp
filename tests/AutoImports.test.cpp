@@ -614,4 +614,50 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_will_force_relative_import_depending_on
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local OtherModule = require(script.Parent.Folder.OtherModule)\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "auto_imports_of_modules_show_path_name")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Folder1",
+                        "className": "Folder",
+                        "children": [{ "name": "Module", "className": "ModuleScript" }]
+                    },
+                    {
+                        "name": "Folder2",
+                        "className": "Folder",
+                        "children": [{ "name": "Module", "className": "ModuleScript" }]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result, "Module");
+
+    REQUIRE_EQ(imports.size(), 2);
+    CHECK_EQ(imports[1].detail, "ReplicatedStorage.Folder1.Module");
+    CHECK_EQ(imports[0].detail, "ReplicatedStorage.Folder2.Module");
+}
+
 TEST_SUITE_END();
