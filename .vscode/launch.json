@@ -16,11 +16,11 @@
       "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
       "preLaunchTask": "npm: compile",
       "env": {
-        "SERVER_PATH": "${input:binaryPath}/luau-lsp"
+        "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp"
       },
       "windows": {
         "env": {
-          "SERVER_PATH": "${input:binaryPath}/luau-lsp.exe"
+          "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp.exe"
         }
       }
     },

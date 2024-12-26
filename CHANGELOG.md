@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed isIgnoredFile check failing due to mismatching case of drive letter on Windows ([#752](https://github.com/JohnnyMorganz/luau-lsp/issues/752))
 - Fixed `luau-lsp analyze --ignore GLOB` not ignoring files matching the glob if the files are within one of the
   provided directories ([#788](https://github.com/JohnnyMorganz/luau-lsp/issues/788))
+- Fixed production VSCode extension failing to find server binary when debugging another VSCode extension ([#644](https://github.com/JohnnyMorganz/luau-lsp/issues/644))
 
 ## [1.37.0] - 2024-12-14
 

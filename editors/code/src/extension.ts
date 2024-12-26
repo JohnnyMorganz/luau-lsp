@@ -181,23 +181,22 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
+  const serverBinPath = vscode.Uri.joinPath(
+    context.extensionUri,
+    "bin",
+    os.platform() === "win32" ? "server.exe" : "server",
+  ).fsPath;
+
   const run: Executable = {
-    command: vscode.Uri.joinPath(
-      context.extensionUri,
-      "bin",
-      os.platform() === "win32" ? "server.exe" : "server",
-    ).fsPath,
+    command: serverBinPath,
     args,
   };
 
   // If debugging, run the locally build extension, with local type definitions file
   const debug: Executable = {
-    command: vscode.Uri.joinPath(
-      context.extensionUri,
-      "..",
-      "..",
-      process.env["SERVER_PATH"] ?? "unknown.exe",
-    ).fsPath,
+    command: process.env["LUAU_LSP_SERVER_PATH"]
+      ? vscode.Uri.file(process.env["LUAU_LSP_SERVER_PATH"]).fsPath
+      : serverBinPath,
     args: debugArgs,
   };
 
