@@ -57,7 +57,8 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
     }
 }
 
-static bool isIgnoredFile(const std::filesystem::path& rootUriPath, const std::filesystem::path& path, std::vector<std::string>& ignoreGlobPatterns)
+static bool isIgnoredFile(
+    const std::filesystem::path& rootUriPath, const std::filesystem::path& path, const std::vector<std::string>& ignoreGlobPatterns)
 {
     auto relativePath = path.lexically_relative(rootUriPath).generic_string(); // HACK: we convert to generic string so we get '/' separators
 
@@ -145,6 +146,53 @@ static bool analyzeFile(
     return reportedErrors == 0 && cr.lintResult.errors.empty();
 }
 
+std::vector<std::filesystem::path> getFilesToAnalyze(const std::vector<std::string>& paths, const std::vector<std::string>& ignoreGlobPatterns)
+{
+    std::vector<std::filesystem::path> files;
+    for (const auto& pathString : paths)
+    {
+        // If the path is not absolute, then we want to construct it into an absolute path
+        // by appending it to the current working directory
+        auto path = std::filesystem::absolute(pathString);
+
+        if (path != "-" && !std::filesystem::exists(path))
+        {
+            std::cerr << "Cannot get " << path << ": path does not exist\n";
+            exit(1);
+        }
+
+
+        if (std::filesystem::is_directory(path))
+        {
+            for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
+                next != end; ++next)
+            {
+                try
+                {
+                    if (next->is_regular_file() && next->path().has_extension())
+                    {
+                        auto ext = next->path().extension();
+                        if (ext == ".lua" || ext == ".luau")
+                        {
+                            if (!isIgnoredFile(std::filesystem::current_path(), next->path(), ignoreGlobPatterns))
+                                files.push_back(next->path());
+                        }
+                    }
+                }
+                catch (const std::filesystem::filesystem_error& e)
+                {
+                    std::cerr << "warning: Failed to visit directory: " << e.what() << "\n";
+                }
+            }
+        }
+        else
+        {
+            files.push_back(path);
+        }
+    }
+    return files;
+}
+
 int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
@@ -158,49 +206,9 @@ int startAnalyze(const argparse::ArgumentParser& program)
     FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
     if (auto filesArg = program.present<std::vector<std::string>>("files"))
-    {
-        for (const auto& pathString : *filesArg)
-        {
-            // If the path is not absolute, then we want to construct it into an absolute path
-            // by appending it to the current working directory
-            auto path = std::filesystem::absolute(pathString);
+        files = getFilesToAnalyze(*filesArg, ignoreGlobPatterns);
 
-            if (path != "-" && !std::filesystem::exists(path))
-            {
-                std::cerr << "Cannot get " << path << ": path does not exist\n";
-                return 1;
-            }
-
-
-            if (std::filesystem::is_directory(path))
-            {
-                for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
-                     next != end; ++next)
-                {
-                    try
-                    {
-                        if (next->is_regular_file() && next->path().has_extension())
-                        {
-                            auto ext = next->path().extension();
-                            if (ext == ".lua" || ext == ".luau")
-                            {
-                                files.push_back(next->path());
-                            }
-                        }
-                    }
-                    catch (const std::filesystem::filesystem_error& e)
-                    {
-                        std::cerr << "warning: Failed to visit directory: " << e.what() << "\n";
-                    }
-                }
-            }
-            else
-            {
-                files.push_back(path);
-            }
-        }
-    }
-    else
+    if (files.empty())
     {
         fprintf(stderr, "error: no files provided\n");
         return 1;

@@ -38,6 +38,8 @@ jobs:
             test-path: ./build/Debug/Luau.LanguageServer.Test
           - os: ubuntu-20.04
             test-path: ./build/Luau.LanguageServer.Test
+          - os: macos-latest
+            test-path: ./build/Luau.LanguageServer.Test
 
     name: Run Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

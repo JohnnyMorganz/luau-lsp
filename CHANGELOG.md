@@ -30,6 +30,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed isIgnoredFile check failing due to mismatching case of drive letter on Windows ([#752](https://github.com/JohnnyMorganz/luau-lsp/issues/752))
+- Fixed `luau-lsp analyze --ignore GLOB` not ignoring files matching the glob if the files are within one of the
+  provided directories ([#788](https://github.com/JohnnyMorganz/luau-lsp/issues/788))
+- Fixed production VSCode extension failing to find server binary when debugging another VSCode extension ([#644](https://github.com/JohnnyMorganz/luau-lsp/issues/644))
+- The Studio Plugin settings configuration is now stored in TestService instead of AnalyticsService to allow it to persist across sessions ([#738](https://github.com/JohnnyMorganz/luau-lsp/issues/739))
+- The Studio Plugin now correctly sends updates to the language server when an instance changes name or ancestry hierarchy ([#636](https://github.com/JohnnyMorganz/luau-lsp/issues/636))
+- Fixed Studio Plugin leaking Instance connections after disconnecting from server
 
 ## [1.37.0] - 2024-12-14
 
