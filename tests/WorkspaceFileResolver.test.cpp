@@ -238,8 +238,12 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
+    WorkspaceFileResolver fileResolver;
+    LSPPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
+
     Luau::ModuleInfo baseContext{};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau");
+    auto resolved = platform.resolveStringRequire(&baseContext, "Module.luau");
 
     REQUIRE(resolved.has_value());
     CHECK(endsWith(resolved->name, "/Module.luau"));
@@ -247,8 +251,12 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
 {
+    WorkspaceFileResolver fileResolver;
+    LSPPlatform platform{&fileResolver};
+    fileResolver.platform = &platform;
+
     Luau::ModuleInfo baseContext{};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod");
+    auto resolved = platform.resolveStringRequire(&baseContext, "Module.mod");
 
     REQUIRE(resolved.has_value());
     CHECK(endsWith(resolved->name, "/Module.mod.lua"));

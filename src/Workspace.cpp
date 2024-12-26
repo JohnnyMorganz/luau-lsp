@@ -180,11 +180,11 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& p
 bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
 {
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
-    auto canonicalised = normalizePath(path.generic_string());
+    auto canonicalised = std::filesystem::weakly_canonical(path);
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (normalizePath(resolvePath(file).generic_string()) == canonicalised)
+        if (std::filesystem::weakly_canonical(resolvePath(file)) == canonicalised)
         {
             return true;
         }

@@ -46,9 +46,3 @@ inline bool contains(const std::map<K, V>& map, const K& value)
 {
     return map.find(value) != map.end();
 }
-
-// TODO: taken from FileUtils, use that instead?
-bool isAbsolutePath(std::string_view path);
-std::string normalizePath(std::string_view path);
-std::string resolvePath(std::string_view relativePath, std::string_view baseFilePath);
-std::vector<std::string_view> splitPath(std::string_view path);
