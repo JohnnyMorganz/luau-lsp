@@ -4,6 +4,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
+#include "TempDir.h"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
@@ -270,6 +271,48 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
 
     CHECK_EQ(Luau::toString(requireType(getModule(moduleName), "other")), "number");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
+{
+    TempDir t("resolve_json_modules");
+    auto path = t.write_child("settings.json", R"({"value": 1})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
+{
+    TempDir t("resolve_toml_modules");
+    auto path = t.write_child("settings.toml", R"(value = 1)");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
 }
 
 TEST_SUITE_END();
