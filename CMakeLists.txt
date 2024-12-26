@@ -98,6 +98,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Diagnostics.test.cpp
         tests/GoToDefinition.test.cpp
         tests/Glob.test.cpp
+        tests/Workspace.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
