@@ -4,6 +4,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
+#include "TempDir.h"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
@@ -262,6 +263,53 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
 
     CHECK_EQ(Luau::toString(requireType(getModule(moduleName), "other")), "number");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_supports_relative_file_aliases")
+{
+    client->globalConfig.require.fileAliases = {
+        {"@file", "path/to/source.luau"},
+    };
+
+    Luau::ModuleInfo baseContext{};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "@file");
+    REQUIRE(resolved);
+    CHECK_EQ(resolved->name, workspace.rootUri.fsPath() / "path/to/source.luau");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_supports_absolute_file_aliases")
+{
+#ifdef _WIN32
+    auto basePath = "C:/Users/test/folder";
+#else
+    auto basePath = "/home/folder";
+#endif
+
+    auto fullPath = (std::filesystem::path(basePath) / "path/to/source.luau").generic_string();
+
+    client->globalConfig.require.fileAliases = {
+        {"@file", fullPath},
+    };
+
+    Luau::ModuleInfo baseContext{};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "@file");
+    REQUIRE(resolved);
+    CHECK_EQ(resolved->name, fullPath);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_supports_absolute_file_aliases_with_tilde_expansion")
+{
+    client->globalConfig.require.fileAliases = {
+        {"@file", "~/path/to/source.luau"},
+    };
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    Luau::ModuleInfo baseContext{};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "@file");
+    REQUIRE(resolved);
+    CHECK_EQ(resolved->name, home.value() / "path/to/source.luau");
 }
 
 TEST_SUITE_END();

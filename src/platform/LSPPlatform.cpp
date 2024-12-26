@@ -118,7 +118,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
         return std::nullopt;
 
     std::filesystem::path basePath = contextPath->parent_path();
-    auto filePath = fileResolver->rootUri.fsPath() / basePath / requiredString;
+    auto filePath = basePath / requiredString;
 
     auto luauConfig = fileResolver->getConfig(context->name);
     if (auto aliasedPath = resolveAlias(requiredString, luauConfig))
@@ -142,7 +142,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
         }
     }
 
-    filePath = normalizePath(filePath.generic_string());
+    filePath = normalizePath((fileResolver->rootUri.fsPath() / filePath).generic_string());
 
     // Handle "init.luau" files in a directory
     std::error_code ec;
