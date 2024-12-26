@@ -92,4 +92,17 @@ TEST_CASE_FIXTURE(Fixture, "managed_files_correctly_resolves_for_virtual_paths")
     CHECK_EQ(textDocumentFromUri, textDocumentFromModuleName);
 }
 
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile")
+{
+    client->globalConfig.ignoreGlobs = {"**/_Index/**"};
+
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.fsPath() / "source.luau"), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.fsPath() / "Packages/_Index/source.luau"), true);
+
+#ifdef _WIN32
+    CHECK_EQ(workspace.isIgnoredFile("c:/Users/random/folder/Packages/_Index/source.luau"), true);
+    CHECK_EQ(workspace.isIgnoredFile("C:/Users/random/folder/Packages/_Index/source.luau"), true);
+#endif
+}
+
 TEST_SUITE_END();

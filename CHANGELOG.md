@@ -27,6 +27,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Optimised the resolution of relative string requires by remove filesystem
   calls ([#856](https://github.com/JohnnyMorganz/luau-lsp/issues/856))
 
+### Fixed
+
+- Fixed isIgnoredFile check failing due to mismatching case of drive letter on Windows ([#752](https://github.com/JohnnyMorganz/luau-lsp/issues/752))
+
 ## [1.37.0] - 2024-12-14
 
 ### Added
