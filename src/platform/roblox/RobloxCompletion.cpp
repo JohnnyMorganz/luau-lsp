@@ -80,8 +80,8 @@ static lsp::TextEdit createRequireTextEdit(const std::string& name, const std::s
     return {range, importText};
 }
 
-static lsp::CompletionItem createSuggestRequire(
-    const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText, const std::string& path)
+static lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText,
+    const std::string& path, const std::string& requirePath)
 {
     std::string documentation;
     for (const auto& edit : textEdits)
@@ -90,7 +90,7 @@ static lsp::CompletionItem createSuggestRequire(
     lsp::CompletionItem item;
     item.label = name;
     item.kind = lsp::CompletionItemKind::Module;
-    item.detail = "Auto-import";
+    item.detail = requirePath;
     item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", documentation) + "\n\n" + path};
     item.insertText = name;
     item.sortText = sortText;
@@ -433,7 +433,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
             textEdits.emplace_back(createRequireTextEdit(node->name, require, lineNumber, prependNewline));
 
-            items.emplace_back(createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path));
+            items.emplace_back(
+                createSuggestRequire(name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path, require));
         }
     }
 }

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Auto-import requires will now show the require path in the details section rather than just "Auto-import". This will
+  help to disambiguate between multiple modules with the same name but at different
+  paths. ([#593](https://github.com/JohnnyMorganz/luau-lsp/issues/593))
+
 ### Changed
 
 - The server no longer computes `relatedDocuments` in a `textDocument/diagnostic` request unnecessarily if the client
