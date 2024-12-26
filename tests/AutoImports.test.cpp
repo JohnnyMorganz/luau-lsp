@@ -655,9 +655,15 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_of_modules_show_path_name")
     auto result = workspace.completion(params);
     auto imports = filterAutoImports(result, "Module");
 
+    std::sort(imports.begin(), imports.end(),
+        [](const auto& a, const auto& b)
+        {
+            return a.detail < b.detail;
+        });
+
     REQUIRE_EQ(imports.size(), 2);
-    CHECK_EQ(imports[1].detail, "ReplicatedStorage.Folder1.Module");
-    CHECK_EQ(imports[0].detail, "ReplicatedStorage.Folder2.Module");
+    CHECK_EQ(imports[0].detail, "ReplicatedStorage.Folder1.Module");
+    CHECK_EQ(imports[1].detail, "ReplicatedStorage.Folder2.Module");
 }
 
 TEST_SUITE_END();
