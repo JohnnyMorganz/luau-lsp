@@ -507,7 +507,7 @@ std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromRealPath(const std
 {
     auto canonicalName = normalizePath(name);
     // URI-ify the file path so that its normalised (in particular, the drive letter)
-    canonicalName = Uri::parse(Uri::file(canonicalName).toString()).fsPath();
+    canonicalName = Uri::parse(Uri::file(canonicalName).toString()).fsPath().generic_string();
     if (realPathsToSourceNodes.find(canonicalName) == realPathsToSourceNodes.end())
         return std::nullopt;
     return realPathsToSourceNodes.at(canonicalName);
