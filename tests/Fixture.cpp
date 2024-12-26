@@ -25,7 +25,7 @@ ClientConfiguration defaultTestClientConfiguration()
 
 Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source)
 {
-    Uri uri("file", "", name);
+    Uri uri = Uri::file(workspace.rootUri.fsPath() / name);
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
     return uri;
 }
@@ -71,13 +71,18 @@ void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleN
     platform->writePathsToMap(std::make_shared<SourceNode>(dummySourceNode), virtualPath);
 }
 
+static Luau::ModuleName getMainModuleName(const WorkspaceFolder& workspace)
+{
+    return workspace.fileResolver.getModuleName(Uri::file(workspace.rootUri.fsPath() / mainModuleName));
+}
+
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
 {
     sourceModule.reset(new Luau::SourceModule);
 
     Luau::ParseResult result = Luau::Parser::parse(source.c_str(), source.length(), *sourceModule->names, *sourceModule->allocator, parseOptions);
 
-    sourceModule->name = fromString(mainModuleName);
+    sourceModule->name = getMainModuleName(workspace);
     sourceModule->root = result.root;
     sourceModule->mode = parseMode(result.hotcomments);
     sourceModule->hotcomments = std::move(result.hotcomments);
@@ -88,7 +93,7 @@ Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseO
 Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
     newDocument(mainModuleName, source);
-    return workspace.frontend.check(mainModuleName);
+    return workspace.frontend.check(getMainModuleName(workspace));
 }
 
 Luau::CheckResult Fixture::check(const std::string& source)
@@ -103,17 +108,17 @@ Luau::ModulePtr Fixture::getModule(const Luau::ModuleName& moduleName)
 
 Luau::ModulePtr Fixture::getMainModule()
 {
-    return getModule(mainModuleName);
+    return getModule(getMainModuleName(workspace));
 }
 
 Luau::SourceModule* Fixture::getMainSourceModule()
 {
-    return workspace.frontend.getSourceModule(fromString(mainModuleName));
+    return workspace.frontend.getSourceModule(getMainModuleName(workspace));
 }
 
 std::vector<std::string> Fixture::getComments(const Luau::Location& node)
 {
-    return workspace.getComments(fromString(mainModuleName), node);
+    return workspace.getComments(getMainModuleName(workspace), node);
 }
 
 std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& name)

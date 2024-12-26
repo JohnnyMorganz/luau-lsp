@@ -61,7 +61,7 @@ TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_
     )";
 
     auto [source, marker] = sourceWithMarker(R"(
-        local bar = require("/bar.luau")
+        local bar = require("bar.luau")
         local item: bar.B = nil
         item.|
     )");
