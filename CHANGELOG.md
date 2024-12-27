@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   parameter ([#779](https://github.com/JohnnyMorganz/luau-lsp/issues/779))
 - Find all references of a returned function / table in a module will now return all cross-module
   references ([#879](https://github.com/JohnnyMorganz/luau-lsp/issues/879))
+- Go To Definition inside of a require call will now lead to the required file, similar to Document Link. This is useful
+  for editors that do not support Document Link ([#612](https://github.com/JohnnyMorganz/luau-lsp/issues/612))
 
 ### Changed
 

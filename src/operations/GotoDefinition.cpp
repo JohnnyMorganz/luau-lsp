@@ -6,6 +6,53 @@
 
 #include <algorithm>
 
+std::pair<std::optional<Luau::ModuleName>, std::optional<Luau::Location>> findLocationForExpr(
+    const Luau::ModulePtr& module, const Luau::AstExpr* expr, const Luau::Position& position)
+{
+    std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
+    std::optional<Luau::Location> location = std::nullopt;
+
+    if (auto lvalue = Luau::tryGetLValue(*expr))
+    {
+        const Luau::LValue* current = &*lvalue;
+        std::vector<std::string> keys{}; // keys in reverse order
+        while (auto field = Luau::get<Luau::Field>(*current))
+        {
+            keys.push_back(field->key);
+            current = Luau::baseof(*current);
+        }
+
+        const auto* symbol = Luau::get<Luau::Symbol>(*current);
+        auto scope = Luau::findScopeAtPosition(*module, position);
+        if (!scope)
+            return {std::nullopt, std::nullopt};
+
+        auto baseType = scope->lookup(*symbol);
+        if (!baseType)
+            return {std::nullopt, std::nullopt};
+        baseType = Luau::follow(*baseType);
+
+        definitionModuleName = Luau::getDefinitionModuleName(*baseType);
+        location = getLocation(*baseType);
+
+        std::vector<Luau::Property> properties{};
+        for (auto it = keys.rbegin(); it != keys.rend(); ++it)
+        {
+            auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
+            auto propInformation = lookupProp(base, *it);
+            if (!propInformation)
+                return {std::nullopt, std::nullopt};
+
+            auto [baseTy, prop] = propInformation.value();
+            definitionModuleName = Luau::getDefinitionModuleName(baseTy);
+            location = prop.location;
+            properties.push_back(prop);
+        }
+    }
+
+    return {definitionModuleName, location};
+}
+
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
 {
     lsp::DefinitionResult result{};
@@ -56,47 +103,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
     if (auto expr = node->asExpr())
     {
-        std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
-        std::optional<Luau::Location> location = std::nullopt;
-
-        if (auto lvalue = Luau::tryGetLValue(*expr))
-        {
-            const Luau::LValue* current = &*lvalue;
-            std::vector<std::string> keys{}; // keys in reverse order
-            while (auto field = Luau::get<Luau::Field>(*current))
-            {
-                keys.push_back(field->key);
-                current = Luau::baseof(*current);
-            }
-
-            const auto* symbol = Luau::get<Luau::Symbol>(*current);
-            auto scope = Luau::findScopeAtPosition(*module, position);
-            if (!scope)
-                return result;
-
-            auto baseType = scope->lookup(*symbol);
-            if (!baseType)
-                return result;
-            baseType = Luau::follow(*baseType);
-
-            definitionModuleName = Luau::getDefinitionModuleName(*baseType);
-            location = getLocation(*baseType);
-
-            std::vector<Luau::Property> properties{};
-            for (auto it = keys.rbegin(); it != keys.rend(); ++it)
-            {
-                auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
-                auto propInformation = lookupProp(base, *it);
-                if (!propInformation)
-                    return result;
-
-                auto [baseTy, prop] = propInformation.value();
-                definitionModuleName = Luau::getDefinitionModuleName(baseTy);
-                location = prop.location;
-                properties.push_back(prop);
-            }
-        }
-
+        auto [definitionModuleName, location] = findLocationForExpr(module, expr, position);
         if (location)
         {
             if (definitionModuleName)
@@ -153,6 +160,26 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
         result.emplace_back(lsp::Location{
             uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
+    }
+
+    // Fallback: if no results found so far, we can try checking if this is within a require statement
+    if (result.empty())
+    {
+        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+        if (ancestry.size() >= 2)
+        {
+            if (auto call = ancestry[ancestry.size() - 2]->as<Luau::AstExprCall>(); call && types::matchRequire(*call))
+            {
+                if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *call))
+                {
+                    auto realName = platform->resolveToRealPath(moduleInfo->name);
+                    if (realName)
+                    {
+                        result.emplace_back(lsp::Location{Uri::file(*realName), lsp::Range{{0, 0}, {0, 0}}});
+                    }
+                }
+            }
+        }
     }
 
     // Remove duplicate elements within the result

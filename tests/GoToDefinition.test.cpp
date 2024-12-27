@@ -403,4 +403,52 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_an_anonymous_function_returns_th
     CHECK_EQ(result[0].range.end, lsp::Position{2, 15});
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_string_require_path")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        local X = require("./te|st")
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "test.lua"));
+    CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
+    CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_roblox_require_path")
+{
+    loadSourcemap(R"({
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [{ "name": "Test", "className": "ModuleScript", "filePaths": ["source.luau"] }]
+            }
+        ]
+    })");
+
+    auto [source, position] = sourceWithMarker(R"(
+        local X = require(game.ReplicatedStorage.Te|st)
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "source.luau"));
+    CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
+    CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
+}
+
 TEST_SUITE_END();
