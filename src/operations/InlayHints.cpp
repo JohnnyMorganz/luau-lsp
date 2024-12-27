@@ -94,6 +94,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (var->name == "_")
                         continue;
 
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
+                        continue;
+
                     auto typeString = Luau::toString(followedTy, stringOptions);
 
                     // If the stringified type is equivalent to the variable name, don't bother
@@ -135,6 +138,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     // If the variable is named "_", don't include an inlay hint
                     if (var->name == "_")
+                        continue;
+
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
                         continue;
 
                     auto typeString = Luau::toString(followedTy, stringOptions);

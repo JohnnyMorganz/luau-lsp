@@ -149,6 +149,37 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_local_definition")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        local x = 1 :: Unknown
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 15});
+    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "respect_hide_inlay_hints_for_error_type_configuration_local_definition")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.hideHintsForErrorTypes = true;
+    auto source = R"(
+        local x = 1 :: Unknown
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_in_for_loop")
 {
     client->globalConfig.inlayHints.variableTypes = true;
@@ -281,6 +312,47 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     CHECK_EQ(result[1].paddingLeft, false);
     CHECK_EQ(result[1].paddingRight, false);
     CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_for_loop")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        for i,v in UNKNOWN do
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 13});
+    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+
+    CHECK_EQ(result[1].position, lsp::Position{1, 15});
+    CHECK_EQ(result[1].label, ": *error-type*");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, false);
+    CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "respect_hide_inlay_hints_for_error_type_configuration_for_loop")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.hideHintsForErrorTypes = true;
+    auto source = R"(
+        for i,v in UNKNOWN do
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_type")

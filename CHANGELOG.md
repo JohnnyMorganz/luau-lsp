@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-import requires will now show the require path in the details section rather than just "Auto-import". This will
   help to disambiguate between multiple modules with the same name but at different
   paths. ([#593](https://github.com/JohnnyMorganz/luau-lsp/issues/593))
+- Added configuration `luau-lsp.inlayHints.hideHintsForErrorTypes` (default: `false`) to configure whether inlay hints
+  should be shown for types that resolve to an error type ([#711](https://github.com/JohnnyMorganz/luau-lsp/issues/711))
 
 ### Changed
 
