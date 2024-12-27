@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   paths. ([#593](https://github.com/JohnnyMorganz/luau-lsp/issues/593))
 - Added configuration `luau-lsp.inlayHints.hideHintsForErrorTypes` (default: `false`) to configure whether inlay hints
   should be shown for types that resolve to an error type ([#711](https://github.com/JohnnyMorganz/luau-lsp/issues/711))
+- Added configuration `luau-lsp.inlayHints.hideHintsForMatchingParameterNames` (default: `true`) to configure whether
+  inlay hints are shown where a variable name matches the
+  parameter ([#779](https://github.com/JohnnyMorganz/luau-lsp/issues/779))
 
 ### Changed
 

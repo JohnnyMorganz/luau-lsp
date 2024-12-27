@@ -279,7 +279,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     std::string stringifiedParam = Luau::toString(param);
                     if (auto indexName = param->as<Luau::AstExprIndexName>())
                         stringifiedParam = Luau::toString(indexName->index);
-                    if (Luau::equalsLower(stringifiedParam, paramName))
+                    if (config.inlayHints.hideHintsForMatchingParameterNames && Luau::equalsLower(stringifiedParam, paramName))
                         createHint = false;
                 }
 

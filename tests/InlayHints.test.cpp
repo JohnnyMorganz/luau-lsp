@@ -660,6 +660,30 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_variable_matches_parameter_name")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_variable_matches_parameter_name_and_hidden_configuration_is_disabled")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    client->globalConfig.inlayHints.hideHintsForMatchingParameterNames = false;
+    auto source = R"(
+        local function id(value: string)
+        end
+
+        local value = "testing"
+        id(value)
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 11});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_indexed_expression_matches_parameter_name")
 {
     client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
@@ -673,6 +697,30 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_indexed_expression_matches_parame
 
     auto result = processInlayHint(this, source);
     REQUIRE_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_indexed_expression_matches_parameter_name_and_hidden_configuration_is_disabled")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    client->globalConfig.inlayHints.hideHintsForMatchingParameterNames = false;
+    auto source = R"(
+        local function id(value: string)
+        end
+
+        local _ = { value = "testing"}
+        id(_.value)
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 11});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
 TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_configuration")

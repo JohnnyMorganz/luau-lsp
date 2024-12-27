@@ -344,6 +344,12 @@
           "default": false,
           "scope": "resource"
         },
+        "luau-lsp.inlayHints.hideHintsForMatchingParameterNames": {
+          "markdownDescription": "Whether type hints should be hidden if the resolved variable name matches the parameter name",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.inlayHints.typeHintMaxLength": {
           "markdownDescription": "The maximum length a type hint should be before being truncated",
           "type": "number",
