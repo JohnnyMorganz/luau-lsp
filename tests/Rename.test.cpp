@@ -342,4 +342,90 @@ TEST_CASE_FIXTURE(Fixture, "disallow_renaming_of_global_from_type_definition")
     REQUIRE_THROWS_WITH_AS(workspace.rename(params), "Cannot rename a global variable", JsonRpcException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_local_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        local function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 27}; // 'useFunction' definition
+    params.newName = "useFunction2";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE_EQ(result->changes.size(), 1);
+    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->second.size(), 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_global_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 20}; // 'useFunction' definition
+    params.newName = "useFunction2";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE_EQ(result->changes.size(), 1);
+    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->second.size(), 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_table")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        local tbl = {}
+
+        return tbl
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local value = tbl
+    )");
+
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 15}; // 'tbl' definition
+    params.newName = "tbl2";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE_EQ(result->changes.size(), 1);
+    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->second.size(), 2);
+}
+
 TEST_SUITE_END();

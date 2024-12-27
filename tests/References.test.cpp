@@ -13,7 +13,7 @@ static void sortResults(std::optional<std::vector<lsp::Location>>& result)
     std::sort(result->begin(), result->end(),
         [](const lsp::Location& a, const lsp::Location& b)
         {
-            return a.uri.toString() < b.uri.toString() || a.range.start < b.range.start;
+            return a.uri.toString() <= b.uri.toString() && a.range.start < b.range.start;
         });
 }
 
@@ -26,7 +26,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_1")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 10);
@@ -44,7 +44,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 12);
@@ -64,7 +64,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_3")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -84,7 +84,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_4")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -165,6 +165,119 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
 
     CHECK_EQ(lsp::Range{{1, 18}, {1, 22}}, result->at(0).range);
     CHECK_EQ(lsp::Range{{2, 18}, {2, 22}}, result->at(1).range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        local function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 28}; // 'useFunction' definition
+
+    auto result = workspace.references(params);
+    REQUIRE(result);
+    REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 23}, {1, 34}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 15}, {4, 26}});
+    CHECK_EQ(result->at(2).uri, user);
+    CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
+    CHECK_EQ(result->at(3).uri, user);
+    CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 20}; // 'useFunction' definition
+
+    auto result = workspace.references(params);
+    REQUIRE(result);
+    REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 17}, {1, 28}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 15}, {4, 26}});
+    CHECK_EQ(result->at(2).uri, user);
+    CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
+    CHECK_EQ(result->at(3).uri, user);
+    CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        local tbl = {}
+
+        return tbl
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local value = tbl
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 16}; // 'tbl' definition
+
+    auto result = workspace.references(params);
+    REQUIRE(result);
+    REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 20}, {1, 22}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{3, 15}, {3, 18}});
+    CHECK_EQ(result->at(2).uri, user);
+    CHECK_EQ(result->at(2).range, lsp::Range{{1, 20}, {1, 39}});
+    CHECK_EQ(result->at(3).uri, user);
+    CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 25}});
 }
 
 

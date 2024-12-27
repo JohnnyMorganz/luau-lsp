@@ -20,6 +20,20 @@ static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
     return false;
 }
 
+static bool isSameFunction(const Luau::TypeId a, const Luau::TypeId b)
+{
+    if (a == b)
+        return true;
+
+    // Two FunctionTypes may be different if one is local to the module and the other is part of the exported interface.
+    // We check for location equality to handle this case
+    if (auto ftv1 = Luau::get<Luau::FunctionType>(a); ftv1 && ftv1->definition && ftv1->definition->definitionModuleName)
+        if (auto ftv2 = Luau::get<Luau::FunctionType>(b); ftv2 && ftv2->definition && ftv2->definition->definitionModuleName)
+            return ftv1->definition->definitionModuleName == ftv2->definition->definitionModuleName &&
+                   ftv1->definition->definitionLocation == ftv2->definition->definitionLocation;
+    return false;
+}
+
 // Find all reverse dependencies of the top-level module
 // NOTE: this function is quite expensive as it requires a BFS
 // TODO: this comes from `markDirty`
@@ -53,8 +67,44 @@ std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Lua
     return dependents;
 }
 
+std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId ty)
+{
+    ty = Luau::follow(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    if (!ftv)
+        return {};
+
+    if (!ftv->definition || !ftv->definition->definitionModuleName || ftv->definition->definitionModuleName->empty())
+        return {};
+
+    std::vector<Reference> references;
+    std::vector<Luau::ModuleName> dependents = findReverseDependencies(ftv->definition->definitionModuleName.value());
+
+    for (const auto& moduleName : dependents)
+    {
+        checkStrict(moduleName);
+        auto module = getModule(moduleName, /* forAutocomplete: */ true);
+        if (!module)
+            continue;
+
+        for (const auto [expr, referencedTy] : module->astTypes)
+        {
+            // Skip the actual function definition
+            if (expr->is<Luau::AstExprFunction>())
+                continue;
+            if (isSameFunction(ty, Luau::follow(referencedTy)))
+                references.emplace_back(Reference{moduleName, expr->location});
+        }
+    }
+
+    // Include original definition location
+    references.emplace_back(Reference{ftv->definition->definitionModuleName.value(), ftv->definition->originalNameLocation});
+
+    return references;
+}
+
 // Find all references across all files for the usage of TableType, or a property on a TableType
-std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
+std::vector<Reference> WorkspaceFolder::findAllTableReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
 {
     ty = Luau::follow(ty);
     auto ttv = Luau::get<Luau::TableType>(ty);
@@ -388,6 +438,23 @@ bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::A
     return true;
 }
 
+static bool typeIsReturned(Luau::TypePackId returnType, Luau::TypeId ty)
+{
+    if (!returnType)
+        return false;
+
+    ty = Luau::follow(ty);
+
+    for (const auto& part : returnType)
+    {
+        auto otherTy = Luau::follow(part);
+        if (isSameTable(ty, otherTy) || isSameFunction(ty, otherTy))
+            return true;
+    }
+
+    return false;
+}
+
 lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -418,10 +485,31 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     std::vector<lsp::Location> result{};
 
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
+
     if (symbol)
     {
+        // Check if symbol was a returned symbol
+        // We currently only handle returned functions and tables
+        // TODO: maybe we can cover more cases if we generalise this to be AST-based rather than type based?
+        // (we could track usages of local vars, cross-module track usages of X in `local X = require()`)
+        auto scope = Luau::findScopeAtPosition(*module, position);
+        if (auto ty = scope->lookup(symbol))
+        {
+            auto followedTy = Luau::follow(*ty);
+            if (typeIsReturned(module->returnType, followedTy))
+            {
+                std::vector<Reference> references;
+                if (Luau::get<Luau::FunctionType>(followedTy))
+                    references = findAllFunctionReferences(followedTy);
+                else if (Luau::get<Luau::TableType>(followedTy))
+                    references = findAllTableReferences(followedTy);
+
+                return processReferences(fileResolver, references);
+            }
+        }
+
         // Search for usages of a local or global symbol
-        // TODO: what if this symbol is returned! need to handle that so we can find cross-file references
         auto references = findSymbolReferences(*sourceModule, symbol);
 
         result.reserve(references.size());
@@ -435,7 +523,6 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     }
 
     // Search for a property
-    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (auto expr = exprOrLocal.getExpr())
     {
         if (auto indexName = expr->as<Luau::AstExprIndexName>())
@@ -444,7 +531,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             if (possibleParentTy)
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
-                auto references = findAllReferences(parentTy, indexName->index.value);
+                auto references = findAllTableReferences(parentTy, indexName->index.value);
                 return processReferences(fileResolver, references);
             }
         }
@@ -460,8 +547,8 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                     auto possibleTableTy = module->astTypes.find(tbl);
                     if (possibleTableTy)
                     {
-                        auto references =
-                            findAllReferences(Luau::follow(*possibleTableTy), Luau::Name(constantString->value.data, constantString->value.size));
+                        auto references = findAllTableReferences(
+                            Luau::follow(*possibleTableTy), Luau::Name(constantString->value.data, constantString->value.size));
                         return processReferences(fileResolver, references);
                     }
                 }

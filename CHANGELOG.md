@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added configuration `luau-lsp.inlayHints.hideHintsForMatchingParameterNames` (default: `true`) to configure whether
   inlay hints are shown where a variable name matches the
   parameter ([#779](https://github.com/JohnnyMorganz/luau-lsp/issues/779))
+- Find all references of a returned function / table in a module will now return all cross-module
+  references ([#879](https://github.com/JohnnyMorganz/luau-lsp/issues/879))
 
 ### Changed
 
