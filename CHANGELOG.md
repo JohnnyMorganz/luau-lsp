@@ -22,6 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   for editors that do not support Document Link ([#612](https://github.com/JohnnyMorganz/luau-lsp/issues/612))
 - The recursive parameter in `game:FindFirstChild("ClassName", true)` is now supported for DataModel awareness. We
   recursively find the closest descendant based on BFS ([#689](https://github.com/JohnnyMorganz/luau-lsp/issues/689))
+- We now attach a semantic token modifier to usages of `self` in non-colon function definitions (i.e.
+  `function T.foo(self, ...)`) if `self` is the first
+  argument ([#456](https://github.com/JohnnyMorganz/luau-lsp/issues/456))
 
 ### Changed
 

@@ -193,11 +193,23 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         if (func->self)
             localMap.insert_or_assign(func->self, AstLocalInfo::Self);
 
+        bool first = true;
         for (auto arg : func->args)
         {
-            tokens.emplace_back(
-                SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
-            localMap.insert_or_assign(arg, AstLocalInfo::Parameter);
+            if (first && !func->self && arg->name == "self")
+            {
+                tokens.emplace_back(SemanticToken{
+                    arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Property, lsp::SemanticTokenModifiers::DefaultLibrary});
+                localMap.insert_or_assign(arg, AstLocalInfo::Self);
+            }
+            else
+            {
+                tokens.emplace_back(
+                    SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
+                localMap.insert_or_assign(arg, AstLocalInfo::Parameter);
+            }
+
+            first = false;
         }
         return true;
     }
