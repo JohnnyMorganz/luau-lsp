@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.38.0] - 2024-12-28
+
 ### Added
 
 - Auto-import requires will now show the require path in the details section rather than just "Auto-import". This will
