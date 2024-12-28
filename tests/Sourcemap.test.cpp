@@ -138,7 +138,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_works_without_sourcemap")
 }
 
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_with_sourcemap")
+TEST_CASE_FIXTURE(Fixture, "find_first_child_supports_recursive_parameter_with_sourcemap")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
     loadSourcemap(R"(
@@ -157,14 +157,54 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_
             }
         )");
 
-    // TODO: Support recursive datamodel lookup - https://github.com/JohnnyMorganz/luau-lsp/issues/689
     auto result = check(R"(
         --!strict
         local template = game:FindFirstChild("Head", true)
     )");
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
-    CHECK(Luau::toString(requireType("template")) == "Instance?");
+    CHECK(Luau::toString(requireType("template")) == "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_performs_bfs_and_picks_closest_matching_child_first")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "Long",
+                        "className": "Folder",
+                        "children": [
+                            {
+                                "name": "Short",
+                                "className": "Folder",
+                                "children": [
+                                    {"name": "Head", "className": "Folder"}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local template = game:FindFirstChild("Head", true)
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Part");
 }
 
 TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_without_sourcemap")
@@ -180,7 +220,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_
 }
 
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_finds_direct_child_recursively")
+TEST_CASE_FIXTURE(Fixture, "find_first_child_finds_direct_child_when_searching_recursively")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
     loadSourcemap(R"(

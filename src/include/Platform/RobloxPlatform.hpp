@@ -83,6 +83,7 @@ struct SourceNode
     std::optional<std::filesystem::path> getScriptFilePath();
     Luau::SourceCode::Type sourceCodeType() const;
     std::optional<SourceNodePtr> findChild(const std::string& name);
+    std::optional<SourceNodePtr> findDescendant(const std::string& name);
     // O(n) search for ancestor of name
     std::optional<SourceNodePtr> findAncestor(const std::string& name);
 };

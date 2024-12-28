@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   references ([#879](https://github.com/JohnnyMorganz/luau-lsp/issues/879))
 - Go To Definition inside of a require call will now lead to the required file, similar to Document Link. This is useful
   for editors that do not support Document Link ([#612](https://github.com/JohnnyMorganz/luau-lsp/issues/612))
+- The recursive parameter in `game:FindFirstChild("ClassName", true)` is now supported for DataModel awareness. We
+  recursively find the closest descendant based on BFS ([#689](https://github.com/JohnnyMorganz/luau-lsp/issues/689))
 
 ### Changed
 

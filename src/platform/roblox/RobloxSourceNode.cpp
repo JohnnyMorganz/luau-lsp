@@ -55,6 +55,30 @@ std::optional<SourceNodePtr> SourceNode::findChild(const std::string& childName)
     return std::nullopt;
 }
 
+std::optional<SourceNodePtr> SourceNode::findDescendant(const std::string& childName)
+{
+    // Peforms a BFS search
+    std::queue<SourceNodePtr> queue{};
+
+    // TODO: this isn't so great, we shouldn't really be making a new shared ptr here
+    // but since we know this will never get returned, we'll leave it alone for now
+    queue.push(std::make_shared<SourceNode>(*this));
+
+    while (!queue.empty())
+    {
+        auto next = queue.front();
+        queue.pop();
+
+        for (const auto& child : next->children)
+        {
+            if (child->name == childName)
+                return child;
+            queue.push(child);
+        }
+    }
+    return std::nullopt;
+}
+
 std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& ancestorName)
 {
     auto current = parent;
