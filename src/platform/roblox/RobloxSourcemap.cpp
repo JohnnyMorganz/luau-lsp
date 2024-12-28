@@ -56,10 +56,11 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
 static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
 
 static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node, Luau::TypeId lookupFuncTy,
-    bool supportRecursiveParameter = false)
+    bool supportsRecursiveParameter = false, bool supportsTimeoutParameter = false)
 {
     Luau::attachMagicFunction(lookupFuncTy,
-        [node, &arena, &globals](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
+        [node, &arena, &globals, supportsRecursiveParameter](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+            const Luau::AstExprCall& expr,
             const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
         {
             if (expr.args.size < 1)
@@ -70,7 +71,7 @@ static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::Ty
                 return std::nullopt;
 
             bool recursive = false;
-            if (expr.args.size >= 2)
+            if (supportsRecursiveParameter && expr.args.size >= 2)
                 if (auto recursiveParameter = expr.args.data[1]->as<Luau::AstExprConstantBool>())
                     recursive = recursiveParameter->value;
 
@@ -82,7 +83,7 @@ static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::Ty
             return std::nullopt;
         });
     Luau::attachDcrMagicFunction(lookupFuncTy,
-        [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
+        [node, &arena, &globals, supportsRecursiveParameter, supportsTimeoutParameter](Luau::MagicFunctionCallContext context) -> bool
         {
             if (context.callSite->args.size < 1)
                 return false;
@@ -91,10 +92,30 @@ static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::Ty
             if (!str)
                 return false;
 
-            if (auto child = node->findChild(std::string(str->value.data, str->value.size)))
+            bool recursive = false;
+            bool timeoutEnabled = false;
+            if (context.callSite->args.size >= 2)
+            {
+                if (auto recursiveParameter = context.callSite->args.data[1]->as<Luau::AstExprConstantBool>();
+                    recursiveParameter && supportsRecursiveParameter)
+                    recursive = recursiveParameter->value;
+                if (supportsTimeoutParameter)
+                    timeoutEnabled = true;
+            }
+
+            auto childName = std::string(str->value.data, str->value.size);
+            auto child = recursive ? node->findDescendant(childName) : node->findChild(childName);
+            if (child)
             {
                 asMutable(context.result)
                     ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
+                return true;
+            }
+
+            if (timeoutEnabled)
+            {
+                auto optionalInstanceType = Luau::makeOption(globals.builtinTypes, arena, getTypeIdForClass(globals.globalScope, "Instance").value());
+                asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({optionalInstanceType}));
                 return true;
             }
 
@@ -123,16 +144,22 @@ static void injectChildrenLookupFunctions(
         auto waitForChildWithTimeoutFunction = Luau::makeFunction(
             arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->numberType}, {"name", "timeout"}, {optionalInstanceType});
 
-        attachChildLookupFunction(globals, arena, node, findFirstChildFunction, /* supportRecursiveParameter= */ true);
-        attachChildLookupFunction(globals, arena, node, waitForChildFunction);
-        attachChildLookupFunction(globals, arena, node, waitForChildWithTimeoutFunction);
-
+        attachChildLookupFunction(globals, arena, node, findFirstChildFunction, /* supportsRecursiveParameter= */ true);
         ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
+
         if (FFlag::LuauSolverV2)
+        {
+            attachChildLookupFunction(
+                globals, arena, node, waitForChildFunction, /* supportsRecursiveParameter= */ false, /*supportsTimeoutParameter= */ true);
             ctv->props["WaitForChild"] = Luau::makeProperty(waitForChildFunction, "@roblox/globaltype/Instance.WaitForChild");
+        }
         else
+        {
+            attachChildLookupFunction(globals, arena, node, waitForChildFunction);
+            attachChildLookupFunction(globals, arena, node, waitForChildWithTimeoutFunction);
             ctv->props["WaitForChild"] = Luau::makeProperty(
                 Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
+        }
     }
 }
 
