@@ -1,4 +1,5 @@
 #include "Platform/RobloxPlatform.hpp"
+#include <queue>
 
 bool SourceNode::isScript()
 {
