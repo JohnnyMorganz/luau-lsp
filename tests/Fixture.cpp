@@ -36,7 +36,7 @@ Fixture::Fixture()
     , workspace(client, "$TEST_WORKSPACE", Uri::file(std::filesystem::current_path()), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
-    client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
+    client->definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
     workspace.setupWithConfiguration(Luau::LanguageServer::defaultTestClientConfiguration());
 
     Luau::setPrintLine([](auto s) {});
@@ -145,7 +145,7 @@ Luau::TypeId Fixture::requireType(Luau::ModulePtr module, const std::string& nam
     return Luau::follow(*ty);
 }
 
-Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source, bool forAutocomplete)
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete)
 {
     RobloxPlatform platform;
 
@@ -153,7 +153,7 @@ Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source
     auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
 
     Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source);
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, packageName, source);
     platform.mutateRegisteredDefinitions(globals, std::nullopt);
     Luau::freeze(globals.globalTypes);
 

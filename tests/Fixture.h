@@ -42,7 +42,7 @@ struct Fixture
     void registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath);
 
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
-    Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);
+    Luau::LoadDefinitionFileResult loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete = false);
     void loadSourcemap(const std::string& source);
     void loadLuaurc(const std::string& source);
     SourceNodePtr getRootSourceNode();

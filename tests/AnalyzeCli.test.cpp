@@ -55,4 +55,48 @@ TEST_CASE("getFilesToAnalyze_still_matches_file_if_it_was_explicitly_provided")
     CHECK_EQ(getFilesToAnalyze({fileA}, {"a.luau"}), std::vector<std::filesystem::path>{fileA});
 }
 
+TEST_CASE("parse_definitions_files_handles_new_syntax")
+{
+    argparse::ArgumentParser program("test");
+    program.set_assign_chars(":=");
+    program.add_argument("--definitions", "--defs")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
+
+    std::vector<std::string> arguments{
+        "", "--definitions:@roblox=example_path.d.luau", "--definitions:@lune=lune.d.luau", "--definitions:no_at_sign=path.d.luau"};
+    program.parse_args(arguments);
+
+    auto definitionsFiles = processDefinitionsFilePaths(program);
+
+    CHECK_EQ(definitionsFiles, std::unordered_map<std::string, std::filesystem::path>{
+                                   {"@roblox", "example_path.d.luau"},
+                                   {"@lune", "lune.d.luau"},
+                                   {"@no_at_sign", "path.d.luau"},
+                               });
+}
+
+TEST_CASE("parse_definitions_files_handles_legacy_syntax")
+{
+    argparse::ArgumentParser program("test");
+    program.set_assign_chars(":=");
+    program.add_argument("--definitions", "--defs")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
+
+    std::vector<std::string> arguments{"", "--definitions=example_path.d.luau", "--definitions=lune.d.luau"};
+    program.parse_args(arguments);
+
+    auto definitionsFiles = processDefinitionsFilePaths(program);
+
+    CHECK_EQ(definitionsFiles, std::unordered_map<std::string, std::filesystem::path>{
+                                   {"@roblox", "example_path.d.luau"},
+                                   {"@roblox1", "lune.d.luau"},
+                               });
+}
+
 TEST_SUITE_END();

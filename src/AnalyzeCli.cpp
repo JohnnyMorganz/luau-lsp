@@ -193,12 +193,46 @@ std::vector<std::filesystem::path> getFilesToAnalyze(const std::vector<std::stri
     return files;
 }
 
+
+std::unordered_map<std::string, std::filesystem::path> processDefinitionsFilePaths(const argparse::ArgumentParser& program)
+{
+    std::unordered_map<std::string, std::filesystem::path> definitionsFiles{};
+    size_t backwardsCompatibilityNameSuffix = 0;
+    for (const auto& definition : program.get<std::vector<std::string>>("--definitions"))
+    {
+        std::string packageName = definition;
+        std::filesystem::path filePath = definition;
+
+        size_t eqIndex = definition.find('=');
+        if (eqIndex == std::string::npos)
+        {
+            // TODO: Remove Me - backwards compatibility
+            packageName = "@roblox";
+            if (backwardsCompatibilityNameSuffix > 0)
+                packageName += std::to_string(backwardsCompatibilityNameSuffix);
+            backwardsCompatibilityNameSuffix += 1;
+        }
+        else
+        {
+            packageName = definition.substr(0, eqIndex);
+            filePath = definition.substr(eqIndex + 1, definition.length());
+        }
+
+        if (!Luau::startsWith(packageName, "@"))
+            packageName = "@" + packageName;
+
+        definitionsFiles.emplace(packageName, filePath);
+    }
+
+    return definitionsFiles;
+}
+
 int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
     bool annotate = program.is_used("--annotate");
     auto sourcemapPath = program.present<std::filesystem::path>("--sourcemap");
-    auto definitionsPaths = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto definitionsPaths = processDefinitionsFilePaths(program);
     auto ignoreGlobPatterns = program.get<std::vector<std::string>>("--ignore");
     auto baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
     auto settingsPath = program.present<std::filesystem::path>("--settings");
@@ -320,7 +354,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     if (!FFlag::LuauSolverV2)
         Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
 
-    for (auto& definitionsPath : definitionsPaths)
+    for (const auto& [packageName, definitionsPath] : definitionsPaths)
     {
         if (!std::filesystem::exists(definitionsPath))
         {
@@ -335,7 +369,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

@@ -436,11 +436,11 @@ export const preLanguageServerStart = async (
       typesConfig.get<string>("robloxSecurityLevel") ?? "PluginSecurity";
     await updateApiInfo(context);
     addArg(
-      `--definitions=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
+      `--definitions:@roblox=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
       "Prod",
     );
     addArg(
-      `--definitions=${globalTypesUri(context, securityLevel, "Debug").fsPath}`,
+      `--definitions:@roblox=${globalTypesUri(context, securityLevel, "Debug").fsPath}`,
       "Debug",
     );
     addArg(`--docs=${apiDocsUri(context).fsPath}`);
