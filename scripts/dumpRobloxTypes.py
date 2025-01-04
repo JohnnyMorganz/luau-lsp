@@ -341,6 +341,9 @@ EXTRA_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart: BasePart?",
     ],
+    "Sound": [
+        "SoundGroup: SoundGroup?",
+    ],
 }
 
 # Hardcoded types

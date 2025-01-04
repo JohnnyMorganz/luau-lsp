@@ -9306,7 +9306,7 @@ declare class Sound extends Instance
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
-	SoundGroup: SoundGroup
+	SoundGroup: SoundGroup?
 	SoundId: ContentId
 	Stopped: RBXScriptSignal<string>
 	TimeLength: number
