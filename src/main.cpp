@@ -45,7 +45,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    auto definitionsFiles = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto definitionsFiles = processDefinitionsFilePaths(program);
     auto documentationFiles = program.get<std::vector<std::filesystem::path>>("--docs");
     std::optional<std::filesystem::path> baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
 
@@ -163,6 +163,7 @@ int main(int argc, char** argv)
 
     // Analyze arguments
     argparse::ArgumentParser analyze_command("analyze");
+    analyze_command.set_assign_chars(":=");
     analyze_command.add_description("Run luau-analyze type checking and linting");
     analyze_command.add_parents(parent_parser);
     analyze_command.add_argument("--annotate")
@@ -187,10 +188,9 @@ int main(int argc, char** argv)
         .metavar("PATH");
     analyze_command.add_argument("--definitions", "--defs")
         .help("A path to a Luau definitions file to load into the global namespace")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
-        .metavar("PATH");
+        .metavar("@NAME=PATH");
     analyze_command.add_argument("--ignore")
         .help("file glob pattern for ignoring error outputs")
         .default_value<std::vector<std::string>>({})
@@ -206,15 +206,15 @@ int main(int argc, char** argv)
 
     // Language server arguments
     argparse::ArgumentParser lsp_command("lsp");
+    lsp_command.set_assign_chars(":=");
     lsp_command.add_description("Start the language server");
     lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
     lsp_command.add_parents(parent_parser);
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
-        .metavar("PATH");
+        .metavar("@NAME=PATH");
     lsp_command.add_argument("--docs", "--documentation")
         .help("path to a Luau documentation database for loaded definitions")
         .action(file_path_parser)

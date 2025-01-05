@@ -200,7 +200,7 @@ bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const 
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
     auto canonicalised = std::filesystem::weakly_canonical(path);
 
-    for (auto& file : config.types.definitionFiles)
+    for (const auto& [_, file] : client->definitionsFiles)
     {
         if (std::filesystem::weakly_canonical(resolvePath(file)) == canonicalised)
         {
@@ -313,10 +313,10 @@ void WorkspaceFolder::registerTypes()
     if (client->definitionsFiles.empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
-    for (const auto& definitionsFile : client->definitionsFiles)
+    for (const auto& [packageName, definitionsFile] : client->definitionsFiles)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + packageName + " - " + resolvedFilePath.generic_string());
 
         auto definitionsContents = readFile(resolvedFilePath);
         if (!definitionsContents)
@@ -334,9 +334,9 @@ void WorkspaceFolder::registerTypes()
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
+        auto result = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
         if (!FFlag::LuauSolverV2)
-            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents);
+            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         client->sendTrace("workspace: applying platform mutations on definitions");
