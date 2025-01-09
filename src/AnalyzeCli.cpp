@@ -205,6 +205,38 @@ int startAnalyze(const argparse::ArgumentParser& program)
     std::vector<std::filesystem::path> files{};
     FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
+    CliClient client;
+
+    if (settingsPath)
+    {
+        if (std::optional<std::string> contents = readFile(*settingsPath))
+        {
+            client.configuration = dottedToClientConfiguration(contents.value());
+
+            auto& ignoreGlobsConfiguration = client.configuration.ignoreGlobs;
+            auto& definitionsFilesConfiguration = client.configuration.types.definitionFiles;
+
+            ignoreGlobPatterns.reserve(ignoreGlobPatterns.size() + ignoreGlobsConfiguration.size());
+            ignoreGlobPatterns.insert(ignoreGlobPatterns.end(), ignoreGlobsConfiguration.cbegin(), ignoreGlobsConfiguration.cend());
+            definitionsPaths.reserve(definitionsPaths.size() + definitionsFilesConfiguration.size());
+            definitionsPaths.insert(definitionsPaths.end(), definitionsFilesConfiguration.cbegin(), definitionsFilesConfiguration.cend());
+
+            // Process any fflags
+            registerFastFlagsCLI(client.configuration.fflags.override);
+            if (!client.configuration.fflags.enableByDefault)
+                std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "
+                             "`--no-flags-enabled` to configure this.\n";
+            if (client.configuration.fflags.sync)
+                std::cerr << "warning: `luau-lsp.fflags.sync` is not supported in CLI Analyze mode. Instead, all FFlags are enabled by default. "
+                             "Please manually configure necessary FFlags\n";
+        }
+        else
+        {
+            fprintf(stderr, "Failed to read settings at '%s'\n", settingsPath->generic_string().c_str());
+            return 1;
+        }
+    }
+
     if (auto filesArg = program.present<std::vector<std::string>>("files"))
         files = getFilesToAnalyze(*filesArg, ignoreGlobPatterns);
 
@@ -253,30 +285,6 @@ int startAnalyze(const argparse::ArgumentParser& program)
     Luau::FrontendOptions frontendOptions;
     frontendOptions.retainFullTypeGraphs = annotate;
     frontendOptions.runLintChecks = true;
-
-    CliClient client;
-
-    if (settingsPath)
-    {
-        if (std::optional<std::string> contents = readFile(*settingsPath))
-        {
-            client.configuration = dottedToClientConfiguration(contents.value());
-
-            // Process any fflags
-            registerFastFlagsCLI(client.configuration.fflags.override);
-            if (!client.configuration.fflags.enableByDefault)
-                std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "
-                             "`--no-flags-enabled` to configure this.\n";
-            if (client.configuration.fflags.sync)
-                std::cerr << "warning: `luau-lsp.fflags.sync` is not supported in CLI Analyze mode. Instead, all FFlags are enabled by default. "
-                             "Please manually configure necessary FFlags\n";
-        }
-        else
-        {
-            fprintf(stderr, "Failed to read settings at '%s'\n", settingsPath->generic_string().c_str());
-            return 1;
-        }
-    }
 
     WorkspaceFileResolver fileResolver;
     if (baseLuaurc)
