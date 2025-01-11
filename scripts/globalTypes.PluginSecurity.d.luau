@@ -14,6 +14,7 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -133,6 +134,10 @@ declare class EnumAdEventType_INTERNAL extends Enum
 	UserCompletedVideo: EnumAdEventType
 	VideoLoaded: EnumAdEventType
 	VideoRemoved: EnumAdEventType
+end
+declare class EnumAdFormat extends EnumItem end
+declare class EnumAdFormat_INTERNAL extends Enum
+	RewardedVideo: EnumAdFormat
 end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
@@ -1613,6 +1618,7 @@ declare class EnumHandlesStyle_INTERNAL extends Enum
 end
 declare class EnumHapticEffectType extends EnumItem end
 declare class EnumHapticEffectType_INTERNAL extends Enum
+	Custom: EnumHapticEffectType
 	GameplayCollision: EnumHapticEffectType
 	GameplayExplosion: EnumHapticEffectType
 	UIClick: EnumHapticEffectType
@@ -2715,6 +2721,7 @@ declare class EnumPromptCreateAvatarResult_INTERNAL extends Enum
 	PurchaseFailure: EnumPromptCreateAvatarResult
 	Success: EnumPromptCreateAvatarResult
 	Timeout: EnumPromptCreateAvatarResult
+	TokenInvalid: EnumPromptCreateAvatarResult
 	UGCValidationFailed: EnumPromptCreateAvatarResult
 	UnknownFailure: EnumPromptCreateAvatarResult
 	UploadFailed: EnumPromptCreateAvatarResult
@@ -3117,6 +3124,14 @@ declare class EnumSeverity_INTERNAL extends Enum
 	Hint: EnumSeverity
 	Information: EnumSeverity
 	Warning: EnumSeverity
+end
+declare class EnumShowAdResult extends EnumItem end
+declare class EnumShowAdResult_INTERNAL extends Enum
+	ExperienceIneligible: EnumShowAdResult
+	NotShown: EnumShowAdResult
+	PlayerIneligible: EnumShowAdResult
+	ShowCompleted: EnumShowAdResult
+	ShowInterrupted: EnumShowAdResult
 end
 declare class EnumSignalBehavior extends EnumItem end
 declare class EnumSignalBehavior_INTERNAL extends Enum
@@ -4100,6 +4115,7 @@ type ENUM_LIST = {
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
 	AdEventType: EnumAdEventType_INTERNAL,
+	AdFormat: EnumAdFormat_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdTeleportMethod: EnumAdTeleportMethod_INTERNAL,
 	AdUIEventType: EnumAdUIEventType_INTERNAL,
@@ -4426,6 +4442,7 @@ type ENUM_LIST = {
 	ServerLiveEditingMode: EnumServerLiveEditingMode_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
 	Severity: EnumSeverity_INTERNAL,
+	ShowAdResult: EnumShowAdResult_INTERNAL,
 	SignalBehavior: EnumSignalBehavior_INTERNAL,
 	SizeConstraint: EnumSizeConstraint_INTERNAL,
 	SolverConvergenceMetricType: EnumSolverConvergenceMetricType_INTERNAL,
@@ -5127,6 +5144,10 @@ declare class AdPortal extends Instance
 end
 
 declare class AdService extends Instance
+	AdAvailabilityChanged: RBXScriptSignal<EnumAdFormat, any>
+	function CreateAdRewardFromDevProductId(self, devProductId: number): AdReward
+	function GetAdAvailability(self, adFormat: EnumAdFormat): any
+	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward): EnumShowAdResult
 end
 
 declare class AdvancedDragger extends Instance
@@ -7434,8 +7455,11 @@ end
 
 declare class HapticEffect extends Instance
 	Looped: boolean
+	Position: Vector3
+	Radius: number
 	Type: EnumHapticEffectType
 	function Play(self): nil
+	function SetWaveformKeys(self, keys: { any }): nil
 	function Stop(self): nil
 end
 
@@ -8422,6 +8446,7 @@ declare class Workspace extends WorldRoot
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
+	FallHeightEnabled: boolean
 	FallenPartsDestroyHeight: number
 	FluidForces: EnumFluidForces
 	GlobalWind: Vector3

@@ -14,6 +14,7 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -133,6 +134,10 @@ declare class EnumAdEventType_INTERNAL extends Enum
 	UserCompletedVideo: EnumAdEventType
 	VideoLoaded: EnumAdEventType
 	VideoRemoved: EnumAdEventType
+end
+declare class EnumAdFormat extends EnumItem end
+declare class EnumAdFormat_INTERNAL extends Enum
+	RewardedVideo: EnumAdFormat
 end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
@@ -1613,6 +1618,7 @@ declare class EnumHandlesStyle_INTERNAL extends Enum
 end
 declare class EnumHapticEffectType extends EnumItem end
 declare class EnumHapticEffectType_INTERNAL extends Enum
+	Custom: EnumHapticEffectType
 	GameplayCollision: EnumHapticEffectType
 	GameplayExplosion: EnumHapticEffectType
 	UIClick: EnumHapticEffectType
@@ -2715,6 +2721,7 @@ declare class EnumPromptCreateAvatarResult_INTERNAL extends Enum
 	PurchaseFailure: EnumPromptCreateAvatarResult
 	Success: EnumPromptCreateAvatarResult
 	Timeout: EnumPromptCreateAvatarResult
+	TokenInvalid: EnumPromptCreateAvatarResult
 	UGCValidationFailed: EnumPromptCreateAvatarResult
 	UnknownFailure: EnumPromptCreateAvatarResult
 	UploadFailed: EnumPromptCreateAvatarResult
@@ -3117,6 +3124,14 @@ declare class EnumSeverity_INTERNAL extends Enum
 	Hint: EnumSeverity
 	Information: EnumSeverity
 	Warning: EnumSeverity
+end
+declare class EnumShowAdResult extends EnumItem end
+declare class EnumShowAdResult_INTERNAL extends Enum
+	ExperienceIneligible: EnumShowAdResult
+	NotShown: EnumShowAdResult
+	PlayerIneligible: EnumShowAdResult
+	ShowCompleted: EnumShowAdResult
+	ShowInterrupted: EnumShowAdResult
 end
 declare class EnumSignalBehavior extends EnumItem end
 declare class EnumSignalBehavior_INTERNAL extends Enum
@@ -4100,6 +4115,7 @@ type ENUM_LIST = {
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
 	AdEventType: EnumAdEventType_INTERNAL,
+	AdFormat: EnumAdFormat_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdTeleportMethod: EnumAdTeleportMethod_INTERNAL,
 	AdUIEventType: EnumAdUIEventType_INTERNAL,
@@ -4426,6 +4442,7 @@ type ENUM_LIST = {
 	ServerLiveEditingMode: EnumServerLiveEditingMode_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
 	Severity: EnumSeverity_INTERNAL,
+	ShowAdResult: EnumShowAdResult_INTERNAL,
 	SignalBehavior: EnumSignalBehavior_INTERNAL,
 	SizeConstraint: EnumSizeConstraint_INTERNAL,
 	SolverConvergenceMetricType: EnumSolverConvergenceMetricType_INTERNAL,
@@ -5144,17 +5161,21 @@ declare class AdPortal extends Instance
 end
 
 declare class AdService extends Instance
+	AdAvailabilityChanged: RBXScriptSignal<EnumAdFormat, any>
 	AdTeleportEnded: RBXScriptSignal<>
 	AdTeleportInitiated: RBXScriptSignal<>
 	PortalPrompt: RBXScriptSignal<number, Instance, boolean>
 	ShowDynamicEudsaDisclosure: RBXScriptSignal<string, string>
-	ShowStaticEudsaDisclosure: RBXScriptSignal<>
+	ShowReportAdPopup: RBXScriptSignal<{ [any]: any }>
 	adGuiRegisterUI: RBXScriptSignal<Instance>
+	function CreateAdRewardFromDevProductId(self, devProductId: number): AdReward
+	function GetAdAvailability(self, adFormat: EnumAdFormat): any
 	function GetAdTeleportInfo(self): any
 	function GetReportAdInfo(self): { any }
 	function HideEudsaDisclosure(self): nil
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 	function SetAdGuiInteractivityHandlerInitialized(self): nil
+	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward): EnumShowAdResult
 end
 
 declare class AdvancedDragger extends Instance
@@ -5492,6 +5513,7 @@ end
 declare class AudioCompressor extends Instance
 	Attack: number
 	Bypass: boolean
+	Editor: boolean
 	MakeupGain: number
 	Ratio: number
 	Release: number
@@ -5604,6 +5626,7 @@ end
 
 declare class AudioLimiter extends Instance
 	Bypass: boolean
+	Editor: boolean
 	MaxLevel: number
 	Release: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
@@ -7696,6 +7719,7 @@ declare class TextBox extends GuiObject
 	ReturnPressedFromOnScreenKeyboard: RBXScriptSignal<>
 	RichText: boolean
 	SelectionStart: number
+	ShouldEmitUpAndDownArrowEvents: boolean
 	ShowNativeInput: boolean
 	Text: string
 	TextBounds: Vector2
@@ -8098,7 +8122,7 @@ declare class HapticEffect extends Instance
 	Type: EnumHapticEffectType
 	Waveform: FloatCurve
 	function Play(self): nil
-	function SetKeys(self, keys: { any }): nil
+	function SetWaveformKeys(self, keys: { any }): nil
 	function Stop(self): nil
 end
 
@@ -9321,6 +9345,7 @@ declare class Workspace extends WorldRoot
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
+	FallHeightEnabled: boolean
 	FallenPartsDestroyHeight: number
 	FluidForces: EnumFluidForces
 	GlobalWind: Vector3
@@ -10777,6 +10802,7 @@ declare class SoundService extends Instance
 	DistanceFactor: number
 	DopplerScale: number
 	OpenAttenuationCurveEditorSignal: RBXScriptSignal<{ Instance }>
+	OpenAudioCompressorEditorSignal: RBXScriptSignal<{ Instance }>
 	OpenAudioEqualizerEditorSignal: RBXScriptSignal<{ Instance }>
 	OpenDirectionalCurveEditorSignal: RBXScriptSignal<{ Instance }>
 	RespectFilteringEnabled: boolean
@@ -10934,6 +10960,8 @@ declare class Stats extends Instance
 	UI3DDrawcallCount: number
 	UI3DTriangleCount: number
 	function GetBrowserTrackerId(self): string
+	function GetMemoryCategoryNames(self): { any }
+	function GetMemoryUsageMbAllCategories(self): { any }
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
 	function GetPaginatedMemoryByTexture(self, queryType: EnumTextureQueryType, pageIndex: number, pageSize: number): { [any]: any }
 	function GetTotalMemoryUsageMb(self): number
@@ -11296,7 +11324,6 @@ declare class StudioWidgetsService extends Instance
 	function ApplyHighlight(self, target: StudioWidget, rowName: string?): nil
 	function ApplyShadows(self): nil
 	function ApplySpotlight(self, target: StudioWidget, rowName: string?): nil
-	function AttachPluginGui(self, target: StudioWidget, gui: PluginGui, attachment: StudioAttachment): nil
 	function GetWidgetFromLabel(self, label: string): StudioWidget
 	function GetWidgetFromPluginGui(self, gui: PluginGui): StudioWidget
 	function HideSpotlight(self): nil
@@ -12457,8 +12484,8 @@ declare class WebViewService extends Instance
 	OnWindowClosed: RBXScriptSignal<>
 	function CloseWindow(self): nil
 	function IsAvailable(self): boolean
-	function MutateWindow(self, url: string, title: string?, isVisible: boolean?, searchType: string?, transitionAnimation: string?): nil
-	function OpenWindow(self, url: string, title: string?, isVisible: boolean?, searchType: string?, transitionAnimation: string?): nil
+	function MutateWindow(self, url: string, title: string?, isVisible: boolean?, searchType: string?, transitionAnimation: string?, showDomainAsTitle: boolean?): nil
+	function OpenWindow(self, url: string, title: string?, isVisible: boolean?, searchType: string?, transitionAnimation: string?, showDomainAsTitle: boolean?): nil
 end
 
 declare class WeldConstraint extends Instance
