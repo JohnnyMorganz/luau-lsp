@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     analyze_command.add_argument("--formatter")
         .help("output analysis errors in a particular format")
         .default_value(std::string("default"))
-        .choices("default", "plain", "gnu");
+        .choices("default", "plain", "gnu", "prettier");
     analyze_command.add_argument("--no-strict-dm-types")
         .help("disable strict DataModel types in type-checking")
         .default_value(false)
