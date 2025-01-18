@@ -58,6 +58,8 @@
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
 #endif
 
+#define NOMINMAX
+
 #include <Windows.h>
 #include <io.h>
 #include <memory>
@@ -544,6 +546,11 @@ inline void setControlMode(const control value) noexcept
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
+/*******************************************************************************/
+/**************** https://github.com/QazmoQwerty/error-reporter ****************/
+/*******************************************************************************/
+/*******************************************************************************/
+
 #ifndef DIAGNOSTIC_REPORTER_HPP_INCLUDED
 #define DIAGNOSTIC_REPORTER_HPP_INCLUDED
 
@@ -857,7 +864,7 @@ namespace reporter {
          * Controls all the characters which are to be rendered. 
          * Note: some of these are stored as strings, while others are stored as single characters.
          */
-        struct {
+         struct {
             std::string errorName = "Error";
             std::string warningName = "Warning";
             std::string noteName = "Note";
@@ -866,28 +873,28 @@ namespace reporter {
 
             std::string shortModeLineSeperator = " / "; // seperates multi-line diagnostic messages
 
-            std::string errCodeBracketLeft  = "(";
-            std::string errCodeBracketRight = ")";
+            char32_t errCodeBracketLeft  = '(';
+            char32_t errCodeBracketRight = ')';
 
             std::string beforeFileName  = "╭─ ";
             std::string afterFileName   = " ─╴";
 
-            std::string borderVertical      = "│";
-            std::string borderHorizontal    = "─";
-            std::string borderBottomRight   = "╯";
-            std::string noteBullet          = "•";
+            char32_t borderVertical      = '│';
+            char32_t borderHorizontal    = '─';
+            char32_t borderBottomRight   = '╯';
+            char32_t noteBullet          = '•';
 
-            std::string lineVertical        = "│";
+            char32_t lineVertical        = '│';
             std::string lineBottomLeft  = "╰ ";
 
-            std::string arrowDown           = "v";
-            std::string arrowUp             = "^";
-            std::string underline1          = "~";
-            std::string underline2          = "=";
-            std::string underline3          = "#";
-            std::string underline4          = "*";
-            std::string underlineA          = "-";
-            std::string underlineB          = "+";
+            char32_t arrowDown           = 'v';
+            char32_t arrowUp             = '^';
+            char32_t underline1          = '~';
+            char32_t underline2          = '=';
+            char32_t underline3          = '#';
+            char32_t underline4          = '*';
+            char32_t underlineA          = '-';
+            char32_t underlineB          = '+';
         } chars;
 
         Config() : style(DisplayStyle::RICH), tabWidth(4) { }
@@ -1028,13 +1035,13 @@ namespace reporter {
         static std::string getUnderline(const Config& config, int8_t level, std::string& line, size_t idx) {
             std::string ret = "";
             switch (level) {
-                case -1: ret = config.chars.lineVertical; break;
+                case -1: ret = toString(config.chars.lineVertical); break;
                 case 0:  ret = " "; break;
-                case 1:  ret = config.chars.underline1; break;
-                case 2:  ret = config.chars.underline2; break;
-                case 3:  ret = config.chars.underline3; break;
-                case 4:  ret = config.chars.underline4; break;
-                default: ret = level%2 ? config.chars.underlineA : config.chars.underlineB; break;
+                case 1:  ret = toString(config.chars.underline1); break;
+                case 2:  ret = toString(config.chars.underline2); break;
+                case 3:  ret = toString(config.chars.underline3); break;
+                case 4:  ret = toString(config.chars.underline4); break;
+                default: ret = toString(level%2 ? config.chars.underlineA : config.chars.underlineB); break;
             }
             if (line[idx] == '\t')
                 return repeat(ret, tabWidth(config, idx));
@@ -1053,7 +1060,7 @@ namespace reporter {
                 case DiagnosticType::HELP:    str = config.chars.helpName;          break;
             }
             if (code != "")
-                return str + config.chars.errCodeBracketLeft + code  + config.chars.errCodeBracketRight;
+                return str + toString(config.chars.errCodeBracketLeft) + code  + toString(config.chars.errCodeBracketRight);
             else return str;
         }
 
@@ -1104,7 +1111,7 @@ namespace reporter {
         void printLeft(const Config& config, std::ostream& out, uint32_t maxLine, bool printBar = true) {
             out << std::string(std::to_string(maxLine).size() + config.padding.beforeLineNum + config.padding.afterLineNum, ' ');
             if (printBar)
-                maybeInherit(config, config.colors.border).print(out, config.chars.borderVertical + std::string(config.padding.borderLeft, ' '));
+                maybeInherit(config, config.colors.border).print(out, toString(config.chars.borderVertical) + std::string(config.padding.borderLeft, ' '));
         }
 
         /* prints the `╭─ file.xyz ─╴` at the start of the file's diagnostics */
@@ -1123,8 +1130,8 @@ namespace reporter {
                 out << "\n";
             }
             for (size_t i = 0; i < std::to_string(maxLine).size() + config.padding.beforeLineNum + config.padding.afterLineNum; i++)
-                maybeInherit(config, config.colors.border).print(out, config.chars.borderHorizontal);
-            maybeInherit(config, config.colors.border).print(out, config.chars.borderBottomRight);
+                maybeInherit(config, config.colors.border).print(out, toString(config.chars.borderHorizontal));
+            maybeInherit(config, config.colors.border).print(out, toString(config.chars.borderBottomRight));
             out << "\n";
         }
 
@@ -1138,7 +1145,7 @@ namespace reporter {
                 maybeInherit(config, config.colors.highlightLineNum).print(out, str);
             else maybeInherit(config, config.colors.lineNum).print(out, str);
             if (printBar)
-                    maybeInherit(config, config.colors.border).print(out, config.chars.borderVertical + std::string(config.padding.borderLeft, ' '));
+                    maybeInherit(config, config.colors.border).print(out, toString(config.chars.borderVertical) + std::string(config.padding.borderLeft, ' '));
         }
 
         /* a 'padding' line is an irrelevant line in between two other relevant lines */
@@ -1271,7 +1278,7 @@ namespace reporter {
                         bool b = false;
                         for (size_t idx = i; !b && idx < secondaries.size() && onSameLine(secondaries[idx], first); idx++)
                             if (secondaries[idx].loc.start == j) {
-                                secondaries[idx].color(config).print(out, config.chars.lineVertical);
+                                secondaries[idx].color(config).print(out, toString(config.chars.lineVertical));
                                 if (line[j] == '\t' && tabWidth(config, j) > 1)
                                     out << std::string(tabWidth(config, j) - 1, ' ');
                                 b = true;
@@ -1290,7 +1297,7 @@ namespace reporter {
                                 bool b = false;
                                 for (auto k = i; !b && k < secondaries.size() && onSameLine(secondaries[k], first); k++)
                                     if (secondaries[k].loc.start == j) {
-                                        secondaries[k].color(config).print(out, config.chars.lineVertical);
+                                        secondaries[k].color(config).print(out, toString(config.chars.lineVertical));
                                         if (line[j] == '\t' && tabWidth(config, j) > 1)
                                             out << std::string(tabWidth(config, j) - 1, ' ');
                                         b = true;
@@ -1317,7 +1324,7 @@ namespace reporter {
                                     bool b = false;
                                     for (auto k = i; !b && k < secondaries.size() && onSameLine(secondaries[k], first); k++)
                                         if (secondaries[k].loc.start == j) {
-                                            secondaries[k].color(config).print(out, config.chars.lineVertical);
+                                            secondaries[k].color(config).print(out, toString(config.chars.lineVertical));
                                             if (line[j] == '\t' && tabWidth(config, j) > 1)
                                                 out << std::string(tabWidth(config, j) - 1, ' ');
                                             b = true;
@@ -1448,8 +1455,8 @@ namespace reporter {
                 indent(config, out, line, loc.start);
                 for (auto j = loc.start; j < loc.end; j++)
                     if (line[j] == '\t')
-                        color(config).print(out, repeat(config.chars.arrowDown, tabWidth(config, j)));
-                    else color(config).print(out, config.chars.arrowDown);
+                        color(config).print(out, repeat(toString(config.chars.arrowDown), tabWidth(config, j)));
+                    else color(config).print(out, toString(config.chars.arrowDown));
                 out << "\n";
             }
             
@@ -1461,8 +1468,8 @@ namespace reporter {
                 indent(config, out, line, loc.start);
                 for (auto j = loc.start; j < loc.end; j++)
                     if (line[j] == '\t')
-                        color(config).print(out, repeat(config.chars.arrowUp, tabWidth(config, j)));
-                    else color(config).print(out, config.chars.arrowUp);
+                        color(config).print(out, repeat(toString(config.chars.arrowUp), tabWidth(config, j)));
+                    else color(config).print(out, toString(config.chars.arrowUp));
                 if (subMsg == "")
                     out << "\n";
                 else {
@@ -1520,7 +1527,7 @@ namespace reporter {
             for (; i < secondaries.size(); i++) {
                 auto& secondary = secondaries[i];
                 printLeft(config, out, maxLine, false);
-                secondary.color(config).print(out, config.chars.noteBullet + " " + secondary.tyToString(config) + ": ");
+                secondary.color(config).print(out, toString(config.chars.noteBullet) + " " + secondary.tyToString(config) + ": ");
 
                 auto lines = splitLines(secondary.msg);
                 

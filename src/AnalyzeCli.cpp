@@ -58,6 +58,7 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
         break;
 
     case ReportFormat::Prettier:
+        // Use Reporter.hpp to create new reporter error
         auto file = new reporter::SimpleFile(name);
         auto err = reporter::Error(
                 type, message,
