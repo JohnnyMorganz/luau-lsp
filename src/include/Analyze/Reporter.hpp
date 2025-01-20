@@ -710,7 +710,7 @@ namespace reporter {
         virtual std::string getLine(uint32_t line) {
             std::fstream file(str());
             file.seekg(std::ios::beg);
-            for (uint32_t i=0; i < line - 1; ++i)
+            for (uint32_t i=0; i < line; ++i)
                 file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
             std::string ret;
             std::getline(file, ret);
