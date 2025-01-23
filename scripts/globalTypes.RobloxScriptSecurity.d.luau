@@ -850,6 +850,13 @@ declare class EnumCompileTarget_INTERNAL extends Enum
 	CoreScriptRaw: EnumCompileTarget
 	Studio: EnumCompileTarget
 end
+declare class EnumCompletionAcceptanceBehavior extends EnumItem end
+declare class EnumCompletionAcceptanceBehavior_INTERNAL extends Enum
+	Insert: EnumCompletionAcceptanceBehavior
+	InsertOnEnterReplaceOnTab: EnumCompletionAcceptanceBehavior
+	Replace: EnumCompletionAcceptanceBehavior
+	ReplaceOnEnterInsertOnTab: EnumCompletionAcceptanceBehavior
+end
 declare class EnumCompletionItemKind extends EnumItem end
 declare class EnumCompletionItemKind_INTERNAL extends Enum
 	Class: EnumCompletionItemKind
@@ -3274,6 +3281,7 @@ declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
 	Self: EnumStudioScriptEditorColorCategories
 	String: EnumStudioScriptEditorColorCategories
 	TODO: EnumStudioScriptEditorColorCategories
+	Type: EnumStudioScriptEditorColorCategories
 	Warning: EnumStudioScriptEditorColorCategories
 	Whitespace: EnumStudioScriptEditorColorCategories
 end
@@ -4199,6 +4207,7 @@ type ENUM_LIST = {
 	CollisionFidelity: EnumCollisionFidelity_INTERNAL,
 	CommandPermission: EnumCommandPermission_INTERNAL,
 	CompileTarget: EnumCompileTarget_INTERNAL,
+	CompletionAcceptanceBehavior: EnumCompletionAcceptanceBehavior_INTERNAL,
 	CompletionItemKind: EnumCompletionItemKind_INTERNAL,
 	CompletionItemTag: EnumCompletionItemTag_INTERNAL,
 	CompletionTriggerKind: EnumCompletionTriggerKind_INTERNAL,
@@ -7288,6 +7297,7 @@ declare class Decal extends FaceInstance
 	Color3: Color3
 	LocalTransparencyModifier: number
 	Texture: ContentId
+	TextureContent: Content
 	Transparency: number
 	ZIndex: number
 end
@@ -8256,6 +8266,7 @@ declare class Humanoid extends Instance
 	function BuildRigFromAttachments(self): nil
 	function CacheDefaults(self): nil
 	function ChangeState(self, state: EnumHumanoidStateType?): nil
+	function ComputeOriginalSizeForPart(self, part: Instance): Vector3?
 	function EquipTool(self, tool: Tool): nil
 	function GetAccessories(self): { Accessory }
 	function GetAccessoryHandleScale(self, instance: Instance, partType: EnumBodyPartR15): Vector3
@@ -9414,6 +9425,7 @@ end
 declare class PackageUIService extends Instance
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
 	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
+	function ConvertToMockPackage(self, instance: Instance): nil
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function GetPackageInfo(self, packageAssetId: number): { [any]: any }
 	function PublishPackage(self, packageInstance: Instance, addUndoWayPoint: boolean): nil
@@ -10873,6 +10885,8 @@ declare class StartPageService extends Instance
 	function removeLocalFileFromRegistry(self, fileName: string): nil
 	function setTutorialBannerClosed(self, closed: boolean): nil
 	function setTutorialPopupClosed(self, closed: boolean): nil
+	function shouldShowMacOSDeprecationWarning(self): boolean
+	function shouldShowWinOSDeprecationWarning(self): boolean
 	function startTutorial(self): nil
 end
 
@@ -11017,6 +11031,7 @@ end
 
 declare class Studio extends Instance
 	ActionOnStopSync: EnumActionOnStopSync
+	AutocompleteAcceptanceBehavior: EnumCompletionAcceptanceBehavior
 	CameraAdaptiveSpeed: boolean
 	CameraTweenFocus: boolean
 	CommandBarLocalState: boolean
