@@ -10656,7 +10656,7 @@ declare PhysicalProperties: {
 }
 
 declare Axes: {
-	new: ((axes: any) -> Axes),
+	new: ((...EnumAxis | EnumNormalId) -> Axes),
 }
 
 declare Region3: {
@@ -10689,7 +10689,7 @@ declare CFrame: {
 }
 
 declare Faces: {
-	new: ((normalIds: any) -> Faces),
+	new: ((...EnumNormalId) -> Faces),
 }
 
 declare Rect: {
