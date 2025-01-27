@@ -89,6 +89,7 @@ static lsp::CompletionItem createSuggestRequire(const std::string& name, const s
 
     lsp::CompletionItem item;
     item.label = name;
+    item.labelDetails = {std::nullopt, requirePath};
     item.kind = lsp::CompletionItemKind::Module;
     item.detail = requirePath;
     item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", documentation) + "\n\n" + path};
@@ -270,8 +271,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-             instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-             Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+        instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
+        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
