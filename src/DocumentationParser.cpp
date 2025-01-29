@@ -405,6 +405,10 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             {
                 comments.emplace_back(commentText.substr(4));
             }
+            else if (commentText == "---")
+            {
+                comments.emplace_back("\n");
+            }
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
         {
