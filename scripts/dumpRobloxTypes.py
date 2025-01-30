@@ -362,6 +362,7 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
