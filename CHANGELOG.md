@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added configuration `luau-lsp.server.path` (default: `""`) which allows the use of locally installed `luau-lsp` binaries. ([#897](https://github.com/JohnnyMorganz/luau-lsp/pull/897))
+
 ### Changed
 
 - Sync to upstream Luau 0.659
