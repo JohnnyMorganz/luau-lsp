@@ -483,4 +483,60 @@ TEST_CASE_FIXTURE(Fixture, "ignored_tags")
                             "\n- `x` number -- Testing");
 }
 
+TEST_CASE_FIXTURE(Fixture, "print_comments_multiline_equals_singleline")
+{
+    auto result = check(R"(
+        --[=[
+            Adds 5 to the input number
+
+            ```lua
+            do
+                local x = 5
+            end
+            ```
+
+            @param x number -- Testing
+        ]=]
+        function foo_ml(x: number)
+            return x + 5
+        end
+        
+        --- Adds 5 to the input number
+        ---
+        --- ```lua
+        --- do
+        ---     local x = 5
+        --- end
+        --- ```
+        ---
+        --- @param x number -- Testing
+        function foo_sl(a: number, b: number): number
+            if b == 0 then
+                error("division by 0")
+            end
+            return a / b
+        end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty_ml = requireType("foo_ml");
+    auto ftv_ml = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv_ml);
+    REQUIRE(ftv_ml->definition);
+
+    auto ty_sl = requireType("foo_sl");
+    auto ftv_sl = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv_sl);
+    REQUIRE(ftv_sl->definition);
+
+    auto comments_ml = getComments(ftv_ml->definition->definitionLocation);
+    auto documentation_ml = printMoonwaveDocumentation(comments_ml);
+
+    auto comments_sl = getComments(ftv_sl->definition->definitionLocation);
+    auto documentation_sl = printMoonwaveDocumentation(comments_sl);
+
+    CHECK_EQ(documentation_ml, documentation_sl);
+}
+
 TEST_SUITE_END();
