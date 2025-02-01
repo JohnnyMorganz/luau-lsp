@@ -55,72 +55,95 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
 
 static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
 
+struct MagicChildLookup final : Luau::MagicFunction
+{
+    const Luau::GlobalTypes& globals;
+    Luau::TypeArena& arena;
+    const SourceNodePtr& node;
+    bool supportsRecursiveParameter;
+    bool supportsTimeoutParameter;
+
+    MagicChildLookup(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node, bool supportsRecursiveParameter = false,
+        bool supportsTimeoutParameter = false)
+        : globals(globals)
+        , arena(arena)
+        , node(node)
+        , supportsRecursiveParameter(supportsRecursiveParameter)
+        , supportsTimeoutParameter(supportsTimeoutParameter)
+    {
+    }
+
+    std::optional<Luau::WithPredicate<Luau::TypePackId>> handleOldSolver(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+        const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate) override;
+    bool infer(const Luau::MagicFunctionCallContext& context) override;
+};
+
+std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicChildLookup::handleOldSolver(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId>)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return std::nullopt;
+
+    bool recursive = false;
+    if (supportsRecursiveParameter && expr.args.size >= 2)
+        if (auto recursiveParameter = expr.args.data[1]->as<Luau::AstExprConstantBool>())
+            recursive = recursiveParameter->value;
+
+    auto childName = std::string(str->value.data, str->value.size);
+    auto child = recursive ? node->findDescendant(childName) : node->findChild(childName);
+    if (child)
+        return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
+
+    return std::nullopt;
+}
+
+bool MagicChildLookup::infer(const Luau::MagicFunctionCallContext& context)
+{
+    if (context.callSite->args.size < 1)
+        return false;
+
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return false;
+
+    bool recursive = false;
+    bool timeoutEnabled = false;
+    if (context.callSite->args.size >= 2)
+    {
+        if (auto recursiveParameter = context.callSite->args.data[1]->as<Luau::AstExprConstantBool>();
+            recursiveParameter && supportsRecursiveParameter)
+            recursive = recursiveParameter->value;
+        if (supportsTimeoutParameter)
+            timeoutEnabled = true;
+    }
+
+    auto childName = std::string(str->value.data, str->value.size);
+    auto child = recursive ? node->findDescendant(childName) : node->findChild(childName);
+    if (child)
+    {
+        asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
+        return true;
+    }
+
+    if (timeoutEnabled)
+    {
+        auto optionalInstanceType = Luau::makeOption(globals.builtinTypes, arena, getTypeIdForClass(globals.globalScope, "Instance").value());
+        asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({optionalInstanceType}));
+        return true;
+    }
+
+    return false;
+}
+
 static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node, Luau::TypeId lookupFuncTy,
     bool supportsRecursiveParameter = false, bool supportsTimeoutParameter = false)
 {
-    Luau::attachMagicFunction(lookupFuncTy,
-        [node, &arena, &globals, supportsRecursiveParameter](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
-            const Luau::AstExprCall& expr,
-            const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
-        {
-            if (expr.args.size < 1)
-                return std::nullopt;
-
-            auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
-            if (!str)
-                return std::nullopt;
-
-            bool recursive = false;
-            if (supportsRecursiveParameter && expr.args.size >= 2)
-                if (auto recursiveParameter = expr.args.data[1]->as<Luau::AstExprConstantBool>())
-                    recursive = recursiveParameter->value;
-
-            auto childName = std::string(str->value.data, str->value.size);
-            auto child = recursive ? node->findDescendant(childName) : node->findChild(childName);
-            if (child)
-                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *child)})};
-
-            return std::nullopt;
-        });
-    Luau::attachDcrMagicFunction(lookupFuncTy,
-        [node, &arena, &globals, supportsRecursiveParameter, supportsTimeoutParameter](Luau::MagicFunctionCallContext context) -> bool
-        {
-            if (context.callSite->args.size < 1)
-                return false;
-
-            auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
-            if (!str)
-                return false;
-
-            bool recursive = false;
-            bool timeoutEnabled = false;
-            if (context.callSite->args.size >= 2)
-            {
-                if (auto recursiveParameter = context.callSite->args.data[1]->as<Luau::AstExprConstantBool>();
-                    recursiveParameter && supportsRecursiveParameter)
-                    recursive = recursiveParameter->value;
-                if (supportsTimeoutParameter)
-                    timeoutEnabled = true;
-            }
-
-            auto childName = std::string(str->value.data, str->value.size);
-            auto child = recursive ? node->findDescendant(childName) : node->findChild(childName);
-            if (child)
-            {
-                asMutable(context.result)
-                    ->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *child)}));
-                return true;
-            }
-
-            if (timeoutEnabled)
-            {
-                auto optionalInstanceType = Luau::makeOption(globals.builtinTypes, arena, getTypeIdForClass(globals.globalScope, "Instance").value());
-                asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({optionalInstanceType}));
-                return true;
-            }
-
-            return false;
-        });
+    Luau::attachMagicFunction(
+        lookupFuncTy, std::make_shared<MagicChildLookup>(globals, arena, node, supportsRecursiveParameter, supportsTimeoutParameter));
     Luau::attachTag(lookupFuncTy, kSourcemapGeneratedTag);
     Luau::attachTag(lookupFuncTy, "Children");
 }
@@ -161,6 +184,60 @@ static void injectChildrenLookupFunctions(
                 Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
         }
     }
+}
+
+struct MagicFindFirstAncestor final : Luau::MagicFunction
+{
+    const Luau::GlobalTypes& globals;
+    Luau::TypeArena& arena;
+    const SourceNodePtr& node;
+
+    MagicFindFirstAncestor(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node)
+        : globals(globals)
+        , arena(arena)
+        , node(node)
+    {
+    }
+
+    std::optional<Luau::WithPredicate<Luau::TypePackId>> handleOldSolver(Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope,
+        const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate) override;
+    bool infer(const Luau::MagicFunctionCallContext& context) override;
+};
+
+std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicFindFirstAncestor::handleOldSolver(
+    Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return std::nullopt;
+
+    // This is a O(n) search, not great!
+    if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
+    {
+        return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *ancestor)})};
+    }
+
+    return std::nullopt;
+}
+
+bool MagicFindFirstAncestor::infer(const Luau::MagicFunctionCallContext& context)
+{
+    if (context.callSite->args.size < 1)
+        return false;
+
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return false;
+
+    if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
+    {
+        asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({getSourcemapType(globals, arena, *ancestor)}));
+        return true;
+    }
+    return false;
 }
 
 // Retrieves the corresponding Luau type for a Sourcemap node
@@ -240,44 +317,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
                     auto findFirstAncestorFunction = Luau::makeFunction(
                         arena, typeId, {globals.builtinTypes->stringType}, {"name"}, {Luau::makeOption(globals.builtinTypes, arena, *instanceType)});
 
-                    Luau::attachMagicFunction(findFirstAncestorFunction,
-                        [&arena, &globals, node](Luau::TypeChecker& typeChecker, const Luau::ScopePtr& scope, const Luau::AstExprCall& expr,
-                            const Luau::WithPredicate<Luau::TypePackId>& withPredicate) -> std::optional<Luau::WithPredicate<Luau::TypePackId>>
-                        {
-                            if (expr.args.size < 1)
-                                return std::nullopt;
-
-                            auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
-                            if (!str)
-                                return std::nullopt;
-
-                            // This is a O(n) search, not great!
-                            if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
-                            {
-                                return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({getSourcemapType(globals, arena, *ancestor)})};
-                            }
-
-                            return std::nullopt;
-                        });
-                    Luau::attachDcrMagicFunction(findFirstAncestorFunction,
-                        [node, &arena, &globals](Luau::MagicFunctionCallContext context) -> bool
-                        {
-                            if (context.callSite->args.size < 1)
-                                return false;
-
-                            auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
-                            if (!str)
-                                return false;
-
-                            if (auto ancestor = node->findAncestor(std::string(str->value.data, str->value.size)))
-                            {
-                                asMutable(context.result)
-                                    ->ty.emplace<Luau::BoundTypePack>(
-                                        context.solver->arena->addTypePack({getSourcemapType(globals, arena, *ancestor)}));
-                                return true;
-                            }
-                            return false;
-                        });
+                    Luau::attachMagicFunction(findFirstAncestorFunction, std::make_shared<MagicFindFirstAncestor>(globals, arena, node));
                     ctv->props["FindFirstAncestor"] = Luau::makeProperty(findFirstAncestorFunction, "@roblox/globaltype/Instance.FindFirstAncestor");
 
                     injectChildrenLookupFunctions(globals, arena, ctv, typeId, node);
