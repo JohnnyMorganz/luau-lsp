@@ -622,7 +622,7 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "undici": "^6.19.2",
+    "undici": "^6.21.1",
     "vscode-languageclient": "^8.1.0-next.6"
   }
 }
