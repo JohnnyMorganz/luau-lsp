@@ -511,10 +511,7 @@ TEST_CASE_FIXTURE(Fixture, "print_comments_multiline_equals_singleline")
         ---
         --- @param x number -- Testing
         function foo_sl(a: number, b: number): number
-            if b == 0 then
-                error("division by 0")
-            end
-            return a / b
+            return x + 5
         end
     )");
 
