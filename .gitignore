@@ -50,3 +50,6 @@ trace.json
 
 # Python venvs
 .venv
+
+# Test File
+discard.luau
