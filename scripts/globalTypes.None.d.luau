@@ -2722,6 +2722,8 @@ declare class EnumProductLocationRestriction_INTERNAL extends Enum
 end
 declare class EnumProductPurchaseChannel extends EnumItem end
 declare class EnumProductPurchaseChannel_INTERNAL extends Enum
+	AdReward: EnumProductPurchaseChannel
+	CommerceProduct: EnumProductPurchaseChannel
 	ExperienceDetailsPage: EnumProductPurchaseChannel
 	InExperience: EnumProductPurchaseChannel
 end
@@ -5372,6 +5374,7 @@ declare class AudioAnalyzer extends Instance
 	PeakLevel: number
 	RmsLevel: number
 	SpectrumEnabled: boolean
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetSpectrum(self): { any }
@@ -5508,12 +5511,13 @@ end
 declare class AudioPitchShifter extends Instance
 	Bypass: boolean
 	Pitch: number
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
 end
 
 declare class AudioPlayer extends Instance
-	AssetId: string
+	Asset: ContentId
 	AutoLoad: boolean
 	Ended: RBXScriptSignal<>
 	IsPlaying: boolean
@@ -9410,6 +9414,7 @@ end
 
 declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
+	CharacterSoundsUseNewApi: EnumRolloutState
 	DistanceFactor: number
 	DopplerScale: number
 	RespectFilteringEnabled: boolean

@@ -2722,6 +2722,8 @@ declare class EnumProductLocationRestriction_INTERNAL extends Enum
 end
 declare class EnumProductPurchaseChannel extends EnumItem end
 declare class EnumProductPurchaseChannel_INTERNAL extends Enum
+	AdReward: EnumProductPurchaseChannel
+	CommerceProduct: EnumProductPurchaseChannel
 	ExperienceDetailsPage: EnumProductPurchaseChannel
 	InExperience: EnumProductPurchaseChannel
 end
@@ -5363,6 +5365,7 @@ end
 declare class AnnotationsService extends Instance
 	AnnotationAdded: RBXScriptSignal<string, Annotation, string>
 	AnnotationDeleted: RBXScriptSignal<string, Annotation>
+	AnnotationEdited: RBXScriptSignal<string, string, string>
 	AnnotationResolved: RBXScriptSignal<string, Annotation, boolean>
 	AnnotationsVisible: boolean
 	Hovered: Annotation
@@ -5370,6 +5373,7 @@ declare class AnnotationsService extends Instance
 	Selected: Annotation
 	function CreateAnnotation(self, annotation: Annotation): nil
 	function DeleteAnnotation(self, annotation: Annotation): nil
+	function EditAnnotation(self, uniqueId: string, contents: string): nil
 	function GetAnnotationThreads(self): { Instance }
 	function LoadAnnotationReplies(self, annotation: Annotation): nil
 	function LoadResolvedAnnotations(self, count: number): nil
@@ -5534,6 +5538,7 @@ declare class AudioAnalyzer extends Instance
 	PeakLevel: number
 	RmsLevel: number
 	SpectrumEnabled: boolean
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetSpectrum(self): { any }
@@ -5596,6 +5601,7 @@ declare class AudioEcho extends Instance
 	WetLevel: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function Reset(self): nil
 end
 
 declare class AudioEmitter extends Instance
@@ -5680,6 +5686,7 @@ declare class AudioListener extends Instance
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetDistanceAttenuation(self): { [any]: any }
 	function GetInteractingEmitters(self): { Instance }
+	function Reset(self): nil
 	function SetAngleAttenuation(self, curve: { [any]: any }): nil
 	function SetDistanceAttenuation(self, curve: { [any]: any }): nil
 end
@@ -5687,12 +5694,13 @@ end
 declare class AudioPitchShifter extends Instance
 	Bypass: boolean
 	Pitch: number
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
 end
 
 declare class AudioPlayer extends Instance
-	AssetId: string
+	Asset: ContentId
 	AutoLoad: boolean
 	Ended: RBXScriptSignal<>
 	IsPlaying: boolean
@@ -5728,6 +5736,7 @@ declare class AudioReverb extends Instance
 	WetLevel: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function Reset(self): nil
 end
 
 declare class AudioSearchParams extends Instance
@@ -10854,6 +10863,7 @@ end
 declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
 	AudioInstanceAdded: RBXScriptSignal<Instance>
+	CharacterSoundsUseNewApi: EnumRolloutState
 	DefaultListenerLocation: EnumListenerLocation
 	DeviceListChanged: RBXScriptSignal<any>
 	DistanceFactor: number
@@ -11023,6 +11033,8 @@ declare class Stats extends Instance
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
 	function GetPaginatedMemoryByTexture(self, queryType: EnumTextureQueryType, pageIndex: number, pageSize: number): { [any]: any }
 	function GetTotalMemoryUsageMb(self): number
+	function ResetHarmonyMemoryTarget(self): nil
+	function SetHarmonyMemoryTarget(self, targetMB: number): nil
 end
 
 declare class StatsItem extends Instance
@@ -11903,11 +11915,14 @@ declare class UGCValidationService extends Instance
 	function CheckMeshInCameraFrustum(self, meshId: string, meshScale: Vector3, handleWorldCF: CFrame, cameraWorldCF: CFrame): boolean
 	function CompareTextureOverlapByteString(self, byteStringBaseline: string, byteStringFollowup: string): { any }
 	function CompareTextureOverlapTextureId(self, textureIdBaseline: string, textureIdFollowup: string): { any }
+	function CreateEditableImageFromBinaryStringRobloxOnly(self, value: BinaryStringValue): EditableImage
+	function CreateEditableMeshFromBinaryStringRobloxOnly(self, value: BinaryStringValue): EditableMesh
 	function FetchAssetWithFormat(self, url: ContentId, assetFormat: string): { Instance }
 	function GetCagingRelevancyMetrics(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string, offsetInner: Vector3, offsetOuter: Vector3): any
 	function GetDynamicHeadEditableMeshInactiveControls(self, editableMesh: EditableMesh, controlNames: { any }): any
 	function GetDynamicHeadMeshInactiveControls(self, meshId: string, controlNames: { any }): any
 	function GetEditableCagingRelevancyMetrics(self, innerCage: EditableMesh, outerCage: EditableMesh, refMesh: EditableMesh, offsetInner: Vector3, offsetOuter: Vector3): any
+	function GetEditableImageData(self, editableImage: EditableImage): BinaryStringValue
 	function GetEditableImageSize(self, editableImage: EditableImage): Vector2
 	function GetEditableMeshMaxNearbyVerticesCollisions(self, editableMesh: EditableMesh, meshScale: Vector3): number
 	function GetEditableMeshTriCount(self, editableMesh: EditableMesh): number
@@ -11917,6 +11932,7 @@ declare class UGCValidationService extends Instance
 	function GetImageTransparencyWithByteString(self, textureId: string): number
 	function GetImageTransparencyWithTextureID(self, textureId: string): number
 	function GetMaxNearbyVerticesCollisions(self, meshId: string, meshScale: Vector3): number
+	function GetMeshDataBinaryString(self, meshId: string): BinaryStringValue
 	function GetMeshTriCount(self, meshId: string): number
 	function GetMeshVertColors(self, meshId: string): { any }
 	function GetMeshVerticesSimilarityRate(self, meshId: string, meshScale: Vector3): number
@@ -11925,6 +11941,7 @@ declare class UGCValidationService extends Instance
 	function GetTextureSize(self, textureId: string): Vector2
 	function IsEditableMeshNumCoplanarIntersectionsOverLimit(self, editableMesh: EditableMesh, limit: number, meshScale: Vector3, intersectBackFaces: boolean): boolean
 	function IsNumCoplanarIntersectionsOverLimit(self, meshId: string, limit: number, meshScale: Vector3, intersectBackFaces: boolean): boolean
+	function RegisterAlternateMesh(self, alternateId: string, binaryStringValue: BinaryStringValue): nil
 	function RegisterUGCValidationFunction(self, setFunction: ((...any) -> ...any)): nil
 	function ReportUGCValidationCounter(self, success: boolean, validationType: string): nil
 	function ReportUGCValidationFailureTelemetry(self, errorType: string): nil
@@ -12534,6 +12551,7 @@ declare class VoiceChatService extends Instance
 	VoiceChatEnabledForUniverseOnRcc: boolean
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
 	function joinVoice(self): nil
+	function leaveVoice(self): nil
 	function rejoinVoice(self): nil
 end
 
