@@ -57,34 +57,32 @@ TEST_CASE("getFilesToAnalyze_still_matches_file_if_it_was_explicitly_provided")
     CHECK_EQ(getFilesToAnalyze({fileA}, {"a.luau"}), std::vector<std::filesystem::path>{fileA});
 }
 
-TEST_CASE("getFilesToAnalyze_handles_settings_file")
+TEST_CASE("ignore_globs_from_settings_file_applied")
 {
-    TempDir t("analyze_cli_handles_settings_file");
-    auto configFile = t.write_child(".vscode/settings.json", "{ \"luau-lsp.ignoreGlobs\": [ \"/ignored/**\" ] }");
-    t.write_child("ignored/ignore.luau", "invalid luau code function do end");
-    auto fileA = t.write_child("src/init.luau", "print(require(\"./ignored/ignore\"))");
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::vector<std::filesystem::path> definitionPaths;
 
-    auto configContent = readFile(configFile);
-    REQUIRE(configContent.has_value());
+    auto configFile = R"({ "luau-lsp.ignoreGlobs": [ "/ignored/**" ] })";
 
-    auto config = dottedToClientConfiguration(configContent.value());
-    CHECK_EQ(config.ignoreGlobs, std::vector<std::string>{"/ignored/**"});
-    auto files = getFilesToAnalyze({fileA}, config.ignoreGlobs);
-    CHECK_EQ(files, std::vector<std::filesystem::path>{fileA});
+    applySettings(configFile, client, ignoreGlobs, definitionPaths);
+
+    REQUIRE_EQ(ignoreGlobs.size(), 1);
+    CHECK_EQ(ignoreGlobs[0], "/ignored/**");
 }
 
-TEST_CASE("getFilesToAnalyze_def_files_settings_file")
+TEST_CASE("definition_files_from_settings_file_applied")
 {
-    TempDir t("analyze_cli_def_files_settings_file");
-    auto configFile = t.write_child(".vscode/settings.json", "{ \"luau-lsp.types.definitionFiles\": [ \"global_types/types.d.luau\" ] }");
-    t.write_child("global_types/types.d.luau", "declare TEST: boolean");
-    t.write_child("src/init.luau", "print(TEST)");
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::vector<std::filesystem::path> definitionPaths;
 
-    auto configContent = readFile(configFile);
-    REQUIRE(configContent.has_value());
+    auto configFile = R"({ "luau-lsp.types.definitionFiles": [ "global_types/types.d.luau" ] })";
 
-    auto config = dottedToClientConfiguration(configContent.value());
-    CHECK_EQ(config.types.definitionFiles, std::vector<std::filesystem::path>{"global_types/types.d.luau"});
+    applySettings(configFile, client, ignoreGlobs, definitionPaths);
+
+    REQUIRE_EQ(definitionPaths.size(), 1);
+    CHECK_EQ(definitionPaths[0], "global_types/types.d.luau");
 }
 
 TEST_SUITE_END();
