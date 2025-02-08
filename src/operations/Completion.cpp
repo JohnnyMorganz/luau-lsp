@@ -3,6 +3,7 @@
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/FragmentAutocomplete.h"
 #include "Luau/TxnLog.h"
 #include "Luau/TypeUtils.h"
 #include "Luau/TimeTrace.h"
@@ -337,7 +338,7 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
 }
 
 std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
-    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
+    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule)
 {
     if (entry.documentationSymbol)
         if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
@@ -358,17 +359,15 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
         else
         {
             // TODO: there is not a nice way to get the containing table type from the entry, so we compute it ourselves
-            auto module = getModule(moduleName, /* forAutocomplete: */ true);
-
-            if (module)
+            if (localModule)
             {
                 Luau::TypeId* parentTy = nullptr;
                 if (auto node = ancestry.back())
                 {
                     if (auto indexName = node->as<Luau::AstExprIndexName>())
-                        parentTy = module->astTypes.find(indexName->expr);
+                        parentTy = localModule->astTypes.find(indexName->expr);
                     else if (auto indexExpr = node->as<Luau::AstExprIndexExpr>())
-                        parentTy = module->astTypes.find(indexExpr->expr);
+                        parentTy = localModule->astTypes.find(indexExpr->expr);
                 }
 
                 if (parentTy)
@@ -424,13 +423,37 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     checkStrict(moduleName, /* forAutocomplete: */ true);
 
     auto position = textDocument->convertPosition(params.position);
-    auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
-            std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
-        {
-            tags.insert(tag);
-            return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-        });
+
+    Luau::FragmentAutocompleteResult fragmentResult;
+    Luau::AutocompleteResult result;
+    if (config.completion.enableFragmentAutocomplete)
+    {
+        Luau::FrontendOptions frontendOptions;
+        frontendOptions.retainFullTypeGraphs = true;
+        if (FFlag::LuauSolverV2)
+            frontendOptions.runLintChecks = true;
+        else
+            frontendOptions.forAutocomplete = true;
+
+        // It is important to keep the fragmentResult in scope for the whole completion step
+        // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
+        fragmentResult = Luau::fragmentAutocomplete(frontend, textDocument->getText(), moduleName, position, frontendOptions,
+            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+            {
+                tags.insert(tag);
+                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+            });
+        result = fragmentResult.acResults;
+    }
+    else
+        result = Luau::autocomplete(frontend, moduleName, position,
+            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+            {
+                tags.insert(tag);
+                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+            });
 
 
     std::vector<lsp::CompletionItem> items{};
@@ -446,7 +469,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
 
-        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, moduleName))
+        const auto localModule =
+            config.completion.enableFragmentAutocomplete ? fragmentResult.incrementalModule : getModule(moduleName, /* forAutocomplete: */ true);
+        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);

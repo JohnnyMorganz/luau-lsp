@@ -1,8 +1,18 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "TempDir.h"
+#include "ScopedFlags.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
+
+LUAU_FASTFLAG(LuauAllowFragmentParsing)
+LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
+LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
+LUAU_FASTFLAG(LuauSymbolEquality)
+LUAU_FASTFLAG(LexerResumesFromPosition2)
+LUAU_FASTFLAG(LuauReferenceAllocatorInNewSolver)
+LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
+LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -18,6 +28,24 @@ lsp::CompletionItem requireItem(const std::vector<lsp::CompletionItem>& items, c
     REQUIRE_MESSAGE(item.has_value(), "no item found");
     return item.value();
 }
+
+struct FragmentAutocompleteFixture : Fixture
+{
+    FragmentAutocompleteFixture()
+    {
+        client->globalConfig.completion.enableFragmentAutocomplete = true;
+    }
+
+    // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
+    ScopedFastFlag flag1{FFlag::LuauAllowFragmentParsing, true};
+    ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
+    ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
+    ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
+    ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
+    ScopedFastFlag flag6{FFlag::LuauReferenceAllocatorInNewSolver, true};
+    ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
+    ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
+};
 
 TEST_SUITE_BEGIN("Autocomplete");
 
@@ -44,6 +72,58 @@ TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
     trim(item.documentation->value);
     CHECK_EQ(item.documentation->value, "This is a function documentation comment");
+}
+
+TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_has_documentation")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local tbl = {
+            --- This is a property on the table!
+            prop = true,
+        }
+
+        local x = tbl.|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "prop");
+
+    REQUIRE(item.documentation);
+    CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item.documentation->value);
+    CHECK_EQ(item.documentation->value, "This is a property on the table!");
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_property_autocomplete_has_documentation")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local tbl = {
+            --- This is a property on the table!
+            prop = true,
+        }
+
+        local x = tbl.|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "prop");
+
+    REQUIRE(item.documentation);
+    CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item.documentation->value);
+    CHECK_EQ(item.documentation->value, "This is a property on the table!");
 }
 
 TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_documentation")
