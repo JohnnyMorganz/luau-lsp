@@ -5,92 +5,72 @@
 {
   "version": "0.2.0",
   "configurations": [
-    // {
-    //   "name": "Run Extension Standalone",
-    //   "type": "extensionHost",
-    //   "request": "launch",
-    //   "args": [
-    //     "--disable-extensions",
-    //     "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
-    //   ],
-    //   "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-    //   "preLaunchTask": "npm: compile",
-    //   "env": {
-    //     "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp"
-    //   },
-    //   "windows": {
-    //     "env": {
-    //       "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp.exe"
-    //     }
-    //   }
-    // },
-    // {
-    //   "name": "Run Extension",
-    //   "type": "extensionHost",
-    //   "request": "launch",
-    //   "args": [
-    //     "--disable-extensions",
-    //     "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
-    //   ],
-    //   "env": {
-    //     "CMAKE_BUILD_TYPE": "${command:cmake.buildType}"
-    //   },
-    //   "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-    //   "preLaunchTask": "Build Server and Extension"
-    // },
-    // {
-    //   "name": "Extension Tests",
-    //   "type": "extensionHost",
-    //   "request": "launch",
-    //   "args": [
-    //     "--extensionDevelopmentPath=${workspaceFolder}/editors/code",
-    //     "--extensionTestsPath=${workspaceFolder}/editors/code/dist/test/suite/index",
-    //     "${workspaceFolder}/editors/code/testFixture"
-    //   ],
-    //   "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
-    //   "preLaunchTask": "tasks: watch-tests"
-    // },
-    // {
-    //   "name": "Win Attach to Server",
-    //   "type": "cppvsdbg",
-    //   "processId": "${command:pickProcess}",
-    //   "request": "attach"
-    // },
     {
-      "name": "Run CLI Application (DEBUG)",
-      "type": "cppdbg",
-      "program": "${workspaceFolder}/build/Debug/luau-lsp.exe",
-      "environment": [{ "name": "config", "value": "Debug" }],
+      "name": "Run Extension Standalone",
+      "type": "extensionHost",
       "request": "launch",
-      "cwd": "${workspaceRoot}",
-      "args": ["analyze", "--formatter", "prettier", "${input:test-file}"]
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
+      ],
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
+      "preLaunchTask": "npm: compile",
+      "env": {
+        "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp"
+      },
+      "windows": {
+        "env": {
+          "LUAU_LSP_SERVER_PATH": "${workspaceFolder}/${input:binaryPath}/luau-lsp.exe"
+        }
+      }
+    },
+    {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code"
+      ],
+      "env": {
+        "CMAKE_BUILD_TYPE": "${command:cmake.buildType}"
+      },
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
+      "preLaunchTask": "Build Server and Extension"
+    },
+    {
+      "name": "Extension Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/editors/code",
+        "--extensionTestsPath=${workspaceFolder}/editors/code/dist/test/suite/index",
+        "${workspaceFolder}/editors/code/testFixture"
+      ],
+      "outFiles": ["${workspaceFolder}/editors/code/dist/**/*.js"],
+      "preLaunchTask": "tasks: watch-tests"
+    },
+    {
+      "name": "Win Attach to Server",
+      "type": "cppvsdbg",
+      "processId": "${command:pickProcess}",
+      "request": "attach"
     }
   ],
   "inputs": [
-    // {
-    //   "id": "binaryPath",
-    //   "type": "pickString",
-    //   "description": "Path to build folder containing 'luau-lsp'",
-    //   "default": "cmake-build-relwithdebinfo-visual-studio",
-    //   "options": [
-    //     "cmake-build-debug-visual-studio",
-    //     "cmake-build-release-visual-studio",
-    //     "cmake-build-relwithdebinfo-visual-studio",
-    //     "cmake-build-debug",
-    //     "cmake-build-release",
-    //     "cmake-build-relwithdebinfo"
-    //   ]
-    // },
     {
-      "id": "test-file",
-      "type": "promptString",
-      "description": "File to analyze",
-      "default": "discard.luau"
-    },
-    {
-      "id": "fflags",
-      "type": "promptString",
-      "description": "Flags for CL"
+      "id": "binaryPath",
+      "type": "pickString",
+      "description": "Path to build folder containing 'luau-lsp'",
+      "default": "cmake-build-relwithdebinfo-visual-studio",
+      "options": [
+        "cmake-build-debug-visual-studio",
+        "cmake-build-release-visual-studio",
+        "cmake-build-relwithdebinfo-visual-studio",
+        "cmake-build-debug",
+        "cmake-build-release",
+        "cmake-build-relwithdebinfo"
+      ]
     }
   ]
 }
