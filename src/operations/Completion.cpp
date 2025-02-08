@@ -338,7 +338,7 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
 }
 
 std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
-    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
+    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule)
 {
     if (entry.documentationSymbol)
         if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
@@ -359,17 +359,15 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
         else
         {
             // TODO: there is not a nice way to get the containing table type from the entry, so we compute it ourselves
-            auto module = getModule(moduleName, /* forAutocomplete: */ true);
-
-            if (module)
+            if (localModule)
             {
                 Luau::TypeId* parentTy = nullptr;
                 if (auto node = ancestry.back())
                 {
                     if (auto indexName = node->as<Luau::AstExprIndexName>())
-                        parentTy = module->astTypes.find(indexName->expr);
+                        parentTy = localModule->astTypes.find(indexName->expr);
                     else if (auto indexExpr = node->as<Luau::AstExprIndexExpr>())
-                        parentTy = module->astTypes.find(indexExpr->expr);
+                        parentTy = localModule->astTypes.find(indexExpr->expr);
                 }
 
                 if (parentTy)
@@ -471,7 +469,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
 
-        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, moduleName))
+        const auto localModule =
+            config.completion.enableFragmentAutocomplete ? fragmentResult.incrementalModule : getModule(moduleName, /* forAutocomplete: */ true);
+        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
