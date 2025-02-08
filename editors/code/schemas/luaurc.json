@@ -46,8 +46,9 @@
             "title": "Require path aliases",
             "description": "The path is resolved by first checking if the first word is an alias defined in a .luaurc file. If so, we perform a string substitution.",
             "examples": [
-                { "Roact": "C:/LuauModules/Roact-v1.4.2" },
-                { "@lib": "packages/lib" }
+                { "shared": "src/shared" },
+                { "client": "src/client" },
+				{ "server": "src/server" }
             ],
             "type": "object",
             "additionalProperties": false,
