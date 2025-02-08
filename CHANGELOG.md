@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `CompletionItem.detail`
 - In VSCode, the opening brace `{` character will be automatically closed with a `}` character when completed within an interpolated string. This occurs when the `{` character is typed just before whitespace or a `` ` `` character ([#916](https://github.com/JohnnyMorganz/luau-lsp/issues/916)).
 - Added support for Luau's fragment autocomplete system. This can be enabled by configuring `luau-lsp.completion.enableFragmentAutocomplete` (default: `false`). This incremental system can lead to performance improvements when autocompleting.
+- The `luau-lsp.ignoreGlobs` and `luau-lsp.types.definitionFiles` configuration from a settings JSON file will now be
+  applied when running `luau-lsp analyze --settings file.json` on the command
+  line ([#892](https://github.com/JohnnyMorganz/luau-lsp/issues/892))
 
 ### Changed
 
