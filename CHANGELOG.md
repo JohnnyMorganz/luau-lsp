@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added configuration `luau-lsp.server.path` (default: `""`) which allows the use of locally installed `luau-lsp` binaries. ([#897](https://github.com/JohnnyMorganz/luau-lsp/pull/897))
+- Auto-import require path information is added in `CompletionItem.labelDetails.description` as well as just in
+  `CompletionItem.detail`
 
 ### Changed
 
