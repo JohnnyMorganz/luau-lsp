@@ -510,7 +510,7 @@ TEST_CASE_FIXTURE(Fixture, "print_comments_multiline_equals_singleline")
         --- ```
         ---
         --- @param x number -- Testing
-        function foo_sl(a: number, b: number): number
+        function foo_sl(x: number)
             return x + 5
         end
     )");
@@ -518,12 +518,12 @@ TEST_CASE_FIXTURE(Fixture, "print_comments_multiline_equals_singleline")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty_ml = requireType("foo_ml");
-    auto ftv_ml = Luau::get<Luau::FunctionType>(ty);
+    auto ftv_ml = Luau::get<Luau::FunctionType>(ty_ml);
     REQUIRE(ftv_ml);
     REQUIRE(ftv_ml->definition);
 
     auto ty_sl = requireType("foo_sl");
-    auto ftv_sl = Luau::get<Luau::FunctionType>(ty);
+    auto ftv_sl = Luau::get<Luau::FunctionType>(ty_sl);
     REQUIRE(ftv_sl);
     REQUIRE(ftv_sl->definition);
 
