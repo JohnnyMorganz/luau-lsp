@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed server failing to start up due to attempting to run an invalid path as the server binary
+
 ## [1.39.0] - 2025-02-08
 
 ### Added

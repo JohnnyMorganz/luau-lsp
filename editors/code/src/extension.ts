@@ -198,12 +198,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   const serverBinConfig = vscode.workspace
     .getConfiguration("luau-lsp.server")
-    .get("path", "");
+    .get("path", "")
+    .trim();
 
   const uri = vscode.Uri.file(serverBinConfig);
   let serverBinPath;
 
-  if (await utils.exists(uri)) {
+  if (serverBinConfig !== "" && (await utils.exists(uri))) {
     serverBinPath = uri.fsPath;
   } else {
     if (serverBinConfig !== "") {
