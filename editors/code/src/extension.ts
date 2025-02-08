@@ -181,11 +181,27 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
-  const serverBinPath = vscode.Uri.joinPath(
-    context.extensionUri,
-    "bin",
-    os.platform() === "win32" ? "server.exe" : "server",
-  ).fsPath;
+  const serverBinConfig = vscode.workspace
+    .getConfiguration("luau-lsp.server")
+    .get("path", "");
+
+  const uri = vscode.Uri.file(serverBinConfig);
+  let serverBinPath;
+
+  if (await utils.exists(uri)) {
+    serverBinPath = uri.fsPath;
+  } else {
+    if (serverBinConfig !== "") {
+      vscode.window.showWarningMessage(
+        `Server binary at path \`${serverBinConfig}\` does not exist, falling back to bundled binary`,
+      );
+    }
+    serverBinPath = vscode.Uri.joinPath(
+      context.extensionUri,
+      "bin",
+      os.platform() === "win32" ? "server.exe" : "server",
+    ).fsPath;
+  }
 
   const run: Executable = {
     command: serverBinPath,

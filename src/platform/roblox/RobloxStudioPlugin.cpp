@@ -30,10 +30,12 @@ bool RobloxPlatform::handleNotification(const std::string& method, std::optional
     if (method == "$/plugin/full")
     {
         onStudioPluginFullChange(JSON_REQUIRED_PARAMS(params, "$/plugin/full"));
+        return true;
     }
     else if (method == "$/plugin/clear")
     {
         onStudioPluginClear();
+        return true;
     }
 
     return false;

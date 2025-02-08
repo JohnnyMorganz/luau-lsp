@@ -339,13 +339,15 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else
     {
+        bool handled = false;
         for (auto& workspace : workspaceFolders)
         {
             if (workspace->platform && workspace->platform->handleNotification(method, params))
-                return;
+                handled = true;
         }
 
-        client->sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
+        if (!handled)
+            client->sendLogMessage(lsp::MessageType::Warning, "unknown notification method: " + method);
     }
 }
 

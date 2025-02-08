@@ -151,6 +151,11 @@
           "scope": "window",
           "default": "off"
         },
+        "luau-lsp.server.path": {
+          "markdownDescription": "Path to the Luau LSP server binary. If not provided, uses the binary included in the extension.",
+          "type": "string",
+          "default": ""
+        },
         "luau-lsp.ignoreGlobs": {
           "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
           "type": "array",
@@ -622,7 +627,7 @@
   },
   "dependencies": {
     "express": "^4.21.2",
-    "undici": "^6.19.2",
+    "undici": "^6.21.1",
     "vscode-languageclient": "^8.1.0-next.6"
   }
 }

@@ -689,9 +689,12 @@
                     "Parameters": [
                         {
                             "Name": "axes",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "Axis | EnumNormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {
@@ -1355,9 +1358,12 @@
                     "Parameters": [
                         {
                             "Name": "normalIds",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "NormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {

@@ -664,6 +664,8 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_of_modules_show_path_name")
     REQUIRE_EQ(imports.size(), 2);
     CHECK_EQ(imports[0].detail, "ReplicatedStorage.Folder1.Module");
     CHECK_EQ(imports[1].detail, "ReplicatedStorage.Folder2.Module");
+    CHECK_EQ(imports[0].labelDetails->description, "ReplicatedStorage.Folder1.Module");
+    CHECK_EQ(imports[1].labelDetails->description, "ReplicatedStorage.Folder2.Module");
 }
 
 TEST_SUITE_END();
