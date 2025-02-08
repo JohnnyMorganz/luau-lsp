@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.660
 
+### Fixed
+
+- Fixed erroneous `unknown notificated method: $/plugin/full` message in logs even though plugin message was handled
+
 ## [1.38.1] - 2025-01-12
 
 ### Changed
