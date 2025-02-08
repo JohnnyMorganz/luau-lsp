@@ -4,6 +4,8 @@
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
+LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
+
 static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
 {
     if (a == b)
@@ -36,34 +38,59 @@ static bool isSameFunction(const Luau::TypeId a, const Luau::TypeId b)
 
 // Find all reverse dependencies of the top-level module
 // NOTE: this function is quite expensive as it requires a BFS
-// TODO: this comes from `markDirty`
+// TODO: this comes from `Frontend::traverseDependencies`
 std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Luau::ModuleName& moduleName)
 {
     std::vector<Luau::ModuleName> dependents{};
-    std::unordered_map<Luau::ModuleName, std::vector<Luau::ModuleName>> reverseDeps;
-    for (const auto& module : frontend.sourceNodes)
+
+    if (FFlag::LuauBetterReverseDependencyTracking)
     {
-        for (const auto& dep : module.second->requireSet)
-            reverseDeps[dep].push_back(module.first);
+        std::vector<Luau::ModuleName> queue{moduleName};
+        while (!queue.empty())
+        {
+            Luau::ModuleName next = std::move(queue.back());
+            queue.pop_back();
+
+            // TODO: maybe do a set-lookup instead?
+            if (contains(dependents, next))
+                continue;
+
+            Luau::SourceNode& sourceNode = *frontend.sourceNodes[next];
+
+            dependents.push_back(next);
+
+            const Luau::Set<Luau::ModuleName>& localDependents = sourceNode.dependents;
+            queue.insert(queue.end(), localDependents.begin(), localDependents.end());
+        }
     }
-    std::vector<Luau::ModuleName> queue{moduleName};
-    while (!queue.empty())
+    else
     {
-        Luau::ModuleName next = std::move(queue.back());
-        queue.pop_back();
+        std::unordered_map<Luau::ModuleName, std::vector<Luau::ModuleName>> reverseDeps;
+        for (const auto& module : frontend.sourceNodes)
+        {
+            for (const auto& dep : module.second->requireSet)
+                reverseDeps[dep].push_back(module.first);
+        }
+        std::vector<Luau::ModuleName> queue{moduleName};
+        while (!queue.empty())
+        {
+            Luau::ModuleName next = std::move(queue.back());
+            queue.pop_back();
 
-        // TODO: maybe do a set-lookup instead?
-        if (contains(dependents, next))
-            continue;
+            // TODO: maybe do a set-lookup instead?
+            if (contains(dependents, next))
+                continue;
 
-        dependents.push_back(next);
+            dependents.push_back(next);
 
-        if (0 == reverseDeps.count(next))
-            continue;
+            if (0 == reverseDeps.count(next))
+                continue;
 
-        const std::vector<Luau::ModuleName>& dependents = reverseDeps[next];
-        queue.insert(queue.end(), dependents.begin(), dependents.end());
+            const std::vector<Luau::ModuleName>& localDependents = reverseDeps[next];
+            queue.insert(queue.end(), localDependents.begin(), localDependents.end());
+        }
     }
+
     return dependents;
 }
 
