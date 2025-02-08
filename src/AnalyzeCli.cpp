@@ -2,7 +2,6 @@
 #include "Analyze/AnalyzeCli.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Analyze/CliClient.hpp"
-#include "Analyze/Reporter.hpp"
 #include "Flags.hpp"
 
 #include "LSP/ClientConfiguration.hpp"
@@ -15,6 +14,7 @@
 #include "Luau/Transpiler.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Reporter/Reporter.hpp"
 #include "LSP/Utils.hpp"
 #include "glob/match.h"
 #include <iostream>
@@ -61,7 +61,7 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
         // Use Reporter.hpp to create new reporter error
         auto file = new reporter::SimpleFile(name);
         auto err = reporter::Error(
-                type, message,
+                message, message,
                 { loc.begin.line, loc.begin.column, loc.end.column, file }
             );
         err.print(std::cerr);
