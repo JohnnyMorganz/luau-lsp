@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed erroneous `unknown notificated method: $/plugin/full` message in logs even though plugin message was handled
+- Linux ARM releases are now built on arm-based GitHub runners, and hence should support Linux ARM properly
 
 ## [1.38.1] - 2025-01-12
 
