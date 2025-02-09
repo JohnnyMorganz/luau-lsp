@@ -48,7 +48,7 @@
             "examples": [
                 { "shared": "src/shared" },
                 { "client": "src/client" },
-				{ "server": "src/server" }
+                { "server": "src/server" }
             ],
             "type": "object",
             "additionalProperties": false,
