@@ -162,6 +162,21 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauNewSolverPrePopulateClasses"] = "true";
   }
 
+  if (
+    vscode.workspace
+      .getConfiguration("luau-lsp.completion")
+      .get<boolean>("enableFragmentAutocomplete")
+  ) {
+    fflags["LuauAllowFragmentParsing"] = "true";
+    fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
+    fflags["LuauStoreSolverTypeOnModule"] = "true";
+    fflags["LuauSymbolEquality"] = "true";
+    fflags["LexerResumesFromPosition2"] = "true";
+    fflags["LuauReferenceAllocatorInNewSolver"] = "true";
+    fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
+    fflags["LuauBetterReverseDependencyTracking"] = "true";
+  }
+
   // Handle overrides
   const overridenFFlags = fflagsConfig.get<FFlags>("override");
   if (overridenFFlags) {
@@ -183,12 +198,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   const serverBinConfig = vscode.workspace
     .getConfiguration("luau-lsp.server")
-    .get("path", "");
+    .get("path", "")
+    .trim();
 
   const uri = vscode.Uri.file(serverBinConfig);
   let serverBinPath;
 
-  if (await utils.exists(uri)) {
+  if (serverBinConfig !== "" && (await utils.exists(uri))) {
     serverBinPath = uri.fsPath;
   } else {
     if (serverBinConfig !== "") {
@@ -278,7 +294,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("luau-lsp.fflags")) {
+      if (
+        e.affectsConfiguration("luau-lsp.fflags") ||
+        e.affectsConfiguration("luau-lsp.completion.enableFragmentAutocomplete")
+      ) {
         vscode.window
           .showInformationMessage(
             "Luau FFlags have been changed, reload server for this to take effect.",

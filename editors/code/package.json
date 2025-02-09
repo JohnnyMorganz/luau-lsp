@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.38.1",
+  "version": "1.39.1",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -499,6 +499,12 @@
           "default": [
             "**/_Index/**"
           ],
+          "scope": "resource"
+        },
+        "luau-lsp.completion.enableFragmentAutocomplete": {
+          "markdownDescription": "Enables the experimental fragment autocomplete system for performance improvements",
+          "type": "boolean",
+          "default": false,
           "scope": "resource"
         },
         "luau-lsp.signatureHelp.enabled": {
