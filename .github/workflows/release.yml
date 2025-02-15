@@ -5,6 +5,9 @@ on:
     tags: ["*"]
   workflow_dispatch:
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: "10.13"
+
 jobs:
   create-release:
     name: Create Release

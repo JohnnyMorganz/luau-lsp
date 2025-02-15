@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: "10.13"
+
 jobs:
   build:
     strategy:
