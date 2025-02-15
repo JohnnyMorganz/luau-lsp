@@ -14,6 +14,7 @@
 #include "Luau/Transpiler.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Reporter/Reporter.hpp"
 #include "LSP/Utils.hpp"
 #include "glob/match.h"
 #include <iostream>
@@ -29,6 +30,7 @@ enum class ReportFormat
     Default,
     Luacheck,
     Gnu,
+    Prettier
 };
 
 static void report(ReportFormat format, const char* name, const Luau::Location& loc, const char* type, const char* message)
@@ -54,6 +56,15 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
         // Note: GNU end column is inclusive but our end column is exclusive
         fprintf(stderr, "%s:%d.%d-%d.%d: %s: %s\n", name, loc.begin.line + 1, loc.begin.column + 1, loc.end.line + 1, loc.end.column, type, message);
         break;
+
+    case ReportFormat::Prettier:
+        // Use Reporter.hpp to create new reporter error
+        auto file = new reporter::SimpleFile(name);
+        auto err = reporter::Error(
+                message, message,
+                { loc.begin.line, loc.begin.column, loc.end.column, file }
+            );
+        err.print(std::cerr);
     }
 }
 
@@ -259,6 +270,8 @@ int startAnalyze(const argparse::ArgumentParser& program)
         format = ReportFormat::Luacheck;
     else if (reportFormatter == "gnu")
         format = ReportFormat::Gnu;
+    else if (reportFormatter == "prettier")
+        format = ReportFormat::Prettier;
 
 #if !defined(LUAU_ENABLE_TIME_TRACE)
     if (FFlag::DebugLuauTimeTracing)
