@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Single-line documentation comments (`---`) now correctly preserve newlines ([#917](https://github.com/JohnnyMorganz/luau-lsp/pull/917)).
 
+### Changed
+
+- Sync to upstream Luau 0.661
+
 ## [1.39.1] - 2025-02-08
 
 ### Fixed
