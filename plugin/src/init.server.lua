@@ -15,8 +15,12 @@ local ConnectButton = toolbar:CreateButton(
 	"Luau Language Server"
 ) :: PluginToolbarButton
 
+ConnectButton.ClickableWhenViewportHidden = true
+
 local SettingsButton =
 	toolbar:CreateButton("Settings", "Open Settings", "rbxassetid://13997395868") :: PluginToolbarButton
+
+SettingsButton.ClickableWhenViewportHidden = true
 
 --#region Settings
 
