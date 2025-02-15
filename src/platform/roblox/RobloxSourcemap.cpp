@@ -59,15 +59,15 @@ struct MagicChildLookup final : Luau::MagicFunction
 {
     const Luau::GlobalTypes& globals;
     Luau::TypeArena& arena;
-    const SourceNodePtr& node;
+    SourceNodePtr node;
     bool supportsRecursiveParameter;
     bool supportsTimeoutParameter;
 
-    MagicChildLookup(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node, bool supportsRecursiveParameter = false,
+    MagicChildLookup(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, SourceNodePtr node, bool supportsRecursiveParameter = false,
         bool supportsTimeoutParameter = false)
         : globals(globals)
         , arena(arena)
-        , node(node)
+        , node(std::move(node))
         , supportsRecursiveParameter(supportsRecursiveParameter)
         , supportsTimeoutParameter(supportsTimeoutParameter)
     {

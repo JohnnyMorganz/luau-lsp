@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Single-line documentation comments (`---`) now correctly preserve newlines ([#917](https://github.com/JohnnyMorganz/luau-lsp/pull/917)).
+- Fixed stack-use-after-free crash in sourcemap definition magic functions when the new solver is
+  enabled ([#928](https://github.com/JohnnyMorganz/luau-lsp/issues/928))
 
 ## [1.39.1] - 2025-02-08
 
