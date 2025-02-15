@@ -46,7 +46,7 @@ public:
         // but it seems that the option specified here is the one used
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
-              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ false}))
+              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
     {
         fileResolver.client = std::static_pointer_cast<BaseClient>(client);
         fileResolver.rootUri = uri;
@@ -78,7 +78,7 @@ public:
 
     void indexFiles(const ClientConfiguration& config);
 
-    Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName, bool runLintChecks = false);
+    Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName);
     void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
