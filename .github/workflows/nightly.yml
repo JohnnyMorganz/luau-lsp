@@ -6,7 +6,7 @@ on:
     - cron: "0 0 * * *" # Runs at 00:00 UTC every day
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: "10.13"
+  MACOSX_DEPLOYMENT_TARGET: "10.15"
 
 jobs:
   dist:
