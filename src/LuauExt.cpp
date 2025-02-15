@@ -221,6 +221,16 @@ struct FindNodeType : public Luau::AstVisitor
     {
         return visit(static_cast<Luau::AstNode*>(node));
     }
+    
+    bool visit(Luau::AstGenericType* node) override
+    {
+        return false;
+    }
+
+    bool visit(Luau::AstGenericTypePack* node) override
+    {
+        return false;
+    }
 
     bool visit(Luau::AstStatBlock* block) override
     {
