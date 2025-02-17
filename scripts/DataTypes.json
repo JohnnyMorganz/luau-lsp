@@ -2787,7 +2787,7 @@
                         }
                     ],
                     "ReturnType": {
-                        "Name": "Number"
+                        "Name": "number"
                     }
                 },
                 {
