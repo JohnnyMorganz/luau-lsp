@@ -2787,7 +2787,7 @@
                         }
                     ],
                     "ReturnType": {
-                        "Name": "Vector2"
+                        "Name": "Number"
                     }
                 },
                 {
