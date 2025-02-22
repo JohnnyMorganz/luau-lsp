@@ -10,7 +10,6 @@ LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
 LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
 LUAU_FASTFLAG(LuauSymbolEquality)
 LUAU_FASTFLAG(LexerResumesFromPosition2)
-LUAU_FASTFLAG(LuauReferenceAllocatorInNewSolver)
 LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
 LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
@@ -42,7 +41,6 @@ struct FragmentAutocompleteFixture : Fixture
     ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
     ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
     ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
-    ScopedFastFlag flag6{FFlag::LuauReferenceAllocatorInNewSolver, true};
     ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
     ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
 };
