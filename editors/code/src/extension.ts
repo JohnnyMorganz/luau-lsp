@@ -172,7 +172,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauStoreSolverTypeOnModule"] = "true";
     fflags["LuauSymbolEquality"] = "true";
     fflags["LexerResumesFromPosition2"] = "true";
-    fflags["LuauReferenceAllocatorInNewSolver"] = "true";
     fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
     fflags["LuauBetterReverseDependencyTracking"] = "true";
   }
