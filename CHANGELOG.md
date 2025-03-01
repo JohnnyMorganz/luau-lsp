@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added configuration `luau-lsp.types.disabledGlobals` to support removing globals from the main scope for analysis.
+  Accepts a list of libraries or library methods (e.g., `table`, `string.split`,
+  etc.) ([#888](https://github.com/JohnnyMorganz/luau-lsp/issues/888))
+
 ### Changed
 
 - Sync to upstream Luau 0.663

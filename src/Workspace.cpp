@@ -300,7 +300,72 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-void WorkspaceFolder::registerTypes()
+static void clearDisabledGlobals(const ClientPtr client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
+{
+    const auto targetScope = globalTypes.globalScope;
+    for (const auto& disabledGlobal : disabledGlobals)
+    {
+        std::string library = disabledGlobal;
+        std::optional<std::string> method = std::nullopt;
+
+        if (const auto separator = disabledGlobal.find('.'); separator != std::string::npos)
+        {
+            library = disabledGlobal.substr(0, separator);
+            method = disabledGlobal.substr(separator + 1);
+        }
+
+        const auto globalName = globalTypes.globalNames.names->get(library.c_str());
+        if (globalName.value == nullptr)
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: skipping unknown global - " + disabledGlobal);
+            continue;
+        }
+
+        if (auto binding = targetScope->bindings.find(globalName); binding != targetScope->bindings.end())
+        {
+            if (method)
+            {
+                const auto typeId = Luau::follow(binding->second.typeId);
+                if (const auto ttv = Luau::getMutable<Luau::TableType>(typeId))
+                {
+                    if (contains(ttv->props, *method))
+                    {
+                        client->sendLogMessage(lsp::MessageType::Info, "disabling globals: erasing global - " + disabledGlobal);
+                        ttv->props.erase(*method);
+                    }
+                    else
+                        client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: could not find method - " + disabledGlobal);
+                }
+                else if (const auto ctv = Luau::getMutable<Luau::ClassType>(typeId))
+                {
+                    if (contains(ctv->props, *method))
+                    {
+                        client->sendLogMessage(lsp::MessageType::Info, "disabling globals: erasing global - " + disabledGlobal);
+                        ttv->props.erase(*method);
+                    }
+                    else
+                        client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: could not find method - " + disabledGlobal);
+                }
+                else
+                {
+                    client->sendLogMessage(lsp::MessageType::Warning,
+                        "disabling globals: cannot clear method from global, only tables or classes are supported - " + disabledGlobal);
+                }
+            }
+            else
+            {
+                client->sendLogMessage(lsp::MessageType::Info, "disabling globals: erasing global - " + disabledGlobal);
+                targetScope->bindings.erase(globalName);
+            }
+        }
+        else
+        {
+            client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: skipping unknown global - " + disabledGlobal);
+        }
+    }
+}
+
+void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlobals)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
     client->sendTrace("workspace initialization: registering Luau globals");
@@ -368,6 +433,16 @@ void WorkspaceFolder::registerTypes()
             client->publishDiagnostics({uri, std::nullopt, diagnostics});
         }
     }
+
+    if (!disabledGlobals.empty())
+    {
+        client->sendTrace("workspace initialization: removing disabled globals");
+        clearDisabledGlobals(client, frontend.globals, disabledGlobals);
+        if (!FFlag::LuauSolverV2)
+            clearDisabledGlobals(client, frontend.globalsForAutocomplete, disabledGlobals);
+        client->sendTrace("workspace initialization: removing disabled globals COMPLETED");
+    }
+
     Luau::freeze(frontend.globals.globalTypes);
     if (!FFlag::LuauSolverV2)
         Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
@@ -387,7 +462,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
         fileResolver.platform = platform.get();
 
-        registerTypes();
+        registerTypes(configuration.types.disabledGlobals);
     }
 
     client->sendTrace("workspace: apply platform-specific configuration");

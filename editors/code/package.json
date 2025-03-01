@@ -294,6 +294,15 @@
           },
           "scope": "window"
         },
+        "luau-lsp.types.disabledGlobals": {
+          "markdownDescription": "A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "window"
+        },
         "luau-lsp.types.roblox": {
           "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
           "type": "boolean",
