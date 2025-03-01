@@ -327,6 +327,72 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
     }
 }
 
+TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_that_is_an_invalid_identifier_should_use_braces")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = {
+            ["hello world"] = true
+        }
+
+        print(x.|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 1);
+    auto item = requireItem(result, "hello world");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->newText, "[\"hello world\"]");
+
+    REQUIRE_EQ(item.additionalTextEdits.size(), 1);
+    CHECK_EQ(item.additionalTextEdits[0].range.start, lsp::Position{6, 15});
+    CHECK_EQ(item.additionalTextEdits[0].range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.additionalTextEdits[0].newText, "");
+}
+
+TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_that_is_a_keyword_should_use_braces")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = {
+            ["then"] = true
+        }
+
+        print(x.|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 1);
+    auto item = requireItem(result, "then");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->newText, "[\"then\"]");
+
+    REQUIRE_EQ(item.additionalTextEdits.size(), 1);
+    CHECK_EQ(item.additionalTextEdits[0].range.start, lsp::Position{6, 15});
+    CHECK_EQ(item.additionalTextEdits[0].range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.additionalTextEdits[0].newText, "");
+}
+
 static void checkStringCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     auto item = requireItem(items, label);

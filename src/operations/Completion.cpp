@@ -303,6 +303,19 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
     return SortText::Default;
 }
 
+const std::vector<std::string> keywords = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil",
+    "not", "or", "repeat", "return", "then", "true", "until", "while"};
+
+static bool isKeyword(std::string_view s)
+{
+    return std::find(keywords.begin(), keywords.end(), s) != keywords.end();
+}
+
+static bool isIdentifier(std::string_view s)
+{
+    return Luau::isIdentifier(s) && !isKeyword(s);
+}
+
 static std::pair<std::string, std::string> computeLabelDetailsForFunction(const Luau::AutocompleteEntry& entry, const Luau::FunctionType* ftv)
 {
     std::string detail = "(";
@@ -511,7 +524,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         }
 
         // Handle if name is not an identifier
-        if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
+        if (entry.kind == Luau::AutocompleteEntryKind::Property && !isIdentifier(name))
         {
             auto lastAst = result.ancestry.back();
             if (auto indexName = lastAst->as<Luau::AstExprIndexName>())
