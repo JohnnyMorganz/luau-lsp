@@ -161,6 +161,52 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_definition")
     CHECK_EQ(result[0].range.end, lsp::Position{2, 25});
 }
 
+TEST_CASE_FIXTURE(Fixture, "methods_on_explicitly_defined_self")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        local Test = {}
+        Test.__index = Test
+
+        function Test.new()
+            local self = setmetatable({}, Test)
+            return self
+        end
+
+        function Test.someFunc(self: Test)
+        end
+
+        function Test:anotherFunc()
+        end
+
+        function Test.anotherCallingFunc(self: Test)
+            self:some|Func()
+            self:anotherFunc()
+        end
+
+        export type Test = typeof(Test.new())
+
+        return Test
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{9, 22});
+    CHECK_EQ(result[0].range.end, lsp::Position{9, 30});
+
+    params.position.line += 1;
+    result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{12, 22});
+    CHECK_EQ(result[0].range.end, lsp::Position{12, 33});
+}
+
 TEST_CASE_FIXTURE(Fixture, "cross_module_inlined_function_table_property_definition")
 {
     auto required = newDocument("required.luau", R"(

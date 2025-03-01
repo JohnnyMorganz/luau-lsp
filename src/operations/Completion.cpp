@@ -243,7 +243,25 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
     case Luau::AutocompleteEntryKind::GeneratedFunction:
         return lsp::CompletionItemKind::Function;
     case Luau::AutocompleteEntryKind::RequirePath:
+    {
+        // FIXME: We abuse the fact that fullPath becomes entry.insertText to determine require kind
+        // This should be deleted once require suggestions supports tags
+        if (entry.insertText == "ALIAS")
+        {
+            return lsp::CompletionItemKind::Constant;
+        }
+        // TODO: ALIAS/FILE is deprecated
+        else if (entry.insertText == "FILE" || entry.insertText == "ALIAS/FILE")
+        {
+            return lsp::CompletionItemKind::File;
+        }
+        // TODO: ALIAS/DIRECTORY is deprecated
+        else if (entry.insertText == "DIRECTORY" || entry.insertText == "ALIAS/DIRECTORY")
+        {
+            return lsp::CompletionItemKind::Folder;
+        }
         return lsp::CompletionItemKind::File;
+    }
     }
 
     return std::nullopt;
@@ -256,7 +274,9 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
         return text;
 
     // If it's a file or directory alias, de-prioritise it compared to normal paths
-    if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+    // FIXME: we abuse the face that entry.insertText == require kind. This should be deleted once require suggestions support tags
+    if (entry.insertText == "ALIAS" || entry.insertText == "ALIAS/FILE" || entry.insertText == "ALIAS/DIRECTORY" ||
+        std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
         return SortText::AutoImports;
 
     // If the entry is `loadstring`, deprioritise it
@@ -281,6 +301,19 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
         return SortText::Keywords;
 
     return SortText::Default;
+}
+
+const std::vector<std::string> keywords = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil",
+    "not", "or", "repeat", "return", "then", "true", "until", "while"};
+
+static bool isKeyword(std::string_view s)
+{
+    return std::find(keywords.begin(), keywords.end(), s) != keywords.end();
+}
+
+static bool isIdentifier(std::string_view s)
+{
+    return Luau::isIdentifier(s) && !isKeyword(s);
 }
 
 static std::pair<std::string, std::string> computeLabelDetailsForFunction(const Luau::AutocompleteEntry& entry, const Luau::FunctionType* ftv)
@@ -481,13 +514,17 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
 
-        // We shouldn't include the extension when inserting a file
-        if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
-            if (auto pos = name.find_last_of('.'); pos != std::string::npos)
-                item.insertText = std::string(name).erase(pos);
+        if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
+        {
+            // FIXME: we abuse fullPath -> insertText to determine require kind
+            // This should be fixed once require suggestions supports tags
+            if (entry.insertText == "FILE")
+                if (auto pos = name.find_last_of('.'); pos != std::string::npos)
+                    item.insertText = std::string(name).erase(pos);
+        }
 
         // Handle if name is not an identifier
-        if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
+        if (entry.kind == Luau::AutocompleteEntryKind::Property && !isIdentifier(name))
         {
             auto lastAst = result.ancestry.back();
             if (auto indexName = lastAst->as<Luau::AstExprIndexName>())

@@ -116,6 +116,12 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     }
 }
 
+std::optional<Luau::RequireSuggestions> WorkspaceFileResolver ::getRequireSuggestions(
+    const Luau::ModuleName& requirer, const std::optional<std::string>& pathString) const
+{
+    return platform->getStringRequireSuggestions(requirer, pathString);
+}
+
 const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const
 {
     std::optional<std::filesystem::path> realPath = platform->resolveToRealPath(name);

@@ -5,12 +5,10 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauAllowFragmentParsing)
 LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
 LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
 LUAU_FASTFLAG(LuauSymbolEquality)
 LUAU_FASTFLAG(LexerResumesFromPosition2)
-LUAU_FASTFLAG(LuauReferenceAllocatorInNewSolver)
 LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
 LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
@@ -37,12 +35,10 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag flag1{FFlag::LuauAllowFragmentParsing, true};
     ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
     ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
     ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
     ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
-    ScopedFastFlag flag6{FFlag::LuauReferenceAllocatorInNewSolver, true};
     ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
     ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
 };
@@ -329,6 +325,72 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
         CHECK_EQ(item.textEdit->range.end, lsp::Position{8, 18});
         CHECK_EQ(item.textEdit->newText, label);
     }
+}
+
+TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_that_is_an_invalid_identifier_should_use_braces")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = {
+            ["hello world"] = true
+        }
+
+        print(x.|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 1);
+    auto item = requireItem(result, "hello world");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->newText, "[\"hello world\"]");
+
+    REQUIRE_EQ(item.additionalTextEdits.size(), 1);
+    CHECK_EQ(item.additionalTextEdits[0].range.start, lsp::Position{6, 15});
+    CHECK_EQ(item.additionalTextEdits[0].range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.additionalTextEdits[0].newText, "");
+}
+
+TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_that_is_a_keyword_should_use_braces")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = {
+            ["then"] = true
+        }
+
+        print(x.|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 1);
+    auto item = requireItem(result, "then");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.textEdit->newText, "[\"then\"]");
+
+    REQUIRE_EQ(item.additionalTextEdits.size(), 1);
+    CHECK_EQ(item.additionalTextEdits[0].range.start, lsp::Position{6, 15});
+    CHECK_EQ(item.additionalTextEdits[0].range.end, lsp::Position{6, 16});
+    CHECK_EQ(item.additionalTextEdits[0].newText, "");
 }
 
 static void checkStringCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
@@ -1009,7 +1071,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 0);
+    CHECK_EQ(result.size(), 1);
+    checkFolderCompletionExists(result, "..");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_directory_alias")

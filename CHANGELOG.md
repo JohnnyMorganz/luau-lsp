@@ -6,10 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.663
+
 ### Fixed
 
 - Fixed an issue where lint warnings would suddenly disappear when typing characters / saving a file, and only reappear
   after further edits
+- Autocompleting a table property that matches a keyword will now autocomplete correctly with braces (i.e., `t.then` ->
+  `t["then"]`) ([#937](https://github.com/JohnnyMorganz/luau-lsp/issues/937))
 
 ## [1.39.2] - 2025-02-15
 
