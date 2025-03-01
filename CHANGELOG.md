@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.40.0] - 2025-03-01
+
 ### Added
 
 - Added configuration `luau-lsp.types.disabledGlobals` to support removing globals from the main scope for analysis.
