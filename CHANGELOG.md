@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue where lint warnings would suddenly disappear when typing characters / saving a file, and only reappear
   after further edits
 
+### Changed
+
+- Sync to upstream Luau 0.663
+
 ## [1.39.2] - 2025-02-15
 
 ### Changed

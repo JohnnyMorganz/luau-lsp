@@ -4,8 +4,6 @@
 #include "Luau/Common.h"
 
 LUAU_FASTFLAG(LuauSolverV2)
-LUAU_FASTFLAG(LuauNewSolverPopulateTableLocations)
-LUAU_FASTFLAG(LuauNewSolverPrePopulateClasses)
 
 int main(int argc, const char** argv)
 {
@@ -15,10 +13,6 @@ int main(int argc, const char** argv)
     if (doctest::parseFlag(argc, argv, "--new-solver"))
     {
         FFlag::LuauSolverV2.value = true;
-
-        // These are required flags for internal functionality.
-        FFlag::LuauNewSolverPopulateTableLocations.value = true;
-        FFlag::LuauNewSolverPrePopulateClasses.value = true;
     }
 
     int test_result = context.run(); // run queries, or run tests unless --no-run

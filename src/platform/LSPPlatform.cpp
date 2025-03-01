@@ -180,104 +180,93 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveModule(const Luau::ModuleInf
     return std::nullopt;
 }
 
+std::optional<Luau::RequireSuggestions> LSPPlatform::getStringRequireSuggestions(
+    const Luau::ModuleName& requirer, const std::optional<std::string>& pathString) const
+{
+    if (!pathString.has_value())
+        return std::nullopt;
+
+    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    auto luauConfig = fileResolver->getConfig(requirer);
+
+    Luau::RequireSuggestions result;
+
+    // Include any files in the directory
+    auto contentsString = pathString.value();
+
+    // We should strip any trailing values until a `/` is found in case autocomplete
+    // is triggered half-way through.
+    // E.g., for "Contents/Test|", we should only consider up to "Contents/" to find all files
+    // For "Mod|", we should only consider an empty string ""
+    auto separator = contentsString.find_last_of("/\\");
+    if (separator == std::string::npos)
+        contentsString = "";
+    else
+        contentsString = contentsString.substr(0, separator + 1);
+
+    // Populate with custom aliases, if we are at the start of a string require
+    if (contentsString.empty())
+    {
+        for (const auto& [_, aliasInfo] : luauConfig.aliases)
+        {
+            // FIXME: Abusing full path to determine require kind
+            result.emplace_back(Luau::RequireSuggestion{"@" + aliasInfo.originalCase, "ALIAS"});
+        }
+        // DEPRECATED
+        for (const auto& [aliasName, _] : config.require.fileAliases)
+        {
+            // FIXME: Abusing full path to determine require kind
+            result.emplace_back(Luau::RequireSuggestion{aliasName, "ALIAS/FILE"});
+        }
+        // DEPRECATED
+        for (const auto& [aliasName, _] : config.require.directoryAliases)
+        {
+            // FIXME: Abusing full path to determine require kind
+            result.emplace_back(Luau::RequireSuggestion{aliasName, "ALIAS/DIRECTORY"});
+        }
+    }
+
+    // Check if it starts with a directory alias, otherwise resolve with require base path
+    std::filesystem::path currentDirectory;
+    if (auto luaurcAlias = resolveAlias(contentsString, luauConfig))
+        currentDirectory = luaurcAlias.value();
+    else if (auto DEPRECATED_directoryAlias =
+                 resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString))
+        currentDirectory = DEPRECATED_directoryAlias.value();
+    else if (auto realPath = resolveToRealPath(requirer); realPath && realPath->has_parent_path())
+        currentDirectory = realPath->parent_path().append(contentsString);
+    else
+        // TODO: this is a weird fallback, maybe we should indicate an error somewhere
+        currentDirectory = workspaceFolder->rootUri.fsPath().append(contentsString);
+
+    try
+    {
+        for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))
+        {
+            if (dir_entry.is_regular_file() || dir_entry.is_directory())
+            {
+                std::string fileName = dir_entry.path().filename().generic_string();
+                // FIXME: abusing fullPath to determine require kind
+                result.emplace_back(Luau::RequireSuggestion{fileName, dir_entry.is_directory() ? "DIRECTORY" : "FILE"});
+            }
+        }
+    }
+    catch (std::exception&)
+    {
+    }
+
+    // Add in ".." support
+    if (currentDirectory.has_parent_path())
+    {
+        // FIXME: abusing fullPath to determine require kind
+        result.emplace_back(Luau::RequireSuggestion{"..", "DIRECTORY"});
+    }
+
+    return result;
+}
+
 std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
     const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
-    if (tag == "Require")
-    {
-        if (!contents.has_value())
-            return std::nullopt;
-
-        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-        auto luauConfig = fileResolver->getConfig(moduleName);
-
-        Luau::AutocompleteEntryMap result;
-
-        // Include any files in the directory
-        auto contentsString = contents.value();
-
-        // We should strip any trailing values until a `/` is found in case autocomplete
-        // is triggered half-way through.
-        // E.g., for "Contents/Test|", we should only consider up to "Contents/" to find all files
-        // For "Mod|", we should only consider an empty string ""
-        auto separator = contentsString.find_last_of("/\\");
-        if (separator == std::string::npos)
-            contentsString = "";
-        else
-            contentsString = contentsString.substr(0, separator + 1);
-
-        // Populate with custom aliases, if we are at the start of a string require
-        if (contentsString.empty())
-        {
-            for (const auto& [_, aliasInfo] : luauConfig.aliases)
-            {
-                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
-                    Luau::TypeCorrectKind::Correct};
-                entry.tags.push_back("Alias");
-                result.insert_or_assign("@" + aliasInfo.originalCase, entry);
-            }
-            // DEPRECATED
-            for (const auto& [aliasName, _] : config.require.fileAliases)
-            {
-                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
-                    Luau::TypeCorrectKind::Correct};
-                entry.tags.push_back("File");
-                entry.tags.push_back("Alias");
-                result.insert_or_assign(aliasName, entry);
-            }
-            // DEPRECATED
-            for (const auto& [aliasName, _] : config.require.directoryAliases)
-            {
-                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
-                    Luau::TypeCorrectKind::Correct};
-                entry.tags.push_back("Directory");
-                entry.tags.push_back("Alias");
-                result.insert_or_assign(aliasName, entry);
-            }
-        }
-
-        // Check if it starts with a directory alias, otherwise resolve with require base path
-        std::filesystem::path currentDirectory;
-        if (auto luaurcAlias = resolveAlias(contentsString, luauConfig))
-            currentDirectory = luaurcAlias.value();
-        else if (auto DEPRECATED_directoryAlias =
-                     resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString))
-            currentDirectory = DEPRECATED_directoryAlias.value();
-        else if (auto realPath = resolveToRealPath(moduleName); realPath && realPath->has_parent_path())
-            currentDirectory = realPath->parent_path().append(contentsString);
-        else
-            // TODO: this is a weird fallback, maybe we should indicate an error somewhere
-            currentDirectory = workspaceFolder->rootUri.fsPath().append(contentsString);
-
-        try
-        {
-            for (const auto& dir_entry : std::filesystem::directory_iterator(currentDirectory))
-            {
-                if (dir_entry.is_regular_file() || dir_entry.is_directory())
-                {
-                    std::string fileName = dir_entry.path().filename().generic_string();
-                    Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false,
-                        false, Luau::TypeCorrectKind::Correct};
-                    entry.tags.push_back(dir_entry.is_directory() ? "Directory" : "File");
-                    result.insert_or_assign(fileName, entry);
-                }
-            }
-
-            // Add in ".." support
-            if (currentDirectory.has_parent_path())
-            {
-                Luau::AutocompleteEntry dotdotEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false,
-                    false, Luau::TypeCorrectKind::Correct};
-                dotdotEntry.tags.push_back("Directory");
-                result.insert_or_assign("..", dotdotEntry);
-            }
-        }
-        catch (std::exception&)
-        {
-        }
-
-        return result;
-    }
-
     return std::nullopt;
 }

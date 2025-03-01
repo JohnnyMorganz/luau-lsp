@@ -5,12 +5,10 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauAllowFragmentParsing)
 LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
 LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
 LUAU_FASTFLAG(LuauSymbolEquality)
 LUAU_FASTFLAG(LexerResumesFromPosition2)
-LUAU_FASTFLAG(LuauReferenceAllocatorInNewSolver)
 LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
 LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
@@ -37,12 +35,10 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag flag1{FFlag::LuauAllowFragmentParsing, true};
     ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
     ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
     ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
     ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
-    ScopedFastFlag flag6{FFlag::LuauReferenceAllocatorInNewSolver, true};
     ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
     ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
 };
@@ -1009,7 +1005,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 0);
+    CHECK_EQ(result.size(), 1);
+    checkFolderCompletionExists(result, "..");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_directory_alias")
