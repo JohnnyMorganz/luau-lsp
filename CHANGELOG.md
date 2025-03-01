@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.663
+- Improved error reporting when the studio plugin server in VSCode fails to start up (typically due to port already in use) ([#936](https://github.com/JohnnyMorganz/luau-lsp/issues/936))
 
 ### Fixed
 
