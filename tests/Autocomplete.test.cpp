@@ -1005,7 +1005,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
 
     auto result = workspace.completion(params);
 
-    CHECK_EQ(result.size(), 0);
+    CHECK_EQ(result.size(), 1);
+    checkFolderCompletionExists(result, "..");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_directory_alias")
