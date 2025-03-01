@@ -55,6 +55,7 @@ TEST_CASE("support_disabling_global_types")
     workspace.setupWithConfiguration(config);
 
     auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
         local x = string.split("", "")
         local y = table.insert({}, 1)
     )");
@@ -81,6 +82,7 @@ TEST_CASE("support_disabling_methods_in_global_types")
     workspace.setupWithConfiguration(config);
 
     auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
         local x = table.find({}, "value")
         local y = table.insert({}, 1)
     )");
