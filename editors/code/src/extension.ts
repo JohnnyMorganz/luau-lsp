@@ -158,8 +158,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   // Enable new solver
   if (fflagsConfig.get<boolean>("enableNewSolver")) {
     fflags["LuauSolverV2"] = "true";
-    fflags["LuauNewSolverPopulateTableLocations"] = "true";
-    fflags["LuauNewSolverPrePopulateClasses"] = "true";
   }
 
   if (
@@ -167,7 +165,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .getConfiguration("luau-lsp.completion")
       .get<boolean>("enableFragmentAutocomplete")
   ) {
-    fflags["LuauAllowFragmentParsing"] = "true";
     fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
     fflags["LuauStoreSolverTypeOnModule"] = "true";
     fflags["LuauSymbolEquality"] = "true";

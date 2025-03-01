@@ -5,7 +5,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauAllowFragmentParsing)
 LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
 LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
 LUAU_FASTFLAG(LuauSymbolEquality)
@@ -36,7 +35,6 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag flag1{FFlag::LuauAllowFragmentParsing, true};
     ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
     ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
     ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
