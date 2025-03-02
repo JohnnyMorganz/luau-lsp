@@ -4678,7 +4678,7 @@ declare class CFrame
 	YVector: Vector3
 	Z: number
 	ZVector: Vector3
-	function FuzzyEq(self, other: CFrame, epsilon: number): boolean
+	function FuzzyEq(self, other: CFrame, epsilon: number?): boolean
 	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
 	function Inverse(self): CFrame
 	function Lerp(self, goal: CFrame, alpha: number): CFrame
@@ -4978,7 +4978,7 @@ declare class Vector3
 	function Cross(self, other: Vector3): Vector3
 	function Dot(self, other: Vector3): number
 	function Floor(self): Vector3
-	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
+	function FuzzyEq(self, other: Vector3, epsilon: number?): boolean
 	function Lerp(self, goal: Vector3, alpha: number): Vector3
 	function Max(self, ...: (Vector3)): Vector3
 	function Min(self, ...: (Vector3)): Vector3
