@@ -307,4 +307,62 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function_call")
     CHECK_EQ(result->contents.value, codeBlock("luau", "function foo(): ()") + kDocumentationBreaker + "This is documentation for Foo\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_newtypes")
+{
+    auto source = R"(
+        --- The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]
+        --- in the [International System of Units] (SI)
+        export type Meters = number
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 21};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(
+        result->contents.value, 
+        codeBlock("luau", "type Meters = number") + 
+        kDocumentationBreaker + 
+        "The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]\n" + 
+        "in the [International System of Units] (SI)\n"
+    );
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_intersected_tables")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as
+        --- metasyntactic variables and placeholder names in computer programming or computer-related documentation
+        export type Foobar = Foo & Bar
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{11, 21};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(
+        result->contents.value, 
+        codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + 
+        kDocumentationBreaker + 
+        "The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as\n" +
+        "metasyntactic variables and placeholder names in computer programming or computer-related documentation\n"
+    );
+}
+
 TEST_SUITE_END();
