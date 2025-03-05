@@ -469,3 +469,35 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     }
     return std::nullopt;
 }
+
+std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
+{
+    if (auto ref = node->as<Luau::AstTypeReference>())
+    {
+        if (ref->prefix)
+        {
+            auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
+            if (!importedModuleName) 
+                return std::nullopt;
+            auto importedModule = getModule(*importedModuleName);
+            if (!importedModule)
+                return std::nullopt;
+            auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
+            if (!typeLocation)
+                return std::nullopt;
+            return printMoonwaveDocumentation(getComments(*importedModuleName, *typeLocation));
+        }
+        else
+        {
+            auto typeLocation = lookupTypeLocation(*scope, ref->name.value);
+            if (!typeLocation)
+                return std::nullopt;
+            return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
+        }
+    }
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>()) 
+    {
+        return printMoonwaveDocumentation(getComments(moduleName, alias->location));
+    }
+    return std::nullopt;
+}
