@@ -350,6 +350,11 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
         typeString += kDocumentationBreaker;
         typeString += *documentation;
     }
+    else if (auto documentation = getDocumentationForAstNode(moduleName, node, scope); documentation && !documentation->empty())
+    {
+        typeString += kDocumentationBreaker;
+        typeString += *documentation;
+    }
     else if (documentationLocation)
     {
         if (auto text = printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location)); !text.empty())
