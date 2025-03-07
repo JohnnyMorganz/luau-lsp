@@ -408,7 +408,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 auto line = std::string_view(commentText).substr(4);
                 if (inCodeBlock)
                 {
-                    if (!line.empty() && line[0] == '#') continue;
+                    if (!line.empty() && line[0] == '$') continue;
                     if (Luau::startsWith(line, "```"))
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
@@ -516,7 +516,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             {
                 if (inCodeBlock)
                 {
-                    if (!line.empty() && line[0] == '#') continue;
+                    if (!line.empty() && line[0] == '$') continue;
                     if (Luau::startsWith(line, "```"))
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
