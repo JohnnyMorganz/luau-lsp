@@ -506,4 +506,102 @@ TEST_CASE_FIXTURE(Fixture, "singleline_comments_preserve_newlines")
     CHECK_EQ("A sample class.", comments[2]);
 }
 
+TEST_CASE_FIXTURE(Fixture, "hide_lines_prefixed_by_dollar_sign_in_luau_code_blocks")
+{
+    auto result = check(R"(
+        --- ```php
+        --- $should_still_work = "because we are not in a `luau` code block";
+        --- ```
+        --- ````luau
+        --- ```
+        --- $ ↑ despite it being incorrect syntax, 
+        --- $ it shouldn't do anything, because we started with 4 backticks
+        --- print("Hello, world!")
+        --- ````shouldn't do anything
+        --- $ ↑ that also shouldn't do anything, because we only close a code block with exactly ````.
+        --- $ this ↓ has 4 spaces after ````, but it shouldn't matter (whitespace is trimmed) and it should still close.
+        --- ````    
+        --- $ this shouldn't be hidden, since we're not in a code block anymore
+        --- ```
+        --- $ this shouldn't be hidden
+        --- ```
+        local MyClass = {}
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("MyClass");
+    auto ttv = Luau::get<Luau::TableType>(ty);
+    REQUIRE(ttv);
+
+    auto comments = getComments(ttv->definitionLocation);
+    REQUIRE_EQ(12, comments.size());
+
+    CHECK_EQ("```php", comments[0]);
+    CHECK_EQ("$should_still_work = \"because we are not in a `luau` code block\";", comments[1]);
+    CHECK_EQ("```", comments[2]);
+
+    CHECK_EQ("````luau", comments[3]);
+    CHECK_EQ("```", comments[4]);
+    CHECK_EQ("print(\"Hello, world!\")", comments[5]);
+    CHECK_EQ("````shouldn't do anything", comments[6]);
+    CHECK_EQ("````", comments[7]);
+    
+    CHECK_EQ("$ this shouldn't be hidden, since we're not in a code block anymore", comments[8]);
+
+    CHECK_EQ("```", comments[9]);
+    CHECK_EQ("$ this shouldn't be hidden", comments[10]);
+    CHECK_EQ("```", comments[11]);
+}
+
+TEST_CASE_FIXTURE(Fixture, "hide_lines_prefixed_by_dollar_sign_in_luau_code_blocks_multiline")
+{
+    auto result = check(R"(
+        --[[
+            ```php
+            $should_still_work = "because we are not in a `luau` code block";
+            ```
+            ````luau
+            ```
+            $ ↑ despite it being incorrect syntax, 
+            $ it shouldn't do anything, because we started with 4 backticks
+            print("Hello, world!")
+            ````shouldn't do anything
+            $ ↑ that also shouldn't do anything, because we only close a code block with exactly ````.
+            $ this ↓ has 4 spaces after ````, but it shouldn't matter (whitespace is trimmed) and it should still close.
+            ````    
+            $ this shouldn't be hidden, since we're not in a code block anymore
+            ```
+            $ this shouldn't be hidden
+            ```
+        ]]
+        local MyClass = {}
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("MyClass");
+    auto ttv = Luau::get<Luau::TableType>(ty);
+    REQUIRE(ttv);
+
+    auto comments = getComments(ttv->definitionLocation);
+    REQUIRE_EQ(12, comments.size());
+
+    CHECK_EQ("```php", comments[0]);
+    CHECK_EQ("$should_still_work = \"because we are not in a `luau` code block\";", comments[1]);
+    CHECK_EQ("```", comments[2]);
+
+    CHECK_EQ("````luau", comments[3]);
+    CHECK_EQ("```", comments[4]);
+    CHECK_EQ("print(\"Hello, world!\")", comments[5]);
+    CHECK_EQ("````shouldn't do anything", comments[6]);
+    CHECK_EQ("````", comments[7]);
+    
+    CHECK_EQ("$ this shouldn't be hidden, since we're not in a code block anymore", comments[8]);
+
+    CHECK_EQ("```", comments[9]);
+    CHECK_EQ("$ this shouldn't be hidden", comments[10]);
+    CHECK_EQ("```", comments[11]);
+}
+
 TEST_SUITE_END();
