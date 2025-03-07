@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Lines prefixed by dollar sign (`$`) in Luau code blocks are now hidden from documentation comments ([#960](https://github.com/JohnnyMorganz/luau-lsp/pull/960)).
+
 ## [1.40.0] - 2025-03-01
 
 ### Added

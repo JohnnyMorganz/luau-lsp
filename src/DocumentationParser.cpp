@@ -387,6 +387,9 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         return {};
 
     std::vector<std::string> comments{};
+    // 0 means not in a code block, otherwise the number of backticks used (minimum 3 for a code block)
+    size_t inCodeBlock = 0;
+    bool isCodeBlockLanguageLuau = false;
     for (auto& comment : commentLocations)
     {
         if (comment.type == Luau::Lexeme::Type::BrokenComment)
@@ -403,7 +406,38 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         {
             if (Luau::startsWith(commentText, "--- "))
             {
-                comments.emplace_back(commentText.substr(4));
+                auto line = std::string_view(commentText).substr(4);
+                if (inCodeBlock > 0)
+                {
+                    if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
+                    if (Luau::startsWith(line, "```") && line.length() == inCodeBlock)
+                    {
+                        auto firstNonBacktick = line.find_first_not_of('`', 3);
+                        if (firstNonBacktick == std::string::npos)
+                        {
+                            inCodeBlock = 0;
+                            isCodeBlockLanguageLuau = false;
+                        }
+                    }
+                }
+                else if (Luau::startsWith(line, "```"))
+                {
+                    auto firstNonBacktick = line.find_first_not_of('`', 3);
+                    if (firstNonBacktick == std::string::npos)
+                    {
+                        inCodeBlock = line.length();
+                    }
+                    else 
+                    {
+                        inCodeBlock = firstNonBacktick;
+                        auto firstWordBeginning = line.find_first_not_of(" \n\r\t", firstNonBacktick);
+                        auto firstWord = firstWordBeginning == std::string::npos ? std::string_view{} : line.substr(firstWordBeginning);
+                        auto firstWordEnd = firstWord.find_first_of(" \n\r\t");
+                        firstWord = firstWord.substr(0, firstWordEnd);
+                        if (firstWord == "luau") isCodeBlockLanguageLuau = true;
+                    }
+                }
+                comments.emplace_back(line);
             }
             else if (commentText == "---")
             {
@@ -412,43 +446,98 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
         {
-            std::regex comment_regex("^--\\[(=*)\\[");
-            std::smatch comment_match;
+            // This is a block comment, which always starts with --[[ and ends with ]] (6 characters at least).
+            // If the closing sequence is missing, the comment is considered broken (`Luau::Lexeme::Type::BrokenComment`), which isn't the case here.
+            LUAU_ASSERT(commentText.length() >= 6);
 
-            if (std::regex_search(commentText, comment_match, comment_regex))
+            size_t commentWidth = commentText.find_first_not_of('=', 3) - 3;
+
+            auto commentWithNoStartAndEnd = std::string_view(commentText).substr(
+                // Skip --[[ and any '=' signs
+                4 + commentWidth,
+                // The final length is the total comment length minus --[[ and ]] (6 characters) and any '=' signs, which are repeated at both the start and end.
+                commentText.length() - 6 - 2 * commentWidth
+            );
+
+            size_t firstNonSpaceCharacter = commentWithNoStartAndEnd.find_first_not_of(" \r\t");
+
+            if (firstNonSpaceCharacter == std::string::npos) continue;
+            if (commentWithNoStartAndEnd[firstNonSpaceCharacter] == '\n')
             {
-                LUAU_ASSERT(comment_match.size() == 2);
-                // Construct "--[=[" and "--]=]" which will be ignored
-                std::string start_string = "--[" + std::string(comment_match[1].length(), '=') + "[";
-                std::string end_string = "]" + std::string(comment_match[1].length(), '=') + "]";
+                if (commentWithNoStartAndEnd.length() == firstNonSpaceCharacter + 1) continue;
+                commentWithNoStartAndEnd = commentWithNoStartAndEnd.substr(firstNonSpaceCharacter + 1);
+            }
 
-                // Parse each line separately
-                for (auto& line : Luau::split(commentText, '\n'))
-                {
-                    auto lineText = std::string(line);
-                    trim_end(lineText);
+            size_t lastNonSpaceCharacter = commentWithNoStartAndEnd.find_last_not_of(" \r\t");
 
-                    auto trimmedLineText = std::string(line);
-                    trim(trimmedLineText);
-                    if (trimmedLineText == start_string || trimmedLineText == end_string)
-                        continue;
-                    comments.emplace_back(lineText);
-                }
+            if (lastNonSpaceCharacter == std::string::npos) continue;
+            if (commentWithNoStartAndEnd[lastNonSpaceCharacter] == '\n')
+            {
+                if (lastNonSpaceCharacter == 0) continue;
+                lastNonSpaceCharacter = commentWithNoStartAndEnd.find_last_not_of(" \n\r\t", lastNonSpaceCharacter);
+                if (lastNonSpaceCharacter == std::string::npos) continue;
+                commentWithNoStartAndEnd = commentWithNoStartAndEnd.substr(0, lastNonSpaceCharacter + 1);
+            }
 
-                // Trim common indentation, but ignore empty lines
-                size_t indentLevel = std::string::npos;
-                for (auto& line : comments)
+            // Parse each line separately
+            auto lines = Luau::split(commentWithNoStartAndEnd, '\n');
+
+            // Trim common indentation, but ignore empty lines
+            size_t indentLevel = std::string::npos;
+            
+            for (auto& line : lines)
+            {
+                auto lastNonSpace = line.find_last_not_of(" \n\r\t");
+                if (lastNonSpace == std::string::npos)
                 {
-                    if (line == "")
-                        continue;
-                    indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
+                    line = std::string_view{};
+                    continue;
                 }
-                for (auto& line : comments)
+                else
                 {
-                    if (line == "")
-                        continue;
-                    line.erase(0, indentLevel);
+                    line = line.substr(0, lastNonSpace + 1);
                 }
+                indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
+            }
+
+            for (auto& line : lines)
+            {
+                if (!line.empty()) line = line.substr(indentLevel);
+            }
+
+            for (auto& line : lines)
+            {
+                if (inCodeBlock > 0)
+                {
+                    if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
+                    if (Luau::startsWith(line, "```") && line.length() == inCodeBlock)
+                    {
+                        auto firstNonBacktick = line.find_first_not_of('`', 3);
+                        if (firstNonBacktick == std::string::npos)
+                        {
+                            inCodeBlock = 0;
+                            isCodeBlockLanguageLuau = false;
+                        }
+                    }
+                }
+                else if (Luau::startsWith(line, "```"))
+                {
+                    auto firstNonBacktick = line.find_first_not_of('`', 3);
+                    if (firstNonBacktick == std::string::npos)
+                    {
+                        inCodeBlock = line.length();
+                    }
+                    else 
+                    {
+                        inCodeBlock = firstNonBacktick;
+                        auto firstWordBeginning = line.find_first_not_of(" \n\r\t", firstNonBacktick);
+                        auto firstWord = firstWordBeginning == std::string::npos ? std::string_view{} : line.substr(firstWordBeginning);
+                        auto firstWordEnd = firstWord.find_first_of(" \n\r\t");
+                        firstWord = firstWord.substr(0, firstWordEnd);
+                        if (firstWord == "luau") isCodeBlockLanguageLuau = true;
+                    }
+                }
+                comments.emplace_back(line);
             }
         }
     }
