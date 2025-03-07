@@ -389,6 +389,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
     std::vector<std::string> comments{};
     // 0 means not in a code block, otherwise the number of backticks used (minimum 3 for a code block)
     size_t inCodeBlock = 0;
+    bool isCodeBlockLanguageLuau = false;
     for (auto& comment : commentLocations)
     {
         if (comment.type == Luau::Lexeme::Type::BrokenComment)
@@ -408,7 +409,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 auto line = std::string_view(commentText).substr(4);
                 if (inCodeBlock)
                 {
-                    if (!line.empty() && line[0] == '$') continue;
+                    if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
                     if (Luau::startsWith(line, "```"))
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
@@ -418,6 +419,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                         {
                             // Then we aren't in a code block anymore
                             inCodeBlock = 0;
+                            isCodeBlockLanguageLuau = false;
                         }
                     }
                 }
@@ -430,18 +432,12 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                     }
                     else 
                     {
-                        auto firstNonSpace = line.find_first_not_of(" \n\r\t", firstNonBacktick);
-                        auto lastNonSpace = line.find_first_of(" \n\r\t", firstNonSpace);
-                        // If there is nothing after the backticks, we'll assume the language is Luau.
-                        // If there is a single word after the backticks that is equal to 'luau', we'll know the code block is for Luau.
-                        // If there are multiple words after the backtick, but the first one is equal to 'luau', we'll know the code block is for Luau.
-                        if (firstNonSpace == std::string::npos
-                        || (lastNonSpace == std::string::npos && line.substr(firstNonSpace) == "luau") 
-                        || (line.substr(firstNonSpace, lastNonSpace - firstNonSpace) == "luau"))
-                        {
-                            // And that means we are now in a code block.
-                            inCodeBlock = firstNonBacktick;
-                        }
+                        inCodeBlock = firstNonBacktick;
+                        auto firstWordBeginning = line.find_first_not_of(" \n\r\t", firstNonBacktick);
+                        auto firstWord = firstWordBeginning == std::string::npos ? std::string_view{} : line.substr(firstWordBeginning);
+                        auto firstWordEnd = firstWord.find_first_of(" \n\r\t");
+                        firstWord = firstWord.substr(0, firstWordEnd);
+                        if (firstWord == "luau") isCodeBlockLanguageLuau = true;
                     }
                 }
                 comments.emplace_back(line);
@@ -516,7 +512,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             {
                 if (inCodeBlock)
                 {
-                    if (!line.empty() && line[0] == '$') continue;
+                    if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
                     if (Luau::startsWith(line, "```"))
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
@@ -526,6 +522,7 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                         {
                             // Then we aren't in a code block anymore
                             inCodeBlock = 0;
+                            isCodeBlockLanguageLuau = false;
                         }
                     }
                 }
@@ -538,18 +535,12 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                     }
                     else 
                     {
-                        auto firstNonSpace = line.find_first_not_of(" \n\r\t", firstNonBacktick);
-                        auto lastNonSpace = line.find_first_of(" \n\r\t", firstNonSpace);
-                        // If there is nothing after the backticks, we'll assume the language is Luau.
-                        // If there is a single word after the backticks that is equal to 'luau', we'll know the code block is for Luau.
-                        // If there are multiple words after the backtick, but the first one is equal to 'luau', we'll know the code block is for Luau.
-                        if (firstNonSpace == std::string::npos
-                        || (lastNonSpace == std::string::npos && line.substr(firstNonSpace) == "luau") 
-                        || (line.substr(firstNonSpace, lastNonSpace - firstNonSpace) == "luau"))
-                        {
-                            // And that means we are now in a code block.
-                            inCodeBlock = firstNonBacktick;
-                        }
+                        inCodeBlock = firstNonBacktick;
+                        auto firstWordBeginning = line.find_first_not_of(" \n\r\t", firstNonBacktick);
+                        auto firstWord = firstWordBeginning == std::string::npos ? std::string_view{} : line.substr(firstWordBeginning);
+                        auto firstWordEnd = firstWord.find_first_of(" \n\r\t");
+                        firstWord = firstWord.substr(0, firstWordEnd);
+                        if (firstWord == "luau") isCodeBlockLanguageLuau = true;
                     }
                 }
                 comments.emplace_back(line);
