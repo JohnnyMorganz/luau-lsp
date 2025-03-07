@@ -469,22 +469,27 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             // Parse each line separately
             auto lines = Luau::split(commentWithNoStartAndEnd, '\n');
 
+            // Trim common indentation, but ignore empty lines
             size_t indentLevel = std::string::npos;
-
-            // Get common indentation
+            
             for (auto& line : lines)
             {
-                // If the line has no non-whitespace characters (such as empty string) it is guaranteed to not change the `indentLevel`, 
-                // because `find_first_not_of` will return `std::string::npos`, and `indentLevel` is always <= `std::string::npos`.
+                auto lastNonSpace = line.find_last_not_of(" \n\r\t");
+                if (lastNonSpace == std::string::npos)
+                {
+                    line = std::string_view{};
+                    continue;
+                }
+                else
+                {
+                    line = line.substr(0, lastNonSpace + 1);
+                }
                 indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
             }
-            if (indentLevel != std::string::npos)
+
+            for (auto& line : lines)
             {
-                // Trim common indentation
-                for (auto& line : lines)
-                {
-                    line = line.length() > indentLevel ? line.substr(indentLevel) : line;
-                }
+                if (!line.empty()) line = line.substr(indentLevel);
             }
 
             for (auto& line : lines)
