@@ -453,43 +453,81 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
         {
-            std::regex comment_regex("^--\\[(=*)\\[");
-            std::smatch comment_match;
+            // This is a block comment, which always starts with --[[ and ends with ]] (6 characters at least).
+            // If the closing sequence is missing, the comment is considered broken (`Luau::Lexeme::Type::BrokenComment`), which isn't the case here.
+            LUAU_ASSERT(commentText.length() >= 6);
 
-            if (std::regex_search(commentText, comment_match, comment_regex))
+            size_t commentWidth = commentText.find_first_not_of('=', 3) - 3;
+
+            auto commentWithNoStartAndEnd = std::string_view(commentText).substr(
+                // Skip --[[ and any '=' signs
+                4 + commentWidth,
+                // The final length is the total comment length minus --[[ and ]] (6 characters) and any '=' signs, which are repeated at both the start and end.
+                commentText.length() - 6 - 2 * commentWidth
+            );
+
+            // Parse each line separately
+            auto lines = Luau::split(commentWithNoStartAndEnd, '\n');
+
+            size_t indentLevel = std::string::npos;
+
+            // Get common indentation
+            for (auto& line : lines)
             {
-                LUAU_ASSERT(comment_match.size() == 2);
-                // Construct "--[=[" and "--]=]" which will be ignored
-                std::string start_string = "--[" + std::string(comment_match[1].length(), '=') + "[";
-                std::string end_string = "]" + std::string(comment_match[1].length(), '=') + "]";
-
-                // Parse each line separately
-                for (auto& line : Luau::split(commentText, '\n'))
+                // If the line has no non-whitespace characters (such as empty string) it is guaranteed to not change the `indentLevel`, 
+                // because `find_first_not_of` will return `std::string::npos`, and `indentLevel` is always <= `std::string::npos`.
+                indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
+            }
+            if (indentLevel != std::string::npos)
+            {
+                // Trim common indentation
+                for (auto& line : lines)
                 {
-                    auto lineText = std::string(line);
-                    trim_end(lineText);
+                    line = line.length() > indentLevel ? line.substr(indentLevel) : line;
+                }
+            }
 
-                    auto trimmedLineText = std::string(line);
-                    trim(trimmedLineText);
-                    if (trimmedLineText == start_string || trimmedLineText == end_string)
-                        continue;
-                    comments.emplace_back(lineText);
-                }
-
-                // Trim common indentation, but ignore empty lines
-                size_t indentLevel = std::string::npos;
-                for (auto& line : comments)
+            for (auto& line : lines)
+            {
+                if (inCodeBlock)
                 {
-                    if (line == "")
-                        continue;
-                    indentLevel = std::min(indentLevel, line.find_first_not_of(" \n\r\t"));
+                    if (!line.empty() && line[0] == '#') continue;
+                    if (Luau::startsWith(line, "```"))
+                    {
+                        auto firstNonBacktick = line.find_first_not_of('`', 3);
+                        // If the number of backticks matches the amount used when starting the code block,
+                        // and there aren't non-whitespace characters after the backticks
+                        if (firstNonBacktick == inCodeBlock && line.find_first_not_of(" \n\r\t", firstNonBacktick) == std::string::npos)
+                        {
+                            // Then we aren't in a code block anymore
+                            inCodeBlock = 0;
+                        }
+                    }
                 }
-                for (auto& line : comments)
+                else if (Luau::startsWith(line, "```"))
                 {
-                    if (line == "")
-                        continue;
-                    line.erase(0, indentLevel);
+                    auto firstNonBacktick = line.find_first_not_of('`', 3);
+                    if (firstNonBacktick == std::string::npos)
+                    {
+                        inCodeBlock = line.length();
+                    }
+                    else 
+                    {
+                        auto firstNonSpace = line.find_first_not_of(" \n\r\t", firstNonBacktick);
+                        auto lastNonSpace = line.find_first_of(" \n\r\t", firstNonSpace);
+                        // If there is nothing after the backticks, we'll assume the language is Luau.
+                        // If there is a single word after the backticks that is equal to 'luau', we'll know the code block is for Luau.
+                        // If there are multiple words after the backtick, but the first one is equal to 'luau', we'll know the code block is for Luau.
+                        if (firstNonSpace == std::string::npos
+                        || (lastNonSpace == std::string::npos && line.substr(firstNonSpace) == "luau") 
+                        || (line.substr(firstNonSpace, lastNonSpace - firstNonSpace) == "luau"))
+                        {
+                            // And that means we are now in a code block.
+                            inCodeBlock = firstNonBacktick;
+                        }
+                    }
                 }
+                comments.emplace_back(line);
             }
         }
     }
