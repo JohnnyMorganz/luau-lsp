@@ -407,17 +407,14 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             if (Luau::startsWith(commentText, "--- "))
             {
                 auto line = std::string_view(commentText).substr(4);
-                if (inCodeBlock)
+                if (inCodeBlock > 0)
                 {
                     if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
-                    if (Luau::startsWith(line, "```"))
+                    if (Luau::startsWith(line, "```") && line.length() == inCodeBlock)
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
-                        // If the number of backticks matches the amount used when starting the code block,
-                        // and there aren't non-whitespace characters after the backticks
-                        if (firstNonBacktick == inCodeBlock && line.find_first_not_of(" \n\r\t", firstNonBacktick) == std::string::npos)
+                        if (firstNonBacktick == std::string::npos)
                         {
-                            // Then we aren't in a code block anymore
                             inCodeBlock = 0;
                             isCodeBlockLanguageLuau = false;
                         }
@@ -510,17 +507,14 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
 
             for (auto& line : lines)
             {
-                if (inCodeBlock)
+                if (inCodeBlock > 0)
                 {
                     if (isCodeBlockLanguageLuau && !line.empty() && line[0] == '$') continue;
-                    if (Luau::startsWith(line, "```"))
+                    if (Luau::startsWith(line, "```") && line.length() == inCodeBlock)
                     {
                         auto firstNonBacktick = line.find_first_not_of('`', 3);
-                        // If the number of backticks matches the amount used when starting the code block,
-                        // and there aren't non-whitespace characters after the backticks
-                        if (firstNonBacktick == inCodeBlock && line.find_first_not_of(" \n\r\t", firstNonBacktick) == std::string::npos)
+                        if (firstNonBacktick == std::string::npos)
                         {
-                            // Then we aren't in a code block anymore
                             inCodeBlock = 0;
                             isCodeBlockLanguageLuau = false;
                         }
