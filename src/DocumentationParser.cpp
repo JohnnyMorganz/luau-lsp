@@ -466,6 +466,26 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
                 commentText.length() - 6 - 2 * commentWidth
             );
 
+            size_t firstNonSpaceCharacter = commentWithNoStartAndEnd.find_first_not_of(" \r\t");
+
+            if (firstNonSpaceCharacter == std::string::npos) continue;
+            if (commentWithNoStartAndEnd[firstNonSpaceCharacter] == '\n')
+            {
+                if (commentWithNoStartAndEnd.length() == firstNonSpaceCharacter + 1) continue;
+                commentWithNoStartAndEnd = commentWithNoStartAndEnd.substr(firstNonSpaceCharacter + 1);
+            }
+
+            size_t lastNonSpaceCharacter = commentWithNoStartAndEnd.find_last_not_of(" \r\t");
+
+            if (lastNonSpaceCharacter == std::string::npos) continue;
+            if (commentWithNoStartAndEnd[lastNonSpaceCharacter] == '\n')
+            {
+                if (lastNonSpaceCharacter == 0) continue;
+                lastNonSpaceCharacter = commentWithNoStartAndEnd.find_last_not_of(" \n\r\t", lastNonSpaceCharacter);
+                if (lastNonSpaceCharacter == std::string::npos) continue;
+                commentWithNoStartAndEnd = commentWithNoStartAndEnd.substr(0, lastNonSpaceCharacter + 1);
+            }
+
             // Parse each line separately
             auto lines = Luau::split(commentWithNoStartAndEnd, '\n');
 
