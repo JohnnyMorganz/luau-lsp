@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.39.2",
+  "version": "1.40.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -223,7 +223,10 @@
           "markdownDescription": "Enables the flags required for Luau's new type solver. These flags can be overriden by `#luau-lsp.fflags.override#`",
           "type": "boolean",
           "default": false,
-          "scope": "window"
+          "scope": "window",
+          "tags": [
+            "preview"
+          ]
         },
         "luau-lsp.fflags.sync": {
           "markdownDescription": "Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'",
@@ -284,6 +287,15 @@
         },
         "luau-lsp.types.documentationFiles": {
           "markdownDescription": "A list of paths to documentation files which provide documentation support to the definition files provided",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "window"
+        },
+        "luau-lsp.types.disabledGlobals": {
+          "markdownDescription": "A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)",
           "type": "array",
           "default": [],
           "items": {
@@ -505,7 +517,10 @@
           "markdownDescription": "Enables the experimental fragment autocomplete system for performance improvements",
           "type": "boolean",
           "default": false,
-          "scope": "resource"
+          "scope": "resource",
+          "tags": [
+            "preview"
+          ]
         },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",

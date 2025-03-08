@@ -36,8 +36,10 @@ struct ClientTypesConfiguration
     bool roblox = true;
     /// Any definition files to load globally
     std::vector<std::filesystem::path> definitionFiles{};
+    /// A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)
+    std::vector<std::string> disabledGlobals{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles, disabledGlobals);
 
 enum struct InlayHintsParameterNamesConfig
 {

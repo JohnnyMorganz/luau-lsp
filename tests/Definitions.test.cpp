@@ -42,4 +42,58 @@ TEST_CASE("handles_definitions_files_relying_on_mutations")
     REQUIRE(result.errors.empty());
 }
 
+TEST_CASE("support_disabling_global_types")
+{
+    auto client = std::make_shared<Client>(Client{});
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+
+    auto config = defaultTestClientConfiguration();
+    config.types.disabledGlobals = {
+        "table",
+    };
+
+    workspace.setupWithConfiguration(config);
+
+    auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
+        local x = string.split("", "")
+        local y = table.insert({}, 1)
+    )");
+
+    auto result = workspace.frontend.check("foo.luau");
+    REQUIRE_EQ(result.errors.size(), 1);
+
+    auto err = Luau::get<Luau::UnknownSymbol>(result.errors[0]);
+    REQUIRE(err);
+    CHECK_EQ(err->name, "table");
+    CHECK_EQ(err->context, Luau::UnknownSymbol::Context::Binding);
+}
+
+TEST_CASE("support_disabling_methods_in_global_types")
+{
+    auto client = std::make_shared<Client>(Client{});
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+
+    auto config = defaultTestClientConfiguration();
+    config.types.disabledGlobals = {
+        "table.insert",
+    };
+
+    workspace.setupWithConfiguration(config);
+
+    auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
+        local x = table.find({}, "value")
+        local y = table.insert({}, 1)
+    )");
+
+    auto result = workspace.frontend.check("foo.luau");
+    REQUIRE_EQ(result.errors.size(), 1);
+
+    auto err = Luau::get<Luau::UnknownProperty>(result.errors[0]);
+    REQUIRE(err);
+    CHECK_EQ(Luau::toString(err->table), "typeof(table)");
+    CHECK_EQ(err->key, "insert");
+}
+
 TEST_SUITE_END();

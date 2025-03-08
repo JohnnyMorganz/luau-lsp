@@ -84,7 +84,7 @@ public:
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
 private:
-    void registerTypes();
+    void registerTypes(const std::vector<std::string>& disabledGlobals);
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);

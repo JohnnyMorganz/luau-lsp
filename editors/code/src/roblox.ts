@@ -324,11 +324,37 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
   });
 
   const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
-  pluginServer = app.listen(port);
-
-  vscode.window.showInformationMessage(
-    `Luau Language Server Studio Plugin is now listening on port ${port}`,
-  );
+  pluginServer = app
+    .listen(port, () => {
+      vscode.window.showInformationMessage(
+        `Luau Language Server Studio Plugin is now listening on port ${port}`,
+      );
+    })
+    .on("error", (err) => {
+      if ((err as any).code === "EADDRINUSE") {
+        vscode.window
+          .showErrorMessage(
+            `Failed to start Luau Language Server Studio Plugin on port ${port}: Port already in use. Check there are no other servers running on this port, or change the port in settings`,
+            "Reconnect",
+            "Change Port Configuration",
+          )
+          .then((value) => {
+            if (value === "Reconnect") {
+              stopPluginServer(true);
+              startPluginServer(client);
+            } else if (value === "Change Port Configuration") {
+              vscode.commands.executeCommand(
+                "workbench.action.openWorkspaceSettings",
+                "luau-lsp.plugin.port",
+              );
+            }
+          });
+      } else {
+        vscode.window.showErrorMessage(
+          `Failed to start Luau Language Server Studio Plugin on port ${port}: ${err}`,
+        );
+      }
+    });
 };
 
 const stopPluginServer = async (isDeactivating = false) => {
