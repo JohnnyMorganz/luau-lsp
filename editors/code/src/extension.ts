@@ -3,9 +3,9 @@ import * as os from "os";
 import { fetch } from "undici";
 import {
   Executable,
-  ServerOptions,
   LanguageClient,
   LanguageClientOptions,
+  ServerOptions,
 } from "vscode-languageclient/node";
 
 import {
@@ -166,10 +166,11 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .get<boolean>("enableFragmentAutocomplete")
   ) {
     fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
-    fflags["LuauStoreSolverTypeOnModule"] = "true";
-    fflags["LuauSymbolEquality"] = "true";
-    fflags["LexerResumesFromPosition2"] = "true";
     fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
+    fflags["LuauFreeTypesMustHaveBounds"] = "true";
+    fflags["LuauCloneIncrementalModule"] = "true";
+    fflags["LuauAllFreeTypesHaveScopes"] = "true";
+    fflags["LuauModuleHoldsAstRoot"] = "true";
     fflags["LuauBetterReverseDependencyTracking"] = "true";
   }
 
