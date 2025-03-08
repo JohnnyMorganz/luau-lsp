@@ -6,10 +6,11 @@
 #include "LSP/IostreamHelpers.hpp"
 
 LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
-LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
-LUAU_FASTFLAG(LuauSymbolEquality)
-LUAU_FASTFLAG(LexerResumesFromPosition2)
 LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
+LUAU_FASTFLAG(LuauFreeTypesMustHaveBounds)
+LUAU_FASTFLAG(LuauCloneIncrementalModule)
+LUAU_FASTFLAG(LuauAllFreeTypesHaveScopes)
+LUAU_FASTFLAG(LuauModuleHoldsAstRoot)
 LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
@@ -35,12 +36,15 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
-    ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
-    ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
-    ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
-    ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
-    ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
+    ScopedFastFlag sffs[7] = {
+        {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
+        {FFlag::LuauIncrementalAutocompleteBugfixes, true},
+        {FFlag::LuauFreeTypesMustHaveBounds, true},
+        {FFlag::LuauCloneIncrementalModule, true},
+        {FFlag::LuauAllFreeTypesHaveScopes, true},
+        {FFlag::LuauModuleHoldsAstRoot, true},
+        {FFlag::LuauBetterReverseDependencyTracking, true},
+    };
 };
 
 TEST_SUITE_BEGIN("Autocomplete");
