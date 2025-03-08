@@ -1,17 +1,9 @@
 import * as vscode from "vscode";
 import * as os from "os";
-import { fetch } from "undici";
-import {
-  Executable,
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-} from "vscode-languageclient/node";
+import {fetch} from "undici";
+import {Executable, LanguageClient, LanguageClientOptions, ServerOptions,} from "vscode-languageclient/node";
 
-import {
-  registerComputeBytecode,
-  registerComputeCompilerRemarks,
-} from "./bytecode";
+import {registerComputeBytecode, registerComputeCompilerRemarks,} from "./bytecode";
 
 import * as roblox from "./roblox";
 import * as utils from "./utils";
@@ -171,6 +163,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauCloneIncrementalModule"] = "true";
     fflags["LuauAllFreeTypesHaveScopes"] = "true";
     fflags["LuauModuleHoldsAstRoot"] = "true";
+    fflags["LuauBetterReverseDependencyTracking"] = "true";
   }
 
   // Handle overrides

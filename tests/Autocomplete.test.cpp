@@ -11,6 +11,7 @@ LUAU_FASTFLAG(LuauFreeTypesMustHaveBounds)
 LUAU_FASTFLAG(LuauCloneIncrementalModule)
 LUAU_FASTFLAG(LuauAllFreeTypesHaveScopes)
 LUAU_FASTFLAG(LuauModuleHoldsAstRoot)
+LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -35,13 +36,14 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[6] = {
+    ScopedFastFlag sffs[7] = {
         {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
         {FFlag::LuauIncrementalAutocompleteBugfixes, true},
         {FFlag::LuauFreeTypesMustHaveBounds, true},
         {FFlag::LuauCloneIncrementalModule, true},
         {FFlag::LuauAllFreeTypesHaveScopes, true},
         {FFlag::LuauModuleHoldsAstRoot, true},
+        {FFlag::LuauBetterReverseDependencyTracking, true},
     };
 };
 
