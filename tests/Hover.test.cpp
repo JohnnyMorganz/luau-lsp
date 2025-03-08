@@ -307,7 +307,7 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function_call")
     CHECK_EQ(result->contents.value, codeBlock("luau", "function foo(): ()") + kDocumentationBreaker + "This is documentation for Foo\n");
 }
 
-TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_newtypes")
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations")
 {
     auto source = R"(
         --- The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]
@@ -332,7 +332,7 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_newtypes")
     );
 }
 
-TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_intersected_tables")
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations_of_intersected_tables")
 {
     auto source = R"(
         type Foo = {
@@ -363,6 +363,36 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_intersected_tables")
         "The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as\n" +
         "metasyntactic variables and placeholder names in computer programming or computer-related documentation\n"
     );
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_references")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- This is the intersection of two types
+        export type Foobar = Foo & Bar
+
+        function consumer(value: Foobar)
+        end
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{12, 36};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + kDocumentationBreaker +
+                                         "This is the intersection of two types\n");
 }
 
 TEST_SUITE_END();
