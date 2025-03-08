@@ -14,28 +14,6 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-/// Converts an HTML string provided as an input to markdown
-/// TODO: currently, this just strips tags, rather than do anything special
-std::string convertHtmlToMarkdown(const std::string& input)
-{
-    // TODO - Tags to support:
-    // <code></code> - as well as <code class="language-lua">
-    // <pre></pre>
-    // <em></em> / <i></i>
-    // <ul><li></li></ul>
-    // <ol><li></li></ol>
-    // <a href=""></a>
-    // <strong></strong> / <b></b>
-    // <img alt="" src="" />
-    // Also need to unescape HTML characters
-
-
-    // Yes, regex is bad, but I really cannot be bothered right now
-    std::regex strip("<[^>]*>");
-    return std::regex_replace(input, strip, "");
-}
-
-
 void parseDocumentation(
     const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client)
 {
@@ -64,9 +42,6 @@ void parseDocumentation(
                         info.at("learn_more_link").get_to(learnMoreLink);
                     if (info.contains("code_sample"))
                         info.at("code_sample").get_to(codeSample);
-
-                    documentation = convertHtmlToMarkdown(documentation);
-
                     if (info.contains("keys"))
                     {
                         Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
