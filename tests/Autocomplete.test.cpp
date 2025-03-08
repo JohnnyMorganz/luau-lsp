@@ -35,7 +35,7 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    [[maybe_unused]] ScopedFastFlag sffs[6] = {
+    ScopedFastFlag sffs[6] = {
         {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
         {FFlag::LuauIncrementalAutocompleteBugfixes, true},
         {FFlag::LuauFreeTypesMustHaveBounds, true},
