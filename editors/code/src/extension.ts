@@ -1,17 +1,9 @@
 import * as vscode from "vscode";
 import * as os from "os";
-import { fetch } from "undici";
-import {
-  Executable,
-  ServerOptions,
-  LanguageClient,
-  LanguageClientOptions,
-} from "vscode-languageclient/node";
+import {fetch} from "undici";
+import {Executable, LanguageClient, LanguageClientOptions, ServerOptions,} from "vscode-languageclient/node";
 
-import {
-  registerComputeBytecode,
-  registerComputeCompilerRemarks,
-} from "./bytecode";
+import {registerComputeBytecode, registerComputeCompilerRemarks,} from "./bytecode";
 
 import * as roblox from "./roblox";
 import * as utils from "./utils";
@@ -166,11 +158,11 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .get<boolean>("enableFragmentAutocomplete")
   ) {
     fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
-    fflags["LuauStoreSolverTypeOnModule"] = "true";
-    fflags["LuauSymbolEquality"] = "true";
-    fflags["LexerResumesFromPosition2"] = "true";
     fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
-    fflags["LuauBetterReverseDependencyTracking"] = "true";
+    fflags["LuauFreeTypesMustHaveBounds"] = "true";
+    fflags["LuauCloneIncrementalModule"] = "true";
+    fflags["LuauAllFreeTypesHaveScopes"] = "true";
+    fflags["LuauModuleHoldsAstRoot"] = "true";
   }
 
   // Handle overrides
