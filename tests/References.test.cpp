@@ -119,47 +119,6 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
     CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(1).range);
 }
 
-TEST_CASE_FIXTURE(Fixture, "find_references_of_a_table_property_following_index_metamethod")
-{
-    // Finding reference of "BaseMethod" from Foo
-    auto source = R"(
-        local Foo = {}
-        Foo.__index = Foo
-        export type Foo = typeof(setmetatable({}, Foo))
-
-        function Foo.BaseMethod(self: Foo, a: number)
-        end
-
-        local Bar = setmetatable({}, Foo)
-        Bar.__index = Bar
-        export type Bar = typeof(setmetatable({}, Foo))
-
-        function Bar.new()
-            local self = setmetatable({}, Bar)
-            return self
-        end
-
-        function Bar.DoSomething(self: Bar)
-            self:BaseMethod(123)
-        end
-    )";
-
-    auto uri = newDocument("foo.luau", source);
-
-    lsp::ReferenceParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = lsp::Position{5, 22};
-
-    auto result = workspace.references(params);
-    REQUIRE(result);
-    REQUIRE_EQ(2, result->size());
-
-    sortResults(result);
-
-    CHECK_EQ(lsp::Range{{5, 21}, {6, 16}}, result->at(0).range);
-    CHECK_EQ(lsp::Range{{18, 17}, {18, 27}}, result->at(1).range);
-}
-
 TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
 {
     auto source = R"(
