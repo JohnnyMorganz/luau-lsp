@@ -171,7 +171,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauCloneIncrementalModule"] = "true";
     fflags["LuauAllFreeTypesHaveScopes"] = "true";
     fflags["LuauModuleHoldsAstRoot"] = "true";
-    fflags["LuauBetterReverseDependencyTracking"] = "true";
   }
 
   // Handle overrides
