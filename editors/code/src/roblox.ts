@@ -255,9 +255,9 @@ const startSourcemapGeneration = async (
       // TODO: should we support shell execution here?
       // It allows us to delegate to the shell for argument parsing
       // but it causes issues when VSCode shuts down, leaving a zombie process
-      const generatorArguments = customGeneratorCommand.split(" ");
-      childProcess = spawn(generatorArguments[0], generatorArguments.slice(1), {
+      childProcess = spawn(customGeneratorCommand, {
         cwd,
+        shell: true,
       });
     } else {
       // Check if the project file exists
