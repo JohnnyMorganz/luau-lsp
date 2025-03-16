@@ -1140,4 +1140,70 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
     checkFileCompletionExists(result, "net.luau");
 }
 
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        function foo()
+            |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    REQUIRE_EQ(editParams.edit.changes.size(), 1);
+
+    auto edits = editParams.edit.changes[uri.toString()];
+    REQUIRE_EQ(edits.size(), 1);
+    CHECK_EQ(edits[0].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[0].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        call(function()
+        |)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    REQUIRE_EQ(editParams.edit.changes.size(), 1);
+
+    auto edits = editParams.edit.changes[uri.toString()];
+    REQUIRE_EQ(edits.size(), 1);
+    CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[0].newText, "\n        end)\n");
+}
+
 TEST_SUITE_END();
