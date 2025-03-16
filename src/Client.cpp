@@ -42,7 +42,7 @@ void Client::sendError(const std::optional<id_type>& id, const JsonRpcException&
     sendRawMessage(msg);
 }
 
-void Client::sendNotification(const std::string& method, const std::optional<json>& params)
+void Client::sendNotification(const std::string& method, const std::optional<json>& params) const
 {
     json msg{
         {"jsonrpc", "2.0"},

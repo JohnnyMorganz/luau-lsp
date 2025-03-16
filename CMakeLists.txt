@@ -75,6 +75,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/main.cpp
         tests/Fixture.cpp
         tests/TempDir.cpp
+        tests/TestClient.cpp
         tests/Autocomplete.test.cpp
         tests/AutoImports.test.cpp
         tests/MagicFunctions.test.cpp

@@ -6,6 +6,8 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "LSP/LuauExt.hpp"
 
+#include "TestClient.h"
+
 #include "doctest.h"
 #include <string_view>
 
@@ -32,7 +34,7 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
 } // namespace Luau::LanguageServer
 
 Fixture::Fixture()
-    : client(std::make_shared<Client>(Client{}))
+    : client(std::make_shared<TestClient>(TestClient{}))
     , workspace(client, "$TEST_WORKSPACE", Uri::file(std::filesystem::current_path()), std::nullopt)
 {
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
