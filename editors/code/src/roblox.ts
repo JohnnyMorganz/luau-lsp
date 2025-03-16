@@ -137,14 +137,24 @@ const getRojoProjectFile = async (
   );
 
   if (foundProjectFiles.length === 0) {
-    vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. Please configure a file in settings`,
-    );
+    vscode.window
+      .showWarningMessage(
+        `Unable to find project file ${projectFile} for Rojo sourcemap generation. Please configure a file in settings`,
+        "Configure Settings",
+      )
+      .then((value) => {
+        if (value === "Configure Settings") {
+          vscode.commands.executeCommand(
+            "workbench.action.openWorkspaceSettings",
+            "luau-lsp.sourcemap",
+          );
+        }
+      });
     return undefined;
   } else if (foundProjectFiles.length === 1) {
     const fileName = utils.basenameUri(foundProjectFiles[0]);
     const option = await vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. We found ${fileName} available`,
+      `Unable to find project file ${projectFile} for Rojo sourcemap generation. We found ${fileName} available`,
       `Set project file to ${fileName}`,
       "Cancel",
     );
@@ -157,7 +167,7 @@ const getRojoProjectFile = async (
     }
   } else {
     const option = await vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. We found ${foundProjectFiles.length} files available`,
+      `Unable to find project file ${projectFile} for Rojo sourcemap generation. We found ${foundProjectFiles.length} files available`,
       "Select project file",
       "Cancel",
     );
