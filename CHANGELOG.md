@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.665
+- VSCode: Improved error reporting when the Studio Plugin sends a result that is too large. The error now includes the
+  size limit, the received size, and steps to resolve the issue ([#969](https://github.com/JohnnyMorganz/luau-lsp/issues/969))
 
 ## [1.40.0] - 2025-03-01
 

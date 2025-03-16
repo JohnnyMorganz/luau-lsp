@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Server } from "http";
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
+import { format as bytesFormat } from "bytes";
 import { fetch } from "undici";
 import { spawn, ChildProcess } from "child_process";
 import { LanguageClient } from "vscode-languageclient/node";
@@ -322,6 +323,23 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     client.sendNotification("$/plugin/clear");
     res.sendStatus(200);
   });
+
+  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+
+    if (err && err.type === "entity.too.large") {
+      res
+        .status(413)
+        .send(
+          `Result is too large. Limit: ${bytesFormat(err.limit)}, Received: ${bytesFormat(err.received)}.\n` +
+            `Increase your available limits by updating the 'luau-lsp.plugin.maximumRequestBodySize' property in VSCode, or by reducing the include list in the Studio Plugin settings`,
+        );
+    }
+  };
+
+  app.use(errorHandler);
 
   const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
   pluginServer = app
