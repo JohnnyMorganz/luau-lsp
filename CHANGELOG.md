@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Enabled HTML support by setting `supportHtml: true` in the language client options. ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
+- Enabled HTML support by setting `supportHtml: true` in the language client options ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
 - Documentation comments now attach to type alias definitions ([#956](https://github.com/JohnnyMorganz/luau-lsp/pull/956))
 
 ### Changed
