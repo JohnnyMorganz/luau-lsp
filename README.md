@@ -14,7 +14,7 @@ to setup your own client for a different editor.
 
 A [Nightly Release](https://github.com/JohnnyMorganz/luau-lsp/actions/workflows/nightly.yml) runs every day with the latest changes on main.
 You can download the relevant release for your platform and manually install the `.vsix`.
-For debugging, the nightly release builds with debug symbols and profiling instrumentation.
+The nightly release builds with debug symbols and profiling instrumentation for debugging.
 
 ### For General Users
 
