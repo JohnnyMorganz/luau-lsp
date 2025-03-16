@@ -322,7 +322,7 @@ const startSourcemapGeneration = async (
             startSourcemapGeneration(client, workspaceFolder);
           } else if (value === "Configure Settings") {
             vscode.commands.executeCommand(
-              "workbench.action.openSettings",
+              "workbench.action.openWorkspaceSettings",
               "luau-lsp.sourcemap",
             );
           }
@@ -365,7 +365,7 @@ const startSourcemapGeneration = async (
                 startSourcemapGeneration(client, workspaceFolder);
               } else if (value === "Configure Settings") {
                 vscode.commands.executeCommand(
-                  "workbench.action.openSettings",
+                  "workbench.action.openWorkspaceSettings",
                   "luau-lsp.sourcemap",
                 );
               }
