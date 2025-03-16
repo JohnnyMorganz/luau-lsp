@@ -248,6 +248,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     initializationOptions: {
       fflags,
     },
+    markdown: {
+      supportHtml: true,
+    },
   };
 
   client = new LanguageClient(

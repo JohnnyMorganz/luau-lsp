@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Enabled HTML support by setting `supportHtml: true` in the language client options ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
 - Documentation comments now attach to type alias definitions ([#956](https://github.com/JohnnyMorganz/luau-lsp/pull/956))
 - VSCode: Introduced `luau-lsp.sourcemap.generatorCommand` to run a custom generator for updating the sourcemap. Accepts a shell command.
   If undefined (default), then falls back to using `rojo`. ([#968](https://github.com/JohnnyMorganz/luau-lsp/issues/968))
