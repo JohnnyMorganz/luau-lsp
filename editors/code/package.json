@@ -213,6 +213,17 @@
           "default": "sourcemap.json",
           "scope": "resource"
         },
+        "luau-lsp.sourcemap.generatorCommand": {
+          "markdownDescription": "A command to run to generate the sourcemap. If not specified, defaults to `rojo`",
+          "type": "string",
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.useVSCodeWatcher": {
+          "markdownDescription": "Whether the VSCode filesystem watchers are used to regenerate the sourcemap. If disabled, delegates to the generator process. If using `rojo`, this command stops using `--watch`",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
         "luau-lsp.fflags.enableByDefault": {
           "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
           "type": "boolean",

@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Documentation comments now attach to type alias definitions ([#956](https://github.com/JohnnyMorganz/luau-lsp/pull/956))
+- VSCode: Introduced `luau-lsp.sourcemap.generatorCommand` to run a custom generator for updating the sourcemap.
+  If undefined (default), then falls back to using `rojo`. ([#968](https://github.com/JohnnyMorganz/luau-lsp/issues/968))
+- VSCode: Introduced `luau-lsp.sourcemap.useVSCodeWatcher` (default: `false`). When enabled, the extension will connect to
+  VSCode file added / removed events for retriggering the generator. When disabled (default), the extension delegates to
+  the generator process for watching. When using `rojo`, this option controls the `--watch` flag.
 
 ### Changed
 
