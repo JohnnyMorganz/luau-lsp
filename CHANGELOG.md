@@ -8,19 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Enabled HTML support by setting `supportHtml: true` in the language client options ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
 - Documentation comments now attach to type alias definitions ([#956](https://github.com/JohnnyMorganz/luau-lsp/pull/956))
 - VSCode: Introduced `luau-lsp.sourcemap.generatorCommand` to run a custom generator for updating the sourcemap. Accepts a shell command.
   If undefined (default), then falls back to using `rojo`. ([#968](https://github.com/JohnnyMorganz/luau-lsp/issues/968))
 - VSCode: Introduced `luau-lsp.sourcemap.useVSCodeWatcher` (default: `false`). When enabled, the extension will connect to
   VSCode file added / removed events for retriggering the generator. When disabled (default), the extension delegates to
   the generator process for watching. When using `rojo`, this option controls the `--watch` flag.
+- VSCode: Documentation now supports HTML syntax ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
 
 ### Changed
 
 - Sync to upstream Luau 0.665
 - VSCode: Improved error reporting when the Studio Plugin sends a result that is too large. The error now includes the
   size limit, the received size, and steps to resolve the issue ([#969](https://github.com/JohnnyMorganz/luau-lsp/issues/969))
+- The language server will no longer attempt to remove HTML tags from
+  documentation ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
 
 ## [1.40.0] - 2025-03-01
 
