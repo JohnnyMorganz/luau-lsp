@@ -79,6 +79,10 @@ struct SourceNode
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
     std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
+#ifdef NEVERMORE_STRING_REQUIRE
+    bool isVirtualNevermoreLoader = false;
+#endif
+
     bool isScript();
     std::optional<std::filesystem::path> getScriptFilePath();
     Luau::SourceCode::Type sourceCodeType() const;
@@ -172,6 +176,13 @@ public:
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
 
     std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const override;
+
+#ifdef NEVERMORE_STRING_REQUIRE
+    std::optional<std::filesystem::path> getRealPathFromVirtualSourceNodeParent(const SourceNodePtr& sourceNode) const;
+    std::vector<std::filesystem::path> findLoaderTargetsForDirectory(std::filesystem::path& directory) const;
+    std::string generateVirtualLoader(std::filesystem::path& directory) const;
+    std::optional<Luau::SourceCode> resolveToVirtualSourceCode(const Luau::ModuleName& name) const override;
+#endif
 
     Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
 
