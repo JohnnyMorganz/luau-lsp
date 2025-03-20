@@ -121,6 +121,18 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
             }
         }
     }
+#ifdef NEVERMORE_STRING_REQUIRE
+    else if (tag == "StringRequires")
+    {
+        Luau::AutocompleteEntryMap result;
+        for (const auto& pair : this->moduleNameToSourceNode)
+            result.insert_or_assign(
+                pair.first, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false,
+                               false, Luau::TypeCorrectKind::Correct});
+
+        return result;
+    }
+#endif
     else if (tag == "Properties")
     {
         if (ctx && ctx.value())
