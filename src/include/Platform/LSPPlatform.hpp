@@ -52,6 +52,13 @@ public:
         return name;
     }
 
+#ifdef NEVERMORE_STRING_REQUIRE
+    [[nodiscard]] virtual std::optional<Luau::SourceCode> resolveToVirtualSourceCode(const Luau::ModuleName& name) const
+    {
+        return std::nullopt;
+    }
+#endif
+
     [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const
     {
         return Luau::SourceCode::Type::Module;

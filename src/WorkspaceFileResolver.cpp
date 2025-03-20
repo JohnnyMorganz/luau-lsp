@@ -75,6 +75,19 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     if (platform->isVirtualPath(name))
     {
         auto filePath = platform->resolveToRealPath(name);
+
+#ifdef NEVERMORE_STRING_REQUIRE
+        // If we are missing a file path, then try to resolve into a virtual node that we generate
+        if (!filePath.has_value())
+        {
+            std::optional<Luau::SourceCode> sourceCode = platform->resolveToVirtualSourceCode(name);
+            if (sourceCode.has_value())
+            {
+                return sourceCode;
+            }
+        }
+#endif
+
         if (!filePath)
             return std::nullopt;
 
