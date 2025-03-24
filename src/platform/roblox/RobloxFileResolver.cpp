@@ -16,6 +16,80 @@ std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::
     }
 }
 
+#ifdef NEVERMORE_STRING_REQUIRE
+std::vector<std::filesystem::path> RobloxPlatform::findLoaderTargetsForDirectory(std::filesystem::path& directory) const
+{
+    // TODO: check source-map for files
+    std::vector<std::filesystem::path> loaderTargets;
+
+    // TODO: Build node based view of file hierarchy
+    // Lookup from our directory and discover files
+
+    return loaderTargets;
+}
+
+std::string RobloxPlatform::generateVirtualLoader(std::filesystem::path& directory) const
+{
+    std::vector<std::filesystem::path> filePaths = this->findLoaderTargetsForDirectory(directory);
+
+    std::string output = R"lua(
+--!strict
+-- This file was generated using Luau-lsp if NEVERMORE_STRING_REQUIRE flag on
+
+local loader = {}
+
+export type RandomUtils = typeof(require(script.Parent.Parent.node_modules["@quenty"].randomutils.Shared.RandomUtils))
+
+export type require = (("RandomUtils") -> RandomUtils)
+
+function loader.load(thisScript: ModuleScript): require
+    return function(str: string): any
+        return nil
+    end
+end
+
+return loader
+)lua";
+
+
+    return output;
+}
+
+
+
+std::optional<Luau::SourceCode> RobloxPlatform::resolveToVirtualSourceCode(const Luau::ModuleName& name) const
+{
+    if (!isVirtualPath(name))
+    {
+        return std::nullopt;
+    }
+
+    auto sourceNode = getSourceNodeFromVirtualPath(name);
+    if (!sourceNode || !sourceNode.value()->isVirtualNevermoreLoader)
+    {
+        return std::nullopt;
+    }
+
+    const SourceNodePtr& parent = sourceNode.value()->parent.lock();
+    if (!parent)
+    {
+        return std::nullopt;
+    }
+
+    std::optional<std::filesystem::path> directory = getRealPathFromVirtualSourceNodeParent(parent);
+    if (!directory)
+    {
+        return std::nullopt;
+    }
+
+    return Luau::SourceCode {
+        this->generateVirtualLoader(directory.value()),
+        Luau::SourceCode::Type::Module,
+    };
+}
+
+#endif
+
 std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
 {
     if (isVirtualPath(name))

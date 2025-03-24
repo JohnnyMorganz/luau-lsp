@@ -435,11 +435,45 @@ void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::strin
         realPathsToSourceNodes[realPath->generic_string()] = node;
     }
 
+#ifndef NEVERMORE_STRING_REQUIRE
     for (auto& child : node->children)
     {
         child->parent = node;
         writePathsToMap(child, base + "/" + child->name);
     }
+#else
+    bool hasScriptChildren = false;
+    bool hasLoader = false;
+
+    for (auto& child : node->children)
+    {
+        if (child->isScript())
+        {
+            hasScriptChildren = true;
+        }
+        if (child->name == "loader")
+        {
+            hasLoader = true;
+        }
+
+        child->parent = node;
+        writePathsToMap(child, base + "/" + child->name);
+    }
+
+    if (hasScriptChildren && !hasLoader)
+    {
+        // Create a virtual source_node for nevermore loader
+        std::shared_ptr<struct SourceNode> source_node = std::make_shared<SourceNode>();
+        source_node->parent = node;
+        source_node->name = "loader";
+        source_node->className = "ModuleScript";
+        source_node->isVirtualNevermoreLoader = true;
+        node->children.push_back(source_node);
+
+        writePathsToMap(source_node, base + "/" + source_node->name);
+    }
+#endif
+
 }
 
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
@@ -594,6 +628,23 @@ Luau::ModuleName RobloxPlatform::getVirtualPathFromSourceNode(const SourceNodePt
 {
     return sourceNode->virtualPath;
 }
+
+#ifdef NEVERMORE_STRING_REQUIRE
+std::optional<std::filesystem::path> RobloxPlatform::getRealPathFromVirtualSourceNodeParent(const SourceNodePtr& sourceNode) const
+{
+    for (const auto& filePath : sourceNode->filePaths)
+    {
+        std::error_code ec;
+        auto canonicalName = std::filesystem::weakly_canonical(fileResolver->rootUri.fsPath() / filePath, ec);
+        if (ec.value() != 0)
+            canonicalName = filePath;
+        // URI-ify the file path so that its normalised (in particular, the drive letter)
+        return Uri::file(canonicalName).fsPath();
+    }
+
+    return std::nullopt;
+}
+#endif
 
 std::optional<std::filesystem::path> RobloxPlatform::getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const
 {
