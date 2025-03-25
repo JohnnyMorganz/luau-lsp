@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.666
 
+### Fixed
+
+- Added a debounce of 1s on file changes triggering sourcemap generation when `luau-lsp.sourcemap.useVSCodeWatcher` is enabled
+
 ## [1.41.0] - 2025-03-16
 
 ### Added

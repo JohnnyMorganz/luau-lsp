@@ -353,8 +353,15 @@ const startSourcemapGeneration = async (
       /* ignoreDeleteEvents = */ false,
     );
 
-    watcher.onDidCreate(() => spawnChildProcess());
-    watcher.onDidDelete(() => spawnChildProcess());
+    let debounceTimer: NodeJS.Timeout;
+    watcher.onDidCreate(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(spawnChildProcess, 1000);
+    });
+    watcher.onDidDelete(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(spawnChildProcess, 1000);
+    });
 
     addSourcemapDisposable(workspaceFolder, watcher);
   } else {
