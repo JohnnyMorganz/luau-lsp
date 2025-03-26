@@ -457,7 +457,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
             if (!importedModuleName) 
                 return std::nullopt;
             auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
-            if (!importedModule)
+            if (!importedModule || !importedModule->hasModuleScope())
                 return std::nullopt;
             auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
             if (!typeLocation)
