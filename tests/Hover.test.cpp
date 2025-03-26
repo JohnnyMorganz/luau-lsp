@@ -395,4 +395,26 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_references")
                                          "This is the intersection of two types\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_external_type_references")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
 TEST_SUITE_END();

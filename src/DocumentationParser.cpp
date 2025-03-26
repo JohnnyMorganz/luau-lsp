@@ -447,6 +447,8 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
 
 std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
 {
+    auto config = client->getConfiguration(rootUri);
+
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
         if (ref->prefix)
@@ -454,7 +456,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
             auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
             if (!importedModuleName) 
                 return std::nullopt;
-            auto importedModule = getModule(*importedModuleName);
+            auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
             if (!importedModule)
                 return std::nullopt;
             auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
