@@ -417,4 +417,30 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_external_type_references"
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
+    // We should still be able to find the type references.
+    workspace.checkSimple(workspace.fileResolver.getModuleName(uri));
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
 TEST_SUITE_END();
