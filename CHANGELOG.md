@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.666
+- Optimized re-indexing on changed files when large number of changes processed at once
+- Watched files re-indexing now respects ignore globs specification
 
 ### Fixed
 

@@ -60,7 +60,7 @@ public:
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
-    void onDidChangeWatchedFiles(const lsp::FileEvent& change);
+    void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
@@ -74,12 +74,13 @@ public:
     void recomputeDiagnostics(const ClientConfiguration& config);
     void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
 
+    void clearDiagnosticsForFiles(const std::vector<lsp::DocumentUri>& uri) const;
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
     void indexFiles(const ClientConfiguration& config);
 
     Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName);
-    void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
+    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 

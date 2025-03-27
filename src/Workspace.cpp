@@ -67,18 +67,25 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
         clearDiagnosticsForFile(uri);
 }
 
-void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
+void WorkspaceFolder::clearDiagnosticsForFiles(const std::vector<lsp::DocumentUri>& uris) const
 {
     if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
     {
-        client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, {}});
+        for (const auto& uri : uris)
+            client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, {}});
     }
     else if (client->workspaceDiagnosticsToken)
     {
-        lsp::WorkspaceDocumentDiagnosticReport documentReport;
-        documentReport.uri = uri;
-        documentReport.kind = lsp::DocumentDiagnosticReportKind::Full;
-        lsp::WorkspaceDiagnosticReportPartialResult report{{documentReport}};
+        std::vector<lsp::WorkspaceDocumentDiagnosticReport> reports;
+        reports.reserve(uris.size());
+        for (const auto& uri : uris)
+        {
+            lsp::WorkspaceDocumentDiagnosticReport report;
+            report.uri = uri;
+            report.kind = lsp::DocumentDiagnosticReportKind::Full;
+            reports.push_back(report);
+        }
+        lsp::WorkspaceDiagnosticReportPartialResult report{reports};
         client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
     }
     else
@@ -87,52 +94,66 @@ void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
     }
 }
 
-void WorkspaceFolder::onDidChangeWatchedFiles(const lsp::FileEvent& change)
+void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
 {
-    auto filePath = change.uri.fsPath();
+    clearDiagnosticsForFiles({uri});
+}
+
+void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes)
+{
+    client->sendTrace("workspace: processing " + std::to_string(changes.size()) + " watched files changes");
+
     auto config = client->getConfiguration(rootUri);
 
-    platform->onDidChangeWatchedFiles(change);
+    std::vector<Luau::ModuleName> dirtyFiles;
+    std::vector<Uri> deletedFiles;
 
-    if (filePath.filename() == ".luaurc")
+    for (const auto& change : changes)
     {
-        client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
-        fileResolver.clearConfigCache();
+        auto filePath = change.uri.fsPath();
 
-        // Recompute diagnostics
-        recomputeDiagnostics(config);
-    }
-    else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
-    {
-        // Notify if it was a definitions file
-        if (isDefinitionFile(filePath, config))
+        platform->onDidChangeWatchedFiles(change);
+
+        if (filePath.filename() == ".luaurc")
         {
-            client->sendWindowMessage(
-                lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
-            return;
-        }
+            client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
+            fileResolver.clearConfigCache();
 
-        // Index the workspace on changes
-        // We only update the require graph. We do not perform type checking
-        if (config.index.enabled && isConfigured)
+            // Recompute diagnostics
+            recomputeDiagnostics(config);
+        }
+        else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
         {
-            auto moduleName = fileResolver.getModuleName(change.uri);
+            // Notify if it was a definitions file
+            if (isDefinitionFile(filePath, config))
+            {
+                client->sendWindowMessage(
+                    lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
+                continue;
+            }
+            else if (isIgnoredFile(filePath, config))
+            {
+                continue;
+            }
 
-            std::vector<Luau::ModuleName> markedDirty{};
-            frontend.markDirty(moduleName, &markedDirty);
+            // Index the workspace on changes
+            if (config.index.enabled && isConfigured)
+            {
+                auto moduleName = fileResolver.getModuleName(change.uri);
+                frontend.markDirty(moduleName, &dirtyFiles);
+            }
 
-            if (change.type == lsp::FileChangeType::Created)
-                frontend.parse(moduleName);
-
-            // Re-check the reverse dependencies
-            for (const auto& reverseDep : markedDirty)
-                frontend.parse(reverseDep);
+            if (change.type == lsp::FileChangeType::Deleted)
+                deletedFiles.push_back(change.uri);
         }
-
-        // Clear the diagnostics for the file in case it was not managed
-        if (change.type == lsp::FileChangeType::Deleted)
-            clearDiagnosticsForFile(change.uri);
     }
+
+    // Parse require graph for files if indexing enabled
+    for (const auto& dirtyModule : dirtyFiles)
+        frontend.parse(dirtyModule);
+
+    // Clear the diagnostics for files in case it was not managed
+    clearDiagnosticsForFiles(deletedFiles);
 }
 
 /// When using lexically_relative, if the root-dir does not match, it will return a default-constructed path.
