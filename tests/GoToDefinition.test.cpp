@@ -424,6 +424,39 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition_after_ch
     CHECK_EQ(result[0].range.end, lsp::Position{2, 32});
 }
 
+TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition_after_check_without_retaining_type_graphs_goto_type_definition")
+{
+    auto required = newDocument("required.luau", R"(
+        --!strict
+        export type Foo = string
+
+        return {}
+    )");
+    registerDocumentForVirtualPath(required, "game/Testing/useFunction");
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local utilities = require(game.Testing.useFunction)
+
+        local y: utilities.Fo|o = ""
+    )");
+    auto document = newDocument("main.luau", source);
+
+    // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
+    // We should still be able to find the type references.
+    workspace.checkSimple(workspace.fileResolver.getModuleName(document));
+
+    auto params = lsp::TypeDefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoTypeDefinition(params);
+    REQUIRE(result);
+    CHECK_EQ(result->uri, required);
+    CHECK_EQ(result->range.start, lsp::Position{2, 8});
+    CHECK_EQ(result->range.end, lsp::Position{2, 32});
+}
+
 TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_a_named_function_returns_the_underlying_definition_and_not_the_require_stmt")
 {
     auto required = newDocument("required.luau", R"(

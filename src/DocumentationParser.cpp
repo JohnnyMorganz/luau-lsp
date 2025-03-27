@@ -456,6 +456,9 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
             auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
             if (!importedModuleName) 
                 return std::nullopt;
+            // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
+            // even when retainFullTypeGraphs = false.
+            checkStrict(*importedModuleName);
             auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
             if (!importedModule || !importedModule->hasModuleScope())
                 return std::nullopt;
