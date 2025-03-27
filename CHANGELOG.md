@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added a debounce of 1s on file changes triggering sourcemap generation when `luau-lsp.sourcemap.useVSCodeWatcher` is enabled
 - Fixed crashing due to bad memory access when hovering over an imported type reference due to documentation computation
 - Fixed sources of crashing and flakiness when hovering + go to definition on imported type references in the new solver
+- Reduced the need to run 2 type checks unnecessarily on files when the new type solver is enabled
 
 ## [1.41.0] - 2025-03-16
 

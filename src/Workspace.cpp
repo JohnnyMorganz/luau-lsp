@@ -236,7 +236,7 @@ Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleNam
 // Uses the autocomplete typechecker to enforce strictness and DM awareness.
 // NOTE: a disadvantage of the autocomplete typechecker is that it has a timeout restriction that
 // can often be hit
-void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete)
+Luau::CheckResult WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete)
 {
     // HACK: note that a previous call to `Frontend::check(moduleName, { retainTypeGraphs: false })`
     // and then a call `Frontend::check(moduleName, { retainTypeGraphs: true })` will NOT actually
@@ -246,7 +246,7 @@ void WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAu
     if (module && module->internalTypes.types.empty()) // If we didn't retain type graphs, then the internalTypes arena is empty
         frontend.markDirty(moduleName);
 
-    frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ true});
+    return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ true});
 }
 
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
