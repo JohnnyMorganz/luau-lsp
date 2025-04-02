@@ -167,6 +167,14 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
     if (call.args.size != 1)
         return std::nullopt;
 
+#ifdef NEVERMORE_STRING_REQUIRE
+    Luau::AstExprLocal* local = call.func->as<Luau::AstExprLocal>();
+    if (local && local->local->name == require)
+    {
+        return call.args.data[0];
+    }
+#endif
+
     const Luau::AstExprGlobal* funcAsGlobal = call.func->as<Luau::AstExprGlobal>();
     if (!funcAsGlobal || funcAsGlobal->name != require)
         return std::nullopt;

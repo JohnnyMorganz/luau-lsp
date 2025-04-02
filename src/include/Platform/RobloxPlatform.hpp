@@ -79,6 +79,13 @@ struct SourceNode
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
     std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
+#ifdef NEVERMORE_STRING_REQUIRE
+    bool isVirtualNevermoreLoader = false;
+    // The corresponding TypeId for this sourcemap node
+    // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
+    std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> stringRequireTypes{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
+#endif
+
     bool isScript();
     std::optional<std::filesystem::path> getScriptFilePath();
     Luau::SourceCode::Type sourceCodeType() const;
@@ -139,6 +146,10 @@ private:
     mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
 
+#ifdef NEVERMORE_STRING_REQUIRE
+    mutable std::unordered_map<std::string, SourceNodePtr> moduleNameToSourceNode{};
+#endif
+
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
     std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
 
@@ -172,6 +183,12 @@ public:
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
 
     std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const override;
+
+#ifdef NEVERMORE_STRING_REQUIRE
+    std::optional<Luau::SourceCode> resolveToVirtualSourceCode(const Luau::ModuleName& name) const override;
+    Luau::TypeId getStringRequireType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node) const;
+    std::optional<SourceNodePtr> findStringModule(const std::string& moduleName) const;
+#endif
 
     Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
 
