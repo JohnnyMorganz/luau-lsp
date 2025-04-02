@@ -194,10 +194,10 @@ jobs:
       - run: npm ci
         working-directory: editors/code
 
-      - name: Publish Extension
-        working-directory: editors/code
-        run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+      # - name: Publish Extension
+      #   working-directory: editors/code
+      #   run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
 
-      - name: Publish OpenVSX Extension
-        working-directory: editors/code
-        run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+      # - name: Publish OpenVSX Extension
+      #   working-directory: editors/code
+      #   run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
