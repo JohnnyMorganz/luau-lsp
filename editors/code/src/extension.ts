@@ -166,11 +166,18 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .get<boolean>("enableFragmentAutocomplete")
   ) {
     fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
-    fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
     fflags["LuauFreeTypesMustHaveBounds"] = "true";
     fflags["LuauCloneIncrementalModule"] = "true";
     fflags["LuauAllFreeTypesHaveScopes"] = "true";
-    fflags["LuauModuleHoldsAstRoot"] = "true";
+    fflags["LuauClonedTableAndFunctionTypesMustHaveScopes"] = "true";
+    fflags["LuauDisableNewSolverAssertsInMixedMode"] = "true";
+    fflags["LuauCloneTypeAliasBindings"] = "true";
+    fflags["LuauDoNotClonePersistentBindings"] = "true";
+    fflags["LuauCloneReturnTypePack"] = "true";
+    fflags["LuauIncrementalAutocompleteDemandBasedCloning"] = "true";
+    fflags["LuauBetterScopeSelection"] = "true";
+    fflags["LuauBlockDiffFragmentSelection"] = "true";
+    fflags["LuauAutocompleteUsesModuleForTypeCompatibility"] = "true";
   }
 
   // Handle overrides
