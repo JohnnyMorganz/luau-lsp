@@ -210,7 +210,7 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
     if (auto kind = platform->handleEntryKind(entry))
         return kind;
 
-    if (entry.type.has_value())
+    if (entry.type.has_value() && entry.kind != Luau::AutocompleteEntryKind::Type)
     {
         auto id = Luau::follow(entry.type.value());
         if (Luau::isOverloadedFunction(id))
@@ -610,7 +610,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.detail = Luau::toString(id);
 
             // Try to infer more type info about the entry to provide better suggestion info
-            if (auto ftv = Luau::get<Luau::FunctionType>(id); ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction)
+            if (auto ftv = Luau::get<Luau::FunctionType>(id);
+                ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction && entry.kind != Luau::AutocompleteEntryKind::Type)
             {
                 // Compute label details and more detailed parentheses snippet
                 auto [detail, parenthesesSnippet] = computeLabelDetailsForFunction(entry, ftv);

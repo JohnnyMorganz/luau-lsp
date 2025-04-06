@@ -1220,4 +1220,29 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
     CHECK_EQ(edits[0].newText, "\n        end)\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "dont_mark_type_as_function_kind_when_autocompleting_in_type_context")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        export type Func = (string) -> string
+
+        export type Mod = {
+            apply: Fu|
+        }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "Func");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Interface);
+    CHECK_EQ(item.labelDetails, std::nullopt);
+    CHECK_EQ(item.insertText, std::nullopt);
+    CHECK_EQ(item.textEdit, std::nullopt);
+    CHECK_EQ(item.command, std::nullopt);
+}
+
 TEST_SUITE_END();
