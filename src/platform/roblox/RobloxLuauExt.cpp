@@ -454,6 +454,18 @@ bool MagicTypeLookup::infer(const Luau::MagicFunctionCallContext& context)
     return false;
 };
 
+static void attachMagicFunctionSafe(Luau::TableType::Props& props, const char* property, std::shared_ptr<Luau::MagicFunction> magic)
+{
+    if (const auto prop = props.find(property); prop != props.end())
+        Luau::attachMagicFunction(prop->second.type(), magic);
+}
+
+static void attachTagSafe(Luau::TableType::Props& props, const char* property, const char* tagName)
+{
+    if (const auto prop = props.find(property); prop != props.end())
+        Luau::attachTag(prop->second.type(), tagName);
+}
+
 void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata)
 {
     // HACK: Mark "debug" using `@luau` symbol instead
@@ -479,11 +491,11 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     {
         if (auto* ctv = Luau::getMutable<Luau::ClassType>(objectType->type))
         {
-            Luau::attachMagicFunction(ctv->props["IsA"].type(), std::make_shared<MagicInstanceIsA>());
-            Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), std::make_shared<MagicGetPropertyChangedSignal>());
+            attachMagicFunctionSafe(ctv->props, "IsA", std::make_shared<MagicInstanceIsA>());
+            attachMagicFunctionSafe(ctv->props, "GetPropertyChangedSignal", std::make_shared<MagicGetPropertyChangedSignal>());
 
-            Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
+            attachTagSafe(ctv->props, "IsA", "ClassNames");
+            attachTagSafe(ctv->props, "GetPropertyChangedSignal", "Properties");
         }
     }
 
@@ -493,27 +505,17 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
         {
             Luau::attachTag(instanceType->type, Luau::kTypeofRootTag);
 
-            Luau::attachMagicFunction(ctv->props["FindFirstChildWhichIsA"].type(), std::make_shared<MagicInstanceFindFirstXWhichIsA>());
-            Luau::attachMagicFunction(ctv->props["FindFirstChildOfClass"].type(), std::make_shared<MagicInstanceFindFirstXWhichIsA>());
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorWhichIsA"].type(), std::make_shared<MagicInstanceFindFirstXWhichIsA>());
-            Luau::attachMagicFunction(ctv->props["FindFirstAncestorOfClass"].type(), std::make_shared<MagicInstanceFindFirstXWhichIsA>());
-            Luau::attachMagicFunction(ctv->props["Clone"].type(), std::make_shared<MagicInstanceClone>());
-
-            // TODO: clip once Object type is used everywhere
-            if (ctv->props.find("IsA") != ctv->props.end()) {
-                Luau::attachMagicFunction(ctv->props["IsA"].type(), std::make_shared<MagicInstanceIsA>());
-                Luau::attachTag(ctv->props["IsA"].type(), "ClassNames");
-            }
-            if (ctv->props.find("GetPropertyChangedSignal") != ctv->props.end()) {
-                Luau::attachMagicFunction(ctv->props["GetPropertyChangedSignal"].type(), std::make_shared<MagicGetPropertyChangedSignal>());
-                Luau::attachTag(ctv->props["GetPropertyChangedSignal"].type(), "Properties");
-            }
+            attachMagicFunctionSafe(ctv->props, "FindFirstChildWhichIsA", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
+            attachMagicFunctionSafe(ctv->props, "FindFirstChildOfClass", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
+            attachMagicFunctionSafe(ctv->props, "FindFirstAncestorWhichIsA", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
+            attachMagicFunctionSafe(ctv->props, "FindFirstAncestorOfClass", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
+            attachMagicFunctionSafe(ctv->props, "Clone", std::make_shared<MagicInstanceClone>());
 
             // Autocomplete ClassNames for :IsA("") and counterparts
-            Luau::attachTag(ctv->props["FindFirstChildWhichIsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstChildOfClass"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorWhichIsA"].type(), "ClassNames");
-            Luau::attachTag(ctv->props["FindFirstAncestorOfClass"].type(), "ClassNames");
+            attachTagSafe(ctv->props, "FindFirstChildWhichIsA", "ClassNames");
+            attachTagSafe(ctv->props, "FindFirstChildOfClass", "ClassNames");
+            attachTagSafe(ctv->props, "FindFirstAncestorWhichIsA", "ClassNames");
+            attachTagSafe(ctv->props, "FindFirstAncestorOfClass", "ClassNames");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
@@ -560,7 +562,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     if (robloxMetadata.has_value() && !robloxMetadata->SERVICES.empty())
         if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
             if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type);
-                ctv && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
+                ctv && ctv->props.find("GetService") != ctv->props.end() && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
             {
                 Luau::attachTag(ctv->props["GetService"].type(), "Services");
                 Luau::attachMagicFunction(
@@ -579,8 +581,8 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             {
                 if (ctv->name == "EnumItem")
                 {
-                    Luau::attachMagicFunction(ctv->props["IsA"].type(), std::make_shared<MagicEnumItemIsA>());
-                    Luau::attachTag(ctv->props["IsA"].type(), "Enums");
+                    attachMagicFunctionSafe(ctv->props, "IsA", std::make_shared<MagicEnumItemIsA>());
+                    attachTagSafe(ctv->props, "IsA", "Enums");
                 }
                 else if (ctv->name != "Enum" && ctv->name != "Enums")
                 {

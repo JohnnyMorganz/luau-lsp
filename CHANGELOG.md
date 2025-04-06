@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Don't show function types with function kind or label details when autocompleting in a type
   context ([#987](https://github.com/JohnnyMorganz/luau-lsp/issues/987))
+- Fixed crash when registering a non-Roblox definitions file that contains classes named `Object` / `Instance` /
+  `ServiceProvider` / `EnumItem` ([#986](https://github.com/JohnnyMorganz/luau-lsp/issues/986))
 
 ## [1.42.0] - 2025-03-27
 
