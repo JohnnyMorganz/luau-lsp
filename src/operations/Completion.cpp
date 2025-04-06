@@ -468,6 +468,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         else
             frontendOptions.forAutocomplete = true;
 
+        // Get parse information for this script
+        frontend.parse(moduleName);
+        const auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return {};
+
         // It is important to keep the fragmentResult in scope for the whole completion step
         // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
         fragmentResult = Luau::fragmentAutocomplete(frontend, textDocument->getText(), moduleName, position, frontendOptions,
@@ -476,7 +482,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             {
                 tags.insert(tag);
                 return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-            });
+            },
+            std::nullopt, sourceModule->root);
         result = fragmentResult.acResults;
     }
     else
