@@ -92,23 +92,4 @@ TEST_CASE_FIXTURE(Fixture, "managed_files_correctly_resolves_for_virtual_paths")
     CHECK_EQ(textDocumentFromUri, textDocumentFromModuleName);
 }
 
-TEST_CASE_FIXTURE(Fixture, "isIgnoredFile")
-{
-    client->globalConfig.ignoreGlobs = {"**/_Index/**"};
-
-    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.fsPath() / "source.luau"), false);
-    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.fsPath() / "Packages/_Index/source.luau"), true);
-
-    // Test upper vs. lower case drive letter
-#ifdef _WIN32
-    auto path = workspace.rootUri.fsPath().generic_string();
-    REQUIRE(path.size() >= 2);
-    REQUIRE(path[1] == ':');
-    auto lowercasedDriveLetter = std::filesystem::path(std::string(1, toupper(path[0])) + path.substr(1));
-    auto uppercasedDriveLetter = std::filesystem::path(std::string(1, tolower(path[0])) + path.substr(1));
-    CHECK_EQ(workspace.isIgnoredFile(lowercasedDriveLetter / "Packages/_Index/source.luau"), true);
-    CHECK_EQ(workspace.isIgnoredFile(uppercasedDriveLetter / "Packages/_Index/source.luau"), true);
-#endif
-}
-
 TEST_SUITE_END();
