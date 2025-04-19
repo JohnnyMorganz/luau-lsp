@@ -173,11 +173,12 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauDisableNewSolverAssertsInMixedMode"] = "true";
     fflags["LuauCloneTypeAliasBindings"] = "true";
     fflags["LuauDoNotClonePersistentBindings"] = "true";
-    fflags["LuauCloneReturnTypePack"] = "true";
     fflags["LuauIncrementalAutocompleteDemandBasedCloning"] = "true";
     fflags["LuauBetterScopeSelection"] = "true";
     fflags["LuauBlockDiffFragmentSelection"] = "true";
     fflags["LuauAutocompleteUsesModuleForTypeCompatibility"] = "true";
+    fflags["LuauFragmentAcMemoryLeak"] = "true";
+    fflags["LuauGlobalVariableModuleIsolation"] = "true";
   }
 
   // Handle overrides
