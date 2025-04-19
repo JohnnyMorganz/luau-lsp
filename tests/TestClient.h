@@ -7,6 +7,8 @@
 class TestClient : public Client
 {
 public:
+    TestClient();
+
     std::vector<std::pair<std::string, std::optional<json>>> requestQueue;
     mutable std::vector<std::pair<std::string, std::optional<json>>> notificationQueue;
 

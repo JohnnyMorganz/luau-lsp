@@ -4,7 +4,7 @@
 
 class PipeTransport : public Transport {
 public:
-    PipeTransport(const std::string& socketPath);
+    PipeTransport(std::string socketPath);
     ~PipeTransport() override;
 
     void send(const std::string& data) override;

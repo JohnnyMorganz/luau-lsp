@@ -10,7 +10,9 @@
 
 #include <iostream>
 
-PipeTransport::PipeTransport(const std::string& socketPath) : socketPath(socketPath), socketFd(-1)
+PipeTransport::PipeTransport(std::string socketPath)
+    : socketPath(std::move(socketPath))
+    , socketFd(-1)
 {
     socketFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (socketFd == -1)
@@ -26,7 +28,7 @@ PipeTransport::~PipeTransport()
 
 void PipeTransport::connect()
 {
-    struct sockaddr_un serverAddress;
+    struct sockaddr_un serverAddress{};
     memset(&serverAddress, 0, sizeof(serverAddress));
 
     serverAddress.sun_family = AF_UNIX;
@@ -35,7 +37,7 @@ void PipeTransport::connect()
 
     if (::connect(socketFd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         close(socketFd);
-        throw new std::runtime_error("Failed to connect to socket at " + socketPath);
+        throw std::runtime_error("Failed to connect to socket at " + socketPath);
     }
 }
 

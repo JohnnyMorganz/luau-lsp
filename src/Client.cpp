@@ -1,7 +1,13 @@
 #include "LSP/Client.hpp"
+#include "LSP/Transport/StdioTransport.hpp"
 
 #include <iostream>
 #include <optional>
+
+Client::Client()
+    : transport(std::make_unique<StdioTransport>())
+{
+}
 
 Client::Client(std::unique_ptr<Transport> transport)
     : transport(std::move(transport))

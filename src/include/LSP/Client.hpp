@@ -54,6 +54,7 @@ private:
     std::unordered_map<id_type, ResponseHandler> responseHandler{};
 
 public:
+    Client();
     Client(std::unique_ptr<Transport> transport);
 
     virtual void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
