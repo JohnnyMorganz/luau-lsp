@@ -64,6 +64,9 @@ jobs:
       - name: Run Tests (New Solver)
         run: ${{ matrix.test-path }} --new-solver
 
+      - name: Run Tests (All FFlags enabled)
+        run: ${{ matrix.test-path }} --fflags=true
+
   types_smoketest:
     name: Types Smoketest
     runs-on: ubuntu-22.04
