@@ -1,3 +1,6 @@
+// TODO: PipeTransport is not supported on Windows, requires implementing named pipes support
+#ifndef _WIN32
+
 #include "LSP/Transport/PipeTransport.hpp"
 
 #include <string>
@@ -83,3 +86,5 @@ bool PipeTransport::readLine(std::string& output)
     }
     return true;
 }
+
+#endif
