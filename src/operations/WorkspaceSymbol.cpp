@@ -14,7 +14,7 @@ struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 
     explicit WorkspaceSymbolsVisitor(const TextDocument* textDocument, std::string query)
         : textDocument(textDocument)
-        , query(std::move(toLower(query)))
+        , query(toLower(query))
     {
     }
 

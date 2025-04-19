@@ -95,10 +95,10 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
 
     for (const auto& reference : references)
     {
-        if (!contains(result.changes, reference.uri.toString()))
-            result.changes.insert_or_assign(reference.uri.toString(), std::vector<lsp::TextEdit>{});
+        if (result.changes.find(reference.uri) == result.changes.end())
+            result.changes.insert_or_assign(reference.uri, std::vector<lsp::TextEdit>{});
 
-        result.changes.at(reference.uri.toString()).emplace_back(lsp::TextEdit{reference.range, params.newName});
+        result.changes.at(reference.uri).emplace_back(lsp::TextEdit{reference.range, params.newName});
     }
 
     return result;

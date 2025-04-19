@@ -38,7 +38,7 @@ public:
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
     ClientConfiguration globalConfig{};
     /// Configuration passed from the language client. Currently we only handle configuration at the workspace level
-    std::unordered_map<std::string /* DocumentUri */, ClientConfiguration> configStore{};
+    std::unordered_map<Uri, ClientConfiguration, UriHash> configStore{};
 
     ConfigChangedCallback configChangedCallback;
 

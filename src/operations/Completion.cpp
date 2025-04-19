@@ -136,7 +136,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
 
             lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText};
-            std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+            std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, {edit}}};
             client->applyEdit({"insert end", {changes}},
                 [this](auto) -> void
                 {
@@ -155,7 +155,7 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             // Insert the end onto the next line
             lsp::Position position{params.position.line + 1, 0};
             lsp::TextEdit edit{{position, position}, indent + "end\n"};
-            std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+            std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, {edit}}};
             client->applyEdit({"insert end", {changes}});
         }
     }
