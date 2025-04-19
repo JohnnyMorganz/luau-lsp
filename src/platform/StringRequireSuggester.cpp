@@ -36,24 +36,6 @@ std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std:
         return nullptr;
 
     return std::make_unique<FileRequireNode>(relativeNodePath, std::filesystem::is_directory(relativeNodePath));
-
-    //    else if (auto DEPRECATED_directoryAlias =
-    //                 resolveDirectoryAlias(workspaceFolder->rootUri.fsPath(), config.require.directoryAliases, contentsString))
-    //        currentDirectory = DEPRECATED_directoryAlias.value();
-    //    else if (auto realPath = resolveToRealPath(moduleName); realPath && realPath->has_parent_path())
-    //        currentDirectory = realPath->parent_path().append(contentsString);
-    //    else
-    // TODO: this is a weird fallback, maybe we should indicate an error somewhere
-    //        currentDirectory = workspaceFolder->rootUri.fsPath().append(contentsString);
-
-
-    //    if (isDirectory)
-    //    {
-    //        auto relativeNodePath = path.parent_path().append(requireString);
-    //        return std::make_unique<FileRequireNode>(relativeNodePath, std::filesystem::is_directory(relativeNodePath));
-    //    }
-    //
-    //    return nullptr;
 }
 
 std::vector<std::unique_ptr<Luau::RequireNode>> FileRequireNode::getChildren() const

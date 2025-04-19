@@ -52,7 +52,6 @@ Fixture::Fixture()
     workspace.setupWithConfiguration(Luau::LanguageServer::defaultTestClientConfiguration());
 
     Luau::setPrintLine([](auto s) {});
-    applyRequiredFlags();
 }
 
 Fixture::~Fixture()

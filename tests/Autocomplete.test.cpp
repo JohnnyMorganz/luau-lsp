@@ -834,13 +834,18 @@ static void checkFileCompletionExists(const std::vector<lsp::CompletionItem>& it
 {
     auto item = requireItem(items, label);
     CHECK_EQ(item.kind, lsp::CompletionItemKind::File);
-    CHECK_EQ(item.insertText, insertText);
+    CHECK_EQ(item.insertText, std::nullopt);
+    REQUIRE(item.textEdit.has_value());
+    CHECK_EQ(item.textEdit->newText, insertText);
 }
 
-static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label, const std::string& insertText)
 {
     auto item = requireItem(items, label);
     CHECK_EQ(item.kind, lsp::CompletionItemKind::Folder);
+    CHECK_EQ(item.insertText, std::nullopt);
+    REQUIRE(item.textEdit.has_value());
+    CHECK_EQ(item.textEdit->newText, insertText);
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_initial_values")
@@ -863,8 +868,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_initial_values")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 2);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, ".");
+    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, ".", ".");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
@@ -887,10 +892,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau", "source");
-    checkFileCompletionExists(result, "first.luau", "first");
-    checkFileCompletionExists(result, "second.luau", "second");
+    checkFolderCompletionExists(result, "..", ".");
+    checkFileCompletionExists(result, "source.luau", "./source");
+    checkFileCompletionExists(result, "first.luau", "./first");
+    checkFileCompletionExists(result, "second.luau", "./second");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
@@ -913,10 +918,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, "nested");
-    checkFileCompletionExists(result, "parent_first.luau", "parent_first");
-    checkFileCompletionExists(result, "parent_second.luau", "parent_second");
+    checkFolderCompletionExists(result, "..", "../..");
+    checkFolderCompletionExists(result, "nested", "../nested");
+    checkFileCompletionExists(result, "parent_first.luau", "../parent_first");
+    checkFileCompletionExists(result, "parent_second.luau", "../parent_second");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
@@ -939,8 +944,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 2);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "child.luau", "child");
+    checkFolderCompletionExists(result, "..", "./nested");
+    checkFileCompletionExists(result, "child.luau", "./nested/child");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_after_entering_then_exiting_child_folder")
@@ -963,10 +968,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_afte
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, "nested");
-    checkFileCompletionExists(result, "source.luau", "source");
-    checkFileCompletionExists(result, "sibling.luau", "sibling");
+    checkFolderCompletionExists(result, "..", "./nested/../..");
+    checkFolderCompletionExists(result, "nested", "./nested/../nested");
+    checkFileCompletionExists(result, "source.luau", "./nested/../source");
+    checkFileCompletionExists(result, "sibling.luau", "./nested/../sibling");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
@@ -994,8 +999,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
     auto result = workspace.completion(params);
 
     CHECK_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, ".");
+    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, ".", ".");
     requireItem(result, "@Roact");
     requireItem(result, "@Fusion");
 }
@@ -1009,15 +1014,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
             "Fusion": "fusion"
         }
     })");
-
-    client->globalConfig.require.fileAliases = {
-        {"@test1", "file1.luau"},
-        {"@test2", "file2.luau"},
-    };
-    client->globalConfig.require.directoryAliases = {
-        {"@dir1", "directory1"},
-        {"@dir2", "directory2"},
-    };
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
@@ -1033,7 +1029,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
     auto result = workspace.completion(params);
 
     CHECK_EQ(result.size(), 1);
-    checkFolderCompletionExists(result, "..");
+    checkFolderCompletionExists(result, "..", "test");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_alias")
@@ -1065,9 +1061,9 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 3);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "process.luau", "process");
-    checkFileCompletionExists(result, "net.luau", "net");
+    checkFolderCompletionExists(result, "..", "@lune");
+    checkFileCompletionExists(result, "process.luau", "@lune/process");
+    checkFileCompletionExists(result, "net.luau", "@lune/net");
 }
 
 TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")

@@ -221,7 +221,9 @@ static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label
             return lsp::CompletionItemKind::Function;
     }
 
-    if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
+    if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+        return lsp::CompletionItemKind::Constant;
+    else if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
         return lsp::CompletionItemKind::File;
     else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
         return lsp::CompletionItemKind::Folder;
@@ -260,9 +262,7 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
         return text;
 
     // If it's a file or directory alias, de-prioritise it compared to normal paths
-    // FIXME: we abuse the face that entry.insertText == require kind. This should be deleted once require suggestions support tags
-    if (entry.insertText == "ALIAS" || entry.insertText == "ALIAS/FILE" || entry.insertText == "ALIAS/DIRECTORY" ||
-        std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+    if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
         return SortText::AutoImports;
 
     // If the entry is `loadstring`, deprioritise it
@@ -518,9 +518,28 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
         {
-            if (entry.insertText && name != "../" && name != "./")
-                if (auto pos = entry.insertText->find_last_of('/'); pos != std::string::npos)
-                    item.insertText = entry.insertText->substr(pos + 1);
+            if (entry.insertText)
+            {
+                LUAU_ASSERT(!result.ancestry.empty());
+                auto containingString = result.ancestry.back()->as<Luau::AstExprConstantString>();
+                LUAU_ASSERT(containingString);
+
+                auto insertText = entry.insertText;
+                if (!insertText->empty() && insertText->back() == '/')
+                    insertText->pop_back();
+
+                item.textEdit = lsp::TextEdit{{params.position, textDocument->convertPosition(Luau::Position{
+                                                                    containingString->location.end.line, containingString->location.end.column - 1})},
+                    *insertText};
+
+                // TextEdit cannot replace the old text for some reason, so we need an additional edit
+                item.additionalTextEdits.emplace_back(
+                    lsp::TextEdit{{textDocument->convertPosition(
+                                       Luau::Position{containingString->location.begin.line, containingString->location.begin.column + 1}),
+                                      textDocument->convertPosition(
+                                          Luau::Position{containingString->location.end.line, containingString->location.end.column - 1})},
+                        ""});
+            }
         }
 
         // Handle if name is not an identifier
@@ -544,7 +563,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         // If autocompleting in a string and the autocompleting text contains a '/' character, then it won't replace correctly due to word boundaries
         // Apply a complete text edit instead
-        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String)
+        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String &&
+            entry.kind != Luau::AutocompleteEntryKind::RequirePath)
         {
             auto lastAst = result.ancestry.back();
             if (auto str = lastAst->as<Luau::AstExprConstantString>())
