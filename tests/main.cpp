@@ -4,6 +4,10 @@
 #include "Luau/Common.h"
 #include "Flags.hpp"
 
+#include <string>
+#include <optional>
+#include <vector>
+
 LUAU_FASTFLAG(LuauSolverV2)
 
 static bool skipFastFlag(const char* flagName)
