@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The deprecated `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` no longer show up in
   autocomplete for string requires. Use aliases as part of `.luaurc` instead
 
+### Changed
+
+- Reimplementation of string require autocomplete based off upstream Luau require work
+
 ## [1.43.0] - 2025-04-19
 
 ### Added
