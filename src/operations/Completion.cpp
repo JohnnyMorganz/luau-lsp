@@ -205,7 +205,7 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     return false;
 }
 
-static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry, LSPPlatform* platform)
+static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label, const Luau::AutocompleteEntry& entry, LSPPlatform* platform)
 {
     if (auto kind = platform->handleEntryKind(entry))
         return kind;
@@ -244,22 +244,8 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
         return lsp::CompletionItemKind::Function;
     case Luau::AutocompleteEntryKind::RequirePath:
     {
-        // FIXME: We abuse the fact that fullPath becomes entry.insertText to determine require kind
-        // This should be deleted once require suggestions supports tags
-        if (entry.insertText == "ALIAS")
-        {
-            return lsp::CompletionItemKind::Constant;
-        }
-        // TODO: ALIAS/FILE is deprecated
-        else if (entry.insertText == "FILE" || entry.insertText == "ALIAS/FILE")
-        {
-            return lsp::CompletionItemKind::File;
-        }
-        // TODO: ALIAS/DIRECTORY is deprecated
-        else if (entry.insertText == "DIRECTORY" || entry.insertText == "ALIAS/DIRECTORY")
-        {
+        if (label == ".." || label == ".")
             return lsp::CompletionItemKind::Folder;
-        }
         return lsp::CompletionItemKind::File;
     }
     }
@@ -509,25 +495,32 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         lsp::CompletionItem item;
         item.label = name;
 
+        // Remove the trailing slash in `../` and `./` as it prevents completion from triggering
+        if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
+        {
+            if (name == "../")
+                item.label = "..";
+            else if (name == "./")
+                item.label = ".";
+        }
+
         const auto localModule =
             config.completion.enableFragmentAutocomplete ? fragmentResult.incrementalModule : getModule(moduleName, /* forAutocomplete: */ true);
         if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
-        item.kind = entryKind(entry, platform.get());
-        item.sortText = sortText(frontend, name, entry, tags, *platform);
+        item.kind = entryKind(item.label, entry, platform.get());
+        item.sortText = sortText(frontend, item.label, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
 
         if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
         {
-            // FIXME: we abuse fullPath -> insertText to determine require kind
-            // This should be fixed once require suggestions supports tags
-            if (entry.insertText == "FILE")
-                if (auto pos = name.find_last_of('.'); pos != std::string::npos)
-                    item.insertText = std::string(name).erase(pos);
+            if (entry.insertText && name != "../" && name != "./")
+                if (auto pos = entry.insertText->find_last_of('/'); pos != std::string::npos)
+                    item.insertText = entry.insertText->substr(pos + 1);
         }
 
         // Handle if name is not an identifier

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- The deprecated `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` no longer show up in
+  autocomplete for string requires. Use aliases as part of `.luaurc` instead
+
 ## [1.43.0] - 2025-04-19
 
 ### Added

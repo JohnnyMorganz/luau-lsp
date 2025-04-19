@@ -5,6 +5,7 @@
 #include "Luau/Parser.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "LSP/LuauExt.hpp"
+#include "Flags.hpp"
 
 #include "TestClient.h"
 
@@ -51,6 +52,7 @@ Fixture::Fixture()
     workspace.setupWithConfiguration(Luau::LanguageServer::defaultTestClientConfiguration());
 
     Luau::setPrintLine([](auto s) {});
+    applyRequiredFlags();
 }
 
 Fixture::~Fixture()

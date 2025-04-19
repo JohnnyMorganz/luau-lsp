@@ -36,6 +36,8 @@ public:
 
     virtual void setupWithConfiguration(const ClientConfiguration& config) {}
 
+    virtual std::unique_ptr<Luau::RequireSuggester> getRequireSuggester();
+
     /// The name points to a virtual path (i.e. for Roblox, game/ or ProjectRoot/)
     [[nodiscard]] virtual bool isVirtualPath(const Luau::ModuleName& name) const
     {
@@ -66,9 +68,6 @@ public:
         const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, std::vector<lsp::CompletionItem>& items)
     {
     }
-
-    virtual std::optional<Luau::RequireSuggestions> getStringRequireSuggestions(
-        const Luau::ModuleName& requirer, const std::optional<std::string>& pathString) const;
 
     virtual std::optional<Luau::AutocompleteEntryMap> completionCallback(
         const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName);

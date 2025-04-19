@@ -37,6 +37,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
         src/platform/LSPPlatform.cpp
+        src/platform/StringRequireSuggester.cpp
         src/platform/roblox/RobloxCodeAction.cpp
         src/platform/roblox/RobloxColorProvider.cpp
         src/platform/roblox/RobloxCompletion.cpp
