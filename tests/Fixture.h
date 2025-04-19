@@ -42,6 +42,7 @@ struct Fixture
 
     Uri newDocument(const std::string& name, const std::string& source);
     void registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath);
+    void updateDocument(const Uri& uri, const std::string& newSource);
 
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
     Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);

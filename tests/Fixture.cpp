@@ -31,6 +31,15 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
     return uri;
 }
+
+void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::string& newSource)
+{
+    lsp::DidChangeTextDocumentParams params;
+    params.textDocument = {{uri}, 0};
+    params.contentChanges = {{std::nullopt, newSource}};
+
+    workspace.updateTextDocument(uri, params);
+}
 } // namespace Luau::LanguageServer
 
 Fixture::Fixture()
@@ -71,6 +80,11 @@ void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleN
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
     LUAU_ASSERT(platform);
     platform->writePathsToMap(std::make_shared<SourceNode>(dummySourceNode), virtualPath);
+}
+
+void Fixture::updateDocument(const Uri& uri, const std::string& newSource)
+{
+    return Luau::LanguageServer::updateDocument(workspace, uri, newSource);
 }
 
 static Luau::ModuleName getMainModuleName(const WorkspaceFolder& workspace)

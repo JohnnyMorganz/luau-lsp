@@ -259,6 +259,9 @@ Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleNam
 // can often be hit
 Luau::CheckResult WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete)
 {
+    if (FFlag::LuauSolverV2)
+        forAutocomplete = false;
+
     // HACK: note that a previous call to `Frontend::check(moduleName, { retainTypeGraphs: false })`
     // and then a call `Frontend::check(moduleName, { retainTypeGraphs: true })` will NOT actually
     // retain the type graph if the module is not marked dirty.
