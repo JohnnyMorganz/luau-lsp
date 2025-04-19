@@ -40,13 +40,10 @@ Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesys
 
     auto filename = path.filename().generic_string();
 
-    if (endsWith(filename, ".server.lua") || endsWith(filename, ".server.luau"))
+    if (endsWith(filename, ".server.lua") || endsWith(filename, ".server.luau") || endsWith(filename, ".client.lua") ||
+        endsWith(filename, ".client.luau"))
     {
         return Luau::SourceCode::Type::Script;
-    }
-    else if (endsWith(filename, ".client.lua") || endsWith(filename, ".client.luau"))
-    {
-        return Luau::SourceCode::Type::Local;
     }
 
     return Luau::SourceCode::Type::Module;
