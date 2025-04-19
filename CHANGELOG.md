@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.43.0] - 2025-04-19
+
 ### Added
 
 - Added setting `luau-lsp.server.communicationChannel` with options `stdio` (default) or `pipe` to support communicating
