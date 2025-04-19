@@ -6,7 +6,7 @@
 
 std::string FileRequireNode::getLabel() const
 {
-    return path.filename();
+    return path.filename().string();
 }
 
 std::string FileRequireNode::getPathComponent() const
