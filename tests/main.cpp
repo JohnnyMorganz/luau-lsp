@@ -2,6 +2,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 #include "Luau/Common.h"
+#include "Flags.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -10,6 +11,7 @@ int main(int argc, const char** argv)
     doctest::Context context;
     context.applyCommandLine(argc, argv);
 
+    applyRequiredFlags();
     if (doctest::parseFlag(argc, argv, "--new-solver"))
     {
         FFlag::LuauSolverV2.value = true;

@@ -5,6 +5,7 @@
 #include "Luau/Parser.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "LSP/LuauExt.hpp"
+#include "Flags.hpp"
 
 #include "TestClient.h"
 
