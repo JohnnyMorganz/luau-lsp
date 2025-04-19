@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, ubuntu-22.04, macos-latest]
     name: Build Server (${{matrix.os}})
     runs-on: ${{matrix.os}}
     steps:
@@ -39,7 +39,7 @@ jobs:
         include:
           - os: windows-latest
             test-path: ./build/Debug/Luau.LanguageServer.Test
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             test-path: ./build/Luau.LanguageServer.Test
           - os: macos-latest
             test-path: ./build/Luau.LanguageServer.Test
@@ -66,7 +66,7 @@ jobs:
 
   types_smoketest:
     name: Types Smoketest
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -117,7 +117,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, ubuntu-22.04, windows-latest]
     name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
