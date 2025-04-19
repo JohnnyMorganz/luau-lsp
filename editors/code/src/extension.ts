@@ -194,6 +194,14 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
       name = name.trim();
       value = value.trim();
+
+      // Strip kind prefix if it was included
+      for (const kind of FFLAG_KINDS) {
+        if (name.startsWith(`${kind}`)) {
+          name = name.substring(kind.length);
+        }
+      }
+
       // Validate that the name and value is valid
       if (name.length > 0 && value.length > 0) {
         fflags[name] = value;
