@@ -105,17 +105,14 @@ void Client::unregisterCapability(const std::string& registrationId, const std::
 
 ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
 {
-    auto key = uri.toString();
-    if (configStore.find(key) != configStore.end())
-    {
-        return configStore.at(key);
-    }
+    if (configStore.find(uri) != configStore.end())
+        return configStore[uri];
     return globalConfig;
 }
 
 void Client::removeConfiguration(const lsp::DocumentUri& uri)
 {
-    configStore.erase(uri.toString());
+    configStore.erase(uri);
 }
 
 void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
@@ -149,10 +146,10 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                         config = *configIt;
 
                     ClientConfiguration* oldConfig = nullptr;
-                    if (auto it = configStore.find(uri.toString()); it != configStore.end())
+                    if (auto it = configStore.find(uri); it != configStore.end())
                         oldConfig = &it->second;
 
-                    configStore.insert_or_assign(uri.toString(), config);
+                    configStore.insert_or_assign(uri, config);
                     sendLogMessage(lsp::MessageType::Info, "loaded configuration for " + uri.toString());
                     if (configChangedCallback)
                         configChangedCallback(uri, config, oldConfig);

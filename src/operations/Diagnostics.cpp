@@ -20,7 +20,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
 
     // TODO: should we apply a resultId and return an unchanged report if unchanged?
     lsp::DocumentDiagnosticReport report;
-    std::unordered_map<std::string /* lsp::DocumentUri */, std::vector<lsp::Diagnostic>> relatedDiagnostics{};
+    std::unordered_map<Uri, std::vector<lsp::Diagnostic>, UriHash> relatedDiagnostics{};
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -63,7 +63,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto textDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
             auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
             auto uri = textDocument ? textDocument->uri() : Uri::file(*fileName);
-            auto& currentDiagnostics = relatedDiagnostics[uri.toString()];
+            auto& currentDiagnostics = relatedDiagnostics[uri];
             currentDiagnostics.emplace_back(diagnostic);
         }
     }
@@ -216,7 +216,7 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
             {
                 if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
                 {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(relatedUri), std::nullopt, relatedDiagnostics.items});
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{relatedUri, std::nullopt, relatedDiagnostics.items});
                 }
             }
         }

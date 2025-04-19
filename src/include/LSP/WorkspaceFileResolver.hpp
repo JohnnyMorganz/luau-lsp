@@ -83,7 +83,7 @@ public:
     LSPPlatform* platform = nullptr;
 
     // Currently opened files where content is managed by client
-    mutable std::unordered_map</* DocumentUri */ std::string, TextDocument> managedFiles{};
+    mutable std::unordered_map<Uri, TextDocument, UriHash> managedFiles{};
 
     WorkspaceFileResolver()
     {
@@ -93,9 +93,6 @@ public:
     // Create a WorkspaceFileResolver with a specific default configuration
     explicit WorkspaceFileResolver(Luau::Config defaultConfig)
         : defaultConfig(std::move(defaultConfig)){};
-
-    // Handle normalisation to simplify lookup
-    static std::string normalisedUriString(const lsp::DocumentUri& uri);
 
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;

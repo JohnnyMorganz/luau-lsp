@@ -326,6 +326,7 @@ std::string Uri::toStringUncached(bool skipEncoding) const
             }
             res += '@';
         }
+        mutAuthority = toLower(mutAuthority);
         toLower(mutAuthority);
         idx = mutAuthority.rfind(':');
         if (idx == std::string::npos)
@@ -387,6 +388,20 @@ std::string Uri::toString(bool skipEncoding) const
             return cachedToString;
         return cachedToString = toStringUncached(skipEncoding);
     }
+}
+
+size_t UriHash::operator()(const Uri& uri) const
+{
+    size_t hashValue = std::hash<std::string>()(uri.scheme);
+    hashValue ^= std::hash<std::string>()(uri.authority) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#if defined(_WIN32) || defined(__APPLE__)
+    hashValue ^= std::hash<std::string>()(toLower(uri.path)) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#else
+    hashValue ^= std::hash<std::string>()(uri.path) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#endif
+    hashValue ^= std::hash<std::string>()(uri.query) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= std::hash<std::string>()(uri.fragment) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    return hashValue;
 }
 
 void from_json(const json& j, Uri& u)

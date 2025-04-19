@@ -1183,7 +1183,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
     lsp::ApplyWorkspaceEditParams editParams = request.second.value();
     REQUIRE_EQ(editParams.edit.changes.size(), 1);
 
-    auto edits = editParams.edit.changes[uri.toString()];
+    auto edits = editParams.edit.changes[uri];
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "        end\n");
@@ -1216,7 +1216,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
     lsp::ApplyWorkspaceEditParams editParams = request.second.value();
     REQUIRE_EQ(editParams.edit.changes.size(), 1);
 
-    auto edits = editParams.edit.changes[uri.toString()];
+    auto edits = editParams.edit.changes[uri];
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "\n        end)\n");

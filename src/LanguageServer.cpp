@@ -637,12 +637,12 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
                 if (filePath)
                 {
                     auto uri = Uri::file(*filePath);
-                    if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()) &&
+                    if (uri != params.textDocument.uri && diagnostics.relatedDocuments.find(uri) == diagnostics.relatedDocuments.end() &&
                         !workspace->isIgnoredFile(*filePath, config))
                     {
                         auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
-                        diagnostics.relatedDocuments.emplace(uri.toString(),
-                            lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
+                        diagnostics.relatedDocuments.emplace(
+                            uri, lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
                         diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
                     }
                 }
@@ -655,7 +655,7 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
             {
                 if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
                 {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, relatedDiagnostics.items});
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, relatedDiagnostics.items});
                 }
             }
         }

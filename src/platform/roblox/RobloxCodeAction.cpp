@@ -56,7 +56,7 @@ lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::Docume
     }
 
     lsp::WorkspaceEdit workspaceEdit;
-    workspaceEdit.changes.emplace(uri.toString(), edits);
+    workspaceEdit.changes.emplace(uri, edits);
     return workspaceEdit;
 }
 

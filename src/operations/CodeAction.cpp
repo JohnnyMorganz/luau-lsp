@@ -65,7 +65,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
     }
 
     lsp::WorkspaceEdit workspaceEdit;
-    workspaceEdit.changes.emplace(uri.toString(), edits);
+    workspaceEdit.changes.emplace(uri, edits);
     return workspaceEdit;
 }
 

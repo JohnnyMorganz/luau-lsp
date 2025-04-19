@@ -22,10 +22,8 @@ const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleN
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
-    auto normalisedUri = fileResolver.normalisedUriString(uri);
-
     fileResolver.managedFiles.emplace(
-        std::make_pair(normalisedUri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
+        std::make_pair(uri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
 
     if (isConfigured)
     {
@@ -38,14 +36,12 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
 void WorkspaceFolder::updateTextDocument(
     const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty)
 {
-    auto normalisedUri = fileResolver.normalisedUriString(uri);
-
-    if (!contains(fileResolver.managedFiles, normalisedUri))
+    if (fileResolver.managedFiles.find(uri) == fileResolver.managedFiles.end())
     {
         client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
         return;
     }
-    auto& textDocument = fileResolver.managedFiles.at(normalisedUri);
+    auto& textDocument = fileResolver.managedFiles.at(uri);
     textDocument.update(params.contentChanges, params.textDocument.version);
 
     // Mark the module dirty for the typechecker
@@ -55,7 +51,7 @@ void WorkspaceFolder::updateTextDocument(
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
-    fileResolver.managedFiles.erase(fileResolver.normalisedUriString(uri));
+    fileResolver.managedFiles.erase(uri);
 
     // Mark the module as dirty as we no longer track its changes
     auto config = client->getConfiguration(rootUri);
@@ -161,6 +157,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 /// resolve this issue
 static std::filesystem::path normaliseDriveLetter(const std::filesystem::path& path)
 {
+    // TODO: GET RID OF THIS - CAN WE IMPLEMENT LEXICALLY_RELATIVE FOR URI INSTEAD?
 #ifdef _WIN32
     if (path.has_root_path())
     {

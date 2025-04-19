@@ -87,7 +87,7 @@ NLOHMANN_DEFINE_OPTIONAL(SingleDocumentDiagnosticReport, kind, resultId, items)
 
 struct RelatedDocumentDiagnosticReport : SingleDocumentDiagnosticReport
 {
-    std::unordered_map<std::string /* DocumentUri */, SingleDocumentDiagnosticReport> relatedDocuments{};
+    std::unordered_map<Uri, SingleDocumentDiagnosticReport, UriHash> relatedDocuments{};
 };
 NLOHMANN_DEFINE_OPTIONAL(RelatedDocumentDiagnosticReport, kind, resultId, items, relatedDocuments)
 

@@ -507,4 +507,18 @@ TEST_CASE("luau-lsp custom: encodeURIComponent #555")
             "file:///home/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk"));
 }
 
+TEST_CASE("luau-lsp custom: two file paths are equal on case-insensitive file systems")
+{
+    auto uri = Uri::file(IF_WINDOWS("c:\\Users\\testing", "/home/testing"));
+    auto uri2 = Uri::file(IF_WINDOWS("C:\\USERS\\TESTING", "/HOME/TESTING"));
+
+#if defined(_WIN32) || defined(__APPLE__)
+    CHECK(uri == uri2);
+    CHECK(UriHash()(uri) == UriHash()(uri2));
+#else
+    CHECK(uri != uri2);
+    CHECK(UriHash()(uri) != UriHash()(uri2));
+#endif
+}
+
 TEST_SUITE_END();
