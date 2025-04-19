@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.40.0",
+  "version": "1.43.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -156,6 +156,24 @@
           "type": "string",
           "default": ""
         },
+        "luau-lsp.server.communicationChannel": {
+          "markdownDescription": "Type of communication channel to use for communicating with the server. Only useful for debug purposes",
+          "type": "string",
+          "enum": [
+            "stdio",
+            "pipe"
+          ],
+          "enumDescriptions": [
+            "Communicate via stdin/stdout (default)",
+            "Communicate via UNIX socket files. Useful for debugging"
+          ],
+          "default": "stdio"
+        },
+        "luau-lsp.server.delayStartup": {
+          "markdownDescription": "Make the server spin indefinitely when starting up to allow time to attach a debugger. Only useful for debug purposes",
+          "type": "boolean",
+          "default": false
+        },
         "luau-lsp.ignoreGlobs": {
           "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
           "type": "array",
@@ -211,6 +229,17 @@
           "markdownDescription": "The name of the sourcemap file",
           "type": "string",
           "default": "sourcemap.json",
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.generatorCommand": {
+          "markdownDescription": "A command to run to generate the sourcemap. If not specified, defaults to `rojo`",
+          "type": "string",
+          "scope": "resource"
+        },
+        "luau-lsp.sourcemap.useVSCodeWatcher": {
+          "markdownDescription": "Whether the VSCode filesystem watchers are used to regenerate the sourcemap. If disabled, delegates to the generator process. If using `rojo`, this command stops using `--watch`",
+          "type": "boolean",
+          "default": false,
           "scope": "resource"
         },
         "luau-lsp.fflags.enableByDefault": {
@@ -630,6 +659,7 @@
     "check:format": "prettier --check src"
   },
   "devDependencies": {
+    "@types/bytes": "^3.1.5",
     "@types/express": "^4.17.14",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.19.39",
@@ -647,6 +677,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "bytes": "^3.1.2",
     "express": "^4.21.2",
     "undici": "^6.21.1",
     "vscode-languageclient": "^8.1.0-next.6"

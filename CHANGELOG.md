@@ -6,6 +6,84 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- The deprecated `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` no longer show up in
+  autocomplete for string requires. Use aliases as part of `.luaurc` instead
+
+### Changed
+
+- Reimplementation of string require autocomplete based off upstream Luau require work
+
+## [1.43.0] - 2025-04-19
+
+### Added
+
+- Added setting `luau-lsp.server.communicationChannel` with options `stdio` (default) or `pipe` to support communicating
+  using a UNIX socket file connection instead of stdin/stdout. On the server, this is configured by passing
+  `--pipe=FILE` to the command line. This is useful for attaching a debugger to the server on macOS. `pipe` is not
+  supported on Windows. ([#998](https://github.com/JohnnyMorganz/luau-lsp/issues/998))
+
+### Changed
+
+- Sync to upstream Luau 0.670
+- Linux runners for GitHub actions are bumped from the deprecated `ubuntu-20.04` to `ubuntu-22.04`. This may mean that release artifacts no longer work on `ubuntu-20.04`.
+- Improved Studio plugin error message when attempting to connect to a server but it is not online ([#982](https://github.com/JohnnyMorganz/luau-lsp/issues/982))
+- VSCode extension will now strip the prefix `FFlag` / `DFFlag` / `FInt` / `DFInt` if they were included in the overrides name ([#981](https://github.com/JohnnyMorganz/luau-lsp/issues/981))
+
+### Fixed
+
+- Fixed a bug when the New Type Solver is enabled where diagnostics would not update in dependent files when a file was
+  changed until the dependent file is modified
+
+## [1.42.1] - 2025-04-06
+
+### Changed
+
+- Sync to upstream Luau 0.668
+
+### Fixed
+
+- Don't show function types with function kind or label details when autocompleting in a type
+  context ([#987](https://github.com/JohnnyMorganz/luau-lsp/issues/987))
+- Fixed crash when registering a non-Roblox definitions file that contains classes named `Object` / `Instance` /
+  `ServiceProvider` / `EnumItem` ([#986](https://github.com/JohnnyMorganz/luau-lsp/issues/986))
+
+## [1.42.0] - 2025-03-27
+
+### Changed
+
+- Sync to upstream Luau 0.666
+- Optimized re-indexing on changed files when large number of changes processed at once
+- Watched files re-indexing now respects ignore globs specification
+
+### Fixed
+
+- Added a debounce of 1s on file changes triggering sourcemap generation when `luau-lsp.sourcemap.useVSCodeWatcher` is enabled
+- Fixed crashing due to bad memory access when hovering over an imported type reference due to documentation computation
+- Fixed sources of crashing and flakiness when hovering + go to definition on imported type references in the new solver
+- Reduced the need to run 2 type checks unnecessarily on files when the new type solver is enabled
+
+## [1.41.0] - 2025-03-16
+
+### Added
+
+- Documentation comments now attach to type alias definitions ([#956](https://github.com/JohnnyMorganz/luau-lsp/pull/956))
+- VSCode: Introduced `luau-lsp.sourcemap.generatorCommand` to run a custom generator for updating the sourcemap. Accepts a shell command.
+  If undefined (default), then falls back to using `rojo`. ([#968](https://github.com/JohnnyMorganz/luau-lsp/issues/968))
+- VSCode: Introduced `luau-lsp.sourcemap.useVSCodeWatcher` (default: `false`). When enabled, the extension will connect to
+  VSCode file added / removed events for retriggering the generator. When disabled (default), the extension delegates to
+  the generator process for watching. When using `rojo`, this option controls the `--watch` flag.
+- VSCode: Documentation now supports HTML syntax ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
+
+### Changed
+
+- Sync to upstream Luau 0.665
+- VSCode: Improved error reporting when the Studio Plugin sends a result that is too large. The error now includes the
+  size limit, the received size, and steps to resolve the issue ([#969](https://github.com/JohnnyMorganz/luau-lsp/issues/969))
+- The language server will no longer attempt to remove HTML tags from
+  documentation ([#964](https://github.com/JohnnyMorganz/luau-lsp/pull/964))
+
 ## [1.40.0] - 2025-03-01
 
 ### Added

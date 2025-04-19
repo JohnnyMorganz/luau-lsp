@@ -164,7 +164,13 @@ local function sendFullDMInfo(isSilent)
 	})
 
 	if not success then
-		warn(`[Luau Language Server] Connecting to server failed: {result}`)
+		if (result :: any) == "HttpError: ConnectFail" then
+			warn(
+				`[Luau Language Server] Connecting to server failed on port {Settings.port}. Is the server enabled? Check the settings 'luau-lsp.plugin.enabled' and 'luau-lsp.plugin.port' in your editor`
+			)
+		else
+			warn(`[Luau Language Server] Connecting to server failed: {result}`)
+		end
 		cleanup()
 	elseif not result.Success then
 		warn(`[Luau Language Server] Sending full DM info failed: {result.StatusCode}: {result.Body}`)

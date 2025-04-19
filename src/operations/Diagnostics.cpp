@@ -27,8 +27,13 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
-    // Check the module. We do not need to store the type graphs
-    Luau::CheckResult cr = checkSimple(moduleName);
+    // Check the module
+    // In the new solver, we end up calling `checkStrict` (retain type graphs), because documentation diagnostics is typically
+    // on the file a user is working on. So, we will end up having to call checkStrict later for Hover etc. i.e., calling 2 typechecks
+    // for no reason.
+    // In the old solver, it doesn't really matter, because there is a differnce between module + moduleForAutocomplete. So we prefer
+    // using checkSimple as we won't use the type graphs
+    Luau::CheckResult cr = FFlag::LuauSolverV2 ? checkStrict(moduleName) : checkSimple(moduleName);
 
     // If there was an error retrieving the source module
     // Bail early with an empty report - it is likely that the file was closed

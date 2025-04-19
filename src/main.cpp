@@ -6,12 +6,15 @@
 #include "Luau/ExperimentalFlags.h"
 #include "argparse/argparse.hpp"
 
+#include "LSP/Transport/StdioTransport.hpp"
+#ifndef _WIN32
+#include "LSP/Transport/PipeTransport.hpp"
+#endif
+
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
 #endif
-
-LUAU_FASTINT(LuauTarjanChildLimit)
 
 static void displayFlags()
 {
@@ -48,6 +51,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     auto definitionsFiles = program.get<std::vector<std::filesystem::path>>("--definitions");
     auto documentationFiles = program.get<std::vector<std::filesystem::path>>("--docs");
     std::optional<std::filesystem::path> baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
+    std::optional<std::filesystem::path> transportPipeFile = program.present<std::filesystem::path>("--pipe");
 
     std::optional<Luau::Config> defaultConfig = std::nullopt;
     if (baseLuaurc)
@@ -70,7 +74,27 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     }
 
     // Setup client
-    auto client = std::make_shared<Client>();
+    std::unique_ptr<Transport> transport;
+    if (transportPipeFile)
+    {
+        if (program.is_used("--stdio"))
+        {
+            std::cerr << "both --stdio and --pipe cannot be specified at the same time\n";
+            return 1;
+        }
+#ifdef _WIN32
+        std::cerr << "--pipe is not supported on windows\n";
+        return 1;
+#else
+        transport = std::make_unique<PipeTransport>(transportPipeFile->string());
+#endif
+    }
+    else
+    {
+        transport = std::make_unique<StdioTransport>();
+    }
+
+    auto client = std::make_shared<Client>(std::move(transport));
     client->definitionsFiles = definitionsFiles;
     client->documentationFiles = documentationFiles;
     parseDocumentation(documentationFiles, client->documentation, client);
@@ -119,15 +143,11 @@ void processFFlags(const argparse::ArgumentParser& program)
     if (enableAllFlags)
     {
         for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
-            if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isFlagExperimental(flag->name))
+            if (strncmp(flag->name, "Luau", 4) == 0 && !Luau::isAnalysisFlagExperimental(flag->name))
                 flag->value = true;
     }
     registerFastFlagsCLI(fastFlags);
-
-    // Manually enforce a LuauTarjanChildLimit increase
-    // TODO: re-evaluate the necessity of this change
-    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
-        FInt::LuauTarjanChildLimit.value = 15000;
+    applyRequiredFlags();
 }
 
 std::filesystem::path file_path_parser(const std::string& value)
@@ -143,7 +163,7 @@ int main(int argc, char** argv)
         return 1;
     };
 
-    argparse::ArgumentParser program("luau-lsp", "1.40.0");
+    argparse::ArgumentParser program("luau-lsp", "1.43.0");
     program.set_assign_chars(":=");
 
     // Global arguments
@@ -230,6 +250,11 @@ int main(int argc, char** argv)
         .help("debug flag to halt startup to allow connection of a debugger")
         .default_value(false)
         .implicit_value(true);
+    lsp_command.add_argument("--stdio").help("set up client communication channel via stdio").implicit_value(true);
+    lsp_command.add_argument("--pipe")
+        .help("path to pipe / socket file name for pipe communication channel")
+        .action(file_path_parser)
+        .metavar("PATH");
 
     program.add_parents(parent_parser);
     program.add_subparser(analyze_command);

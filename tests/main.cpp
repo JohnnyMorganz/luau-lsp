@@ -2,6 +2,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 #include "Luau/Common.h"
+#include "Flags.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -103,6 +104,8 @@ int main(int argc, const char** argv)
 
     if (std::vector<doctest::String> flags; doctest::parseCommaSepArgs(argc, argv, "--fflags=", flags))
         setFastFlags(flags);
+
+    applyRequiredFlags();
 
     if (doctest::parseFlag(argc, argv, "--new-solver"))
     {

@@ -37,6 +37,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
         src/platform/LSPPlatform.cpp
+        src/platform/StringRequireSuggester.cpp
         src/platform/roblox/RobloxCodeAction.cpp
         src/platform/roblox/RobloxColorProvider.cpp
         src/platform/roblox/RobloxCompletion.cpp
@@ -63,6 +64,8 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
+        src/transport/PipeTransport.cpp
+        src/transport/StdioTransport.cpp
         extern/glob/match.cpp
 )
 
@@ -75,6 +78,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/main.cpp
         tests/Fixture.cpp
         tests/TempDir.cpp
+        tests/TestClient.cpp
         tests/Autocomplete.test.cpp
         tests/AutoImports.test.cpp
         tests/MagicFunctions.test.cpp

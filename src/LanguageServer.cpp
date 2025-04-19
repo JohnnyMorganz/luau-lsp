@@ -733,11 +733,18 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
 
 void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
 {
+    Luau::DenseHashMap<WorkspaceFolderPtr, std::vector<lsp::FileEvent>> workspaceChanges{nullptr};
+
     for (const auto& change : params.changes)
     {
         auto workspace = findWorkspace(change.uri);
-        workspace->onDidChangeWatchedFiles(change);
+        if (!workspaceChanges.find(workspace))
+            workspaceChanges[workspace] = {};
+        workspaceChanges[workspace].push_back(change);
     }
+
+    for (const auto& [workspace, changes] : workspaceChanges)
+        workspace->onDidChangeWatchedFiles(changes);
 }
 
 Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)

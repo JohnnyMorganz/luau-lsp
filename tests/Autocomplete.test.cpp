@@ -6,11 +6,19 @@
 #include "LSP/IostreamHelpers.hpp"
 
 LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
-LUAU_FASTFLAG(LuauStoreSolverTypeOnModule)
-LUAU_FASTFLAG(LuauSymbolEquality)
-LUAU_FASTFLAG(LexerResumesFromPosition2)
-LUAU_FASTFLAG(LuauIncrementalAutocompleteBugfixes)
-LUAU_FASTFLAG(LuauBetterReverseDependencyTracking)
+LUAU_FASTFLAG(LuauFreeTypesMustHaveBounds)
+LUAU_FASTFLAG(LuauCloneIncrementalModule)
+LUAU_FASTFLAG(LuauAllFreeTypesHaveScopes)
+LUAU_FASTFLAG(LuauClonedTableAndFunctionTypesMustHaveScopes)
+LUAU_FASTFLAG(LuauDisableNewSolverAssertsInMixedMode)
+LUAU_FASTFLAG(LuauCloneTypeAliasBindings)
+LUAU_FASTFLAG(LuauDoNotClonePersistentBindings)
+LUAU_FASTFLAG(LuauIncrementalAutocompleteDemandBasedCloning)
+LUAU_FASTFLAG(LuauBetterScopeSelection)
+LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
+LUAU_FASTFLAG(LuauAutocompleteUsesModuleForTypeCompatibility)
+LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
+LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -23,7 +31,7 @@ std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem
 lsp::CompletionItem requireItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     auto item = getItem(items, label);
-    REQUIRE_MESSAGE(item.has_value(), "no item found");
+    REQUIRE_MESSAGE(item.has_value(), "no item found ", label);
     return item.value();
 }
 
@@ -35,12 +43,22 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag flag2{FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true};
-    ScopedFastFlag flag3{FFlag::LuauStoreSolverTypeOnModule, true};
-    ScopedFastFlag flag4{FFlag::LuauSymbolEquality, true};
-    ScopedFastFlag flag5{FFlag::LexerResumesFromPosition2, true};
-    ScopedFastFlag flag7{FFlag::LuauIncrementalAutocompleteBugfixes, true};
-    ScopedFastFlag flag8{FFlag::LuauBetterReverseDependencyTracking, true};
+    ScopedFastFlag sffs[14] = {
+        {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
+        {FFlag::LuauFreeTypesMustHaveBounds, true},
+        {FFlag::LuauCloneIncrementalModule, true},
+        {FFlag::LuauAllFreeTypesHaveScopes, true},
+        {FFlag::LuauClonedTableAndFunctionTypesMustHaveScopes, true},
+        {FFlag::LuauDisableNewSolverAssertsInMixedMode, true},
+        {FFlag::LuauCloneTypeAliasBindings, true},
+        {FFlag::LuauDoNotClonePersistentBindings, true},
+        {FFlag::LuauIncrementalAutocompleteDemandBasedCloning, true},
+        {FFlag::LuauBetterScopeSelection, true},
+        {FFlag::LuauBlockDiffFragmentSelection, true},
+        {FFlag::LuauAutocompleteUsesModuleForTypeCompatibility, true},
+        {FFlag::LuauFragmentAcMemoryLeak, true},
+        {FFlag::LuauGlobalVariableModuleIsolation, true},
+    };
 };
 
 TEST_SUITE_BEGIN("Autocomplete");
@@ -812,19 +830,25 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_wh
     CHECK_EQ(insertedLineNumber, 3);
 }
 
-static void checkFileCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+static void checkFileCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label, const std::string& insertText)
 {
     auto item = requireItem(items, label);
     CHECK_EQ(item.kind, lsp::CompletionItemKind::File);
+    CHECK_EQ(item.insertText, std::nullopt);
+    REQUIRE(item.textEdit.has_value());
+    CHECK_EQ(item.textEdit->newText, insertText);
 }
 
-static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label)
+static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& items, const std::string& label, const std::string& insertText)
 {
     auto item = requireItem(items, label);
     CHECK_EQ(item.kind, lsp::CompletionItemKind::Folder);
+    CHECK_EQ(item.insertText, std::nullopt);
+    REQUIRE(item.textEdit.has_value());
+    CHECK_EQ(item.textEdit->newText, insertText);
 }
 
-TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_files_in_current_directory")
+TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_initial_values")
 {
     TempDir t("require_default");
     t.write_child("first.luau", "return {}");
@@ -843,11 +867,9 @@ TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_files_in_current_direct
 
     auto result = workspace.completion(params);
 
-    REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau");
-    checkFileCompletionExists(result, "first.luau");
-    checkFileCompletionExists(result, "second.luau");
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, ".", ".");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
@@ -870,10 +892,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau");
-    checkFileCompletionExists(result, "first.luau");
-    checkFileCompletionExists(result, "second.luau");
+    checkFolderCompletionExists(result, "..", ".");
+    checkFileCompletionExists(result, "source.luau", "./source");
+    checkFileCompletionExists(result, "first.luau", "./first");
+    checkFileCompletionExists(result, "second.luau", "./second");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
@@ -896,10 +918,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, "nested");
-    checkFileCompletionExists(result, "parent_first.luau");
-    checkFileCompletionExists(result, "parent_second.luau");
+    checkFolderCompletionExists(result, "..", "../..");
+    checkFolderCompletionExists(result, "nested", "../nested");
+    checkFileCompletionExists(result, "parent_first.luau", "../parent_first");
+    checkFileCompletionExists(result, "parent_second.luau", "../parent_second");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
@@ -922,8 +944,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 2);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "child.luau");
+    checkFolderCompletionExists(result, "..", "./nested");
+    checkFileCompletionExists(result, "child.luau", "./nested/child");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_after_entering_then_exiting_child_folder")
@@ -946,10 +968,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_afte
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFolderCompletionExists(result, "nested");
-    checkFileCompletionExists(result, "source.luau");
-    checkFileCompletionExists(result, "sibling.luau");
+    checkFolderCompletionExists(result, "..", "./nested/../..");
+    checkFolderCompletionExists(result, "nested", "./nested/../nested");
+    checkFileCompletionExists(result, "source.luau", "./nested/../source");
+    checkFileCompletionExists(result, "sibling.luau", "./nested/../sibling");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
@@ -977,66 +999,10 @@ TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
     auto result = workspace.completion(params);
 
     CHECK_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau");
+    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, ".", ".");
     requireItem(result, "@Roact");
     requireItem(result, "@Fusion");
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_require_contains_file_aliases")
-{
-    TempDir t("file_aliases");
-    client->globalConfig.require.fileAliases = {
-        {"@test1", "file1.luau"},
-        {"@test2", "file2.luau"},
-    };
-
-    auto [source, marker] = sourceWithMarker(R"(
-        --!strict
-        local x = require("|")
-    )");
-
-    auto uri = newDocument(t.touch_child("source.luau"), source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params);
-
-    CHECK_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau");
-    checkFileCompletionExists(result, "@test1");
-    checkFileCompletionExists(result, "@test2");
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_require_contains_directory_aliases")
-{
-    TempDir t("directory_aliases");
-    client->globalConfig.require.directoryAliases = {
-        {"@dir1", "directory1"},
-        {"@dir2", "directory2"},
-    };
-
-    auto [source, marker] = sourceWithMarker(R"(
-        --!strict
-        local x = require("|")
-    )");
-
-    auto uri = newDocument(t.touch_child("source.luau"), source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params);
-
-    CHECK_EQ(result.size(), 4);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "source.luau");
-    checkFolderCompletionExists(result, "@dir1");
-    checkFolderCompletionExists(result, "@dir2");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory_separator_is_seen")
@@ -1048,15 +1014,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
             "Fusion": "fusion"
         }
     })");
-
-    client->globalConfig.require.fileAliases = {
-        {"@test1", "file1.luau"},
-        {"@test2", "file2.luau"},
-    };
-    client->globalConfig.require.directoryAliases = {
-        {"@dir1", "directory1"},
-        {"@dir2", "directory2"},
-    };
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
@@ -1072,36 +1029,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
     auto result = workspace.completion(params);
 
     CHECK_EQ(result.size(), 1);
-    checkFolderCompletionExists(result, "..");
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_directory_alias")
-{
-    TempDir t("lune");
-    t.write_child("process.luau", "return {}");
-    t.write_child("net.luau", "return {}");
-
-    client->globalConfig.require.directoryAliases = {
-        {"@lune", t.path()},
-    };
-
-    auto [source, marker] = sourceWithMarker(R"(
-        --!strict
-        local x = require("@lune/|")
-    )");
-
-    auto uri = newDocument("foo.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params);
-
-    REQUIRE_EQ(result.size(), 3);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "process.luau");
-    checkFileCompletionExists(result, "net.luau");
+    checkFolderCompletionExists(result, "..", "test");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_alias")
@@ -1133,9 +1061,100 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 3);
-    checkFolderCompletionExists(result, "..");
-    checkFileCompletionExists(result, "process.luau");
-    checkFileCompletionExists(result, "net.luau");
+    checkFolderCompletionExists(result, "..", "@lune");
+    checkFileCompletionExists(result, "process.luau", "@lune/process");
+    checkFileCompletionExists(result, "net.luau", "@lune/net");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        function foo()
+            |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    REQUIRE_EQ(editParams.edit.changes.size(), 1);
+
+    auto edits = editParams.edit.changes[uri.toString()];
+    REQUIRE_EQ(edits.size(), 1);
+    CHECK_EQ(edits[0].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[0].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        call(function()
+        |)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    REQUIRE_EQ(editParams.edit.changes.size(), 1);
+
+    auto edits = editParams.edit.changes[uri.toString()];
+    REQUIRE_EQ(edits.size(), 1);
+    CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[0].newText, "\n        end)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "dont_mark_type_as_function_kind_when_autocompleting_in_type_context")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        export type Func = (string) -> string
+
+        export type Mod = {
+            apply: Fu|
+        }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto item = requireItem(result, "Func");
+    CHECK_EQ(item.kind, lsp::CompletionItemKind::Interface);
+    CHECK_EQ(item.labelDetails, std::nullopt);
+    CHECK_EQ(item.insertText, std::nullopt);
+    CHECK_EQ(item.textEdit, std::nullopt);
+    CHECK_EQ(item.command, std::nullopt);
 }
 
 TEST_SUITE_END();

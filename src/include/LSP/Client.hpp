@@ -9,6 +9,7 @@
 #include "Protocol/Workspace.hpp"
 #include "LSP/JsonRpc.hpp"
 #include "LSP/ClientConfiguration.hpp"
+#include "LSP/Transport/Transport.hpp"
 
 using namespace json_rpc;
 using ResponseHandler = std::function<void(const JsonRpcMessage&)>;
@@ -47,25 +48,29 @@ public:
     std::optional<lsp::ProgressToken> workspaceDiagnosticsToken = std::nullopt;
 
 private:
+    std::unique_ptr<Transport> transport;
     /// The request id for the next request
     int nextRequestId = 0;
     std::unordered_map<id_type, ResponseHandler> responseHandler{};
 
 public:
-    void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
-        const std::optional<ResponseHandler>& handler = std::nullopt);
-    static void sendResponse(const id_type& id, const json& result);
-    static void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
-    static void sendNotification(const std::string& method, const std::optional<json>& params);
+    Client();
+    Client(std::unique_ptr<Transport> transport);
 
-    static void sendProgress(const lsp::ProgressParams& params)
+    virtual void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
+        const std::optional<ResponseHandler>& handler = std::nullopt);
+    void sendResponse(const id_type& id, const json& result);
+    void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
+    virtual void sendNotification(const std::string& method, const std::optional<json>& params) const;
+
+    void sendProgress(const lsp::ProgressParams& params)
     {
         sendNotification("$/progress", params);
     }
 
-    static void sendLogMessage(const lsp::MessageType& type, const std::string& message);
+    void sendLogMessage(const lsp::MessageType& type, const std::string& message);
     void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
-    static void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
+    void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);
@@ -82,10 +87,10 @@ public:
 
     void setTrace(const lsp::SetTraceParams& params);
 
-    static bool readRawMessage(std::string& output);
+    bool readRawMessage(std::string& output) const;
 
     void handleResponse(const JsonRpcMessage& message);
 
 private:
-    static void sendRawMessage(const json& message);
+    void sendRawMessage(const json& message) const;
 };

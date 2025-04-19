@@ -14,28 +14,6 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-/// Converts an HTML string provided as an input to markdown
-/// TODO: currently, this just strips tags, rather than do anything special
-std::string convertHtmlToMarkdown(const std::string& input)
-{
-    // TODO - Tags to support:
-    // <code></code> - as well as <code class="language-lua">
-    // <pre></pre>
-    // <em></em> / <i></i>
-    // <ul><li></li></ul>
-    // <ol><li></li></ol>
-    // <a href=""></a>
-    // <strong></strong> / <b></b>
-    // <img alt="" src="" />
-    // Also need to unescape HTML characters
-
-
-    // Yes, regex is bad, but I really cannot be bothered right now
-    std::regex strip("<[^>]*>");
-    return std::regex_replace(input, strip, "");
-}
-
-
 void parseDocumentation(
     const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client)
 {
@@ -64,9 +42,6 @@ void parseDocumentation(
                         info.at("learn_more_link").get_to(learnMoreLink);
                     if (info.contains("code_sample"))
                         info.at("code_sample").get_to(codeSample);
-
-                    documentation = convertHtmlToMarkdown(documentation);
-
                     if (info.contains("keys"))
                     {
                         Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
@@ -466,6 +441,43 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv && !ttv->definitionModuleName.empty())
     {
         return printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
+{
+    auto config = client->getConfiguration(rootUri);
+
+    if (auto ref = node->as<Luau::AstTypeReference>())
+    {
+        if (ref->prefix)
+        {
+            auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
+            if (!importedModuleName) 
+                return std::nullopt;
+            // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
+            // even when retainFullTypeGraphs = false.
+            checkStrict(*importedModuleName);
+            auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+            if (!importedModule || !importedModule->hasModuleScope())
+                return std::nullopt;
+            auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
+            if (!typeLocation)
+                return std::nullopt;
+            return printMoonwaveDocumentation(getComments(*importedModuleName, *typeLocation));
+        }
+        else
+        {
+            auto typeLocation = lookupTypeLocation(*scope, ref->name.value);
+            if (!typeLocation)
+                return std::nullopt;
+            return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
+        }
+    }
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>()) 
+    {
+        return printMoonwaveDocumentation(getComments(moduleName, alias->location));
     }
     return std::nullopt;
 }

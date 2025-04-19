@@ -304,7 +304,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
                 fprintf(stderr, "%s: %s\n", baseLuaurc->generic_string().c_str(), error->c_str());
                 return 1;
             }
-            fileResolver = WorkspaceFileResolver(result);
+            fileResolver.defaultConfig = std::move(result);
         }
         else
         {
@@ -327,6 +327,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     std::unique_ptr<LSPPlatform> platform = LSPPlatform::getPlatform(client.configuration, &fileResolver);
 
     fileResolver.platform = platform.get();
+    fileResolver.requireSuggester = fileResolver.platform->getRequireSuggester();
 
     Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
 

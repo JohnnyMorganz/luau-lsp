@@ -42,6 +42,18 @@ TEST_CASE("handles_definitions_files_relying_on_mutations")
     REQUIRE(result.errors.empty());
 }
 
+TEST_CASE("dont_crash_when_mutating_a_definitions_file_that_does_not_contain_expected_state")
+{
+    auto client = std::make_shared<Client>(Client{});
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+
+    client->definitionsFiles.emplace_back("./tests/testdata/bad_standard_definitions.d.luau");
+
+    workspace.setupWithConfiguration(defaultTestClientConfiguration());
+
+    REQUIRE(workspace.definitionsFileMetadata);
+}
+
 TEST_CASE("support_disabling_global_types")
 {
     auto client = std::make_shared<Client>(Client{});

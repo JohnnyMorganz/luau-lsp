@@ -19,6 +19,7 @@ SECURITY_LEVELS = [
     "None",
     "LocalUserSecurity",
     "PluginSecurity",
+    "WritePlayerSecurity",
     "RobloxScriptSecurity",
     "RobloxSecurity",
     "NotAccessibleSecurity",

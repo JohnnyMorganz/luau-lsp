@@ -140,6 +140,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                     return result;
                 uri = Uri::file(*fileName);
 
+                // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
+                // even when retainFullTypeGraphs = false.
+                checkStrict(*importedName);
                 // TODO: fix "forAutocomplete"
                 if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true); importedModule && importedModule->hasModuleScope())
                     scope = importedModule->getModuleScope();
@@ -239,6 +242,9 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
                         return std::nullopt;
                     uri = Uri::file(*fileName);
 
+                    // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
+                    // even when retainFullTypeGraphs = false.
+                    checkStrict(*importedName);
                     // TODO: fix "forAutocomplete"
                     if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
                         importedModule && importedModule->hasModuleScope())

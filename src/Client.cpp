@@ -1,7 +1,18 @@
 #include "LSP/Client.hpp"
+#include "LSP/Transport/StdioTransport.hpp"
 
 #include <iostream>
 #include <optional>
+
+Client::Client()
+    : transport(std::make_unique<StdioTransport>())
+{
+}
+
+Client::Client(std::unique_ptr<Transport> transport)
+    : transport(std::move(transport))
+{
+}
 
 void Client::sendRequest(
     const id_type& id, const std::string& method, const std::optional<json>& params, const std::optional<ResponseHandler>& handler)
@@ -42,7 +53,7 @@ void Client::sendError(const std::optional<id_type>& id, const JsonRpcException&
     sendRawMessage(msg);
 }
 
-void Client::sendNotification(const std::string& method, const std::optional<json>& params)
+void Client::sendNotification(const std::string& method, const std::optional<json>& params) const
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -190,9 +201,9 @@ void Client::setTrace(const lsp::SetTraceParams& params)
     traceMode = params.value;
 }
 
-bool Client::readRawMessage(std::string& output)
+bool Client::readRawMessage(std::string& output) const
 {
-    return json_rpc::readRawMessage(std::cin, output);
+    return json_rpc::readRawMessage(transport.get(), output);
 }
 
 void Client::handleResponse(const JsonRpcMessage& message)
@@ -222,7 +233,7 @@ void Client::handleResponse(const JsonRpcMessage& message)
     }
 }
 
-void Client::sendRawMessage(const json& message)
+void Client::sendRawMessage(const json& message) const
 {
-    json_rpc::sendRawMessage(std::cout, message);
+    json_rpc::sendRawMessage(transport.get(), message);
 }

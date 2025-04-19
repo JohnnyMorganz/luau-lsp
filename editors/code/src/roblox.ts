@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import { Server } from "http";
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
+import { format as bytesFormat } from "bytes";
 import { fetch } from "undici";
-import { spawn, ChildProcess } from "child_process";
+import { spawn } from "child_process";
 import { LanguageClient } from "vscode-languageclient/node";
 import { AddArgCallback, PlatformContext } from "./extension";
 
@@ -136,14 +137,24 @@ const getRojoProjectFile = async (
   );
 
   if (foundProjectFiles.length === 0) {
-    vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. Please configure a file in settings`,
-    );
+    vscode.window
+      .showWarningMessage(
+        `Unable to find project file ${projectFile} for Rojo sourcemap generation. Please configure a file in settings`,
+        "Configure Settings",
+      )
+      .then((value) => {
+        if (value === "Configure Settings") {
+          vscode.commands.executeCommand(
+            "workbench.action.openWorkspaceSettings",
+            "luau-lsp.sourcemap",
+          );
+        }
+      });
     return undefined;
   } else if (foundProjectFiles.length === 1) {
     const fileName = utils.basenameUri(foundProjectFiles[0]);
     const option = await vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. We found ${fileName} available`,
+      `Unable to find project file ${projectFile} for Rojo sourcemap generation. We found ${fileName} available`,
       `Set project file to ${fileName}`,
       "Cancel",
     );
@@ -156,7 +167,7 @@ const getRojoProjectFile = async (
     }
   } else {
     const option = await vscode.window.showWarningMessage(
-      `Unable to find project file ${projectFile}. We found ${foundProjectFiles.length} files available`,
+      `Unable to find project file ${projectFile} for Rojo sourcemap generation. We found ${foundProjectFiles.length} files available`,
       "Select project file",
       "Cancel",
     );
@@ -177,24 +188,38 @@ const getRojoProjectFile = async (
   return undefined;
 };
 
-const sourcemapGeneratorProcesses: Map<vscode.WorkspaceFolder, ChildProcess> =
-  new Map();
+const sourcemapDisposables: Map<
+  vscode.WorkspaceFolder,
+  Array<vscode.Disposable>
+> = new Map();
 
-const stopSourcemapGeneration = async (
+const addSourcemapDisposable = (
+  workspaceFolder: vscode.WorkspaceFolder,
+  disposable: vscode.Disposable,
+) => {
+  if (!sourcemapDisposables.get(workspaceFolder)) {
+    sourcemapDisposables.set(workspaceFolder, []);
+  }
+  sourcemapDisposables.get(workspaceFolder)!.push(disposable);
+};
+
+const cleanupSourcemapDisposables = async (
   workspaceFolder: vscode.WorkspaceFolder,
 ) => {
-  const process = sourcemapGeneratorProcesses.get(workspaceFolder);
-  if (process) {
-    process.kill();
+  const disposables = sourcemapDisposables.get(workspaceFolder);
+  if (disposables) {
+    for (const disposable of disposables) {
+      disposable.dispose();
+    }
   }
-  sourcemapGeneratorProcesses.delete(workspaceFolder);
+  sourcemapDisposables.delete(workspaceFolder);
 };
 
 const startSourcemapGeneration = async (
   client: LanguageClient | undefined,
   workspaceFolder: vscode.WorkspaceFolder,
 ) => {
-  stopSourcemapGeneration(workspaceFolder);
+  cleanupSourcemapDisposables(workspaceFolder);
 
   const config = vscode.workspace.getConfiguration(
     "luau-lsp.sourcemap",
@@ -205,11 +230,8 @@ const startSourcemapGeneration = async (
     return;
   }
 
-  // Check if the project file exists
-  const projectFile = await getRojoProjectFile(workspaceFolder, config);
-  if (!projectFile) {
-    return;
-  }
+  const customGeneratorCommand = config.get<string>("generatorCommand");
+  const useVSCodeWatcher = config.get<boolean>("useVSCodeWatcher") ?? false;
 
   const loggingFunc = client ? client.info.bind(client) : console.log;
   loggingFunc(
@@ -218,73 +240,166 @@ const startSourcemapGeneration = async (
     } (${workspaceFolder.uri.toString(true)})`,
   );
 
-  const workspacePath = workspaceFolder.uri.fsPath;
-  const rojoPath = config.get<string>("rojoPath") ?? "rojo";
-  const sourcemapFileName =
-    config.get<string>("sourcemapFile") ?? "sourcemap.json";
-  const args = [
-    "sourcemap",
-    projectFile,
-    "--watch",
-    "--output",
-    sourcemapFileName,
-  ];
+  const cwd = workspaceFolder.uri.fsPath;
 
-  if (config.get<boolean>("includeNonScripts")) {
-    args.push("--include-non-scripts");
-  }
+  const spawnChildProcess = async () => {
+    loggingFunc(
+      `Spawning sourcemap generator for ${
+        workspaceFolder.name
+      } (${workspaceFolder.uri.toString(true)})`,
+    );
 
-  const childProcess = spawn(rojoPath, args, {
-    cwd: workspacePath,
-  });
+    let childProcess;
 
-  sourcemapGeneratorProcesses.set(workspaceFolder, childProcess);
+    if (customGeneratorCommand && customGeneratorCommand.trim() !== "") {
+      // TODO: should we support shell execution here?
+      // It allows us to delegate to the shell for argument parsing
+      // but it causes issues when VSCode shuts down, leaving a zombie process
+      childProcess = spawn(customGeneratorCommand, {
+        cwd,
+        shell: true,
+      });
+    } else {
+      // Check if the project file exists
+      const projectFile = await getRojoProjectFile(workspaceFolder, config);
+      if (!projectFile) {
+        return;
+      }
+      const rojoPath = config.get<string>("rojoPath") ?? "rojo";
+      const sourcemapFileName =
+        config.get<string>("sourcemapFile") ?? "sourcemap.json";
+      const args = ["sourcemap", projectFile, "--output", sourcemapFileName];
 
-  let stderr = "";
-  childProcess.stderr.on("data", (data) => {
-    stderr += data;
-  });
-
-  childProcess.on("close", (code, signal) => {
-    sourcemapGeneratorProcesses.delete(workspaceFolder);
-    if (childProcess.killed) {
-      return;
-    }
-    if (code !== 0) {
-      let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
-      let options = ["Retry"];
-
-      if (stderr.includes("Found argument 'sourcemap' which wasn't expected")) {
-        output +=
-          "Your Rojo version doesn't have sourcemap support. Upgrade to Rojo v7.3.0+";
-      } else if (
-        stderr.includes("Found argument '--watch' which wasn't expected")
-      ) {
-        output +=
-          "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
-      } else if (
-        stderr.includes("is not recognized") ||
-        stderr.includes("ENOENT")
-      ) {
-        output +=
-          "Rojo not found. Please install Rojo to your PATH or disable sourcemap autogeneration";
-        options.push("Configure Settings");
-      } else {
-        output += stderr;
+      if (config.get<boolean>("includeNonScripts")) {
+        args.push("--include-non-scripts");
       }
 
-      vscode.window.showWarningMessage(output, ...options).then((value) => {
-        if (value === "Retry") {
-          startSourcemapGeneration(client, workspaceFolder);
-        } else if (value === "Configure Settings") {
-          vscode.commands.executeCommand(
-            "workbench.action.openSettings",
-            "luau-lsp.sourcemap",
-          );
+      if (!useVSCodeWatcher) {
+        args.push("--watch");
+      }
+
+      childProcess = spawn(rojoPath, args, { cwd });
+    }
+
+    let stderr = "";
+    childProcess.stderr.on("data", (data) => {
+      stderr += data;
+    });
+
+    childProcess.on("error", (err) => {
+      stderr += err.message;
+    });
+
+    childProcess.on("close", (code, signal) => {
+      if (childProcess.killed) {
+        return;
+      }
+      if (code !== 0) {
+        let output = `Failed to update sourcemap for ${workspaceFolder.name}: `;
+        let options = ["Retry"];
+
+        if (customGeneratorCommand) {
+          output += stderr;
+          if (stderr === "") {
+            output += "<no output>";
+          }
+          options.push("Configure Settings");
+        } else {
+          if (
+            stderr.includes("Found argument 'sourcemap' which wasn't expected")
+          ) {
+            output +=
+              "Your Rojo version doesn't have sourcemap support. Upgrade to Rojo v7.3.0+";
+          } else if (
+            stderr.includes("Found argument '--watch' which wasn't expected")
+          ) {
+            output +=
+              "Your Rojo version doesn't have sourcemap watching support. Upgrade to Rojo v7.3.0+";
+          } else if (
+            stderr.includes("is not recognized") ||
+            stderr.includes("ENOENT")
+          ) {
+            output +=
+              "Rojo not found. Please install Rojo to your PATH or disable sourcemap autogeneration";
+            options.push("Configure Settings");
+          } else {
+            output += stderr;
+          }
+        }
+
+        vscode.window.showWarningMessage(output, ...options).then((value) => {
+          if (value === "Retry") {
+            startSourcemapGeneration(client, workspaceFolder);
+          } else if (value === "Configure Settings") {
+            vscode.commands.executeCommand(
+              "workbench.action.openWorkspaceSettings",
+              "luau-lsp.sourcemap",
+            );
+          }
+        });
+      }
+    });
+
+    return childProcess;
+  };
+
+  if (useVSCodeWatcher) {
+    spawnChildProcess();
+
+    const watcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(workspaceFolder, "**/*.{lua,luau}"),
+      /* ignoreCreateEvents = */ false,
+      /* ignoreChangeEvents = */ true,
+      /* ignoreDeleteEvents = */ false,
+    );
+
+    let debounceTimer: NodeJS.Timeout;
+    watcher.onDidCreate(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(spawnChildProcess, 1000);
+    });
+    watcher.onDidDelete(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(spawnChildProcess, 1000);
+    });
+
+    addSourcemapDisposable(workspaceFolder, watcher);
+  } else {
+    const childProcess = await spawnChildProcess();
+    if (childProcess) {
+      childProcess.on("close", (code) => {
+        cleanupSourcemapDisposables(workspaceFolder);
+
+        if (code === 0) {
+          vscode.window
+            .showWarningMessage(
+              "Sourcemap generator ended. No further updates will be tracked. If the generator does not support file watching, enable luau-lsp.sourcemap.useVSCodeWatcher",
+              "Restart",
+              "Configure Settings",
+            )
+            .then((value) => {
+              if (value === "Restart") {
+                startSourcemapGeneration(client, workspaceFolder);
+              } else if (value === "Configure Settings") {
+                vscode.commands.executeCommand(
+                  "workbench.action.openWorkspaceSettings",
+                  "luau-lsp.sourcemap",
+                );
+              }
+            });
         }
       });
+      addSourcemapDisposable(
+        workspaceFolder,
+        new vscode.Disposable(() => {
+          if (childProcess.killed) {
+            return;
+          }
+          childProcess.kill();
+        }),
+      );
     }
-  });
+  }
 };
 
 const startPluginServer = async (client: LanguageClient | undefined) => {
@@ -322,6 +437,23 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     client.sendNotification("$/plugin/clear");
     res.sendStatus(200);
   });
+
+  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+
+    if (err && err.type === "entity.too.large") {
+      res
+        .status(413)
+        .send(
+          `Result is too large. Limit: ${bytesFormat(err.limit)}, Received: ${bytesFormat(err.received)}.\n` +
+            `Increase your available limits by updating the 'luau-lsp.plugin.maximumRequestBodySize' property in VSCode, or by reducing the include list in the Studio Plugin settings`,
+        );
+    }
+  };
+
+  app.use(errorHandler);
 
   const port = vscode.workspace.getConfiguration("luau-lsp.plugin").get("port");
   pluginServer = app
@@ -419,7 +551,7 @@ export const onActivate = async (
               !config.get<boolean>("enabled") ||
               !config.get<boolean>("autogenerate")
             ) {
-              stopSourcemapGeneration(folder);
+              cleanupSourcemapDisposables(folder);
             } else {
               startSourcemapGeneration(platformContext.client, folder);
             }
@@ -486,8 +618,8 @@ export const postLanguageServerStart = async (
 
 export const onDeactivate = () => {
   return [
-    ...Array.from(sourcemapGeneratorProcesses.keys()).map((workspace) =>
-      stopSourcemapGeneration(workspace),
+    ...Array.from(sourcemapDisposables.keys()).map((workspace) =>
+      cleanupSourcemapDisposables(workspace),
     ),
     stopPluginServer(true),
   ];

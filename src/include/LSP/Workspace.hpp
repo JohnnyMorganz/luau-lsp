@@ -60,7 +60,7 @@ public:
         const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
-    void onDidChangeWatchedFiles(const lsp::FileEvent& change);
+    void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
@@ -74,12 +74,13 @@ public:
     void recomputeDiagnostics(const ClientConfiguration& config);
     void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
 
+    void clearDiagnosticsForFiles(const std::vector<lsp::DocumentUri>& uri) const;
     void clearDiagnosticsForFile(const lsp::DocumentUri& uri);
 
     void indexFiles(const ClientConfiguration& config);
 
     Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName);
-    void checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
+    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
@@ -95,6 +96,7 @@ private:
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);
     std::optional<std::string> getDocumentationForType(const Luau::TypeId ty);
+    std::optional<std::string> getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope);
     std::optional<std::string> getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
         const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule);
     std::vector<Reference> findAllTableReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);

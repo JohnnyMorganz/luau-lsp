@@ -3,9 +3,10 @@ import * as os from "os";
 import { fetch } from "undici";
 import {
   Executable,
-  ServerOptions,
   LanguageClient,
   LanguageClientOptions,
+  ServerOptions,
+  TransportKind,
 } from "vscode-languageclient/node";
 
 import {
@@ -166,11 +167,19 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .get<boolean>("enableFragmentAutocomplete")
   ) {
     fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
-    fflags["LuauStoreSolverTypeOnModule"] = "true";
-    fflags["LuauSymbolEquality"] = "true";
-    fflags["LexerResumesFromPosition2"] = "true";
-    fflags["LuauIncrementalAutocompleteBugfixes"] = "true";
-    fflags["LuauBetterReverseDependencyTracking"] = "true";
+    fflags["LuauFreeTypesMustHaveBounds"] = "true";
+    fflags["LuauCloneIncrementalModule"] = "true";
+    fflags["LuauAllFreeTypesHaveScopes"] = "true";
+    fflags["LuauClonedTableAndFunctionTypesMustHaveScopes"] = "true";
+    fflags["LuauDisableNewSolverAssertsInMixedMode"] = "true";
+    fflags["LuauCloneTypeAliasBindings"] = "true";
+    fflags["LuauDoNotClonePersistentBindings"] = "true";
+    fflags["LuauIncrementalAutocompleteDemandBasedCloning"] = "true";
+    fflags["LuauBetterScopeSelection"] = "true";
+    fflags["LuauBlockDiffFragmentSelection"] = "true";
+    fflags["LuauAutocompleteUsesModuleForTypeCompatibility"] = "true";
+    fflags["LuauFragmentAcMemoryLeak"] = "true";
+    fflags["LuauGlobalVariableModuleIsolation"] = "true";
   }
 
   // Handle overrides
@@ -185,6 +194,14 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
       name = name.trim();
       value = value.trim();
+
+      // Strip kind prefix if it was included
+      for (const kind of FFLAG_KINDS) {
+        if (name.startsWith(`${kind}`)) {
+          name = name.substring(kind.length);
+        }
+      }
+
       // Validate that the name and value is valid
       if (name.length > 0 && value.length > 0) {
         fflags[name] = value;
@@ -192,10 +209,10 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     }
   }
 
-  const serverBinConfig = vscode.workspace
-    .getConfiguration("luau-lsp.server")
-    .get("path", "")
-    .trim();
+  const serverConfiguration =
+    vscode.workspace.getConfiguration("luau-lsp.server");
+
+  const serverBinConfig = serverConfiguration.get("path", "").trim();
 
   const uri = vscode.Uri.file(serverBinConfig);
   let serverBinPath;
@@ -215,9 +232,23 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     ).fsPath;
   }
 
+  const transport =
+    serverConfiguration.get<"stdio" | "pipe">(
+      "communicationChannel",
+      "stdio",
+    ) === "pipe"
+      ? TransportKind.pipe
+      : TransportKind.stdio;
+
+  const delayStartup = serverConfiguration.get<boolean>("delayStartup", false);
+  if (delayStartup) {
+    addArg("--delay-startup");
+  }
+
   const run: Executable = {
     command: serverBinPath,
     args,
+    transport,
   };
 
   // If debugging, run the locally build extension, with local type definitions file
@@ -226,6 +257,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       ? vscode.Uri.file(process.env["LUAU_LSP_SERVER_PATH"]).fsPath
       : serverBinPath,
     args: debugArgs,
+    transport,
   };
 
   const serverOptions: ServerOptions = { run, debug };
@@ -247,6 +279,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     },
     initializationOptions: {
       fflags,
+    },
+    markdown: {
+      supportHtml: true,
     },
   };
 
@@ -290,7 +325,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (
+      if (e.affectsConfiguration("luau-lsp.server")) {
+        vscode.window
+          .showInformationMessage(
+            "Luau LSP server configuration has changed, reload server for this to take effect.",
+            "Reload Language Server",
+          )
+          .then((command) => {
+            if (command === "Reload Language Server") {
+              vscode.commands.executeCommand("luau-lsp.reloadServer");
+            }
+          });
+      } else if (
         e.affectsConfiguration("luau-lsp.fflags") ||
         e.affectsConfiguration("luau-lsp.completion.enableFragmentAutocomplete")
       ) {

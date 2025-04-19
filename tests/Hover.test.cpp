@@ -307,4 +307,140 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function_call")
     CHECK_EQ(result->contents.value, codeBlock("luau", "function foo(): ()") + kDocumentationBreaker + "This is documentation for Foo\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations")
+{
+    auto source = R"(
+        --- The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]
+        --- in the [International System of Units] (SI)
+        export type Meters = number
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 21};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(
+        result->contents.value, 
+        codeBlock("luau", "type Meters = number") + 
+        kDocumentationBreaker + 
+        "The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]\n" + 
+        "in the [International System of Units] (SI)\n"
+    );
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations_of_intersected_tables")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as
+        --- metasyntactic variables and placeholder names in computer programming or computer-related documentation
+        export type Foobar = Foo & Bar
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{11, 21};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(
+        result->contents.value, 
+        codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + 
+        kDocumentationBreaker + 
+        "The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as\n" +
+        "metasyntactic variables and placeholder names in computer programming or computer-related documentation\n"
+    );
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_references")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- This is the intersection of two types
+        export type Foobar = Foo & Bar
+
+        function consumer(value: Foobar)
+        end
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{12, 36};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + kDocumentationBreaker +
+                                         "This is the intersection of two types\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_external_type_references")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
+    // We should still be able to find the type references.
+    workspace.checkSimple(workspace.fileResolver.getModuleName(uri));
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
 TEST_SUITE_END();
