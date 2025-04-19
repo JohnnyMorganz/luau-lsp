@@ -30,7 +30,7 @@ std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
 
 Luau::SourceCode::Type SourceNode::sourceCodeType() const
 {
-    if (className == "ServerScript" or className == "LocalScript")
+    if (className == "ServerScript" || className == "LocalScript")
     {
         return Luau::SourceCode::Type::Script;
     }
