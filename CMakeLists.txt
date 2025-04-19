@@ -63,6 +63,8 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
+        src/transport/PipeTransport.cpp
+        src/transport/StdioTransport.cpp
         extern/glob/match.cpp
 )
 
