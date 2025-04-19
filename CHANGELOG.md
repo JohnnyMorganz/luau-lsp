@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.669
+- Sync to upstream Luau 0.670
 - Linux runners for GitHub actions are bumped from the deprecated `ubuntu-20.04` to `ubuntu-22.04`. This may mean that release artifacts no longer work on `ubuntu-20.04`.
 
 ## [1.42.1] - 2025-04-06

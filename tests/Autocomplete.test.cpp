@@ -13,11 +13,12 @@ LUAU_FASTFLAG(LuauClonedTableAndFunctionTypesMustHaveScopes)
 LUAU_FASTFLAG(LuauDisableNewSolverAssertsInMixedMode)
 LUAU_FASTFLAG(LuauCloneTypeAliasBindings)
 LUAU_FASTFLAG(LuauDoNotClonePersistentBindings)
-LUAU_FASTFLAG(LuauCloneReturnTypePack)
 LUAU_FASTFLAG(LuauIncrementalAutocompleteDemandBasedCloning)
 LUAU_FASTFLAG(LuauBetterScopeSelection)
 LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauAutocompleteUsesModuleForTypeCompatibility)
+LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
+LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -42,7 +43,7 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[13] = {
+    ScopedFastFlag sffs[14] = {
         {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
         {FFlag::LuauFreeTypesMustHaveBounds, true},
         {FFlag::LuauCloneIncrementalModule, true},
@@ -51,11 +52,12 @@ struct FragmentAutocompleteFixture : Fixture
         {FFlag::LuauDisableNewSolverAssertsInMixedMode, true},
         {FFlag::LuauCloneTypeAliasBindings, true},
         {FFlag::LuauDoNotClonePersistentBindings, true},
-        {FFlag::LuauCloneReturnTypePack, true},
         {FFlag::LuauIncrementalAutocompleteDemandBasedCloning, true},
         {FFlag::LuauBetterScopeSelection, true},
         {FFlag::LuauBlockDiffFragmentSelection, true},
         {FFlag::LuauAutocompleteUsesModuleForTypeCompatibility, true},
+        {FFlag::LuauFragmentAcMemoryLeak, true},
+        {FFlag::LuauGlobalVariableModuleIsolation, true},
     };
 };
 
