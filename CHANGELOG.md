@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added setting `luau-lsp.server.communicationChannel` with options `stdio` (default) or `pipe` to support communicating
+  using a UNIX socket file connection instead of stdin/stdout. On the server, this is configured by passing
+  `--pipe=FILE` to the command line. This is useful for attaching a debugger to the server on macOS. `pipe` is not
+  supported on Windows. ([#998](https://github.com/JohnnyMorganz/luau-lsp/issues/998))
+
 ### Changed
 
 - Sync to upstream Luau 0.670
