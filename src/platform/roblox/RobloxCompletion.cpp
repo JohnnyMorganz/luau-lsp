@@ -387,7 +387,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
             if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                 continue;
             if (auto scriptFilePath = getRealPathFromSourceNode(node);
-                scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
+                scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(Uri::file(*scriptFilePath), config))
                 continue;
 
             std::string requirePath;

@@ -58,11 +58,13 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
         else if (supportsRelatedDocuments(client->capabilities))
         {
             auto fileName = platform->resolveToRealPath(error.moduleName);
-            if (!fileName || isIgnoredFile(*fileName, config))
+            if (!fileName)
                 continue;
             auto textDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
             auto uri = textDocument ? textDocument->uri() : Uri::file(*fileName);
+            if (isIgnoredFile(uri, config))
+                continue;
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
             auto& currentDiagnostics = relatedDiagnostics[uri];
             currentDiagnostics.emplace_back(diagnostic);
         }

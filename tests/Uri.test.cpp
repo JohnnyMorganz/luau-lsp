@@ -10,6 +10,11 @@
 #define IF_WINDOWS(X, Y) Y
 #endif
 
+std::ostream& operator<<(std::ostream& stream, const Uri& uri)
+{
+    return stream << uri.toString();
+}
+
 TEST_SUITE_BEGIN("UriTests");
 
 TEST_CASE("file#toString")
@@ -518,6 +523,21 @@ TEST_CASE("luau-lsp custom: two file paths are equal on case-insensitive file sy
 #else
     CHECK(uri != uri2);
     CHECK(UriHash()(uri) != UriHash()(uri2));
+#endif
+}
+
+TEST_CASE("luau-lsp custom: lexicallyRelative")
+{
+    // NOTE: We will only ever deal with absolute URIs
+    CHECK_EQ(Uri::file("/a/d").lexicallyRelative(Uri::file("/a/b/c")), "../../d");
+    CHECK_EQ(Uri::file("/a/b/c").lexicallyRelative(Uri::file("/a/d")), "../b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a")), "b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c/x/y")), "../..");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c")), ".");
+    CHECK_EQ(Uri::file("/a/b").lexicallyRelative(Uri::file("/c/d")), "../../a/b");
+    
+#ifdef _WIN32
+    CHECK_EQ(Uri::file("C:/project/file").lexicallyRelative(Uri::file("c:/project")), "file");
 #endif
 }
 

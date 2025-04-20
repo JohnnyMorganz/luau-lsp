@@ -59,7 +59,7 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
     frontend.markDirty(moduleName);
 
     // Refresh workspace diagnostics to clear diagnostics on ignored files
-    if (!config.diagnostics.workspace || isIgnoredFile(uri.fsPath()))
+    if (!config.diagnostics.workspace || isIgnoredFile(uri))
         clearDiagnosticsForFile(uri);
 }
 
@@ -127,7 +127,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                     lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
                 continue;
             }
-            else if (isIgnoredFile(filePath, config))
+            else if (isIgnoredFile(change.uri, config))
             {
                 continue;
             }
@@ -152,35 +152,11 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     clearDiagnosticsForFiles(deletedFiles);
 }
 
-/// When using lexically_relative, if the root-dir does not match, it will return a default-constructed path.
-/// Commonly, this doesn't match due to difference in casing. On Windows, we force all drive letters to be lowercase to
-/// resolve this issue
-static std::filesystem::path normaliseDriveLetter(const std::filesystem::path& path)
-{
-    // TODO: GET RID OF THIS - CAN WE IMPLEMENT LEXICALLY_RELATIVE FOR URI INSTEAD?
-#ifdef _WIN32
-    if (path.has_root_path())
-    {
-        auto root = path.root_path().generic_string();
-        if (root.size() >= 1 && isupper(root[0]))
-        {
-            return std::filesystem::path(std::string(1, tolower(root[0])) + path.generic_string().substr(1));
-        }
-    }
-#endif
-    return path;
-}
-
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
-bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+bool WorkspaceFolder::isIgnoredFile(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig) const
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
-    auto relativeFsPath = normaliseDriveLetter(path).lexically_relative(normaliseDriveLetter(rootUri.fsPath()));
-    if (relativeFsPath == std::filesystem::path())
-        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFile failed: relative path is default-constructed when constructing " +
-                                                                  path.string() + " against " + rootUri.fsPath().string());
-    auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
-
+    auto relativePathString = uri.lexicallyRelative(rootUri);
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
     std::vector<std::string> patterns = config.ignoreGlobs; // TODO: extend further?
     for (auto& pattern : patterns)
@@ -193,14 +169,10 @@ bool WorkspaceFolder::isIgnoredFile(const std::filesystem::path& path, const std
     return false;
 }
 
-bool WorkspaceFolder::isIgnoredFileForAutoImports(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig) const
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
-    auto relativeFsPath = normaliseDriveLetter(path).lexically_relative(normaliseDriveLetter(rootUri.fsPath()));
-    if (relativeFsPath == std::filesystem::path())
-        throw JsonRpcException(lsp::ErrorCode::InternalError, "isIgnoredFileForAutoImports failed: relative path is default-constructed");
-    auto relativePathString = relativeFsPath.generic_string(); // HACK: we convert to generic string so we get '/' separators
-
+    auto relativePathString = uri.lexicallyRelative(rootUri);
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
     std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
     for (auto& pattern : patterns)
@@ -297,7 +269,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         try
         {
             if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
-                !isIgnoredFile(next->path(), config))
+                !isIgnoredFile(Uri::file(next->path()), config))
             {
                 auto ext = next->path().extension();
                 if (ext == ".lua" || ext == ".luau")

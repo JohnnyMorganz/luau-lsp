@@ -86,6 +86,9 @@ private:
 public:
     // Encodes the Uri into a string representation
     std::string toString(bool skipEncoding = false) const;
+
+    // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
+    std::string lexicallyRelative(const Uri& base) const;
 };
 
 struct UriHash
