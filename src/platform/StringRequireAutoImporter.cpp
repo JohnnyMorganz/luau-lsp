@@ -15,13 +15,6 @@ std::string requireNameFromModuleName(const Luau::ModuleName& name)
     return fileName;
 }
 
-
-static std::string resolveAliasPath(const Luau::Config::AliasInfo& alias)
-{
-    // TODO: shouldn't be here
-    return (std::filesystem::path(alias.configLocation) / resolvePath(alias.value)).generic_string();
-}
-
 // Resolves the best alias path
 std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap& availableAliases)
 {
@@ -31,7 +24,7 @@ std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap&
 
     for (const auto& [aliasName, aliasInfo] : availableAliases)
     {
-        auto aliasLocation = resolveAliasPath(aliasInfo);
+        auto aliasLocation = resolveAliasLocation(aliasInfo).generic_string();
         if (!Luau::startsWith(to.path, aliasLocation))
             continue;
 
