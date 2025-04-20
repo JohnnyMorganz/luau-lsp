@@ -23,6 +23,19 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
     return fsPath;
 }
 
+Uri WorkspaceFileResolver::getUri(const Luau::ModuleName& moduleName) const
+{
+    if (platform->isVirtualPath(moduleName))
+    {
+        if (auto filePath = platform->resolveToRealPath(moduleName))
+            return Uri::file(*filePath);
+    }
+
+    // TODO: right now we map to file paths for module names, unless it's a non-file uri. Should we store uris directly instead?
+    // Then this would be Uri::parse
+    return Uri::file(moduleName);
+}
+
 const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUri& uri) const
 {
     auto it = managedFiles.find(uri);
@@ -38,10 +51,7 @@ const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const L
     if (auto document = getTextDocument(Uri::parse(name)))
         return document;
 
-    if (auto filePath = platform->resolveToRealPath(name))
-        return getTextDocument(Uri::file(*filePath));
-
-    return nullptr;
+    return getTextDocument(getUri(name));
 }
 
 TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(const Luau::ModuleName& name)

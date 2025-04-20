@@ -84,9 +84,7 @@ public:
     }
 
     virtual void handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
-        size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
-    {
-    }
+        size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items);
 
     virtual void handleSignatureHelp(
         const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, lsp::SignatureHelp& signatureHelp)
@@ -127,6 +125,7 @@ public:
     virtual ~LSPPlatform() = default;
 };
 
+std::filesystem::path resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo);
 std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config);
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(

@@ -391,6 +391,14 @@ std::string Uri::toString(bool skipEncoding) const
     }
 }
 
+std::optional<Uri> Uri::parent() const
+{
+    auto parentParent = getParentPath(path);
+    if (!parentParent)
+        return std::nullopt;
+    return Uri(scheme, authority, *parentParent, query, fragment);
+}
+
 std::string Uri::lexicallyRelative(const Uri& base) const
 {
     if (base.scheme != scheme || base.authority != authority)

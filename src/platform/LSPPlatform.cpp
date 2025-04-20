@@ -4,6 +4,7 @@
 #include "LSP/Workspace.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
+#include "Platform/StringRequireAutoImporter.hpp"
 
 #include <memory>
 
@@ -36,6 +37,11 @@ std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& n
         return readFile(path);
 
     return std::nullopt;
+}
+
+std::filesystem::path resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo)
+{
+    return std::filesystem::path(aliasInfo.configLocation) / resolvePath(aliasInfo.value);
 }
 
 std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config)
@@ -77,7 +83,7 @@ std::optional<std::filesystem::path> resolveAlias(const std::string& path, const
         // absolute path
         remainder.erase(0, remainder.find_first_not_of("/\\"));
 
-        auto resolvedPath = std::filesystem::path(aliasInfo->configLocation) / resolvePath(aliasInfo->value);
+        auto resolvedPath = resolveAliasLocation(*aliasInfo);
         if (remainder.empty())
             return resolvedPath;
         else
@@ -190,4 +196,27 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
     const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
     return std::nullopt;
+}
+
+void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
+    size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
+{
+    if (!config.completion.imports.suggestRequires)
+        return;
+
+    LUAU_ASSERT(module.root);
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(module.root);
+
+    Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
+        module.name,
+        Luau::NotNull(&textDocument),
+        Luau::NotNull(&workspaceFolder->frontend),
+        Luau::NotNull(workspaceFolder),
+        Luau::NotNull(&config.completion.imports),
+        hotCommentsLineNumber,
+        Luau::NotNull(&importsVisitor),
+    };
+
+    return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }

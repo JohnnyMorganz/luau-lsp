@@ -56,7 +56,7 @@ TEST_CASE_FIXTURE(Fixture, "FindImports require simple")
     )");
     REQUIRE(block);
 
-    FindImportsVisitor visitor;
+    Luau::LanguageServer::AutoImports::FindImportsVisitor visitor;
     visitor.visit(block);
 
     CHECK(visitor.containsRequire("test"));
@@ -74,7 +74,7 @@ TEST_CASE_FIXTURE(Fixture, "FindImports require multiline")
     )");
     REQUIRE(block);
 
-    FindImportsVisitor visitor;
+    Luau::LanguageServer::AutoImports::FindImportsVisitor visitor;
     visitor.visit(block);
 
     CHECK(visitor.containsRequire("test"));

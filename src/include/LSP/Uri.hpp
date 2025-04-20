@@ -87,6 +87,8 @@ public:
     // Encodes the Uri into a string representation
     std::string toString(bool skipEncoding = false) const;
 
+    // Returns the parent path of this URI, if it exists
+    std::optional<Uri> parent() const;
     // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
     std::string lexicallyRelative(const Uri& base) const;
 };

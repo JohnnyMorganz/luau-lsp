@@ -30,6 +30,7 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
 {
     Uri uri = Uri::file(workspace.rootUri.fsPath() / name);
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(uri));
     return uri;
 }
 
@@ -47,9 +48,10 @@ Fixture::Fixture()
     : client(std::make_shared<TestClient>(TestClient{}))
     , workspace(client, "$TEST_WORKSPACE", Uri::file(std::filesystem::current_path()), std::nullopt)
 {
+    client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
-    workspace.setupWithConfiguration(Luau::LanguageServer::defaultTestClientConfiguration());
+    workspace.setupWithConfiguration(client->globalConfig);
 
     Luau::setPrintLine([](auto s) {});
 }
