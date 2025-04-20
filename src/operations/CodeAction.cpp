@@ -3,6 +3,7 @@
 #include "Protocol/CodeAction.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Luau/Transpiler.h"
+#include "Platform/AutoImports.hpp"
 
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::DocumentUri& uri)
 {
@@ -19,7 +20,7 @@ lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::Docum
         return {};
 
     // Find all the `local X = require(...)` calls
-    FindImportsVisitor visitor;
+    Luau::LanguageServer::AutoImports::FindImportsVisitor visitor;
     visitor.visit(sourceModule->root);
 
     // Check if there are any requires

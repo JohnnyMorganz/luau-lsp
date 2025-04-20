@@ -4,6 +4,7 @@
 #include "LSP/Workspace.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
+#include "Platform/StringRequireAutoImporter.hpp"
 
 #include <memory>
 
@@ -190,4 +191,27 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
     const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
     return std::nullopt;
+}
+
+void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
+    size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
+{
+    if (!config.completion.imports.suggestRequires)
+        return;
+
+    LUAU_ASSERT(module.root);
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(module.root);
+
+    Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
+        module.name,
+        Luau::NotNull(&textDocument),
+        Luau::NotNull(&workspaceFolder->frontend),
+        Luau::NotNull(workspaceFolder),
+        Luau::NotNull(&config.completion.imports),
+        hotCommentsLineNumber,
+        Luau::NotNull(&importsVisitor),
+    };
+
+    return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }

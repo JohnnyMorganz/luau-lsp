@@ -103,6 +103,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ImportRequireStyle, {
                                                      {ImportRequireStyle::AlwaysAbsolute, "alwaysAbsolute"},
                                                  })
 
+struct ClientCompletionImportsStringRequiresConfiguration
+{
+    // Whether to use string requires when auto-importing requires (roblox platform only)
+    bool enabled = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsStringRequiresConfiguration, enabled);
+
 struct ClientCompletionImportsConfiguration
 {
     /// Whether we should suggest automatic imports in completions
@@ -113,13 +120,14 @@ struct ClientCompletionImportsConfiguration
     bool suggestRequires = true;
     /// The style of the auto-imported require
     ImportRequireStyle requireStyle = ImportRequireStyle::Auto;
+    ClientCompletionImportsStringRequiresConfiguration stringRequires;
     /// Whether services and requires should be separated by an empty line
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle, separateGroupsWithLine, ignoreGlobs);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle,
+    stringRequires, separateGroupsWithLine, ignoreGlobs);
 
 struct ClientCompletionConfiguration
 {

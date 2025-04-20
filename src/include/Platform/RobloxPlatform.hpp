@@ -2,6 +2,7 @@
 
 #include "LSP/LuauExt.hpp"
 #include "Platform/LSPPlatform.hpp"
+#include "Platform/AutoImports.hpp"
 
 using json = nlohmann::json;
 using SourceNodePtr = std::shared_ptr<struct SourceNode>;
@@ -16,7 +17,7 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
-struct RobloxFindImportsVisitor : public FindImportsVisitor
+struct RobloxFindImportsVisitor : public Luau::LanguageServer::AutoImports::FindImportsVisitor
 {
 public:
     std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
@@ -125,10 +126,6 @@ static void from_json(const json& j, PluginNode& p)
         }
     }
 }
-
-size_t computeMinimumLineNumberForRequire(const RobloxFindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
-size_t computeBestLineForRequire(
-    const RobloxFindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
 
 class RobloxPlatform : public LSPPlatform
 {

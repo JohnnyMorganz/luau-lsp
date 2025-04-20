@@ -103,6 +103,7 @@ public:
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path
     Luau::ModuleName getModuleName(const Uri& name) const;
+    Uri getUri(const Luau::ModuleName& moduleName) const;
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;

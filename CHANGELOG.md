@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The deprecated `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` no longer show up in
   autocomplete for string requires. Use aliases as part of `.luaurc` instead
 
+### Added
+
+- Auto-importing now supports string requires. In standard platform, string requires is the default when
+  `luau-lsp.completion.imports.enabled` and `luau-lsp.completion.imports.suggestRequires` are enabled. For the Roblox
+  platform, string require auto imports must be switched on using `luau-lsp.completion.imports.stringRequires.enabled` (
+  default: `false`) ([#494](https://github.com/JohnnyMorganz/luau-lsp/issues/494)).
+
 ### Changed
 
 - Reimplementation of string require autocomplete based off upstream Luau require work

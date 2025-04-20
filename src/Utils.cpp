@@ -159,7 +159,6 @@ std::string removePrefix(const std::string& str, const std::string& prefix)
     return str;
 }
 
-
 void trim_end(std::string& str)
 {
     str.erase(str.find_last_not_of(" \n\r\t") + 1);
@@ -192,6 +191,13 @@ std::string_view getFirstLine(const std::string_view& str)
 bool endsWith(const std::string_view& str, const std::string_view& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
+}
+
+std::string removeSuffix(const std::string& str, const std::string_view& suffix)
+{
+    if (endsWith(str, suffix))
+        return str.substr(0, str.length() - suffix.size());
+    return str;
 }
 
 bool replace(std::string& str, const std::string& from, const std::string& to)
