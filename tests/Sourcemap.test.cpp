@@ -611,7 +611,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
     auto filePath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(filePath);
 
-    CHECK(workspace.isIgnoredFileForAutoImports(*filePath));
+    CHECK(workspace.isIgnoredFileForAutoImports(Uri::file(*filePath)));
 }
 
 TEST_SUITE_END();

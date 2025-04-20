@@ -63,9 +63,9 @@ public:
     void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
-    bool isIgnoredFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
+    bool isIgnoredFile(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
     /// Whether the file has been marked as ignored for auto-importing
-    bool isIgnoredFileForAutoImports(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
+    bool isIgnoredFileForAutoImports(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
     /// Whether the file has been specified in the configuration as a definitions file
     bool isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
 

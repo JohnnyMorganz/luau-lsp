@@ -14,6 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Reimplementation of string require autocomplete based off upstream Luau require work
+- Updated implementation of Uris internally to handle case-insensitive file systems correctly
+
+### Fixed
+
+- Fixed diagnostics not updating on windows for Neovim or Zed due to mismatched URI
+  cases ([#988](https://github.com/JohnnyMorganz/luau-lsp/issues/988))
+- Fixed "isIgnoredFile failed: relative path is default-constructed" for Neovim Windows
+  users ([#752](https://github.com/JohnnyMorganz/luau-lsp/issues/752))
 
 ## [1.43.0] - 2025-04-19
 

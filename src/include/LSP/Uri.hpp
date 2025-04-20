@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <regex>
 #include "nlohmann/json.hpp"
+#include "LSP/Utils.hpp"
+
 using json = nlohmann::json;
 
 // implements a bit of https://tools.ietf.org/html/rfc3986#section-5
@@ -53,7 +55,12 @@ public:
 
     bool operator==(const Uri& other) const
     {
+#if defined(_WIN32) || defined(__APPLE__)
+        return scheme == other.scheme && authority == other.authority && toLower(path) == toLower(other.path) && query == other.query &&
+               fragment == other.fragment;
+#else
         return scheme == other.scheme && authority == other.authority && path == other.path && query == other.query && fragment == other.fragment;
+#endif
     }
 
     bool operator!=(const Uri& other) const
@@ -64,6 +71,7 @@ public:
     static Uri parse(const std::string& value);
     static Uri file(const std::filesystem::path& fsPath);
 
+    // TODO: make this conversion explicit
     operator std::filesystem::path()
     {
         return fsPath();
@@ -78,6 +86,14 @@ private:
 public:
     // Encodes the Uri into a string representation
     std::string toString(bool skipEncoding = false) const;
+
+    // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
+    std::string lexicallyRelative(const Uri& base) const;
+};
+
+struct UriHash
+{
+    size_t operator()(const Uri& uri) const;
 };
 
 void from_json(const json& j, Uri& u);

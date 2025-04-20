@@ -367,7 +367,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_local_
     auto result = workspace.rename(params);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
-    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->first, uri);
     CHECK_EQ(result->changes.begin()->second.size(), 2);
 }
 
@@ -396,7 +396,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_global
     auto result = workspace.rename(params);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
-    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->first, uri);
     CHECK_EQ(result->changes.begin()->second.size(), 2);
 }
 
@@ -424,7 +424,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_table"
     auto result = workspace.rename(params);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
-    CHECK_EQ(result->changes.begin()->first, uri.toString());
+    CHECK_EQ(result->changes.begin()->first, uri);
     CHECK_EQ(result->changes.begin()->second.size(), 2);
 }
 

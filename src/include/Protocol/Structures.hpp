@@ -157,7 +157,7 @@ NLOHMANN_DEFINE_OPTIONAL(MarkupContent, kind, value)
 struct WorkspaceEdit
 {
     // TODO: this is optional and there are other options provided
-    std::unordered_map<std::string /* DocumentUri */, std::vector<TextEdit>> changes{};
+    std::unordered_map<Uri, std::vector<TextEdit>, UriHash> changes{};
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes)
 

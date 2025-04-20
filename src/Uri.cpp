@@ -5,6 +5,7 @@
 #include <cctype>
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
 
 static std::string decodeURIComponent(const std::string& str)
 {
@@ -326,6 +327,7 @@ std::string Uri::toStringUncached(bool skipEncoding) const
             }
             res += '@';
         }
+        mutAuthority = toLower(mutAuthority);
         toLower(mutAuthority);
         idx = mutAuthority.rfind(':');
         if (idx == std::string::npos)
@@ -387,6 +389,70 @@ std::string Uri::toString(bool skipEncoding) const
             return cachedToString;
         return cachedToString = toStringUncached(skipEncoding);
     }
+}
+
+std::string Uri::lexicallyRelative(const Uri& base) const
+{
+    if (base.scheme != scheme || base.authority != authority)
+    {
+        // Different scheme or authority, target is already relative
+        return path;
+    }
+
+    // Split paths into components
+    std::vector<std::string_view> basePathComponents = Luau::split(base.path, '/');
+    std::vector<std::string_view> targetPathComponents = Luau::split(path, '/');
+
+    size_t min_size = std::min(basePathComponents.size(), targetPathComponents.size());
+    size_t common_components = 0;
+
+    // Find the common path components
+    for (size_t i = 0; i < min_size; ++i)
+    {
+#if defined(_WIN32) || defined(__APPLE__)
+        auto equal = toLower(std::string(basePathComponents[i])) == toLower(std::string(targetPathComponents[i]));
+#else
+        auto equal = basePathComponents[i] == targetPathComponents[i];
+#endif
+        if (equal)
+            common_components++;
+        else
+            break;
+    }
+
+    // Handle if they are the same path
+    if (common_components == basePathComponents.size() && common_components == targetPathComponents.size())
+        return ".";
+
+    std::string relative_path;
+    for (size_t i = common_components; i < basePathComponents.size(); ++i)
+    {
+        relative_path += "..";
+        if (i < basePathComponents.size() - 1 || common_components < targetPathComponents.size())
+            relative_path += "/";
+    }
+    for (size_t i = common_components; i < targetPathComponents.size(); ++i)
+    {
+        relative_path += targetPathComponents[i];
+        if (i < targetPathComponents.size() - 1)
+            relative_path += "/";
+    }
+
+    return relative_path;
+}
+
+size_t UriHash::operator()(const Uri& uri) const
+{
+    size_t hashValue = std::hash<std::string>()(uri.scheme);
+    hashValue ^= std::hash<std::string>()(uri.authority) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#if defined(_WIN32) || defined(__APPLE__)
+    hashValue ^= std::hash<std::string>()(toLower(uri.path)) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#else
+    hashValue ^= std::hash<std::string>()(uri.path) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#endif
+    hashValue ^= std::hash<std::string>()(uri.query) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= std::hash<std::string>()(uri.fragment) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    return hashValue;
 }
 
 void from_json(const json& j, Uri& u)

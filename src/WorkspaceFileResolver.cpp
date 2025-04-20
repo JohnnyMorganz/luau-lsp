@@ -23,22 +23,9 @@ Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
     return fsPath;
 }
 
-std::string WorkspaceFileResolver::normalisedUriString(const lsp::DocumentUri& uri)
-{
-    auto uriString = uri.toString();
-
-// As windows/macOS is case-insensitive, we lowercase the URI string for simplicity and to handle
-// normalisation issues
-#if defined(_WIN32) || defined(__APPLE__)
-    uriString = toLower(uriString);
-#endif
-
-    return uriString;
-}
-
 const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUri& uri) const
 {
-    auto it = managedFiles.find(normalisedUriString(uri));
+    auto it = managedFiles.find(uri);
     if (it != managedFiles.end())
         return &it->second;
 

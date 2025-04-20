@@ -10,6 +10,11 @@
 #define IF_WINDOWS(X, Y) Y
 #endif
 
+std::ostream& operator<<(std::ostream& stream, const Uri& uri)
+{
+    return stream << uri.toString();
+}
+
 TEST_SUITE_BEGIN("UriTests");
 
 TEST_CASE("file#toString")
@@ -505,6 +510,35 @@ TEST_CASE("luau-lsp custom: encodeURIComponent #555")
         IF_WINDOWS(
             "file:///c%3A/Users/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk",
             "file:///home/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk"));
+}
+
+TEST_CASE("luau-lsp custom: two file paths are equal on case-insensitive file systems")
+{
+    auto uri = Uri::file(IF_WINDOWS("c:\\Users\\testing", "/home/testing"));
+    auto uri2 = Uri::file(IF_WINDOWS("C:\\USERS\\TESTING", "/HOME/TESTING"));
+
+#if defined(_WIN32) || defined(__APPLE__)
+    CHECK(uri == uri2);
+    CHECK(UriHash()(uri) == UriHash()(uri2));
+#else
+    CHECK(uri != uri2);
+    CHECK(UriHash()(uri) != UriHash()(uri2));
+#endif
+}
+
+TEST_CASE("luau-lsp custom: lexicallyRelative")
+{
+    // NOTE: We will only ever deal with absolute URIs
+    CHECK_EQ(Uri::file("/a/d").lexicallyRelative(Uri::file("/a/b/c")), "../../d");
+    CHECK_EQ(Uri::file("/a/b/c").lexicallyRelative(Uri::file("/a/d")), "../b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a")), "b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c/x/y")), "../..");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c")), ".");
+    CHECK_EQ(Uri::file("/a/b").lexicallyRelative(Uri::file("/c/d")), "../../a/b");
+    
+#ifdef _WIN32
+    CHECK_EQ(Uri::file("C:/project/file").lexicallyRelative(Uri::file("c:/project")), "file");
+#endif
 }
 
 TEST_SUITE_END();

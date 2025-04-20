@@ -171,7 +171,7 @@ void trim(std::string& str)
     trim_end(str);
 }
 
-std::string& toLower(std::string& str)
+std::string toLower(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c)
