@@ -454,6 +454,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         client->sendTrace("workspace: first time configuration, setting appropriate platform");
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
         fileResolver.platform = platform.get();
+        fileResolver.requireSuggester = fileResolver.platform->getRequireSuggester();
 
         registerTypes(configuration.types.disabledGlobals);
     }

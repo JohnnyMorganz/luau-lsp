@@ -16,8 +16,6 @@
 #include <fcntl.h>
 #endif
 
-LUAU_FASTINT(LuauTarjanChildLimit)
-
 static void displayFlags()
 {
     printf("Available flags:\n");
@@ -149,11 +147,7 @@ void processFFlags(const argparse::ArgumentParser& program)
                 flag->value = true;
     }
     registerFastFlagsCLI(fastFlags);
-
-    // Manually enforce a LuauTarjanChildLimit increase
-    // TODO: re-evaluate the necessity of this change
-    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
-        FInt::LuauTarjanChildLimit.value = 15000;
+    applyRequiredFlags();
 }
 
 std::filesystem::path file_path_parser(const std::string& value)
