@@ -83,7 +83,7 @@ std::optional<std::filesystem::path> resolveAlias(const std::string& path, const
         // absolute path
         remainder.erase(0, remainder.find_first_not_of("/\\"));
 
-        auto resolvedPath = resolveAliasLocation(aliasInfo);
+        auto resolvedPath = resolveAliasLocation(*aliasInfo);
         if (remainder.empty())
             return resolvedPath;
         else
