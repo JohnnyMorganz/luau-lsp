@@ -428,4 +428,24 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_table"
     CHECK_EQ(result->changes.begin()->second.size(), 2);
 }
 
+TEST_CASE_FIXTURE(Fixture, "response_json_is_valid_structure")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        local value = 1
+    )");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 15}; // 'value' definition
+    params.newName = "value2";
+
+    auto result = workspace.rename(params);
+    REQUIRE(result);
+    REQUIRE_EQ(result->changes.size(), 1);
+
+    json response = result;
+    CHECK_EQ(response.dump(), R"({"changes":{")" + uri.toString() +
+                                  R"(":[{"newText":"value2","range":{"end":{"character":19,"line":1},"start":{"character":14,"line":1}}}]}})");
+}
+
 TEST_SUITE_END();

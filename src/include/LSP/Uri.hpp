@@ -100,3 +100,25 @@ struct UriHash
 
 void from_json(const json& j, Uri& u);
 void to_json(json& j, const Uri& u);
+
+namespace nlohmann
+{
+template<typename T>
+struct adl_serializer<std::unordered_map<Uri, T, UriHash>>
+{
+    static void to_json(json& j, const std::unordered_map<Uri, T, UriHash>& opt)
+    {
+        std::unordered_map<std::string, T> stringifiedKeys;
+        for (const auto& [k, v] : opt)
+            stringifiedKeys[k.toString()] = v;
+        j = stringifiedKeys;
+    }
+
+    static void from_json(const json& j, std::unordered_map<Uri, T, UriHash>& opt)
+    {
+        std::unordered_map<std::string, T> result = j;
+        for (const auto& [k, v] : result)
+            opt[Uri::parse(k)] = v;
+    }
+};
+} // namespace nlohmann
