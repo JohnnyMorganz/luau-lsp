@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.44.1] - 2025-04-24
+
 ### Fixed
 
 - Fixed incorrect serialization of maps that are keyed by a Uri, causing commands that apply edits such as Rename to
