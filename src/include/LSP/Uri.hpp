@@ -89,8 +89,12 @@ public:
 
     // Returns the parent path of this URI, if it exists
     std::optional<Uri> parent() const;
+
     // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
     std::string lexicallyRelative(const Uri& base) const;
+
+    // Returns whether the current Uri is an ancestor of the other URI
+    bool isAncestorOf(const Uri& other) const;
 };
 
 struct UriHash
