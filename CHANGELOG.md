@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+###
+
+- The language server now follows the [new require-by-string semantics for
+  `init.luau` files](https://rfcs.luau.org/abstract-module-paths-and-init-dot-luau.html) for file resolution and string
+  require autocomplete
+
 ### Changed
 
 - Sync to upstream Luau 0.672
