@@ -371,9 +371,9 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     {
         std::optional<Luau::ModuleName> definitionModuleName;
 
-        if (entry.containingClass)
+        if (entry.containingExternType)
         {
-            definitionModuleName = entry.containingClass.value()->definitionModuleName;
+            definitionModuleName = entry.containingExternType.value()->definitionModuleName;
         }
         else
         {
@@ -463,7 +463,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         // It is important to keep the fragmentResult in scope for the whole completion step
         // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
         fragmentResult = Luau::fragmentAutocomplete(frontend, textDocument->getText(), moduleName, position, frontendOptions,
-            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+            [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
                 std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
             {
                 tags.insert(tag);
@@ -474,7 +474,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
     else
         result = Luau::autocomplete(frontend, moduleName, position,
-            [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+            [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
                 std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
             {
                 tags.insert(tag);

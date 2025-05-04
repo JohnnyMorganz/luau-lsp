@@ -149,7 +149,7 @@ static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::Ty
 }
 
 static void injectChildrenLookupFunctions(
-    const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ClassType* ctv, const Luau::TypeId& ty, const SourceNodePtr& node)
+    const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ExternType* ctv, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
     if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
     {
@@ -279,7 +279,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
             }
 
             // Point the metatable to the metatable of "Instance" so that we allow equality
-            auto* instanceCtv = Luau::get<Luau::ClassType>(instanceTy->type);
+            auto* instanceCtv = Luau::get<Luau::ExternType>(instanceTy->type);
             if (!instanceCtv)
             {
                 ltv.unwrapped = globals.builtinTypes->anyType;
@@ -289,13 +289,13 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
             // Create the ClassType representing the instance
             std::string typeName = types::getTypeName(baseTypeId).value_or(node->name);
-            Luau::ClassType baseInstanceCtv{
+            Luau::ExternType baseInstanceCtv{
                 typeName, {}, baseTypeId, instanceMetaIdentity, {}, {}, instanceCtv->definitionModuleName, instanceCtv->definitionLocation};
             auto typeId = arena.addType(std::move(baseInstanceCtv));
 
             // Attach Parent and Children info
             // Get the mutable version of the type var
-            if (auto* ctv = Luau::getMutable<Luau::ClassType>(typeId))
+            if (auto* ctv = Luau::getMutable<Luau::ExternType>(typeId))
             {
                 if (auto parentNode = node->parent.lock())
                     ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(globals, arena, parentNode));
@@ -335,7 +335,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
 void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
 {
-    if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
+    if (auto* ctv = Luau::getMutable<Luau::ExternType>(ty))
     {
         // Clear out all the old registered children
         for (auto it = ctv->props.begin(); it != ctv->props.end();)
@@ -508,7 +508,7 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
         // TODO: Player.Character should contain StarterCharacter instances
         if (auto playerType = globals.globalScope->lookupType("Player"))
         {
-            if (auto* ctv = Luau::getMutable<Luau::ClassType>(playerType->type))
+            if (auto* ctv = Luau::getMutable<Luau::ExternType>(playerType->type))
             {
                 // Player.Backpack should be defined
                 if (auto backpackType = globals.globalScope->lookupType("Backpack"))

@@ -5,9 +5,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauAutocompleteRefactorsForIncrementalAutocomplete)
-LUAU_FASTFLAG(LuauFreeTypesMustHaveBounds)
-LUAU_FASTFLAG(LuauCloneIncrementalModule)
 LUAU_FASTFLAG(LuauAllFreeTypesHaveScopes)
 LUAU_FASTFLAG(LuauClonedTableAndFunctionTypesMustHaveScopes)
 LUAU_FASTFLAG(LuauDisableNewSolverAssertsInMixedMode)
@@ -43,10 +40,7 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[14] = {
-        {FFlag::LuauAutocompleteRefactorsForIncrementalAutocomplete, true},
-        {FFlag::LuauFreeTypesMustHaveBounds, true},
-        {FFlag::LuauCloneIncrementalModule, true},
+    ScopedFastFlag sffs[11] = {
         {FFlag::LuauAllFreeTypesHaveScopes, true},
         {FFlag::LuauClonedTableAndFunctionTypesMustHaveScopes, true},
         {FFlag::LuauDisableNewSolverAssertsInMixedMode, true},

@@ -329,7 +329,7 @@ static void clearDisabledGlobals(const ClientPtr client, const Luau::GlobalTypes
                     else
                         client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: could not find method - " + disabledGlobal);
                 }
-                else if (const auto ctv = Luau::getMutable<Luau::ClassType>(typeId))
+                else if (const auto ctv = Luau::getMutable<Luau::ExternType>(typeId))
                 {
                     if (contains(ctv->props, *method))
                     {

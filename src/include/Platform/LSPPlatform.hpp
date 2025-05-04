@@ -70,7 +70,7 @@ public:
     }
 
     virtual std::optional<Luau::AutocompleteEntryMap> completionCallback(
-        const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName);
+        const std::string& tag, std::optional<const Luau::ExternType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName);
 
     virtual const char* handleSortText(
         const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry, const std::unordered_set<std::string>& tags)

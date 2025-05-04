@@ -166,9 +166,6 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .getConfiguration("luau-lsp.completion")
       .get<boolean>("enableFragmentAutocomplete")
   ) {
-    fflags["LuauAutocompleteRefactorsForIncrementalAutocomplete"] = "true";
-    fflags["LuauFreeTypesMustHaveBounds"] = "true";
-    fflags["LuauCloneIncrementalModule"] = "true";
     fflags["LuauAllFreeTypesHaveScopes"] = "true";
     fflags["LuauClonedTableAndFunctionTypesMustHaveScopes"] = "true";
     fflags["LuauDisableNewSolverAssertsInMixedMode"] = "true";

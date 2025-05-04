@@ -180,7 +180,7 @@ public:
 
     void handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes);
 
-    std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+    std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ExternType*> ctx,
         std::optional<std::string> contents, const Luau::ModuleName& moduleName) override;
 
     const char* handleSortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
