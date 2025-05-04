@@ -307,12 +307,12 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicGetPropertyChangedSign
 
 
     auto instanceType = typeChecker.checkExpr(scope, *index->expr);
-    auto ctv = Luau::get<Luau::ClassType>(Luau::follow(instanceType.type));
+    auto ctv = Luau::get<Luau::ExternType>(Luau::follow(instanceType.type));
     if (!ctv)
         return std::nullopt;
 
     std::string property(str->value.data, str->value.size);
-    if (!Luau::lookupClassProp(ctv, property))
+    if (!Luau::lookupExternTypeProp(ctv, property))
     {
         typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownProperty{instanceType.type, property}});
         return std::nullopt;
@@ -336,12 +336,12 @@ bool MagicGetPropertyChangedSignal::infer(const Luau::MagicFunctionCallContext& 
     if (!selfTy)
         return false;
 
-    auto ctv = Luau::get<Luau::ClassType>(Luau::follow(selfTy));
+    auto ctv = Luau::get<Luau::ExternType>(Luau::follow(selfTy));
     if (!ctv)
         return false;
 
     std::string property(str->value.data, str->value.size);
-    if (!Luau::lookupClassProp(ctv, property))
+    if (!Luau::lookupExternTypeProp(ctv, property))
     {
         context.solver->reportError(Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownProperty{*selfTy, property}});
     }
@@ -489,7 +489,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     // Extend Instance types
     if (auto objectType = globals.globalScope->lookupType("Object"))
     {
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(objectType->type))
+        if (auto* ctv = Luau::getMutable<Luau::ExternType>(objectType->type))
         {
             attachMagicFunctionSafe(ctv->props, "IsA", std::make_shared<MagicInstanceIsA>());
             attachMagicFunctionSafe(ctv->props, "GetPropertyChangedSignal", std::make_shared<MagicGetPropertyChangedSignal>());
@@ -501,7 +501,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
 
     if (auto instanceType = globals.globalScope->lookupType("Instance"))
     {
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(instanceType->type))
+        if (auto* ctv = Luau::getMutable<Luau::ExternType>(instanceType->type))
         {
             Luau::attachTag(instanceType->type, Luau::kTypeofRootTag);
 
@@ -523,7 +523,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             // We assume that all subclasses of instance don't have any metamethods
             for (auto& [_, ty] : globals.globalScope->exportedTypeBindings)
             {
-                if (auto* c = Luau::getMutable<Luau::ClassType>(ty.type))
+                if (auto* c = Luau::getMutable<Luau::ExternType>(ty.type))
                 {
                     // Check if the ctv is a subclass of instance
                     if (Luau::isSubclass(c, ctv))
@@ -561,7 +561,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     // Attach onto `game:GetService()`
     if (robloxMetadata.has_value() && !robloxMetadata->SERVICES.empty())
         if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
-            if (auto* ctv = Luau::getMutable<Luau::ClassType>(serviceProviderType->type);
+            if (auto* ctv = Luau::getMutable<Luau::ExternType>(serviceProviderType->type);
                 ctv && ctv->props.find("GetService") != ctv->props.end() && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
             {
                 Luau::attachTag(ctv->props["GetService"].type(), "Services");
@@ -575,7 +575,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     {
         auto erase = false;
         auto ty = it->second.type;
-        if (auto* ctv = Luau::getMutable<Luau::ClassType>(ty))
+        if (auto* ctv = Luau::getMutable<Luau::ExternType>(ty))
         {
             if (Luau::startsWith(ctv->name, "Enum"))
             {

@@ -6,8 +6,6 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
-LUAU_FASTFLAG(LuauExposeRequireByStringAutocomplete2)
-
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
     // Handle non-file schemes
@@ -113,13 +111,6 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     {
         return name;
     }
-}
-
-std::optional<Luau::RequireSuggestions> WorkspaceFileResolver ::getRequireSuggestions(
-    const Luau::ModuleName& requirer, const std::optional<std::string>& path) const
-{
-    // TODO: Remove override once flag is clipped
-    return requireSuggester ? requireSuggester->getRequireSuggestions(requirer, path) : std::nullopt;
 }
 
 const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const

@@ -193,7 +193,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveModule(const Luau::ModuleInf
 }
 
 std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
-    const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
+    const std::string& tag, std::optional<const Luau::ExternType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
     return std::nullopt;
 }

@@ -26,7 +26,7 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
         if (auto mtvName = Luau::getName(mtv->metatable))
             name = *mtvName;
     }
-    else if (auto parentClass = Luau::get<Luau::ClassType>(ty))
+    else if (auto parentClass = Luau::get<Luau::ExternType>(ty))
     {
         name = parentClass->name;
     }
@@ -297,9 +297,9 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 // Returns [base, property] - base is important during intersections
 std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
-    if (auto ctv = Luau::get<Luau::ClassType>(parentType))
+    if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
-        if (auto prop = Luau::lookupClassProp(ctv, name))
+        if (auto prop = Luau::lookupExternTypeProp(ctv, name))
             return std::make_pair(parentType, *prop);
     }
     else if (auto tbl = Luau::get<Luau::TableType>(parentType))
@@ -780,7 +780,7 @@ std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
     std::optional<Luau::TypeId> metatable;
     if (const auto mtType = Luau::get<Luau::MetatableType>(type))
         metatable = mtType->metatable;
-    else if (const auto classType = Luau::get<Luau::ClassType>(type))
+    else if (const auto classType = Luau::get<Luau::ExternType>(type))
         metatable = classType->metatable;
 
     if (!metatable)

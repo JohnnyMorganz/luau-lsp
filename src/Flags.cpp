@@ -5,7 +5,6 @@
 #include <iostream>
 
 LUAU_FASTINT(LuauTarjanChildLimit)
-LUAU_FASTFLAG(LuauExposeRequireByStringAutocomplete)
 
 void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, ErrorCallback onError, ErrorCallback onWarning)
 {
@@ -76,5 +75,4 @@ void applyRequiredFlags()
     // TODO: re-evaluate the necessity of this change
     if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
         FInt::LuauTarjanChildLimit.value = 15000;
-    FFlag::LuauExposeRequireByStringAutocomplete.value = true;
 }

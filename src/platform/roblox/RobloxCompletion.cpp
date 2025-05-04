@@ -90,7 +90,7 @@ static std::string optimiseAbsoluteRequire(const std::string& path)
 }
 
 std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
-    const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
+    const std::string& tag, std::optional<const Luau::ExternType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName)
 {
     if (auto parentResult = LSPPlatform::completionCallback(tag, ctx, contents, moduleName))
         return parentResult;
@@ -101,12 +101,12 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
     {
         if (auto instanceType = workspaceFolder->frontend.globals.globalScope->lookupType("Instance"))
         {
-            if (auto* ctv = Luau::get<Luau::ClassType>(instanceType->type))
+            if (auto* ctv = Luau::get<Luau::ExternType>(instanceType->type))
             {
                 Luau::AutocompleteEntryMap result;
                 for (auto& [_, ty] : workspaceFolder->frontend.globals.globalScope->exportedTypeBindings)
                 {
-                    if (auto* c = Luau::get<Luau::ClassType>(ty.type))
+                    if (auto* c = Luau::get<Luau::ExternType>(ty.type))
                     {
                         // Check if the ctv is a subclass of instance
                         if (Luau::isSubclass(c, ctv))
@@ -145,7 +145,7 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                                       false, false, Luau::TypeCorrectKind::Correct});
                 }
                 if (ctv->parent)
-                    ctv = Luau::get<Luau::ClassType>(*ctv->parent);
+                    ctv = Luau::get<Luau::ExternType>(*ctv->parent);
                 else
                     break;
             }
@@ -223,8 +223,8 @@ const char* RobloxPlatform::handleSortText(
     // If calling a property on ServiceProvider, then prioritise these properties
     auto& completionGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
     if (auto dataModelType = completionGlobals.globalScope->lookupType("ServiceProvider");
-        dataModelType && Luau::get<Luau::ClassType>(dataModelType->type) && entry.containingClass &&
-        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(dataModelType->type)) && !entry.wrongIndexType)
+        dataModelType && Luau::get<Luau::ExternType>(dataModelType->type) && entry.containingExternType &&
+        Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(dataModelType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_SERVICE_PROVIDER_PROPERTIES), std::end(COMMON_SERVICE_PROVIDER_PROPERTIES), name);
             it != std::end(COMMON_SERVICE_PROVIDER_PROPERTIES))
@@ -233,8 +233,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-        instanceType && Luau::get<Luau::ClassType>(instanceType->type) && entry.containingClass &&
-        Luau::isSubclass(entry.containingClass.value(), Luau::get<Luau::ClassType>(instanceType->type)) && !entry.wrongIndexType)
+        instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
+        Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
