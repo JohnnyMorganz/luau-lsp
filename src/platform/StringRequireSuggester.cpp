@@ -28,7 +28,7 @@ std::vector<std::string> FileRequireNode::getTags() const
 std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std::string& requireString) const
 {
     std::filesystem::path relativeNodePath;
-    if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig))
+    if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig, path)) // TODO: correct?
         relativeNodePath = luaurcAlias.value();
     else if (path.has_parent_path())
         relativeNodePath = path.parent_path().append(requireString);

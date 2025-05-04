@@ -126,7 +126,7 @@ public:
 };
 
 std::filesystem::path resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo);
-std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config);
+std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config, const std::filesystem::path& from);
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
