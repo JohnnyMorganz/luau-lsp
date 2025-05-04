@@ -122,6 +122,11 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
+bool isInitLuauFile(const std::filesystem::path& path)
+{
+    return path.stem() == "init";
+}
+
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
 {
     if (!context)
@@ -132,7 +137,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
         return std::nullopt;
 
     std::filesystem::path basePath = contextPath->parent_path();
-    if (contextPath->filename().stem() == "init")
+    if (isInitLuauFile(*contextPath))
         basePath = basePath.parent_path();
 
     auto filePath = basePath / requiredString;

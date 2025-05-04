@@ -1080,7 +1080,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolve_init_luau_relative_to_parent_
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 3);
-    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, "..", ".");
     checkFolderCompletionExists(result, "directory", "./directory");
     checkFileCompletionExists(result, "sibling.luau", "./sibling");
 }
@@ -1100,7 +1100,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_self_alias_if_in_init_file")
 
     auto result = workspace.completion(params);
 
-    checkFolderCompletionExists(result, "@self", "@self");
+    requireItem(result, "@self");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias_relative_to_current_file")
@@ -1123,7 +1123,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias_relative_to_curre
     auto result = workspace.completion(params);
 
     REQUIRE_EQ(result.size(), 2);
-    checkFolderCompletionExists(result, "..", "..");
+    checkFolderCompletionExists(result, "..", "@self");
     checkFileCompletionExists(result, "utils.luau", "@self/utils");
 }
 

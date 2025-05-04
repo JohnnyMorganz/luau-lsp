@@ -130,3 +130,5 @@ std::optional<std::filesystem::path> resolveAlias(const std::string& path, const
 
 std::optional<std::filesystem::path> resolveDirectoryAlias(
     const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
+
+bool isInitLuauFile(const std::filesystem::path& path);
