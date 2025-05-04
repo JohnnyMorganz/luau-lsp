@@ -44,7 +44,7 @@ std::filesystem::path resolveAliasLocation(const Luau::Config::AliasInfo& aliasI
     return std::filesystem::path(aliasInfo.configLocation) / resolvePath(aliasInfo.value);
 }
 
-std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config)
+std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config, const std::filesystem::path& from)
 {
     if (path.size() < 1 || path[0] != '@')
         return std::nullopt;
@@ -75,23 +75,25 @@ std::optional<std::filesystem::path> resolveAlias(const std::string& path, const
             return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
         });
 
+    std::filesystem::path resolvedPath;
     if (auto aliasInfo = config.aliases.find(potentialAlias))
-    {
-        auto remainder = path.substr(potentialAlias.size() + 1);
+        resolvedPath = resolveAliasLocation(*aliasInfo);
+    else if (potentialAlias == "self")
+        resolvedPath = from;
+    else
+        // TODO: report error: "@" + potentialAlias + " is not a valid alias"
+        return std::nullopt;
 
-        // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
-        // absolute path
-        remainder.erase(0, remainder.find_first_not_of("/\\"));
+    auto remainder = path.substr(potentialAlias.size() + 1);
 
-        auto resolvedPath = resolveAliasLocation(*aliasInfo);
-        if (remainder.empty())
-            return resolvedPath;
-        else
-            return resolvedPath / remainder;
-    }
+    // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
+    // absolute path
+    remainder.erase(0, remainder.find_first_not_of("/\\"));
 
-    // TODO: report error: "@" + potentialAlias + " is not a valid alias"
-    return std::nullopt;
+    if (remainder.empty())
+        return resolvedPath;
+    else
+        return resolvedPath / remainder;
 }
 
 // DEPRECATED: Resolve the string using a directory alias if present
@@ -120,6 +122,11 @@ std::optional<std::filesystem::path> resolveDirectoryAlias(
     return std::nullopt;
 }
 
+bool isInitLuauFile(const std::filesystem::path& path)
+{
+    return path.stem() == "init" || Luau::startsWith(path.stem().generic_string(), "init.");
+}
+
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
 {
     if (!context)
@@ -130,10 +137,13 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
         return std::nullopt;
 
     std::filesystem::path basePath = contextPath->parent_path();
+    if (isInitLuauFile(*contextPath))
+        basePath = basePath.parent_path();
+
     auto filePath = basePath / requiredString;
 
     auto luauConfig = fileResolver->getConfig(context->name);
-    if (auto aliasedPath = resolveAlias(requiredString, luauConfig))
+    if (auto aliasedPath = resolveAlias(requiredString, luauConfig, contextPath->parent_path()))
     {
         filePath = aliasedPath.value();
     }

@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.672
 - Color picker will now strip redundant decimal digits (i.e. `0.0000` ->
   `0`) ([#1022](https://github.com/JohnnyMorganz/luau-lsp/issues/1022))
+- The language server now follows the [new require-by-string semantics for
+  `init.luau` files](https://rfcs.luau.org/abstract-module-paths-and-init-dot-luau.html) for file resolution and string
+  require autocomplete ([#1023](https://github.com/JohnnyMorganz/luau-lsp/issues/1023))
 
 ## [1.44.1] - 2025-04-24
 

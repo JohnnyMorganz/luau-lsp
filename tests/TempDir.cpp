@@ -10,6 +10,9 @@ TempDir::TempDir(const std::string& name)
 {
     std::filesystem::remove_all(fullPath);
     std::filesystem::create_directories(fullPath);
+    // Note: on macOS, TEMPDIR points to /var/, but it's a symlink to /private/var
+    // For simplicity, let's resolve the symlink so that other code works correctly
+    fullPath = std::filesystem::canonical(fullPath);
 }
 
 TempDir::~TempDir()

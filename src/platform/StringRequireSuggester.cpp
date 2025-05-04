@@ -27,11 +27,18 @@ std::vector<std::string> FileRequireNode::getTags() const
 
 std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std::string& requireString) const
 {
+    auto basePath = path.parent_path();
+
     std::filesystem::path relativeNodePath;
-    if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig))
+    if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig, basePath))
         relativeNodePath = luaurcAlias.value();
     else if (path.has_parent_path())
-        relativeNodePath = path.parent_path().append(requireString);
+    {
+        if (isInitLuauFile(path))
+            relativeNodePath = basePath.parent_path().append(requireString);
+        else
+            relativeNodePath = basePath.append(requireString);
+    }
     else
         return nullptr;
 
@@ -48,7 +55,7 @@ std::vector<std::unique_ptr<Luau::RequireNode>> FileRequireNode::getChildren() c
         {
             for (const auto& dir_entry : std::filesystem::directory_iterator(path))
             {
-                if (dir_entry.is_regular_file() || dir_entry.is_directory())
+                if ((dir_entry.is_regular_file() && !isInitLuauFile(dir_entry.path())) || dir_entry.is_directory())
                 {
                     std::string fileName = dir_entry.path().filename().generic_string();
                     results.emplace_back(std::make_unique<FileRequireNode>(dir_entry.path(), dir_entry.is_directory()));
@@ -70,6 +77,10 @@ std::vector<Luau::RequireAlias> FileRequireNode::getAvailableAliases() const
 
     for (const auto& [_, aliasInfo] : mainRequirerNodeConfig.aliases)
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
+
+    // Include @self alias for init.lua files
+    if (isInitLuauFile(path))
+        results.emplace_back(Luau::RequireAlias{"self", {"Alias"}});
 
     return results;
 }

@@ -1060,6 +1060,73 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
     checkFileCompletionExists(result, "net.luau", "@lune/net");
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_resolve_init_luau_relative_to_parent_directory")
+{
+    TempDir t("autocomplete_string_require_init_luau");
+    t.write_child("project/sibling.luau", "return {}");
+    t.write_child("project/directory/utils.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(t.touch_child("project/directory/init.luau"), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 3);
+    checkFolderCompletionExists(result, "..", ".");
+    checkFolderCompletionExists(result, "directory", "./directory");
+    checkFileCompletionExists(result, "sibling.luau", "./sibling");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_shows_self_alias_if_in_init_file")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("|")
+    )");
+
+    auto uri = newDocument("init.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    requireItem(result, "@self");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias_relative_to_current_file")
+{
+    TempDir t("autocomplete_string_require_self_alias");
+    t.write_child("project/sibling.luau", "return {}");
+    t.write_child("project/directory/utils.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@self/|")
+    )");
+
+    auto uri = newDocument(t.touch_child("project/directory/init.luau"), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..", "@self");
+    checkFileCompletionExists(result, "utils.luau", "@self/utils");
+}
+
 TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
 {
     client->globalConfig.completion.autocompleteEnd = true;
