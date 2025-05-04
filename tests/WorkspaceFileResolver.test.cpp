@@ -322,6 +322,16 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
     CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils")->name, projectDirectoryUtilsPath);
 }
 
+TEST_CASE("is_init_luau_file")
+{
+    CHECK_EQ(isInitLuauFile("foo/init.lua"), true);
+    CHECK_EQ(isInitLuauFile("foo/init.luau"), true);
+    CHECK_EQ(isInitLuauFile("foo/init.client.luau"), true);
+    CHECK_EQ(isInitLuauFile("foo/init.server.luau"), true);
+
+    CHECK_EQ(isInitLuauFile("foo/utils.luau"), false);
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
 {
     TempDir t("resolve_init_luau_self_alias");
