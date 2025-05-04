@@ -16,6 +16,19 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
+{
+    if (ancestry.size() < 2)
+        return nullptr;
+    for (auto it = ++ancestry.rbegin(); it != ancestry.rend(); ++it)
+    {
+        if ((*it)->is<Luau::AstExprError>() || (*it)->is<Luau::AstStatError>())
+            continue;
+        return *it;
+    }
+    return nullptr;
+}
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -89,9 +102,35 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             unclosedBlock = false;
     }
 
-    // TODO: we could potentially extend this further that just `hasEnd`
-    // by inserting `then`, `until` `do` etc. It seems Studio does this
-    // NOTE: `until` can be inserted if `hasEnd` in a repeat block is false
+    std::vector<lsp::TextEdit> edits;
+    bool moveCursorUp = false;
+
+    // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
+
+    auto parentNode = getParentNode(ancestry);
+    if (parentNode)
+    {
+        if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && statIf->condition && !statIf->thenLocation)
+        {
+            lsp::Position thenLocation = document->convertPosition(statIf->thenbody->location.begin);
+            edits.emplace_back(lsp::TextEdit{{thenLocation, thenLocation}, " then"});
+        }
+        else if (auto* statWhile = parentNode->as<Luau::AstStatWhile>(); statWhile && statWhile->condition && !statWhile->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statWhile->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+        else if (auto* statForIn = parentNode->as<Luau::AstStatForIn>(); statForIn && statForIn->values.size > 0 && !statForIn->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statForIn->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+        else if (auto* statFor = parentNode->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statFor->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+    }
 
     if (unclosedBlock)
     {
@@ -134,9 +173,23 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         {
             // Insert an end at the current position, with a newline before it
             auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
+            edits.emplace_back(lsp::TextEdit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText});
+            moveCursorUp = true;
+        }
+        else
+        {
+            LUAU_ASSERT(currentLineContent.empty());
 
-            lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText};
-            std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, {edit}}};
+            // Insert the end onto the next line
+            lsp::Position position{params.position.line + 1, 0};
+            edits.emplace_back(lsp::TextEdit{{position, position}, indent + "end\n"});
+        }
+    }
+
+    if (!edits.empty())
+    {
+        std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, edits}};
+        if (moveCursorUp)
             client->applyEdit({"insert end", {changes}},
                 [this](auto) -> void
                 {
@@ -147,17 +200,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
                                                               {"data", {{"to", "prevBlankLine"}}},
                                                           }));
                 });
-        }
         else
-        {
-            LUAU_ASSERT(currentLineContent.empty());
-
-            // Insert the end onto the next line
-            lsp::Position position{params.position.line + 1, 0};
-            lsp::TextEdit edit{{position, position}, indent + "end\n"};
-            std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, {edit}}};
             client->applyEdit({"insert end", {changes}});
-        }
     }
 }
 

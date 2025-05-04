@@ -1155,6 +1155,19 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_show_files_matching_ignore_g
     checkFileCompletionExists(result, "utils.luau", "./utils");
 }
 
+static std::vector<lsp::TextEdit> requireEndAutocompletionEdits(const std::shared_ptr<TestClient>& client, const Uri& uri)
+{
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    REQUIRE_EQ(editParams.edit.changes.size(), 1);
+
+    return editParams.edit.changes[uri];
+}
+
 TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
 {
     client->globalConfig.completion.autocompleteEnd = true;
@@ -1173,16 +1186,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-
-    REQUIRE(!client->requestQueue.empty());
-    auto request = client->requestQueue.back();
-    REQUIRE_EQ(request.first, "workspace/applyEdit");
-    REQUIRE(request.second);
-
-    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
-    REQUIRE_EQ(editParams.edit.changes.size(), 1);
-
-    auto edits = editParams.edit.changes[uri];
+    auto edits = requireEndAutocompletionEdits(client, uri);
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "        end\n");
@@ -1206,19 +1210,296 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-
-    REQUIRE(!client->requestQueue.empty());
-    auto request = client->requestQueue.back();
-    REQUIRE_EQ(request.first, "workspace/applyEdit");
-    REQUIRE(request.second);
-
-    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
-    REQUIRE_EQ(editParams.edit.changes.size(), 1);
-
-    auto edits = editParams.edit.changes[uri];
+    auto edits = requireEndAutocompletionEdits(client, uri);
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "\n        end)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_then_in_if_statement_no_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        if
+|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 10}, {1, 10}});
+    CHECK_EQ(edits[0].newText, " then");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_then_in_if_statement_with_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        if condition
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 20}, {1, 20}});
+    CHECK_EQ(edits[0].newText, " then");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_while_statement_no_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        while
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 13}, {1, 13}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_while_statement_with_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        while condition
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 23}, {1, 23}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_loop")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 11}, {1, 11}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_in_loop_no_values")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i in
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 16}, {1, 16}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_in_loop")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i in x
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 18}, {1, 18}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i = 1, 10
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 21}, {1, 21}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_with_step")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i = 1, 10, 2
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 24}, {1, 24}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_missing_to")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i = 1,
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 18}, {1, 18}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_missing_step")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        for i = 1, 10,
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params);
+    auto edits = requireEndAutocompletionEdits(client, uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].range, lsp::Range{{1, 22}, {1, 22}});
+    CHECK_EQ(edits[0].newText, " do");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
 }
 
 TEST_CASE_FIXTURE(Fixture, "dont_mark_type_as_function_kind_when_autocompleting_in_type_context")
