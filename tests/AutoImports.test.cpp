@@ -36,6 +36,14 @@ static std::vector<lsp::CompletionItem> filterAutoImports(const std::vector<lsp:
 
 TEST_SUITE_BEGIN("AutoImports");
 
+TEST_CASE("make_valid_variable_names")
+{
+    using namespace Luau::LanguageServer::AutoImports;
+    CHECK_EQ(makeValidVariableName("react spring"), "react_spring");
+    CHECK_EQ(makeValidVariableName("react-spring"), "react_spring");
+    CHECK_EQ(makeValidVariableName("react@spring"), "react_spring");
+}
+
 TEST_CASE_FIXTURE(Fixture, "services_show_up_in_auto_import")
 {
     client->globalConfig.completion.imports.enabled = true;

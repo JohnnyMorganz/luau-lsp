@@ -26,6 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed string-require auto imports not using aliases correctly on Windows ([#1025](https://github.com/JohnnyMorganz/luau-lsp/issues/1025))
+- Instance-based auto-imports now use expression syntax when parts are not a valid identifier (e.g.
+  `require(Modules["react-spring"])`) ([#1026](https://github.com/JohnnyMorganz/luau-lsp/issues/1026))
+- Auto-imports no longer create invalid variable names ([#1026](https://github.com/JohnnyMorganz/luau-lsp/issues/1026))
 
 ## [1.44.1] - 2025-04-24
 

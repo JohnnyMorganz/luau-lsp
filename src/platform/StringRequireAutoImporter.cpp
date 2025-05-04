@@ -9,10 +9,9 @@ std::string requireNameFromModuleName(const Luau::ModuleName& name)
     auto fileName = name;
     if (const auto slashPos = fileName.find_last_of('/'); slashPos != std::string::npos)
         fileName =  fileName.substr(slashPos + 1);
-    replaceAll(fileName, " ", "_");
     fileName = removeSuffix(fileName, ".luau");
     fileName = removeSuffix(fileName, ".lua");
-    return fileName;
+    return makeValidVariableName(fileName);
 }
 
 // Resolves the best alias path

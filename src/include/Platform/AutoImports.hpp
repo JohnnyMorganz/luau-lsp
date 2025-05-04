@@ -40,6 +40,7 @@ public:
     bool visit(Luau::AstStatBlock* block) override;
 };
 
+std::string makeValidVariableName(std::string name);
 lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false);
 lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText,
     const std::string& path, const std::string& requirePath);

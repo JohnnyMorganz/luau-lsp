@@ -314,8 +314,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
             for (auto& [path, node] : virtualPathsToSourceNodes)
             {
-                auto name = node->name;
-                replaceAll(name, " ", "_");
+                auto name = Luau::LanguageServer::AutoImports::makeValidVariableName(node->name);
 
                 if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                     continue;

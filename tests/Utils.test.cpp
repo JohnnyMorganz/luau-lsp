@@ -65,6 +65,11 @@ TEST_CASE("convertToScriptPath handles whitespaces in path")
     CHECK_EQ(convertToScriptPath("game/Replicated Storage/Common"), "game[\"Replicated Storage\"].Common");
 }
 
+TEST_CASE("convertToScriptPath handles non-identifier characters in path")
+{
+    CHECK_EQ(convertToScriptPath("game/ReplicatedStorage/Packages/react-spring"), "game.ReplicatedStorage.Packages[\"react-spring\"]");
+}
+
 TEST_CASE("convertToScriptPath handles relative paths")
 {
     CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent.Child.Foo");

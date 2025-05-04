@@ -52,6 +52,16 @@ bool FindImportsVisitor::visit(Luau::AstStatBlock* block)
     return false;
 }
 
+std::string makeValidVariableName(std::string name)
+{
+    size_t pos = 0;
+    while ((pos = name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_", pos)) != std::string::npos)
+    {
+        name.replace(pos, 1, "_");
+    }
+    return name;
+}
+
 lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
