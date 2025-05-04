@@ -289,8 +289,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
     auto projectOtherPath = t.touch_child("project/other.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name, projectLibUtilsPath);
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name, projectOtherPath);
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name), Uri::file(projectLibUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name), Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau_file")
@@ -300,7 +300,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau
     auto projectOtherPath = t.touch_child("project/other/init.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name, projectOtherPath);
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name), Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_init_luau")
@@ -313,13 +313,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
     auto projectDirectoryInitPath = t.touch_child("project/directory/init.luau");
 
     Luau::ModuleInfo baseContext{projectDirectoryInitPath};
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling")->name, projectSiblingPath);
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling")->name), Uri::file(projectSiblingPath));
 
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools")->name, toolsInitPath);
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file")->name, toolsFilePath);
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools")->name), Uri::file(toolsInitPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file")->name), Uri::file(toolsFilePath));
 
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name, t.path() + "/project/utils.lua");
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils")->name, projectDirectoryUtilsPath);
+    CHECK_EQ(
+        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name), Uri::file(t.path() + "/project/utils.lua"));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils")->name),
+        Uri::file(projectDirectoryUtilsPath));
 }
 
 TEST_CASE("is_init_luau_file")
@@ -339,7 +341,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
     auto projectUtilsPath = t.touch_child("project/utils.luau");
 
     Luau::ModuleInfo baseContext{projectInitPath};
-    CHECK_EQ(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils")->name, projectUtilsPath);
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils")->name), Uri::file(projectUtilsPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
