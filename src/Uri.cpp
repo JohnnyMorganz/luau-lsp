@@ -449,6 +449,18 @@ std::string Uri::lexicallyRelative(const Uri& base) const
     return relative_path;
 }
 
+bool Uri::isAncestorOf(const Uri& other) const
+{
+    if (scheme != other.scheme || authority != other.authority)
+        return false;
+
+#if defined(_WIN32) || defined(__APPLE__)
+    return Luau::startsWith(toLower(other.path), toLower(path));
+#else
+    return Luau::startsWith(other.path, path);
+#endif
+}
+
 size_t UriHash::operator()(const Uri& uri) const
 {
     size_t hashValue = std::hash<std::string>()(uri.scheme);

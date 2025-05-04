@@ -20,18 +20,17 @@ std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap&
 {
     std::optional<std::string> bestAliasedPath = std::nullopt;
 
-    auto toComponents = Luau::split(to.path, '/');
-
     for (const auto& [aliasName, aliasInfo] : availableAliases)
     {
-        auto aliasLocation = resolveAliasLocation(aliasInfo).generic_string();
-        if (!Luau::startsWith(to.path, aliasLocation))
+        auto aliasLocation = Uri::file(resolveAliasLocation(aliasInfo));
+
+        if (!aliasLocation.isAncestorOf(to))
             continue;
 
-        auto remainder = removePrefix(to.path, aliasLocation);
+        auto remainder = to.lexicallyRelative(aliasLocation);
         auto aliasedPath = "@" + aliasInfo.originalCase;
-        if (!remainder.empty() && remainder != "/")
-            aliasedPath += remainder;
+        if (!remainder.empty() && remainder != ".")
+            aliasedPath += "/" + remainder;
 
         if (!bestAliasedPath || aliasedPath.size() < bestAliasedPath->size())
             bestAliasedPath = aliasedPath;
@@ -107,4 +106,4 @@ void suggestStringRequires(const StringRequireAutoImporterContext& ctx, std::vec
         items.emplace_back(createSuggestRequire(name, textEdits, sortText, moduleName, require));
     }
 }
-}
+} // namespace Luau::LanguageServer::AutoImports

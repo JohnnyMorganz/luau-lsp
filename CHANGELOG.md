@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `init.luau` files](https://rfcs.luau.org/abstract-module-paths-and-init-dot-luau.html) for file resolution and string
   require autocomplete ([#1023](https://github.com/JohnnyMorganz/luau-lsp/issues/1023))
 
+### Fixed
+
+- Fixed string-require auto imports not using aliases correctly on Windows ([#1025](https://github.com/JohnnyMorganz/luau-lsp/issues/1025))
+
 ## [1.44.1] - 2025-04-24
 
 ### Fixed
