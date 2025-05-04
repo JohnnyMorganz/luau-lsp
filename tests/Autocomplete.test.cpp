@@ -1127,6 +1127,34 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias_relative_to_curre
     checkFileCompletionExists(result, "utils.luau", "@self/utils");
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_does_not_show_files_matching_ignore_glob")
+{
+    client->globalConfig.completion.imports.ignoreGlobs = {"*.server.luau", "*.client.luau"};
+
+    TempDir t("string_require_completion_ignore_globs");
+    t.write_child("project/main.server.luau", "return {}");
+    t.write_child("project/client_main.client.luau", "return {}");
+    t.write_child("project/utils.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(t.write_child("project/source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+
+    REQUIRE_EQ(result.size(), 3);
+    checkFolderCompletionExists(result, "..", ".");
+    checkFileCompletionExists(result, "source.luau", "./source");
+    checkFileCompletionExists(result, "utils.luau", "./utils");
+}
+
 TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
 {
     client->globalConfig.completion.autocompleteEnd = true;

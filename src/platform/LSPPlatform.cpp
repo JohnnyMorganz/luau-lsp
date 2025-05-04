@@ -25,7 +25,7 @@ std::unique_ptr<LSPPlatform> LSPPlatform::getPlatform(
 
 std::unique_ptr<Luau::RequireSuggester> LSPPlatform::getRequireSuggester()
 {
-    return std::make_unique<StringRequireSuggester>(fileResolver, this);
+    return std::make_unique<StringRequireSuggester>(workspaceFolder, fileResolver, this);
 }
 
 std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const

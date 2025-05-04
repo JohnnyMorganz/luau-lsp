@@ -1,5 +1,6 @@
 #include "Luau/FileResolver.h"
 #include "Platform/StringRequireSuggester.hpp"
+#include "LSP/Workspace.hpp"
 
 #include <filesystem>
 
@@ -42,7 +43,7 @@ std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std:
     else
         return nullptr;
 
-    return std::make_unique<FileRequireNode>(relativeNodePath, std::filesystem::is_directory(relativeNodePath));
+    return std::make_unique<FileRequireNode>(relativeNodePath, std::filesystem::is_directory(relativeNodePath), workspaceFolder);
 }
 
 std::vector<std::unique_ptr<Luau::RequireNode>> FileRequireNode::getChildren() const
@@ -57,8 +58,11 @@ std::vector<std::unique_ptr<Luau::RequireNode>> FileRequireNode::getChildren() c
             {
                 if ((dir_entry.is_regular_file() && !isInitLuauFile(dir_entry.path())) || dir_entry.is_directory())
                 {
+                    if (workspaceFolder->isIgnoredFileForAutoImports(Uri::file(dir_entry.path())))
+                        continue;
+
                     std::string fileName = dir_entry.path().filename().generic_string();
-                    results.emplace_back(std::make_unique<FileRequireNode>(dir_entry.path(), dir_entry.is_directory()));
+                    results.emplace_back(std::make_unique<FileRequireNode>(dir_entry.path(), dir_entry.is_directory(), workspaceFolder));
                 }
             }
         }
@@ -90,7 +94,7 @@ std::unique_ptr<Luau::RequireNode> StringRequireSuggester::getNode(const Luau::M
     if (auto realPath = platform->resolveToRealPath(name))
     {
         auto config = configResolver->getConfig(name);
-        return std::make_unique<FileRequireNode>(*realPath, std::filesystem::is_directory(*realPath), config);
+        return std::make_unique<FileRequireNode>(*realPath, std::filesystem::is_directory(*realPath), workspaceFolder, config);
     }
 
     return nullptr;

@@ -6,16 +6,18 @@
 class FileRequireNode : public Luau::RequireNode
 {
 public:
-    FileRequireNode(std::filesystem::path path, bool isDirectory)
+    FileRequireNode(std::filesystem::path path, bool isDirectory, WorkspaceFolder* workspaceFolder)
         : path(std::move(path))
         , isDirectory(isDirectory)
+        , workspaceFolder(workspaceFolder)
     {
     }
 
-    FileRequireNode(std::filesystem::path path, bool isDirectory, Luau::Config mainRequirerNodeConfig)
+    FileRequireNode(std::filesystem::path path, bool isDirectory, WorkspaceFolder* workspaceFolder, Luau::Config mainRequirerNodeConfig)
         : path(std::move(path))
         , isDirectory(isDirectory)
         , mainRequirerNodeConfig(std::move(mainRequirerNodeConfig))
+        , workspaceFolder(workspaceFolder)
     {
     }
 
@@ -33,13 +35,18 @@ private:
     /// The resolved configuration for the main requirer node
     /// This is for alias resolution
     Luau::Config mainRequirerNodeConfig;
+
+    /// The workspace folder that the files belong to
+    /// Used to check ignoreGlobs
+    WorkspaceFolder* workspaceFolder;
 };
 
 class StringRequireSuggester : public Luau::RequireSuggester
 {
 public:
-    StringRequireSuggester(Luau::ConfigResolver* configResolver, LSPPlatform* platform)
-        : configResolver(configResolver)
+    StringRequireSuggester(WorkspaceFolder* workspaceFolder, Luau::ConfigResolver* configResolver, LSPPlatform* platform)
+        : workspaceFolder(workspaceFolder)
+        , configResolver(configResolver)
         , platform(platform)
     {
     }
@@ -48,6 +55,7 @@ protected:
     std::unique_ptr<Luau::RequireNode> getNode(const Luau::ModuleName& name) const override;
 
 private:
+    WorkspaceFolder* workspaceFolder;
     Luau::ConfigResolver* configResolver;
     LSPPlatform* platform;
 };

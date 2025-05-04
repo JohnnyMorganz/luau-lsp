@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Autocomplete in string requires now respects `luau-lsp.completion.imports.ignoreGlobs` for filtering out files to
+  skip (e.g., one can add `*.server.luau` or
+  `*.client.luau`) ([#1014](https://github.com/JohnnyMorganz/luau-lsp/issues/1014))
+
 ### Changed
 
 - Sync to upstream Luau 0.672
