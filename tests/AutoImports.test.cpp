@@ -3,6 +3,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
+#include "TempDir.h"
 
 static std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -825,6 +826,43 @@ TEST_CASE_FIXTURE(Fixture, "string_require_compute_best_alias")
     CHECK_EQ(computeBestAliasedPath(Uri::file("packages/nested/library/React.luau"), aliases), "@Packages/nested/library/React");
     CHECK_EQ(computeBestAliasedPath(Uri::file("project/nested/lib.luau"), aliases), "@NestedProject/lib");
     CHECK_EQ(computeBestAliasedPath(Uri::file("random/test.luau"), aliases), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "ReplicatedStorage": "src/shared",
+            "Modules": "src/shared/Modules",
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+
+    // HACK: Fixture is loaded for RobloxPlatform
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.isConfigured = false;
+    workspace.setupWithConfiguration(client->globalConfig);
+
+    newDocument("src/shared/Modules/Module.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("src/client/file.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result);
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(\"@Modules/Module\")\n");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
