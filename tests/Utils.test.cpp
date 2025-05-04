@@ -72,7 +72,12 @@ TEST_CASE("convertToScriptPath handles non-identifier characters in path")
 
 TEST_CASE("convertToScriptPath handles relative paths")
 {
-    CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent.Child.Foo");
+    CHECK_EQ(convertToScriptPath("../Child/Foo"), "script.Parent.Child.Foo");
+}
+
+TEST_CASE("convertToScriptPath handles path where name contains dot")
+{
+    CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent[\"Child.Foo\"]");
 }
 
 TEST_CASE("getHomeDirectory finds a home directory")

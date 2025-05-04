@@ -60,9 +60,7 @@ std::string convertToScriptPath(const std::string& path)
     for (auto it = p.begin(); it != p.end(); ++it)
     {
         auto str = it->string();
-        if (!Luau::isIdentifier(str))
-            output += "[\"" + str + "\"]";
-        else if (str == ".")
+        if (str == ".")
         {
             if (it == p.begin())
                 output += "script";
@@ -74,6 +72,8 @@ std::string convertToScriptPath(const std::string& path)
             else
                 output += ".Parent";
         }
+        else if (!Luau::isIdentifier(str))
+            output += "[\"" + str + "\"]";
         else
         {
             if (it != p.begin())
