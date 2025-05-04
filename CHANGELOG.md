@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.45.0] - 2025-05-04
+
 ### Added
 
 - Autocomplete in string requires now respects `luau-lsp.completion.imports.ignoreGlobs` for filtering out files to
