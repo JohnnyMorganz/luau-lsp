@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.672
+- Color picker will now strip redundant decimal digits (i.e. `0.0000` ->
+  `0`) ([#1022](https://github.com/JohnnyMorganz/luau-lsp/issues/1022))
 
 ## [1.44.1] - 2025-04-24
 
