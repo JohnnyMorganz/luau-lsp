@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed invalid variable names created for instance-based auto-imports
+
 ## [1.45.0] - 2025-05-04
 
 ### Added

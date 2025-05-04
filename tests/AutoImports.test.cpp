@@ -677,6 +677,48 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_of_modules_show_path_name")
     CHECK_EQ(imports[1].labelDetails->description, "ReplicatedStorage.Folder2.Module");
 }
 
+TEST_CASE_FIXTURE(Fixture, "instance_auto_imports_creates_valid_identifier")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "react-spring",
+                        "className": "ModuleScript",
+                        "filePaths": ["module.luau"]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("source.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result);
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "react_spring");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 2);
+    CHECK_EQ(imports[0].additionalTextEdits[1].newText, "local react_spring = require(ReplicatedStorage[\"react-spring\"])\n");
+}
+
 using namespace Luau::LanguageServer::AutoImports;
 
 static StringRequireAutoImporterContext createContext(Fixture* fixture, const Uri& uri, FindImportsVisitor* importsVisitor)

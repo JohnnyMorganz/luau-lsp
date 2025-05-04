@@ -364,7 +364,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 // Whether we need to add a newline before the require to separate it from the services
                 bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
 
-                textEdits.emplace_back(Luau::LanguageServer::AutoImports::createRequireTextEdit(node->name, require, lineNumber, prependNewline));
+                textEdits.emplace_back(Luau::LanguageServer::AutoImports::createRequireTextEdit(name, require, lineNumber, prependNewline));
 
                 items.emplace_back(Luau::LanguageServer::AutoImports::createSuggestRequire(
                     name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path, require));
