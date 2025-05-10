@@ -10,12 +10,12 @@ LUAU_FASTFLAG(LuauClonedTableAndFunctionTypesMustHaveScopes)
 LUAU_FASTFLAG(LuauDisableNewSolverAssertsInMixedMode)
 LUAU_FASTFLAG(LuauCloneTypeAliasBindings)
 LUAU_FASTFLAG(LuauDoNotClonePersistentBindings)
-LUAU_FASTFLAG(LuauIncrementalAutocompleteDemandBasedCloning)
 LUAU_FASTFLAG(LuauBetterScopeSelection)
 LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauAutocompleteUsesModuleForTypeCompatibility)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
 LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
+LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -46,13 +46,11 @@ struct FragmentAutocompleteFixture : Fixture
         {FFlag::LuauDisableNewSolverAssertsInMixedMode, true},
         {FFlag::LuauCloneTypeAliasBindings, true},
         {FFlag::LuauDoNotClonePersistentBindings, true},
-        {FFlag::LuauIncrementalAutocompleteDemandBasedCloning, true},
         {FFlag::LuauBetterScopeSelection, true},
         {FFlag::LuauBlockDiffFragmentSelection, true},
         {FFlag::LuauAutocompleteUsesModuleForTypeCompatibility, true},
         {FFlag::LuauFragmentAcMemoryLeak, true},
-        {FFlag::LuauGlobalVariableModuleIsolation, true},
-    };
+        {FFlag::LuauGlobalVariableModuleIsolation, true}, {FFlag::LuauFragmentAutocompleteIfRecommendations, true}};
 };
 
 TEST_SUITE_BEGIN("Autocomplete");
