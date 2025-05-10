@@ -596,70 +596,13 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
     // Start managing the file in-memory
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->openTextDocument(params.textDocument.uri, params);
-
-    // Trigger diagnostics
-    // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
-    // however if a client doesn't yet support it, we push the diagnostics instead
-    if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
-    {
-        workspace->pushDiagnostics(params.textDocument.uri, params.textDocument.version);
-    }
 }
 
 void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)
 {
-    // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
-    std::vector<Luau::ModuleName> markedDirty{};
-
     // Update in-memory file with new contents
     auto workspace = findWorkspace(params.textDocument.uri);
-    workspace->updateTextDocument(params.textDocument.uri, params, &markedDirty);
-
-    // Trigger diagnostics
-    // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
-    // however if a client doesn't yet support it, we push the diagnostics instead
-    if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
-    {
-        // Convert the diagnostics report into a series of diagnostics published for each relevant file
-        auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{params.textDocument.uri}});
-        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
-
-        // Compute diagnostics for reverse dependencies
-        // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
-        // TODO: maybe this should only be done onSave
-        auto config = client->getConfiguration(workspace->rootUri);
-        if (config.diagnostics.includeDependents || config.diagnostics.workspace)
-        {
-            std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics{};
-            for (auto& module : markedDirty)
-            {
-                auto filePath = workspace->platform->resolveToRealPath(module);
-                if (filePath)
-                {
-                    auto uri = Uri::file(*filePath);
-                    if (uri != params.textDocument.uri && diagnostics.relatedDocuments.find(uri) == diagnostics.relatedDocuments.end() &&
-                        !workspace->isIgnoredFile(uri, config))
-                    {
-                        auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
-                        diagnostics.relatedDocuments.emplace(
-                            uri, lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
-                        diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
-                    }
-                }
-            }
-        }
-
-        if (!diagnostics.relatedDocuments.empty())
-        {
-            for (const auto& [uri, relatedDiagnostics] : diagnostics.relatedDocuments)
-            {
-                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
-                {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, relatedDiagnostics.items});
-                }
-            }
-        }
-    }
+    workspace->updateTextDocument(params.textDocument.uri, params);
 }
 
 void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)

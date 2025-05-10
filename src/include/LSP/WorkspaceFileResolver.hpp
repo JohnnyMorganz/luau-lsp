@@ -40,6 +40,11 @@ public:
         return document != nullptr;
     }
 
+    const TextDocument* operator*() const
+    {
+        return document;
+    }
+
     const TextDocument* operator->() const
     {
         return document;

@@ -56,8 +56,7 @@ public:
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
-    void updateTextDocument(
-        const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty = nullptr);
+    void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
     void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
@@ -69,7 +68,7 @@ public:
     /// Whether the file has been specified in the configuration as a definitions file
     bool isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
 
-    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params);
+    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles = false);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
     void recomputeDiagnostics(const ClientConfiguration& config);
     void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);

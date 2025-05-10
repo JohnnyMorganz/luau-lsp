@@ -1,9 +1,9 @@
 #include "LSP/Workspace.hpp"
 
-#include <iostream>
 #include <memory>
 
 #include "LSP/LanguageServer.hpp"
+#include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/match.h"
@@ -30,11 +30,16 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
         // Mark the file as dirty as we don't know what changes were made to it
         auto moduleName = fileResolver.getModuleName(uri);
         frontend.markDirty(moduleName);
+
+        // Trigger diagnostics
+        // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
+        // however if a client doesn't yet support it, we push the diagnostics instead
+        if (!usingPullDiagnostics(client->capabilities))
+            pushDiagnostics(params.textDocument.uri, params.textDocument.version);
     }
 }
 
-void WorkspaceFolder::updateTextDocument(
-    const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params, std::vector<Luau::ModuleName>* markedDirty)
+void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
 {
     if (fileResolver.managedFiles.find(uri) == fileResolver.managedFiles.end())
     {
@@ -44,9 +49,78 @@ void WorkspaceFolder::updateTextDocument(
     auto& textDocument = fileResolver.managedFiles.at(uri);
     textDocument.update(params.contentChanges, params.textDocument.version);
 
+    // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
+    std::vector<Luau::ModuleName> markedDirty{};
+
     // Mark the module dirty for the typechecker
-    auto moduleName = fileResolver.getModuleName(uri);
-    frontend.markDirty(moduleName, markedDirty);
+    frontend.markDirty(fileResolver.getModuleName(uri), &markedDirty);
+
+    // Update diagnostics
+    // In pull based diagnostics module, documentDiagnostics will update the necessary files
+    // But, if workspace diagnostics is enabled, or we are using push-based diagnostics, we need to update
+    if (client->workspaceDiagnosticsToken || !usingPullDiagnostics(client->capabilities))
+    {
+        // Convert the diagnostics report into a series of diagnostics published for each relevant file
+        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
+
+        if (!usingPullDiagnostics(client->capabilities))
+            client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, params.textDocument.version, diagnostics.items});
+
+        // Compute diagnostics for reverse dependencies
+        // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
+        // TODO: maybe this should only be done onSave
+        auto config = client->getConfiguration(rootUri);
+        if (client->workspaceDiagnosticsToken || config.diagnostics.includeDependents)
+        {
+            for (auto& moduleName : markedDirty)
+            {
+                auto dirtyUri = fileResolver.getUri(moduleName);
+                if (dirtyUri != uri && diagnostics.relatedDocuments.find(dirtyUri) == diagnostics.relatedDocuments.end() &&
+                    !isIgnoredFile(dirtyUri, config))
+                {
+                    auto dependencyDiags = documentDiagnostics(lsp::DocumentDiagnosticParams{{dirtyUri}}, /* allowUnmanagedFiles= */ true);
+                    diagnostics.relatedDocuments.emplace(
+                        dirtyUri, lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
+                    diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
+                }
+            }
+        }
+
+        if (client->workspaceDiagnosticsToken)
+        {
+            lsp::WorkspaceDiagnosticReportPartialResult report;
+
+            lsp::WorkspaceDocumentDiagnosticReport mainDocumentReport;
+            mainDocumentReport.uri = params.textDocument.uri;
+            mainDocumentReport.version = params.textDocument.version;
+            mainDocumentReport.kind = diagnostics.kind;
+            mainDocumentReport.items = diagnostics.items;
+            mainDocumentReport.items = diagnostics.items;
+            report.items.emplace_back(mainDocumentReport);
+
+            for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
+            {
+                lsp::WorkspaceDocumentDiagnosticReport documentReport;
+                documentReport.uri = relatedUri;
+                documentReport.kind = relatedDiagnostics.kind;
+                documentReport.items = relatedDiagnostics.items;
+                documentReport.items = relatedDiagnostics.items;
+                report.items.emplace_back(documentReport);
+            }
+
+            client->sendProgress({*client->workspaceDiagnosticsToken, report});
+        }
+        else if (!diagnostics.relatedDocuments.empty())
+        {
+            for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
+            {
+                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{relatedUri, std::nullopt, relatedDiagnostics.items});
+                }
+            }
+        }
+    }
 }
 
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
