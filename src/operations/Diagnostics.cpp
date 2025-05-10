@@ -1,15 +1,26 @@
+#include "LSP/Diagnostics.hpp"
+
 #include "LSP/Workspace.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Luau/TimeTrace.h"
 
+bool usingPullDiagnostics(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.textDocument && capabilities.textDocument->diagnostic;
+}
+
 static bool supportsRelatedDocuments(const lsp::ClientCapabilities& capabilities)
 {
     return capabilities.textDocument && capabilities.textDocument->diagnostic && capabilities.textDocument->diagnostic->relatedDocumentSupport;
 }
 
-lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params)
+/// Compute a document diagnostics report for a single file (and potentially related files)
+/// By default, this is called by the client for an open document. Hence we can expect that files are managed
+/// However, we sometimes call this as part of reverse-dependency updates (see updateTextDocument), where the file may be unmanaged
+/// In the default cause, we don't want to bother opening the file unnecessarily if it was closed.
+lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
     if (!isConfigured)
@@ -23,7 +34,8 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     std::unordered_map<Uri, std::vector<lsp::Diagnostic>, UriHash> relatedDiagnostics{};
 
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
-    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
+    TextDocumentPtr textDocument = allowUnmanagedFiles ? fileResolver.getOrCreateTextDocumentFromModuleName(moduleName)
+                                                       : TextDocumentPtr(fileResolver.getTextDocument(params.textDocument.uri));
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
@@ -52,7 +64,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     {
         if (error.moduleName == moduleName)
         {
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, *textDocument);
             report.items.emplace_back(diagnostic);
         }
         else if (supportsRelatedDocuments(client->capabilities))
@@ -60,11 +72,11 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
             auto fileName = platform->resolveToRealPath(error.moduleName);
             if (!fileName)
                 continue;
-            auto textDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
-            auto uri = textDocument ? textDocument->uri() : Uri::file(*fileName);
+            auto relatedTextDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
+            auto uri = relatedTextDocument ? relatedTextDocument->uri() : Uri::file(*fileName);
             if (isIgnoredFile(uri, config))
                 continue;
-            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, textDocument);
+            auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, relatedTextDocument);
             auto& currentDiagnostics = relatedDiagnostics[uri];
             currentDiagnostics.emplace_back(diagnostic);
         }
@@ -85,12 +97,12 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     // Lints only apply to the current file
     for (auto& error : cr.lintResult.errors)
     {
-        auto diagnostic = createLintDiagnostic(error, textDocument);
+        auto diagnostic = createLintDiagnostic(error, *textDocument);
         diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
         report.items.emplace_back(diagnostic);
     }
     for (auto& error : cr.lintResult.warnings)
-        report.items.emplace_back(createLintDiagnostic(error, textDocument));
+        report.items.emplace_back(createLintDiagnostic(error, *textDocument));
 
     return report;
 }
