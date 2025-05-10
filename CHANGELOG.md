@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added progress indicator during indexing of initial startup. Currently does not provide much detail, but does provide
+  some feedback to indicate the server is doing work.
+
 ### Fixed
 
 - Fixed invalid variable names created for instance-based auto-imports

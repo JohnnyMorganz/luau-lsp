@@ -1,5 +1,6 @@
 #include "LSP/Client.hpp"
 #include "LSP/Transport/StdioTransport.hpp"
+#include "Protocol/WorkDoneProgress.hpp"
 
 #include <iostream>
 #include <optional>
@@ -62,6 +63,59 @@ void Client::sendNotification(const std::string& method, const std::optional<jso
     };
 
     sendRawMessage(msg);
+}
+
+static bool supportsWorkDoneProgress(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.window && capabilities.window->workDoneProgress;
+}
+
+void Client::createWorkDoneProgress(const lsp::ProgressToken& token)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    // TODO: handle responses?
+    sendRequest(nextRequestId++, "window/workDoneProgress/create", lsp::WorkDoneProgressCreateParams{token});
+}
+
+void Client::sendWorkDoneProgressBegin(
+    const lsp::ProgressToken& token, const std::string& title, std::optional<std::string> message, std::optional<uint8_t> percentage)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressBegin workDone;
+    workDone.title = title;
+    workDone.cancellable = false;
+    workDone.message = message;
+    workDone.percentage = percentage;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
+}
+
+void Client::sendWorkDoneProgressReport(const lsp::ProgressToken& token, std::optional<std::string> message, std::optional<uint8_t> percentage)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressReport workDone;
+    workDone.cancellable = false;
+    workDone.message = message;
+    workDone.percentage = percentage;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
+}
+
+void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressEnd workDone;
+    workDone.message = message;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
 }
 
 void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message)

@@ -67,6 +67,12 @@ public:
     {
         sendNotification("$/progress", params);
     }
+    void createWorkDoneProgress(const lsp::ProgressToken& token);
+    void sendWorkDoneProgressBegin(const lsp::ProgressToken& token, const std::string& title, std::optional<std::string> message = std::nullopt,
+        std::optional<uint8_t> percentage = std::nullopt);
+    void sendWorkDoneProgressReport(
+        const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt, std::optional<uint8_t> percentage = std::nullopt);
+    void sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt);
 
     void sendLogMessage(const lsp::MessageType& type, const std::string& message);
     void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;

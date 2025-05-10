@@ -514,6 +514,23 @@ struct ClientGeneralCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(ClientGeneralCapabilities, positionEncodings)
 
+struct ClientWindowCapabilities
+{
+    /**
+     * It indicates whether the client supports server initiated
+     * progress using the `window/workDoneProgress/create` request.
+     *
+     * The capability also controls Whether client supports handling
+     * of progress notifications. If set servers are allowed to report a
+     * `workDoneProgress` property in the request specific server
+     * capabilities.
+     *
+     * @since 3.15.0
+     */
+    bool workDoneProgress = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(ClientWindowCapabilities, workDoneProgress)
+
 struct ClientCapabilities
 {
     /**
@@ -533,9 +550,13 @@ struct ClientCapabilities
      */
     std::optional<ClientGeneralCapabilities> general = std::nullopt;
 
+    /**
+     * Window specific client capabilities.
+     */
+    std::optional<ClientWindowCapabilities> window = std::nullopt;
+
     // TODO
     // notebook
-    // window
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientCapabilities, textDocument, workspace, general)
+NLOHMANN_DEFINE_OPTIONAL(ClientCapabilities, textDocument, workspace, general, window)
 } // namespace lsp

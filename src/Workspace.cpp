@@ -316,6 +316,8 @@ Luau::CheckResult WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleNam
     return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ true});
 }
 
+static const char* kIndexProgressToken = "luau/indexFiles";
+
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::indexFiles", "LSP");
@@ -326,6 +328,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         return;
 
     client->sendTrace("workspace: indexing all files");
+    client->createWorkDoneProgress(kIndexProgressToken);
+    client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing files");
 
     size_t indexCount = 0;
 
@@ -364,6 +368,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         }
     }
 
+    client->sendWorkDoneProgressEnd(kIndexProgressToken, "Indexed " + std::to_string(indexCount) + " files");
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
