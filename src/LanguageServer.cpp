@@ -9,6 +9,7 @@
 
 #include "LSP/Uri.hpp"
 #include "LSP/DocumentationParser.hpp"
+#include "LSP/Diagnostics.hpp"
 
 #define ASSERT_PARAMS(params, method) \
     if (!params) \
@@ -596,6 +597,12 @@ void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams&
     // Start managing the file in-memory
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->openTextDocument(params.textDocument.uri, params);
+
+    // Trigger diagnostics
+    // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
+    // however if a client doesn't yet support it, we push the diagnostics instead
+    if (!usingPullDiagnostics(client->capabilities))
+        workspace->pushDiagnostics(params.textDocument.uri, params.textDocument.version);
 }
 
 void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params)

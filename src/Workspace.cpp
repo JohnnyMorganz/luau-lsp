@@ -30,12 +30,6 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
         // Mark the file as dirty as we don't know what changes were made to it
         auto moduleName = fileResolver.getModuleName(uri);
         frontend.markDirty(moduleName);
-
-        // Trigger diagnostics
-        // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
-        // however if a client doesn't yet support it, we push the diagnostics instead
-        if (!usingPullDiagnostics(client->capabilities))
-            pushDiagnostics(params.textDocument.uri, params.textDocument.version);
     }
 }
 
