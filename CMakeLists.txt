@@ -16,6 +16,12 @@ if (LUAU_ENABLE_TIME_TRACE)
 endif ()
 
 project(Luau.LanguageServer LANGUAGES CXX)
+
+# Sentry setup
+add_subdirectory(extern/sentry-native)
+set(BUILD_SHARED_LIBS OFF)
+set(SENTRY_BUILD_RUNTIMESTATIC ON)
+
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
 add_executable(Luau.LanguageServer.CLI)
@@ -158,7 +164,7 @@ set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
 target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer.CLI PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer.CLI PRIVATE src/include ${EXTERN_INCLUDES})
-target_link_libraries(Luau.LanguageServer.CLI PRIVATE Luau.LanguageServer Luau.Analysis)
+target_link_libraries(Luau.LanguageServer.CLI PRIVATE Luau.LanguageServer Luau.Analysis sentry)
 
 target_compile_features(Luau.LanguageServer.Test PRIVATE cxx_std_17)
 target_compile_options(Luau.LanguageServer.Test PRIVATE ${LUAU_LSP_OPTIONS})
