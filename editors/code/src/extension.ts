@@ -249,6 +249,10 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     addArg("--delay-startup");
   }
 
+  if (serverConfiguration.get<boolean>("crashReporting.enabled", false)) {
+    addArg("--enable-crash-reporting");
+  }
+
   const run: Executable = {
     command: serverBinPath,
     args,
