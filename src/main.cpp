@@ -1,3 +1,6 @@
+#define SENTRY_BUILD_STATIC 1
+#include <sentry.h>
+
 #include "Flags.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/DocumentationParser.hpp"
@@ -33,6 +36,16 @@ static void displayFlags()
 
 int startLanguageServer(const argparse::ArgumentParser& program)
 {
+    bool isCrashReportingEnabled = program.is_used("--enable-crash-reporting");
+    if (isCrashReportingEnabled)
+    {
+        sentry_options_t* options = sentry_options_new();
+        sentry_options_set_dsn(options, "https://bc658c75485d1aecbaf1c0c1f7980922@o4509305213026304.ingest.de.sentry.io/4509305221283920");
+        sentry_options_set_database_path(options, ".sentry-native"); // TODO: configure
+        sentry_options_set_release(options, "luau-lsp@0.0.0");       // TODO: configure
+        sentry_init(options);
+    }
+
     // Debug loop: set a breakpoint inside while loop to attach debugger before init
     if (program.is_used("--delay-startup"))
     {
@@ -116,6 +129,9 @@ int startLanguageServer(const argparse::ArgumentParser& program)
 
     // Begin input loop
     server.processInputLoop();
+
+    if (isCrashReportingEnabled)
+        sentry_close();
 
     // If we received a shutdown request before exiting, exit normally. Otherwise, it is an abnormal exit
     return server.requestedShutdown() ? 0 : 1;
@@ -255,6 +271,10 @@ int main(int argc, char** argv)
         .help("path to pipe / socket file name for pipe communication channel")
         .action(file_path_parser)
         .metavar("PATH");
+    lsp_command.add_argument("--enable-crash-reporting")
+        .help("whether to enable crash reporting to Sentry")
+        .default_value(false)
+        .implicit_value(true);
 
     program.add_parents(parent_parser);
     program.add_subparser(analyze_command);
