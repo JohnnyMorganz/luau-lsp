@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added progress indicator during indexing of initial startup. Currently does not provide much detail, but does provide
   some feedback to indicate the server is doing work.
+- VSCode: server binary location setting (`luau-lsp.server.path`) now supports relative paths ([#1036](https://github.com/JohnnyMorganz/luau-lsp/issues/1036))
 
 ### Changed
 

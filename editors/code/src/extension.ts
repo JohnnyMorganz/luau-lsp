@@ -16,6 +16,7 @@ import {
 
 import * as roblox from "./roblox";
 import * as utils from "./utils";
+import path from "path";
 
 export type PlatformContext = { client: LanguageClient | undefined };
 export type AddArgCallback = (
@@ -210,16 +211,22 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     vscode.workspace.getConfiguration("luau-lsp.server");
 
   const serverBinConfig = serverConfiguration.get("path", "").trim();
-
-  const uri = vscode.Uri.file(serverBinConfig);
+  const serverBinUri =
+    vscode.workspace.workspaceFolders &&
+    vscode.workspace.workspaceFolders.length > 0
+      ? utils.resolveUri(
+          vscode.workspace.workspaceFolders[0].uri,
+          serverBinConfig,
+        )
+      : vscode.Uri.file(serverBinConfig);
   let serverBinPath;
 
-  if (serverBinConfig !== "" && (await utils.exists(uri))) {
-    serverBinPath = uri.fsPath;
+  if (serverBinConfig !== "" && (await utils.exists(serverBinUri))) {
+    serverBinPath = serverBinUri.fsPath;
   } else {
     if (serverBinConfig !== "") {
       vscode.window.showWarningMessage(
-        `Server binary at path \`${serverBinConfig}\` does not exist, falling back to bundled binary`,
+        `Server binary at path \`${serverBinUri.fsPath}\` does not exist, falling back to bundled binary`,
       );
     }
     serverBinPath = vscode.Uri.joinPath(
