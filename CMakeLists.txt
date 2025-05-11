@@ -21,6 +21,7 @@ project(Luau.LanguageServer LANGUAGES CXX)
 add_subdirectory(extern/sentry-native)
 set(BUILD_SHARED_LIBS OFF)
 set(SENTRY_BUILD_RUNTIMESTATIC ON)
+set(CRASHPAD_ENABLE_STACKTRACE ON)
 
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
