@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.673
+- Luau FFlags are now synced from the Studio channel rather than the main channel on VSCode, which is typically updated
+  earlier ([[#1040](https://github.com/JohnnyMorganz/luau-lsp/issues/1040)])
 
 ### Fixed
 

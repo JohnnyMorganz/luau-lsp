@@ -28,7 +28,7 @@ let platformContext: PlatformContext = { client: undefined };
 const clientDisposables: vscode.Disposable[] = [];
 
 const CURRENT_FFLAGS =
-  "https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCDesktopClient";
+  "https://clientsettingscdn.roblox.com/v1/settings/application?applicationName=PCStudioApp";
 const FFLAG_KINDS = ["FFlag", "FInt", "DFFlag", "DFInt"];
 
 type FFlags = Record<string, string>;
