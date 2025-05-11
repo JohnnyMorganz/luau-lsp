@@ -55,9 +55,12 @@ jobs:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             cp build/RelWithDebInfo/luau-lsp.exe editors/code/bin/server.exe
             cp build/RelWithDebInfo/luau-lsp.pdb editors/code/bin/server.pdb
+            cp build/RelWithDebInfo/crashpad_handler.exe editors/code/bin/crashpad_handler.exe
           else
             cp build/luau-lsp editors/code/bin/server
             chmod 777 editors/code/bin/server
+            cp build/crashpad_handler editors/code/bin/crashpad_handler
+            chmod 777 editors/code/bin/crashpad_handler
           fi
 
       - name: Create Release Archive
