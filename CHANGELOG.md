@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed diagnostics not getting updated for dependent files when a file is edited and workspace diagnostics is
   enabled ([#1042](https://github.com/JohnnyMorganz/luau-lsp/issues/1042))
 
+### Changed
+
+- Sync to upstream Luau 0.673
+
 ## [1.45.0] - 2025-05-04
 
 ### Added
