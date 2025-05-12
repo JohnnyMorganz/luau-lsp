@@ -71,10 +71,17 @@ jobs:
             chmod 777 editors/code/bin/crashpad_handler
           fi
 
+      - name: Setup Sentry CLI
+        uses: matbour/setup-sentry-cli@v2
+        with:
+          token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          organization: luau-lsp
+          project: luau-lsp
+
       - name: Upload debug symbols
         shell: bash
         run: |
-          sentry-cli debug-files upload -o ${{ secrets.SENTRY_ORG }} -p ${{ secrets.SENTRY_PROJECT }} --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} build
+          sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
         shell: bash
