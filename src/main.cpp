@@ -18,9 +18,15 @@
 #define NOMINMAX
 #endif
 
+#ifdef LSP_BUILD_WITH_SENTRY
 // sentry.h pulls in <windows.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#endif
 #define SENTRY_BUILD_STATIC 1
 #include <sentry.h>
+#endif
 
 static void displayFlags()
 {
@@ -39,6 +45,7 @@ static void displayFlags()
 
 int startLanguageServer(const argparse::ArgumentParser& program)
 {
+#ifdef LSP_BUILD_WITH_SENTRY
     bool isCrashReportingEnabled = program.is_used("--enable-crash-reporting");
     if (isCrashReportingEnabled)
     {
@@ -48,6 +55,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         sentry_options_set_release(options, "luau-lsp@0.0.0");       // TODO: configure
         sentry_init(options);
     }
+#endif
 
     // Debug loop: set a breakpoint inside while loop to attach debugger before init
     if (program.is_used("--delay-startup"))
@@ -133,8 +141,10 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     // Begin input loop
     server.processInputLoop();
 
+#ifdef LSP_BUILD_WITH_SENTRY
     if (isCrashReportingEnabled)
         sentry_close();
+#endif
 
     // If we received a shutdown request before exiting, exit normally. Otherwise, it is an abnormal exit
     return server.requestedShutdown() ? 0 : 1;
