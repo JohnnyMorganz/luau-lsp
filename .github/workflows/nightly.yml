@@ -47,6 +47,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: lipo -archs build/luau-lsp
 
+      - name: (MacOS) Separate debug symbols
+        if: matrix.os == 'macos-latest'
+        run: dsymutil build/luau-lsp && strip -S build/luau-lsp
+
+      - name: (Linux) Separate debug symbols
+        if: matrix.os == 'ubuntu-22.04'
+        run: objcopy --only-keep-debug build/luau-lsp build/luau-lsp.dbg && objcopy --strip-debug build/luau-lsp
+
       - name: Copy Build into Extension
         shell: bash
         run: |
@@ -62,6 +70,11 @@ jobs:
             cp build/crashpad_handler editors/code/bin/crashpad_handler
             chmod 777 editors/code/bin/crashpad_handler
           fi
+
+      - name: Upload debug symbols
+        shell: bash
+        run: |
+          sentry-cli debug-files upload -o ${{ secrets.SENTRY_ORG }} -p ${{ secrets.SENTRY_PROJECT }} --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} build
 
       - name: Create Release Archive
         shell: bash
