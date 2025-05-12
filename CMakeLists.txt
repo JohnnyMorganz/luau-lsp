@@ -186,7 +186,7 @@ if (LSP_BUILD_WITH_SENTRY)
     add_custom_command(
             TARGET Luau.LanguageServer.CLI POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>/extern/sentry-native/crashpad_build/handler/crashpad_handler$<IF:$<PLATFORM_ID:Windows>,.exe,>"
+            "$<TARGET_FILE:crashpad_handler>"
             "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>"
             COMMENT "Copying crashpad_handler to output directory"
     )
