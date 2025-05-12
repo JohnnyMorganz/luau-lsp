@@ -1,6 +1,3 @@
-#define SENTRY_BUILD_STATIC 1
-#include <sentry.h>
-
 #include "Flags.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/DocumentationParser.hpp"
@@ -17,7 +14,13 @@
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #endif
+
+// sentry.h pulls in <windows.h>
+#define SENTRY_BUILD_STATIC 1
+#include <sentry.h>
 
 static void displayFlags()
 {
