@@ -177,7 +177,7 @@ struct SetTraceParams
     /**
      * The new value that should be assigned to the trace setting.
      */
-    TraceValue value;
+    TraceValue value = TraceValue::Off;
 };
 NLOHMANN_DEFINE_OPTIONAL(SetTraceParams, value)
 
