@@ -182,10 +182,12 @@ target_compile_options(Luau.LanguageServer.Test PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer.Test PRIVATE tests ${EXTERN_INCLUDES} extern/doctest)
 target_link_libraries(Luau.LanguageServer.Test PRIVATE Luau.Ast Luau.Analysis Luau.LanguageServer)
 
-add_custom_command(
-    TARGET Luau.LanguageServer.CLI POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+if (LSP_BUILD_WITH_SENTRY)
+    add_custom_command(
+            TARGET Luau.LanguageServer.CLI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>/extern/sentry-native/crashpad_build/handler/crashpad_handler$<IF:$<PLATFORM_ID:Windows>,.exe,>"
             "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>"
-    COMMENT "Copying crashpad_handler to output directory"
-)
+            COMMENT "Copying crashpad_handler to output directory"
+    )
+endif ()
