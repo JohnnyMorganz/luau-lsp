@@ -37,6 +37,14 @@ jobs:
         with:
           node-version: 20
 
+      - name: Set Nightly Version
+        shell: bash
+        run: |
+          DATE=$(date +%Y%m%d)
+          VERSION="nightly.$DATE"
+          sed -i.bak "s/#define LSP_VERSION .*/#define LSP_VERSION \"$VERSION\"/g" src/main.cpp
+          jq ".version = \"$VERSION\"" editors/code/package.json > tmp.json && mv tmp.json editors/code/package.json
+
       - name: Build Server
         run: |
           mkdir build && cd build

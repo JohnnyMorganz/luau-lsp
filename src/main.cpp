@@ -28,6 +28,8 @@
 #include <sentry.h>
 #endif
 
+#define LSP_VERSION "1.45.0"
+
 static void displayFlags()
 {
     printf("Available flags:\n");
@@ -52,7 +54,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         sentry_options_t* options = sentry_options_new();
         sentry_options_set_dsn(options, "https://bc658c75485d1aecbaf1c0c1f7980922@o4509305213026304.ingest.de.sentry.io/4509305221283920");
         sentry_options_set_database_path(options, ".sentry-native"); // TODO: configure
-        sentry_options_set_release(options, "luau-lsp@0.0.0");       // TODO: configure
+        sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
         sentry_init(options);
     }
 #endif
@@ -192,7 +194,7 @@ int main(int argc, char** argv)
         return 1;
     };
 
-    argparse::ArgumentParser program("luau-lsp", "1.45.0");
+    argparse::ArgumentParser program("luau-lsp", LSP_VERSION);
     program.set_assign_chars(":=");
 
     // Global arguments
