@@ -17,12 +17,15 @@ jobs:
           - os: windows-latest
             artifact-name: luau-lsp-win64
             code-target: [win32-x64]
+            crash-reporting: true
           - os: ubuntu-22.04
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
+            crash-reporting: false
           - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
+            crash-reporting: true
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -48,7 +51,7 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLUAU_ENABLE_TIME_TRACE:BOOL=ON -DLSP_BUILD_WITH_SENTRY:BOOL=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLUAU_ENABLE_TIME_TRACE:BOOL=ON -DLSP_BUILD_WITH_SENTRY:BOOL=${{ matrix.crash-reporting }} ..
           cmake --build . --config RelWithDebInfo --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
@@ -77,6 +80,17 @@ jobs:
             chmod 777 editors/code/bin/server
             cp build/crashpad_handler editors/code/bin/crashpad_handler
             chmod 777 editors/code/bin/crashpad_handler
+          fi
+
+      - name: Copy Crashpad Handler into Extension
+        shell: bash
+        if: matrix.crash-reporting == 'true'
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+              cp build/RelWithDebInfo/crashpad_handler.exe editors/code/bin/crashpad_handler.exe
+          else
+              cp build/crashpad_handler editors/code/bin/crashpad_handler
+              chmod 777 editors/code/bin/crashpad_handler
           fi
 
       - name: Setup Sentry CLI

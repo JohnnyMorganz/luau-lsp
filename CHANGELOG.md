@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Implemented opt-in crash reporting for the language server. This is enabled via `luau-lsp.server.crashReporting.enabled`. Note: crash reporting
+  sends network requests to [Sentry](https://sentry.io/). Crash Reporting is only available on Windows and macOS, and is not enabled in Standalone mode (`luau-lsp analyze`).
+
 ### Changed
 
 - Sync to upstream Luau 0.674
@@ -17,8 +22,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added progress indicator during indexing of initial startup. Currently does not provide much detail, but does provide
   some feedback to indicate the server is doing work.
 - VSCode: server binary location setting (`luau-lsp.server.path`) now supports relative paths ([#1036](https://github.com/JohnnyMorganz/luau-lsp/issues/1036))
-- Implemented opt-in crash reporting for the language server. This is enabled via `luau-lsp.server.crashReporting.enabled`. Note: crash reporting
-  sends network requests to [Sentry](https://sentry.io/). Crash Reporting is not enabled in Standalone mode (`luau-lsp analyze`).
 
 ### Changed
 

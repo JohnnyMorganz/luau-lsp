@@ -111,7 +111,7 @@ The language server implements opt-in crash reporting, using [Sentry](https://se
 On VSCode, this is configured via the setting `luau-lsp.server.crashReporting.enabled`.
 When a crash is encountered, an out-of-process crash handler will upload the crash details to Sentry via HTTP.
 
-Crash Reporting is not active for Standalone mode (`luau-lsp analyze`)
+Crash Reporting is only available for Windows and macOS, and is not active for Standalone mode (`luau-lsp analyze`)
 
 ## Build From Source
 
