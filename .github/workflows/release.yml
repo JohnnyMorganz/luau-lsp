@@ -69,15 +69,19 @@ jobs:
           - os: windows-latest
             artifact-name: luau-lsp-win64
             code-target: [win32-x64, win32-arm64]
+            crash-reporting: true
           - os: ubuntu-22.04
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
+            crash-reporting: false
           - os: ubuntu-22.04-arm
             artifact-name: luau-lsp-linux-arm64
             code-target: [linux-arm64]
+            crash-reporting: false
           - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
+            crash-reporting: true
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -95,12 +99,20 @@ jobs:
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLSP_BUILD_WITH_SENTRY:BOOL=ON
-          cmake --build . --config Release --target Luau.LanguageServer.CLI -j 3
+          cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLSP_BUILD_WITH_SENTRY:BOOL=${{ matrix.crash-reporting }}
+          cmake --build . --config RelWithDebInfo --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
         if: matrix.os == 'macos-latest'
         run: lipo -archs build/luau-lsp
+
+      - name: (MacOS) Separate debug symbols
+        if: matrix.os == 'macos-latest'
+        run: dsymutil build/luau-lsp && strip -S build/luau-lsp
+
+      - name: (Linux) Separate debug symbols
+        if: matrix.os == 'ubuntu-22.04'
+        run: objcopy --only-keep-debug build/luau-lsp build/luau-lsp.dbg && objcopy --strip-debug build/luau-lsp
 
       - name: Copy Build into Extension
         shell: bash
@@ -108,11 +120,36 @@ jobs:
           mkdir -p ./dist
           mkdir -p editors/code/bin
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp build/Release/luau-lsp.exe editors/code/bin/server.exe
+            cp build/RelWithDebInfo/luau-lsp.exe editors/code/bin/server.exe
           else
             cp build/luau-lsp editors/code/bin/server
             chmod 777 editors/code/bin/server
           fi
+
+      - name: Copy Crashpad Handler into Extension
+        shell: bash
+        if: matrix.crash-reporting == true
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+              cp build/RelWithDebInfo/crashpad_handler.exe editors/code/bin/crashpad_handler.exe
+          else
+              cp build/crashpad_handler editors/code/bin/crashpad_handler
+              chmod 777 editors/code/bin/crashpad_handler
+          fi
+
+      - name: Setup Sentry CLI
+        uses: matbour/setup-sentry-cli@v2
+        if: matrix.crash-reporting == true
+        with:
+          token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          organization: luau-lsp
+          project: luau-lsp
+
+      - name: Upload debug symbols
+        shell: bash
+        if: matrix.crash-reporting == true
+        run: |
+          sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
         shell: bash

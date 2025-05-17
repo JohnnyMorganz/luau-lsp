@@ -92,6 +92,7 @@ jobs:
 
       - name: Setup Sentry CLI
         uses: matbour/setup-sentry-cli@v2
+        if: matrix.crash-reporting == true
         with:
           token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           organization: luau-lsp
@@ -99,6 +100,7 @@ jobs:
 
       - name: Upload debug symbols
         shell: bash
+        if: matrix.crash-reporting == true
         run: |
           sentry-cli debug-files upload --include-sources build
 
