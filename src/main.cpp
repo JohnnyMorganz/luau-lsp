@@ -28,7 +28,7 @@
 #include <sentry.h>
 #endif
 
-#define LSP_VERSION "1.45.0"
+#define LSP_VERSION "1.46.0"
 
 static void displayFlags()
 {
