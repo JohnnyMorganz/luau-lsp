@@ -4,6 +4,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
 option(LSP_BUILD_ASAN "Build with ASAN" OFF)
 option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
+option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 
 if (LSP_STATIC_CRT)
     cmake_policy(SET CMP0091 NEW)
@@ -15,7 +16,20 @@ if (LUAU_ENABLE_TIME_TRACE)
     add_definitions(-DLUAU_ENABLE_TIME_TRACE)
 endif ()
 
+if (LSP_BUILD_WITH_SENTRY)
+    add_definitions(-DLSP_BUILD_WITH_SENTRY)
+endif ()
+
 project(Luau.LanguageServer LANGUAGES CXX)
+
+# Sentry setup
+if (LSP_BUILD_WITH_SENTRY)
+    add_subdirectory(extern/sentry-native)
+    set(BUILD_SHARED_LIBS OFF)
+    set(SENTRY_BUILD_RUNTIMESTATIC ON)
+    set(CRASHPAD_ENABLE_STACKTRACE ON)
+endif ()
+
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
 add_executable(Luau.LanguageServer.CLI)
@@ -159,8 +173,21 @@ target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer.CLI PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer.CLI PRIVATE src/include ${EXTERN_INCLUDES})
 target_link_libraries(Luau.LanguageServer.CLI PRIVATE Luau.LanguageServer Luau.Analysis)
+if (LSP_BUILD_WITH_SENTRY)
+    target_link_libraries(Luau.LanguageServer.CLI PRIVATE sentry)
+endif ()
 
 target_compile_features(Luau.LanguageServer.Test PRIVATE cxx_std_17)
 target_compile_options(Luau.LanguageServer.Test PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer.Test PRIVATE tests ${EXTERN_INCLUDES} extern/doctest)
 target_link_libraries(Luau.LanguageServer.Test PRIVATE Luau.Ast Luau.Analysis Luau.LanguageServer)
+
+if (LSP_BUILD_WITH_SENTRY)
+    add_custom_command(
+            TARGET Luau.LanguageServer.CLI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:crashpad_handler>"
+            "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>"
+            COMMENT "Copying crashpad_handler to output directory"
+    )
+endif ()

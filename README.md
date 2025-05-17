@@ -104,6 +104,15 @@ They can be investigated at a later time:
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
 - [ ] Type Hierarchy (Luau currently does not provide any [public] ways to define type hierarchies)
 
+## Crash Reporting
+
+The language server implements opt-in crash reporting, using [Sentry](https://sentry.io/).
+
+On VSCode, this is configured via the setting `luau-lsp.server.crashReporting.enabled`.
+When a crash is encountered, an out-of-process crash handler will upload the crash details to Sentry via HTTP.
+
+Crash Reporting is only available for Windows and macOS, and is not active for Standalone mode (`luau-lsp analyze`)
+
 ## Build From Source
 
 ```sh

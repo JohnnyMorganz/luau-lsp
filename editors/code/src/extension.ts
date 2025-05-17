@@ -2,9 +2,15 @@ import * as vscode from "vscode";
 import * as os from "os";
 import { fetch } from "undici";
 import {
+  CloseAction,
+  CloseHandlerResult,
+  ErrorAction,
+  ErrorHandler,
+  ErrorHandlerResult,
   Executable,
   LanguageClient,
   LanguageClientOptions,
+  Message,
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
@@ -52,6 +58,94 @@ const getFFlags = async () => {
 const isAlphanumericUnderscore = (str: string) => {
   return /^[a-zA-Z0-9_]+$/.test(str);
 };
+
+const isCrashReportingEnabled = () => {
+  const config = vscode.workspace.getConfiguration("luau-lsp.server");
+  return config.get("crashReporting.enabled", false);
+};
+
+const DO_NOT_SHOW_CRASH_REPORTING_SUGGESTION_KEY =
+  "doNotShowCrashReportingSuggestion";
+
+const shouldShowEnableCrashReportsMessage = (
+  context: vscode.ExtensionContext,
+) => {
+  return !context.globalState.get<boolean>(
+    DO_NOT_SHOW_CRASH_REPORTING_SUGGESTION_KEY,
+  );
+};
+
+class ClientErrorHandler implements ErrorHandler {
+  private readonly restarts: number[];
+  private recommendedCrashReporting: boolean = false;
+
+  constructor(
+    private context: vscode.ExtensionContext,
+    private maxRestartCount: number,
+  ) {
+    this.restarts = [];
+  }
+
+  public error(
+    _error: Error,
+    _message: Message,
+    count: number,
+  ): ErrorHandlerResult {
+    if (count && count <= 3) {
+      return { action: ErrorAction.Continue };
+    }
+    return { action: ErrorAction.Shutdown };
+  }
+
+  public closed(): CloseHandlerResult {
+    if (
+      !this.recommendedCrashReporting &&
+      !isCrashReportingEnabled() &&
+      shouldShowEnableCrashReportsMessage(this.context)
+    ) {
+      this.recommendedCrashReporting = true;
+      vscode.window
+        .showInformationMessage(
+          "The Luau Language server exited unexpected. Would you like to enable crash reporting?",
+          "Enable",
+          "Not now",
+          "Do not show again",
+        )
+        .then((value) => {
+          if (value === "Enable") {
+            vscode.workspace
+              .getConfiguration("luau-lsp.server")
+              .update(
+                "crashReporting.enabled",
+                true,
+                vscode.ConfigurationTarget.Global,
+              );
+          } else if (value === "Do not show again") {
+            this.context.globalState.update(
+              DO_NOT_SHOW_CRASH_REPORTING_SUGGESTION_KEY,
+              true,
+            );
+          }
+        });
+    }
+
+    this.restarts.push(Date.now());
+    if (this.restarts.length <= this.maxRestartCount) {
+      return { action: CloseAction.Restart };
+    } else {
+      const diff = this.restarts[this.restarts.length - 1] - this.restarts[0];
+      if (diff <= 3 * 60 * 1000) {
+        return {
+          action: CloseAction.DoNotRestart,
+          message: `The Luau Language server crashed ${this.maxRestartCount + 1} times in the last 3 minutes. The server will not be restarted. See the output for more information.`,
+        };
+      } else {
+        this.restarts.shift();
+        return { action: CloseAction.Restart };
+      }
+    }
+  }
+}
 
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
   for (const disposable of clientDisposables) {
@@ -249,6 +343,13 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     addArg("--delay-startup");
   }
 
+  if (isCrashReportingEnabled()) {
+    addArg("--enable-crash-reporting");
+    addArg(
+      `--crash-report-directory=${vscode.Uri.joinPath(context.globalStorageUri, "sentry").fsPath}`,
+    );
+  }
+
   const run: Executable = {
     command: serverBinPath,
     args,
@@ -287,6 +388,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     markdown: {
       supportHtml: true,
     },
+    errorHandler: new ClientErrorHandler(context, 4),
   };
 
   client = new LanguageClient(

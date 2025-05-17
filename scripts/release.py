@@ -38,10 +38,9 @@ with open(MAIN_CPP_FILE, "r") as file:
     lines = file.readlines()
 
     for line in lines:
-        if line.strip().startswith('argparse::ArgumentParser program("luau-lsp", '):
+        if line.strip().startswith("#define LSP_VERSION "):
             new_line = (
-                line[0 : line.find(line.strip())]
-                + f'argparse::ArgumentParser program("luau-lsp", "{VERSION}");\n'
+                line[0 : line.find(line.strip())] + f'#define LSP_VERSION "{VERSION}"\n'
             )
             new_main_cpp_lines.append(new_line)
         else:
