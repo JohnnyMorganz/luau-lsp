@@ -111,7 +111,7 @@ jobs:
         run: dsymutil build/luau-lsp && strip -S build/luau-lsp
 
       - name: (Linux) Separate debug symbols
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm'
         run: objcopy --only-keep-debug build/luau-lsp build/luau-lsp.dbg && objcopy --strip-debug build/luau-lsp
 
       - name: Copy Build into Extension

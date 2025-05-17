@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed blowup of `linux-arm64` release build size due to the inclusion of debug symbols
+
 ## [1.47.0] - 2025-05-17
 
 ### Added
