@@ -81,7 +81,7 @@ jobs:
 
       - name: Copy Crashpad Handler into Extension
         shell: bash
-        if: matrix.crash-reporting == 'true'
+        if: matrix.crash-reporting == true
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
               cp build/RelWithDebInfo/crashpad_handler.exe editors/code/bin/crashpad_handler.exe
