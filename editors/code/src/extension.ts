@@ -251,6 +251,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   if (serverConfiguration.get<boolean>("crashReporting.enabled", false)) {
     addArg("--enable-crash-reporting");
+    addArg(`--crash-report-directory=${context.globalStorageUri.fsPath}`);
   }
 
   const run: Executable = {

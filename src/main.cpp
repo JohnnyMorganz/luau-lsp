@@ -51,9 +51,20 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     bool isCrashReportingEnabled = program.is_used("--enable-crash-reporting");
     if (isCrashReportingEnabled)
     {
+        std::optional<std::filesystem::path> crashReportDirectory = program.present<std::filesystem::path>("--crash-report-directory");
+
         sentry_options_t* options = sentry_options_new();
         sentry_options_set_dsn(options, "https://bc658c75485d1aecbaf1c0c1f7980922@o4509305213026304.ingest.de.sentry.io/4509305221283920");
-        sentry_options_set_database_path(options, ".sentry-native"); // TODO: configure
+
+        if (crashReportDirectory.has_value())
+        {
+#ifdef _WIN32
+            sentry_options_set_database_pathw(options, crashReportDirectory->c_str());
+#else
+            sentry_options_set_database_path(options, crashReportDirectory->c_str());
+#endif
+        }
+
         sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
         sentry_init(options);
     }
@@ -290,6 +301,10 @@ int main(int argc, char** argv)
         .help("whether to enable crash reporting to Sentry")
         .default_value(false)
         .implicit_value(true);
+    lsp_command.add_argument("--crash-report-directory")
+        .help("location to store database for crash reports")
+        .action(file_path_parser)
+        .metavar("PATH");
 
     program.add_parents(parent_parser);
     program.add_subparser(analyze_command);
