@@ -14,8 +14,6 @@
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #endif
 
 #ifdef LSP_BUILD_WITH_SENTRY
@@ -47,10 +45,10 @@ static void displayFlags()
 
 int startLanguageServer(const argparse::ArgumentParser& program)
 {
-#ifdef LSP_BUILD_WITH_SENTRY
     bool isCrashReportingEnabled = program.is_used("--enable-crash-reporting");
     if (isCrashReportingEnabled)
     {
+#ifdef LSP_BUILD_WITH_SENTRY
         std::optional<std::filesystem::path> crashReportDirectory = program.present<std::filesystem::path>("--crash-report-directory");
 
         sentry_options_t* options = sentry_options_new();
@@ -67,8 +65,10 @@ int startLanguageServer(const argparse::ArgumentParser& program)
 
         sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
         sentry_init(options);
-    }
+#else
+        std::cerr << "Ignoring '--enable-crash-reporting' as this server was not built with crash reporting features\n";
 #endif
+    }
 
     // Debug loop: set a breakpoint inside while loop to attach debugger before init
     if (program.is_used("--delay-startup"))
