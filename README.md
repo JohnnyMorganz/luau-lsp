@@ -111,6 +111,15 @@ The language server implements opt-in crash reporting, using [Sentry](https://se
 On VSCode, this is configured via the setting `luau-lsp.server.crashReporting.enabled`.
 When a crash is encountered, an out-of-process crash handler will upload the crash details to Sentry via HTTP.
 
+When a crash is reported, the report stores the following information:
+
+- Crash reason and thread stack trace
+- Device metadata: OS name, version and CPU architecture
+- Dynamic libraries loaded into the process (including filesystem paths)
+
+This information is transferred through a [Minidump](https://docs.sentry.io/platforms/native/guides/minidumps/#what-is-a-minidump) file.
+This file is not stored after processing. No general usage data is recorded.
+
 Crash Reporting is only available for Windows and macOS, and is not active for Standalone mode (`luau-lsp analyze`)
 
 ## Build From Source
