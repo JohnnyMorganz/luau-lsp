@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
+
 ### Fixed
 
 - Fixed blowup of `linux-arm64` release build size due to the inclusion of debug symbols

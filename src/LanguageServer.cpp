@@ -11,6 +11,16 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Diagnostics.hpp"
 
+#ifdef LSP_BUILD_WITH_SENTRY
+// sentry.h pulls in <windows.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#endif
+#define SENTRY_BUILD_STATIC 1
+#include <sentry.h>
+#endif
+
 #define ASSERT_PARAMS(params, method) \
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
@@ -397,6 +407,13 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
     }
     catch (const std::exception& e)
     {
+#ifdef LSP_BUILD_WITH_SENTRY
+        sentry_value_t event = sentry_value_new_event();
+        sentry_value_t exc = sentry_value_new_exception("CaughtException", e.what());
+        sentry_value_set_stacktrace(exc, NULL, 0);
+        sentry_value_set_by_key(exc, "handled", sentry_value_new_bool(true));
+        sentry_event_add_exception(event, exc);
+#endif
         client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
     }
 }
