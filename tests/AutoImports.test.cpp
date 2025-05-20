@@ -1154,4 +1154,33 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_are_inserted_after_services")
     CHECK_EQ(item->additionalTextEdits[0].range.start.line, 2);
 }
 
+TEST_CASE_FIXTURE(Fixture, "auto_import_empty_require_statement")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    newDocument("alphabet.luau", "");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local Value = require()
+
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result);
+
+    REQUIRE_EQ(imports.size(), 1);
+    auto item = getItem(imports, "alphabet");
+    REQUIRE(item);
+    REQUIRE_EQ(item->additionalTextEdits.size(), 1);
+    CHECK_EQ(item->additionalTextEdits[0].range.start.line, 1);
+}
+
 TEST_SUITE_END();

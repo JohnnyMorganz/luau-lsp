@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed blowup of `linux-arm64` release build size due to the inclusion of debug symbols
+- Fixed crash when auto imports is enabled and the file contains a require with no arguments (e.g.
+  `local Value = require()`, typically the case when in the middle of typing a require)
 
 ## [1.47.0] - 2025-05-17
 

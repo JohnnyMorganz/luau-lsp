@@ -132,7 +132,7 @@ size_t computeBestLineForRequire(
             auto* call = stat->values.data[0]->as<Luau::AstExprCall>();
             if (auto assertion = stat->values.data[0]->as<Luau::AstExprTypeAssertion>())
                 call = assertion->expr->as<Luau::AstExprCall>();
-            if (!call)
+            if (!call || call->args.size != 1)
                 continue;
 
             std::string argText;
