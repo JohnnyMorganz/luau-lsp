@@ -89,6 +89,8 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_triggers_diagnostics_in_depende
 
 TEST_CASE_FIXTURE(Fixture, "text_document_update_auto_updates_workspace_diagnostics_of_dependent_files")
 {
+    client->globalConfig.diagnostics.workspace = true;
+
     auto firstDocument = newDocument("a.luau", R"(
         --!strict
         return { hello = true }
@@ -132,6 +134,36 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_auto_updates_workspace_diagnost
         CHECK_EQ(dependentDiagnostics.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
     else
         CHECK_EQ(dependentDiagnostics.items[0].message, "TypeError: Key 'hello' not found in table '{| hello2: boolean |}'");
+}
+
+TEST_CASE_FIXTURE(Fixture, "text_document_update_does_not_update_workspace_diagnostics_if_setting_is_disabled")
+{
+    client->globalConfig.diagnostics.workspace = false;
+
+    auto firstDocument = newDocument("a.luau", R"(
+        --!strict
+        return { hello = true }
+    )");
+    auto secondDocument = newDocument("b.luau", R"(
+        --!strict
+        local a = require("./a.luau")
+        print(a.hello)
+    )");
+
+    // Assumption: initial workspace diagnostics was triggered
+    // We are using documentDiagnostics to replicate workspace diagnostics checking the file (and making it non-dirty)
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    client->workspaceDiagnosticsToken = "WORKSPACE-DIAGNOSTICS-PROGRESS-TOKEN";
+
+    updateDocument(firstDocument, R"(
+        --!strict
+        return { hello2 = true }
+    )");
+
+    // Check no workspace diagnostics progress on queue
+    for (const auto& notification : client->notificationQueue)
+        CHECK_NE(notification.first, "$/progress");
 }
 
 TEST_SUITE_END();

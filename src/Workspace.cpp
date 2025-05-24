@@ -33,6 +33,11 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
     }
 }
 
+static bool isWorkspaceDiagnosticsEnabled(const ClientPtr& client, const ClientConfiguration& config)
+{
+    return client->workspaceDiagnosticsToken && config.diagnostics.workspace;
+}
+
 void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
 {
     if (fileResolver.managedFiles.find(uri) == fileResolver.managedFiles.end())
@@ -52,7 +57,8 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     // Update diagnostics
     // In pull based diagnostics module, documentDiagnostics will update the necessary files
     // But, if workspace diagnostics is enabled, or we are using push-based diagnostics, we need to update
-    if (client->workspaceDiagnosticsToken || !usingPullDiagnostics(client->capabilities))
+    auto config = client->getConfiguration(rootUri);
+    if (isWorkspaceDiagnosticsEnabled(client, config) || !usingPullDiagnostics(client->capabilities))
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
         auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
@@ -63,8 +69,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
         // Compute diagnostics for reverse dependencies
         // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
         // TODO: maybe this should only be done onSave
-        auto config = client->getConfiguration(rootUri);
-        if (client->workspaceDiagnosticsToken || config.diagnostics.includeDependents)
+        if (isWorkspaceDiagnosticsEnabled(client, config) || config.diagnostics.includeDependents)
         {
             for (auto& moduleName : markedDirty)
             {
@@ -80,7 +85,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
             }
         }
 
-        if (client->workspaceDiagnosticsToken)
+        if (isWorkspaceDiagnosticsEnabled(client, config))
         {
             lsp::WorkspaceDiagnosticReportPartialResult report;
 
