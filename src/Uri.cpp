@@ -1,6 +1,5 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/6dec22d7dcc6c63c30343d3a8d56050d0078cb6a/src/uri.ts
 #include <filesystem>
-#include <regex>
 #include <optional>
 #include <cctype>
 #include "LSP/Uri.hpp"
@@ -35,17 +34,19 @@ static std::string decodeURIComponent(const std::string& str)
 
 static std::string percentDecode(const std::string& str)
 {
-    const std::regex REGEX_EXPR(R"((%[0-9A-Za-z][0-9A-Za-z])+)");
     std::string out;
-    auto it = str.cbegin();
-    auto end = str.cend();
-
-    for (std::smatch match; std::regex_search(it, end, match, REGEX_EXPR); it = match[0].second)
+    for (size_t i = 0; i < str.length(); ++i)
     {
-        out += match.prefix();
-        out += decodeURIComponent(match.str());
+        if (str[i] == '%' && i + 2 < str.length() && isxdigit(str[i + 1]) && isxdigit(str[i + 2]))
+        {
+            out += decodeURIComponent(str.substr(i, 3));
+            i += 2;
+        }
+        else
+        {
+            out += str[i];
+        }
     }
-    out.append(it, end);
     return out;
 }
 
@@ -217,20 +218,76 @@ static std::string encodeURIComponentMinimal(const std::string& path, bool, bool
     return res.has_value() ? *res : path;
 }
 
+static Uri kNullUri = {"", "", "", "", ""};
+
 Uri Uri::parse(const std::string& value)
 {
-    const std::regex REGEX_EXPR(R"(^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
-    std::smatch match;
-    if (std::regex_match(value, match, REGEX_EXPR))
+    std::string scheme;
+    std::string authority;
+    std::string path;
+    std::string query;
+    std::string fragment;
+
+    size_t current_pos = 0;
+    size_t scheme_end = value.find(':');
+    if (scheme_end != std::string::npos)
     {
-        // match[0] is whole string
-        return {match[2], percentDecode(match[4]), percentDecode(match[5]), percentDecode(match[7]), percentDecode(match[9])};
+        scheme = value.substr(0, scheme_end);
+        current_pos = scheme_end + 1;
     }
     else
     {
-        // TODO: should we error?
-        return {"", "", "", "", ""};
+        return kNullUri;
     }
+
+    if (current_pos < value.length() && value.substr(current_pos, 2) == "//")
+    {
+        current_pos += 2;
+        size_t authority_end = value.find_first_of("/?#", current_pos);
+        if (authority_end != std::string::npos)
+        {
+            authority = value.substr(current_pos, authority_end - current_pos);
+            current_pos = authority_end;
+        }
+        else
+        {
+            authority = value.substr(current_pos);
+            current_pos = value.length();
+        }
+    }
+
+    size_t path_end = value.find_first_of("?#", current_pos);
+    if (path_end != std::string::npos)
+    {
+        path = value.substr(current_pos, path_end - current_pos);
+        current_pos = path_end;
+    }
+    else
+    {
+        path = value.substr(current_pos);
+        current_pos = value.length();
+    }
+
+    if (current_pos < value.length() && value[current_pos] == '?')
+    {
+        current_pos++;
+        size_t fragment_start = value.find('#', current_pos);
+        if (fragment_start != std::string::npos)
+        {
+            query = value.substr(current_pos, fragment_start - current_pos);
+            current_pos = fragment_start;
+        }
+        else
+        {
+            query = value.substr(current_pos);
+            current_pos = value.length();
+        }
+    }
+
+    if (current_pos < value.length() && value[current_pos] == '#')
+        fragment = value.substr(current_pos + 1);
+
+    return {scheme, percentDecode(authority), percentDecode(path), percentDecode(query), percentDecode(fragment)};
 }
 
 Uri Uri::file(const std::filesystem::path& fsPath)

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
 
+### Changed
+
+- 1160x performance improvement to Uri parsing time at scale (7.77s to 0.0067s for ~30,000 URIs)
+
 ### Fixed
 
 - Fixed blowup of `linux-arm64` release build size due to the inclusion of debug symbols
