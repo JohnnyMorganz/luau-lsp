@@ -167,9 +167,6 @@ target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
 target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler)
-if (LSP_BUILD_WITH_SENTRY)
-    target_link_libraries(Luau.LanguageServer PRIVATE sentry)
-endif ()
 
 set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
 target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)
@@ -183,6 +180,9 @@ target_include_directories(Luau.LanguageServer.Test PRIVATE tests ${EXTERN_INCLU
 target_link_libraries(Luau.LanguageServer.Test PRIVATE Luau.Ast Luau.Analysis Luau.LanguageServer)
 
 if (LSP_BUILD_WITH_SENTRY)
+    target_link_libraries(Luau.LanguageServer PRIVATE sentry)
+    target_link_libraries(Luau.LanguageServer.CLI PRIVATE sentry)
+
     add_custom_command(
             TARGET Luau.LanguageServer.CLI POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
