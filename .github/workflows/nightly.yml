@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           DATE=$(date +%Y%m%d)
-          VERSION="$DATE.0.0"
+          VERSION="0.$DATE.0"
           sed -i.bak "s/#define LSP_VERSION .*/#define LSP_VERSION \"$VERSION\"/g" src/main.cpp
           jq ".version = \"$VERSION\"" editors/code/package.json > tmp.json && mv tmp.json editors/code/package.json
 
