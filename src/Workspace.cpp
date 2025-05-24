@@ -168,9 +168,14 @@ void WorkspaceFolder::clearDiagnosticsForFile(const lsp::DocumentUri& uri)
     clearDiagnosticsForFiles({uri});
 }
 
+static const char* kWatchedFilesProgressToken = "luau/onDidChangeWatchedFiles";
+
 void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes)
 {
     client->sendTrace("workspace: processing " + std::to_string(changes.size()) + " watched files changes");
+
+    client->createWorkDoneProgress(kWatchedFilesProgressToken);
+    client->sendWorkDoneProgressBegin(kWatchedFilesProgressToken, "Luau: Processing " + std::to_string(changes.size()) + " file changes");
 
     auto config = client->getConfiguration(rootUri);
 
@@ -223,6 +228,8 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 
     // Clear the diagnostics for files in case it was not managed
     clearDiagnosticsForFiles(deletedFiles);
+
+    client->sendWorkDoneProgressEnd(kWatchedFilesProgressToken);
 }
 
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration

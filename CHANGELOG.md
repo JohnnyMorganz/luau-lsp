@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
+- Added progress indicator for watched files changes
 
 ### Changed
 
