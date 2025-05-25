@@ -504,8 +504,8 @@ TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///home/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///home/project");
     loadSourcemap(R"(
         {
             "name": "Game",
@@ -533,8 +533,8 @@ TEST_CASE_FIXTURE(Fixture, "get_real_path_from_virtual_name")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/random/project");
-    workspace.fileResolver.rootUri = Uri::parse("/random/project");
+    workspace.rootUri = Uri::parse("file:///random/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///random/project");
     loadSourcemap(R"(
         {
             "name": "Game",
@@ -560,8 +560,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/random/project");
-    workspace.fileResolver.rootUri = Uri::parse("/random/project");
+    workspace.rootUri = Uri::parse("file:///random/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///random/project");
     loadSourcemap(R"(
         {
             "name": "RootNode",
@@ -594,8 +594,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///home/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///home/project");
     loadSourcemap(R"(
         {
             "name": "RootNode",
