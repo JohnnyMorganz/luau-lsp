@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
 - Added progress indicator for watched files changes
+- A Cloudflare page is now available to serve the type definition files and API documentations, due to GitHub ratelimiting ([#1059](https://github.com/JohnnyMorganz/luau-lsp/issues/1059))
+
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/api-docs/en-us.json`
 
 ### Changed
 
@@ -27,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed crash where catch-all error handler attempts to send an error message with non-UTF 8 characters
 - Fixed find references not showing types used as return types for
   functions ([#1060](https://github.com/JohnnyMorganz/luau-lsp/issues/1060))
+- VSCode: if fetching API documentation / definitions fails, then we do not overwrite the existing file ([#740](https://github.com/JohnnyMorganz/luau-lsp/issues/740))
 
 ## [1.47.0] - 2025-05-17
 

@@ -10,17 +10,14 @@ The script extracts type information from the Roblox API Dump:
 
 - https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json
 
-We make use of some corrections provided by Roblox LSP:
-
-- https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/Corrections.json
-
-DataTypes are also provided by Roblox LSP:
-
-- https://raw.githubusercontent.com/NightrainsRbx/RobloxLsp/master/server/api/DataTypes.json
-
 BrickColor information is retrieved from:
 
 - https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json
+
+The API dump is missing some information, such as DataTypes. This is stored independently in `DataTypes.json`.
+
+A legacy set of corrections is also present in `Corrections.json`. But note that future corrections are typically
+written in the script directly.
 
 ## Contributing
 
@@ -47,3 +44,14 @@ In summary, to submit corrections, follow the following steps:
 2. Edit `EXTRA_MEMBERS` in `dumpRobloxTypes.py` with your fixes
 3. Run `python dumpRobloxTypes.py > globalTypes.d.luau`
 4. Commit and submit a Pull Request
+
+## Serving
+
+Due to GitHub strict ratelimits for unauthenticated requests, the type definition files and API documentation are available
+to access statically via a Cloudflare Pages deployment:
+
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+- `https://luau-lsp.pages.dev/api-docs/en-us.json`
