@@ -115,7 +115,7 @@ bool readRawMessage(Transport* transport, std::string& output)
 /// Sends a raw JSON-RPC message to output stream
 void sendRawMessage(Transport* transport, const json& message)
 {
-    std::string s = message.dump();
+    std::string s = message.dump(-1, ' ', false, json::error_handler_t::ignore);
     transport->send(std::string("Content-Length: ") + std::to_string(s.length()) + "\r\n\r\n" + s);
 }
 
