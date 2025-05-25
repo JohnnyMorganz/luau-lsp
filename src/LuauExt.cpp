@@ -221,7 +221,12 @@ struct FindNodeType : public Luau::AstVisitor
     {
         return visit(static_cast<Luau::AstNode*>(node));
     }
-    
+
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return visit(static_cast<Luau::AstNode*>(node));
+    }
+
     bool visit(Luau::AstGenericType* node) override
     {
         return false;
@@ -646,6 +651,11 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstTypePack* type) override
+    {
+        return true;
+    }
+
     bool visit(Luau::AstTypeReference* typeReference) override
     {
         // TODO: this is not *completely* correct in the case of shadowing, as it is just a name comparison
@@ -676,6 +686,11 @@ struct FindTypeReferences : public Luau::AstVisitor
     }
 
     bool visit(class Luau::AstType* node) override
+    {
+        return true;
+    }
+
+    bool visit(class Luau::AstTypePack* node) override
     {
         return true;
     }

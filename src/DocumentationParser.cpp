@@ -332,6 +332,11 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
     {
         return true;
     }
+
+    bool visit(Luau::AstTypePack* ty) override
+    {
+        return true;
+    }
 };
 
 std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node)

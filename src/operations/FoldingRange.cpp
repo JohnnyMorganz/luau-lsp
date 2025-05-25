@@ -70,6 +70,11 @@ struct FoldingRangeVisitor : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return true;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         // Create a folding range for this block
