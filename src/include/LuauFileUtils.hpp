@@ -1,4 +1,8 @@
+#pragma once
+
+#include <string>
 #include <string_view>
+#include <vector>
 
 // TODO: Use Luau FileUtils directly once it is namespaced
 namespace Luau::FileUtils {

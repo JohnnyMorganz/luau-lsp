@@ -1,7 +1,5 @@
 #include "LuauFileUtils.hpp"
 
-#include <vector>
-
 namespace Luau::FileUtils {
 bool isAbsolutePath(std::string_view path)
 {
