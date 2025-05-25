@@ -544,7 +544,7 @@ TEST_CASE_FIXTURE(Fixture, "get_real_path_from_virtual_name")
     )");
 #endif
 
-    CHECK_EQ(workspace.platform->resolveToRealPath("game/MainScript"), workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+    CHECK_EQ(workspace.platform->resolveToRealPath("game/MainScript"), workspace.rootUri.resolvePath("Foo/Test.luau"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subchild_with_lower_case_drive_letter")
@@ -578,7 +578,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
     auto normalisedPath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(normalisedPath);
 
-    CHECK_EQ((workspace.rootUri.fsPath() / *filePath).generic_string(), normalisedPath->generic_string());
+    CHECK_EQ((workspace.rootUri.fsPath() / *filePath).generic_string(), normalisedPath->fsPath().generic_string());
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")

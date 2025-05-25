@@ -49,10 +49,7 @@ public:
         return std::nullopt;
     }
 
-    [[nodiscard]] virtual std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const
-    {
-        return name;
-    }
+    [[nodiscard]] virtual std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const;
 
     [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const
     {
@@ -125,10 +122,10 @@ public:
     virtual ~LSPPlatform() = default;
 };
 
-std::filesystem::path resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo);
-std::optional<std::filesystem::path> resolveAlias(const std::string& path, const Luau::Config& config, const std::filesystem::path& from);
+Uri resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo);
+std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from);
 
-std::optional<std::filesystem::path> resolveDirectoryAlias(
-    const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
+std::optional<Uri> resolveDirectoryAlias(
+    const Uri& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
 
 bool isInitLuauFile(const std::filesystem::path& path);

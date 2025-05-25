@@ -457,6 +457,46 @@ std::optional<Uri> Uri::parent() const
     return Uri(scheme, authority, *parentParent, query, fragment);
 }
 
+std::string Uri::filename() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    return std::string(components.back());
+}
+
+std::string Uri::extension() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    auto parts = Luau::split(components.back(), '.');
+    if (parts.empty())
+        return "";
+
+    return std::string(parts.back());
+}
+
+bool Uri::isDirectory() const
+{
+    if (scheme != "file")
+        return false;
+
+    std::error_code ec;
+    return std::filesystem::is_directory(path);
+}
+
+bool Uri::exists() const
+{
+    if (scheme != "file")
+        return false;
+
+    std::error_code ec;
+    return std::filesystem::exists(path);
+}
+
 std::string Uri::lexicallyRelative(const Uri& base) const
 {
     if (base.scheme != scheme || base.authority != authority)

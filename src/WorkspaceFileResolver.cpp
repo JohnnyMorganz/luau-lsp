@@ -100,7 +100,7 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     {
         if (auto realPath = platform->resolveToRealPath(name))
         {
-            return realPath->relative_path().generic_string() + " [" + name + "]";
+            return realPath->fsPath().relative_path().generic_string() + " [" + name + "]";
         }
         else
         {

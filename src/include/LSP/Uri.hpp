@@ -90,6 +90,22 @@ public:
     // Returns the parent path of this URI, if it exists
     std::optional<Uri> parent() const;
 
+    /// Returns the filename of this URI, if it exists
+    /// Equivalent to the last component of the Uri.path;
+    std::string filename() const;
+
+    /// Returns the extension of a path, if it exists
+    /// If the path has no components, or no extension, then returns an empty string
+    std::string extension() const;
+
+    /// Checks whether this URI corresponds to a directory. Performs a file-system call.
+    /// Always returns false if scheme is not 'file'
+    bool isDirectory() const;
+
+    /// Checks whether this URI corresponds to a path that exists on the file system. Performs a file-system call.
+    /// Always returns false if scheme is not 'file'
+    bool exists() const;
+
     // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
     std::string lexicallyRelative(const Uri& base) const;
 
