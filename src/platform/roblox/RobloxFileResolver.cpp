@@ -35,7 +35,6 @@ std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& nam
 
 Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesystem::path& path) const
 {
-    if (auto sourceNode = getSourceNodeFromRealPath(path.generic_string()))
     if (auto sourceNode = getSourceNodeFromRealPath(Uri::file(path)))
         return (*sourceNode)->sourceCodeType();
 
