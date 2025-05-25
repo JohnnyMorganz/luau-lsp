@@ -66,7 +66,7 @@ public:
     /// Whether the file has been marked as ignored for auto-importing
     bool isIgnoredFileForAutoImports(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
     /// Whether the file has been specified in the configuration as a definitions file
-    bool isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt);
+    bool isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
 
     lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles = false);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
