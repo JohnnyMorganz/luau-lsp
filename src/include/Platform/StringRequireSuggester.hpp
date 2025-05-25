@@ -6,15 +6,15 @@
 class FileRequireNode : public Luau::RequireNode
 {
 public:
-    FileRequireNode(std::filesystem::path path, bool isDirectory, WorkspaceFolder* workspaceFolder)
-        : path(std::move(path))
+    FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder)
+        : uri(std::move(uri))
         , isDirectory(isDirectory)
         , workspaceFolder(workspaceFolder)
     {
     }
 
-    FileRequireNode(std::filesystem::path path, bool isDirectory, WorkspaceFolder* workspaceFolder, Luau::Config mainRequirerNodeConfig)
-        : path(std::move(path))
+    FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder, Luau::Config mainRequirerNodeConfig)
+        : uri(uri)
         , isDirectory(isDirectory)
         , mainRequirerNodeConfig(std::move(mainRequirerNodeConfig))
         , workspaceFolder(workspaceFolder)
@@ -29,7 +29,7 @@ public:
     std::vector<Luau::RequireAlias> getAvailableAliases() const override;
 
 private:
-    std::filesystem::path path;
+    Uri uri;
     bool isDirectory = false;
 
     /// The resolved configuration for the main requirer node

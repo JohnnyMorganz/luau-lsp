@@ -199,7 +199,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
         else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
         {
             // Notify if it was a definitions file
-            if (isDefinitionFile(filePath, config))
+            if (isDefinitionFile(change.uri, config))
             {
                 client->sendWindowMessage(
                     lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
@@ -265,14 +265,13 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::opt
     return false;
 }
 
-bool WorkspaceFolder::isDefinitionFile(const std::filesystem::path& path, const std::optional<ClientConfiguration>& givenConfig)
+bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig) const
 {
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
-    auto canonicalised = std::filesystem::weakly_canonical(path);
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (std::filesystem::weakly_canonical(resolvePath(file)) == canonicalised)
+        if (rootUri.resolvePath(resolvePath(file).generic_string()) == path)
         {
             return true;
         }
@@ -352,13 +351,13 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
         try
         {
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config) &&
-                !isIgnoredFile(Uri::file(next->path()), config))
+            auto uri = Uri::file(next->path());
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
             {
                 auto ext = next->path().extension();
                 if (ext == ".lua" || ext == ".luau")
                 {
-                    auto moduleName = fileResolver.getModuleName(Uri::file(next->path()));
+                    auto moduleName = fileResolver.getModuleName(uri);
 
                     // Parse the module to infer require data
                     // We do not perform any type checking here

@@ -55,7 +55,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     auto config = client->getConfiguration(rootUri);
 
     // If the file is a definitions file, then don't display any diagnostics
-    if (isDefinitionFile(params.textDocument.uri.fsPath(), config))
+    if (isDefinitionFile(params.textDocument.uri, config))
         return report;
 
     // Report Type Errors
@@ -117,11 +117,12 @@ std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::fi
     {
         try
         {
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(next->path(), config))
+            auto uri = Uri::file(next->path());
+            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(uri, config))
             {
                 auto ext = next->path().extension();
                 if (ext == ".lua" || ext == ".luau")
-                    files.push_back(Uri::file(next->path()));
+                    files.push_back(uri);
             }
         }
         catch (const std::filesystem::filesystem_error& e)

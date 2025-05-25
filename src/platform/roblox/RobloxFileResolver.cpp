@@ -9,14 +9,14 @@ std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::
     }
     else
     {
-        auto sourceNode = getSourceNodeFromRealPath(name);
+        auto sourceNode = getSourceNodeFromRealPath(Uri::file(name));
         if (!sourceNode)
             return std::nullopt;
         return getVirtualPathFromSourceNode(sourceNode.value());
     }
 }
 
-std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
+std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
 {
     if (isVirtualPath(name))
     {
@@ -27,7 +27,7 @@ std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Lua
     }
     else
     {
-        return name;
+        return fileResolver->getUri(name);
     }
 
     return std::nullopt;
@@ -35,7 +35,7 @@ std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Lua
 
 Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesystem::path& path) const
 {
-    if (auto sourceNode = getSourceNodeFromRealPath(path.generic_string()))
+    if (auto sourceNode = getSourceNodeFromRealPath(Uri::file(path)))
         return (*sourceNode)->sourceCodeType();
 
     auto filename = path.filename().generic_string();

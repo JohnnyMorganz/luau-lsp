@@ -90,8 +90,36 @@ public:
     // Returns the parent path of this URI, if it exists
     std::optional<Uri> parent() const;
 
+    /// Returns the filename of this URI, if it exists
+    /// Equivalent to the last component of the Uri.path;
+    std::string filename() const;
+
+    /// Returns the extension of a path, if it exists.
+    /// If the path has no components, or no extension, then returns an empty string.
+    /// Extension includes the '.' character (e.g., `.luau`)
+    std::string extension() const;
+
+    /// Checks whether this URI corresponds to a directory. Performs a file-system call.
+    /// Always returns false if scheme is not 'file'
+    bool isDirectory() const;
+
+    /// Checks whether this URI corresponds to a path that exists on the file system. Performs a file-system call.
+    /// Always returns false if scheme is not 'file'
+    bool exists() const;
+
     // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
     std::string lexicallyRelative(const Uri& base) const;
+
+    // Resolves a path against the path of the URI
+    // '/' is used as the directory separation character.
+    //
+    // The resolved path will be normalized. That means:
+    //  - all '..' and '.' segments are resolved.
+    //  - multiple, sequential occurences of '/' are replaced by a single instance of '/'.
+    //  - trailing separators are removed.
+    //
+    // If 'otherPath' is an absolute path, then the current path of the Uri is replaced
+    Uri resolvePath(std::string_view otherPath) const;
 
     // Returns whether the current Uri is an ancestor of the other URI
     bool isAncestorOf(const Uri& other) const;

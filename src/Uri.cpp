@@ -5,6 +5,7 @@
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
+#include "LuauFileUtils.hpp"
 
 static std::string decodeURIComponent(const std::string& str)
 {
@@ -456,6 +457,46 @@ std::optional<Uri> Uri::parent() const
     return Uri(scheme, authority, *parentParent, query, fragment);
 }
 
+std::string Uri::filename() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    return std::string(components.back());
+}
+
+std::string Uri::extension() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    auto parts = Luau::split(components.back(), '.');
+    if (parts.empty())
+        return "";
+
+    return "." + std::string(parts.back());
+}
+
+bool Uri::isDirectory() const
+{
+    if (scheme != "file")
+        return false;
+
+    std::error_code ec;
+    return std::filesystem::is_directory(fsPath());
+}
+
+bool Uri::exists() const
+{
+    if (scheme != "file")
+        return false;
+
+    std::error_code ec;
+    return std::filesystem::exists(fsPath());
+}
+
 std::string Uri::lexicallyRelative(const Uri& base) const
 {
     if (base.scheme != scheme || base.authority != authority)
@@ -504,6 +545,40 @@ std::string Uri::lexicallyRelative(const Uri& base) const
     }
 
     return relative_path;
+}
+
+Uri Uri::resolvePath(std::string_view otherPath) const
+{
+    auto resolvedPath = this->path;
+    bool slashAdded = false;
+
+    if (Luau::FileUtils::isAbsolutePath(otherPath))
+        resolvedPath = otherPath;
+    else
+    {
+        if ((resolvedPath.empty() && authority.empty()) || (!resolvedPath.empty() && resolvedPath.back() == '/'))
+            resolvedPath += otherPath;
+        else
+        {
+            resolvedPath += '/';
+            resolvedPath += otherPath;
+        }
+    }
+
+    // We assume that the base is at least absolute, otherwise normalizePath will compute a relative path
+    // If it's not, then modify it to prevent relative paths
+    if (!Luau::FileUtils::isAbsolutePath(resolvedPath))
+    {
+        resolvedPath = "/" + resolvedPath;
+        slashAdded = true;
+    }
+
+    resolvedPath = Luau::FileUtils::normalizePath(resolvedPath);
+
+    if (slashAdded)
+        resolvedPath = resolvedPath.substr(1);
+
+    return {scheme, authority, resolvedPath, query, fragment};
 }
 
 bool Uri::isAncestorOf(const Uri& other) const

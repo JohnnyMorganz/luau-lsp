@@ -535,10 +535,30 @@ TEST_CASE("luau-lsp custom: lexicallyRelative")
     CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c/x/y")), "../..");
     CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c")), ".");
     CHECK_EQ(Uri::file("/a/b").lexicallyRelative(Uri::file("/c/d")), "../../a/b");
-    
+
 #ifdef _WIN32
     CHECK_EQ(Uri::file("C:/project/file").lexicallyRelative(Uri::file("c:/project")), "file");
 #endif
+}
+
+TEST_CASE("Uri::resolvePath")
+{
+    CHECK_EQ(Uri::parse("foo://a/foo/bar").resolvePath("x").toString(), "foo://a/foo/bar/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("x").toString(), "foo://a/foo/bar/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("/x").toString(), "foo://a/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("x/").toString(), "foo://a/foo/bar/x");
+
+    CHECK_EQ(Uri::parse("foo://a").resolvePath("x/").toString(), "foo://a/x");
+    CHECK_EQ(Uri::parse("foo://a").resolvePath("/x/").toString(), "foo://a/x");
+
+    CHECK_EQ(Uri::parse("foo://a/b").resolvePath("/x/..//y/.").toString(), "foo://a/y");
+    CHECK_EQ(Uri::parse("foo://a/b").resolvePath("x/..//y/.").toString(), "foo://a/b/y");
+    CHECK_EQ(Uri::parse("untitled:untitled-1").resolvePath("../foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:").resolvePath("foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:").resolvePath("..").toString(), "untitled:");
+    // TODO: LSP Deviation
+    //    CHECK_EQ(Uri::parse("untitled:").resolvePath("/foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:/").resolvePath("/foo").toString(), "untitled:/foo");
 }
 
 TEST_SUITE_END();

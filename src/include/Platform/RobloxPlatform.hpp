@@ -133,11 +133,11 @@ private:
     // Plugin-provided DataModel information
     PluginNodePtr pluginInfo;
 
-    mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes{};
+    mutable std::unordered_map<Uri, SourceNodePtr, UriHash> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
 
     std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
-    std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
+    std::optional<SourceNodePtr> getSourceNodeFromRealPath(const Uri& name) const;
 
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
 
@@ -153,7 +153,7 @@ public:
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
     /// For testing only
     void writePathsToMap(const SourceNodePtr& node, const std::string& base);
-    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
+    std::optional<Uri> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
@@ -168,7 +168,7 @@ public:
 
     std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
 
-    std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const override;
+    std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const override;
 
     Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
 
