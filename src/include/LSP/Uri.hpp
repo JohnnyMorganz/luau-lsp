@@ -93,6 +93,17 @@ public:
     // Returns a string path that is lexically relative to the other URI, similar to std::filesystem::path.lexically_relative()
     std::string lexicallyRelative(const Uri& base) const;
 
+    // Resolves a path against the path of the URI
+    // '/' is used as the directory separation character.
+    //
+    // The resolved path will be normalized. That means:
+    //  - all '..' and '.' segments are resolved.
+    //  - multiple, sequential occurences of '/' are replaced by a single instance of '/'.
+    //  - trailing separators are removed.
+    //
+    // If 'otherPath' is an absolute path, then the current path of the Uri is replaced
+    Uri resolvePath(std::string_view otherPath) const;
+
     // Returns whether the current Uri is an ancestor of the other URI
     bool isAncestorOf(const Uri& other) const;
 };

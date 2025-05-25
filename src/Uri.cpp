@@ -5,6 +5,7 @@
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
+#include "LuauFileUtils.hpp"
 
 static std::string decodeURIComponent(const std::string& str)
 {
@@ -504,6 +505,40 @@ std::string Uri::lexicallyRelative(const Uri& base) const
     }
 
     return relative_path;
+}
+
+Uri Uri::resolvePath(std::string_view otherPath) const
+{
+    auto resolvedPath = this->path;
+    bool slashAdded = false;
+
+    if (Luau::FileUtils::isAbsolutePath(otherPath))
+        resolvedPath = otherPath;
+    else
+    {
+        if ((resolvedPath.empty() && authority.empty()) || (!resolvedPath.empty() && resolvedPath.back() == '/'))
+            resolvedPath += otherPath;
+        else
+        {
+            resolvedPath += '/';
+            resolvedPath += otherPath;
+        }
+    }
+
+    // We assume that the base is at least absolute, otherwise normalizePath will compute a relative path
+    // If it's not, then modify it to prevent relative paths
+    if (!Luau::FileUtils::isAbsolutePath(resolvedPath))
+    {
+        resolvedPath = "/" + resolvedPath;
+        slashAdded = true;
+    }
+
+    resolvedPath = Luau::FileUtils::normalizePath(resolvedPath);
+
+    if (slashAdded)
+        resolvedPath = resolvedPath.substr(1);
+
+    return {scheme, authority, resolvedPath, query, fragment};
 }
 
 bool Uri::isAncestorOf(const Uri& other) const
