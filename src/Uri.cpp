@@ -476,7 +476,7 @@ std::string Uri::extension() const
     if (parts.empty())
         return "";
 
-    return std::string(parts.back());
+    return "." + std::string(parts.back());
 }
 
 bool Uri::isDirectory() const

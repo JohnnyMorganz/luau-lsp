@@ -94,8 +94,9 @@ public:
     /// Equivalent to the last component of the Uri.path;
     std::string filename() const;
 
-    /// Returns the extension of a path, if it exists
-    /// If the path has no components, or no extension, then returns an empty string
+    /// Returns the extension of a path, if it exists.
+    /// If the path has no components, or no extension, then returns an empty string.
+    /// Extension includes the '.' character (e.g., `.luau`)
     std::string extension() const;
 
     /// Checks whether this URI corresponds to a directory. Performs a file-system call.
