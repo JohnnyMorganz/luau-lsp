@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed performance regression from previous release where type checking is being performed on document change even if
   workspace diagnostics is disabled
 - Fixed crash where catch-all error handler attempts to send an error message with non-UTF 8 characters
+- Fixed find references not showing types used as return types for
+  functions ([#1060](https://github.com/JohnnyMorganz/luau-lsp/issues/1060))
 
 ## [1.47.0] - 2025-05-17
 
