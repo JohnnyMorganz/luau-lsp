@@ -37,6 +37,11 @@ jobs:
           python dumpRobloxTypes.py RobloxScriptSecurity > globalTypes.RobloxScriptSecurity.d.luau
           python dumpRobloxTypes.py > globalTypes.d.lua
 
+      - name: Update API docs
+        run: |
+          mkdir -p scripts/api-docs
+          curl https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json > scripts/api-docs/en-us.json
+
       - name: Create Pull Request
         id: create_pull_request
         uses: peter-evans/create-pull-request@v6
