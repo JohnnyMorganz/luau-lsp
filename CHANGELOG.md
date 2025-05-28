@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.48.0] - 2025-05-28
+
 ### Added
 
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
