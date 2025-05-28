@@ -5,15 +5,8 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauAllFreeTypesHaveScopes)
-LUAU_FASTFLAG(LuauClonedTableAndFunctionTypesMustHaveScopes)
-LUAU_FASTFLAG(LuauDisableNewSolverAssertsInMixedMode)
-LUAU_FASTFLAG(LuauCloneTypeAliasBindings)
-LUAU_FASTFLAG(LuauDoNotClonePersistentBindings)
-LUAU_FASTFLAG(LuauIncrementalAutocompleteDemandBasedCloning)
 LUAU_FASTFLAG(LuauBetterScopeSelection)
 LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
-LUAU_FASTFLAG(LuauAutocompleteUsesModuleForTypeCompatibility)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
 LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
@@ -41,15 +34,9 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[11] = {
-        {FFlag::LuauAllFreeTypesHaveScopes, true},
-        {FFlag::LuauClonedTableAndFunctionTypesMustHaveScopes, true},
-        {FFlag::LuauDisableNewSolverAssertsInMixedMode, true},
-        {FFlag::LuauCloneTypeAliasBindings, true},
-        {FFlag::LuauDoNotClonePersistentBindings, true},
+    ScopedFastFlag sffs[5] = {
         {FFlag::LuauBetterScopeSelection, true},
         {FFlag::LuauBlockDiffFragmentSelection, true},
-        {FFlag::LuauAutocompleteUsesModuleForTypeCompatibility, true},
         {FFlag::LuauFragmentAcMemoryLeak, true},
         {FFlag::LuauGlobalVariableModuleIsolation, true},
         {FFlag::LuauFragmentAutocompleteIfRecommendations, true},

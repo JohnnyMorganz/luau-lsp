@@ -223,8 +223,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     }
 
     // Parse require graph for files if indexing enabled
-    for (const auto& dirtyModule : dirtyFiles)
-        frontend.parse(dirtyModule);
+    frontend.parseModules(dirtyFiles);
 
     // Clear the diagnostics for files in case it was not managed
     clearDiagnosticsForFiles(deletedFiles);
@@ -334,14 +333,14 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
     client->sendTrace("workspace: indexing all files");
     client->createWorkDoneProgress(kIndexProgressToken);
-    client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing files");
+    client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing");
 
-    size_t indexCount = 0;
+    std::vector<Luau::ModuleName> moduleNames;
 
     for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
          next != end; ++next)
     {
-        if (indexCount >= config.index.maxFiles)
+        if (moduleNames.size() >= config.index.maxFiles)
         {
             client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
                                                                      ") has been hit. This may cause some language features to only work partially "
@@ -358,12 +357,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
                 if (ext == ".lua" || ext == ".luau")
                 {
                     auto moduleName = fileResolver.getModuleName(uri);
-
-                    // Parse the module to infer require data
-                    // We do not perform any type checking here
-                    frontend.parse(moduleName);
-
-                    indexCount += 1;
+                    moduleNames.emplace_back(moduleName);
                 }
             }
         }
@@ -373,7 +367,16 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         }
     }
 
-    client->sendWorkDoneProgressEnd(kIndexProgressToken, "Indexed " + std::to_string(indexCount) + " files");
+    client->sendWorkDoneProgressReport(kIndexProgressToken, std::to_string(moduleNames.size()) + " files");
+
+    frontend.clearStats();
+    frontend.parseModules(moduleNames);
+
+    client->sendLogMessage(lsp::MessageType::Info,
+        "Indexed " + std::to_string(frontend.stats.files) + " files (" + std::to_string(frontend.stats.lines) +
+            " lines)\n Time read: " + std::to_string(frontend.stats.timeRead) + "\n Time parse: " + std::to_string(frontend.stats.timeParse));
+
+    client->sendWorkDoneProgressEnd(kIndexProgressToken, "Indexed " + std::to_string(moduleNames.size()) + " files");
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
