@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - ~1160x performance improvement to Uri parsing time at scale (7.77s to 0.0067s for ~30,000 URIs)
 - ~10x performance improvement to require resolution for string requires and virtual (sourcemap) -> real file paths (
   3.28s to 0.322s for ~30,000 files)
+- ~1.29x performance improvement to reading files (4.5s to 3.66s for ~30,000 files)
 
 ### Fixed
 
