@@ -22,7 +22,6 @@ import {
 
 import * as roblox from "./roblox";
 import * as utils from "./utils";
-import path from "path";
 
 export type PlatformContext = { client: LanguageClient | undefined };
 export type AddArgCallback = (
@@ -261,14 +260,8 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       .getConfiguration("luau-lsp.completion")
       .get<boolean>("enableFragmentAutocomplete")
   ) {
-    fflags["LuauAllFreeTypesHaveScopes"] = "true";
-    fflags["LuauClonedTableAndFunctionTypesMustHaveScopes"] = "true";
-    fflags["LuauDisableNewSolverAssertsInMixedMode"] = "true";
-    fflags["LuauCloneTypeAliasBindings"] = "true";
-    fflags["LuauDoNotClonePersistentBindings"] = "true";
     fflags["LuauBetterScopeSelection"] = "true";
     fflags["LuauBlockDiffFragmentSelection"] = "true";
-    fflags["LuauAutocompleteUsesModuleForTypeCompatibility"] = "true";
     fflags["LuauFragmentAcMemoryLeak"] = "true";
     fflags["LuauGlobalVariableModuleIsolation"] = "true";
     fflags["LuauFragmentAutocompleteIfRecommendations"] = "true";
