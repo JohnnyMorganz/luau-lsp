@@ -4,17 +4,6 @@
 #include <algorithm>
 #include <fstream>
 
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <direct.h>
-#include <windows.h>
-#endif
-
 #include "Luau/TimeTrace.h"
 
 std::optional<std::string> getParentPath(const std::string& path)
@@ -103,23 +92,10 @@ std::string codeBlock(const std::string& language, const std::string& code)
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
-#ifdef _WIN32
-static std::wstring fromUtf8(const std::string& path)
-{
-    size_t result = MultiByteToWideChar(CP_UTF8, 0, path.data(), int(path.size()), nullptr, 0);
-    LUAU_ASSERT(result);
-
-    std::wstring buf(result, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, path.data(), int(path.size()), &buf[0], int(buf.size()));
-
-    return buf;
-}
-#endif
-
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
 #ifdef _WIN32
-    FILE* file = _wfopen(fromUtf8(name).c_str(), L"rb");
+    FILE* file = _wfopen(filePath.c_str(), L"rb");
 #else
     FILE* file = fopen(filePath.c_str(), "rb");
 #endif
