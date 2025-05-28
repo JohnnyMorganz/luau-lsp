@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "Luau/TimeTrace.h"
+
 std::optional<std::string> getParentPath(const std::string& path)
 {
     if (path == "" || path == "." || path == "/")
@@ -90,24 +92,50 @@ std::string codeBlock(const std::string& language, const std::string& code)
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
+#ifdef _WIN32
+static std::wstring fromUtf8(const std::string& path)
+{
+    size_t result = MultiByteToWideChar(CP_UTF8, 0, path.data(), int(path.size()), nullptr, 0);
+    LUAU_ASSERT(result);
+
+    std::wstring buf(result, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, path.data(), int(path.size()), &buf[0], int(buf.size()));
+
+    return buf;
+}
+#endif
+
 std::optional<std::string> readFile(const std::filesystem::path& filePath)
 {
-    std::ifstream fileContents;
-    fileContents.open(filePath);
+#ifdef _WIN32
+    FILE* file = _wfopen(fromUtf8(name).c_str(), L"rb");
+#else
+    FILE* file = fopen(filePath.c_str(), "rb");
+#endif
 
-    std::string output;
-    std::stringstream buffer;
+    if (!file)
+        return std::nullopt;
 
-    if (fileContents)
+    fseek(file, 0, SEEK_END);
+    long length = ftell(file);
+    if (length < 0)
     {
-        buffer << fileContents.rdbuf();
-        output = buffer.str();
-        return output;
-    }
-    else
-    {
+        fclose(file);
         return std::nullopt;
     }
+    fseek(file, 0, SEEK_SET);
+
+    std::string result(length, 0);
+
+    size_t read = fread(result.data(), 1, length, file);
+    fclose(file);
+
+    if (read != size_t(length))
+        return std::nullopt;
+
+    // LSP Deviation: we handle the shebang in TextDocument
+
+    return result;
 }
 
 std::optional<std::filesystem::path> getHomeDirectory()
