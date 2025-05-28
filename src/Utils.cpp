@@ -4,6 +4,17 @@
 #include <algorithm>
 #include <fstream>
 
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <direct.h>
+#include <windows.h>
+#endif
+
 #include "Luau/TimeTrace.h"
 
 std::optional<std::string> getParentPath(const std::string& path)
