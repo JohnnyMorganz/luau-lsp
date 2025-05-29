@@ -658,7 +658,10 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
 
     auto hover2 = workspace.hover(params);
     REQUIRE(hover2);
-    CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));
+    else
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
 }
 
 TEST_SUITE_END();
