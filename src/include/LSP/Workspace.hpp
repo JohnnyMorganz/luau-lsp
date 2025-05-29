@@ -68,7 +68,8 @@ public:
     /// Whether the file has been specified in the configuration as a definitions file
     bool isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
 
-    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles = false);
+    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params,
+        const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken, bool allowUnmanagedFiles = false);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
     void recomputeDiagnostics(const ClientConfiguration& config);
     void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
@@ -78,8 +79,10 @@ public:
 
     void indexFiles(const ClientConfiguration& config);
 
-    Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName);
-    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true);
+    Luau::CheckResult checkSimple(
+        const Luau::ModuleName& moduleName, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken = nullptr);
+    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true,
+        const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken = nullptr);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
@@ -102,7 +105,8 @@ public:
     std::vector<Reference> findAllFunctionReferences(const Luau::TypeId ty);
     std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
 
-    std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
+    std::vector<lsp::CompletionItem> completion(
+        const lsp::CompletionParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken);
 
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);

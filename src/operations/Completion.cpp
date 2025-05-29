@@ -460,7 +460,8 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     return std::nullopt;
 }
 
-std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
+std::vector<lsp::CompletionItem> WorkspaceFolder::completion(
+    const lsp::CompletionParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::completion", "LSP");
     auto config = client->getConfiguration(rootUri);
@@ -483,7 +484,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     std::unordered_set<std::string> tags;
 
     // We must perform check before autocompletion
-    checkStrict(moduleName, /* forAutocomplete: */ true);
+    checkStrict(moduleName, /* forAutocomplete: */ true, cancellationToken);
+
+    if (cancellationToken && cancellationToken->requested())
+        throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
 
     auto position = textDocument->convertPosition(params.position);
 
@@ -717,8 +721,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     return items;
 }
 
-std::vector<lsp::CompletionItem> LanguageServer::completion(const lsp::CompletionParams& params)
+std::vector<lsp::CompletionItem> LanguageServer::completion(
+    const lsp::CompletionParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
 {
     auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->completion(params);
+    return workspace->completion(params, cancellationToken);
 }
