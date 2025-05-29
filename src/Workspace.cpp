@@ -61,7 +61,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     if (isWorkspaceDiagnosticsEnabled(client, config) || !usingPullDiagnostics(client->capabilities))
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
-        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
+        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}}, /* cancellationToken= */ nullptr);
 
         if (!usingPullDiagnostics(client->capabilities))
             client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, params.textDocument.version, diagnostics.items});
@@ -77,7 +77,8 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
                 if (dirtyUri != uri && diagnostics.relatedDocuments.find(dirtyUri) == diagnostics.relatedDocuments.end() &&
                     !isIgnoredFile(dirtyUri, config))
                 {
-                    auto dependencyDiags = documentDiagnostics(lsp::DocumentDiagnosticParams{{dirtyUri}}, /* allowUnmanagedFiles= */ true);
+                    auto dependencyDiags = documentDiagnostics(
+                        lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken=*/nullptr, /* allowUnmanagedFiles= */ true);
                     diagnostics.relatedDocuments.emplace(
                         dirtyUri, lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
                     diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
@@ -283,12 +284,14 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
 // NOTE: use `frontend.parse` if you do not care about typechecking
-Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName)
+Luau::CheckResult WorkspaceFolder::checkSimple(
+    const Luau::ModuleName& moduleName, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
 {
     try
     {
-        return frontend.check(
-            moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, /* runLintChecks: */ true});
+        Luau::FrontendOptions options{/* retainFullTypeGraphs: */ false, /* forAutocomplete: */ false, /* runLintChecks: */ true};
+        options.cancellationToken = cancellationToken;
+        return frontend.check(moduleName, options);
     }
     catch (Luau::InternalCompilerError& err)
     {
@@ -304,7 +307,8 @@ Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleNam
 // Uses the autocomplete typechecker to enforce strictness and DM awareness.
 // NOTE: a disadvantage of the autocomplete typechecker is that it has a timeout restriction that
 // can often be hit
-Luau::CheckResult WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete)
+Luau::CheckResult WorkspaceFolder::checkStrict(
+    const Luau::ModuleName& moduleName, bool forAutocomplete, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
 {
     if (FFlag::LuauSolverV2)
         forAutocomplete = false;
@@ -317,7 +321,9 @@ Luau::CheckResult WorkspaceFolder::checkStrict(const Luau::ModuleName& moduleNam
     if (module && module->internalTypes.types.empty()) // If we didn't retain type graphs, then the internalTypes arena is empty
         frontend.markDirty(moduleName);
 
-    return frontend.check(moduleName, Luau::FrontendOptions{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ true});
+    Luau::FrontendOptions options{/* retainFullTypeGraphs: */ true, forAutocomplete, /* runLintChecks: */ true};
+    options.cancellationToken = cancellationToken;
+    return frontend.check(moduleName, options);
 }
 
 static const char* kIndexProgressToken = "luau/indexFiles";

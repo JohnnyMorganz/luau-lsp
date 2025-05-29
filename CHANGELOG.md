@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- The language server now supports cancellation notifications from the client. This should help in cases where the server is stuck waiting for typechecking to complete.
+
 ## [1.48.0] - 2025-05-28
 
 ### Added
