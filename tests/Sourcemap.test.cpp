@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "ScopedFlags.h"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 
@@ -662,6 +663,34 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
         CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));
     else
         CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.Workspace.Part
+        part.Parent = Instance.new("TextLabel")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
 }
 
 TEST_SUITE_END();

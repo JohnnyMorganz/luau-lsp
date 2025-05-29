@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- For DM types, `.Parent` is now typed with a write type of "Instance" in the new solver, preventing false-positive type
+  errors ([#1039](https://github.com/JohnnyMorganz/luau-lsp/issues/1039))
+
 ### Fixed
 
 - Fixed require-by-string failing for files named `luau` (e.g, `project/luau.luau`)
