@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed require-by-string failing for files named `luau` (e.g, `project/luau.luau`)
+
 ## [1.48.0] - 2025-05-28
 
 ### Added

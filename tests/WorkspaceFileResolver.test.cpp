@@ -320,6 +320,16 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
         Uri::file(projectDirectoryUtilsPath));
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
+{
+    TempDir t("resolve_init_luau_relative_to_directory");
+    auto mainPath = t.touch_child("project/main.luau");
+    auto luauPath = t.touch_child("project/luau.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./luau")->name), Uri::file(luauPath));
+}
+
 TEST_CASE("is_init_luau_file")
 {
     CHECK_EQ(isInitLuauFile("foo/init.lua"), true);
