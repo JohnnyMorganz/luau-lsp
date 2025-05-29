@@ -22,15 +22,13 @@ const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleN
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
+    LUAU_ASSERT(isReady);
     fileResolver.managedFiles.emplace(
         std::make_pair(uri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
 
-    if (isConfigured)
-    {
-        // Mark the file as dirty as we don't know what changes were made to it
-        auto moduleName = fileResolver.getModuleName(uri);
-        frontend.markDirty(moduleName);
-    }
+    // Mark the file as dirty as we don't know what changes were made to it
+    auto moduleName = fileResolver.getModuleName(uri);
+    frontend.markDirty(moduleName);
 }
 
 static bool isWorkspaceDiagnosticsEnabled(const ClientPtr& client, const ClientConfiguration& config)
@@ -40,6 +38,8 @@ static bool isWorkspaceDiagnosticsEnabled(const ClientPtr& client, const ClientC
 
 void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
 {
+    LUAU_ASSERT(isReady);
+
     if (fileResolver.managedFiles.find(uri) == fileResolver.managedFiles.end())
     {
         client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
@@ -211,7 +211,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             }
 
             // Index the workspace on changes
-            if (config.index.enabled && isConfigured)
+            if (config.index.enabled && appliedFirstTimeConfiguration)
             {
                 auto moduleName = fileResolver.getModuleName(change.uri);
                 frontend.markDirty(moduleName, &dirtyFiles);
@@ -528,15 +528,37 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 }
 
+void WorkspaceFolder::lazyInitialize()
+{
+    if (isReady)
+        return;
+
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::lazyInitialize", "LSP");
+
+    if (isNullWorkspace())
+    {
+        client->sendTrace("initializing null workspace");
+        setupWithConfiguration(client->globalConfig);
+    }
+    else
+    {
+        client->sendTrace("initializing workspace: " + rootUri.toString());
+        auto config = client->getConfiguration(rootUri);
+        setupWithConfiguration(config);
+    }
+
+    isReady = true;
+}
+
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
 
     // Apply first-time configuration
-    if (!isConfigured)
+    if (!appliedFirstTimeConfiguration)
     {
-        isConfigured = true;
+        appliedFirstTimeConfiguration = true;
 
         client->sendTrace("workspace: first time configuration, setting appropriate platform");
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);

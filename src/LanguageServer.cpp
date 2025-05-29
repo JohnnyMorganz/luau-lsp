@@ -27,10 +27,14 @@
 
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
-WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
+WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file, bool shouldInitialize)
 {
     if (file == nullWorkspace->rootUri)
+    {
+        if (shouldInitialize)
+            nullWorkspace->lazyInitialize();
         return nullWorkspace;
+    }
 
     WorkspaceFolderPtr bestWorkspace = nullptr;
     size_t length = 0;
@@ -55,9 +59,15 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
     }
 
     if (bestWorkspace)
+    {
+        if (shouldInitialize)
+            bestWorkspace->lazyInitialize();
         return bestWorkspace;
+    }
 
     client->sendTrace("cannot find workspace for " + file.toString());
+    if (shouldInitialize)
+        nullWorkspace->lazyInitialize();
     return nullWorkspace;
 }
 
@@ -362,15 +372,20 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
 }
 
-bool LanguageServer::allWorkspacesConfigured() const
+bool LanguageServer::allWorkspacesReceivedConfiguration() const
 {
     for (auto& workspace : workspaceFolders)
     {
-        if (!workspace->isConfigured)
+        if (!workspace->hasConfiguration)
             return false;
     }
 
     return true;
+}
+
+static bool notificationRequiresWorkspace(std::string_view method)
+{
+    return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
 }
 
 void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
@@ -379,7 +394,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
     {
         if (msg.is_request())
         {
-            if (isInitialized && !allWorkspacesConfigured())
+            if (isInitialized && !allWorkspacesReceivedConfiguration())
             {
                 client->sendTrace("workspaces not configured, postponing message: " + msg.method.value());
                 configPostponedMessages.emplace_back(msg);
@@ -394,6 +409,13 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         }
         else if (msg.is_notification())
         {
+            if (isInitialized && !allWorkspacesReceivedConfiguration() && notificationRequiresWorkspace(msg.method.value()))
+            {
+                client->sendTrace("workspaces not configured, postponing notification: " + msg.method.value());
+                configPostponedMessages.emplace_back(msg);
+                return;
+            }
+
             onNotification(msg.method.value(), msg.params);
         }
         else
@@ -423,7 +445,7 @@ void LanguageServer::processInputLoop()
     std::string jsonString;
     while (std::cin)
     {
-        if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
+        if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
         {
             client->sendTrace("workspaces configured, handling postponed messages");
             for (const auto& msg : configPostponedMessages)
@@ -537,7 +559,11 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     // Handle configuration responses
     client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
     {
-        auto workspace = findWorkspace(workspaceUri);
+        auto workspace = findWorkspace(workspaceUri, /* shouldInitialize = */ false);
+
+        workspace->hasConfiguration = true;
+        if (!workspace->isReady)
+            return;
 
         // Update the workspace setup with the new configuration
         workspace->setupWithConfiguration(config);
@@ -591,21 +617,12 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
             "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes will not be provided");
     }
 
-    // Initialise loaded workspaces
-    // NOTE: we delay initialisation until AFTER we have sent of requests to the client to retrieve
-    // configuration and register watchers. This is because initialisation can take a long time
-    // for the Roblox types. If we don't send the request for configuration beforehand, we hit
-    // a race condition where the first LSP events are executed before receiving the user configuration,
-    // causing us to fall back to the global configuration. Sending the request for configuration
-    // first means we receive the user config before processing the first LSP events
-    client->sendTrace("initializing null workspace");
-    nullWorkspace->setupWithConfiguration(client->globalConfig);
-    for (auto& folder : workspaceFolders)
+    nullWorkspace->hasConfiguration = true;
+    // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+    if (!requestedConfiguration)
     {
-        client->sendTrace("initializing workspace: " + folder->rootUri.toString());
-        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
-        if (!requestedConfiguration)
-            folder->setupWithConfiguration(client->globalConfig);
+        for (auto& folder : workspaceFolders)
+            folder->hasConfiguration = true;
     }
 }
 
@@ -704,7 +721,10 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
 
     for (const auto& change : params.changes)
     {
-        auto workspace = findWorkspace(change.uri);
+        auto workspace = findWorkspace(change.uri, /* shouldInitialize= */ false);
+        if (!workspace->isReady)
+            continue;
+
         if (!workspaceChanges.find(workspace))
             workspaceChanges[workspace] = {};
         workspaceChanges[workspace].push_back(change);

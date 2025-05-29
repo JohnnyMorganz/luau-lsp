@@ -52,6 +52,7 @@ Fixture::Fixture()
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
     client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
     workspace.setupWithConfiguration(client->globalConfig);
+    workspace.isReady = true;
 
     Luau::setPrintLine([](auto s) {});
 }

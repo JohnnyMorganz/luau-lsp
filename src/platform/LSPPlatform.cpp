@@ -6,6 +6,7 @@
 #include "Platform/StringRequireSuggester.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
+#include "Luau/TimeTrace.h"
 #include <memory>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
@@ -37,6 +38,7 @@ std::optional<Uri> LSPPlatform::resolveToRealPath(const Luau::ModuleName& name) 
 
 std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const
 {
+    LUAU_TIMETRACE_SCOPE("LSPPlatform::readSourceCode", "LSP");
     if (auto textDocument = fileResolver->getTextDocumentFromModuleName(name))
         return textDocument->getText();
 
