@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Workspaces are initialized lazily on-demand, improving startup time for set-ups with many workspace folders. We only
+  setup and index a workspace folder once we receive a request for that
+  folder. ([#947](https://github.com/JohnnyMorganz/luau-lsp/issues/947))
+
+### Fixed
+
+- Fixed crash during early startup where a text document update notification is already sent before the workspaces are
+  fully configured.
+
 ## [1.48.0] - 2025-05-28
 
 ### Added
