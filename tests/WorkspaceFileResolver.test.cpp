@@ -322,7 +322,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
 {
-    TempDir t("resolve_init_luau_relative_to_directory");
+    TempDir t("resolve_file_named_luau");
     auto mainPath = t.touch_child("project/main.luau");
     auto luauPath = t.touch_child("project/luau.luau");
 
