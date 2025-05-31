@@ -46,6 +46,10 @@ struct FragmentAutocompleteFixture : Fixture
 
     std::vector<lsp::CompletionItem> fragmentAutocomplete(const std::string& oldSource, const std::string& newSource, const lsp::Position& position)
     {
+        // Enable pull-based diagnostics, otherwise updateTextDocument will trigger a diagnostic check
+        client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+        client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
         auto uri = newDocument("foo.luau", oldSource);
         auto moduleName = workspace.fileResolver.getModuleName(uri);
         bool forAutocomplete = !FFlag::LuauSolverV2;
