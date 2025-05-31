@@ -546,6 +546,19 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         registerTypes(configuration.types.disabledGlobals);
     }
 
+    if (!configuration.plugins.paths.empty())
+    {
+        client->sendTrace("workspace: registering plugins");
+
+        for (const auto& pluginFile : configuration.plugins.paths)
+        {
+            auto resolvedFilePath = resolvePath(pluginFile);
+            pluginManager.registerPlugin(resolvedFilePath);
+        }
+    
+        client->sendTrace("workspace: registering plugins COMPLETED");
+    }
+
     client->sendTrace("workspace: apply platform-specific configuration");
 
     platform->setupWithConfiguration(configuration);

@@ -12,6 +12,7 @@
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/LuauExt.hpp"
+#include "LSP/PluginManager.hpp"
 
 struct Reference
 {
@@ -36,6 +37,9 @@ public:
     bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
+private:
+    Plugins::PluginManager pluginManager;
+
 public:
     WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
@@ -47,7 +51,9 @@ public:
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
+        , pluginManager(client.get())
     {
+        fileResolver.pluginManager = &pluginManager;
         fileResolver.client = std::static_pointer_cast<BaseClient>(client);
         fileResolver.rootUri = uri;
     }

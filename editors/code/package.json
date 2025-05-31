@@ -104,7 +104,7 @@
       },
       {
         "command": "luau-lsp.regenerateSourcemap",
-        "title": "Luau: Regenerate Rojo Sourcemap"
+        "title": "Luau: Regenerate Sourcemap"
       },
       {
         "command": "luau-lsp.reloadServer",
@@ -656,6 +656,18 @@
           "default": "Vector3",
           "scope": "resource",
           "markdownDescription": "The `vectorType` to use when compiling bytecode"
+        },
+        "luau-lsp.plugins.paths": {
+          "markdownDescription": "EXPERIMENTAL: A list of paths to plugin files to load in to the language server",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "resource",
+          "tags": [
+            "experimental"
+          ]
         }
       }
     }

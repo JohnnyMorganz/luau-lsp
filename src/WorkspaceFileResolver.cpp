@@ -69,6 +69,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     Luau::SourceCode::Type sourceType = Luau::SourceCode::Type::None;
 
     std::filesystem::path realFileName = name;
+    Uri uri = Uri::file(name);
     if (platform->isVirtualPath(name))
     {
         auto filePath = platform->resolveToRealPath(name);
@@ -76,6 +77,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
             return std::nullopt;
 
         realFileName = *filePath;
+        uri = *filePath;
         sourceType = platform->sourceCodeTypeFromPath(*filePath);
     }
     else
@@ -84,7 +86,14 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     }
 
     if (auto source = platform->readSourceCode(name, realFileName))
-        return Luau::SourceCode{*source, sourceType};
+    {
+        Plugins::OnReadFileContext ctx{uri, name, *source};
+
+        if (auto modifiedSource = pluginManager->handleReadFile(ctx))
+            return Luau::SourceCode{*modifiedSource, sourceType};
+        else
+            return Luau::SourceCode{*source, sourceType};
+    }
 
     return std::nullopt;
 }

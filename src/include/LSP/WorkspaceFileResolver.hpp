@@ -9,6 +9,7 @@
 #include "LSP/Client.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/TextDocument.hpp"
+#include "LSP/PluginManager.hpp"
 #include "Platform/LSPPlatform.hpp"
 
 
@@ -85,6 +86,7 @@ public:
     std::shared_ptr<BaseClient> client;
     Uri rootUri;
 
+    Plugins::PluginManager* pluginManager = nullptr;
     LSPPlatform* platform = nullptr;
 
     // Currently opened files where content is managed by client

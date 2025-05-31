@@ -224,6 +224,13 @@ struct ClientPlatformConfiguration
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPlatformConfiguration, type);
 
+struct ClientPluginConfiguration
+{
+    std::vector<std::filesystem::path> paths;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginConfiguration, paths);
+
 // These are the passed configuration options by the client, prefixed with `luau-lsp.`
 // Here we also define the default settings
 struct ClientConfiguration
@@ -244,6 +251,7 @@ struct ClientConfiguration
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
+    ClientPluginConfiguration plugins{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, plugins);
