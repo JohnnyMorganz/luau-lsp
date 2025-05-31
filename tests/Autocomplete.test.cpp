@@ -10,6 +10,7 @@ LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
 LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
+LUAU_FASTFLAG(LuauPopulateRefinedTypesInFragmentFromOldSolver)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -34,12 +35,13 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[5] = {
+    ScopedFastFlag sffs[6] = {
         {FFlag::LuauBetterScopeSelection, true},
         {FFlag::LuauBlockDiffFragmentSelection, true},
         {FFlag::LuauFragmentAcMemoryLeak, true},
         {FFlag::LuauGlobalVariableModuleIsolation, true},
         {FFlag::LuauFragmentAutocompleteIfRecommendations, true},
+        {FFlag::LuauPopulateRefinedTypesInFragmentFromOldSolver, true},
     };
 };
 
