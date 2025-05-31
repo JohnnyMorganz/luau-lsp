@@ -482,14 +482,22 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     std::unordered_set<std::string> tags;
 
-    // We must perform check before autocompletion
-    checkStrict(moduleName, /* forAutocomplete: */ true);
+    auto stringCompletionCB = [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
+                                  std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+    {
+        tags.insert(tag);
+        return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+    };
 
     auto position = textDocument->convertPosition(params.position);
 
-    Luau::FragmentAutocompleteResult fragmentResult;
+    Luau::FragmentAutocompleteStatusResult fragmentStatusResult;
     Luau::AutocompleteResult result;
-    if (config.completion.enableFragmentAutocomplete)
+    bool forAutocomplete = !FFlag::LuauSolverV2; // New type solver does not have a different engine for autocomplete
+    bool fragmentWasSuccessful = false;
+
+    if (config.completion.enableFragmentAutocomplete && frontend.allModuleDependenciesValid(moduleName, forAutocomplete) &&
+        frontend.isDirty(moduleName, forAutocomplete))
     {
         Luau::FrontendOptions frontendOptions;
         frontendOptions.retainFullTypeGraphs = true;
@@ -504,27 +512,34 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (!sourceModule)
             return {};
 
+        auto newSrc = textDocument->getText();
+        Luau::FragmentContext fragmentContext = {
+            newSrc,
+            // TODO: we have to construct a parse result as tryFragmentAutocomplete only accepts this
+            Luau::ParseResult{sourceModule->root},
+            frontendOptions,
+        };
+
         // It is important to keep the fragmentResult in scope for the whole completion step
         // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
-        fragmentResult = Luau::fragmentAutocomplete(frontend, textDocument->getText(), moduleName, position, frontendOptions,
-            [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
-                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
-            {
-                tags.insert(tag);
-                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-            },
-            std::nullopt, sourceModule->root);
-        result = fragmentResult.acResults;
-    }
-    else
-        result = Luau::autocomplete(frontend, moduleName, position,
-            [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
-                std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
-            {
-                tags.insert(tag);
-                return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-            });
+        fragmentStatusResult = Luau::tryFragmentAutocomplete(frontend, moduleName, position, fragmentContext, stringCompletionCB);
+        if (fragmentStatusResult.status == Luau::FragmentAutocompleteStatus::Success)
+        {
+            // Result is nullopt if there are no suggestions (i.e. comments)
+            if (!fragmentStatusResult.result)
+                return {};
 
+            result = fragmentStatusResult.result->acResults;
+            fragmentWasSuccessful = true;
+        }
+    }
+
+    if (!fragmentWasSuccessful)
+    {
+        // We must perform check before autocompletion
+        checkStrict(moduleName, forAutocomplete);
+        result = Luau::autocomplete(frontend, moduleName, position, stringCompletionCB);
+    }
 
     std::vector<lsp::CompletionItem> items{};
 
@@ -548,8 +563,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                 item.label = ".";
         }
 
-        const auto localModule =
-            config.completion.enableFragmentAutocomplete ? fragmentResult.incrementalModule : getModule(moduleName, /* forAutocomplete: */ true);
+        const auto localModule = fragmentWasSuccessful ? fragmentStatusResult.result->incrementalModule : getModule(moduleName, forAutocomplete);
         if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 

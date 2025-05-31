@@ -43,6 +43,33 @@ struct FragmentAutocompleteFixture : Fixture
         {FFlag::LuauFragmentAutocompleteIfRecommendations, true},
         {FFlag::LuauPopulateRefinedTypesInFragmentFromOldSolver, true},
     };
+
+    std::vector<lsp::CompletionItem> fragmentAutocomplete(const std::string& oldSource, const std::string& newSource, const lsp::Position& position)
+    {
+        auto uri = newDocument("foo.luau", oldSource);
+        auto moduleName = workspace.fileResolver.getModuleName(uri);
+        bool forAutocomplete = !FFlag::LuauSolverV2;
+
+        // Perform an initial type check
+        workspace.checkStrict(moduleName, /* forAutocomplete= */ forAutocomplete);
+
+        // Update the text document
+        updateDocument(uri, newSource);
+
+        REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+        REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+
+        lsp::CompletionParams params;
+        params.textDocument = lsp::TextDocumentIdentifier{uri};
+        params.position = position;
+
+        auto results = workspace.completion(params);
+
+        // Module should still be dirty afterwards if fragment autocomplete worked
+        REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+
+        return results;
+    }
 };
 
 TEST_SUITE_BEGIN("Autocomplete");
@@ -100,6 +127,15 @@ TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_has_documentation")
 
 TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_property_autocomplete_has_documentation")
 {
+    auto oldSource = R"(
+        local tbl = {
+            --- This is a property on the table!
+            prop = true,
+        }
+
+        local x = tbl
+    )";
+
     auto [source, marker] = sourceWithMarker(R"(
         local tbl = {
             --- This is a property on the table!
@@ -109,13 +145,7 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_prop
         local x = tbl.|
     )");
 
-    auto uri = newDocument("foo.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params);
+    auto result = fragmentAutocomplete(oldSource, source, marker);
     auto item = requireItem(result, "prop");
 
     REQUIRE(item.documentation);
