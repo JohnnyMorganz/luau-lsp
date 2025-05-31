@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - For DM types, `.Parent` is now typed with a write type of "Instance" in the new solver, preventing false-positive type
   errors ([#1039](https://github.com/JohnnyMorganz/luau-lsp/issues/1039))
+- Sync to upstream Luau 0.676
 
 ### Fixed
 
