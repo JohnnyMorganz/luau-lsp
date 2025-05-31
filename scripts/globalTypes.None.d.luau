@@ -5708,7 +5708,7 @@ declare class AssetService extends Instance
 	function GetGamePlacesAsync(self): Instance
 	function PromptCreateAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
 	function PromptImportAnimationClipFromVideoAsync(self, player: Player, progressCallback: ((...any) -> ...any)): any
-	function SavePlaceAsync(self, requestParameters: { [any]: any }?): nil
+	function SavePlaceAsync(self): nil
 	function SearchAudio(self, searchParameters: AudioSearchParams): AudioPages
 end
 

@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "ScopedFlags.h"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 
@@ -612,6 +613,84 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
     REQUIRE(filePath);
 
     CHECK(workspace.isIgnoredFileForAutoImports(Uri::file(*filePath)));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
+{
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto document = newDocument("foo.luau", R"(
+        local part = game.Workspace.Part
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = {document};
+    params.position = lsp::Position{1, 16};
+    auto hover = workspace.hover(params);
+
+    REQUIRE(hover);
+    CHECK_EQ(hover->contents.value, codeBlock("luau", "local part: Part"));
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part2", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto hover2 = workspace.hover(params);
+    REQUIRE(hover2);
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));
+    else
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.Workspace.Part
+        part.Parent = Instance.new("TextLabel")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
 }
 
 TEST_SUITE_END();

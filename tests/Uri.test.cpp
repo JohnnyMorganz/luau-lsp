@@ -541,6 +541,15 @@ TEST_CASE("luau-lsp custom: lexicallyRelative")
 #endif
 }
 
+TEST_CASE("Uri::extension")
+{
+    CHECK_EQ(Uri::parse("file://a/b/init.lua").extension(), ".lua");
+    CHECK_EQ(Uri::parse("file://a/b/init.luau").extension(), ".luau");
+    CHECK_EQ(Uri::parse("file://a/b/init.server.luau").extension(), ".luau");
+    CHECK_EQ(Uri::parse("file://a/b/init.server").extension(), ".server");
+    CHECK_EQ(Uri::parse("file://a/b/init").extension(), "");
+}
+
 TEST_CASE("Uri::resolvePath")
 {
     CHECK_EQ(Uri::parse("foo://a/foo/bar").resolvePath("x").toString(), "foo://a/foo/bar/x");

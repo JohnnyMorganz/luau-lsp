@@ -8,12 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- For DM types, `.Parent` is now typed with a write type of "Instance" in the new solver, preventing false-positive type
+  errors ([#1039](https://github.com/JohnnyMorganz/luau-lsp/issues/1039))
+- Renamed command "Luau: Regenerate Rojo Sourcemap" to "Luau: Regenerate Sourcemap" as it can be configured to generate sourcemaps from non-Rojo tooling
 - Workspaces are initialized lazily on-demand, improving startup time for set-ups with many workspace folders. We only
   setup and index a workspace folder once we receive a request for that
   folder. ([#947](https://github.com/JohnnyMorganz/luau-lsp/issues/947))
 
 ### Fixed
 
+- Fixed require-by-string failing for files named `luau` (e.g, `project/luau.luau`)
 - Fixed crash during early startup where a text document update notification is already sent before the workspaces are
   fully configured.
 

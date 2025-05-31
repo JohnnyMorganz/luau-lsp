@@ -298,7 +298,12 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
             if (auto* ctv = Luau::getMutable<Luau::ExternType>(typeId))
             {
                 if (auto parentNode = node->parent.lock())
-                    ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(globals, arena, parentNode));
+                {
+                    if (FFlag::LuauSolverV2)
+                        ctv->props["Parent"] = Luau::Property::rw(getSourcemapType(globals, arena, parentNode), instanceTy->type);
+                    else
+                        ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(globals, arena, parentNode));
+                }
 
                 // Add children as properties
                 for (const auto& child : node->children)
