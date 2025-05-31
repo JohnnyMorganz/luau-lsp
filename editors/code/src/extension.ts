@@ -265,6 +265,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     fflags["LuauFragmentAcMemoryLeak"] = "true";
     fflags["LuauGlobalVariableModuleIsolation"] = "true";
     fflags["LuauFragmentAutocompleteIfRecommendations"] = "true";
+    fflags["LuauPopulateRefinedTypesInFragmentFromOldSolver"] = "true";
   }
 
   // Handle overrides

@@ -10,6 +10,7 @@ LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
 LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
+LUAU_FASTFLAG(LuauPopulateRefinedTypesInFragmentFromOldSolver)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -40,6 +41,7 @@ struct FragmentAutocompleteFixture : Fixture
         {FFlag::LuauFragmentAcMemoryLeak, true},
         {FFlag::LuauGlobalVariableModuleIsolation, true},
         {FFlag::LuauFragmentAutocompleteIfRecommendations, true},
+        {FFlag::LuauPopulateRefinedTypesInFragmentFromOldSolver, true},
     };
 };
 
