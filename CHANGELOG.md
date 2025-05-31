@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed require-by-string failing for files named `luau` (e.g, `project/luau.luau`)
+- Fixed crash during early startup where a text document update notification is already sent before the workspaces are
+  fully configured.
 
 ## [1.48.0] - 2025-05-28
 

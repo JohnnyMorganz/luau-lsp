@@ -373,6 +373,11 @@ bool LanguageServer::allWorkspacesConfigured() const
     return true;
 }
 
+static bool notificationRequiresWorkspace(std::string_view method)
+{
+    return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
+}
+
 void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
 {
     try
@@ -394,6 +399,13 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         }
         else if (msg.is_notification())
         {
+            if (isInitialized && !allWorkspacesConfigured() && notificationRequiresWorkspace(msg.method.value()))
+            {
+                client->sendTrace("workspaces not configured, postponing notification: " + msg.method.value());
+                configPostponedMessages.emplace_back(msg);
+                return;
+            }
+
             onNotification(msg.method.value(), msg.params);
         }
         else
