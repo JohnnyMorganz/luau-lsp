@@ -892,7 +892,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
 
     // HACK: Fixture is loaded for RobloxPlatform
     client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.isConfigured = false;
+    workspace.appliedFirstTimeConfiguration = false;
     workspace.setupWithConfiguration(client->globalConfig);
 
     newDocument("src/shared/Modules/Module.luau", "return {}");
@@ -921,7 +921,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
 
     // HACK: Fixture is loaded for RobloxPlatform
     client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.isConfigured = false;
+    workspace.appliedFirstTimeConfiguration = false;
     workspace.setupWithConfiguration(client->globalConfig);
 
     newDocument("library.luau", "");
@@ -951,7 +951,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments")
 
     // HACK: Fixture is loaded for RobloxPlatform
     client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.isConfigured = false;
+    workspace.appliedFirstTimeConfiguration = false;
     workspace.setupWithConfiguration(client->globalConfig);
 
     newDocument("library.luau", "");
@@ -982,7 +982,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments_2")
 
     // HACK: Fixture is loaded for RobloxPlatform
     client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.isConfigured = false;
+    workspace.appliedFirstTimeConfiguration = false;
     workspace.setupWithConfiguration(client->globalConfig);
 
     newDocument("library.luau", "");

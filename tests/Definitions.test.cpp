@@ -15,6 +15,7 @@ TEST_CASE("use_platform_metadata_from_first_registered_definitions_file")
     client->definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
 
     workspace.setupWithConfiguration(defaultTestClientConfiguration());
+    workspace.isReady = true;
 
     REQUIRE(workspace.definitionsFileMetadata);
 
@@ -32,6 +33,7 @@ TEST_CASE("handles_definitions_files_relying_on_mutations")
     client->definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
 
     workspace.setupWithConfiguration(defaultTestClientConfiguration());
+    workspace.isReady = true;
 
     auto document = newDocument(workspace, "foo.luau", R"(
         local x: ExtraDataRelyingOnMutations
@@ -65,6 +67,7 @@ TEST_CASE("support_disabling_global_types")
     };
 
     workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
 
     auto document = newDocument(workspace, "foo.luau", R"(
         --!strict
@@ -92,6 +95,7 @@ TEST_CASE("support_disabling_methods_in_global_types")
     };
 
     workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
 
     auto document = newDocument(workspace, "foo.luau", R"(
         --!strict

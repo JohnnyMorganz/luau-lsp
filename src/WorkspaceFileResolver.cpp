@@ -6,6 +6,8 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
+#include "Luau/TimeTrace.h"
+
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
     // Handle non-file schemes
@@ -66,6 +68,7 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::readSource", "LSP");
     Luau::SourceCode::Type sourceType = Luau::SourceCode::Type::None;
 
     std::filesystem::path realFileName = name;
@@ -115,6 +118,7 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
 
 const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::getConfig", "Frontend");
     std::optional<std::filesystem::path> realPath = platform->resolveToRealPath(name);
     if (!realPath || !realPath->has_relative_path() || !realPath->has_parent_path())
         return defaultConfig;

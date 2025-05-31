@@ -23,7 +23,7 @@ static bool supportsRelatedDocuments(const lsp::ClientCapabilities& capabilities
 lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
-    if (!isConfigured)
+    if (!isReady)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
         throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);
@@ -136,7 +136,7 @@ std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::fi
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::workspaceDiagnostics", "LSP");
-    if (!isConfigured)
+    if (!isReady)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
         throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);

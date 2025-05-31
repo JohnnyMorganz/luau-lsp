@@ -1,8 +1,11 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
 
+#include "Luau/TimeTrace.h"
+
 std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::string& name) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::resolveToVirtualPath", "LSP");
     if (isVirtualPath(name))
     {
         return name;
@@ -18,6 +21,7 @@ std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::
 
 std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::resolveToRealPath", "LSP");
     if (isVirtualPath(name))
     {
         if (auto sourceNode = getSourceNodeFromVirtualPath(name))
@@ -35,6 +39,7 @@ std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& nam
 
 Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesystem::path& path) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::sourceCodeTypeFromPath", "LSP");
     if (auto sourceNode = getSourceNodeFromRealPath(Uri::file(path)))
         return (*sourceNode)->sourceCodeType();
 
@@ -51,6 +56,7 @@ Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesys
 
 std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::readSourceCode", "LSP");
     if (auto parentResult = LSPPlatform::readSourceCode(name, path))
         return parentResult;
 

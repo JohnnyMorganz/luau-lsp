@@ -55,7 +55,7 @@ public:
 
     /// Finds the workspace which the file belongs to.
     /// If no workspace is found, the file is attached to the null workspace
-    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri& file);
+    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri& file, bool shouldInitialize = true);
 
     void onRequest(const id_type& id, const std::string& method, std::optional<json> params);
     void onNotification(const std::string& method, std::optional<json> params);
@@ -64,7 +64,7 @@ public:
 
     // Dispatch handlers
 private:
-    bool allWorkspacesConfigured() const;
+    bool allWorkspacesReceivedConfiguration() const;
     void handleMessage(const json_rpc::JsonRpcMessage& msg);
 
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);

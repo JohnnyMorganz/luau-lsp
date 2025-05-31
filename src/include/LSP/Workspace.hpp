@@ -33,8 +33,20 @@ public:
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
-    bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
+
+    /// Whether this workspace folder has received configuration data.
+    /// We postpone all initial messages until configuration data is received from the client.
+    bool hasConfiguration = false;
+
+    /// Whether the first-time configuration (platform, global types) have been applied for this folder.
+    /// First-time configuration is only applied once, and changes require a language server restart
+    bool appliedFirstTimeConfiguration = false;
+
+    /// Whether this workspace folder has completed an initial set up process.
+    /// Workspaces are initialized lazily on demand.
+    /// When a new request comes in and the workspace is not ready, we will prepare it then.
+    bool isReady = false;
 
 public:
     WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
@@ -51,6 +63,9 @@ public:
         fileResolver.client = std::static_pointer_cast<BaseClient>(client);
         fileResolver.rootUri = uri;
     }
+
+    /// Initializes the workspace on demand
+    void lazyInitialize();
 
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
