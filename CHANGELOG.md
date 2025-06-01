@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.49.0] - 2025-06-01
+
 ### Added
 
 - Added `luau-lsp.require.useOriginalRequireByStringSemantics` to fall back to the old require-by-string semantics for
