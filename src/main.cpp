@@ -64,6 +64,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         }
 
         sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
+        sentry_set_tag("luau.new_solver_enabled", FFlag::LuauSolverV2 ? "true" : "false");
         sentry_init(options);
 #else
         std::cerr << "Ignoring '--enable-crash-reporting' as this server was not built with crash reporting features\n";
