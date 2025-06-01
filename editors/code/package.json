@@ -611,6 +611,14 @@
           "markdownDeprecationMessage": "**Deprecated**: Please use `aliases` in a `.luaurc` file instead.",
           "deprecationMessage": "Deprecated: Please use aliases in a .luaurc file instead."
         },
+        "luau-lsp.require.useOriginalRequireByStringSemantics": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Use the old require-by-string semantics for init.luau resolution",
+          "markdownDeprecationMessage": "**Deprecated**: Use the new require-by-string semantics instead. This option may be removed at any time in the future",
+          "deprecationMessage": "Deprecated: Use the new require-by-string semantics instead. This option may be removed at any time in the future"
+        },
         "luau-lsp.index.enabled": {
           "type": "boolean",
           "default": true,

@@ -167,9 +167,11 @@ struct ClientRequireConfiguration
     std::unordered_map<std::string, std::string> fileAliases;
     // DEPRECATED: USE .luaurc INSTEAD. A mapping of custom require prefixes to directory paths
     std::unordered_map<std::string, std::string> directoryAliases;
+    // DEPRECATED: USE NEW REQUIRE-BY-STRING SEMANTICS INSTEAD.
+    bool useOriginalRequireByStringSemantics = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases, useOriginalRequireByStringSemantics);
 
 struct ClientIndexConfiguration
 {

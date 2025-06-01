@@ -149,7 +149,11 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     if (!baseUri)
         return std::nullopt;
 
-    if (isInitLuauFile(*contextPath))
+    ClientConfiguration clientConfig;
+    if (fileResolver->client)
+        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
+
+    if (isInitLuauFile(*contextPath) && !clientConfig.require.useOriginalRequireByStringSemantics)
     {
         baseUri = baseUri->parent();
         if (!baseUri)
@@ -166,15 +170,13 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     // DEPRECATED: Check for custom require overrides
     else if (fileResolver->client)
     {
-        auto config = fileResolver->client->getConfiguration(fileResolver->rootUri);
-
         // Check file aliases
-        if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
+        if (auto it = clientConfig.require.fileAliases.find(requiredString); it != clientConfig.require.fileAliases.end())
         {
             fileUri = Uri::file(resolvePath(it->second));
         }
         // Check directory aliases
-        else if (auto directoryAliasedPath = resolveDirectoryAlias(fileResolver->rootUri, config.require.directoryAliases, requiredString))
+        else if (auto directoryAliasedPath = resolveDirectoryAlias(fileResolver->rootUri, clientConfig.require.directoryAliases, requiredString))
         {
             fileUri = *directoryAliasedPath;
         }

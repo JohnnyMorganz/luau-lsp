@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `luau-lsp.require.useOriginalRequireByStringSemantics` to fall back to the old require-by-string semantics for
+  `init.luau` files to preserve backwards compatibility. This option is deprecated and may be removed at any time in the
+  future. Note that `@self`-based requires remain supported with this option, allowing gradual migration to the new
+  semantics ([#1046](https://github.com/JohnnyMorganz/luau-lsp/issues/1046))
+
 ### Changed
 
 - Sync to upstream Luau 0.676
