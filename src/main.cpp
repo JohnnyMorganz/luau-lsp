@@ -206,7 +206,6 @@ int main(int argc, char** argv)
     };
 
     argparse::ArgumentParser program("luau-lsp", LSP_VERSION);
-    program.set_assign_chars(":=");
 
     // Global arguments
     argparse::ArgumentParser parent_parser("-", "0.0", argparse::default_arguments::none);
@@ -225,6 +224,7 @@ int main(int argc, char** argv)
 
     // Analyze arguments
     argparse::ArgumentParser analyze_command("analyze");
+    analyze_command.set_assign_chars(":=");
     analyze_command.add_description("Run luau-analyze type checking and linting");
     analyze_command.add_parents(parent_parser);
     analyze_command.add_argument("--annotate")
@@ -268,6 +268,7 @@ int main(int argc, char** argv)
 
     // Language server arguments
     argparse::ArgumentParser lsp_command("lsp");
+    lsp_command.set_assign_chars(":=");
     lsp_command.add_description("Start the language server");
     lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
     lsp_command.add_parents(parent_parser);
