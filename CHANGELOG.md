@@ -38,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - When importing a directory containing an `init.luau` file with string require auto-imports, we now correctly resolve
   to the directory name instead of to
   `directory/init` ([#1038](https://github.com/JohnnyMorganz/luau-lsp/issues/1038) / [#1041](https://github.com/JohnnyMorganz/luau-lsp/issues/1041))
+- `init.luau` files are no longer aware of `.luaurc` files that are its sibling on the file
+  system ([#1037](https://github.com/JohnnyMorganz/luau-lsp/issues/1037))
 
 ## [1.48.0] - 2025-05-28
 

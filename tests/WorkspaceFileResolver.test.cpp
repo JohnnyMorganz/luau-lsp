@@ -350,6 +350,41 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
     CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils")->name), Uri::file(projectUtilsPath));
 }
 
+TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaurc_files")
+{
+    TempDir t("init_luau_files_should_not_be_aware_of_sibling_luaurc_files");
+    auto initPath = t.touch_child("project/code/init.luau");
+    auto siblingFilePath = t.touch_child("project/code/sibling.luau");
+    auto luaurcPath = t.write_child("project/code/.luaurc", R"({
+        "aliases": {
+            "test": "test"
+        }
+    })");
+
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)));
+    auto siblingConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(siblingFilePath)));
+
+    CHECK_EQ(initConfig.aliases.size(), 0);
+    CHECK_EQ(siblingConfig.aliases.size(), 1);
+    CHECK(siblingConfig.aliases.find("test"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_sibling_to_its_parent_directory")
+{
+    TempDir t("init_luau_files_are_aware_of_luaurc_files_that_are_sibling_to_its_parent_directory");
+    auto initPath = t.touch_child("project/code/init.luau");
+    auto luaurcPath = t.write_child("project/.luaurc", R"({
+        "aliases": {
+            "test": "test"
+        }
+    })");
+
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)));
+
+    CHECK_EQ(initConfig.aliases.size(), 1);
+    CHECK(initConfig.aliases.find("test"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
 {
     TempDir t("resolve_json_modules");

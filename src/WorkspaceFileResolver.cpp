@@ -123,7 +123,16 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
     if (!realPath || !realPath->has_relative_path() || !realPath->has_parent_path())
         return defaultConfig;
 
-    return readConfigRec(realPath->parent_path());
+    auto base = realPath->parent_path();
+    if (isInitLuauFile(*realPath))
+    {
+        if (base.has_parent_path())
+            base = base.parent_path();
+        else
+            return defaultConfig;
+    }
+
+    return readConfigRec(base);
 }
 
 std::optional<std::string> WorkspaceFileResolver::parseConfig(
