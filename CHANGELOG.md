@@ -35,6 +35,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   FFlags ([#1090](https://github.com/JohnnyMorganz/luau-lsp/issues/1090))
 - Fixed string require auto-imports in an `init.luau` file not resolving correctly with new require-by-string semantics.
   Now, `@self` is correctly added when necessary. ([#1030](https://github.com/JohnnyMorganz/luau-lsp/issues/1030))
+- When importing a directory containing an `init.luau` file with string require auto-imports, we now correctly resolve
+  to the directory name instead of to
+  `directory/init` ([#1038](https://github.com/JohnnyMorganz/luau-lsp/issues/1038) / [#1041](https://github.com/JohnnyMorganz/luau-lsp/issues/1041))
 
 ## [1.48.0] - 2025-05-28
 

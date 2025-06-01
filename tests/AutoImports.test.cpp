@@ -925,6 +925,18 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_correctly_for_init_luau_file
     CHECK_EQ(computeRequirePath(from, Uri::file("project/file.luau"), aliases, style).first, "./file");
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_to_directory_that_contains_init_luau_file")
+{
+    AliasMap aliases{""};
+    auto style = ImportRequireStyle::Auto;
+
+    auto from = Uri::file("project/file.luau");
+    auto to = Uri::file("project/code/init.luau");
+
+    CHECK_EQ(requireNameFromModuleName(workspace.fileResolver.getModuleName(to)), "code");
+    CHECK_EQ(computeRequirePath(from, to, aliases, style).first, "./code");
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
 {
     client->globalConfig.completion.imports.enabled = true;
