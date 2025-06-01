@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Workspaces are initialized lazily on-demand, improving startup time for set-ups with many workspace folders. We only
   setup and index a workspace folder once we receive a request for that
   folder. ([#947](https://github.com/JohnnyMorganz/luau-lsp/issues/947))
+- It is no longer valid to pass `--flag` and `--no-flags-enabled` before the subcommand name on the CLI: it should be
+  `luau-lsp lsp --flag:NAME=VALUE` / `luau-lsp lsp --no-flags-enabled`.
 
 ### Fixed
 
