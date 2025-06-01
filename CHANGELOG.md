@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed crash during early startup where a text document update notification is already sent before the workspaces are
   fully configured.
 - Fixed unnecessary type check when fragment autocomplete is enabled, leading to an autocomplete delay ([#991](https://github.com/JohnnyMorganz/luau-lsp/issues/991))
+- Fixed FFlag registration logic always enabling all
+  FFlags ([#1090](https://github.com/JohnnyMorganz/luau-lsp/issues/1090))
 
 ## [1.48.0] - 2025-05-28
 

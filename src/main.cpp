@@ -306,7 +306,6 @@ int main(int argc, char** argv)
         .action(file_path_parser)
         .metavar("PATH");
 
-    program.add_parents(parent_parser);
     program.add_subparser(analyze_command);
     program.add_subparser(lsp_command);
 
@@ -321,7 +320,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    processFFlags(program);
     if (program.is_used("--show-flags"))
     {
         displayFlags();
