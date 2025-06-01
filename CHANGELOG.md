@@ -33,6 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed unnecessary type check when fragment autocomplete is enabled, leading to an autocomplete delay ([#991](https://github.com/JohnnyMorganz/luau-lsp/issues/991))
 - Fixed FFlag registration logic always enabling all
   FFlags ([#1090](https://github.com/JohnnyMorganz/luau-lsp/issues/1090))
+- Fixed string require auto-imports in an `init.luau` file not resolving correctly with new require-by-string semantics.
+  Now, `@self` is correctly added when necessary. ([#1030](https://github.com/JohnnyMorganz/luau-lsp/issues/1030))
 
 ## [1.48.0] - 2025-05-28
 

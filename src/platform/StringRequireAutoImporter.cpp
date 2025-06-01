@@ -70,8 +70,23 @@ std::pair<std::string, SortText::SortTextT> computeRequirePath(const Uri& from, 
     relativePath = removeSuffix(relativePath, ".luau");
     relativePath = removeSuffix(relativePath, ".lua");
 
-    if (!Luau::startsWith(relativePath, "../"))
-        relativePath = "./" + relativePath;
+    if (isInitLuauFile(from.fsPath()))
+    {
+        // Move the relative path up one directory
+        if (!Luau::startsWith(relativePath, "../"))
+            relativePath = "@self/" + relativePath;
+        else
+        {
+            relativePath = removePrefix(relativePath, "../");
+            if (!Luau::startsWith(relativePath, "../"))
+                relativePath = "./" + relativePath;
+        }
+    }
+    else
+    {
+        if (!Luau::startsWith(relativePath, "../"))
+            relativePath = "./" + relativePath;
+    }
 
     return {relativePath, SortText::AutoImports};
 }
