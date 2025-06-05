@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed requests failing when write a string require where the filename begins with disallowed names (e.g. `./con`) on
+  Windows
+
 ## [1.49.0] - 2025-06-01
 
 ### Added
