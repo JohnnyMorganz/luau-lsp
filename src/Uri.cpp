@@ -485,7 +485,7 @@ bool Uri::isDirectory() const
         return false;
 
     std::error_code ec;
-    return std::filesystem::is_directory(fsPath());
+    return std::filesystem::is_directory(fsPath(), ec);
 }
 
 bool Uri::exists() const
@@ -494,7 +494,7 @@ bool Uri::exists() const
         return false;
 
     std::error_code ec;
-    return std::filesystem::exists(fsPath());
+    return std::filesystem::exists(fsPath(), ec);
 }
 
 std::string Uri::lexicallyRelative(const Uri& base) const
