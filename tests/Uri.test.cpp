@@ -570,4 +570,14 @@ TEST_CASE("Uri::resolvePath")
     CHECK_EQ(Uri::parse("untitled:/").resolvePath("/foo").toString(), "untitled:/foo");
 }
 
+TEST_CASE("Uri::isDirectory handles filesystem errors")
+{
+    CHECK_FALSE(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).isDirectory());
+}
+
+TEST_CASE("Uri::exists handles filesystem errors")
+{
+    CHECK_FALSE(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
+}
+
 TEST_SUITE_END();
