@@ -126,6 +126,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     {
         auto uri = params.textDocument.uri;
         TextDocumentPtr referenceTextDocument(textDocument);
+        std::optional<Luau::Location> location = std::nullopt;
 
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)
@@ -135,34 +136,30 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         {
             if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
             {
-                auto fileName = platform->resolveToRealPath(*importedName);
-                if (!fileName)
+                auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
+                if (!importedModule)
                     return result;
-                uri = Uri::file(*fileName);
 
-                // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
-                // even when retainFullTypeGraphs = false.
-                checkStrict(*importedName);
-                // TODO: fix "forAutocomplete"
-                if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true); importedModule && importedModule->hasModuleScope())
-                    scope = importedModule->getModuleScope();
-                else
+                const auto it = importedModule->exportedTypeBindings.find(reference->name.value);
+                if (it == importedModule->exportedTypeBindings.end() || !it->second.definitionLocation)
                     return result;
 
                 referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
-                if (!referenceTextDocument)
-                    return result;
+                location = *it->second.definitionLocation;
             }
             else
                 return result;
         }
+        else
+        {
+            location = lookupTypeLocation(*scope, reference->name.value);
+        }
 
-        auto location = lookupTypeLocation(*scope, reference->name.value);
-        if (!location)
+        if (!referenceTextDocument || !location)
             return result;
 
-        result.emplace_back(lsp::Location{
-            uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
+        result.emplace_back(lsp::Location{referenceTextDocument->uri(),
+            lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
     }
 
     // Fallback: if no results found so far, we can try checking if this is within a require statement

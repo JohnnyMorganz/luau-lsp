@@ -461,16 +461,13 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
             auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
             if (!importedModuleName) 
                 return std::nullopt;
-            // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
-            // even when retainFullTypeGraphs = false.
-            checkStrict(*importedModuleName);
             auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
-            if (!importedModule || !importedModule->hasModuleScope())
+            if (!importedModule)
                 return std::nullopt;
-            auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
-            if (!typeLocation)
-                return std::nullopt;
-            return printMoonwaveDocumentation(getComments(*importedModuleName, *typeLocation));
+            if (const auto it = importedModule->exportedTypeBindings.find(ref->name.value);
+                it != importedModule->exportedTypeBindings.end() && it->second.definitionLocation)
+                return printMoonwaveDocumentation(getComments(*importedModuleName, *it->second.definitionLocation));
+            return std::nullopt;
         }
         else
         {
