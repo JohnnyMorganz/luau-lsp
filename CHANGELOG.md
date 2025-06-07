@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed requests failing when write a string require where the filename begins with disallowed names (e.g. `./con`) on
   Windows
 
+### Changed
+
+- Sync to upstream Luau 0.677
+
 ## [1.49.0] - 2025-06-01
 
 ### Added
