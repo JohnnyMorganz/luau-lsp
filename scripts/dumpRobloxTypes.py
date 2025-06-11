@@ -441,14 +441,6 @@ export type RBXScriptSignal<T... = ...any> = {
     Once: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-export type RaycastResult<T = BasePart> = {
-    Instance: T,
-    Position: Vector3,
-    Normal: Vector3,
-    Material: EnumMaterial,
-    Distance: number,
-}
-
 type HttpRequestOptions = {
     Url: string,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
@@ -477,6 +469,14 @@ type HumanoidDescriptionAccessory = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+export type RaycastResult<T = BasePart> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Material: EnumMaterial,
+    Distance: number,
+}
+
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
