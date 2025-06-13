@@ -532,6 +532,10 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     isInitialized = true;
     lsp::InitializeResult result;
     result.capabilities = getServerCapabilities();
+    result.serverInfo = lsp::InitializeResult::ServerInfo{
+        .name = LSP_NAME,
+        .version = LSP_VERSION,
+    };
 
     // Position Encoding
     if (client->capabilities.general && client->capabilities.general->positionEncodings &&
