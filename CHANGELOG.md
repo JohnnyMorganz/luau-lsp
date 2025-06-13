@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `ServerInfo` to the `LanguageServer::onInitialize` result.
+
 ## [1.49.1] - 2025-06-09
 
 ### Changed
