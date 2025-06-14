@@ -17,6 +17,8 @@ type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
+    function FromValue(self,Number: number): any
+    function FromName(self,Name: string): any
 end
 
 declare class EnumItem
