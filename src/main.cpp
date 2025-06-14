@@ -26,8 +26,6 @@
 #include <sentry.h>
 #endif
 
-#define LSP_VERSION "1.49.1"
-
 static void displayFlags()
 {
     printf("Available flags:\n");
