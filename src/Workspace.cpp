@@ -188,7 +188,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 
         platform->onDidChangeWatchedFiles(change);
 
-        if (filePath.filename() == ".luaurc")
+        if (filePath.filename() == ".luaurc" || filePath.filename() == ".robloxrc")
         {
             client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
             fileResolver.clearConfigCache();

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `.robloxrc` files are now processed alongside `.luaurc` files for backwards compatibility with old
+  configuration. It is recommended to still use `.luaurc` for new code.
+
 ### Changed
 
 - Sync to upstream Luau 0.678
