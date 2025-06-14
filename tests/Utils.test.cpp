@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "LSP/Utils.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "TempDir.h"
 
 TEST_SUITE_BEGIN("UtilsTest");
 
@@ -116,6 +117,17 @@ TEST_CASE("getFirstLine returns string when there is no newline")
 {
     CHECK_EQ(getFirstLine(""), "");
     CHECK_EQ(getFirstLine("testing"), "testing");
+}
+
+TEST_CASE("readFile non ASCII characters")
+{
+    auto contents = "local x = 1";
+
+    TempDir t("readFile_non_ascii_characters");
+    auto path = t.write_child("ō.luau", contents);
+
+    auto result = readFile(path);
+    CHECK_EQ(result, contents);
 }
 
 TEST_SUITE_END();
