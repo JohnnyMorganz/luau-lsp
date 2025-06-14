@@ -66,6 +66,7 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
+    "RaycastResult", # Redefined using generics
 ]
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -345,6 +346,9 @@ EXTRA_MEMBERS = {
     "Sound": [
         "SoundGroup: SoundGroup?",
     ],
+    "StudioService": [
+        "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?"
+    ],
 }
 
 # Hardcoded types
@@ -467,6 +471,14 @@ type HumanoidDescriptionAccessory = {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+export type RaycastResult<T = BasePart> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Material: EnumMaterial,
+    Distance: number,
+}
+
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
