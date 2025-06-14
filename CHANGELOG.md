@@ -9,6 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added `ServerInfo` to the `LanguageServer::onInitialize` result.
+- `.robloxrc` files are now processed alongside `.luaurc` files for backwards compatibility with old
+  configuration. It is recommended to still use `.luaurc` for new code.
+
+### Changed
+
+- Sync to upstream Luau 0.678
+- Removed the restriction on maximum table size when displaying during Hover etc. This is done by setting the
+  `LuauTableTypeMaximumStringifierLength` flag value to `0`. Overrides for this value are still respected.
 
 ## [1.49.1] - 2025-06-09
 

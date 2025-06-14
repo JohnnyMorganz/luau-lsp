@@ -5,6 +5,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
+LUAU_FASTFLAG(LuauImplicitTableIndexerKeys)
 LUAU_FASTFLAG(LuauBetterScopeSelection)
 LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
@@ -355,7 +356,10 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
     for (const auto& label : labels)
     {
         auto item = requireItem(result, label);
-        CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+        if (FFlag::LuauImplicitTableIndexerKeys)
+            CHECK_EQ(item.kind, lsp::CompletionItemKind::Constant);
+        else
+            CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
         REQUIRE(item.textEdit);
         CHECK_EQ(item.textEdit->range.start, lsp::Position{8, 13});
         CHECK_EQ(item.textEdit->range.end, lsp::Position{8, 18});

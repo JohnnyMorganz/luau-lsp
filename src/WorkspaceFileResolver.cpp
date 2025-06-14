@@ -136,7 +136,7 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
 }
 
 std::optional<std::string> WorkspaceFileResolver::parseConfig(
-    const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result)
+    const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result, bool compat)
 {
     Luau::ConfigOptions::AliasOptions aliasOpts;
     aliasOpts.configLocation = configPath.parent_path().generic_string();
@@ -144,6 +144,7 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(
 
     Luau::ConfigOptions opts;
     opts.aliasOptions = std::move(aliasOpts);
+    opts.compat = compat;
 
     return Luau::parseConfig(contents, result, opts);
 }
@@ -156,11 +157,38 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
 
     Luau::Config result = (path.has_relative_path() && path.has_parent_path()) ? readConfigRec(path.parent_path()) : defaultConfig;
     auto configPath = path / Luau::kConfigName;
+    auto robloxRcPath = path / ".robloxrc";
 
     if (std::optional<std::string> contents = readFile(configPath))
     {
         auto configUri = Uri::file(configPath);
         std::optional<std::string> error = parseConfig(configPath, *contents, result);
+        if (error)
+        {
+            if (client)
+            {
+                lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+                diagnostic.message = *error;
+                diagnostic.severity = lsp::DiagnosticSeverity::Error;
+                diagnostic.source = "Luau";
+                client->publishDiagnostics({configUri, std::nullopt, {diagnostic}});
+            }
+            else
+                // TODO: this should never be reached anymore
+                std::cerr << configUri.toString() << ": " << *error;
+        }
+        else
+        {
+            if (client)
+                // Clear errors presented for file
+                client->publishDiagnostics({configUri, std::nullopt, {}});
+        }
+    }
+    else if (std::optional<std::string> robloxRcContents = readFile(robloxRcPath))
+    {
+        // Backwards compatibility for .robloxrc files
+        auto configUri = Uri::file(robloxRcPath);
+        std::optional<std::string> error = parseConfig(robloxRcPath, *robloxRcContents, result, /* compat = */ true);
         if (error)
         {
             if (client)

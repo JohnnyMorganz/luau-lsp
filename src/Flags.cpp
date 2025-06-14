@@ -5,6 +5,7 @@
 #include <iostream>
 
 LUAU_FASTINT(LuauTarjanChildLimit)
+LUAU_FASTINT(LuauTableTypeMaximumStringifierLength)
 
 void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, ErrorCallback onError, ErrorCallback onWarning)
 {
@@ -75,4 +76,8 @@ void applyRequiredFlags()
     // TODO: re-evaluate the necessity of this change
     if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
         FInt::LuauTarjanChildLimit.value = 15000;
+    // This flag value is enforced due to Studio, but modern editors can handle this easily. Let's remove the restriction by setting it to zero.
+    // NOTE: 40 is the current value on Studio. We check against that so that we don't inadvertently change people's overrides
+    if (FInt::LuauTableTypeMaximumStringifierLength == 40)
+        FInt::LuauTableTypeMaximumStringifierLength.value = 0;
 }
