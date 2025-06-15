@@ -255,7 +255,11 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
     auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau");
 
     REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\Module.luau"));
+#else
     CHECK(endsWith(resolved->name, "/Module.luau"));
+#endif
 }
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
@@ -264,7 +268,11 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extens
     auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod");
 
     REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\Module.mod.lua"));
+#else
     CHECK(endsWith(resolved->name, "/Module.mod.lua"));
+#endif
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file_integration_test")

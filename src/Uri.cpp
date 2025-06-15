@@ -332,18 +332,23 @@ Uri Uri::file(std::string_view fsPath)
 
 std::string Uri::fsPath() const
 {
+    std::string value;
     if (!authority.empty() && path.length() > 1 && scheme == "file")
     {
-        return "//" + authority + path;
+        value = "//" + authority + path;
     }
     else if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
     {
-        return path.substr(1);
+        value = path.substr(1);
     }
     else
     {
-        return path;
+        value = path;
     }
+#ifdef _WIN32
+    std::replace(value.begin(), value.end(), '/', '\\');
+#endif
+    return value;
 }
 
 // Encodes the Uri into a string representation

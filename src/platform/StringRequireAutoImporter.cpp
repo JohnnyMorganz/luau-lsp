@@ -9,8 +9,13 @@ std::string requireNameFromModuleName(const Luau::ModuleName& name)
     if (isInitLuauFile(Uri::file(name)))
         fileName = getParentPath(name).value_or(name);
 
+#ifdef _WIN32
+    if (const auto slashPos = fileName.find_last_of("\\/"); slashPos != std::string::npos)
+        fileName = fileName.substr(slashPos + 1);
+#else
     if (const auto slashPos = fileName.find_last_of('/'); slashPos != std::string::npos)
         fileName = fileName.substr(slashPos + 1);
+#endif
     fileName = removeSuffix(fileName, ".luau");
     fileName = removeSuffix(fileName, ".lua");
     return makeValidVariableName(fileName);
