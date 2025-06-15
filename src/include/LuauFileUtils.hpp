@@ -9,6 +9,10 @@
 // TODO: Use Luau FileUtils directly once it is namespaced
 namespace Luau::FileUtils
 {
+#ifdef _WIN32
+std::wstring fromUtf8(const std::string& path);
+#endif
+
 bool isAbsolutePath(std::string_view path);
 
 std::optional<std::string> readFile(const std::string& name);

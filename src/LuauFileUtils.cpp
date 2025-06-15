@@ -22,8 +22,10 @@
 #include <string.h>
 #include <string_view>
 
+namespace Luau::FileUtils
+{
 #ifdef _WIN32
-static std::wstring fromUtf8(const std::string& path)
+std::wstring fromUtf8(const std::string& path)
 {
     size_t result = MultiByteToWideChar(CP_UTF8, 0, path.data(), int(path.size()), nullptr, 0);
     LUAU_ASSERT(result);
@@ -46,8 +48,6 @@ static std::string toUtf8(const std::wstring& path)
 }
 #endif
 
-namespace Luau::FileUtils
-{
 bool isAbsolutePath(std::string_view path)
 {
 #ifdef _WIN32
