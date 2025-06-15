@@ -873,6 +873,9 @@ def printEnums(dump: ApiDump):
         items.sort()
         for item in items:
             out += f"\t{escapeName(item)}: Enum{enum}\n"
+        out += f"\tfunction GetEnumItems(self): {{ Enum{enum} }}\n"
+        out += f"\tfunction FromName(self, Name: string): Enum{enum}?\n"
+        out += f"\tfunction FromValue(self, Value: number): Enum{enum}?\n"
         out += "end\n"
     print(out)
     print()
