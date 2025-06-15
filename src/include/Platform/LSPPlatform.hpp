@@ -16,7 +16,6 @@
 #include "Protocol/Workspace.hpp"
 #include "nlohmann/json.hpp"
 
-#include <filesystem>
 #include <memory>
 #include <unordered_set>
 
@@ -44,19 +43,19 @@ public:
         return false;
     }
 
-    [[nodiscard]] virtual std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const
+    [[nodiscard]] virtual std::optional<Luau::ModuleName> resolveToVirtualPath(const Uri& name) const
     {
         return std::nullopt;
     }
 
     [[nodiscard]] virtual std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const;
 
-    [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const
+    [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const
     {
         return Luau::SourceCode::Type::Module;
     }
 
-    [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const;
+    [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const;
 
     std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString);
     virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node);
@@ -127,5 +126,3 @@ std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& con
 
 std::optional<Uri> resolveDirectoryAlias(
     const Uri& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
-
-bool isInitLuauFile(const std::filesystem::path& path);

@@ -835,7 +835,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_include_modules_that_are_alr
 TEST_CASE_FIXTURE(Fixture, "string_require_uses_aliases")
 {
     AliasMap aliases{""};
-    aliases["Packages"] = {Uri::file("Packages").fsPath().generic_string(), "", "Packages"};
+    aliases["Packages"] = {Uri::file("Packages").fsPath(), "", "Packages"};
     auto style = ImportRequireStyle::Auto;
 
     auto from = Uri::file("project/user.luau");
@@ -845,7 +845,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_aliases")
 TEST_CASE_FIXTURE(Fixture, "dont_use_aliases_when_always_relative_specified")
 {
     AliasMap aliases{""};
-    aliases["Packages"] = {Uri::file("Packages").fsPath().generic_string(), "", "Packages"};
+    aliases["Packages"] = {Uri::file("Packages").fsPath(), "", "Packages"};
     auto style = ImportRequireStyle::AlwaysRelative;
 
     auto from = Uri::file("project/user.luau");
@@ -855,7 +855,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_use_aliases_when_always_relative_specified")
 TEST_CASE_FIXTURE(Fixture, "always_use_possible_aliases_when_always_absolute_specified")
 {
     AliasMap aliases{""};
-    aliases["project"] = {Uri::file("project").fsPath().generic_string(), "", "project"};
+    aliases["project"] = {Uri::file("project").fsPath(), "", "project"};
     auto style = ImportRequireStyle::AlwaysAbsolute;
 
     auto from = Uri::file("project/user.luau");
@@ -867,9 +867,9 @@ TEST_CASE_FIXTURE(Fixture, "always_use_possible_aliases_when_always_absolute_spe
 TEST_CASE_FIXTURE(Fixture, "string_require_compute_best_alias")
 {
     AliasMap aliases{""};
-    aliases["project"] = {Uri::file("project").fsPath().generic_string(), "", "Project"};
-    aliases["packages"] = {Uri::file("packages").fsPath().generic_string(), "", "Packages"};
-    aliases["nestedproject"] = {Uri::file("project/nested").fsPath().generic_string(), "", "NestedProject"};
+    aliases["project"] = {Uri::file("project").fsPath(), "", "Project"};
+    aliases["packages"] = {Uri::file("packages").fsPath(), "", "Packages"};
+    aliases["nestedproject"] = {Uri::file("project/nested").fsPath(), "", "NestedProject"};
 
     CHECK_EQ(computeBestAliasedPath(Uri::file("project/user.luau"), aliases), "@Project/user");
     CHECK_EQ(computeBestAliasedPath(Uri::file("packages/React.luau"), aliases), "@Packages/React");

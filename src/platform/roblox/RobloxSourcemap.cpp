@@ -5,6 +5,7 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -413,12 +414,12 @@ bool RobloxPlatform::updateSourceMap()
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 
-    auto sourcemapPath = workspaceFolder->rootUri.fsPath() / sourcemapFileName;
-    workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.generic_string());
+    auto sourcemapPath = workspaceFolder->rootUri.resolvePath(sourcemapFileName);
+    workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.toString());
 
     // Read in the sourcemap
     // TODO: we assume a sourcemap file in the workspace root
-    if (auto sourceMapContents = readFile(sourcemapPath))
+    if (auto sourceMapContents = Luau::FileUtils::readFile(sourcemapPath.fsPath()))
     {
         return updateSourceMapFromContents(sourceMapContents.value());
     }
@@ -599,7 +600,7 @@ std::optional<Uri> RobloxPlatform::getRealPathFromSourceNode(const SourceNodePtr
     // command was run from. Hence, we concatenate it to the end of the workspace path, and normalise the result
     // TODO: make sure this is correct once we make sourcemap.json generic
     if (auto filePath = sourceNode->getScriptFilePath())
-        return fileResolver->rootUri.resolvePath(filePath->generic_string());
+        return fileResolver->rootUri.resolvePath(*filePath);
 
     return std::nullopt;
 }

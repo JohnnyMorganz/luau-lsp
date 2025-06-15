@@ -4,6 +4,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Parser.h"
 #include "Luau/BuiltinDefinitions.h"
+#include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Flags.hpp"
 
@@ -28,7 +29,7 @@ ClientConfiguration defaultTestClientConfiguration()
 
 Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source)
 {
-    Uri uri = Uri::file(workspace.rootUri.fsPath() / name);
+    Uri uri = workspace.rootUri.resolvePath(name);
     workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
     workspace.frontend.parse(workspace.fileResolver.getModuleName(uri));
     return uri;
@@ -46,7 +47,7 @@ void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::strin
 
 Fixture::Fixture()
     : client(std::make_shared<TestClient>(TestClient{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri::file(std::filesystem::current_path()), std::nullopt)
+    , workspace(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt)
 {
     client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
@@ -93,7 +94,7 @@ void Fixture::updateDocument(const Uri& uri, const std::string& newSource)
 
 static Luau::ModuleName getMainModuleName(const WorkspaceFolder& workspace)
 {
-    return workspace.fileResolver.getModuleName(Uri::file(workspace.rootUri.fsPath() / mainModuleName));
+    return workspace.fileResolver.getModuleName(workspace.rootUri.resolvePath(mainModuleName));
 }
 
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
@@ -206,7 +207,7 @@ void Fixture::loadSourcemap(const std::string& contents)
 
 void Fixture::loadLuaurc(const std::string& source)
 {
-    REQUIRE(!WorkspaceFileResolver::parseConfig(std::filesystem::current_path() / Luau::kConfigName, source, workspace.fileResolver.defaultConfig)
+    REQUIRE(!WorkspaceFileResolver::parseConfig(workspace.rootUri.resolvePath(Luau::kConfigName), source, workspace.fileResolver.defaultConfig)
                  .has_value());
 }
 

@@ -76,7 +76,7 @@ TEST_CASE_FIXTURE(Fixture, "managed_files_correctly_resolves_for_virtual_paths")
         ]
     })");
 
-    Uri uri = Uri::file(workspace.rootUri.fsPath() / "source.luau");
+    Uri uri = workspace.rootUri.resolvePath("source.luau");
     workspace.openTextDocument(uri, {{uri, "luau", 0, "Hello, World!"}});
 
     auto textDocumentFromUri = workspace.fileResolver.getTextDocument(uri);
@@ -96,18 +96,18 @@ TEST_CASE_FIXTURE(Fixture, "isIgnoredFile")
 {
     client->globalConfig.ignoreGlobs = {"**/_Index/**"};
 
-    CHECK_EQ(workspace.isIgnoredFile(Uri::file(workspace.rootUri.fsPath() / "source.luau")), false);
-    CHECK_EQ(workspace.isIgnoredFile(Uri::file(workspace.rootUri.fsPath() / "Packages/_Index/source.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("source.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("Packages/_Index/source.luau")), true);
 
     // Test upper vs. lower case drive letter
 #ifdef _WIN32
-    auto path = workspace.rootUri.fsPath().generic_string();
+    auto path = workspace.rootUri.fsPath();
     REQUIRE(path.size() >= 2);
     REQUIRE(path[1] == ':');
     auto lowercasedDriveLetter = std::filesystem::path(std::string(1, toupper(path[0])) + path.substr(1));
     auto uppercasedDriveLetter = std::filesystem::path(std::string(1, tolower(path[0])) + path.substr(1));
-    CHECK_EQ(workspace.isIgnoredFile(Uri::file(lowercasedDriveLetter / "Packages/_Index/source.luau")), true);
-    CHECK_EQ(workspace.isIgnoredFile(Uri::file(uppercasedDriveLetter / "Packages/_Index/source.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(Uri::file((lowercasedDriveLetter / "Packages/_Index/source.luau").generic_string())), true);
+    CHECK_EQ(workspace.isIgnoredFile(Uri::file((uppercasedDriveLetter / "Packages/_Index/source.luau").generic_string())), true);
 #endif
 }
 

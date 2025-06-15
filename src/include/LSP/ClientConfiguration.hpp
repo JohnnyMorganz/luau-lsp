@@ -35,7 +35,7 @@ struct ClientTypesConfiguration
     /// DEPRECATED: USE `platform.type` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
-    std::vector<std::filesystem::path> definitionFiles{};
+    std::vector<std::string> definitionFiles{};
     /// A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)
     std::vector<std::string> disabledGlobals{};
 };

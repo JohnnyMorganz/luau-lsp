@@ -73,7 +73,7 @@ struct SourceNode
     std::weak_ptr<struct SourceNode> parent; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
     std::string name;
     std::string className;
-    std::vector<std::filesystem::path> filePaths{};
+    std::vector<std::string> filePaths{};
     std::vector<SourceNodePtr> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
     // The corresponding TypeId for this sourcemap node
@@ -81,7 +81,7 @@ struct SourceNode
     std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
     bool isScript();
-    std::optional<std::filesystem::path> getScriptFilePath();
+    std::optional<std::string> getScriptFilePath();
     Luau::SourceCode::Type sourceCodeType() const;
     std::optional<SourceNodePtr> findChild(const std::string& name);
     std::optional<SourceNodePtr> findDescendant(const std::string& name);
@@ -166,13 +166,13 @@ public:
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
 
-    std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
+    std::optional<Luau::ModuleName> resolveToVirtualPath(const Uri& name) const override;
 
     std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const override;
 
-    Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
+    Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const override;
 
-    std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const override;
+    std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;
 
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
 

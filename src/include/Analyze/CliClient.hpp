@@ -5,7 +5,7 @@
 struct CliClient : public BaseClient
 {
     ClientConfiguration configuration;
-    mutable std::vector<std::pair<std::filesystem::path, std::string>> diagnostics{};
+    mutable std::vector<std::pair<Uri, std::string>> diagnostics{};
 
     ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override
     {

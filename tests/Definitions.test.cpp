@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "LuauFileUtils.hpp"
 
 using namespace Luau::LanguageServer;
 
@@ -27,7 +28,7 @@ TEST_CASE("use_platform_metadata_from_first_registered_definitions_file")
 TEST_CASE("handles_definitions_files_relying_on_mutations")
 {
     auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
     client->definitionsFiles.emplace_back("./tests/testdata/standard_definitions.d.luau");
     client->definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
@@ -40,7 +41,7 @@ TEST_CASE("handles_definitions_files_relying_on_mutations")
         local y = x.RigType
     )");
 
-    auto result = workspace.frontend.check("foo.luau");
+    auto result = workspace.frontend.check(workspace.fileResolver.getModuleName(document));
     REQUIRE(result.errors.empty());
 }
 
@@ -59,7 +60,7 @@ TEST_CASE("dont_crash_when_mutating_a_definitions_file_that_does_not_contain_exp
 TEST_CASE("support_disabling_global_types")
 {
     auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
     auto config = defaultTestClientConfiguration();
     config.types.disabledGlobals = {
@@ -75,7 +76,7 @@ TEST_CASE("support_disabling_global_types")
         local y = table.insert({}, 1)
     )");
 
-    auto result = workspace.frontend.check("foo.luau");
+    auto result = workspace.frontend.check(workspace.fileResolver.getModuleName(document));
     REQUIRE_EQ(result.errors.size(), 1);
 
     auto err = Luau::get<Luau::UnknownSymbol>(result.errors[0]);
@@ -87,7 +88,7 @@ TEST_CASE("support_disabling_global_types")
 TEST_CASE("support_disabling_methods_in_global_types")
 {
     auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
     auto config = defaultTestClientConfiguration();
     config.types.disabledGlobals = {
@@ -103,7 +104,7 @@ TEST_CASE("support_disabling_methods_in_global_types")
         local y = table.insert({}, 1)
     )");
 
-    auto result = workspace.frontend.check("foo.luau");
+    auto result = workspace.frontend.check(workspace.fileResolver.getModuleName(document));
     REQUIRE_EQ(result.errors.size(), 1);
 
     auto err = Luau::get<Luau::UnknownProperty>(result.errors[0]);

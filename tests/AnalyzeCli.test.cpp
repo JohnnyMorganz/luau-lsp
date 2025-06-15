@@ -27,41 +27,41 @@ ostream& operator<<(ostream& os, const vector<T>& value)
 TEST_CASE("getFilesToAnalyze")
 {
     TempDir t("analyze_cli_get_files_to_analyze");
-    auto fileA = t.write_child("src/a.luau", "");
-    auto fileB = t.write_child("src/b.luau", "");
+    auto fileA = Uri::file(t.write_child("src/a.luau", "")).fsPath();
+    auto fileB = Uri::file(t.write_child("src/b.luau", "")).fsPath();
 
     auto allResults = getFilesToAnalyze({t.path()}, {});
     std::sort(allResults.begin(), allResults.end());
-    CHECK_EQ(allResults, std::vector<std::filesystem::path>{fileA, fileB});
+    CHECK_EQ(allResults, std::vector<std::string>{fileA, fileB});
 
     auto ignoredFile = getFilesToAnalyze({t.path()}, {"b.luau"});
     std::sort(ignoredFile.begin(), ignoredFile.end());
-    CHECK_EQ(ignoredFile, std::vector<std::filesystem::path>{fileA});
+    CHECK_EQ(ignoredFile, std::vector<std::string>{fileA});
 }
 
 TEST_CASE("getFilesToAnalyze_handles_ignore_globs_within_directories")
 {
     TempDir t("analyze_cli_ignored_files");
-    auto fileA = t.write_child("src/a.luau", "");
-    auto fileB = t.write_child("src/b.luau", "");
+    auto fileA = Uri::file(t.write_child("src/a.luau", "")).fsPath();
+    auto fileB = Uri::file(t.write_child("src/b.luau", "")).fsPath();
 
     auto ignoredFile = getFilesToAnalyze({t.path()}, {"b.luau"});
     std::sort(ignoredFile.begin(), ignoredFile.end());
-    CHECK_EQ(ignoredFile, std::vector<std::filesystem::path>{fileA});
+    CHECK_EQ(ignoredFile, std::vector<std::string>{fileA});
 }
 
 TEST_CASE("getFilesToAnalyze_still_matches_file_if_it_was_explicitly_provided")
 {
     TempDir t("analyze_cli_ignored_files_explicitly_provided");
-    auto fileA = t.write_child("src/a.luau", "");
-    CHECK_EQ(getFilesToAnalyze({fileA}, {"a.luau"}), std::vector<std::filesystem::path>{fileA});
+    auto fileA = Uri::file(t.write_child("src/a.luau", "")).fsPath();
+    CHECK_EQ(getFilesToAnalyze({fileA}, {"a.luau"}), std::vector<std::string>{fileA});
 }
 
 TEST_CASE("ignore_globs_from_settings_file_applied")
 {
     CliClient client;
     std::vector<std::string> ignoreGlobs;
-    std::vector<std::filesystem::path> definitionPaths;
+    std::vector<std::string> definitionPaths;
 
     auto configFile = R"({ "luau-lsp.ignoreGlobs": [ "/ignored/**" ] })";
 
@@ -75,7 +75,7 @@ TEST_CASE("definition_files_from_settings_file_applied")
 {
     CliClient client;
     std::vector<std::string> ignoreGlobs;
-    std::vector<std::filesystem::path> definitionPaths;
+    std::vector<std::string> definitionPaths;
 
     auto configFile = R"({ "luau-lsp.types.definitionFiles": [ "global_types/types.d.luau" ] })";
 

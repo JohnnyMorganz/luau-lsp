@@ -2,9 +2,9 @@
 #include "Luau/StringUtils.h"
 #include "Platform/RobloxPlatform.hpp"
 #include <algorithm>
-#include <fstream>
 
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 std::optional<std::string> getParentPath(const std::string& path)
 {
@@ -55,30 +55,33 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     return std::nullopt;
 }
 
-std::string convertToScriptPath(const std::string& path)
+std::string convertToScriptPath(std::string path)
 {
-    std::filesystem::path p(path);
     std::string output = "";
-    for (auto it = p.begin(); it != p.end(); ++it)
+#ifdef _WIN32
+    std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+    std::vector<std::string_view> components = Luau::split(path, '/');
+    for (auto it = components.begin(); it != components.end(); ++it)
     {
-        auto str = it->string();
+        auto str = *it;
         if (str == ".")
         {
-            if (it == p.begin())
+            if (it == components.begin())
                 output += "script";
         }
         else if (str == "..")
         {
-            if (it == p.begin())
+            if (it == components.begin())
                 output += "script.Parent";
             else
                 output += ".Parent";
         }
         else if (!Luau::isIdentifier(str))
-            output += "[\"" + str + "\"]";
+            output += "[\"" + std::string(str) + "\"]";
         else
         {
-            if (it != p.begin())
+            if (it != components.begin())
                 output += ".";
             output += str;
         }
@@ -92,40 +95,7 @@ std::string codeBlock(const std::string& language, const std::string& code)
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
-std::optional<std::string> readFile(const std::filesystem::path& filePath)
-{
-#ifdef _WIN32
-    FILE* file = _wfopen(filePath.c_str(), L"rb");
-#else
-    FILE* file = fopen(filePath.c_str(), "rb");
-#endif
-
-    if (!file)
-        return std::nullopt;
-
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    if (length < 0)
-    {
-        fclose(file);
-        return std::nullopt;
-    }
-    fseek(file, 0, SEEK_SET);
-
-    std::string result(length, 0);
-
-    size_t read = fread(result.data(), 1, length, file);
-    fclose(file);
-
-    if (read != size_t(length))
-        return std::nullopt;
-
-    // LSP Deviation: we handle the shebang in TextDocument
-
-    return result;
-}
-
-std::optional<std::filesystem::path> getHomeDirectory()
+std::optional<std::string> getHomeDirectory()
 {
     if (const char* home = getenv("HOME"))
     {
@@ -142,12 +112,12 @@ std::optional<std::filesystem::path> getHomeDirectory()
 }
 
 // Resolves a filesystem path, including any tilde expansion
-std::filesystem::path resolvePath(const std::filesystem::path& path)
+std::string resolvePath(const std::string& path)
 {
-    if (Luau::startsWith(path.generic_string(), "~/"))
+    if (Luau::startsWith(path, "~/"))
     {
         if (auto home = getHomeDirectory())
-            return home.value() / path.string().substr(2);
+            return Luau::FileUtils::joinPaths(*home, path.substr(2));
         else
             // TODO: should we error / return an optional here instead?
             return path;
