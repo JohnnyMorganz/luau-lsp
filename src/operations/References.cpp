@@ -244,22 +244,10 @@ static std::vector<lsp::Location> processReferences(WorkspaceFileResolver& fileR
 
     for (const auto& reference : references)
     {
-        if (auto refTextDocument = fileResolver.getTextDocumentFromModuleName(reference.moduleName))
+        if (auto refTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(reference.moduleName))
         {
             result.emplace_back(lsp::Location{refTextDocument->uri(),
                 {refTextDocument->convertPosition(reference.location.begin), refTextDocument->convertPosition(reference.location.end)}});
-        }
-        else
-        {
-            if (auto filePath = fileResolver.platform->resolveToRealPath(reference.moduleName))
-            {
-                if (auto source = fileResolver.readSource(reference.moduleName))
-                {
-                    auto refTextDocument = TextDocument{Uri::file(*filePath), "luau", 0, source->source};
-                    result.emplace_back(lsp::Location{refTextDocument.uri(),
-                        {refTextDocument.convertPosition(reference.location.begin), refTextDocument.convertPosition(reference.location.end)}});
-                }
-            }
         }
     }
 
