@@ -58,7 +58,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
 #ifdef _WIN32
             sentry_options_set_database_pathw(options, Luau::FileUtils::fromUtf8(*crashReportDirectory).c_str());
 #else
-            sentry_options_set_database_path(options, *crashReportDirectory);
+            sentry_options_set_database_path(options, crashReportDirectory->c_str());
 #endif
         }
 
