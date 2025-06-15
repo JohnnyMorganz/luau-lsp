@@ -1,1 +1,1 @@
-local x = 1
+local _ = 1
