@@ -6605,13 +6605,7 @@ declare class RaycastParams
 	function AddToFilter(self, instances: Instance | { Instance }): nil
 end
 
-declare class RaycastResult
-	Distance: number
-	Instance: Instance
-	Material: EnumMaterial
-	Normal: Vector3
-	Position: Vector3
-end
+
 
 declare class Rect
 	Height: number
@@ -13875,7 +13869,7 @@ declare class StudioService extends Instance
 	function GetStartupPluginId(self): string
 	function GetTermsOfUseUrl(self): string
 	function GetUserId(self): number
-	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
+	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?
 	function HasInternalPermission(self): boolean
 	function IsPluginInstalled(self, assetId: number): boolean
 	function IsPluginUpToDate(self, assetId: number, currentAssetVersion: number): boolean
@@ -15370,6 +15364,14 @@ declare Path2DControlPoint: {
 	new: (() -> Path2DControlPoint) & ((position: UDim2) -> Path2DControlPoint) & ((position: UDim2, leftTangent: UDim2, rightTangent: UDim2) -> Path2DControlPoint),
 }
 
+
+export type RaycastResult<T = BasePart> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Material: EnumMaterial,
+    Distance: number,
+}
 
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
