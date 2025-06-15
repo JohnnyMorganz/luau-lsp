@@ -1,3 +1,4 @@
+// This file is part of the Luau programming language and is licensed under MIT License; see LICENSE.txt for details
 #include "LuauFileUtils.hpp"
 
 #include "Luau/Common.h"
@@ -315,8 +316,9 @@ std::string resolvePath(std::string_view path, std::string_view baseFilePath)
     if (isAbsolutePath(path))
     {
         // path is absolute, we use path's prefix and ignore baseFilePath
-        size_t afterPrefix = path.find_first_of("\\/") + 1;
-        resolvedPathPrefix = path.substr(0, afterPrefix);
+        size_t afterPrefix = path.find_first_of("\\/");
+        // LUAU-LSP DEVIATION: we normalize to '/' slash for resolvedPathPrefix
+        resolvedPathPrefix = std::string(path.substr(0, afterPrefix)) + "/";
         pathComponents = splitPath(path.substr(afterPrefix));
     }
     else
