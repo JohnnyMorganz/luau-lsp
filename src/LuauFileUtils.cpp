@@ -18,6 +18,9 @@
 #include <sys/stat.h>
 #endif
 
+#include <string.h>
+#include <string_view>
+
 #ifdef _WIN32
 static std::wstring fromUtf8(const std::string& path)
 {
