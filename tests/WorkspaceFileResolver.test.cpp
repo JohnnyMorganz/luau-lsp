@@ -5,6 +5,7 @@
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
 #include "TempDir.h"
+#include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
@@ -146,7 +147,7 @@ TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
     // for now we don't "fix" this, because our startsWith check is greedy, so we want to allow differentiation between `@foo/` and `@foobar/`
     CHECK_EQ(resolveDirectoryAlias(rootPath, directoryAliases, "@test4"), Uri::file("C:/Users/test/test1"));
 
-    CHECK_EQ(resolveDirectoryAlias(rootPath, directoryAliases, "@test2/bar"), Uri::file(home.value() / "test2" / "bar"));
+    CHECK_EQ(resolveDirectoryAlias(rootPath, directoryAliases, "@test2/bar"), Uri::file(Luau::FileUtils::joinPaths(*home, "test2/bar")));
 
     CHECK_EQ(resolveDirectoryAlias(rootPath, directoryAliases, "@test3/bar"), std::nullopt);
 
@@ -177,9 +178,9 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_variations_with_directory_sepa
     }
     )");
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path() / "folder"));
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path() / "folder"));
-    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path() / "folder/foo"));
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder/foo"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trailing_slash")
@@ -194,10 +195,9 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trai
 
     auto x = resolveAlias("@test", workspace.fileResolver.defaultConfig, {});
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path()).resolvePath("folder"));
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path()).resolvePath("folder"));
-    CHECK_EQ(
-        resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(std::filesystem::current_path()).resolvePath("folder/foo"));
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder/foo"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
@@ -236,14 +236,14 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
     auto home = getHomeDirectory();
     REQUIRE(home);
 
-    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(*home / "definitions"));
-    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(*home / "definitions"));
-    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(*home / "definitions" / "foo"));
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions")));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions")));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions/foo")));
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
 {
-    auto basePath = Uri::file(std::filesystem::current_path());
+    auto basePath = workspace.fileResolver.rootUri;
 
     CHECK_EQ(resolveAlias("@self", workspace.fileResolver.defaultConfig, basePath), basePath);
     CHECK_EQ(resolveAlias("@self/foo", workspace.fileResolver.defaultConfig, basePath), basePath.resolvePath("foo"));
@@ -332,12 +332,12 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
 
 TEST_CASE("is_init_luau_file")
 {
-    CHECK_EQ(isInitLuauFile("foo/init.lua"), true);
-    CHECK_EQ(isInitLuauFile("foo/init.luau"), true);
-    CHECK_EQ(isInitLuauFile("foo/init.client.luau"), true);
-    CHECK_EQ(isInitLuauFile("foo/init.server.luau"), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.lua")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.luau")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.client.luau")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.server.luau")), true);
 
-    CHECK_EQ(isInitLuauFile("foo/utils.luau"), false);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/utils.luau")), false);
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")

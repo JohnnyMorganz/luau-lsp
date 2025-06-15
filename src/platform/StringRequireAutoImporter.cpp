@@ -1,18 +1,16 @@
 #include "Platform/StringRequireAutoImporter.hpp"
 
-#include <filesystem>
-
 namespace Luau::LanguageServer::AutoImports
 {
 std::string requireNameFromModuleName(const Luau::ModuleName& name)
 {
     auto fileName = name;
 
-    if (isInitLuauFile(name))
+    if (isInitLuauFile(Uri::file(name)))
         fileName = getParentPath(name).value_or(name);
 
     if (const auto slashPos = fileName.find_last_of('/'); slashPos != std::string::npos)
-        fileName =  fileName.substr(slashPos + 1);
+        fileName = fileName.substr(slashPos + 1);
     fileName = removeSuffix(fileName, ".luau");
     fileName = removeSuffix(fileName, ".lua");
     return makeValidVariableName(fileName);
@@ -25,7 +23,7 @@ std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap&
 
     for (const auto& [aliasName, aliasInfo] : availableAliases)
     {
-        auto aliasLocation = Uri::file(resolveAliasLocation(aliasInfo));
+        auto aliasLocation = resolveAliasLocation(aliasInfo);
 
         if (!aliasLocation.isAncestorOf(to))
             continue;
@@ -54,7 +52,7 @@ std::pair<std::string, SortText::SortTextT> computeRequirePath(
 {
     auto fromParent = from.parent();
 
-    if (isInitLuauFile(to.fsPath()))
+    if (isInitLuauFile(to))
         to = to.parent().value_or(to);
 
     if (importRequireStyle != ImportRequireStyle::AlwaysRelative)
@@ -78,7 +76,7 @@ std::pair<std::string, SortText::SortTextT> computeRequirePath(
     relativePath = removeSuffix(relativePath, ".luau");
     relativePath = removeSuffix(relativePath, ".lua");
 
-    if (isInitLuauFile(from.fsPath()))
+    if (isInitLuauFile(from))
     {
         // Move the relative path up one directory
         if (!Luau::startsWith(relativePath, "../"))

@@ -1,8 +1,7 @@
 #include "Luau/FileResolver.h"
 #include "Platform/StringRequireSuggester.hpp"
 #include "LSP/Workspace.hpp"
-
-#include <filesystem>
+#include "LuauFileUtils.hpp"
 
 
 std::string FileRequireNode::getLabel() const
@@ -35,7 +34,7 @@ std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std:
     Uri relativeNodeUri;
     if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig, *basePath))
         relativeNodeUri = luaurcAlias.value();
-    else if (isInitLuauFile(uri.fsPath()))
+    else if (isInitLuauFile(uri))
     {
         if (auto parent = basePath->parent())
             relativeNodeUri = parent->resolvePath(requireString);
@@ -54,24 +53,19 @@ std::vector<std::unique_ptr<Luau::RequireNode>> FileRequireNode::getChildren() c
 
     if (isDirectory)
     {
-        try
-        {
-            for (const auto& dir_entry : std::filesystem::directory_iterator(uri.fsPath()))
+        Luau::FileUtils::traverseDirectory(uri.fsPath(),
+            [&](auto& path)
             {
-                if ((dir_entry.is_regular_file() && !isInitLuauFile(dir_entry.path())) || dir_entry.is_directory())
+                auto childUri = Uri::file(path);
+                if ((childUri.isFile() && !isInitLuauFile(childUri)) || childUri.isDirectory())
                 {
-                    if (workspaceFolder->isIgnoredFileForAutoImports(Uri::file(dir_entry.path())))
-                        continue;
+                    if (workspaceFolder->isIgnoredFileForAutoImports(childUri))
+                        return;
 
-                    std::string fileName = dir_entry.path().filename().generic_string();
-                    results.emplace_back(std::make_unique<FileRequireNode>(Uri::file(dir_entry.path()), dir_entry.is_directory(), workspaceFolder));
+                    std::string fileName = childUri.filename();
+                    results.emplace_back(std::make_unique<FileRequireNode>(childUri, childUri.isDirectory(), workspaceFolder));
                 }
-            }
-        }
-        catch (std::exception&)
-        {
-            // TODO: error?
-        }
+            });
     }
 
     return results;
@@ -85,7 +79,7 @@ std::vector<Luau::RequireAlias> FileRequireNode::getAvailableAliases() const
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
 
     // Include @self alias for init.lua files
-    if (isInitLuauFile(uri.fsPath()))
+    if (isInitLuauFile(uri))
         results.emplace_back(Luau::RequireAlias{"self", {"Alias"}});
 
     return results;

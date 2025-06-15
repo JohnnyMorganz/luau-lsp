@@ -1,6 +1,5 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/main/src/uri.ts
 #pragma once
-#include <filesystem>
 #include <regex>
 #include "nlohmann/json.hpp"
 #include "LSP/Utils.hpp"
@@ -69,15 +68,9 @@ public:
     }
 
     static Uri parse(const std::string& value);
-    static Uri file(const std::filesystem::path& fsPath);
+    static Uri file(std::string_view fsPath);
 
-    // TODO: make this conversion explicit
-    operator std::filesystem::path()
-    {
-        return fsPath();
-    }
-
-    std::filesystem::path fsPath() const;
+    std::string fsPath() const;
 
 private:
     mutable std::string cachedToString;
@@ -98,6 +91,10 @@ public:
     /// If the path has no components, or no extension, then returns an empty string.
     /// Extension includes the '.' character (e.g., `.luau`)
     std::string extension() const;
+
+    /// Checks whether this URI corresponds to a file. Performs a file-system call.
+    /// Always returns false if scheme is not 'file'
+    bool isFile() const;
 
     /// Checks whether this URI corresponds to a directory. Performs a file-system call.
     /// Always returns false if scheme is not 'file'
@@ -154,3 +151,5 @@ struct adl_serializer<std::unordered_map<Uri, T, UriHash>>
     }
 };
 } // namespace nlohmann
+
+bool isInitLuauFile(const Uri& path);

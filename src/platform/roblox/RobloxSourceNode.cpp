@@ -8,19 +8,20 @@ bool SourceNode::isScript()
 
 /// NOTE: Use `WorkspaceFileResolver::getRealPathFromSourceNode()` instead of this function where
 /// possible, as that will ensure it is relative to the correct workspace root.
-std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
+std::optional<std::string> SourceNode::getScriptFilePath()
 {
     for (const auto& path : filePaths)
     {
-        if (path.extension() == ".lua" || path.extension() == ".luau")
+        const auto uri = Uri::file(path);
+        if (uri.extension() == ".lua" || uri.extension() == ".luau")
         {
             return path;
         }
-        else if (path.extension() == ".json" && isScript() && !endsWith(path.filename().generic_string(), ".meta.json"))
+        else if (uri.extension() == ".json" && isScript() && !endsWith(uri.filename(), ".meta.json"))
         {
             return path;
         }
-        else if (path.extension() == ".toml" && isScript())
+        else if (uri.extension() == ".toml" && isScript())
         {
             return path;
         }

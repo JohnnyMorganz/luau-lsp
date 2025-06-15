@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "LSP/Utils.hpp"
+#include "LuauFileUtils.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "TempDir.h"
 
 TEST_SUITE_BEGIN("UtilsTest");
 
@@ -94,7 +96,7 @@ TEST_CASE("resolvePath resolves paths including tilde expansions")
     auto home = getHomeDirectory();
     REQUIRE(home);
 
-    CHECK_EQ(resolvePath("~/foo.lua"), home.value() / "foo.lua");
+    CHECK_EQ(resolvePath("~/foo.lua"), Luau::FileUtils::joinPaths(*home, "foo.lua"));
 }
 
 TEST_CASE("isDataModel returns true when path starts with game")
@@ -116,6 +118,12 @@ TEST_CASE("getFirstLine returns string when there is no newline")
 {
     CHECK_EQ(getFirstLine(""), "");
     CHECK_EQ(getFirstLine("testing"), "testing");
+}
+
+TEST_CASE("readFile can handle non-ASCII characters in path")
+{
+    auto result = Luau::FileUtils::readFile("C:\\Users\\Development\\Documents\\luau-lsp\\tests\\testdata\\non-ascii\\ō.luau");
+    CHECK_EQ(result, "local x = 1");
 }
 
 TEST_SUITE_END();

@@ -1,5 +1,4 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/6dec22d7dcc6c63c30343d3a8d56050d0078cb6a/src/uri.ts
-#include <filesystem>
 #include <optional>
 #include <cctype>
 #include "LSP/Uri.hpp"
@@ -291,10 +290,10 @@ Uri Uri::parse(const std::string& value)
     return {scheme, percentDecode(authority), percentDecode(path), percentDecode(query), percentDecode(fragment)};
 }
 
-Uri Uri::file(const std::filesystem::path& fsPath)
+Uri Uri::file(std::string_view fsPath)
 {
     std::string authority = "";
-    auto path = fsPath.string();
+    std::string path = std::string(fsPath);
 
 // normalize to fwd-slashes on windows,
 // on other systems bwd-slashes are valid
@@ -331,7 +330,7 @@ Uri Uri::file(const std::filesystem::path& fsPath)
     return Uri("file", authority, path, "", "");
 }
 
-std::filesystem::path Uri::fsPath() const
+std::string Uri::fsPath() const
 {
     if (!authority.empty() && path.length() > 1 && scheme == "file")
     {
@@ -479,13 +478,20 @@ std::string Uri::extension() const
     return "." + std::string(parts.back());
 }
 
+bool Uri::isFile() const
+{
+    if (scheme != "file")
+        return false;
+
+    return Luau::FileUtils::isFile(fsPath());
+}
+
 bool Uri::isDirectory() const
 {
     if (scheme != "file")
         return false;
 
-    std::error_code ec;
-    return std::filesystem::is_directory(fsPath(), ec);
+    return Luau::FileUtils::isDirectory(fsPath());
 }
 
 bool Uri::exists() const
@@ -493,8 +499,7 @@ bool Uri::exists() const
     if (scheme != "file")
         return false;
 
-    std::error_code ec;
-    return std::filesystem::exists(fsPath(), ec);
+    return Luau::FileUtils::exists(fsPath());
 }
 
 std::string Uri::lexicallyRelative(const Uri& base) const
@@ -615,4 +620,9 @@ void from_json(const json& j, Uri& u)
 void to_json(json& j, const Uri& u)
 {
     j = u.toString();
+}
+
+bool isInitLuauFile(const Uri& uri)
+{
+    return uri.filename() == "init" || Luau::startsWith(uri.filename(), "init.");
 }
