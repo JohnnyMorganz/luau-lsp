@@ -1,5 +1,6 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/main/src/uri.ts
 #pragma once
+#include <optional>
 #include <string>
 #include "nlohmann/json.hpp"
 
