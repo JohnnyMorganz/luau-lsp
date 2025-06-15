@@ -218,7 +218,7 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     if (!node)
         return std::nullopt;
 
-    auto findTypeLocation = [this, textDocument, &module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
+    auto findTypeLocation = [this, textDocument, &module, &position](Luau::AstType* type) -> std::optional<lsp::Location>
     {
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
