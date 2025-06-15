@@ -223,8 +223,8 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
         {
-            auto uri = params.textDocument.uri;
             TextDocumentPtr referenceTextDocument(textDocument);
+            std::optional<Luau::Location> location = std::nullopt;
 
             auto scope = Luau::findScopeAtPosition(*module, position);
             if (!scope)
@@ -234,35 +234,30 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             {
                 if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
                 {
-                    auto fileName = platform->resolveToRealPath(*importedName);
-                    if (!fileName)
+                    auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
+                    if (!importedModule)
                         return std::nullopt;
-                    uri = Uri::file(*fileName);
 
-                    // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
-                    // even when retainFullTypeGraphs = false.
-                    checkStrict(*importedName);
-                    // TODO: fix "forAutocomplete"
-                    if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
-                        importedModule && importedModule->hasModuleScope())
-                        scope = importedModule->getModuleScope();
-                    else
+                    const auto it = importedModule->exportedTypeBindings.find(reference->name.value);
+                    if (it == importedModule->exportedTypeBindings.end() || !it->second.definitionLocation)
                         return std::nullopt;
 
                     referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
-                    if (!referenceTextDocument)
-                        return std::nullopt;
+                    location = *it->second.definitionLocation;
                 }
                 else
                     return std::nullopt;
             }
+            else
+            {
+                location = lookupTypeLocation(*scope, reference->name.value);
+            }
 
-            auto location = lookupTypeLocation(*scope, reference->name.value);
-            if (!location)
+            if (!referenceTextDocument || !location)
                 return std::nullopt;
 
-            return lsp::Location{
-                uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}};
+            return lsp::Location{referenceTextDocument->uri(),
+                lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}};
         }
         return std::nullopt;
     };
