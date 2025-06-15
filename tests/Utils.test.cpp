@@ -124,7 +124,7 @@ TEST_CASE("readFile can handle non-ASCII characters in path")
 {
     auto path = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii/ō.luau");
     auto result = Luau::FileUtils::readFile(path);
-    CHECK_EQ(result, "local x = 1\n");
+    CHECK_EQ(result, "local _ = 1\n");
 }
 
 TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
