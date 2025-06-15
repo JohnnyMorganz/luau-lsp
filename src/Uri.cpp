@@ -6,6 +6,30 @@
 #include "Luau/StringUtils.h"
 #include "LuauFileUtils.hpp"
 
+// implements a bit of https://tools.ietf.org/html/rfc3986#section-5
+static std::string _referenceResolution(const std::string& scheme, const std::string& path)
+{
+    std::string res = path;
+
+    // the slash-character is our 'default base' as we don't
+    // support constructing URIs relative to other URIs. This
+    // also means that we alter and potentially break paths.
+    // see https://tools.ietf.org/html/rfc3986#section-5.1.4
+    if (scheme == "https" || scheme == "http" || scheme == "file")
+    {
+        if (res.empty())
+        {
+            res = "/";
+        }
+        else if (res[0] != '/')
+        {
+            res = '/' + path;
+        }
+    }
+
+    return res;
+}
+
 static std::string decodeURIComponent(const std::string& str)
 {
     std::string res;
@@ -219,6 +243,31 @@ static std::string encodeURIComponentMinimal(const std::string& path, bool, bool
 }
 
 static Uri kNullUri = {"", "", "", "", ""};
+
+Uri::Uri(const std::string& scheme, std::string authority, const std::string& path, std::string query, std::string fragment)
+    : scheme(std::move(scheme))
+    , authority(std::move(authority))
+    , path(_referenceResolution(scheme, path))
+    , query(std::move(query))
+    , fragment(std::move(fragment))
+{
+    // TODO: validate?
+}
+
+bool Uri::operator==(const Uri& other) const
+{
+#if defined(_WIN32) || defined(__APPLE__)
+    return scheme == other.scheme && authority == other.authority && toLower(path) == toLower(other.path) && query == other.query &&
+           fragment == other.fragment;
+#else
+    return scheme == other.scheme && authority == other.authority && path == other.path && query == other.query && fragment == other.fragment;
+#endif
+}
+
+bool Uri::operator!=(const Uri& other) const
+{
+    return !operator==(other);
+}
 
 Uri Uri::parse(const std::string& value)
 {
