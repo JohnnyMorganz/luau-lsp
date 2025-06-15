@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `ServerInfo` to the `LanguageServer::onInitialize` result.
 - `.robloxrc` files are now processed alongside `.luaurc` files for backwards compatibility with old
   configuration. It is recommended to still use `.luaurc` for new code.
+- `FindFirstChildWhichIsA` and friends now report an error if the class name provided was not found as a valid instance
+  type.
 
 ### Changed
 
