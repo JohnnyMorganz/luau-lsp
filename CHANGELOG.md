@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Removed the restriction on maximum table size when displaying during Hover etc. This is done by setting the
   `LuauTableTypeMaximumStringifierLength` flag value to `0`. Overrides for this value are still respected.
 
+### Fixed
+
+- Fixed stack overflow when looking up a property on self-referential intersection types
+
 ## [1.49.1] - 2025-06-09
 
 ### Changed

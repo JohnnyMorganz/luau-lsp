@@ -300,8 +300,13 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
+    const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
+    if (seenSet.contains(parentType))
+        return std::nullopt;
+    seenSet.insert(parentType);
+
     if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
         if (auto prop = Luau::lookupExternTypeProp(ctv, name))
@@ -324,7 +329,7 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
                 Luau::TypeId followed = Luau::follow(indexIt->second.type());
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
-                    return lookupProp(followed, name);
+                    return lookupProp(followed, name, seenSet);
                 }
                 else if (Luau::get<Luau::FunctionType>(followed))
                 {
@@ -347,7 +352,7 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     {
         for (Luau::TypeId ty : i->parts)
         {
-            if (auto prop = lookupProp(Luau::follow(ty), name))
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet))
                 return prop;
         }
     }
@@ -356,6 +361,12 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     //     // Find the corresponding ty
     // }
     return std::nullopt;
+}
+
+std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+{
+    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    return lookupProp(parentType, name, seenSet);
 }
 
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name)
