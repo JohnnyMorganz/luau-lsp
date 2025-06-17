@@ -22,7 +22,7 @@ std::optional<std::string> getCurrentWorkingDirectory();
 bool exists(const std::string& path);
 bool isFile(const std::string& path);
 bool isDirectory(const std::string& path);
-// LUAU-LSP DEVIATION: 'traverseDirectory' is non-recursive, and there is a separate recursive function
+// LUAU-LSP DEVIATION: 'traverseDirectory' is non-recursive and matches on directory names. There is a separate recursive function
 bool traverseDirectory(const std::string& path, const std::function<void(const std::string& name)>& callback);
 bool traverseDirectoryRecursive(const std::string& path, const std::function<void(const std::string& name)>& callback);
 

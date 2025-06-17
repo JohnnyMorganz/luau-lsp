@@ -354,7 +354,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             }
 
             auto uri = Uri::file(path);
-            if (uri.isFile() && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            if (!isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
             {
                 auto ext = uri.extension();
                 if (ext == ".lua" || ext == ".luau")

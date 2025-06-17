@@ -158,9 +158,12 @@ static bool traverseDirectoryRec(const std::wstring& path, const std::function<v
             {
                 // Skip reparse points to avoid handling cycles
             }
-            else if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && recursive)
+            else if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
             {
-                traverseDirectoryRec(buf, callback, recursive);
+                if (recursive)
+                    traverseDirectoryRec(buf, callback, recursive);
+                else
+                    callback(toUtf8(buf));
             }
             else
             {
@@ -221,9 +224,12 @@ static bool traverseDirectoryRec(const std::string& path, const std::function<vo
                 mode = st.st_mode;
             }
 
-            if (mode == S_IFDIR && recursive)
+            if (mode == S_IFDIR)
             {
-                traverseDirectoryRec(buf, callback, recursive);
+                if (recursive)
+                    traverseDirectoryRec(buf, callback, recursive);
+                else
+                    callback(buf);
             }
             else if (mode == S_IFREG)
             {
