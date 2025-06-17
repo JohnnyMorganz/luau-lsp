@@ -1,0 +1,19 @@
+name: Test Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Windows Test
+    runs-on: windows-latest
+    steps:
+      - name: Check
+        run: |
+          dir C:/Users
