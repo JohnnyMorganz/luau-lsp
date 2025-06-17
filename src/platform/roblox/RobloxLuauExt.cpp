@@ -54,7 +54,7 @@ bool MagicInstanceIsA::infer(const Luau::MagicFunctionCallContext& context)
         return false;
 
     std::string className(str->value.data, str->value.size);
-    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+    std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
     if (!tfun)
         context.solver->reportError(
             Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
@@ -172,9 +172,13 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceFindFirstXWhic
     if (!str)
         return std::nullopt;
 
-    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = typeChecker.globalScope->lookupType(className);
     if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+    {
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
         return std::nullopt;
+    }
 
     auto type = Luau::follow(tfun->type);
 
@@ -192,9 +196,13 @@ bool MagicInstanceFindFirstXWhichIsA::infer(const Luau::MagicFunctionCallContext
     if (!str)
         return false;
 
-    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(std::string(str->value.data, str->value.size));
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
     if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+    {
+        context.solver->reportError(Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}, str->location);
         return false;
+    }
 
     auto type = Luau::follow(tfun->type);
 
@@ -430,8 +438,7 @@ bool MagicTypeLookup::infer(const Luau::MagicFunctionCallContext& context)
         auto className = std::string(str->value.data, str->value.size);
         if (contains(lookupList, className))
         {
-            // TODO: only check the global scope?
-            std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+            std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
             if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
             {
                 context.solver->reportError(

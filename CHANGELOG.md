@@ -6,22 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Reimplemented internal file-system calls and removed references to `std::filesystem`. There should be no external differences from this change, except that non-ASCII filepaths are handled correctly on Windows
+
+### Fixed
+
+- Fixed handling of non-ASCII file paths and directories on Windows ([#746](https://github.com/JohnnyMorganz/luau-lsp/issues/746))
+
+## [1.50.0] - 2025-06-16
+
 ### Added
 
 - Added `ServerInfo` to the `LanguageServer::onInitialize` result.
 - `.robloxrc` files are now processed alongside `.luaurc` files for backwards compatibility with old
   configuration. It is recommended to still use `.luaurc` for new code.
+- `FindFirstChildWhichIsA` and friends now report an error if the class name provided was not found as a valid instance
+  type.
 
 ### Changed
 
 - Sync to upstream Luau 0.678
 - Removed the restriction on maximum table size when displaying during Hover etc. This is done by setting the
   `LuauTableTypeMaximumStringifierLength` flag value to `0`. Overrides for this value are still respected.
-- Reimplemented internal file-system calls and removed references to `std::filesystem`. There should be no external differences from this change, except that non-ASCII filepaths are handled correctly on Windows
 
 ### Fixed
 
-- Fixed handling of non-ASCII file paths and directories on Windows ([#746](https://github.com/JohnnyMorganz/luau-lsp/issues/746))
+- Fixed stack overflow when looking up a property on self-referential intersection types
 
 ## [1.49.1] - 2025-06-09
 
