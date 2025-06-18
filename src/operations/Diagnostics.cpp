@@ -116,11 +116,10 @@ std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::st
         [&](auto& path)
         {
             auto uri = Uri::file(path);
-            if (!isDefinitionFile(uri, config))
+            auto ext = uri.extension();
+            if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config))
             {
-                auto ext = uri.extension();
-                if (ext == ".lua" || ext == ".luau")
-                    files.push_back(uri);
+                files.push_back(uri);
             }
         });
 

@@ -354,14 +354,11 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             }
 
             auto uri = Uri::file(path);
-            if (!isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            auto ext = uri.extension();
+            if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
             {
-                auto ext = uri.extension();
-                if (ext == ".lua" || ext == ".luau")
-                {
-                    auto moduleName = fileResolver.getModuleName(uri);
-                    moduleNames.emplace_back(moduleName);
-                }
+                auto moduleName = fileResolver.getModuleName(uri);
+                moduleNames.emplace_back(moduleName);
             }
         });
 
