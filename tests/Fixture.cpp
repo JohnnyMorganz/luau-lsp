@@ -78,11 +78,10 @@ Uri Fixture::newDocument(const std::string& name, const std::string& source)
 /// requires to resolve. e.g. registering "game/Testing/A" will allow `require(game.Testing.A`) to work
 void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath)
 {
-    SourceNode dummySourceNode("Dummy", "ModuleScript", {uri.fsPath()}, {});
-
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
     LUAU_ASSERT(platform);
-    platform->writePathsToMap(&dummySourceNode, virtualPath);
+    auto sourceNode = platform->sourceNodeAllocator.allocate(SourceNode(uri.filename(), "ModuleScript", {uri.fsPath()}, {}));
+    platform->writePathsToMap(sourceNode, virtualPath);
 }
 
 void Fixture::updateDocument(const Uri& uri, const std::string& newSource)

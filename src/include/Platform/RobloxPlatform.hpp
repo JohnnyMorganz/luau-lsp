@@ -104,11 +104,9 @@ struct PluginNode
 class RobloxPlatform : public LSPPlatform
 {
 private:
-    Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
-    Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
-
     // Plugin-provided DataModel information
     PluginNode* pluginInfo = nullptr;
+    Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
 
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
@@ -123,6 +121,7 @@ private:
 public:
     // The root source node from a parsed Rojo source map
     SourceNode* rootSourceNode = nullptr;
+    Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
 
     Luau::TypeArena instanceTypes;
 
