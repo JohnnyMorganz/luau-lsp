@@ -264,11 +264,6 @@ bool exists(const std::string& path)
     DWORD fileAttributes = GetFileAttributesW(fromUtf8(path).c_str());
     if (fileAttributes == INVALID_FILE_ATTRIBUTES)
         return false;
-    if (fileAttributes & FILE_ATTRIBUTE_DEVICE)
-    {
-        // Ignore non-regular files like 'con'
-        return false;
-    }
     return true;
 #else
     struct stat st = {};
