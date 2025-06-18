@@ -114,8 +114,11 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::Module
 
         if (g->name == "script")
         {
-            LUAU_ASSERT(!isVirtualPath(context->name));
-            if (auto virtualPath = resolveToVirtualPath(fileResolver->getUri(context->name)))
+            if (isVirtualPath(context->name))
+            {
+                return Luau::ModuleInfo{context->name};
+            }
+            else if (auto virtualPath = resolveToVirtualPath(fileResolver->getUri(context->name)))
             {
                 return Luau::ModuleInfo{virtualPath.value()};
             }
