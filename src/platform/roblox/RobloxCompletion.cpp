@@ -1,6 +1,7 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 #include "LSP/Completion.hpp"
 
@@ -332,7 +333,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                     (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
                         (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
                 {
-                    requirePath = "./" + std::filesystem::relative(path, module.name).string();
+                    // HACK: using Uri's purely to access lexicallyRelative
+                    requirePath = Uri::file(path).lexicallyRelative(Uri::file(module.name));
                     isRelative = true;
                 }
                 else
