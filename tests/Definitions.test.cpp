@@ -9,11 +9,11 @@ TEST_SUITE_BEGIN("Definitions");
 
 TEST_CASE("use_platform_metadata_from_first_registered_definitions_file")
 {
-    auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri(), std::nullopt);
 
-    client->definitionsFiles.emplace_back("./tests/testdata/standard_definitions.d.luau");
-    client->definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
+    client.definitionsFiles.emplace_back("./tests/testdata/standard_definitions.d.luau");
+    client.definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
 
     workspace.setupWithConfiguration(defaultTestClientConfiguration());
     workspace.isReady = true;
@@ -27,11 +27,11 @@ TEST_CASE("use_platform_metadata_from_first_registered_definitions_file")
 
 TEST_CASE("handles_definitions_files_relying_on_mutations")
 {
-    auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
-    client->definitionsFiles.emplace_back("./tests/testdata/standard_definitions.d.luau");
-    client->definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
+    client.definitionsFiles.emplace_back("./tests/testdata/standard_definitions.d.luau");
+    client.definitionsFiles.emplace_back("./tests/testdata/extra_definitions_relying_on_mutations.d.luau");
 
     workspace.setupWithConfiguration(defaultTestClientConfiguration());
     workspace.isReady = true;
@@ -47,10 +47,10 @@ TEST_CASE("handles_definitions_files_relying_on_mutations")
 
 TEST_CASE("dont_crash_when_mutating_a_definitions_file_that_does_not_contain_expected_state")
 {
-    auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri(), std::nullopt);
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri(), std::nullopt);
 
-    client->definitionsFiles.emplace_back("./tests/testdata/bad_standard_definitions.d.luau");
+    client.definitionsFiles.emplace_back("./tests/testdata/bad_standard_definitions.d.luau");
 
     workspace.setupWithConfiguration(defaultTestClientConfiguration());
 
@@ -59,8 +59,8 @@ TEST_CASE("dont_crash_when_mutating_a_definitions_file_that_does_not_contain_exp
 
 TEST_CASE("support_disabling_global_types")
 {
-    auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
     auto config = defaultTestClientConfiguration();
     config.types.disabledGlobals = {
@@ -87,8 +87,8 @@ TEST_CASE("support_disabling_global_types")
 
 TEST_CASE("support_disabling_methods_in_global_types")
 {
-    auto client = std::make_shared<Client>(Client{});
-    auto workspace = WorkspaceFolder(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
 
     auto config = defaultTestClientConfiguration();
     config.types.disabledGlobals = {

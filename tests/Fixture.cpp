@@ -46,8 +46,8 @@ void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::strin
 } // namespace Luau::LanguageServer
 
 Fixture::Fixture()
-    : client(std::make_shared<TestClient>(TestClient{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt)
+    : client(std::make_unique<TestClient>(TestClient{}))
+    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt)
 {
     client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
@@ -78,13 +78,11 @@ Uri Fixture::newDocument(const std::string& name, const std::string& source)
 /// requires to resolve. e.g. registering "game/Testing/A" will allow `require(game.Testing.A`) to work
 void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath)
 {
-    SourceNode dummySourceNode{};
-    dummySourceNode.className = "ModuleScript";
-    dummySourceNode.filePaths = {uri.fsPath()};
+    SourceNode dummySourceNode("Dummy", "ModuleScript", {uri.fsPath()}, {});
 
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
     LUAU_ASSERT(platform);
-    platform->writePathsToMap(std::make_shared<SourceNode>(dummySourceNode), virtualPath);
+    platform->writePathsToMap(&dummySourceNode, virtualPath);
 }
 
 void Fixture::updateDocument(const Uri& uri, const std::string& newSource)
@@ -211,7 +209,7 @@ void Fixture::loadLuaurc(const std::string& source)
                  .has_value());
 }
 
-SourceNodePtr Fixture::getRootSourceNode()
+SourceNode* Fixture::getRootSourceNode()
 {
     auto sourceNode = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->rootSourceNode;
     REQUIRE(sourceNode);

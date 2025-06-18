@@ -100,14 +100,13 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive
 
 TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
 {
-    SourceNode sourceNode;
-    sourceNode.name = "Foo";
+    SourceNode sourceNode("Foo", "ClassName", {}, {});
 
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
-    platform.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
+    platform.rootSourceNode = &sourceNode;
 
     Luau::ModuleInfo baseContext{"ProjectRoot/Bar"};
 

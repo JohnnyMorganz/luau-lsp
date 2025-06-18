@@ -23,18 +23,16 @@ TEST_CASE("getAncestorPath handles when ancestor is root of DataModel node")
 
 TEST_CASE("getAncestorPath handles when ancestor is root of non-DataModel node")
 {
-    SourceNode node;
-    node.name = "Foo";
+    SourceNode node("Foo", "ClassName", {}, {});
 
-    CHECK_EQ(getAncestorPath("ProjectRoot/Bar", "Foo", std::make_shared<SourceNode>(node)), "ProjectRoot");
+    CHECK_EQ(getAncestorPath("ProjectRoot/Bar", "Foo", &node), "ProjectRoot");
 }
 
 TEST_CASE("getAncestorPath handles when ancestor is root of non-DataModel node and its name has multiple occurrences")
 {
-    SourceNode node;
-    node.name = "Foo";
+    SourceNode node("Foo", "ClassName", {}, {});
 
-    CHECK_EQ(getAncestorPath("ProjectRoot/Bar/Foo/Baz", "Foo", std::make_shared<SourceNode>(node)), "ProjectRoot/Bar/Foo");
+    CHECK_EQ(getAncestorPath("ProjectRoot/Bar/Foo/Baz", "Foo", &node), "ProjectRoot/Bar/Foo");
 }
 
 TEST_CASE("getAncestorPath returns nothing when ancestorName == current name, and no ancestor of name found")
