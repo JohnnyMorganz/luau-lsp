@@ -1,5 +1,4 @@
 #include <optional>
-#include <filesystem>
 
 #include "LSP/JsonRpc.hpp"
 #include "nlohmann/json.hpp"

@@ -1,9 +1,9 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 #include "LSP/Completion.hpp"
-#include "LSP/Workspace.hpp"
 
 #include "Platform/AutoImports.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
@@ -233,8 +233,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-        instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
-        Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
+             instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
+             Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
@@ -319,7 +319,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                     continue;
                 if (auto scriptFilePath = getRealPathFromSourceNode(node);
-                    scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(Uri::file(*scriptFilePath), config))
+                    scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
                     continue;
 
                 std::string requirePath;
@@ -333,7 +333,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                     (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
                         (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
                 {
-                    requirePath = "./" + std::filesystem::relative(path, module.name).string();
+                    // HACK: using Uri's purely to access lexicallyRelative
+                    requirePath = Uri::file(path).lexicallyRelative(Uri::file(module.name));
                     isRelative = true;
                 }
                 else

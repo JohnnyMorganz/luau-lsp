@@ -516,7 +516,7 @@ TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
     )");
 #endif
 
-    auto uri = Uri::file(workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+    auto uri = workspace.rootUri.resolvePath("Foo/Test.luau");
 
     CHECK_EQ(workspace.fileResolver.getModuleName(uri), "game/MainScript");
 }
@@ -579,7 +579,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
     auto normalisedPath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(normalisedPath);
 
-    CHECK_EQ((workspace.rootUri.fsPath() / *filePath).generic_string(), normalisedPath->fsPath().generic_string());
+    CHECK_EQ(workspace.rootUri.resolvePath(*filePath), normalisedPath);
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
@@ -612,7 +612,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
     auto filePath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(filePath);
 
-    CHECK(workspace.isIgnoredFileForAutoImports(Uri::file(*filePath)));
+    CHECK(workspace.isIgnoredFileForAutoImports(*filePath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")

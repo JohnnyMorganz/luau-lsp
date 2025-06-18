@@ -528,7 +528,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_string_require_path")
 
     auto result = workspace.gotoDefinition(params);
     REQUIRE_EQ(result.size(), 1);
-    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "test.lua"));
+    CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("test.lua"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
     CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
 }
@@ -558,7 +558,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_roblox_require_path")
 
     auto result = workspace.gotoDefinition(params);
     REQUIRE_EQ(result.size(), 1);
-    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "source.luau"));
+    CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("source.luau"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
     CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
 }

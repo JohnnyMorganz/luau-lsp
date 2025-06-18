@@ -108,11 +108,10 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         {
             if (definitionModuleName)
             {
-                if (auto file = platform->resolveToRealPath(*definitionModuleName))
+                if (auto uri = platform->resolveToRealPath(*definitionModuleName))
                 {
                     auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
-                    auto uri = document ? document->uri() : Uri::file(*file);
-                    result.emplace_back(lsp::Location{uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
+                    result.emplace_back(lsp::Location{*uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
                 }
             }
             else
@@ -172,10 +171,9 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
             {
                 if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *call))
                 {
-                    auto realName = platform->resolveToRealPath(moduleInfo->name);
-                    if (realName)
+                    if (auto uri = platform->resolveToRealPath(moduleInfo->name))
                     {
-                        result.emplace_back(lsp::Location{Uri::file(*realName), lsp::Range{{0, 0}, {0, 0}}});
+                        result.emplace_back(lsp::Location{*uri, lsp::Range{{0, 0}, {0, 0}}});
                     }
                 }
             }

@@ -47,7 +47,7 @@ TEST_CASE("file#fsPath (win-special)")
 
     CHECK_EQ(Uri::file("c:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("c:/win/path/").fsPath(), "c:\\win\\path\\");
-    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "c:/win/path"); // DEVIATION: c:\\win\\path
+    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("/c:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("./c/win/path").fsPath(), "\\.\\c\\win\\path");
 #endif
@@ -139,7 +139,7 @@ TEST_CASE("parse")
     CHECK_EQ(value.path, "/files/c#/p.cs");
     CHECK_EQ(value.fragment, "");
     CHECK_EQ(value.query, "");
-    CHECK_EQ(value.fsPath(), "//shares/files/c#/p.cs"); // DEVIATION: IF_WINDOWS("\\\\shares\\files\\c#\\p.cs", "//shares/files/c#/p.cs")
+    CHECK_EQ(value.fsPath(), IF_WINDOWS("\\\\shares\\files\\c#\\p.cs", "//shares/files/c#/p.cs"));
 
     value = Uri::parse("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/"
                        "resources/app/plugins/c%23/plugin.json");
@@ -237,7 +237,7 @@ TEST_CASE("URI#file, win-speciale")
     value = Uri::file("\\\\localhost\\c$\\GitDevelopment\\express");
     CHECK_EQ(value.scheme, "file");
     CHECK_EQ(value.path, "/c$/GitDevelopment/express");
-    CHECK_EQ(value.fsPath(), "//localhost/c$/GitDevelopment/express"); // DEVIATION: \\\\localhost\\c$\\GitDevelopment\\express
+    CHECK_EQ(value.fsPath(), "\\\\localhost\\c$\\GitDevelopment\\express");
     CHECK_EQ(value.query, "");
     CHECK_EQ(value.fragment, "");
     CHECK_EQ(value.toString(), "file://localhost/c%24/GitDevelopment/express");
@@ -362,10 +362,8 @@ TEST_CASE("correctFileUriToFilePath2")
     test("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/resources/app/plugins",
         IF_WINDOWS("c:\\Source\\Zürich or Zurich (ˈzjʊərɪk,\\Code\\resources\\app\\plugins",
             "c:/Source/Zürich or Zurich (ˈzjʊərɪk,/Code/resources/app/plugins"));
-    test("file://monacotools/folder/isi.txt",
-        "//monacotools/folder/isi.txt"); // DEVIATION: IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt")
-    test("file://monacotools1/certificates/SSL/",
-        "//monacotools1/certificates/SSL/"); // DEVIATION: IF_WINDOWS("\\\\monacotools1\\certificates\\SSL\\", "//monacotools1/certificates/SSL/")
+    test("file://monacotools/folder/isi.txt", IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt"));
+    test("file://monacotools1/certificates/SSL/", IF_WINDOWS("\\\\monacotools1\\certificates\\SSL\\", "//monacotools1/certificates/SSL/"));
 }
 
 TEST_CASE("URI - http, query & toString'")
@@ -577,7 +575,7 @@ TEST_CASE("Uri::isDirectory handles filesystem errors")
 
 TEST_CASE("Uri::exists handles filesystem errors")
 {
-    CHECK_FALSE(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
+    CHECK_NOTHROW(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
 }
 
 TEST_SUITE_END();

@@ -9,6 +9,7 @@
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -184,11 +185,9 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 
     for (const auto& change : changes)
     {
-        auto filePath = change.uri.fsPath();
-
         platform->onDidChangeWatchedFiles(change);
 
-        if (filePath.filename() == ".luaurc" || filePath.filename() == ".robloxrc")
+        if (change.uri.filename() == ".luaurc" || change.uri.filename() == ".robloxrc")
         {
             client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
             fileResolver.clearConfigCache();
@@ -196,7 +195,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             // Recompute diagnostics
             recomputeDiagnostics(config);
         }
-        else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
+        else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau")
         {
             // Notify if it was a definitions file
             if (isDefinitionFile(change.uri, config))
@@ -270,7 +269,7 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (rootUri.resolvePath(resolvePath(file).generic_string()) == path)
+        if (rootUri.resolvePath(resolvePath(file)) == path)
         {
             return true;
         }
@@ -337,35 +336,34 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
     std::vector<Luau::ModuleName> moduleNames;
 
-    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
-    {
-        if (moduleNames.size() >= config.index.maxFiles)
+    bool sentMessage = false;
+    Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
+        [&](auto& path)
         {
-            client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
-                                                                     ") has been hit. This may cause some language features to only work partially "
-                                                                     "(Find All References, Rename). If necessary, consider increasing the limit");
-            break;
-        }
-
-        try
-        {
-            auto uri = Uri::file(next->path());
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            if (moduleNames.size() >= config.index.maxFiles)
             {
-                auto ext = next->path().extension();
+                if (!sentMessage)
+                {
+                    client->sendWindowMessage(
+                        lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                       ") has been hit. This may cause some language features to only work partially "
+                                                       "(Find All References, Rename). If necessary, consider increasing the limit");
+                    sentMessage = true;
+                }
+                return;
+            }
+
+            auto uri = Uri::file(path);
+            if (!isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            {
+                auto ext = uri.extension();
                 if (ext == ".lua" || ext == ".luau")
                 {
                     auto moduleName = fileResolver.getModuleName(uri);
                     moduleNames.emplace_back(moduleName);
                 }
             }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to index file: ") + e.what());
-        }
-    }
+        });
 
     client->sendWorkDoneProgressReport(kIndexProgressToken, std::to_string(moduleNames.size()) + " files");
 
@@ -462,13 +460,13 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     for (const auto& definitionsFile : client->definitionsFiles)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath);
 
-        auto definitionsContents = readFile(resolvedFilePath);
+        auto definitionsContents = Luau::FileUtils::readFile(resolvedFilePath);
         if (!definitionsContents)
         {
-            client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to read definitions file " + resolvedFilePath + ". Extended types will not be provided");
             continue;
         }
 
@@ -498,8 +496,8 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         }
         else
         {
-            client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to read definitions file " + resolvedFilePath + ". Extended types will not be provided");
 
             // Display relevant diagnostics
             std::vector<lsp::Diagnostic> diagnostics;

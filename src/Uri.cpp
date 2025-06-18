@@ -1,11 +1,34 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/6dec22d7dcc6c63c30343d3a8d56050d0078cb6a/src/uri.ts
-#include <filesystem>
 #include <optional>
 #include <cctype>
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
 #include "Luau/StringUtils.h"
 #include "LuauFileUtils.hpp"
+
+// implements a bit of https://tools.ietf.org/html/rfc3986#section-5
+static std::string _referenceResolution(const std::string& scheme, const std::string& path)
+{
+    std::string res = path;
+
+    // the slash-character is our 'default base' as we don't
+    // support constructing URIs relative to other URIs. This
+    // also means that we alter and potentially break paths.
+    // see https://tools.ietf.org/html/rfc3986#section-5.1.4
+    if (scheme == "https" || scheme == "http" || scheme == "file")
+    {
+        if (res.empty())
+        {
+            res = "/";
+        }
+        else if (res[0] != '/')
+        {
+            res = '/' + path;
+        }
+    }
+
+    return res;
+}
 
 static std::string decodeURIComponent(const std::string& str)
 {
@@ -221,6 +244,31 @@ static std::string encodeURIComponentMinimal(const std::string& path, bool, bool
 
 static Uri kNullUri = {"", "", "", "", ""};
 
+Uri::Uri(const std::string& scheme, std::string authority, const std::string& path, std::string query, std::string fragment)
+    : scheme(std::move(scheme))
+    , authority(std::move(authority))
+    , path(_referenceResolution(scheme, path))
+    , query(std::move(query))
+    , fragment(std::move(fragment))
+{
+    // TODO: validate?
+}
+
+bool Uri::operator==(const Uri& other) const
+{
+#if defined(_WIN32) || defined(__APPLE__)
+    return scheme == other.scheme && authority == other.authority && toLower(path) == toLower(other.path) && query == other.query &&
+           fragment == other.fragment;
+#else
+    return scheme == other.scheme && authority == other.authority && path == other.path && query == other.query && fragment == other.fragment;
+#endif
+}
+
+bool Uri::operator!=(const Uri& other) const
+{
+    return !operator==(other);
+}
+
 Uri Uri::parse(const std::string& value)
 {
     std::string scheme;
@@ -291,10 +339,10 @@ Uri Uri::parse(const std::string& value)
     return {scheme, percentDecode(authority), percentDecode(path), percentDecode(query), percentDecode(fragment)};
 }
 
-Uri Uri::file(const std::filesystem::path& fsPath)
+Uri Uri::file(std::string_view fsPath)
 {
     std::string authority = "";
-    auto path = fsPath.string();
+    std::string path = std::string(fsPath);
 
 // normalize to fwd-slashes on windows,
 // on other systems bwd-slashes are valid
@@ -331,20 +379,25 @@ Uri Uri::file(const std::filesystem::path& fsPath)
     return Uri("file", authority, path, "", "");
 }
 
-std::filesystem::path Uri::fsPath() const
+std::string Uri::fsPath() const
 {
+    std::string value;
     if (!authority.empty() && path.length() > 1 && scheme == "file")
     {
-        return "//" + authority + path;
+        value = "//" + authority + path;
     }
     else if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
     {
-        return path.substr(1);
+        value = path.substr(1);
     }
     else
     {
-        return path;
+        value = path;
     }
+#ifdef _WIN32
+    std::replace(value.begin(), value.end(), '/', '\\');
+#endif
+    return value;
 }
 
 // Encodes the Uri into a string representation
@@ -479,13 +532,20 @@ std::string Uri::extension() const
     return "." + std::string(parts.back());
 }
 
+bool Uri::isFile() const
+{
+    if (scheme != "file")
+        return false;
+
+    return Luau::FileUtils::isFile(fsPath());
+}
+
 bool Uri::isDirectory() const
 {
     if (scheme != "file")
         return false;
 
-    std::error_code ec;
-    return std::filesystem::is_directory(fsPath(), ec);
+    return Luau::FileUtils::isDirectory(fsPath());
 }
 
 bool Uri::exists() const
@@ -493,8 +553,7 @@ bool Uri::exists() const
     if (scheme != "file")
         return false;
 
-    std::error_code ec;
-    return std::filesystem::exists(fsPath(), ec);
+    return Luau::FileUtils::exists(fsPath());
 }
 
 std::string Uri::lexicallyRelative(const Uri& base) const
@@ -615,4 +674,9 @@ void from_json(const json& j, Uri& u)
 void to_json(json& j, const Uri& u)
 {
     j = u.toString();
+}
+
+bool isInitLuauFile(const Uri& uri)
+{
+    return uri.filename() == "init" || Luau::startsWith(uri.filename(), "init.");
 }
