@@ -15,8 +15,7 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-void parseDocumentation(
-    const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client)
+void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const Client* client)
 {
     if (documentationFiles.empty())
     {

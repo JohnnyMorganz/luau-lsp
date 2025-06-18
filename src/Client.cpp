@@ -118,7 +118,7 @@ void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optio
     sendProgress(lsp::ProgressParams{token, workDone});
 }
 
-void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message)
+void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message) const
 {
     json params{
         {"type", type},
@@ -137,7 +137,7 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     sendNotification("$/logTrace", params);
 }
 
-void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
+void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message) const
 {
     lsp::ShowMessageParams params{type, message};
     sendNotification("window/showMessage", params);

@@ -32,7 +32,7 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
     frontend.markDirty(moduleName);
 }
 
-static bool isWorkspaceDiagnosticsEnabled(const ClientPtr& client, const ClientConfiguration& config)
+static bool isWorkspaceDiagnosticsEnabled(const Client* client, const ClientConfiguration& config)
 {
     return client->workspaceDiagnosticsToken && config.diagnostics.workspace;
 }
@@ -375,7 +375,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-static void clearDisabledGlobals(const ClientPtr client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
+static void clearDisabledGlobals(const Client* client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
 {
     const auto targetScope = globalTypes.globalScope;
     for (const auto& disabledGlobal : disabledGlobals)

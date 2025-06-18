@@ -24,7 +24,7 @@ std::optional<std::string> getParentPath(const std::string& path)
 
 /// Returns a path at the ancestor point.
 /// i.e., for game/ReplicatedStorage/Module/Child/Foo, and ancestor == Module, returns game/ReplicatedStorage/Module
-std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode)
+std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNode* rootSourceNode)
 {
     // We want to remove the child from the path name in case the ancestor has the same name as the child
     auto parentPath = getParentPath(path);

@@ -27,7 +27,7 @@ struct Reference
 class WorkspaceFolder
 {
 public:
-    std::shared_ptr<Client> client;
+    Client* client;
     std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
@@ -49,7 +49,7 @@ public:
     bool isReady = false;
 
 public:
-    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
         , name(std::move(name))
         , rootUri(uri)
@@ -60,7 +60,7 @@ public:
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
     {
-        fileResolver.client = std::static_pointer_cast<BaseClient>(client);
+        fileResolver.client = client;
         fileResolver.rootUri = uri;
     }
 

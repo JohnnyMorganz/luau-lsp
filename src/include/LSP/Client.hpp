@@ -74,9 +74,9 @@ public:
         const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt, std::optional<uint8_t> percentage = std::nullopt);
     void sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt);
 
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message);
+    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const;
     void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
-    void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
+    void sendWindowMessage(const lsp::MessageType& type, const std::string& message) const;
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);
