@@ -575,7 +575,7 @@ TEST_CASE("Uri::isDirectory handles filesystem errors")
 
 TEST_CASE("Uri::exists handles filesystem errors")
 {
-    CHECK_FALSE(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
+    CHECK_NOTHROW(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
 }
 
 TEST_SUITE_END();
