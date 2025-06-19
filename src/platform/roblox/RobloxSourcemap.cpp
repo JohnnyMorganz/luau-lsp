@@ -306,7 +306,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
 
                 // Add children as properties
                 for (const auto& child : node->children)
-                    ctv->props[child->name] = ctv->props[child->name] = Luau::Property{
+                    ctv->props[child->name] = Luau::Property{
                         getSourcemapType(globals, arena, child),
                         /* deprecated */ false,
                         /* deprecatedSuggestion */ {},
