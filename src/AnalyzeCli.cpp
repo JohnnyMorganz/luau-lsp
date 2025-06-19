@@ -7,7 +7,6 @@
 #include "LSP/ClientConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
-#include "Luau/ModuleResolver.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
 #include "Luau/TypeAttach.h"
@@ -295,7 +294,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     }
 
     fileResolver.rootUri = Uri::file(*currentWorkingDirectory);
-    fileResolver.client = std::make_shared<CliClient>(client);
+    fileResolver.client = &client;
 
     if (auto platformArg = program.present("--platform"))
     {

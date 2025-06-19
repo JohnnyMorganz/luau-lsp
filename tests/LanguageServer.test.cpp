@@ -8,8 +8,8 @@ LUAU_FASTFLAG(DebugLuauTimeTracing);
 
 TEST_CASE("language_server_handles_fflags_in_initialization_options")
 {
-    auto client = std::make_shared<Client>();
-    LanguageServer server(client, std::nullopt);
+    Client client;
+    LanguageServer server(&client, std::nullopt);
 
     InitializationOptions initializationOptions{};
     initializationOptions.fflags.insert_or_assign("DebugLuauTimeTracing", "True");
@@ -26,11 +26,11 @@ TEST_CASE("language_server_handles_fflags_in_initialization_options")
 
 TEST_CASE("language_server_lazily_initializes_workspace_folders")
 {
-    auto client = std::make_shared<Client>();
-    LanguageServer server(client, std::nullopt);
+    Client client;
+    LanguageServer server(&client, std::nullopt);
 
     // Indexing throws errors as the workspace doesn't exist
-    client->globalConfig.index.enabled = false;
+    client.globalConfig.index.enabled = false;
 
     auto workspaceUri = Uri::file("project");
 

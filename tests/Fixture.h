@@ -33,8 +33,7 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
 struct Fixture
 {
     std::unique_ptr<Luau::SourceModule> sourceModule;
-
-    std::shared_ptr<TestClient> client;
+    std::unique_ptr<TestClient> client;
     WorkspaceFolder workspace;
 
     explicit Fixture();
@@ -48,7 +47,7 @@ struct Fixture
     Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);
     void loadSourcemap(const std::string& source);
     void loadLuaurc(const std::string& source);
-    SourceNodePtr getRootSourceNode();
+    SourceNode* getRootSourceNode();
 
     // Single file operations
     Luau::CheckResult check(Luau::Mode mode, std::string source);

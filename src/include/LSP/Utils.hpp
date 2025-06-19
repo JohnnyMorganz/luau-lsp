@@ -8,11 +8,10 @@
 #include <memory>
 #include <algorithm>
 
-// TODO: must duplicate using to avoid cyclical includes
-using SourceNodePtr = std::shared_ptr<struct SourceNode>;
+struct SourceNode;
 
 std::optional<std::string> getParentPath(const std::string& path);
-std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode);
+std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNode* rootSourceNode);
 std::string convertToScriptPath(std::string path);
 std::string codeBlock(const std::string& language, const std::string& code);
 std::optional<std::string> getHomeDirectory();

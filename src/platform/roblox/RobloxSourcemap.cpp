@@ -9,23 +9,21 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
-static void mutateSourceNodeWithPluginInfo(SourceNode& sourceNode, const PluginNodePtr& pluginInstance)
+static void mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginNode* pluginInstance, Luau::TypedAllocator<SourceNode>& allocator)
 {
     // We currently perform purely additive changes where we add in new children
     for (const auto& dmChild : pluginInstance->children)
     {
-        if (auto existingChildNode = sourceNode.findChild(dmChild->name))
+        if (auto existingChildNode = sourceNode->findChild(dmChild->name))
         {
-            mutateSourceNodeWithPluginInfo(*existingChildNode.value(), dmChild);
+            mutateSourceNodeWithPluginInfo(*existingChildNode, dmChild, allocator);
         }
         else
         {
-            SourceNode childNode;
-            childNode.name = dmChild->name;
-            childNode.className = dmChild->className;
-            mutateSourceNodeWithPluginInfo(childNode, dmChild);
+            auto childNode = allocator.allocate(SourceNode(dmChild->name, dmChild->className, {}, {}));
+            mutateSourceNodeWithPluginInfo(childNode, dmChild, allocator);
 
-            sourceNode.children.push_back(std::make_shared<SourceNode>(childNode));
+            sourceNode->children.push_back(childNode);
         }
     }
 }
@@ -54,17 +52,17 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
     }
 }
 
-static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node);
+static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node);
 
 struct MagicChildLookup final : Luau::MagicFunction
 {
     const Luau::GlobalTypes& globals;
     Luau::TypeArena& arena;
-    SourceNodePtr node;
+    const SourceNode* node;
     bool supportsRecursiveParameter;
     bool supportsTimeoutParameter;
 
-    MagicChildLookup(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, SourceNodePtr node, bool supportsRecursiveParameter = false,
+    MagicChildLookup(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node, bool supportsRecursiveParameter = false,
         bool supportsTimeoutParameter = false)
         : globals(globals)
         , arena(arena)
@@ -140,7 +138,7 @@ bool MagicChildLookup::infer(const Luau::MagicFunctionCallContext& context)
     return false;
 }
 
-static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node, Luau::TypeId lookupFuncTy,
+static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node, Luau::TypeId lookupFuncTy,
     bool supportsRecursiveParameter = false, bool supportsTimeoutParameter = false)
 {
     Luau::attachMagicFunction(
@@ -150,7 +148,7 @@ static void attachChildLookupFunction(const Luau::GlobalTypes& globals, Luau::Ty
 }
 
 static void injectChildrenLookupFunctions(
-    const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ExternType* ctv, const Luau::TypeId& ty, const SourceNodePtr& node)
+    const Luau::GlobalTypes& globals, Luau::TypeArena& arena, Luau::ExternType* ctv, const Luau::TypeId& ty, const SourceNode* node)
 {
     if (auto instanceType = getTypeIdForClass(globals.globalScope, "Instance"))
     {
@@ -191,9 +189,9 @@ struct MagicFindFirstAncestor final : Luau::MagicFunction
 {
     const Luau::GlobalTypes& globals;
     Luau::TypeArena& arena;
-    const SourceNodePtr& node;
+    const SourceNode* node;
 
-    MagicFindFirstAncestor(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node)
+    MagicFindFirstAncestor(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node)
         : globals(globals)
         , arena(arena)
         , node(node)
@@ -243,7 +241,7 @@ bool MagicFindFirstAncestor::infer(const Luau::MagicFunctionCallContext& context
 
 // Retrieves the corresponding Luau type for a Sourcemap node
 // If it does not yet exist, the type is produced
-static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNodePtr& node)
+static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node)
 {
     // Gets the type corresponding to the sourcemap node if it exists
     // Make sure to use the correct ty version (base typeChecker vs autocomplete typeChecker)
@@ -298,12 +296,12 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
             // Get the mutable version of the type var
             if (auto* ctv = Luau::getMutable<Luau::ExternType>(typeId))
             {
-                if (auto parentNode = node->parent.lock())
+                if (node->parent)
                 {
                     if (FFlag::LuauSolverV2)
-                        ctv->props["Parent"] = Luau::Property::rw(getSourcemapType(globals, arena, parentNode), instanceTy->type);
+                        ctv->props["Parent"] = Luau::Property::rw(getSourcemapType(globals, arena, node->parent), instanceTy->type);
                     else
-                        ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(globals, arena, parentNode));
+                        ctv->props["Parent"] = Luau::makeProperty(getSourcemapType(globals, arena, node->parent));
                 }
 
                 // Add children as properties
@@ -339,7 +337,7 @@ static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::Typ
     return ty;
 }
 
-void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNodePtr& node)
+void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const Luau::TypeId& ty, const SourceNode* node)
 {
     if (auto* ctv = Luau::getMutable<Luau::ExternType>(ty))
     {
@@ -430,7 +428,7 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
-void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::string& base)
+void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
     node->virtualPath = base;
@@ -451,13 +449,15 @@ void RobloxPlatform::writePathsToMap(const SourceNodePtr& node, const std::strin
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceNodeMap", "LSP");
+    rootSourceNode = nullptr;
+    sourceNodeAllocator.clear();
     realPathsToSourceNodes.clear();
     virtualPathsToSourceNodes.clear();
 
     try
     {
         auto j = json::parse(sourceMapContents);
-        rootSourceNode = std::make_shared<SourceNode>(j.get<SourceNode>());
+        rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
 
         // Write paths
         std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
@@ -465,8 +465,8 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     }
     catch (const std::exception& e)
     {
-        // TODO: log message?
-        std::cerr << e.what() << '\n';
+        // TODO: log message? NOTE: this function can be called from CLI
+        std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
     }
 }
 
@@ -484,7 +484,7 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
     {
         if (rootSourceNode->className == "DataModel")
         {
-            mutateSourceNodeWithPluginInfo(*rootSourceNode, pluginInfo);
+            mutateSourceNodeWithPluginInfo(rootSourceNode, pluginInfo, sourceNodeAllocator);
         }
         else
         {
@@ -575,26 +575,26 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
     };
 }
 
-std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
+std::optional<const SourceNode*> RobloxPlatform::getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const
 {
     if (auto it = virtualPathsToSourceNodes.find(name); it != virtualPathsToSourceNodes.end())
         return it->second;
     return std::nullopt;
 }
 
-std::optional<SourceNodePtr> RobloxPlatform::getSourceNodeFromRealPath(const Uri& name) const
+std::optional<const SourceNode*> RobloxPlatform::getSourceNodeFromRealPath(const Uri& name) const
 {
     if (auto it = realPathsToSourceNodes.find(name); it != realPathsToSourceNodes.end())
         return it->second;
     return std::nullopt;
 }
 
-Luau::ModuleName RobloxPlatform::getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode)
+Luau::ModuleName RobloxPlatform::getVirtualPathFromSourceNode(const SourceNode* sourceNode)
 {
     return sourceNode->virtualPath;
 }
 
-std::optional<Uri> RobloxPlatform::getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const
+std::optional<Uri> RobloxPlatform::getRealPathFromSourceNode(const SourceNode* sourceNode) const
 {
     // NOTE: this filepath is generated by the sourcemap, which is relative to the cwd where the sourcemap
     // command was run from. Hence, we concatenate it to the end of the workspace path, and normalise the result

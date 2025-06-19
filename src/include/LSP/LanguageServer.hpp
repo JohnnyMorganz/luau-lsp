@@ -12,7 +12,6 @@
 using json = nlohmann::json;
 using namespace json_rpc;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
-using ClientPtr = std::shared_ptr<Client>;
 
 #define JSON_REQUIRED_PARAMS(params, method) \
     (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
@@ -32,19 +31,20 @@ NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
 class LanguageServer
 {
 private:
+    // Client is guaranteed to live for the duration of the whole program
+    Client* client;
+    std::optional<Luau::Config> defaultConfig;
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
-    ClientPtr client;
-    std::optional<Luau::Config> defaultConfig;
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
 
     std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
-    explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig)
-        : client(std::move(aClient))
+    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig)
+        : client(aClient)
         , defaultConfig(std::move(aDefaultConfig))
         , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
     {

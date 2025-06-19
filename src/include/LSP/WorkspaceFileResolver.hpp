@@ -81,7 +81,7 @@ private:
 
 public:
     Luau::Config defaultConfig;
-    std::shared_ptr<BaseClient> client;
+    BaseClient* client;
     Uri rootUri;
 
     LSPPlatform* platform = nullptr;

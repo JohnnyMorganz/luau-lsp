@@ -131,16 +131,16 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         transport = std::make_unique<StdioTransport>();
     }
 
-    auto client = std::make_shared<Client>(std::move(transport));
-    client->definitionsFiles = definitionsFiles;
-    client->documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client->documentation, client);
+    Client client{std::move(transport)};
+    client.definitionsFiles = definitionsFiles;
+    client.documentationFiles = documentationFiles;
+    parseDocumentation(documentationFiles, client.documentation, &client);
 
     // Parse LSP Settings
     if (auto settingsPath = program.present<std::string>("--settings"))
     {
         if (std::optional<std::string> contents = Luau::FileUtils::readFile(*settingsPath))
-            client->globalConfig = dottedToClientConfiguration(contents.value());
+            client.globalConfig = dottedToClientConfiguration(contents.value());
         else
         {
             std::cerr << "Failed to read base LSP settings at '" << *settingsPath << "'\n";
@@ -148,7 +148,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         }
     }
 
-    LanguageServer server(client, defaultConfig);
+    LanguageServer server(&client, defaultConfig);
 
     // Begin input loop
     server.processInputLoop();

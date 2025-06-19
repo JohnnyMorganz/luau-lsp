@@ -22,7 +22,7 @@ void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::setupWithConfiguration", "LSP");
-    std::shared_ptr<Client>& client = workspaceFolder->client;
+    auto client = workspaceFolder->client;
 
     if (config.sourcemap.enabled)
     {
