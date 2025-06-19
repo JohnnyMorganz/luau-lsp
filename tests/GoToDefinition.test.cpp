@@ -26,6 +26,25 @@ TEST_CASE_FIXTURE(Fixture, "local_variable_definition")
     CHECK_EQ(result[0].range.end, lsp::Position{2, 19});
 }
 
+TEST_CASE_FIXTURE(Fixture, "local_variable_definition_pointing_to_a_table")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        local process = { call = function() end }
+        local value = pro|cess.call()
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{1, 14});
+    CHECK_EQ(result[0].range.end, lsp::Position{1, 21});
+}
+
 TEST_CASE_FIXTURE(Fixture, "local_inlined_primitive_table_property_definition")
 {
     auto [source, position] = sourceWithMarker(R"(

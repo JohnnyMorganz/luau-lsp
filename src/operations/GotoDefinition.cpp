@@ -102,6 +102,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
         result.emplace_back(lsp::Location{params.textDocument.uri,
             lsp::Range{textDocument->convertPosition(binding->location.begin), textDocument->convertPosition(binding->location.end)}});
+        return result;
     }
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
