@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Go To Definition now follows to the location of a property on a table type if the property doesn't have a real
+  implementation ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
+- Go To Definition now works on properties on the result of a function call (e.g., `unwrap` in
+  `process.spawn(""):unwrap()`) ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
+
 ### Changed
 
 - Reimplemented internal file-system calls and removed references to `std::filesystem`. There should be no external differences from this change, except that non-ASCII filepaths are handled correctly on Windows

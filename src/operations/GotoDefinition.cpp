@@ -6,51 +6,58 @@
 
 #include <algorithm>
 
-std::pair<std::optional<Luau::ModuleName>, std::optional<Luau::Location>> findLocationForExpr(
+struct LocationInformation
+{
+    std::optional<std::string> definitionModuleName;
+    std::optional<Luau::Location> location;
+    Luau::TypeId ty;
+};
+
+static std::optional<LocationInformation> findLocationForSymbol(
+    const Luau::ModulePtr& module, const Luau::Position& position, const Luau::Symbol& symbol)
+{
+    auto scope = Luau::findScopeAtPosition(*module, position);
+    auto ty = scope->lookup(symbol);
+    if (!ty)
+        return std::nullopt;
+    ty = Luau::follow(*ty);
+    return LocationInformation{Luau::getDefinitionModuleName(*ty), getLocation(*ty), *ty};
+}
+
+static std::optional<LocationInformation> findLocationForIndex(const Luau::ModulePtr& module, const Luau::AstExpr* base, const Luau::Name& name)
+{
+    auto baseTy = module->astTypes.find(base);
+    if (!baseTy)
+        return std::nullopt;
+    auto baseTyFollowed = Luau::follow(*baseTy);
+    auto propInformation = lookupProp(baseTyFollowed, name);
+    if (!propInformation)
+        return std::nullopt;
+
+    auto [realBaseTy, prop] = *propInformation;
+    auto location = prop.location ? prop.location : prop.typeLocation;
+
+    return LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, prop.type()};
+}
+
+static std::optional<LocationInformation> findLocationForExpr(
     const Luau::ModulePtr& module, const Luau::AstExpr* expr, const Luau::Position& position)
 {
-    std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
-    std::optional<Luau::Location> location = std::nullopt;
+    auto scope = Luau::findScopeAtPosition(*module, position);
 
-    if (auto lvalue = Luau::tryGetLValue(*expr))
+    if (auto local = expr->as<Luau::AstExprLocal>())
+        return findLocationForSymbol(module, position, local->local);
+    else if (auto global = expr->as<Luau::AstExprGlobal>())
+        return findLocationForSymbol(module, position, global->name);
+    else if (auto indexname = expr->as<Luau::AstExprIndexName>())
+        return findLocationForIndex(module, indexname->expr, indexname->index.value);
+    else if (auto indexexpr = expr->as<Luau::AstExprIndexExpr>())
     {
-        const Luau::LValue* current = &*lvalue;
-        std::vector<std::string> keys{}; // keys in reverse order
-        while (auto field = Luau::get<Luau::Field>(*current))
-        {
-            keys.push_back(field->key);
-            current = Luau::baseof(*current);
-        }
-
-        const auto* symbol = Luau::get<Luau::Symbol>(*current);
-        auto scope = Luau::findScopeAtPosition(*module, position);
-        if (!scope)
-            return {std::nullopt, std::nullopt};
-
-        auto baseType = scope->lookup(*symbol);
-        if (!baseType)
-            return {std::nullopt, std::nullopt};
-        baseType = Luau::follow(*baseType);
-
-        definitionModuleName = Luau::getDefinitionModuleName(*baseType);
-        location = getLocation(*baseType);
-
-        std::vector<Luau::Property> properties{};
-        for (auto it = keys.rbegin(); it != keys.rend(); ++it)
-        {
-            auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
-            auto propInformation = lookupProp(base, *it);
-            if (!propInformation)
-                return {std::nullopt, std::nullopt};
-
-            auto [baseTy, prop] = propInformation.value();
-            definitionModuleName = Luau::getDefinitionModuleName(baseTy);
-            location = prop.location;
-            properties.push_back(prop);
-        }
+        if (auto string = indexexpr->index->as<Luau::AstExprConstantString>())
+            return findLocationForIndex(module, indexexpr->expr, std::string(string->value.data, string->value.size));
     }
 
-    return {definitionModuleName, location};
+    return std::nullopt;
 }
 
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
@@ -103,21 +110,25 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
     if (auto expr = node->asExpr())
     {
-        auto [definitionModuleName, location] = findLocationForExpr(module, expr, position);
-        if (location)
+        auto locationInformation = findLocationForExpr(module, expr, position);
+        if (locationInformation)
         {
-            if (definitionModuleName)
+            auto [definitionModuleName, location, _] = *locationInformation;
+            if (location)
             {
-                if (auto uri = platform->resolveToRealPath(*definitionModuleName))
+                if (definitionModuleName)
                 {
-                    auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
-                    result.emplace_back(lsp::Location{*uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
+                    if (auto uri = platform->resolveToRealPath(*definitionModuleName))
+                    {
+                        auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
+                        result.emplace_back(lsp::Location{*uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
+                    }
                 }
-            }
-            else
-            {
-                result.emplace_back(lsp::Location{params.textDocument.uri,
-                    lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+                else
+                {
+                    result.emplace_back(lsp::Location{params.textDocument.uri,
+                        lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+                }
             }
         }
     }
