@@ -435,6 +435,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         sentry_value_set_stacktrace(exc, NULL, 0);
         sentry_value_set_by_key(exc, "handled", sentry_value_new_bool(true));
         sentry_event_add_exception(event, exc);
+        sentry_capture_event(event);
 #endif
         client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
     }
