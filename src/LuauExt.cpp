@@ -731,6 +731,14 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
         if (ftv->definition)
             return ftv->definition->originalNameLocation;
     }
+    else if (auto ttv = Luau::get<Luau::TableType>(type))
+    {
+        return ttv->definitionLocation;
+    }
+    else if (auto ctv = Luau::get<Luau::ExternType>(type))
+    {
+        return ctv->definitionLocation;
+    }
 
     return std::nullopt;
 }

@@ -279,13 +279,19 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     {
         return findTypeLocation(typeAlias->type);
     }
-    else if (auto localExpr = node->as<Luau::AstExprLocal>())
+    else if (auto expr = node->asExpr())
     {
-        if (auto local = localExpr->local)
+        if (auto ty = module->astTypes.find(expr))
         {
-            if (auto annotation = local->annotation)
+            auto followedTy = Luau::follow(*ty);
+            auto definitionModuleName = Luau::getDefinitionModuleName(followedTy);
+            auto location = getLocation(followedTy);
+
+            if (definitionModuleName && location)
             {
-                return findTypeLocation(annotation);
+                auto document = fileResolver.getOrCreateTextDocumentFromModuleName(*definitionModuleName);
+                return lsp::Location{
+                    document->uri(), lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}};
             }
         }
     }

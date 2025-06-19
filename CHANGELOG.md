@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   implementation ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
 - Go To Definition now works on properties on the result of a function call (e.g., `unwrap` in
   `process.spawn(""):unwrap()`) ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
+- Go To Type Definition now follows through expressions (such as variables) better (e.g., cross module) to find the true
+  location of the original type
 
 ### Changed
 

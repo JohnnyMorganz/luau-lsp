@@ -613,4 +613,27 @@ TEST_CASE_FIXTURE(Fixture, "property_on_the_return_of_a_function_call")
     CHECK_EQ(result[0].range.end, lsp::Position{2, 18});
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_returns_the_table_location")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        type Process = {
+            spawn: (string) -> Result
+        }
+
+        local process = {} :: Process
+        local value = pr|ocess.spawn("test")
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::TypeDefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoTypeDefinition(params);
+    REQUIRE(result);
+    CHECK_EQ(result->uri, document);
+    CHECK_EQ(result->range.start, lsp::Position{1, 23});
+    CHECK_EQ(result->range.end, lsp::Position{3, 9});
+}
+
 TEST_SUITE_END();
