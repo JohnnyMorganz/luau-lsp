@@ -51,8 +51,8 @@ static Luau::TypeId lookupFunctionCallType(Luau::ModulePtr module, const Luau::A
         if (auto parentIt = module->astTypes.find(index->expr))
         {
             auto parentType = Luau::follow(*parentIt);
-            if (auto prop = lookupProp(parentType, index->index.value))
-                return Luau::follow(prop->second.type());
+            if (auto prop = lookupProp(parentType, index->index.value); prop && prop->second.readTy)
+                return Luau::follow(*prop->second.readTy);
         }
     }
 

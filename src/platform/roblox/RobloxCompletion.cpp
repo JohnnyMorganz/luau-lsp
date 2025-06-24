@@ -132,7 +132,8 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                 for (auto& [propName, prop] : ctv->props)
                 {
                     // Don't include functions or events
-                    auto ty = Luau::follow(prop.type());
+                    LUAU_ASSERT(prop.readTy);
+                    auto ty = Luau::follow(*prop.readTy);
                     if (Luau::get<Luau::FunctionType>(ty) || Luau::isOverloadedFunction(ty))
                         continue;
                     else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
