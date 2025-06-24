@@ -301,16 +301,17 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         }
 
         auto ty = Luau::follow(*parentTy);
-        if (auto propInformation = lookupProp(ty, std::string(index->index.value)))
+        if (auto propInformation = lookupProp(ty, std::string(index->index.value)); propInformation && propInformation->second.readTy)
         {
             auto prop = propInformation->second;
+
             auto defaultType = lsp::SemanticTokenTypes::Property;
             if (parentIsEnum)
                 defaultType = lsp::SemanticTokenTypes::Enum;
             else if (Luau::hasTag(prop.tags, "EnumItem"))
                 defaultType = lsp::SemanticTokenTypes::EnumMember;
 
-            auto type = inferTokenType(prop.type(), defaultType);
+            auto type = inferTokenType(*prop.readTy, defaultType);
             auto modifiers = lsp::SemanticTokenModifiers::None;
             if (parentIsBuiltin)
             {

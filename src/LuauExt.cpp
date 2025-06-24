@@ -324,9 +324,9 @@ static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
         if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
-            if (indexIt != mtable->props.end())
+            if (indexIt != mtable->props.end() && indexIt->second.readTy)
             {
-                Luau::TypeId followed = Luau::follow(indexIt->second.type());
+                Luau::TypeId followed = Luau::follow(*indexIt->second.readTy);
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
                     return lookupProp(followed, name, seenSet);
@@ -821,8 +821,9 @@ std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
         return std::nullopt;
 
     auto unwrapped = Luau::follow(*metatable);
-    if (auto prop = lookupProp(unwrapped, "__call")) {
-        return prop->second.type();
+    if (auto prop = lookupProp(unwrapped, "__call"); prop && prop->second.readTy)
+    {
+        return prop->second.readTy;
     }
 
     return std::nullopt;

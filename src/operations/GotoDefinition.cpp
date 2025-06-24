@@ -37,7 +37,10 @@ static std::optional<LocationInformation> findLocationForIndex(const Luau::Modul
     auto [realBaseTy, prop] = *propInformation;
     auto location = prop.location ? prop.location : prop.typeLocation;
 
-    return LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, prop.type()};
+    if (!prop.readTy)
+        return std::nullopt;
+
+    return LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, *prop.readTy};
 }
 
 static std::optional<LocationInformation> findLocationForExpr(
