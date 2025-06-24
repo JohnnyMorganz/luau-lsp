@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.51.0] - 2025-06-24
+
 ### Added
 
 - Go To Definition now follows to the location of a property on a table type if the property doesn't have a real
@@ -99,7 +101,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
 - Added progress indicator for watched files changes
 - A Cloudflare page is now available to serve the type definition files and API documentations, due to GitHub ratelimiting ([#1059](https://github.com/JohnnyMorganz/luau-lsp/issues/1059))
-
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
@@ -1337,7 +1338,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

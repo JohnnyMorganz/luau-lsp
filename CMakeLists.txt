@@ -6,7 +6,7 @@ option(LSP_BUILD_ASAN "Build with ASAN" OFF)
 option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 
-set(LSP_VERSION "1.50.0")
+set(LSP_VERSION "1.51.0")
 set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
