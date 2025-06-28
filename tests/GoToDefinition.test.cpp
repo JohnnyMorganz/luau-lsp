@@ -26,6 +26,25 @@ TEST_CASE_FIXTURE(Fixture, "local_variable_definition")
     CHECK_EQ(result[0].range.end, lsp::Position{2, 19});
 }
 
+TEST_CASE_FIXTURE(Fixture, "local_variable_definition_pointing_to_a_table")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        local process = { call = function() end }
+        local value = pro|cess.call()
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{1, 14});
+    CHECK_EQ(result[0].range.end, lsp::Position{1, 21});
+}
+
 TEST_CASE_FIXTURE(Fixture, "local_inlined_primitive_table_property_definition")
 {
     auto [source, position] = sourceWithMarker(R"(
@@ -528,7 +547,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_string_require_path")
 
     auto result = workspace.gotoDefinition(params);
     REQUIRE_EQ(result.size(), 1);
-    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "test.lua"));
+    CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("test.lua"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
     CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
 }
@@ -558,9 +577,82 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_roblox_require_path")
 
     auto result = workspace.gotoDefinition(params);
     REQUIRE_EQ(result.size(), 1);
-    CHECK_EQ(result[0].uri, Uri::file(workspace.rootUri.fsPath() / "source.luau"));
+    CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("source.luau"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
     CHECK_EQ(result[0].range.end, lsp::Position{0, 0});
+}
+
+TEST_CASE_FIXTURE(Fixture, "property_on_table_type_without_actual_definition")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        type Process = {
+            spawn: (string) -> string
+        }
+
+        local process = {} :: Process
+        local value = process.sp|awn()
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{2, 12});
+    CHECK_EQ(result[0].range.end, lsp::Position{2, 17});
+}
+
+TEST_CASE_FIXTURE(Fixture, "property_on_the_return_of_a_function_call")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        type Result = {
+            unwrap: (Result) -> boolean
+        }
+
+        type Process = {
+            spawn: (string) -> Result
+        }
+
+        local process = {} :: Process
+        local value = process.spawn("test"):unwr|ap()
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range.start, lsp::Position{2, 12});
+    CHECK_EQ(result[0].range.end, lsp::Position{2, 18});
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_returns_the_table_location")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        type Process = {
+            spawn: (string) -> Result
+        }
+
+        local process = {} :: Process
+        local value = pr|ocess.spawn("test")
+    )");
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::TypeDefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoTypeDefinition(params);
+    REQUIRE(result);
+    CHECK_EQ(result->uri, document);
+    CHECK_EQ(result->range.start, lsp::Position{1, 23});
+    CHECK_EQ(result->range.end, lsp::Position{3, 9});
 }
 
 TEST_SUITE_END();

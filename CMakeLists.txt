@@ -5,6 +5,10 @@ option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
 option(LSP_BUILD_ASAN "Build with ASAN" OFF)
 option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
+option(LSP_WERROR "Warnings as errors" ON)
+
+set(LSP_VERSION "1.51.0")
+set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
     cmake_policy(SET CMP0091 NEW)
@@ -127,11 +131,19 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
-    list(APPEND LUAU_LSP_OPTIONS /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
+    list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
     list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
 else ()
-    list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
+    list(APPEND LUAU_LSP_OPTIONS -Wall)
 endif ()
+
+if(LSP_WERROR)
+    if(MSVC)
+        list(APPEND LUAU_LSP_OPTIONS /WX) # Warnings are errors
+    else()
+        list(APPEND LUAU_LSP_OPTIONS -Werror) # Warnings are errors
+    endif()
+endif()
 
 if (LSP_BUILD_ASAN)
     if (MSVC)
@@ -166,6 +178,8 @@ set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/incl
 
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
+target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_VERSION="${LSP_VERSION}")
+target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_NAME="${LSP_NAME}")
 target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
 target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler)
 

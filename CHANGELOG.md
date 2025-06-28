@@ -8,7 +8,107 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Add a warning message to `luau-lsp analyze` when `--platform=roblox` is set but no definitions files are provided
 - The language server now supports cancellation notifications from the client. This should help in cases where the server is stuck waiting for typechecking to complete.
+
+### Changed
+
+- Sync to upstream Luau 0.680
+- Workspace diagnostics are now only updated on text document save, rather than on text document type, due to
+  performance overhead (especially when new solver is
+  enabled) ([#1076](https://github.com/JohnnyMorganz/luau-lsp/issues/1076))
+
+### Fixed
+
+- Fixed crash when retrieving the extension of a file path with an empty basename
+
+## [1.51.0] - 2025-06-24
+
+### Added
+
+- Go To Definition now follows to the location of a property on a table type if the property doesn't have a real
+  implementation ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
+- Go To Definition now works on properties on the result of a function call (e.g., `unwrap` in
+  `process.spawn(""):unwrap()`) ([#1123](https://github.com/JohnnyMorganz/luau-lsp/issues/1123))
+- Go To Type Definition now follows through expressions (such as variables) better (e.g., cross module) to find the true
+  location of the original type
+
+### Changed
+
+- Reimplemented internal file-system calls and removed references to `std::filesystem`. There should be no external differences from this change, except that non-ASCII filepaths are handled correctly on Windows
+- Sync to upstream Luau 0.679
+
+### Fixed
+
+- Fixed handling of non-ASCII file paths and directories on Windows ([#746](https://github.com/JohnnyMorganz/luau-lsp/issues/746))
+
+## [1.50.0] - 2025-06-16
+
+### Added
+
+- Added `ServerInfo` to the `LanguageServer::onInitialize` result.
+- `.robloxrc` files are now processed alongside `.luaurc` files for backwards compatibility with old
+  configuration. It is recommended to still use `.luaurc` for new code.
+- `FindFirstChildWhichIsA` and friends now report an error if the class name provided was not found as a valid instance
+  type.
+
+### Changed
+
+- Sync to upstream Luau 0.678
+- Removed the restriction on maximum table size when displaying during Hover etc. This is done by setting the
+  `LuauTableTypeMaximumStringifierLength` flag value to `0`. Overrides for this value are still respected.
+
+### Fixed
+
+- Fixed stack overflow when looking up a property on self-referential intersection types
+
+## [1.49.1] - 2025-06-09
+
+### Changed
+
+- Sync to upstream Luau 0.677
+
+### Fixed
+
+- Fixed requests failing when write a string require where the filename begins with disallowed names (e.g. `./con`) on
+  Windows
+
+## [1.49.0] - 2025-06-01
+
+### Added
+
+- Added `luau-lsp.require.useOriginalRequireByStringSemantics` to fall back to the old require-by-string semantics for
+  `init.luau` files to preserve backwards compatibility. This option is deprecated and may be removed at any time in the
+  future. Note that `@self`-based requires remain supported with this option, allowing gradual migration to the new
+  semantics ([#1046](https://github.com/JohnnyMorganz/luau-lsp/issues/1046))
+
+### Changed
+
+- Sync to upstream Luau 0.676
+- For DM types, `.Parent` is now typed with a write type of "Instance" in the new solver, preventing false-positive type
+  errors ([#1039](https://github.com/JohnnyMorganz/luau-lsp/issues/1039))
+- Renamed command "Luau: Regenerate Rojo Sourcemap" to "Luau: Regenerate Sourcemap" as it can be configured to generate sourcemaps from non-Rojo tooling
+- Workspaces are initialized lazily on-demand, improving startup time for set-ups with many workspace folders. We only
+  setup and index a workspace folder once we receive a request for that
+  folder. ([#947](https://github.com/JohnnyMorganz/luau-lsp/issues/947))
+- It is no longer valid to pass `--flag` and `--no-flags-enabled` before the subcommand name on the CLI: it should be
+  `luau-lsp lsp --flag:NAME=VALUE` / `luau-lsp lsp --no-flags-enabled`.
+
+### Fixed
+
+- Fixed require-by-string failing for files named `luau` (e.g, `project/luau.luau`)
+- Fixed crash during early startup where a text document update notification is already sent before the workspaces are
+  fully configured.
+- Fixed unnecessary type check when fragment autocomplete is enabled, leading to an autocomplete delay ([#991](https://github.com/JohnnyMorganz/luau-lsp/issues/991))
+- Fixed FFlag registration logic always enabling all
+  FFlags ([#1090](https://github.com/JohnnyMorganz/luau-lsp/issues/1090))
+- Fixed string require auto-imports in an `init.luau` file not resolving correctly with new require-by-string semantics.
+  Now, `@self` is correctly added when necessary. ([#1030](https://github.com/JohnnyMorganz/luau-lsp/issues/1030))
+- When importing a directory containing an `init.luau` file with string require auto-imports, we now correctly resolve
+  to the directory name instead of to
+  `directory/init` ([#1038](https://github.com/JohnnyMorganz/luau-lsp/issues/1038) / [#1041](https://github.com/JohnnyMorganz/luau-lsp/issues/1041))
+- `init.luau` files are no longer aware of `.luaurc` files that are its sibling on the file
+  system ([#1037](https://github.com/JohnnyMorganz/luau-lsp/issues/1037))
 
 ## [1.48.0] - 2025-05-28
 
@@ -17,7 +117,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Internal caught but unhandled exceptions are now reported to Sentry if crash reporting is enabled
 - Added progress indicator for watched files changes
 - A Cloudflare page is now available to serve the type definition files and API documentations, due to GitHub ratelimiting ([#1059](https://github.com/JohnnyMorganz/luau-lsp/issues/1059))
-
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
   - `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
@@ -1255,7 +1354,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

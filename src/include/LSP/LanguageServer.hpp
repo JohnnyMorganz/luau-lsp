@@ -1,5 +1,4 @@
 #include <optional>
-#include <filesystem>
 #include <thread>
 
 #include "LSP/JsonRpc.hpp"
@@ -14,7 +13,6 @@
 using json = nlohmann::json;
 using namespace json_rpc;
 using WorkspaceFolderPtr = std::shared_ptr<WorkspaceFolder>;
-using ClientPtr = std::shared_ptr<Client>;
 
 #define JSON_REQUIRED_PARAMS(params, method) \
     (!(params) ? throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method) : (params).value())
@@ -34,24 +32,25 @@ NLOHMANN_DEFINE_OPTIONAL(InitializationOptions, fflags)
 class LanguageServer
 {
 private:
+    // Client is guaranteed to live for the duration of the whole program
+    Client* client;
+    std::optional<Luau::Config> defaultConfig;
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
-    ClientPtr client;
-    std::optional<Luau::Config> defaultConfig;
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
 
     std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
-    explicit LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aDefaultConfig);
+    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig);
 
     lsp::ServerCapabilities getServerCapabilities();
 
     /// Finds the workspace which the file belongs to.
     /// If no workspace is found, the file is attached to the null workspace
-    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri& file);
+    WorkspaceFolderPtr findWorkspace(const lsp::DocumentUri& file, bool shouldInitialize = true);
 
     void onRequest(const id_type& id, const std::string& method, std::optional<json> params);
     void onNotification(const std::string& method, std::optional<json> params);
@@ -60,7 +59,7 @@ public:
 
     // Dispatch handlers
 private:
-    bool allWorkspacesConfigured() const;
+    bool allWorkspacesReceivedConfiguration() const;
     void clearCancellationToken(const json_rpc::JsonRpcMessage& msg);
     void handleMessage(const json_rpc::JsonRpcMessage& msg);
     std::optional<json_rpc::JsonRpcMessage> popMessage();
@@ -70,6 +69,7 @@ private:
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);
+    void onDidSaveTextDocument(const lsp::DidSaveTextDocumentParams& params);
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params);
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);

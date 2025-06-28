@@ -7,17 +7,15 @@
 #include "LSP/ClientConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
-#include "Luau/ModuleResolver.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
 #include "Luau/TypeAttach.h"
 #include "Luau/Transpiler.h"
+#include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
-#include "LSP/Utils.hpp"
 #include "glob/match.h"
 #include <iostream>
-#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -57,19 +55,15 @@ static void report(ReportFormat format, const char* name, const Luau::Location& 
     }
 }
 
-static bool isIgnoredFile(
-    const std::filesystem::path& rootUriPath, const std::filesystem::path& path, const std::vector<std::string>& ignoreGlobPatterns)
+static bool isIgnoredFile(const Uri& rootUri, const Uri& uri, const std::vector<std::string>& ignoreGlobPatterns)
 {
-    auto relativePath = path.lexically_relative(rootUriPath).generic_string(); // HACK: we convert to generic string so we get '/' separators
-
-    // luau analyze returns relative path for files that are to be analyzed
-    if (relativePath.empty())
-        relativePath = path.generic_string();
-
+    // We want to test globs against a relative path to workspace, since that's what makes most sense
+    auto relativePathString = uri.lexicallyRelative(rootUri);
     for (auto& pattern : ignoreGlobPatterns)
-        if (glob::gitignore_glob_match(relativePath, pattern))
+    {
+        if (glob::gitignore_glob_match(relativePathString, pattern))
             return true;
-
+    }
     return false;
 }
 
@@ -77,17 +71,17 @@ static bool reportError(
     const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
     auto* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
-    std::filesystem::path rootUriPath = fileResolver->rootUri.fsPath();
     auto path = fileResolver->platform->resolveToRealPath(error.moduleName);
+    LUAU_ASSERT(path);
 
     // For consistency, we want to map the error.moduleName to a relative path (if it is a real path)
     Luau::ModuleName errorFriendlyName = error.moduleName;
     if (!fileResolver->platform->isVirtualPath(error.moduleName))
-        errorFriendlyName = std::filesystem::proximate(*path, rootUriPath).generic_string();
+        errorFriendlyName = fileResolver->rootUri.lexicallyRelative(*path);
 
     std::string humanReadableName = fileResolver->getHumanReadableModuleName(errorFriendlyName);
 
-    if (isIgnoredFile(rootUriPath, *path, ignoreGlobPatterns))
+    if (isIgnoredFile(fileResolver->rootUri, *path, ignoreGlobPatterns))
         return false;
 
     if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
@@ -105,10 +99,10 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
 }
 
 static bool analyzeFile(
-    Luau::Frontend& frontend, const std::filesystem::path& path, ReportFormat format, bool annotate, std::vector<std::string>& ignoreGlobPatterns)
+    Luau::Frontend& frontend, const std::string& path, ReportFormat format, bool annotate, std::vector<std::string>& ignoreGlobPatterns)
 {
     Luau::CheckResult cr;
-    Luau::ModuleName name = path.generic_string();
+    Luau::ModuleName name = path;
 
     if (frontend.isDirty(name))
         cr = frontend.check(name);
@@ -146,55 +140,47 @@ static bool analyzeFile(
     return reportedErrors == 0 && cr.lintResult.errors.empty();
 }
 
-std::vector<std::filesystem::path> getFilesToAnalyze(const std::vector<std::string>& paths, const std::vector<std::string>& ignoreGlobPatterns)
+std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths, const std::vector<std::string>& ignoreGlobPatterns)
 {
-    std::vector<std::filesystem::path> files;
+    auto cwd = Luau::FileUtils::getCurrentWorkingDirectory();
+    LUAU_ASSERT(cwd);
+    auto cwdUri = Uri::file(*cwd);
+
+    std::vector<std::string> files;
     for (const auto& pathString : paths)
     {
-        // If the path is not absolute, then we want to construct it into an absolute path
-        // by appending it to the current working directory
-        auto path = std::filesystem::absolute(pathString);
-
-        if (path != "-" && !std::filesystem::exists(path))
+        Uri uri = cwdUri.resolvePath(pathString);
+        if (!uri.exists())
         {
-            std::cerr << "Cannot get " << path << ": path does not exist\n";
+            std::cerr << "Cannot get " << uri.fsPath() << ": path does not exist\n";
             exit(1);
         }
 
 
-        if (std::filesystem::is_directory(path))
+        if (uri.isDirectory())
         {
-            for (std::filesystem::recursive_directory_iterator next(path, std::filesystem::directory_options::skip_permission_denied), end;
-                next != end; ++next)
-            {
-                try
+            Luau::FileUtils::traverseDirectoryRecursive(uri.fsPath(),
+                [&](const auto& path)
                 {
-                    if (next->is_regular_file() && next->path().has_extension())
+                    auto uri = Uri::file(path);
+                    auto ext = uri.extension();
+                    if (ext == ".lua" || ext == ".luau")
                     {
-                        auto ext = next->path().extension();
-                        if (ext == ".lua" || ext == ".luau")
-                        {
-                            if (!isIgnoredFile(std::filesystem::current_path(), next->path(), ignoreGlobPatterns))
-                                files.push_back(next->path());
-                        }
+                        if (!isIgnoredFile(cwdUri, uri, ignoreGlobPatterns))
+                            files.push_back(uri.fsPath());
                     }
-                }
-                catch (const std::filesystem::filesystem_error& e)
-                {
-                    std::cerr << "warning: Failed to visit directory: " << e.what() << "\n";
-                }
-            }
+                });
         }
         else
         {
-            files.push_back(path);
+            files.push_back(uri.fsPath());
         }
     }
     return files;
 }
 
-void applySettings(const std::string& settingsContents, CliClient& client, std::vector<std::string>& ignoreGlobPatterns,
-    std::vector<std::filesystem::path>& definitionsPaths)
+void applySettings(
+    const std::string& settingsContents, CliClient& client, std::vector<std::string>& ignoreGlobPatterns, std::vector<std::string>& definitionsPaths)
 {
     client.configuration = dottedToClientConfiguration(settingsContents);
 
@@ -220,25 +206,32 @@ int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
     bool annotate = program.is_used("--annotate");
-    auto sourcemapPath = program.present<std::filesystem::path>("--sourcemap");
-    auto definitionsPaths = program.get<std::vector<std::filesystem::path>>("--definitions");
+    auto sourcemapPath = program.present<std::string>("--sourcemap");
+    auto definitionsPaths = program.get<std::vector<std::string>>("--definitions");
     auto ignoreGlobPatterns = program.get<std::vector<std::string>>("--ignore");
-    auto baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
-    auto settingsPath = program.present<std::filesystem::path>("--settings");
-    std::vector<std::filesystem::path> files{};
+    auto baseLuaurc = program.present<std::string>("--base-luaurc");
+    auto settingsPath = program.present<std::string>("--settings");
+    std::vector<std::string> files{};
     FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
     CliClient client;
 
+    auto currentWorkingDirectory = Luau::FileUtils::getCurrentWorkingDirectory();
+    if (!currentWorkingDirectory)
+    {
+        fprintf(stderr, "Failed to determine current working directory\n");
+        return 1;
+    }
+
     if (settingsPath)
     {
-        if (std::optional<std::string> contents = readFile(*settingsPath))
+        if (std::optional<std::string> contents = Luau::FileUtils::readFile(*settingsPath))
         {
             applySettings(contents.value(), client, ignoreGlobPatterns, definitionsPaths);
         }
         else
         {
-            fprintf(stderr, "Failed to read settings at '%s'\n", settingsPath->generic_string().c_str());
+            fprintf(stderr, "Failed to read settings at '%s'\n", settingsPath->c_str());
             return 1;
         }
     }
@@ -268,19 +261,6 @@ int startAnalyze(const argparse::ArgumentParser& program)
     }
 #endif
 
-    // Check if files exist
-    if (sourcemapPath.has_value() && !std::filesystem::exists(sourcemapPath.value()))
-    {
-        fprintf(stderr, "Cannot load sourcemap path %s: path does not exist\n", sourcemapPath->generic_string().c_str());
-        return 1;
-    }
-
-    if (settingsPath.has_value() && !std::filesystem::exists(settingsPath.value()))
-    {
-        fprintf(stderr, "Cannot load settings path %s: path does not exist\n", settingsPath->generic_string().c_str());
-        return 1;
-    }
-
     if (files.empty())
     {
         fprintf(stderr, "error: no files provided\n");
@@ -296,25 +276,25 @@ int startAnalyze(const argparse::ArgumentParser& program)
     if (baseLuaurc)
     {
         Luau::Config result;
-        if (std::optional<std::string> contents = readFile(*baseLuaurc))
+        if (std::optional<std::string> contents = Luau::FileUtils::readFile(*baseLuaurc))
         {
-            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(*baseLuaurc, *contents, result);
+            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(Uri::file(*baseLuaurc), *contents, result);
             if (error)
             {
-                fprintf(stderr, "%s: %s\n", baseLuaurc->generic_string().c_str(), error->c_str());
+                fprintf(stderr, "%s: %s\n", baseLuaurc->c_str(), error->c_str());
                 return 1;
             }
             fileResolver.defaultConfig = std::move(result);
         }
         else
         {
-            fprintf(stderr, "Failed to read base .luaurc configuration at '%s'\n", baseLuaurc->generic_string().c_str());
+            fprintf(stderr, "Failed to read base .luaurc configuration at '%s'\n", baseLuaurc->c_str());
             return 1;
         }
     }
 
-    fileResolver.rootUri = Uri::file(std::filesystem::current_path());
-    fileResolver.client = std::make_shared<CliClient>(client);
+    fileResolver.rootUri = Uri::file(*currentWorkingDirectory);
+    fileResolver.client = &client;
 
     if (auto platformArg = program.present("--platform"))
     {
@@ -335,18 +315,25 @@ int startAnalyze(const argparse::ArgumentParser& program)
     if (!FFlag::LuauSolverV2)
         Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
 
+    if (client.configuration.platform.type == LSPPlatformConfig::Roblox && definitionsPaths.empty())
+    {
+        fprintf(stderr, "WARNING: --platform is set to 'roblox' but no definitions files are provided. 'luau-lsp analyze' does not download "
+                        "definitions files; use `--platform=standard` to silence\n");
+    }
+
     for (auto& definitionsPath : definitionsPaths)
     {
-        if (!std::filesystem::exists(definitionsPath))
+        auto uri = fileResolver.rootUri.resolvePath(definitionsPath);
+        if (!uri.exists())
         {
-            fprintf(stderr, "Cannot load definitions file %s: path does not exist\n", definitionsPath.generic_string().c_str());
+            fprintf(stderr, "Cannot load definitions file %s: path does not exist\n", definitionsPath.c_str());
             return 1;
         }
 
-        auto definitionsContents = readFile(definitionsPath);
+        auto definitionsContents = Luau::FileUtils::readFile(uri.fsPath());
         if (!definitionsContents)
         {
-            fprintf(stderr, "Cannot load definitions file %s: failed to read\n", definitionsPath.generic_string().c_str());
+            fprintf(stderr, "Cannot load definitions file %s: failed to read\n", definitionsPath.c_str());
             return 1;
         }
 
@@ -355,18 +342,15 @@ int startAnalyze(const argparse::ArgumentParser& program)
         {
             fprintf(stderr, "Failed to load definitions\n");
             for (const auto& error : loadResult.parseResult.errors)
-                report(
-                    format, definitionsPath.relative_path().generic_string().c_str(), error.getLocation(), "SyntaxError", error.getMessage().c_str());
+                report(format, uri.fsPath().c_str(), error.getLocation(), "SyntaxError", error.getMessage().c_str());
 
             if (loadResult.module)
             {
                 for (const auto& error : loadResult.module->errors)
                     if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
-                        report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "SyntaxError",
-                            syntaxError->message.c_str());
+                        report(format, uri.fsPath().c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
                     else
-                        report(format, definitionsPath.relative_path().generic_string().c_str(), error.location, "TypeError",
-                            Luau::toString(error).c_str());
+                        report(format, uri.fsPath().c_str(), error.location, "TypeError", Luau::toString(error).c_str());
             }
             return 1;
         }
@@ -380,13 +364,18 @@ int startAnalyze(const argparse::ArgumentParser& program)
         {
             auto robloxPlatform = dynamic_cast<RobloxPlatform*>(platform.get());
 
-            if (auto sourceMapContents = readFile(*sourcemapPath))
+            if (auto sourceMapContents = Luau::FileUtils::readFile(*sourcemapPath))
             {
                 robloxPlatform->updateSourceNodeMap(sourceMapContents.value());
 
                 bool expressiveTypes =
                     (program.is_used("--no-strict-dm-types") && client.configuration.diagnostics.strictDatamodelTypes) || FFlag::LuauSolverV2;
                 robloxPlatform->handleSourcemapUpdate(frontend, frontend.globals, expressiveTypes);
+            }
+            else
+            {
+                fprintf(stderr, "Cannot load sourcemap path %s: failed to read contents\n", sourcemapPath->c_str());
+                return 1;
             }
         }
         else
@@ -402,7 +391,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
     int failed = 0;
 
-    for (const std::filesystem::path& path : files)
+    for (const auto& path : files)
         failed += !analyzeFile(frontend, path, format, annotate, ignoreGlobPatterns);
 
     if (!client.diagnostics.empty())
@@ -410,7 +399,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
         failed += int(client.diagnostics.size());
 
         for (const auto& [path, err] : client.diagnostics)
-            fprintf(stderr, "%s: %s\n", path.generic_string().c_str(), err.c_str());
+            fprintf(stderr, "%s: %s\n", path.fsPath().c_str(), err.c_str());
     }
 
     if (format == ReportFormat::Luacheck)

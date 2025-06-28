@@ -84,4 +84,15 @@ TEST_CASE_FIXTURE(Fixture, "FindImports require multiline")
     CHECK_EQ(visitor.requiresMap[0].begin()->second->location.end.line, 2);
 }
 
+TEST_CASE_FIXTURE(Fixture, "lookupProp on a self-referential intersection type does not stack overflow")
+{
+    Luau::TypeArena arena;
+    auto intersectionTypeId = arena.addType(Luau::IntersectionType{});
+    auto itv = Luau::getMutable<Luau::IntersectionType>(intersectionTypeId);
+    REQUIRE(itv);
+    itv->parts.emplace_back(intersectionTypeId);
+
+    CHECK_FALSE(lookupProp(intersectionTypeId, "RandomProp"));
+}
+
 TEST_SUITE_END();

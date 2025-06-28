@@ -5,6 +5,7 @@
 #include "LSP/Client.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 bool usingPullDiagnostics(const lsp::ClientCapabilities& capabilities)
 {
@@ -24,7 +25,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     const lsp::DocumentDiagnosticParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken, bool allowUnmanagedFiles)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
-    if (!isConfigured)
+    if (!isReady)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
         throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);
@@ -74,15 +75,14 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
         }
         else if (supportsRelatedDocuments(client->capabilities))
         {
-            auto fileName = platform->resolveToRealPath(error.moduleName);
-            if (!fileName)
+            auto uri = platform->resolveToRealPath(error.moduleName);
+            if (!uri)
                 continue;
             auto relatedTextDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
-            auto uri = relatedTextDocument ? relatedTextDocument->uri() : Uri::file(*fileName);
-            if (isIgnoredFile(uri, config))
+            if (isIgnoredFile(*uri, config))
                 continue;
             auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, relatedTextDocument);
-            auto& currentDiagnostics = relatedDiagnostics[uri];
+            auto& currentDiagnostics = relatedDiagnostics[*uri];
             currentDiagnostics.emplace_back(diagnostic);
         }
     }
@@ -112,36 +112,29 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     return report;
 }
 
-std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::filesystem::path& rootPath, const ClientConfiguration& config)
+std::vector<Uri> WorkspaceFolder::findFilesForWorkspaceDiagnostics(const std::string& rootPath, const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::findFilesForWorkspaceDiagnostics", "LSP");
 
     std::vector<Uri> files{};
-    for (std::filesystem::recursive_directory_iterator next(rootPath, std::filesystem::directory_options::skip_permission_denied), end; next != end;
-         ++next)
-    {
-        try
+    Luau::FileUtils::traverseDirectoryRecursive(rootPath,
+        [&](auto& path)
         {
-            auto uri = Uri::file(next->path());
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(uri, config))
+            auto uri = Uri::file(path);
+            auto ext = uri.extension();
+            if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config))
             {
-                auto ext = next->path().extension();
-                if (ext == ".lua" || ext == ".luau")
-                    files.push_back(uri);
+                files.push_back(uri);
             }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to compute workspace diagnostics for file: ") + e.what());
-        }
-    }
+        });
+
     return files;
 }
 
 lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::workspaceDiagnostics", "LSP");
-    if (!isConfigured)
+    if (!isReady)
     {
         lsp::DiagnosticServerCancellationData cancellationData{/*retriggerRequest: */ true};
         throw JsonRpcException(lsp::ErrorCode::ServerCancelled, "server not yet received configuration for diagnostics", cancellationData);

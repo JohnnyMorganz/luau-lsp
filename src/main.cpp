@@ -5,6 +5,7 @@
 #include "Analyze/CliConfigurationParser.hpp"
 #include "Luau/ExperimentalFlags.h"
 #include "argparse/argparse.hpp"
+#include "LuauFileUtils.hpp"
 
 #include "LSP/Transport/StdioTransport.hpp"
 #ifndef _WIN32
@@ -25,8 +26,6 @@
 #define SENTRY_BUILD_STATIC 1
 #include <sentry.h>
 #endif
-
-#define LSP_VERSION "1.48.0"
 
 static void displayFlags()
 {
@@ -49,7 +48,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     if (isCrashReportingEnabled)
     {
 #ifdef LSP_BUILD_WITH_SENTRY
-        std::optional<std::filesystem::path> crashReportDirectory = program.present<std::filesystem::path>("--crash-report-directory");
+        std::optional<std::string> crashReportDirectory = program.present<std::string>("--crash-report-directory");
 
         sentry_options_t* options = sentry_options_new();
         sentry_options_set_dsn(options, "https://bc658c75485d1aecbaf1c0c1f7980922@o4509305213026304.ingest.de.sentry.io/4509305221283920");
@@ -57,7 +56,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         if (crashReportDirectory.has_value())
         {
 #ifdef _WIN32
-            sentry_options_set_database_pathw(options, crashReportDirectory->c_str());
+            sentry_options_set_database_pathw(options, Luau::FileUtils::fromUtf8(*crashReportDirectory).c_str());
 #else
             sentry_options_set_database_path(options, crashReportDirectory->c_str());
 #endif
@@ -65,6 +64,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
 
         sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
         sentry_init(options);
+        sentry_set_tag("luau.new_solver_enabled", FFlag::LuauSolverV2 ? "true" : "false");
 #else
         std::cerr << "Ignoring '--enable-crash-reporting' as this server was not built with crash reporting features\n";
 #endif
@@ -85,27 +85,27 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    auto definitionsFiles = program.get<std::vector<std::filesystem::path>>("--definitions");
-    auto documentationFiles = program.get<std::vector<std::filesystem::path>>("--docs");
-    std::optional<std::filesystem::path> baseLuaurc = program.present<std::filesystem::path>("--base-luaurc");
-    std::optional<std::filesystem::path> transportPipeFile = program.present<std::filesystem::path>("--pipe");
+    auto definitionsFiles = program.get<std::vector<std::string>>("--definitions");
+    auto documentationFiles = program.get<std::vector<std::string>>("--docs");
+    auto baseLuaurc = program.present<std::string>("--base-luaurc");
+    auto transportPipeFile = program.present<std::string>("--pipe");
 
     std::optional<Luau::Config> defaultConfig = std::nullopt;
     if (baseLuaurc)
     {
-        if (std::optional<std::string> contents = readFile(*baseLuaurc))
+        if (std::optional<std::string> contents = Luau::FileUtils::readFile(*baseLuaurc))
         {
             defaultConfig = Luau::Config{};
-            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(*baseLuaurc, *contents, *defaultConfig);
+            std::optional<std::string> error = WorkspaceFileResolver::parseConfig(Uri::file(*baseLuaurc), *contents, *defaultConfig);
             if (error)
             {
-                std::cerr << baseLuaurc->generic_string() << ": " << *error << "\n";
+                std::cerr << *baseLuaurc << ": " << *error << "\n";
                 return 1;
             }
         }
         else
         {
-            std::cerr << "Failed to read base .luaurc configuration at '" << baseLuaurc->generic_string() << "'\n";
+            std::cerr << "Failed to read base .luaurc configuration at '" << *baseLuaurc << "'\n";
             return 1;
         }
     }
@@ -123,7 +123,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         std::cerr << "--pipe is not supported on windows\n";
         return 1;
 #else
-        transport = std::make_unique<PipeTransport>(transportPipeFile->string());
+        transport = std::make_unique<PipeTransport>(*transportPipeFile);
 #endif
     }
     else
@@ -131,25 +131,24 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         transport = std::make_unique<StdioTransport>();
     }
 
-    auto client = std::make_shared<Client>(std::move(transport));
-    client->definitionsFiles = definitionsFiles;
-    client->documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client->documentation, client);
+    Client client{std::move(transport)};
+    client.definitionsFiles = definitionsFiles;
+    client.documentationFiles = documentationFiles;
+    parseDocumentation(documentationFiles, client.documentation, &client);
 
     // Parse LSP Settings
-    auto settingsPath = program.present<std::filesystem::path>("--settings");
-    if (settingsPath)
+    if (auto settingsPath = program.present<std::string>("--settings"))
     {
-        if (std::optional<std::string> contents = readFile(*settingsPath))
-            client->globalConfig = dottedToClientConfiguration(contents.value());
+        if (std::optional<std::string> contents = Luau::FileUtils::readFile(*settingsPath))
+            client.globalConfig = dottedToClientConfiguration(contents.value());
         else
         {
-            std::cerr << "Failed to read base LSP settings at '" << settingsPath->generic_string() << "'\n";
+            std::cerr << "Failed to read base LSP settings at '" << *settingsPath << "'\n";
             return 1;
         }
     }
 
-    LanguageServer server(client, defaultConfig);
+    LanguageServer server(&client, defaultConfig);
 
     // Begin input loop
     server.processInputLoop();
@@ -192,11 +191,6 @@ void processFFlags(const argparse::ArgumentParser& program)
     applyRequiredFlags();
 }
 
-std::filesystem::path file_path_parser(const std::string& value)
-{
-    return {value};
-}
-
 int main(int argc, char** argv)
 {
     Luau::assertHandler() = [](const char* expr, const char* file, int line, const char*) -> int
@@ -206,7 +200,6 @@ int main(int argc, char** argv)
     };
 
     argparse::ArgumentParser program("luau-lsp", LSP_VERSION);
-    program.set_assign_chars(":=");
 
     // Global arguments
     argparse::ArgumentParser parent_parser("-", "0.0", argparse::default_arguments::none);
@@ -225,6 +218,7 @@ int main(int argc, char** argv)
 
     // Analyze arguments
     argparse::ArgumentParser analyze_command("analyze");
+    analyze_command.set_assign_chars(":=");
     analyze_command.add_description("Run luau-analyze type checking and linting");
     analyze_command.add_parents(parent_parser);
     analyze_command.add_argument("--annotate")
@@ -243,14 +237,10 @@ int main(int argc, char** argv)
         .help("disable strict DataModel types in type-checking")
         .default_value(false)
         .implicit_value(true);
-    analyze_command.add_argument("--sourcemap")
-        .help("path to a Rojo-style instance sourcemap to understand the DataModel")
-        .action(file_path_parser)
-        .metavar("PATH");
+    analyze_command.add_argument("--sourcemap").help("path to a Rojo-style instance sourcemap to understand the DataModel").metavar("PATH");
     analyze_command.add_argument("--definitions", "--defs")
         .help("A path to a Luau definitions file to load into the global namespace")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
     analyze_command.add_argument("--ignore")
@@ -258,55 +248,41 @@ int main(int argc, char** argv)
         .default_value<std::vector<std::string>>({})
         .append()
         .metavar("GLOB");
-    analyze_command.add_argument("--base-luaurc")
-        .help("path to a .luaurc file which acts as the base default configuration")
-        .action(file_path_parser)
-        .metavar("PATH");
+    analyze_command.add_argument("--base-luaurc").help("path to a .luaurc file which acts as the base default configuration").metavar("PATH");
     analyze_command.add_argument("--platform").help("platform-specific support features").choices("standard", "roblox");
-    analyze_command.add_argument("--settings").help("path to LSP-style settings").action(file_path_parser).metavar("PATH");
+    analyze_command.add_argument("--settings").help("path to LSP-style settings").metavar("PATH");
     analyze_command.add_argument("files").help("files to perform analysis on").remaining();
 
     // Language server arguments
     argparse::ArgumentParser lsp_command("lsp");
+    lsp_command.set_assign_chars(":=");
     lsp_command.add_description("Start the language server");
     lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
     lsp_command.add_parents(parent_parser);
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
     lsp_command.add_argument("--docs", "--documentation")
         .help("path to a Luau documentation database for loaded definitions")
-        .action(file_path_parser)
-        .default_value<std::vector<std::filesystem::path>>({})
+        .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
-    lsp_command.add_argument("--base-luaurc")
-        .help("path to a .luaurc file which acts as the base default configuration")
-        .action(file_path_parser)
-        .metavar("PATH");
-    lsp_command.add_argument("--settings").help("path to LSP settings to use as default").action(file_path_parser).metavar("PATH");
+    lsp_command.add_argument("--base-luaurc").help("path to a .luaurc file which acts as the base default configuration").metavar("PATH");
+    lsp_command.add_argument("--settings").help("path to LSP settings to use as default").metavar("PATH");
     lsp_command.add_argument("--delay-startup")
         .help("debug flag to halt startup to allow connection of a debugger")
         .default_value(false)
         .implicit_value(true);
     lsp_command.add_argument("--stdio").help("set up client communication channel via stdio").implicit_value(true);
-    lsp_command.add_argument("--pipe")
-        .help("path to pipe / socket file name for pipe communication channel")
-        .action(file_path_parser)
-        .metavar("PATH");
+    lsp_command.add_argument("--pipe").help("path to pipe / socket file name for pipe communication channel").metavar("PATH");
     lsp_command.add_argument("--enable-crash-reporting")
         .help("whether to enable crash reporting to Sentry")
         .default_value(false)
         .implicit_value(true);
-    lsp_command.add_argument("--crash-report-directory")
-        .help("location to store database for crash reports")
-        .action(file_path_parser)
-        .metavar("PATH");
+    lsp_command.add_argument("--crash-report-directory").help("location to store database for crash reports").metavar("PATH");
 
-    program.add_parents(parent_parser);
     program.add_subparser(analyze_command);
     program.add_subparser(lsp_command);
 
@@ -321,7 +297,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    processFFlags(program);
     if (program.is_used("--show-flags"))
     {
         displayFlags();

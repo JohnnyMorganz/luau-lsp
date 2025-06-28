@@ -51,8 +51,8 @@ static Luau::TypeId lookupFunctionCallType(Luau::ModulePtr module, const Luau::A
         if (auto parentIt = module->astTypes.find(index->expr))
         {
             auto parentType = Luau::follow(*parentIt);
-            if (auto prop = lookupProp(parentType, index->index.value))
-                return Luau::follow(prop->second.type());
+            if (auto prop = lookupProp(parentType, index->index.value); prop && prop->second.readTy)
+                return Luau::follow(*prop->second.readTy);
         }
     }
 
@@ -140,30 +140,9 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     {
         ty = scope->lookup(local).value_or(nullptr);
     }
-    else if (auto lvalue = Luau::tryGetLValue(*exprOrLocal.getExpr()))
+    else if (auto type = module->astTypes.find(exprOrLocal.getExpr()))
     {
-        const Luau::LValue* current = &*lvalue;
-        std::vector<std::string> keys{}; // keys in reverse order
-        while (auto field = Luau::get<Luau::Field>(*current))
-        {
-            keys.push_back(field->key);
-            current = Luau::baseof(*current);
-        }
-
-        const auto* symbol = Luau::get<Luau::Symbol>(*current);
-
-        if (auto baseType = scope->lookup(*symbol))
-            ty = Luau::follow(*baseType);
-        else
-            return {};
-
-        for (auto it = keys.rbegin(); it != keys.rend(); ++it)
-        {
-            auto prop = lookupProp(ty, *it);
-            if (!prop)
-                return {};
-            ty = Luau::follow(prop->second.type());
-        }
+        ty = Luau::follow(*type);
     }
 
     if (!ty)

@@ -1,5 +1,6 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+#include "LuauFileUtils.hpp"
 #include <regex>
 #include <algorithm>
 
@@ -14,8 +15,7 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-void parseDocumentation(
-    const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client)
+void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const Client* client)
 {
     if (documentationFiles.empty())
     {
@@ -26,7 +26,7 @@ void parseDocumentation(
     for (auto& documentationFile : documentationFiles)
     {
         auto resolvedFilePath = resolvePath(documentationFile);
-        if (auto contents = readFile(resolvedFilePath))
+        if (auto contents = Luau::FileUtils::readFile(resolvedFilePath))
         {
             try
             {
@@ -80,15 +80,15 @@ void parseDocumentation(
             }
             catch (const std::exception& e)
             {
-                client->sendLogMessage(lsp::MessageType::Error,
-                    "Failed to load documentation database for " + resolvedFilePath.generic_string() + ": " + std::string(e.what()));
+                client->sendLogMessage(
+                    lsp::MessageType::Error, "Failed to load documentation database for " + resolvedFilePath + ": " + std::string(e.what()));
                 client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
             }
         }
         else
         {
-            client->sendLogMessage(lsp::MessageType::Error,
-                "Failed to read documentation file for " + resolvedFilePath.generic_string() + ". Documentation will not be provided");
+            client->sendLogMessage(
+                lsp::MessageType::Error, "Failed to read documentation file for " + resolvedFilePath + ". Documentation will not be provided");
             client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
         }
     }
@@ -450,7 +450,8 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     return std::nullopt;
 }
 
-std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
+std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(
+    const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -459,18 +460,15 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
         if (ref->prefix)
         {
             auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
-            if (!importedModuleName) 
+            if (!importedModuleName)
                 return std::nullopt;
-            // TODO: remove this checkStrict call in the future, once alias locations are preserved on a module
-            // even when retainFullTypeGraphs = false.
-            checkStrict(*importedModuleName);
             auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
-            if (!importedModule || !importedModule->hasModuleScope())
+            if (!importedModule)
                 return std::nullopt;
-            auto typeLocation = lookupTypeLocation(*importedModule->getModuleScope(), ref->name.value);
-            if (!typeLocation)
-                return std::nullopt;
-            return printMoonwaveDocumentation(getComments(*importedModuleName, *typeLocation));
+            if (const auto it = importedModule->exportedTypeBindings.find(ref->name.value);
+                it != importedModule->exportedTypeBindings.end() && it->second.definitionLocation)
+                return printMoonwaveDocumentation(getComments(*importedModuleName, *it->second.definitionLocation));
+            return std::nullopt;
         }
         else
         {
@@ -480,7 +478,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(const Lua
             return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
         }
     }
-    else if (auto alias = node->as<Luau::AstStatTypeAlias>()) 
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>())
     {
         return printMoonwaveDocumentation(getComments(moduleName, alias->location));
     }

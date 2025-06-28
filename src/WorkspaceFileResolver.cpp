@@ -1,4 +1,3 @@
-#include <filesystem>
 #include <optional>
 #include <unordered_map>
 #include <iostream>
@@ -6,27 +5,27 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
+#include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
+
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
     // Handle non-file schemes
     if (name.scheme != "file")
         return name.toString();
 
-    auto fsPath = name.fsPath().generic_string();
-    if (auto virtualPath = platform->resolveToVirtualPath(fsPath))
-    {
+    if (auto virtualPath = platform->resolveToVirtualPath(name))
         return *virtualPath;
-    }
 
-    return fsPath;
+    return name.fsPath();
 }
 
 Uri WorkspaceFileResolver::getUri(const Luau::ModuleName& moduleName) const
 {
     if (platform->isVirtualPath(moduleName))
     {
-        if (auto filePath = platform->resolveToRealPath(moduleName))
-            return Uri::file(*filePath);
+        if (auto uri = platform->resolveToRealPath(moduleName))
+            return *uri;
     }
 
     // TODO: right now we map to file paths for module names, unless it's a non-file uri. Should we store uris directly instead?
@@ -59,31 +58,18 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
 
     if (auto filePath = platform->resolveToRealPath(name))
         if (auto source = readSource(name))
-            return TextDocumentPtr(Uri::file(*filePath), "luau", source->source);
+            return TextDocumentPtr(*filePath, "luau", source->source);
 
     return TextDocumentPtr(nullptr);
 }
 
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
-    Luau::SourceCode::Type sourceType = Luau::SourceCode::Type::None;
+    LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::readSource", "LSP");
+    auto uri = getUri(name);
+    auto sourceType = platform->sourceCodeTypeFromPath(uri);
 
-    std::filesystem::path realFileName = name;
-    if (platform->isVirtualPath(name))
-    {
-        auto filePath = platform->resolveToRealPath(name);
-        if (!filePath)
-            return std::nullopt;
-
-        realFileName = *filePath;
-        sourceType = platform->sourceCodeTypeFromPath(*filePath);
-    }
-    else
-    {
-        sourceType = platform->sourceCodeTypeFromPath(realFileName);
-    }
-
-    if (auto source = platform->readSourceCode(name, realFileName))
+    if (auto source = platform->readSourceCode(name, uri))
         return Luau::SourceCode{*source, sourceType};
 
     return std::nullopt;
@@ -100,7 +86,7 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     {
         if (auto realPath = platform->resolveToRealPath(name))
         {
-            return realPath->fsPath().relative_path().generic_string() + " [" + name + "]";
+            return realPath->fsPath() + " [" + name + "]";
         }
         else
         {
@@ -115,38 +101,49 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
 
 const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const
 {
-    std::optional<std::filesystem::path> realPath = platform->resolveToRealPath(name);
-    if (!realPath || !realPath->has_relative_path() || !realPath->has_parent_path())
+    LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::getConfig", "Frontend");
+    auto uri = getUri(name);
+    auto base = uri.parent();
+
+    if (base && isInitLuauFile(uri))
+        base = base->parent();
+
+    if (!base)
         return defaultConfig;
 
-    return readConfigRec(realPath->parent_path());
+    return readConfigRec(*base);
 }
 
-std::optional<std::string> WorkspaceFileResolver::parseConfig(
-    const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result)
+std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat)
 {
+    LUAU_ASSERT(configPath.parent());
+
     Luau::ConfigOptions::AliasOptions aliasOpts;
-    aliasOpts.configLocation = configPath.parent_path().generic_string();
+    aliasOpts.configLocation = configPath.parent()->fsPath();
     aliasOpts.overwriteAliases = true;
 
     Luau::ConfigOptions opts;
     opts.aliasOptions = std::move(aliasOpts);
+    opts.compat = compat;
 
     return Luau::parseConfig(contents, result, opts);
 }
 
-const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::path& path) const
+const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
 {
-    auto it = configCache.find(path.generic_string());
+    auto it = configCache.find(uri);
     if (it != configCache.end())
         return it->second;
 
-    Luau::Config result = (path.has_relative_path() && path.has_parent_path()) ? readConfigRec(path.parent_path()) : defaultConfig;
-    auto configPath = path / Luau::kConfigName;
+    Luau::Config result = defaultConfig;
+    if (const auto& parent = uri.parent())
+        result = readConfigRec(*parent);
 
-    if (std::optional<std::string> contents = readFile(configPath))
+    auto configPath = uri.resolvePath(Luau::kConfigName);
+    auto robloxRcPath = uri.resolvePath(".robloxrc");
+
+    if (std::optional<std::string> contents = Luau::FileUtils::readFile(configPath.fsPath()))
     {
-        auto configUri = Uri::file(configPath);
         std::optional<std::string> error = parseConfig(configPath, *contents, result);
         if (error)
         {
@@ -156,21 +153,46 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const std::filesystem::
                 diagnostic.message = *error;
                 diagnostic.severity = lsp::DiagnosticSeverity::Error;
                 diagnostic.source = "Luau";
-                client->publishDiagnostics({configUri, std::nullopt, {diagnostic}});
+                client->publishDiagnostics({configPath, std::nullopt, {diagnostic}});
             }
             else
                 // TODO: this should never be reached anymore
-                std::cerr << configUri.toString() << ": " << *error;
+                std::cerr << configPath.toString() << ": " << *error;
         }
         else
         {
             if (client)
                 // Clear errors presented for file
-                client->publishDiagnostics({configUri, std::nullopt, {}});
+                client->publishDiagnostics({configPath, std::nullopt, {}});
+        }
+    }
+    else if (std::optional<std::string> robloxRcContents = Luau::FileUtils::readFile(robloxRcPath.fsPath()))
+    {
+        // Backwards compatibility for .robloxrc files
+        std::optional<std::string> error = parseConfig(robloxRcPath, *robloxRcContents, result, /* compat = */ true);
+        if (error)
+        {
+            if (client)
+            {
+                lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+                diagnostic.message = *error;
+                diagnostic.severity = lsp::DiagnosticSeverity::Error;
+                diagnostic.source = "Luau";
+                client->publishDiagnostics({robloxRcPath, std::nullopt, {diagnostic}});
+            }
+            else
+                // TODO: this should never be reached anymore
+                std::cerr << robloxRcPath.toString() << ": " << *error;
+        }
+        else
+        {
+            if (client)
+                // Clear errors presented for file
+                client->publishDiagnostics({robloxRcPath, std::nullopt, {}});
         }
     }
 
-    return configCache[path.generic_string()] = result;
+    return configCache[uri] = result;
 }
 
 void WorkspaceFileResolver::clearConfigCache()

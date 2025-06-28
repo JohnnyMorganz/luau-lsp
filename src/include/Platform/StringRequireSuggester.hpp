@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LSP/WorkspaceFileResolver.hpp"
-#include <filesystem>
 
 class FileRequireNode : public Luau::RequireNode
 {

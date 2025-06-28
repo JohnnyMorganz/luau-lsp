@@ -1,26 +1,35 @@
 #include "Platform/RobloxPlatform.hpp"
 #include <queue>
 
-bool SourceNode::isScript()
+SourceNode::SourceNode(std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children)
+    : name(std::move(name))
+    , className(std::move(className))
+    , filePaths(std::move(filePaths))
+    , children(std::move(children))
+{
+}
+
+bool SourceNode::isScript() const
 {
     return className == "ModuleScript" || className == "Script" || className == "LocalScript";
 }
 
 /// NOTE: Use `WorkspaceFileResolver::getRealPathFromSourceNode()` instead of this function where
 /// possible, as that will ensure it is relative to the correct workspace root.
-std::optional<std::filesystem::path> SourceNode::getScriptFilePath()
+std::optional<std::string> SourceNode::getScriptFilePath() const
 {
     for (const auto& path : filePaths)
     {
-        if (path.extension() == ".lua" || path.extension() == ".luau")
+        const auto uri = Uri::file(path);
+        if (uri.extension() == ".lua" || uri.extension() == ".luau")
         {
             return path;
         }
-        else if (path.extension() == ".json" && isScript() && !endsWith(path.filename().generic_string(), ".meta.json"))
+        else if (uri.extension() == ".json" && isScript() && !endsWith(uri.filename(), ".meta.json"))
         {
             return path;
         }
-        else if (path.extension() == ".toml" && isScript())
+        else if (uri.extension() == ".toml" && isScript())
         {
             return path;
         }
@@ -44,7 +53,7 @@ Luau::SourceCode::Type SourceNode::sourceCodeType() const
     }
 }
 
-std::optional<SourceNodePtr> SourceNode::findChild(const std::string& childName)
+std::optional<SourceNode*> SourceNode::findChild(const std::string& childName) const
 {
     for (const auto& child : children)
         if (child->name == childName)
@@ -52,14 +61,14 @@ std::optional<SourceNodePtr> SourceNode::findChild(const std::string& childName)
     return std::nullopt;
 }
 
-std::optional<SourceNodePtr> SourceNode::findDescendant(const std::string& childName)
+std::optional<const SourceNode*> SourceNode::findDescendant(const std::string& childName) const
 {
     // Peforms a BFS search
-    std::queue<SourceNodePtr> queue{};
+    std::queue<const SourceNode*> queue{};
 
     // TODO: this isn't so great, we shouldn't really be making a new shared ptr here
     // but since we know this will never get returned, we'll leave it alone for now
-    queue.push(std::make_shared<SourceNode>(*this));
+    queue.push(this);
 
     while (!queue.empty())
     {
@@ -76,14 +85,33 @@ std::optional<SourceNodePtr> SourceNode::findDescendant(const std::string& child
     return std::nullopt;
 }
 
-std::optional<SourceNodePtr> SourceNode::findAncestor(const std::string& ancestorName)
+std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& ancestorName) const
 {
     auto current = parent;
-    while (auto currentPtr = current.lock())
+    while (current)
     {
-        if (currentPtr->name == ancestorName)
-            return currentPtr;
-        current = currentPtr->parent;
+        if (current->name == ancestorName)
+            return current;
+        current = current->parent;
     }
     return std::nullopt;
+}
+
+SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator)
+{
+    auto name = j.at("name").get<std::string>();
+    auto className = j.at("className").get<std::string>();
+
+    std::vector<std::string> filePaths;
+    if (j.contains("filePaths"))
+        j.at("filePaths").get_to(filePaths);
+
+    std::vector<SourceNode*> children;
+    if (j.contains("children"))
+    {
+        for (auto& child : j.at("children"))
+            children.emplace_back(SourceNode::fromJson(child, allocator));
+    }
+
+    return allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children)));
 }

@@ -1,11 +1,13 @@
 #include "Platform/LSPPlatform.hpp"
 
+#include "LuauFileUtils.hpp"
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Workspace.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
+#include "Luau/TimeTrace.h"
 #include <memory>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
@@ -35,20 +37,21 @@ std::optional<Uri> LSPPlatform::resolveToRealPath(const Luau::ModuleName& name) 
     return fileResolver->getUri(name);
 }
 
-std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const
+std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const Uri& path) const
 {
+    LUAU_TIMETRACE_SCOPE("LSPPlatform::readSourceCode", "LSP");
     if (auto textDocument = fileResolver->getTextDocumentFromModuleName(name))
         return textDocument->getText();
 
     if (path.extension() == ".lua" || path.extension() == ".luau")
-        return readFile(path);
+        return Luau::FileUtils::readFile(path.fsPath());
 
     return std::nullopt;
 }
 
 Uri resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo)
 {
-    return Uri::file(aliasInfo.configLocation).resolvePath(resolvePath(aliasInfo.value).generic_string());
+    return Uri::file(aliasInfo.configLocation).resolvePath(resolvePath(aliasInfo.value));
 }
 
 std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from)
@@ -107,31 +110,25 @@ std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& con
 std::optional<Uri> resolveDirectoryAlias(
     const Uri& rootUri, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str)
 {
-    for (const auto& [alias, path] : directoryAliases)
+    for (const auto& [alias, directoryPath] : directoryAliases)
     {
         if (Luau::startsWith(str, alias))
         {
-            std::filesystem::path directoryPath = path;
             std::string remainder = str.substr(alias.length());
 
             // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
             // absolute path
             remainder.erase(0, remainder.find_first_not_of("/\\"));
 
-            auto filePath = resolvePath(remainder.empty() ? directoryPath : directoryPath / remainder);
-            if (filePath.is_absolute())
+            auto filePath = resolvePath(remainder.empty() ? directoryPath : Luau::FileUtils::joinPaths(directoryPath, remainder));
+            if (Luau::FileUtils::isAbsolutePath(filePath))
                 return Uri::file(filePath);
             else
-                return rootUri.resolvePath(filePath.generic_string());
+                return rootUri.resolvePath(filePath);
         }
     }
 
     return std::nullopt;
-}
-
-bool isInitLuauFile(const std::filesystem::path& path)
-{
-    return path.stem() == "init" || Luau::startsWith(path.stem().generic_string(), "init.");
 }
 
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
@@ -147,7 +144,11 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     if (!baseUri)
         return std::nullopt;
 
-    if (isInitLuauFile(*contextPath))
+    ClientConfiguration clientConfig;
+    if (fileResolver->client)
+        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
+
+    if (isInitLuauFile(*contextPath) && !clientConfig.require.useOriginalRequireByStringSemantics)
     {
         baseUri = baseUri->parent();
         if (!baseUri)
@@ -164,15 +165,13 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     // DEPRECATED: Check for custom require overrides
     else if (fileResolver->client)
     {
-        auto config = fileResolver->client->getConfiguration(fileResolver->rootUri);
-
         // Check file aliases
-        if (auto it = config.require.fileAliases.find(requiredString); it != config.require.fileAliases.end())
+        if (auto it = clientConfig.require.fileAliases.find(requiredString); it != clientConfig.require.fileAliases.end())
         {
             fileUri = Uri::file(resolvePath(it->second));
         }
         // Check directory aliases
-        else if (auto directoryAliasedPath = resolveDirectoryAlias(fileResolver->rootUri, config.require.directoryAliases, requiredString))
+        else if (auto directoryAliasedPath = resolveDirectoryAlias(fileResolver->rootUri, clientConfig.require.directoryAliases, requiredString))
         {
             fileUri = *directoryAliasedPath;
         }

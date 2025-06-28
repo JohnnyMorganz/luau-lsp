@@ -1,9 +1,9 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 #include "LSP/Completion.hpp"
-#include "LSP/Workspace.hpp"
 
 #include "Platform/AutoImports.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
@@ -132,7 +132,8 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
                 for (auto& [propName, prop] : ctv->props)
                 {
                     // Don't include functions or events
-                    auto ty = Luau::follow(prop.type());
+                    LUAU_ASSERT(prop.readTy);
+                    auto ty = Luau::follow(*prop.readTy);
                     if (Luau::get<Luau::FunctionType>(ty) || Luau::isOverloadedFunction(ty))
                         continue;
                     else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
@@ -233,8 +234,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-        instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
-        Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
+             instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
+             Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
@@ -319,7 +320,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 if (path == module.name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
                     continue;
                 if (auto scriptFilePath = getRealPathFromSourceNode(node);
-                    scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(Uri::file(*scriptFilePath), config))
+                    scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
                     continue;
 
                 std::string requirePath;
@@ -333,7 +334,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                     (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
                         (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
                 {
-                    requirePath = "./" + std::filesystem::relative(path, module.name).string();
+                    // HACK: using Uri's purely to access lexicallyRelative
+                    requirePath = Uri::file(path).lexicallyRelative(Uri::file(module.name));
                     isRelative = true;
                 }
                 else

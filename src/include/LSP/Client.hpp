@@ -30,9 +30,9 @@ public:
     lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
     /// A registered definitions file passed by the client
-    std::vector<std::filesystem::path> definitionsFiles{};
+    std::vector<std::string> definitionsFiles{};
     /// A registered documentation file passed by the client
-    std::vector<std::filesystem::path> documentationFiles{};
+    std::vector<std::string> documentationFiles{};
     /// Parsed documentation database
     Luau::DocumentationDatabase documentation{""};
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
@@ -74,9 +74,9 @@ public:
         const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt, std::optional<uint8_t> percentage = std::nullopt);
     void sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt);
 
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message);
+    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const;
     void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
-    void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
+    void sendWindowMessage(const lsp::MessageType& type, const std::string& message) const;
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);

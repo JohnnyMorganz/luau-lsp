@@ -54,7 +54,7 @@ bool MagicInstanceIsA::infer(const Luau::MagicFunctionCallContext& context)
         return false;
 
     std::string className(str->value.data, str->value.size);
-    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+    std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
     if (!tfun)
         context.solver->reportError(
             Luau::TypeError{context.callSite->args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
@@ -172,9 +172,13 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceFindFirstXWhic
     if (!str)
         return std::nullopt;
 
-    std::optional<Luau::TypeFun> tfun = scope->lookupType(std::string(str->value.data, str->value.size));
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = typeChecker.globalScope->lookupType(className);
     if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+    {
+        typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
         return std::nullopt;
+    }
 
     auto type = Luau::follow(tfun->type);
 
@@ -192,9 +196,13 @@ bool MagicInstanceFindFirstXWhichIsA::infer(const Luau::MagicFunctionCallContext
     if (!str)
         return false;
 
-    std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(std::string(str->value.data, str->value.size));
+    std::string className(str->value.data, str->value.size);
+    std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
     if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+    {
+        context.solver->reportError(Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}, str->location);
         return false;
+    }
 
     auto type = Luau::follow(tfun->type);
 
@@ -430,8 +438,7 @@ bool MagicTypeLookup::infer(const Luau::MagicFunctionCallContext& context)
         auto className = std::string(str->value.data, str->value.size);
         if (contains(lookupList, className))
         {
-            // TODO: only check the global scope?
-            std::optional<Luau::TypeFun> tfun = context.constraint->scope->lookupType(className);
+            std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
             if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
             {
                 context.solver->reportError(
@@ -457,13 +464,20 @@ bool MagicTypeLookup::infer(const Luau::MagicFunctionCallContext& context)
 static void attachMagicFunctionSafe(Luau::TableType::Props& props, const char* property, std::shared_ptr<Luau::MagicFunction> magic)
 {
     if (const auto prop = props.find(property); prop != props.end())
-        Luau::attachMagicFunction(prop->second.type(), magic);
+    {
+        LUAU_ASSERT(prop->second.readTy);
+        LUAU_ASSERT(Luau::is<Luau::FunctionType>(prop->second.readTy));
+        Luau::attachMagicFunction(*prop->second.readTy, std::move(magic));
+    }
 }
 
 static void attachTagSafe(Luau::TableType::Props& props, const char* property, const char* tagName)
 {
     if (const auto prop = props.find(property); prop != props.end())
-        Luau::attachTag(prop->second.type(), tagName);
+    {
+        LUAU_ASSERT(prop->second.readTy);
+        Luau::attachTag(*prop->second.readTy, tagName);
+    }
 }
 
 void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata)
@@ -543,18 +557,18 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             if (auto ttv = Luau::get<Luau::TableType>(instanceGlobal.value()))
             {
                 if (auto newFunction = ttv->props.find("new");
-                    newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+                    newFunction != ttv->props.end() && newFunction->second.readTy && Luau::get<Luau::FunctionType>(newFunction->second.readTy))
                 {
 
-                    Luau::attachTag(newFunction->second.type(), "CreatableInstances");
+                    Luau::attachTag(*newFunction->second.readTy, "CreatableInstances");
                     Luau::attachMagicFunction(
-                        newFunction->second.type(), std::make_shared<MagicTypeLookup>(robloxMetadata->CREATABLE_INSTANCES, "Invalid class name"));
+                        *newFunction->second.readTy, std::make_shared<MagicTypeLookup>(robloxMetadata->CREATABLE_INSTANCES, "Invalid class name"));
                 }
 
                 if (auto newFunction = ttv->props.find("fromExisting");
-                    newFunction != ttv->props.end() && Luau::get<Luau::FunctionType>(newFunction->second.type()))
+                    newFunction != ttv->props.end() && newFunction->second.readTy && Luau::get<Luau::FunctionType>(newFunction->second.readTy))
                 {
-                    Luau::attachMagicFunction(newFunction->second.type(), std::make_shared<MagicInstanceFromExisting>());
+                    Luau::attachMagicFunction(*newFunction->second.readTy, std::make_shared<MagicInstanceFromExisting>());
                 }
             }
 
@@ -562,11 +576,12 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
     if (robloxMetadata.has_value() && !robloxMetadata->SERVICES.empty())
         if (auto serviceProviderType = globals.globalScope->lookupType("ServiceProvider"))
             if (auto* ctv = Luau::getMutable<Luau::ExternType>(serviceProviderType->type);
-                ctv && ctv->props.find("GetService") != ctv->props.end() && Luau::get<Luau::FunctionType>(ctv->props["GetService"].type()))
+                ctv && ctv->props.find("GetService") != ctv->props.end() && ctv->props["GetService"].readTy &&
+                Luau::get<Luau::FunctionType>(ctv->props["GetService"].readTy))
             {
-                Luau::attachTag(ctv->props["GetService"].type(), "Services");
+                Luau::attachTag(*ctv->props["GetService"].readTy, "Services");
                 Luau::attachMagicFunction(
-                    ctv->props["GetService"].type(), std::make_shared<MagicTypeLookup>(robloxMetadata->SERVICES, "Invalid service name"));
+                    *ctv->props["GetService"].readTy, std::make_shared<MagicTypeLookup>(robloxMetadata->SERVICES, "Invalid service name"));
             }
 
     // Move Enums over as imported type bindings

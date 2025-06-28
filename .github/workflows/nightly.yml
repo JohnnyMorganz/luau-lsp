@@ -45,7 +45,7 @@ jobs:
         run: |
           DATE=$(date +%Y%m%d)
           VERSION="0.$DATE.0"
-          sed -i.bak "s/#define LSP_VERSION .*/#define LSP_VERSION \"$VERSION\"/g" src/main.cpp
+          sed -i.bak "s/set(LSP_VERSION .*/set(LSP_VERSION \"$VERSION\")/g" CMakeLists.txt
           jq ".version = \"$VERSION\"" editors/code/package.json > tmp.json && mv tmp.json editors/code/package.json
 
       - name: Build Server

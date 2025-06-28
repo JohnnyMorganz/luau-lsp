@@ -5,11 +5,13 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
+LUAU_FASTFLAG(LuauImplicitTableIndexerKeys2)
 LUAU_FASTFLAG(LuauBetterScopeSelection)
 LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
 LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
 LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
 LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
+LUAU_FASTFLAG(LuauPopulateRefinedTypesInFragmentFromOldSolver)
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -34,13 +36,45 @@ struct FragmentAutocompleteFixture : Fixture
     }
 
     // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[5] = {
+    ScopedFastFlag sffs[6] = {
         {FFlag::LuauBetterScopeSelection, true},
         {FFlag::LuauBlockDiffFragmentSelection, true},
         {FFlag::LuauFragmentAcMemoryLeak, true},
         {FFlag::LuauGlobalVariableModuleIsolation, true},
         {FFlag::LuauFragmentAutocompleteIfRecommendations, true},
+        {FFlag::LuauPopulateRefinedTypesInFragmentFromOldSolver, true},
     };
+
+    std::vector<lsp::CompletionItem> fragmentAutocomplete(const std::string& oldSource, const std::string& newSource, const lsp::Position& position)
+    {
+        // Enable pull-based diagnostics, otherwise updateTextDocument will trigger a diagnostic check
+        client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+        client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
+        auto uri = newDocument("foo.luau", oldSource);
+        auto moduleName = workspace.fileResolver.getModuleName(uri);
+        bool forAutocomplete = !FFlag::LuauSolverV2;
+
+        // Perform an initial type check
+        workspace.checkStrict(moduleName, /* forAutocomplete= */ forAutocomplete);
+
+        // Update the text document
+        updateDocument(uri, newSource);
+
+        REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+        REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+
+        lsp::CompletionParams params;
+        params.textDocument = lsp::TextDocumentIdentifier{uri};
+        params.position = position;
+
+        auto results = workspace.completion(params);
+
+        // Module should still be dirty afterwards if fragment autocomplete worked
+        REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+
+        return results;
+    }
 };
 
 TEST_SUITE_BEGIN("Autocomplete");
@@ -98,6 +132,15 @@ TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_has_documentation")
 
 TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_property_autocomplete_has_documentation")
 {
+    auto oldSource = R"(
+        local tbl = {
+            --- This is a property on the table!
+            prop = true,
+        }
+
+        local x = tbl
+    )";
+
     auto [source, marker] = sourceWithMarker(R"(
         local tbl = {
             --- This is a property on the table!
@@ -107,13 +150,7 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_prop
         local x = tbl.|
     )");
 
-    auto uri = newDocument("foo.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params);
+    auto result = fragmentAutocomplete(oldSource, source, marker);
     auto item = requireItem(result, "prop");
 
     REQUIRE(item.documentation);
@@ -319,7 +356,10 @@ TEST_CASE_FIXTURE(Fixture, "string_completion_after_slash_should_replace_whole_s
     for (const auto& label : labels)
     {
         auto item = requireItem(result, label);
-        CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
+        if (FFlag::LuauImplicitTableIndexerKeys2)
+            CHECK_EQ(item.kind, lsp::CompletionItemKind::Constant);
+        else
+            CHECK_EQ(item.kind, lsp::CompletionItemKind::Field);
         REQUIRE(item.textEdit);
         CHECK_EQ(item.textEdit->range.start, lsp::Position{8, 13});
         CHECK_EQ(item.textEdit->range.end, lsp::Position{8, 18});
@@ -1143,7 +1183,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_show_files_matching_ignore_g
     checkFileCompletionExists(result, "utils.luau", "./utils");
 }
 
-static std::vector<lsp::TextEdit> requireEndAutocompletionEdits(const std::shared_ptr<TestClient>& client, const Uri& uri)
+static std::vector<lsp::TextEdit> requireEndAutocompletionEdits(const TestClient* client, const Uri& uri)
 {
     REQUIRE(!client->requestQueue.empty());
     auto request = client->requestQueue.back();
@@ -1174,7 +1214,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "        end\n");
@@ -1198,7 +1238,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "\n        end)\n");
@@ -1222,7 +1262,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_then_in_if_statement_no_condition")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 10}, {1, 10}});
     CHECK_EQ(edits[0].newText, " then");
@@ -1248,7 +1288,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_then_in_if_statement_with_condition")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 20}, {1, 20}});
     CHECK_EQ(edits[0].newText, " then");
@@ -1274,7 +1314,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_while_statement_no_condition")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 13}, {1, 13}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1300,7 +1340,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_while_statement_with_condition")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 23}, {1, 23}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1326,7 +1366,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_loop")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 11}, {1, 11}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1352,7 +1392,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_in_loop_no_values")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 16}, {1, 16}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1378,7 +1418,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_for_in_loop")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 18}, {1, 18}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1404,7 +1444,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 21}, {1, 21}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1430,7 +1470,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_with_step")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 24}, {1, 24}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1456,7 +1496,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_missing_to")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 18}, {1, 18}});
     CHECK_EQ(edits[0].newText, " do");
@@ -1482,7 +1522,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_missing_step")
     params.context->triggerCharacter = "\n";
 
     auto result = workspace.completion(params);
-    auto edits = requireEndAutocompletionEdits(client, uri);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
     REQUIRE_EQ(edits.size(), 2);
     CHECK_EQ(edits[0].range, lsp::Range{{1, 22}, {1, 22}});
     CHECK_EQ(edits[0].newText, " do");

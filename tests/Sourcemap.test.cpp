@@ -1,38 +1,31 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "ScopedFlags.h"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 
 TEST_CASE("getScriptFilePath")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.lua"};
+    SourceNode node("test", "ModuleScript", {"test.lua"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.lua");
 }
 
 TEST_CASE("getScriptFilePath returns json file if node is populated by JSON")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.json"};
+    SourceNode node("test", "ModuleScript", {"test.json"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.json");
 }
 
 TEST_CASE("getScriptFilePath returns toml file if node is populated by TOML")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.toml"};
+    SourceNode node("test", "ModuleScript", {"test.toml"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.toml");
 }
 
 TEST_CASE("getScriptFilePath doesn't pick .meta.json")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"init.meta.json", "init.lua"};
+    SourceNode node("init", "ModuleScript", {"init.meta.json", "init.lua"}, {});
     CHECK_EQ(node.getScriptFilePath(), "init.lua");
 }
 
@@ -515,7 +508,7 @@ TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
     )");
 #endif
 
-    auto uri = Uri::file(workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+    auto uri = workspace.rootUri.resolvePath("Foo/Test.luau");
 
     CHECK_EQ(workspace.fileResolver.getModuleName(uri), "game/MainScript");
 }
@@ -578,7 +571,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
     auto normalisedPath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(normalisedPath);
 
-    CHECK_EQ((workspace.rootUri.fsPath() / *filePath).generic_string(), normalisedPath->fsPath().generic_string());
+    CHECK_EQ(workspace.rootUri.resolvePath(*filePath), normalisedPath);
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
@@ -611,7 +604,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
     auto filePath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(filePath);
 
-    CHECK(workspace.isIgnoredFileForAutoImports(Uri::file(*filePath)));
+    CHECK(workspace.isIgnoredFileForAutoImports(*filePath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
@@ -658,7 +651,38 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
 
     auto hover2 = workspace.hover(params);
     REQUIRE(hover2);
-    CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));
+    else
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.Workspace.Part
+        part.Parent = Instance.new("TextLabel")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
 }
 
 TEST_SUITE_END();

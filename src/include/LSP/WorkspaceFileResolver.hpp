@@ -1,6 +1,5 @@
 #pragma once
 #include <optional>
-#include <filesystem>
 #include <unordered_map>
 #include <utility>
 #include "Luau/FileResolver.h"
@@ -78,11 +77,11 @@ struct WorkspaceFileResolver
     , Luau::ConfigResolver
 {
 private:
-    mutable std::unordered_map<std::string, Luau::Config> configCache{};
+    mutable std::unordered_map<Uri, Luau::Config, UriHash> configCache{};
 
 public:
     Luau::Config defaultConfig;
-    std::shared_ptr<BaseClient> client;
+    BaseClient* client;
     Uri rootUri;
 
     LSPPlatform* platform = nullptr;
@@ -116,8 +115,8 @@ public:
     const Luau::Config& getConfig(const Luau::ModuleName& name) const override;
     void clearConfigCache();
 
-    static std::optional<std::string> parseConfig(const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result);
+    static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
 
 private:
-    const Luau::Config& readConfigRec(const std::filesystem::path& path) const;
+    const Luau::Config& readConfigRec(const Uri& path) const;
 };

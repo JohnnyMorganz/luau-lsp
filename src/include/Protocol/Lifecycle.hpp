@@ -171,6 +171,10 @@ struct InitializedParams
 {
 };
 inline void from_json(const json&, InitializedParams&){};
+inline void to_json(json& j, const InitializedParams& u)
+{
+    j = json{};
+};
 
 struct SetTraceParams
 {

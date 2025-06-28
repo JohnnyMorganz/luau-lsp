@@ -27,17 +27,29 @@ struct Reference
 class WorkspaceFolder
 {
 public:
-    std::shared_ptr<Client> client;
+    Client* client;
     std::unique_ptr<LSPPlatform> platform;
     std::string name;
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
-    bool isConfigured = false;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
+    /// Whether this workspace folder has received configuration data.
+    /// We postpone all initial messages until configuration data is received from the client.
+    bool hasConfiguration = false;
+
+    /// Whether the first-time configuration (platform, global types) have been applied for this folder.
+    /// First-time configuration is only applied once, and changes require a language server restart
+    bool appliedFirstTimeConfiguration = false;
+
+    /// Whether this workspace folder has completed an initial set up process.
+    /// Workspaces are initialized lazily on demand.
+    /// When a new request comes in and the workspace is not ready, we will prepare it then.
+    bool isReady = false;
+
 public:
-    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
         , name(std::move(name))
         , rootUri(uri)
@@ -48,15 +60,19 @@ public:
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
     {
-        fileResolver.client = std::static_pointer_cast<BaseClient>(client);
+        fileResolver.client = client;
         fileResolver.rootUri = uri;
     }
+
+    /// Initializes the workspace on demand
+    void lazyInitialize();
 
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
+    void onDidSaveTextDocument(const lsp::DocumentUri& uri, const lsp::DidSaveTextDocumentParams& params);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
     void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
@@ -93,7 +109,7 @@ private:
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
-    std::vector<Uri> findFilesForWorkspaceDiagnostics(const std::filesystem::path& rootPath, const ClientConfiguration& config);
+    std::vector<Uri> findFilesForWorkspaceDiagnostics(const std::string& rootPath, const ClientConfiguration& config);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);

@@ -300,8 +300,13 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
+    const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
+    if (seenSet.contains(parentType))
+        return std::nullopt;
+    seenSet.insert(parentType);
+
     if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
         if (auto prop = Luau::lookupExternTypeProp(ctv, name))
@@ -319,12 +324,12 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
         if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
-            if (indexIt != mtable->props.end())
+            if (indexIt != mtable->props.end() && indexIt->second.readTy)
             {
-                Luau::TypeId followed = Luau::follow(indexIt->second.type());
+                Luau::TypeId followed = Luau::follow(*indexIt->second.readTy);
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
-                    return lookupProp(followed, name);
+                    return lookupProp(followed, name, seenSet);
                 }
                 else if (Luau::get<Luau::FunctionType>(followed))
                 {
@@ -347,7 +352,7 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     {
         for (Luau::TypeId ty : i->parts)
         {
-            if (auto prop = lookupProp(Luau::follow(ty), name))
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet))
                 return prop;
         }
     }
@@ -356,6 +361,12 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     //     // Find the corresponding ty
     // }
     return std::nullopt;
+}
+
+std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+{
+    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    return lookupProp(parentType, name, seenSet);
 }
 
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name)
@@ -720,6 +731,14 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
         if (ftv->definition)
             return ftv->definition->originalNameLocation;
     }
+    else if (auto ttv = Luau::get<Luau::TableType>(type))
+    {
+        return ttv->definitionLocation;
+    }
+    else if (auto ctv = Luau::get<Luau::ExternType>(type))
+    {
+        return ctv->definitionLocation;
+    }
 
     return std::nullopt;
 }
@@ -802,8 +821,9 @@ std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
         return std::nullopt;
 
     auto unwrapped = Luau::follow(*metatable);
-    if (auto prop = lookupProp(unwrapped, "__call")) {
-        return prop->second.type();
+    if (auto prop = lookupProp(unwrapped, "__call"); prop && prop->second.readTy)
+    {
+        return prop->second.readTy;
     }
 
     return std::nullopt;

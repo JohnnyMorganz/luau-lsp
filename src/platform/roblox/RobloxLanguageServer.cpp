@@ -8,12 +8,11 @@ static const char* kSourcemapWatchingRegistrationId = "sourcemapWatching";
 
 void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 {
-    auto filePath = change.uri.fsPath();
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 
     // Flag sourcemap changes
-    if (filePath.filename() == sourcemapFileName)
+    if (change.uri.filename() == sourcemapFileName)
     {
         workspaceFolder->client->sendLogMessage(lsp::MessageType::Info, "Registering sourcemap changed for workspace " + workspaceFolder->name);
         updateSourceMap();
@@ -23,7 +22,7 @@ void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::setupWithConfiguration", "LSP");
-    std::shared_ptr<Client>& client = workspaceFolder->client;
+    auto client = workspaceFolder->client;
 
     if (config.sourcemap.enabled)
     {

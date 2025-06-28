@@ -9,6 +9,7 @@
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -22,24 +23,24 @@ const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleN
 
 void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params)
 {
+    LUAU_ASSERT(isReady);
     fileResolver.managedFiles.emplace(
         std::make_pair(uri, TextDocument(uri, params.textDocument.languageId, params.textDocument.version, params.textDocument.text)));
 
-    if (isConfigured)
-    {
-        // Mark the file as dirty as we don't know what changes were made to it
-        auto moduleName = fileResolver.getModuleName(uri);
-        frontend.markDirty(moduleName);
-    }
+    // Mark the file as dirty as we don't know what changes were made to it
+    auto moduleName = fileResolver.getModuleName(uri);
+    frontend.markDirty(moduleName);
 }
 
-static bool isWorkspaceDiagnosticsEnabled(const ClientPtr& client, const ClientConfiguration& config)
+static bool isWorkspaceDiagnosticsEnabled(const Client* client, const ClientConfiguration& config)
 {
     return client->workspaceDiagnosticsToken && config.diagnostics.workspace;
 }
 
 void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
 {
+    LUAU_ASSERT(isReady);
+
     if (fileResolver.managedFiles.find(uri) == fileResolver.managedFiles.end())
     {
         client->sendLogMessage(lsp::MessageType::Error, "Text Document not loaded locally: " + uri.toString());
@@ -54,22 +55,18 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     // Mark the module dirty for the typechecker
     frontend.markDirty(fileResolver.getModuleName(uri), &markedDirty);
 
-    // Update diagnostics
     // In pull based diagnostics module, documentDiagnostics will update the necessary files
-    // But, if workspace diagnostics is enabled, or we are using push-based diagnostics, we need to update
+    // But if we are still using push-based diagnostics, we need to send updates
     auto config = client->getConfiguration(rootUri);
-    if (isWorkspaceDiagnosticsEnabled(client, config) || !usingPullDiagnostics(client->capabilities))
+    if (!usingPullDiagnostics(client->capabilities))
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
         auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}}, /* cancellationToken= */ nullptr);
-
-        if (!usingPullDiagnostics(client->capabilities))
-            client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, params.textDocument.version, diagnostics.items});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, params.textDocument.version, diagnostics.items});
 
         // Compute diagnostics for reverse dependencies
         // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
-        // TODO: maybe this should only be done onSave
-        if (isWorkspaceDiagnosticsEnabled(client, config) || config.diagnostics.includeDependents)
+        if (config.diagnostics.includeDependents)
         {
             for (auto& moduleName : markedDirty)
             {
@@ -78,48 +75,61 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
                     !isIgnoredFile(dirtyUri, config))
                 {
                     auto dependencyDiags = documentDiagnostics(
-                        lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken=*/nullptr, /* allowUnmanagedFiles= */ true);
-                    diagnostics.relatedDocuments.emplace(
-                        dirtyUri, lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
-                    diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
+                        lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken=*/ nullptr, /* allowUnmanagedFiles= */ true);
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{dirtyUri, std::nullopt, dependencyDiags.items});
                 }
             }
         }
+    }
+}
 
-        if (isWorkspaceDiagnosticsEnabled(client, config))
-        {
-            lsp::WorkspaceDiagnosticReportPartialResult report;
+void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const lsp::DidSaveTextDocumentParams& params)
+{
+    LUAU_ASSERT(isReady);
 
-            lsp::WorkspaceDocumentDiagnosticReport mainDocumentReport;
-            mainDocumentReport.uri = params.textDocument.uri;
-            mainDocumentReport.version = params.textDocument.version;
-            mainDocumentReport.kind = diagnostics.kind;
-            mainDocumentReport.items = diagnostics.items;
-            mainDocumentReport.items = diagnostics.items;
-            report.items.emplace_back(mainDocumentReport);
-
-            for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
+    auto config = client->getConfiguration(rootUri);
+    if (isWorkspaceDiagnosticsEnabled(client, config))
+    {
+        Luau::DenseHashSet<Luau::ModuleName> dependents{""};
+        frontend.traverseDependents(fileResolver.getModuleName(uri),
+            [&dependents](Luau::SourceNode& sourceNode)
             {
+                if (dependents.contains(sourceNode.name))
+                    return false;
+
+                dependents.insert(sourceNode.name);
+                return true;
+            });
+
+        lsp::WorkspaceDiagnosticReportPartialResult report;
+
+        // Convert the diagnostics report into a series of diagnostics published for each relevant file
+        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
+
+        lsp::WorkspaceDocumentDiagnosticReport mainDocumentReport;
+        mainDocumentReport.uri = uri;
+        mainDocumentReport.kind = diagnostics.kind;
+        mainDocumentReport.items = diagnostics.items;
+        mainDocumentReport.items = diagnostics.items;
+        report.items.emplace_back(mainDocumentReport);
+
+        for (auto& moduleName : dependents)
+        {
+            auto dirtyUri = fileResolver.getUri(moduleName);
+            if (dirtyUri != uri && !isIgnoredFile(dirtyUri, config))
+            {
+                auto dependencyDiags = documentDiagnostics(lsp::DocumentDiagnosticParams{{dirtyUri}}, /* allowUnmanagedFiles= */ true);
+
                 lsp::WorkspaceDocumentDiagnosticReport documentReport;
-                documentReport.uri = relatedUri;
-                documentReport.kind = relatedDiagnostics.kind;
-                documentReport.items = relatedDiagnostics.items;
-                documentReport.items = relatedDiagnostics.items;
+                documentReport.uri = dirtyUri;
+                documentReport.kind = dependencyDiags.kind;
+                documentReport.items = dependencyDiags.items;
+                documentReport.items = dependencyDiags.items;
                 report.items.emplace_back(documentReport);
             }
+        }
 
-            client->sendProgress({*client->workspaceDiagnosticsToken, report});
-        }
-        else if (!diagnostics.relatedDocuments.empty())
-        {
-            for (const auto& [relatedUri, relatedDiagnostics] : diagnostics.relatedDocuments)
-            {
-                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
-                {
-                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{relatedUri, std::nullopt, relatedDiagnostics.items});
-                }
-            }
-        }
+        client->sendProgress({*client->workspaceDiagnosticsToken, report});
     }
 }
 
@@ -185,11 +195,9 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 
     for (const auto& change : changes)
     {
-        auto filePath = change.uri.fsPath();
-
         platform->onDidChangeWatchedFiles(change);
 
-        if (filePath.filename() == ".luaurc")
+        if (change.uri.filename() == ".luaurc" || change.uri.filename() == ".robloxrc")
         {
             client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
             fileResolver.clearConfigCache();
@@ -197,7 +205,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             // Recompute diagnostics
             recomputeDiagnostics(config);
         }
-        else if (filePath.extension() == ".lua" || filePath.extension() == ".luau")
+        else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau")
         {
             // Notify if it was a definitions file
             if (isDefinitionFile(change.uri, config))
@@ -212,7 +220,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             }
 
             // Index the workspace on changes
-            if (config.index.enabled && isConfigured)
+            if (config.index.enabled && appliedFirstTimeConfiguration)
             {
                 auto moduleName = fileResolver.getModuleName(change.uri);
                 frontend.markDirty(moduleName, &dirtyFiles);
@@ -271,7 +279,7 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
 
     for (auto& file : config.types.definitionFiles)
     {
-        if (rootUri.resolvePath(resolvePath(file).generic_string()) == path)
+        if (rootUri.resolvePath(resolvePath(file)) == path)
         {
             return true;
         }
@@ -343,35 +351,31 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
     std::vector<Luau::ModuleName> moduleNames;
 
-    for (std::filesystem::recursive_directory_iterator next(rootUri.fsPath(), std::filesystem::directory_options::skip_permission_denied), end;
-         next != end; ++next)
-    {
-        if (moduleNames.size() >= config.index.maxFiles)
+    bool sentMessage = false;
+    Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
+        [&](auto& path)
         {
-            client->sendWindowMessage(lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
-                                                                     ") has been hit. This may cause some language features to only work partially "
-                                                                     "(Find All References, Rename). If necessary, consider increasing the limit");
-            break;
-        }
-
-        try
-        {
-            auto uri = Uri::file(next->path());
-            if (next->is_regular_file() && next->path().has_extension() && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            if (moduleNames.size() >= config.index.maxFiles)
             {
-                auto ext = next->path().extension();
-                if (ext == ".lua" || ext == ".luau")
+                if (!sentMessage)
                 {
-                    auto moduleName = fileResolver.getModuleName(uri);
-                    moduleNames.emplace_back(moduleName);
+                    client->sendWindowMessage(
+                        lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                       ") has been hit. This may cause some language features to only work partially "
+                                                       "(Find All References, Rename). If necessary, consider increasing the limit");
+                    sentMessage = true;
                 }
+                return;
             }
-        }
-        catch (const std::filesystem::filesystem_error& e)
-        {
-            client->sendLogMessage(lsp::MessageType::Warning, std::string("failed to index file: ") + e.what());
-        }
-    }
+
+            auto uri = Uri::file(path);
+            auto ext = uri.extension();
+            if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+            {
+                auto moduleName = fileResolver.getModuleName(uri);
+                moduleNames.emplace_back(moduleName);
+            }
+        });
 
     client->sendWorkDoneProgressReport(kIndexProgressToken, std::to_string(moduleNames.size()) + " files");
 
@@ -386,7 +390,7 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
-static void clearDisabledGlobals(const ClientPtr client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
+static void clearDisabledGlobals(const Client* client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
 {
     const auto targetScope = globalTypes.globalScope;
     for (const auto& disabledGlobal : disabledGlobals)
@@ -468,13 +472,13 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     for (const auto& definitionsFile : client->definitionsFiles)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath.generic_string());
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath);
 
-        auto definitionsContents = readFile(resolvedFilePath);
+        auto definitionsContents = Luau::FileUtils::readFile(resolvedFilePath);
         if (!definitionsContents)
         {
-            client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to read definitions file " + resolvedFilePath + ". Extended types will not be provided");
             continue;
         }
 
@@ -504,8 +508,8 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         }
         else
         {
-            client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to read definitions file " + resolvedFilePath.generic_string() + ". Extended types will not be provided");
+            client->sendWindowMessage(
+                lsp::MessageType::Error, "Failed to read definitions file " + resolvedFilePath + ". Extended types will not be provided");
 
             // Display relevant diagnostics
             std::vector<lsp::Diagnostic> diagnostics;
@@ -534,15 +538,37 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 }
 
+void WorkspaceFolder::lazyInitialize()
+{
+    if (isReady)
+        return;
+
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::lazyInitialize", "LSP");
+
+    if (isNullWorkspace())
+    {
+        client->sendTrace("initializing null workspace");
+        setupWithConfiguration(client->globalConfig);
+    }
+    else
+    {
+        client->sendTrace("initializing workspace: " + rootUri.toString());
+        auto config = client->getConfiguration(rootUri);
+        setupWithConfiguration(config);
+    }
+
+    isReady = true;
+}
+
 void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configuration)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
 
     // Apply first-time configuration
-    if (!isConfigured)
+    if (!appliedFirstTimeConfiguration)
     {
-        isConfigured = true;
+        appliedFirstTimeConfiguration = true;
 
         client->sendTrace("workspace: first time configuration, setting appropriate platform");
         platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);

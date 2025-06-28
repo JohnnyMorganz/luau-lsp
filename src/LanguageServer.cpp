@@ -40,10 +40,14 @@ LanguageServer::LanguageServer(ClientPtr aClient, std::optional<Luau::Config> aD
 
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
-WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
+WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file, bool shouldInitialize)
 {
     if (file == nullWorkspace->rootUri)
+    {
+        if (shouldInitialize)
+            nullWorkspace->lazyInitialize();
         return nullWorkspace;
+    }
 
     WorkspaceFolderPtr bestWorkspace = nullptr;
     size_t length = 0;
@@ -68,16 +72,27 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file)
     }
 
     if (bestWorkspace)
+    {
+        if (shouldInitialize)
+            bestWorkspace->lazyInitialize();
         return bestWorkspace;
+    }
 
     client->sendTrace("cannot find workspace for " + file.toString());
+    if (shouldInitialize)
+        nullWorkspace->lazyInitialize();
     return nullWorkspace;
 }
 
 lsp::ServerCapabilities LanguageServer::getServerCapabilities()
 {
     lsp::ServerCapabilities capabilities;
-    capabilities.textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
+    // Text Document Sync
+    lsp::TextDocumentSyncOptions textDocumentSyncOptions;
+    textDocumentSyncOptions.openClose = true;
+    textDocumentSyncOptions.change = lsp::TextDocumentSyncKind::Incremental;
+    textDocumentSyncOptions.save = {/* includeText= */ false};
+    capabilities.textDocumentSync = textDocumentSyncOptions;
     // Completion
     std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "/", "\n"}; // \n is used to trigger end completion
     lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
@@ -355,7 +370,7 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "textDocument/didSave")
     {
-        // NO-OP
+        onDidSaveTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didSave"));
     }
     else if (method == "textDocument/didClose")
     {
@@ -387,11 +402,11 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
 }
 
-bool LanguageServer::allWorkspacesConfigured() const
+bool LanguageServer::allWorkspacesReceivedConfiguration() const
 {
     for (auto& workspace : workspaceFolders)
     {
-        if (!workspace->isConfigured)
+        if (!workspace->hasConfiguration)
             return false;
     }
 
@@ -408,13 +423,18 @@ void LanguageServer::clearCancellationToken(const json_rpc::JsonRpcMessage& msg)
         cancellationTokens.erase(it);
 }
 
+static bool notificationRequiresWorkspace(std::string_view method)
+{
+    return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
+}
+
 void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
 {
     try
     {
         if (msg.is_request())
         {
-            if (isInitialized && !allWorkspacesConfigured())
+            if (isInitialized && !allWorkspacesReceivedConfiguration())
             {
                 client->sendTrace("workspaces not configured, postponing message: " + msg.method.value());
                 configPostponedMessages.emplace_back(msg);
@@ -430,6 +450,13 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         }
         else if (msg.is_notification())
         {
+            if (isInitialized && !allWorkspacesReceivedConfiguration() && notificationRequiresWorkspace(msg.method.value()))
+            {
+                client->sendTrace("workspaces not configured, postponing notification: " + msg.method.value());
+                configPostponedMessages.emplace_back(msg);
+                return;
+            }
+
             onNotification(msg.method.value(), msg.params);
         }
         else
@@ -450,6 +477,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         sentry_value_set_stacktrace(exc, NULL, 0);
         sentry_value_set_by_key(exc, "handled", sentry_value_new_bool(true));
         sentry_event_add_exception(event, exc);
+        sentry_capture_event(event);
 #endif
         client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
         clearCancellationToken(msg);
@@ -480,10 +508,9 @@ void LanguageServer::processInputLoop()
     while (std::cin)
     {
         // TODO: can we simplify this as part of the queue?
-        if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
+        if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
         {
             client->sendTrace("workspaces configured, handling postponed messages");
-
             {
                 std::unique_lock guard(messagesMutex);
                 for (const auto& msg : configPostponedMessages)
@@ -589,6 +616,7 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     isInitialized = true;
     lsp::InitializeResult result;
     result.capabilities = getServerCapabilities();
+    result.serverInfo = lsp::InitializeResult::ServerInfo{LSP_NAME, LSP_VERSION};
 
     // Position Encoding
     if (client->capabilities.general && client->capabilities.general->positionEncodings &&
@@ -616,7 +644,11 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     // Handle configuration responses
     client->configChangedCallback = [&](const lsp::DocumentUri& workspaceUri, const ClientConfiguration& config, const ClientConfiguration* oldConfig)
     {
-        auto workspace = findWorkspace(workspaceUri);
+        auto workspace = findWorkspace(workspaceUri, /* shouldInitialize = */ false);
+
+        workspace->hasConfiguration = true;
+        if (!workspace->isReady)
+            return;
 
         // Update the workspace setup with the new configuration
         workspace->setupWithConfiguration(config);
@@ -660,6 +692,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
 
         std::vector<lsp::FileSystemWatcher> watchers{};
         watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
+        watchers.push_back(lsp::FileSystemWatcher{"**/.robloxrc"});
         watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
         client->registerCapability(
             "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
@@ -670,21 +703,12 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
             "client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap/config changes will not be provided");
     }
 
-    // Initialise loaded workspaces
-    // NOTE: we delay initialisation until AFTER we have sent of requests to the client to retrieve
-    // configuration and register watchers. This is because initialisation can take a long time
-    // for the Roblox types. If we don't send the request for configuration beforehand, we hit
-    // a race condition where the first LSP events are executed before receiving the user configuration,
-    // causing us to fall back to the global configuration. Sending the request for configuration
-    // first means we receive the user config before processing the first LSP events
-    client->sendTrace("initializing null workspace");
-    nullWorkspace->setupWithConfiguration(client->globalConfig);
-    for (auto& folder : workspaceFolders)
+    nullWorkspace->hasConfiguration = true;
+    // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+    if (!requestedConfiguration)
     {
-        client->sendTrace("initializing workspace: " + folder->rootUri.toString());
-        // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
-        if (!requestedConfiguration)
-            folder->setupWithConfiguration(client->globalConfig);
+        for (auto& folder : workspaceFolders)
+            folder->hasConfiguration = true;
     }
 }
 
@@ -706,6 +730,12 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
     // Update in-memory file with new contents
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->updateTextDocument(params.textDocument.uri, params);
+}
+
+void LanguageServer::onDidSaveTextDocument(const lsp::DidSaveTextDocumentParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    workspace->onDidSaveTextDocument(params.textDocument.uri, params);
 }
 
 void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
@@ -783,7 +813,10 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
 
     for (const auto& change : params.changes)
     {
-        auto workspace = findWorkspace(change.uri);
+        auto workspace = findWorkspace(change.uri, /* shouldInitialize= */ false);
+        if (!workspace->isReady)
+            continue;
+
         if (!workspaceChanges.find(workspace))
             workspaceChanges[workspace] = {};
         workspaceChanges[workspace].push_back(change);

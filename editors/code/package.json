@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.48.0",
+  "version": "1.51.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -104,7 +104,7 @@
       },
       {
         "command": "luau-lsp.regenerateSourcemap",
-        "title": "Luau: Regenerate Rojo Sourcemap"
+        "title": "Luau: Regenerate Sourcemap"
       },
       {
         "command": "luau-lsp.reloadServer",
@@ -610,6 +610,14 @@
           "scope": "resource",
           "markdownDeprecationMessage": "**Deprecated**: Please use `aliases` in a `.luaurc` file instead.",
           "deprecationMessage": "Deprecated: Please use aliases in a .luaurc file instead."
+        },
+        "luau-lsp.require.useOriginalRequireByStringSemantics": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Use the old require-by-string semantics for init.luau resolution",
+          "markdownDeprecationMessage": "**Deprecated**: Use the new require-by-string semantics instead. This option may be removed at any time in the future",
+          "deprecationMessage": "Deprecated: Use the new require-by-string semantics instead. This option may be removed at any time in the future"
         },
         "luau-lsp.index.enabled": {
           "type": "boolean",
