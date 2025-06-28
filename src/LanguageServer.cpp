@@ -74,7 +74,12 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file, b
 lsp::ServerCapabilities LanguageServer::getServerCapabilities()
 {
     lsp::ServerCapabilities capabilities;
-    capabilities.textDocumentSync = lsp::TextDocumentSyncKind::Incremental;
+    // Text Document Sync
+    lsp::TextDocumentSyncOptions textDocumentSyncOptions;
+    textDocumentSyncOptions.openClose = true;
+    textDocumentSyncOptions.change = lsp::TextDocumentSyncKind::Incremental;
+    textDocumentSyncOptions.save = {/* includeText= */ false};
+    capabilities.textDocumentSync = textDocumentSyncOptions;
     // Completion
     std::vector<std::string> completionTriggerCharacters{".", ":", "'", "\"", "/", "\n"}; // \n is used to trigger end completion
     lsp::CompletionOptions::CompletionItem completionItem{/* labelDetailsSupport: */ true};
@@ -340,7 +345,7 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "textDocument/didSave")
     {
-        // NO-OP
+        onDidSaveTextDocument(JSON_REQUIRED_PARAMS(params, "textDocument/didSave"));
     }
     else if (method == "textDocument/didClose")
     {
@@ -647,6 +652,12 @@ void LanguageServer::onDidChangeTextDocument(const lsp::DidChangeTextDocumentPar
     // Update in-memory file with new contents
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->updateTextDocument(params.textDocument.uri, params);
+}
+
+void LanguageServer::onDidSaveTextDocument(const lsp::DidSaveTextDocumentParams& params)
+{
+    auto workspace = findWorkspace(params.textDocument.uri);
+    workspace->onDidSaveTextDocument(params.textDocument.uri, params);
 }
 
 void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)

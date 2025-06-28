@@ -72,6 +72,7 @@ public:
 
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
+    void onDidSaveTextDocument(const lsp::DocumentUri& uri, const lsp::DidSaveTextDocumentParams& params);
     void closeTextDocument(const lsp::DocumentUri& uri);
 
     void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);

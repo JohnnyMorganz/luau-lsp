@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.680
+- Workspace diagnostics are now only updated on text document save, rather than on text document type, due to
+  performance overhead (especially when new solver is
+  enabled) ([#1076](https://github.com/JohnnyMorganz/luau-lsp/issues/1076))
 
 ### Fixed
 

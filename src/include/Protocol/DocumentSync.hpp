@@ -26,6 +26,20 @@ struct DidChangeTextDocumentParams
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DidChangeTextDocumentParams, textDocument, contentChanges)
 
+struct DidSaveTextDocumentParams
+{
+    /**
+     * The document that was saved.
+     */
+    TextDocumentIdentifier textDocument;
+    /**
+     * Optional the content when saved. Depends on the includeText value
+     * when the save notification was requested.
+     */
+    std::optional<std::string> text = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(DidSaveTextDocumentParams, textDocument, text)
+
 struct DidCloseTextDocumentParams
 {
     TextDocumentIdentifier textDocument;

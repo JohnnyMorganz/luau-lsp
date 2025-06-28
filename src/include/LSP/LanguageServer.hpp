@@ -71,6 +71,7 @@ private:
 
     void onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params);
     void onDidChangeTextDocument(const lsp::DidChangeTextDocumentParams& params);
+    void onDidSaveTextDocument(const lsp::DidSaveTextDocumentParams& params);
     void onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params);
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
