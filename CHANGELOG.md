@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Add a warning message to `luau-lsp analyze` when `--platform=roblox` is set but no definitions files are provided
+
 ### Changed
 
 - Sync to upstream Luau 0.680

@@ -315,6 +315,12 @@ int startAnalyze(const argparse::ArgumentParser& program)
     if (!FFlag::LuauSolverV2)
         Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
 
+    if (client.configuration.platform.type == LSPPlatformConfig::Roblox && definitionsPaths.empty())
+    {
+        fprintf(stderr, "WARNING: --platform is set to 'roblox' but no definitions files are provided. 'luau-lsp analyze' does not download "
+                        "definitions files; use `--platform=standard` to silence\n");
+    }
+
     for (auto& definitionsPath : definitionsPaths)
     {
         auto uri = fileResolver.rootUri.resolvePath(definitionsPath);
