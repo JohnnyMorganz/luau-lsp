@@ -5,6 +5,7 @@ option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
 option(LSP_BUILD_ASAN "Build with ASAN" OFF)
 option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
+option(LSP_WERROR "Warnings as errors" ON)
 
 set(LSP_VERSION "1.51.0")
 set(LSP_NAME "Luau")
@@ -130,11 +131,19 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
-    list(APPEND LUAU_LSP_OPTIONS /W3 /WX /D_CRT_SECURE_NO_WARNINGS)
+    list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
     list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
 else ()
-    list(APPEND LUAU_LSP_OPTIONS -Wall -Werror)
+    list(APPEND LUAU_LSP_OPTIONS -Wall)
 endif ()
+
+if(LSP_WERROR)
+    if(MSVC)
+        list(APPEND LUAU_LSP_OPTIONS /WX) # Warnings are errors
+    else()
+        list(APPEND LUAU_LSP_OPTIONS -Werror) # Warnings are errors
+    endif()
+endif()
 
 if (LSP_BUILD_ASAN)
     if (MSVC)
