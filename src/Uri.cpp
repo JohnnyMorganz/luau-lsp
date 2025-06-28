@@ -526,7 +526,7 @@ std::string Uri::extension() const
         return "";
 
     auto parts = Luau::split(components.back(), '.');
-    if (parts.size() == 1)
+    if (parts.size() <= 1)
         return "";
 
     return "." + std::string(parts.back());
