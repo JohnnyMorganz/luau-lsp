@@ -294,8 +294,9 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             if (definitionModuleName && location)
             {
                 auto document = fileResolver.getOrCreateTextDocumentFromModuleName(*definitionModuleName);
-                return lsp::Location{
-                    document->uri(), lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}};
+                if (document)
+                    return lsp::Location{
+                        document->uri(), lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}};
             }
         }
     }
