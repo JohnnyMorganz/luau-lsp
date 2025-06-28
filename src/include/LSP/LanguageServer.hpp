@@ -1,5 +1,7 @@
 #include <optional>
 #include <thread>
+#include <queue>
+#include <condition_variable>
 
 #include "LSP/JsonRpc.hpp"
 #include "nlohmann/json.hpp"
