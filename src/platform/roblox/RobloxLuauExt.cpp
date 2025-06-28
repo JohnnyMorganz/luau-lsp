@@ -466,7 +466,8 @@ static void attachMagicFunctionSafe(Luau::TableType::Props& props, const char* p
     if (const auto prop = props.find(property); prop != props.end())
     {
         LUAU_ASSERT(prop->second.readTy);
-        Luau::attachMagicFunction(*prop->second.readTy, magic);
+        LUAU_ASSERT(Luau::is<Luau::FunctionType>(prop->second.readTy));
+        Luau::attachMagicFunction(*prop->second.readTy, std::move(magic));
     }
 }
 
