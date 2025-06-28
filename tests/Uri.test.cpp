@@ -546,6 +546,8 @@ TEST_CASE("Uri::extension")
     CHECK_EQ(Uri::parse("file://a/b/init.server.luau").extension(), ".luau");
     CHECK_EQ(Uri::parse("file://a/b/init.server").extension(), ".server");
     CHECK_EQ(Uri::parse("file://a/b/init").extension(), "");
+    CHECK_EQ(Uri::parse("file://a/b/").extension(), "");
+    CHECK_EQ(Uri::parse("file://a/b//").extension(), "");
 }
 
 TEST_CASE("Uri::resolvePath")

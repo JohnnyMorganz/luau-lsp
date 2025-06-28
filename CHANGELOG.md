@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.680
 
+### Fixed
+
+- Fixed crash when retrieving the extension of a file path with an empty basename
+
 ## [1.51.0] - 2025-06-24
 
 ### Added
