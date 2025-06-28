@@ -66,7 +66,7 @@ IGNORED_INSTANCES: List[str] = [
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
-    "RaycastResult", # Redefined using generics
+    "RaycastResult",  # Redefined using generics
 ]
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -81,6 +81,7 @@ EXTRA_MEMBERS = {
         "function __idiv(self, other: Vector3 | number): Vector3",
     ],
     "Vector2": [
+        "function FuzzyEq(self, other: Vector2, epsilon: number?): boolean"
         "function __add(self, other: Vector2): Vector2",
         "function __sub(self, other: Vector2): Vector2",
         "function __mul(self, other: Vector2 | number): Vector2",
