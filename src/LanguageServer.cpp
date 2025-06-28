@@ -441,12 +441,24 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
                 return;
             }
 
+            client->sendTrace("Server now processing " + *msg.method + " (" + std::to_string(std::get<int>(msg.id.value())) + ")");
             onRequest(msg.id.value(), msg.method.value(), msg.params);
             clearCancellationToken(msg);
         }
         else if (msg.is_response())
         {
+            client->sendTrace("Server now processing response to request " + std::to_string(std::get<int>(msg.id.value())));
             client->handleResponse(msg);
+
+            // Receiving configuration is always at the end of a response. Now we can check to see if we can process any postponed messages
+            if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
+            {
+                client->sendTrace("workspaces configured, handling postponed messages");
+                for (const auto& postponedMessage : configPostponedMessages)
+                    handleMessage(postponedMessage);
+                configPostponedMessages.clear();
+                client->sendTrace("workspaces configured, handling postponed COMPLETED");
+            }
         }
         else if (msg.is_notification())
         {
@@ -457,6 +469,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
                 return;
             }
 
+            client->sendTrace("Server now processing notification: " + *msg.method);
             onNotification(msg.method.value(), msg.params);
         }
         else
@@ -507,21 +520,6 @@ void LanguageServer::processInputLoop()
     std::string jsonString;
     while (std::cin)
     {
-        // TODO: can we simplify this as part of the queue?
-        if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
-        {
-            client->sendTrace("workspaces configured, handling postponed messages");
-            {
-                std::unique_lock guard(messagesMutex);
-                for (const auto& msg : configPostponedMessages)
-                    messages.push(msg);
-            }
-            messagesCv.notify_one();
-
-            configPostponedMessages.clear();
-            client->sendTrace("workspaces configured, handling postponed COMPLETED");
-        }
-
         if (client->readRawMessage(jsonString))
         {
             std::optional<id_type> id = std::nullopt;
