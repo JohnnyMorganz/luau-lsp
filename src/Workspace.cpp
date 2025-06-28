@@ -104,7 +104,7 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
         lsp::WorkspaceDiagnosticReportPartialResult report;
 
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
-        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
+        auto diagnostics = documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}}, /* cancellationToken= */ nullptr);
 
         lsp::WorkspaceDocumentDiagnosticReport mainDocumentReport;
         mainDocumentReport.uri = uri;
@@ -118,7 +118,8 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
             auto dirtyUri = fileResolver.getUri(moduleName);
             if (dirtyUri != uri && !isIgnoredFile(dirtyUri, config))
             {
-                auto dependencyDiags = documentDiagnostics(lsp::DocumentDiagnosticParams{{dirtyUri}}, /* allowUnmanagedFiles= */ true);
+                auto dependencyDiags =
+                    documentDiagnostics(lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken= */ nullptr, /* allowUnmanagedFiles= */ true);
 
                 lsp::WorkspaceDocumentDiagnosticReport documentReport;
                 documentReport.uri = dirtyUri;
