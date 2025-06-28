@@ -6720,6 +6720,7 @@ declare class Vector2
 	function Cross(self, other: Vector2): number
 	function Dot(self, v: Vector2): number
 	function Floor(self): Vector2
+	function FuzzyEq(self, other: Vector2, epsilon: number?): boolean
 	function Lerp(self, v: Vector2, alpha: number): Vector2
 	function Max(self, ...: (Vector2)): Vector2
 	function Min(self, ...: (Vector2)): Vector2
