@@ -669,12 +669,9 @@ void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParam
 
 void LanguageServer::onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params)
 {
-    // We can't tell what workspace this is for, so we will have to clear our config information and
-    // manually get it for all the workspaces again
+    // We can't tell what workspace this is for, so we will have to request it from the client directly again
     if (client->capabilities.workspace && client->capabilities.workspace->configuration)
     {
-        client->configStore.clear();
-
         // Send off requests to get the configuration again for each workspace
         std::vector<lsp::DocumentUri> items{nullWorkspace->rootUri};
         for (auto& workspace : workspaceFolders)
