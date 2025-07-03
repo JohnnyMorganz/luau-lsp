@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Add a warning message to `luau-lsp analyze` when `--platform=roblox` is set but no definitions files are provided
+- The language server now supports cancellation notifications from the client. This should help in cases where the server is stuck waiting for typechecking to complete.
 
 ### Changed
 

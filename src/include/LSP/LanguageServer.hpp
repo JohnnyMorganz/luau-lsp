@@ -1,4 +1,7 @@
 #include <optional>
+#include <thread>
+#include <queue>
+#include <condition_variable>
 
 #include "LSP/JsonRpc.hpp"
 #include "nlohmann/json.hpp"
@@ -43,12 +46,7 @@ private:
     std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
-    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig)
-        : client(aClient)
-        , defaultConfig(std::move(aDefaultConfig))
-        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
-    {
-    }
+    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig);
 
     lsp::ServerCapabilities getServerCapabilities();
 
@@ -64,7 +62,9 @@ public:
     // Dispatch handlers
 private:
     bool allWorkspacesReceivedConfiguration() const;
+    void clearCancellationToken(const json_rpc::JsonRpcMessage& msg);
     void handleMessage(const json_rpc::JsonRpcMessage& msg);
+    std::optional<json_rpc::JsonRpcMessage> popMessage();
 
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
@@ -77,7 +77,8 @@ private:
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
 
-    std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params);
+    std::vector<lsp::CompletionItem> completion(
+        const lsp::CompletionParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken);
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
@@ -92,11 +93,18 @@ private:
     lsp::RenameResult rename(const lsp::RenameParams& params);
     lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
-    lsp::DocumentDiagnosticReport documentDiagnostic(const lsp::DocumentDiagnosticParams& params);
+    lsp::DocumentDiagnosticReport documentDiagnostic(
+        const lsp::DocumentDiagnosticParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
     Response onShutdown([[maybe_unused]] const id_type& id);
 
 private:
     bool isInitialized = false;
     bool shutdownRequested = false;
+
+    std::mutex messagesMutex;
+    std::condition_variable messagesCv;
+    std::queue<json_rpc::JsonRpcMessage> messages;
+    std::thread messageProcessorThread;
+    std::unordered_map<id_type, std::shared_ptr<Luau::FrontendCancellationToken>> cancellationTokens;
 };
