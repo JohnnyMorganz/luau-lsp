@@ -35,6 +35,7 @@ OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyThrust",
     "BodyVelocity",
     # "RocketPropulsion",
+    "BevelMesh",  # superclass of BlockMesh
 ]
 
 TYPE_INDEX = {
@@ -61,7 +62,6 @@ TYPE_INDEX = {
 
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
-    "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
