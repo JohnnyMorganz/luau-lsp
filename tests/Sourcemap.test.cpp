@@ -685,4 +685,80 @@ TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
 }
 
+TEST_CASE_FIXTURE(Fixture, "child_properties_of_services_are_cleared_when_the_service_is_removed_from_sourcemap")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto source = R"(
+        --!strict
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        print(ReplicatedStorage.Part)
+    )";
+
+    auto result = check(source);
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": []
+        }
+    )");
+
+    auto result2 = check(source);
+
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "child_properties_of_game_are_cleared_when_an_invalid_sourcemap_is_given")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Part",
+                    "className": "Part"
+                }
+            ]
+        }
+    )");
+
+    auto source = R"(
+        --!strict
+        print(game.Part)
+    )";
+
+    auto result = check(source);
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    loadSourcemap("");
+
+    auto result2 = check(source);
+
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
+}
+
 TEST_SUITE_END();

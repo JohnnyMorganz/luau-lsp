@@ -160,7 +160,7 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
             Luau::AutocompleteEntryMap result;
             for (auto& [propName, prop] : ctv->props)
             {
-                if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                if (Luau::hasTag(prop, kSourcemapGeneratedTag) && !(prop.readTy && Luau::is<Luau::FunctionType>(*prop.readTy)))
                     result.insert_or_assign(
                         propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
                                       false, false, Luau::TypeCorrectKind::Correct});

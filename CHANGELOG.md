@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed missing name for `timeout` parameter in `:WaitForChild()` when the new solver is enabled
+- (Attempted) fix for memory access crashes after the sourcemap changes
+
 ## [1.52.0] - 2025-07-05
 
 ### Added
