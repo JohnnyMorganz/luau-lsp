@@ -350,6 +350,12 @@ EXTRA_MEMBERS = {
     "StudioService": [
         "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?"
     ],
+    "ControllerManager": [
+        "ActiveController: ControllerBase?",
+        "ClimbSensor: ControllerSensor?",
+        "GroundSensor: ControllerSensor?",
+        "RootPart: BasePart?",
+    ],
 }
 
 # Hardcoded types
