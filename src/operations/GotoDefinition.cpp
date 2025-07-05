@@ -124,8 +124,11 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
                 {
                     if (auto uri = platform->resolveToRealPath(*definitionModuleName))
                     {
-                        auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
-                        result.emplace_back(lsp::Location{*uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
+                        if (auto document = fileResolver.getOrCreateTextDocumentFromModuleName(*definitionModuleName))
+                        {
+                            result.emplace_back(lsp::Location{
+                                *uri, lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}});
+                        }
                     }
                 }
                 else

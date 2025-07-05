@@ -20,7 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash when retrieving the extension of a file path with an empty basename
-- Fixed crash in Go To Type Definition on an expression when the relevant module document could not be looked up
+- Fixed crash in Go To Definition and Go To Type Definition on an expression when the relevant module document could not
+  be looked up
 - Fixed an issue with lazy workspace initialization when the first processed message is a
   `workspace/didChangeConfiguration`, causing configuration to not apply. This affects Neovim
   users ([#1139](https://github.com/JohnnyMorganz/luau-lsp/issues/1139))
