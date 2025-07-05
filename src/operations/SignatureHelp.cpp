@@ -240,7 +240,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     // Handle __call metamethod
     if (const auto metamethod = findCallMetamethod(followedId))
-        if (auto ftv = Luau::get<Luau::FunctionType>(*metamethod))
+        if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*metamethod)))
             addSignature(*metamethod, ftv);
 
     lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
