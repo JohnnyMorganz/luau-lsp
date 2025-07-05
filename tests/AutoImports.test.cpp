@@ -719,6 +719,212 @@ TEST_CASE_FIXTURE(Fixture, "instance_auto_imports_creates_valid_identifier")
     CHECK_EQ(imports[0].additionalTextEdits[1].newText, "local react_spring = require(ReplicatedStorage[\"react-spring\"])\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_children_of_module")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["init.luau"],
+                        "children": [
+                            {
+                                "name": "ChildModule",
+                                "className": "ModuleScript"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("init.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result, "ChildModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "ChildModule");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ChildModule = require(script.ChildModule)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_descendant_of_module")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["init.luau"],
+                        "children": [
+                            {
+                                "name": "Folder",
+                                "className": "Folder",
+                                "children": [
+                                    {
+                                        "name": "DescendantModule",
+                                        "className": "ModuleScript"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("init.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result, "DescendantModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "DescendantModule");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local DescendantModule = require(script.Folder.DescendantModule)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_parent_of_module")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["init.luau"],
+                        "children": [
+                            {
+                                "name": "ChildModule",
+                                "className": "ModuleScript",
+                                "filePaths": ["source.luau"]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("source.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result, "Module");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Module");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(script.Parent)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_ancestor_of_module")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["init.luau"],
+                        "children": [
+                            {
+                                "name": "Folder",
+                                "className": "Folder",
+                                "children": [
+                                    {
+                                        "name": "DescendantModule",
+                                        "className": "ModuleScript",
+                                        "filePaths": ["source.luau"]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("source.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params);
+    auto imports = filterAutoImports(result, "Module");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Module");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(script.Parent.Parent)\n");
+}
+
 using namespace Luau::LanguageServer::AutoImports;
 
 static StringRequireAutoImporterContext createContext(Fixture* fixture, const Uri& uri, FindImportsVisitor* importsVisitor)

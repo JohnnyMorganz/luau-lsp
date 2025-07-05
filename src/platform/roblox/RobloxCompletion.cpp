@@ -335,7 +335,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
                 {
                     // HACK: using Uri's purely to access lexicallyRelative
-                    requirePath = Uri::file(path).lexicallyRelative(Uri::file(module.name));
+                    requirePath = "./" + Uri::file(path).lexicallyRelative(Uri::file(module.name));
                     isRelative = true;
                 }
                 else

@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed an issue with lazy workspace initialization when the first processed message is a
   `workspace/didChangeConfiguration`, causing configuration to not apply. This affects Neovim
   users ([#1139](https://github.com/JohnnyMorganz/luau-lsp/issues/1139))
+- Fixed auto-imports of children / descendant modules missing a `script.` prefix in the generated require
+  statement ([#1135](https://github.com/JohnnyMorganz/luau-lsp/issues/1135))
 
 ## [1.51.0] - 2025-06-24
 
