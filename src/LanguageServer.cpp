@@ -25,6 +25,19 @@
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
+LanguageServer::LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig)
+    : client(aClient)
+    , defaultConfig(std::move(aDefaultConfig))
+    , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
+{
+    messageProcessorThread = std::thread(
+        [this]
+        {
+            while (auto message = popMessage())
+                handleMessage(*message);
+        });
+}
+
 /// Finds the workspace which the file belongs to.
 /// If no workspace is found, the file is attached to the null workspace
 WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file, bool shouldInitialize)
@@ -147,6 +160,19 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     if (shutdownRequested)
         throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down");
 
+    std::shared_ptr<Luau::FrontendCancellationToken> cancellationToken;
+    if (const auto& it = cancellationTokens.find(id); it != cancellationTokens.end())
+        cancellationToken = it->second;
+
+    if (!cancellationToken)
+    {
+        LUAU_ASSERT(!"Have a request with no cancellation token");
+        cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    }
+
+    if (cancellationToken->requested())
+        throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
+
     Response response;
 
     if (method == "initialize")
@@ -159,7 +185,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/completion")
     {
-        response = completion(JSON_REQUIRED_PARAMS(baseParams, "textDocument/completion"));
+        response = completion(JSON_REQUIRED_PARAMS(baseParams, "textDocument/completion"), cancellationToken);
     }
     else if (method == "textDocument/documentLink")
     {
@@ -247,7 +273,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/diagnostic")
     {
-        response = documentDiagnostic(JSON_REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"));
+        response = documentDiagnostic(JSON_REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"), cancellationToken);
     }
     else if (method == "workspace/diagnostic")
     {
@@ -326,8 +352,7 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
     }
     else if (method == "$/cancelRequest")
     {
-        // NO-OP
-        // TODO: support cancellation
+        // NO-OP: cancellation is handled in main loop
     }
     else if (method == "$/flushTimeTrace")
     {
@@ -388,6 +413,16 @@ bool LanguageServer::allWorkspacesReceivedConfiguration() const
     return true;
 }
 
+void LanguageServer::clearCancellationToken(const json_rpc::JsonRpcMessage& msg)
+{
+    if (!msg.is_request())
+        return;
+
+    std::unique_lock guard(messagesMutex);
+    if (const auto& it = cancellationTokens.find(*msg.id); it != cancellationTokens.end())
+        cancellationTokens.erase(it);
+}
+
 static bool notificationRequiresWorkspace(std::string_view method)
 {
     return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
@@ -406,11 +441,24 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
                 return;
             }
 
+            client->sendTrace("Server now processing " + *msg.method + " (" + std::to_string(std::get<int>(msg.id.value())) + ")");
             onRequest(msg.id.value(), msg.method.value(), msg.params);
+            clearCancellationToken(msg);
         }
         else if (msg.is_response())
         {
+            client->sendTrace("Server now processing response to request " + std::to_string(std::get<int>(msg.id.value())));
             client->handleResponse(msg);
+
+            // Receiving configuration is always at the end of a response. Now we can check to see if we can process any postponed messages
+            if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
+            {
+                client->sendTrace("workspaces configured, handling postponed messages");
+                for (const auto& postponedMessage : configPostponedMessages)
+                    handleMessage(postponedMessage);
+                configPostponedMessages.clear();
+                client->sendTrace("workspaces configured, handling postponed COMPLETED");
+            }
         }
         else if (msg.is_notification())
         {
@@ -421,6 +469,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
                 return;
             }
 
+            client->sendTrace("Server now processing notification: " + *msg.method);
             onNotification(msg.method.value(), msg.params);
         }
         else
@@ -431,6 +480,7 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
     catch (const JsonRpcException& e)
     {
         client->sendError(msg.id, e);
+        clearCancellationToken(msg);
     }
     catch (const std::exception& e)
     {
@@ -443,7 +493,26 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
         sentry_capture_event(event);
 #endif
         client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InternalError, e.what()));
+        clearCancellationToken(msg);
     }
+}
+
+std::optional<json_rpc::JsonRpcMessage> LanguageServer::popMessage()
+{
+    std::unique_lock guard(messagesMutex);
+
+    messagesCv.wait(guard,
+        [this]
+        {
+            return !messages.empty() || shutdownRequested;
+        });
+
+    if (shutdownRequested)
+        return std::nullopt;
+
+    auto message = messages.front();
+    messages.pop();
+    return message;
 }
 
 void LanguageServer::processInputLoop()
@@ -451,19 +520,8 @@ void LanguageServer::processInputLoop()
     std::string jsonString;
     while (std::cin)
     {
-        if (!configPostponedMessages.empty() && allWorkspacesReceivedConfiguration())
-        {
-            client->sendTrace("workspaces configured, handling postponed messages");
-            for (const auto& msg : configPostponedMessages)
-                handleMessage(msg);
-
-            configPostponedMessages.clear();
-            client->sendTrace("workspaces configured, handling postponed COMPLETED");
-        }
-
         if (client->readRawMessage(jsonString))
         {
-            // sendTrace(jsonString, std::nullopt);
             std::optional<id_type> id = std::nullopt;
             try
             {
@@ -471,7 +529,25 @@ void LanguageServer::processInputLoop()
                 auto msg = json_rpc::parse(jsonString);
                 id = msg.id;
 
-                handleMessage(msg);
+                if (msg.is_request())
+                    cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
+
+                {
+                    std::unique_lock guard(messagesMutex);
+                    if (msg.is_notification() && msg.method == "$/cancelRequest")
+                    {
+                        ASSERT_PARAMS(msg.params, "$/cancelRequest")
+                        auto params = msg.params->get<lsp::CancelParams>();
+                        if (const auto& it = cancellationTokens.find(params.id); it != cancellationTokens.end())
+                            it->second->cancel();
+
+                        client->sendTrace("Processed cancellation for " + msg.params->dump());
+                        continue;
+                    }
+                    messages.push(msg);
+                }
+
+                messagesCv.notify_one();
             }
             catch (const json::exception& e)
             {
@@ -747,6 +823,11 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
 
 Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)
 {
-    shutdownRequested = true;
+    {
+        std::unique_lock lock(messagesMutex);
+        shutdownRequested = true;
+    }
+
+    messagesCv.notify_all();
     return nullptr;
 }
