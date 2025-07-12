@@ -157,30 +157,46 @@ static void injectChildrenLookupFunctions(
             {globals.builtinTypes->stringType, Luau::makeOption(globals.builtinTypes, arena, globals.builtinTypes->booleanType)},
             {"name", "recursive"}, {optionalInstanceType});
 
-        Luau::TypeId waitForChildFunction;
-        if (FFlag::LuauSolverV2)
-            waitForChildFunction = Luau::makeFunction(
-                arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->optionalNumberType}, {"name"}, {*instanceType});
-        else
-            waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
-        auto waitForChildWithTimeoutFunction = Luau::makeFunction(
-            arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->numberType}, {"name", "timeout"}, {optionalInstanceType});
-
         attachChildLookupFunction(globals, arena, node, findFirstChildFunction, /* supportsRecursiveParameter= */ true);
-        ctv->props["FindFirstChild"] = Luau::makeProperty(findFirstChildFunction, "@roblox/globaltype/Instance.FindFirstChild");
+        ctv->props["FindFirstChild"] = Luau::Property{
+            /* type */ findFirstChildFunction,
+            /* deprecated */ false,
+            /* deprecatedSuggestion */ {},
+            /* location */ std::nullopt,
+            /* tags */ {kSourcemapGeneratedTag},
+            "@roblox/globaltype/Instance.FindFirstChild",
+        };
 
         if (FFlag::LuauSolverV2)
         {
+            auto waitForChildFunction = Luau::makeFunction(
+                arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->optionalNumberType}, {"name", "timeout"}, {*instanceType});
             attachChildLookupFunction(
                 globals, arena, node, waitForChildFunction, /* supportsRecursiveParameter= */ false, /*supportsTimeoutParameter= */ true);
-            ctv->props["WaitForChild"] = Luau::makeProperty(waitForChildFunction, "@roblox/globaltype/Instance.WaitForChild");
+            ctv->props["WaitForChild"] = Luau::Property{
+                /* type */ waitForChildFunction,
+                /* deprecated */ false,
+                /* deprecatedSuggestion */ {},
+                /* location */ std::nullopt,
+                /* tags */ {kSourcemapGeneratedTag},
+                "@roblox/globaltype/Instance.WaitForChild",
+            };
         }
         else
         {
+            auto waitForChildFunction = Luau::makeFunction(arena, ty, {globals.builtinTypes->stringType}, {"name"}, {*instanceType});
+            auto waitForChildWithTimeoutFunction = Luau::makeFunction(
+                arena, ty, {globals.builtinTypes->stringType, globals.builtinTypes->numberType}, {"name", "timeout"}, {optionalInstanceType});
             attachChildLookupFunction(globals, arena, node, waitForChildFunction);
             attachChildLookupFunction(globals, arena, node, waitForChildWithTimeoutFunction);
-            ctv->props["WaitForChild"] = Luau::makeProperty(
-                Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}), "@roblox/globaltype/Instance.WaitForChild");
+            ctv->props["WaitForChild"] = Luau::Property{
+                /* type */ Luau::makeIntersection(arena, {waitForChildFunction, waitForChildWithTimeoutFunction}),
+                /* deprecated */ false,
+                /* deprecatedSuggestion */ {},
+                /* location */ std::nullopt,
+                /* tags */ {kSourcemapGeneratedTag},
+                "@roblox/globaltype/Instance.WaitForChild",
+            };
         }
     }
 }
@@ -341,16 +357,6 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
 {
     if (auto* ctv = Luau::getMutable<Luau::ExternType>(ty))
     {
-        // Clear out all the old registered children
-        for (auto it = ctv->props.begin(); it != ctv->props.end();)
-        {
-            if (hasTag(it->second, kSourcemapGeneratedTag))
-                it = ctv->props.erase(it);
-            else
-                ++it;
-        }
-
-
         // Extend the props to include the children
         for (const auto& child : node->children)
         {
@@ -369,18 +375,45 @@ void addChildrenToCTV(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, 
     }
 }
 
+static void clearSourcemapGeneratedTypes(Luau::GlobalTypes& globals)
+{
+    for (const auto& [_, tfun] : globals.globalScope->exportedTypeBindings)
+    {
+        if (auto* ctv = Luau::getMutable<Luau::ExternType>(tfun.type))
+        {
+            for (auto it = ctv->props.begin(); it != ctv->props.end();)
+            {
+                // TODO: will this clear out the generated FindFirstChild/WaitForChild function, is that a problem?
+                if (hasTag(it->second, kSourcemapGeneratedTag))
+                    it = ctv->props.erase(it);
+                else
+                    ++it;
+            }
+        }
+    }
+}
+
+void RobloxPlatform::clearSourcemapTypes()
+{
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::clearSourcemapTypes", "LSP");
+    workspaceFolder->frontend.clear(); // TODO: https://github.com/JohnnyMorganz/luau-lsp/issues/1115
+    instanceTypes.clear();             // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
+    clearSourcemapGeneratedTypes(workspaceFolder->frontend.globals);
+    if (!FFlag::LuauSolverV2)
+        clearSourcemapGeneratedTypes(workspaceFolder->frontend.globalsForAutocomplete);
+}
+
 bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMapFromContents", "LSP");
     workspaceFolder->client->sendTrace("Sourcemap file read successfully");
 
-    workspaceFolder->frontend.clear();
+    clearSourcemapTypes();
     updateSourceNodeMap(sourceMapContents);
 
     workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
 
     // Recreate instance types
-    instanceTypes.clear(); // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 

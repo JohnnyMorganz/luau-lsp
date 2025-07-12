@@ -67,27 +67,32 @@ static bool isIgnoredFile(const Uri& rootUri, const Uri& uri, const std::vector<
     return false;
 }
 
+FilePathInformation getFilePath(const WorkspaceFileResolver* fileResolver, const Luau::ModuleName& moduleName)
+{
+    auto path = fileResolver->platform->resolveToRealPath(moduleName);
+    LUAU_ASSERT(path);
+
+    // For consistency, we want to map the error.moduleName to a relative path (if it is a real path)
+    Luau::ModuleName errorFriendlyName = moduleName;
+    if (!fileResolver->platform->isVirtualPath(moduleName))
+        errorFriendlyName = path->lexicallyRelative(fileResolver->rootUri);
+
+    return {*path, fileResolver->getHumanReadableModuleName(errorFriendlyName)};
+}
+
 static bool reportError(
     const Luau::Frontend& frontend, ReportFormat format, const Luau::TypeError& error, std::vector<std::string>& ignoreGlobPatterns)
 {
     auto* fileResolver = static_cast<WorkspaceFileResolver*>(frontend.fileResolver);
-    auto path = fileResolver->platform->resolveToRealPath(error.moduleName);
-    LUAU_ASSERT(path);
+    auto [uri, relativePath] = getFilePath(fileResolver, error.moduleName);
 
-    // For consistency, we want to map the error.moduleName to a relative path (if it is a real path)
-    Luau::ModuleName errorFriendlyName = error.moduleName;
-    if (!fileResolver->platform->isVirtualPath(error.moduleName))
-        errorFriendlyName = fileResolver->rootUri.lexicallyRelative(*path);
-
-    std::string humanReadableName = fileResolver->getHumanReadableModuleName(errorFriendlyName);
-
-    if (isIgnoredFile(fileResolver->rootUri, *path, ignoreGlobPatterns))
+    if (isIgnoredFile(fileResolver->rootUri, uri, ignoreGlobPatterns))
         return false;
 
     if (const auto* syntaxError = Luau::get_if<Luau::SyntaxError>(&error.data))
-        report(format, humanReadableName.c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
+        report(format, relativePath.c_str(), error.location, "SyntaxError", syntaxError->message.c_str());
     else
-        report(format, humanReadableName.c_str(), error.location, "TypeError",
+        report(format, relativePath.c_str(), error.location, "TypeError",
             Luau::toString(error, Luau::TypeErrorToStringOptions{frontend.fileResolver}).c_str());
 
     return true;
@@ -118,12 +123,11 @@ static bool analyzeFile(
         reportedErrors += reportError(frontend, format, error, ignoreGlobPatterns);
 
     // For the human readable module name, we use a relative version
-    auto errorFriendlyName = std::filesystem::proximate(path).generic_string();
-    std::string humanReadableName = frontend.fileResolver->getHumanReadableModuleName(errorFriendlyName);
+    auto [_, relativePath] = getFilePath(static_cast<WorkspaceFileResolver*>(frontend.fileResolver), path);
     for (auto& error : cr.lintResult.errors)
-        reportWarning(format, humanReadableName.c_str(), error);
+        reportWarning(format, relativePath.c_str(), error);
     for (auto& warning : cr.lintResult.warnings)
-        reportWarning(format, humanReadableName.c_str(), warning);
+        reportWarning(format, relativePath.c_str(), warning);
 
     if (annotate)
     {

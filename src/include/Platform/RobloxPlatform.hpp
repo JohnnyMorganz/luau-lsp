@@ -116,6 +116,7 @@ private:
 
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNode* sourceNode);
 
+    void clearSourcemapTypes();
     bool updateSourceMap();
 
 public:

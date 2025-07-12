@@ -160,7 +160,8 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
             Luau::AutocompleteEntryMap result;
             for (auto& [propName, prop] : ctv->props)
             {
-                if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                if (Luau::hasTag(prop, kSourcemapGeneratedTag) &&
+                    !(prop.readTy && (Luau::is<Luau::FunctionType>(*prop.readTy) || Luau::isOverloadedFunction(*prop.readTy))))
                     result.insert_or_assign(
                         propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
                                       false, false, Luau::TypeCorrectKind::Correct});
@@ -335,7 +336,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         (Luau::startsWith(module.name, path) || Luau::startsWith(path, module.name) || parent1 == parent2)))
                 {
                     // HACK: using Uri's purely to access lexicallyRelative
-                    requirePath = Uri::file(path).lexicallyRelative(Uri::file(module.name));
+                    requirePath = "./" + Uri::file(path).lexicallyRelative(Uri::file(module.name));
                     isRelative = true;
                 }
                 else

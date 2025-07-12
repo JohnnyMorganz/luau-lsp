@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed missing name for `timeout` parameter in `:WaitForChild()` when the new solver is enabled
+- (Attempted) fix for memory access crashes after the sourcemap changes
+- Fixed incorrect paths showing up for errors when using
+  `luau-lsp analyze` ([#1146](https://github.com/JohnnyMorganz/luau-lsp/issues/1146))
+
+### Changed
+
+- Sync to upstream Luau 0.682
+
+## [1.52.0] - 2025-07-05
+
 ### Added
 
 - Add a warning message to `luau-lsp analyze` when `--platform=roblox` is set but no definitions files are provided
@@ -13,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.680
+- Sync to upstream Luau 0.681
 - Workspace diagnostics are now only updated on text document save, rather than on text document type, due to
   performance overhead (especially when new solver is
   enabled) ([#1076](https://github.com/JohnnyMorganz/luau-lsp/issues/1076))
@@ -21,6 +34,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash when retrieving the extension of a file path with an empty basename
+- Fixed crash in Go To Definition and Go To Type Definition on an expression when the relevant module document could not
+  be looked up
+- Fixed an issue with lazy workspace initialization when the first processed message is a
+  `workspace/didChangeConfiguration`, causing configuration to not apply. This affects Neovim
+  users ([#1139](https://github.com/JohnnyMorganz/luau-lsp/issues/1139))
+- Fixed auto-imports of children / descendant modules missing a `script.` prefix in the generated require
+  statement ([#1135](https://github.com/JohnnyMorganz/luau-lsp/issues/1135))
 
 ## [1.51.0] - 2025-06-24
 

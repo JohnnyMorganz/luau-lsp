@@ -35,6 +35,7 @@ OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyThrust",
     "BodyVelocity",
     # "RocketPropulsion",
+    "BevelMesh",  # superclass of BlockMesh
 ]
 
 TYPE_INDEX = {
@@ -61,12 +62,11 @@ TYPE_INDEX = {
 
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
-    "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
-    "RaycastResult", # Redefined using generics
+    "RaycastResult",  # Redefined using generics
 ]
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
@@ -81,6 +81,7 @@ EXTRA_MEMBERS = {
         "function __idiv(self, other: Vector3 | number): Vector3",
     ],
     "Vector2": [
+        "function FuzzyEq(self, other: Vector2, epsilon: number?): boolean",
         "function __add(self, other: Vector2): Vector2",
         "function __sub(self, other: Vector2): Vector2",
         "function __mul(self, other: Vector2 | number): Vector2",
@@ -348,6 +349,12 @@ EXTRA_MEMBERS = {
     ],
     "StudioService": [
         "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?"
+    ],
+    "ControllerManager": [
+        "ActiveController: ControllerBase?",
+        "ClimbSensor: ControllerSensor?",
+        "GroundSensor: ControllerSensor?",
+        "RootPart: BasePart?",
     ],
 }
 
