@@ -6,16 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.682
+
 ### Fixed
 
 - Fixed missing name for `timeout` parameter in `:WaitForChild()` when the new solver is enabled
 - (Attempted) fix for memory access crashes after the sourcemap changes
 - Fixed incorrect paths showing up for errors when using
   `luau-lsp analyze` ([#1146](https://github.com/JohnnyMorganz/luau-lsp/issues/1146))
-
-### Changed
-
-- Sync to upstream Luau 0.682
 
 ## [1.52.0] - 2025-07-05
 
