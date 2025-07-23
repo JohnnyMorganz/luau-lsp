@@ -375,13 +375,13 @@ type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
 type AdReward = any
 
-declare extern type Enum with
+declare class Enum
     function GetEnumItems(self): { any }
     function FromValue(self,Number: number): any
     function FromName(self,Name: string): any
 end
 
-declare extern type EnumItem with
+declare class EnumItem
     Name: string
     Value: number
     EnumType: Enum
@@ -435,7 +435,7 @@ declare function printidentity(prefix: string?)
 """
 
 POST_DATATYPES_BASE = """
-declare extern type SharedTable with
+declare class SharedTable
   [string | number]: any
   function __iter(self): (any, number) -> (number, any)
 end
@@ -486,7 +486,7 @@ export type RaycastResult<T = BasePart> = {
     Distance: number,
 }
 
-declare extern type GlobalSettings extends GenericSettings with
+declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
     Studio: Studio
@@ -839,10 +839,10 @@ def declareClass(klass: ApiClass) -> str:
     if shouldExcludeAsDeprecated(klass):
         return ""
 
-    out = "declare extern type " + klass["Name"]
+    out = "declare class " + klass["Name"]
     if "Superclass" in klass and klass["Superclass"] != "<<<ROOT>>>":
         out += " extends " + klass["Superclass"]
-    out += " with\n"
+    out += "\n"
 
     def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
@@ -887,8 +887,8 @@ def printEnums(dump: ApiDump):
     out = ""
     for enum, items in enums.items():
         # Declare an atom for the enum
-        out += f"declare extern type Enum{enum} extends EnumItem with end\n"
-        out += f"declare extern type Enum{enum}_INTERNAL extends Enum with\n"
+        out += f"declare class Enum{enum} extends EnumItem end\n"
+        out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
         items.sort()
         for item in items:
             out += f"\t{escapeName(item)}: Enum{enum}\n"
