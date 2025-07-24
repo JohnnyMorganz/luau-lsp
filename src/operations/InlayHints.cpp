@@ -29,7 +29,7 @@ void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Lua
     auto result = Luau::toStringDetailed(ty, opts);
     if (result.invalid || result.truncated || result.error || result.cycle)
         return;
-    hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
+    hint.textEdits.emplace_back();
 }
 
 void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Luau::TypePackId ty, bool removeLeadingEllipsis = false)
@@ -47,20 +47,71 @@ void makeInsertable(const ClientConfiguration& config, lsp::InlayHint& hint, Lua
 }
 struct InlayHintVisitor : public Luau::AstVisitor
 {
+    WorkspaceFileResolver* fileResolver = nullptr;
     const Luau::ModulePtr& module;
     const ClientConfiguration& config;
     const TextDocument* textDocument;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument)
-        : module(module)
+    explicit InlayHintVisitor(
+        WorkspaceFileResolver* fileResolver, const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument)
+        : fileResolver(fileResolver)
+        , module(module)
         , config(config)
         , textDocument(textDocument)
 
     {
         stringOptions.maxTableLength = 30;
         stringOptions.maxTypeLength = config.inlayHints.typeHintMaxLength;
+    }
+
+    void createInlayHintForType(const Luau::TypeId& ty, const lsp::Position& position,
+        const std::optional<std::function<bool(const std::string&)>>& shouldSkip = std::nullopt)
+    {
+        auto result = Luau::toStringDetailed(ty, stringOptions);
+        if (shouldSkip && (*shouldSkip)(result.name))
+            return;
+
+        lsp::InlayHint hint;
+        hint.kind = lsp::InlayHintKind::Type;
+        hint.position = position;
+
+        hint.label.emplace_back(lsp::InlayHintLabelPart{": "});
+
+        // TODO: Decompose this further with https://github.com/luau-lang/luau/issues/1591
+        std::optional<lsp::Location> goToLocation = std::nullopt;
+        if (auto location = getLocation(ty))
+        {
+            if (auto definitionModuleName = Luau::getDefinitionModuleName(ty))
+            {
+                if (auto document = fileResolver->getOrCreateTextDocumentFromModuleName(*definitionModuleName))
+                {
+                    goToLocation = lsp::Location{
+                        document->uri(), lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}};
+                }
+            }
+        }
+        hint.label.emplace_back(lsp::InlayHintLabelPart{result.name, std::nullopt, goToLocation});
+
+        if (config.inlayHints.makeInsertable && !(result.invalid || result.truncated || result.error || result.cycle))
+            hint.textEdits.emplace_back(lsp::TextEdit{{hint.position, hint.position}, ": " + result.name});
+
+        hints.emplace_back(hint);
+    }
+
+    void createInlayHintForType(const Luau::TypePackId& ty, const lsp::Position& position, bool forVarArg = false)
+    {
+        auto typeString = types::toStringReturnType(ty, stringOptions);
+        if (forVarArg)
+            typeString = removePrefix(typeString, "...");
+
+        lsp::InlayHint hint;
+        hint.kind = lsp::InlayHintKind::Type;
+        hint.label.emplace_back(lsp::InlayHintLabelPart{": " + typeString});
+        hint.position = position;
+        makeInsertable(config, hint, ty, forVarArg);
+        hints.emplace_back(hint);
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -97,19 +148,13 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
                         continue;
 
-                    auto typeString = Luau::toString(followedTy, stringOptions);
-
-                    // If the stringified type is equivalent to the variable name, don't bother
-                    // showing an inlay hint
-                    if (Luau::equalsLower(typeString, var->name.value))
-                        continue;
-
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
-                    hint.position = textDocument->convertPosition(var->location.end);
-                    makeInsertable(config, hint, followedTy);
-                    hints.emplace_back(hint);
+                    createInlayHintForType(followedTy, textDocument->convertPosition(var->location.end),
+                        [var](const std::string& typeString)
+                        {
+                            // If the stringified type is equivalent to the variable name, don't bother
+                            // showing an inlay hint
+                            return Luau::equalsLower(typeString, var->name.value);
+                        });
                 }
             }
         }
@@ -143,19 +188,13 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
                         continue;
 
-                    auto typeString = Luau::toString(followedTy, stringOptions);
-
-                    // If the stringified type is equivalent to the variable name, don't bother
-                    // showing an inlay hint
-                    if (Luau::equalsLower(typeString, var->name.value))
-                        continue;
-
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
-                    hint.position = textDocument->convertPosition(var->location.end);
-                    makeInsertable(config, hint, followedTy);
-                    hints.emplace_back(hint);
+                    createInlayHintForType(followedTy, textDocument->convertPosition(var->location.end),
+                        [var](const std::string& typeString)
+                        {
+                            // If the stringified type is equivalent to the variable name, don't bother
+                            // showing an inlay hint
+                            return Luau::equalsLower(typeString, var->name.value);
+                        });
                 }
             }
         }
@@ -176,14 +215,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
             if (config.inlayHints.functionReturnTypes)
             {
                 if (!func->returnAnnotation && func->argLocation && !isNoOpFunction(func))
-                {
-                    lsp::InlayHint hint;
-                    hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
-                    hint.position = textDocument->convertPosition(func->argLocation->end);
-                    makeInsertable(config, hint, ftv->retTypes);
-                    hints.emplace_back(hint);
-                }
+                    createInlayHintForType(ftv->retTypes, textDocument->convertPosition(func->argLocation->end));
             }
 
             // Parameter types hint
@@ -203,14 +235,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                         auto argType = *it;
                         if (!param->annotation && param->name != "_")
-                        {
-                            lsp::InlayHint hint;
-                            hint.kind = lsp::InlayHintKind::Type;
-                            hint.label = ": " + Luau::toString(argType, stringOptions);
-                            hint.position = textDocument->convertPosition(param->location.end);
-                            makeInsertable(config, hint, argType);
-                            hints.emplace_back(hint);
-                        }
+                            createInlayHintForType(argType, textDocument->convertPosition(param->location.end));
 
                         it++;
                     }
@@ -221,12 +246,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     auto varargType = *it.tail();
                     if (!func->varargAnnotation)
                     {
-                        lsp::InlayHint hint;
-                        hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
-                        hint.position = textDocument->convertPosition(func->varargLocation.end);
-                        makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
-                        hints.emplace_back(hint);
+                        createInlayHintForType(varargType, textDocument->convertPosition(func->varargLocation.end), /* forVarArg= */ true);
                     }
                 }
             }
@@ -292,7 +312,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Parameter;
-                    hint.label = paramName + ":";
+                    hint.label.emplace_back(lsp::InlayHintLabelPart{paramName + ":"});
                     hint.position = textDocument->convertPosition(param->location.begin);
                     hint.paddingRight = true;
                     hints.emplace_back(hint);
@@ -334,7 +354,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config, textDocument};
+    InlayHintVisitor visitor{&fileResolver, module, config, textDocument};
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
