@@ -317,7 +317,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     }
 };
 
-lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params)
+lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -327,7 +327,8 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    checkStrict(moduleName, cancellationToken, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
@@ -338,10 +339,4 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
-}
-
-lsp::InlayHintResult LanguageServer::inlayHint(const lsp::InlayHintParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->inlayHint(params);
 }

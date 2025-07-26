@@ -13,6 +13,12 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+void throwIfCancelled(const LSPCancellationToken& cancellationToken)
+{
+    if (cancellationToken && cancellationToken->requested())
+        throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
+}
+
 const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const
 {
     if (FFlag::LuauSolverV2 || !forAutocomplete)
@@ -293,8 +299,7 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
 // Uses the diagnostic type checker, so strictness and DM awareness is not enforced
 // NOTE: do NOT use this if you later retrieve a ModulePtr (via frontend.moduleResolver.getModule). Instead use `checkStrict`
 // NOTE: use `frontend.parse` if you do not care about typechecking
-Luau::CheckResult WorkspaceFolder::checkSimple(
-    const Luau::ModuleName& moduleName, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
+Luau::CheckResult WorkspaceFolder::checkSimple(const Luau::ModuleName& moduleName, const LSPCancellationToken& cancellationToken)
 {
     try
     {
@@ -317,7 +322,7 @@ Luau::CheckResult WorkspaceFolder::checkSimple(
 // NOTE: a disadvantage of the autocomplete typechecker is that it has a timeout restriction that
 // can often be hit
 Luau::CheckResult WorkspaceFolder::checkStrict(
-    const Luau::ModuleName& moduleName, bool forAutocomplete, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken)
+    const Luau::ModuleName& moduleName, const LSPCancellationToken& cancellationToken, bool forAutocomplete)
 {
     if (FFlag::LuauSolverV2)
         forAutocomplete = false;

@@ -185,7 +185,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/completion")
     {
-        response = completion(JSON_REQUIRED_PARAMS(baseParams, "textDocument/completion"), cancellationToken);
+        ASSERT_PARAMS(baseParams, "textDocument/completion")
+        auto params = baseParams->get<lsp::CompletionParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->completion(params, cancellationToken);
     }
     else if (method == "textDocument/documentLink")
     {
@@ -193,27 +196,45 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/hover")
     {
-        response = hover(JSON_REQUIRED_PARAMS(baseParams, "textDocument/hover"));
+        ASSERT_PARAMS(baseParams, "textDocument/hover")
+        auto params = baseParams->get<lsp::HoverParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->hover(params, cancellationToken);
     }
     else if (method == "textDocument/signatureHelp")
     {
-        response = signatureHelp(JSON_REQUIRED_PARAMS(baseParams, "textDocument/signatureHelp"));
+        ASSERT_PARAMS(baseParams, "textDocument/signatureHelp")
+        auto params = baseParams->get<lsp::SignatureHelpParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->signatureHelp(params, cancellationToken);
     }
     else if (method == "textDocument/definition")
     {
-        response = gotoDefinition(JSON_REQUIRED_PARAMS(baseParams, "textDocument/definition"));
+        ASSERT_PARAMS(baseParams, "textDocument/definition")
+        auto params = baseParams->get<lsp::DefinitionParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->gotoDefinition(params, cancellationToken);
     }
     else if (method == "textDocument/typeDefinition")
     {
-        response = gotoTypeDefinition(JSON_REQUIRED_PARAMS(baseParams, "textDocument/typeDefinition"));
+        ASSERT_PARAMS(baseParams, "textDocument/typeDefinition")
+        auto params = baseParams->get<lsp::TypeDefinitionParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->gotoTypeDefinition(params, cancellationToken);
     }
     else if (method == "textDocument/references")
     {
-        response = references(JSON_REQUIRED_PARAMS(baseParams, "textDocument/references"));
+        ASSERT_PARAMS(baseParams, "textDocument/references")
+        auto params = baseParams->get<lsp::ReferenceParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->references(params, cancellationToken);
     }
     else if (method == "textDocument/rename")
     {
-        response = rename(JSON_REQUIRED_PARAMS(baseParams, "textDocument/rename"));
+        ASSERT_PARAMS(baseParams, "textDocument/rename")
+        auto params = baseParams->get<lsp::RenameParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->rename(params, cancellationToken);
     }
     else if (method == "textDocument/documentSymbol")
     {
@@ -229,11 +250,17 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     // }
     else if (method == "textDocument/semanticTokens/full")
     {
-        response = semanticTokens(JSON_REQUIRED_PARAMS(baseParams, "textDocument/semanticTokens/full"));
+        ASSERT_PARAMS(baseParams, "textDocument/semanticTokens/full")
+        auto params = baseParams->get<lsp::SemanticTokensParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->semanticTokens(params, cancellationToken);
     }
     else if (method == "textDocument/inlayHint")
     {
-        response = inlayHint(JSON_REQUIRED_PARAMS(baseParams, "textDocument/inlayHint"));
+        ASSERT_PARAMS(baseParams, "textDocument/inlayHint")
+        auto params = baseParams->get<lsp::InlayHintParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->inlayHint(params, cancellationToken);
     }
     else if (method == "textDocument/documentColor")
     {
@@ -248,7 +275,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         ASSERT_PARAMS(baseParams, "textDocument/prepareCallHierarchy")
         auto params = baseParams->get<lsp::CallHierarchyPrepareParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
-        response = workspace->prepareCallHierarchy(params);
+        response = workspace->prepareCallHierarchy(params, cancellationToken);
     }
     else if (method == "callHierarchy/incomingCalls")
     {
@@ -273,7 +300,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/diagnostic")
     {
-        response = documentDiagnostic(JSON_REQUIRED_PARAMS(baseParams, "textDocument/diagnostic"), cancellationToken);
+        ASSERT_PARAMS(baseParams, "textDocument/diagnostic")
+        auto params = baseParams->get<lsp::DocumentDiagnosticParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->documentDiagnostics(params, cancellationToken);
     }
     else if (method == "workspace/diagnostic")
     {

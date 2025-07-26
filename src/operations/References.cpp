@@ -62,7 +62,7 @@ std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Lua
     return dependents;
 }
 
-std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId ty)
+std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId ty, const LSPCancellationToken& cancellationToken)
 {
     ty = Luau::follow(ty);
     auto ftv = Luau::get<Luau::FunctionType>(ty);
@@ -77,7 +77,8 @@ std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId t
 
     for (const auto& moduleName : dependents)
     {
-        checkStrict(moduleName);
+        checkStrict(moduleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
         auto module = getModule(moduleName, /* forAutocomplete: */ true);
         if (!module)
             continue;
@@ -99,7 +100,8 @@ std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId t
 }
 
 // Find all references across all files for the usage of TableType, or a property on a TableType
-std::vector<Reference> WorkspaceFolder::findAllTableReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
+std::vector<Reference> WorkspaceFolder::findAllTableReferences(
+    Luau::TypeId ty, const LSPCancellationToken& cancellationToken, std::optional<Luau::Name> property)
 {
     ty = Luau::follow(ty);
     auto ttv = Luau::get<Luau::TableType>(ty);
@@ -117,7 +119,8 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(Luau::TypeId ty, 
     for (const auto& moduleName : dependents)
     {
         // Run the typechecker over the dependency modules
-        checkStrict(moduleName);
+        checkStrict(moduleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
         auto module = getModule(moduleName, /* forAutocomplete: */ true);
         if (!module)
             continue;
@@ -176,7 +179,8 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(Luau::TypeId ty, 
 }
 
 // Find all references of an exported type
-std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName)
+std::vector<Reference> WorkspaceFolder::findAllTypeReferences(
+    const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken)
 {
     std::vector<Reference> result;
 
@@ -191,7 +195,8 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         result.emplace_back(Reference{moduleName, location});
 
     // Find the actual declaration location
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
     auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!module)
         return {};
@@ -209,7 +214,8 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
             continue;
 
         // Run the typechecker over the dependency module
-        checkStrict(dependencyModuleName);
+        checkStrict(dependencyModuleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
         auto sourceModule = frontend.getSourceModule(dependencyModuleName);
         auto module = getModule(dependencyModuleName, /* forAutocomplete: */ true);
         if (sourceModule)
@@ -438,7 +444,7 @@ static bool typeIsReturned(Luau::TypePackId returnType, Luau::TypeId ty)
     return false;
 }
 
-lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
+lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -448,7 +454,8 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     // Run the type checker to ensure we are up to date
     // We check for autocomplete here since autocomplete has stricter types
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
@@ -484,9 +491,9 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             {
                 std::vector<Reference> references;
                 if (Luau::get<Luau::FunctionType>(followedTy))
-                    references = findAllFunctionReferences(followedTy);
+                    references = findAllFunctionReferences(followedTy, cancellationToken);
                 else if (Luau::get<Luau::TableType>(followedTy))
-                    references = findAllTableReferences(followedTy);
+                    references = findAllTableReferences(followedTy, cancellationToken);
 
                 return processReferences(fileResolver, references);
             }
@@ -514,7 +521,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             if (possibleParentTy)
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
-                auto references = findAllTableReferences(parentTy, indexName->index.value);
+                auto references = findAllTableReferences(parentTy, cancellationToken, indexName->index.value);
                 return processReferences(fileResolver, references);
             }
         }
@@ -531,7 +538,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                     if (possibleTableTy)
                     {
                         auto references = findAllTableReferences(
-                            Luau::follow(*possibleTableTy), Luau::Name(constantString->value.data, constantString->value.size));
+                            Luau::follow(*possibleTableTy), cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
                         return processReferences(fileResolver, references);
                     }
                 }
@@ -555,7 +562,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         if (typeDefinition->exported)
         {
             // Type may potentially be used in other files, so we need to handle this globally
-            auto references = findAllTypeReferences(moduleName, typeDefinition->name.value);
+            auto references = findAllTypeReferences(moduleName, typeDefinition->name.value, cancellationToken);
             return processReferences(fileResolver, references);
         }
         else
@@ -582,7 +589,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             if (auto importedModuleName = module->getModuleScope()->importedModules.find(prefix.value().value);
                 importedModuleName != module->getModuleScope()->importedModules.end())
             {
-                auto references = findAllTypeReferences(importedModuleName->second, reference->name.value);
+                auto references = findAllTypeReferences(importedModuleName->second, reference->name.value, cancellationToken);
                 return processReferences(fileResolver, references);
             }
 
@@ -658,10 +665,4 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     }
 
     return std::nullopt;
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
 }

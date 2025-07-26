@@ -18,14 +18,16 @@ static bool isGlobalBinding(const Luau::Binding& binding)
     return binding.location.begin == Luau::Position{0, 0} && binding.location.end == Luau::Position{0, 0};
 }
 
-std::vector<lsp::Location> getReferencesForRenaming(WorkspaceFolder* workspaceFolder, const lsp::RenameParams& params)
+std::vector<lsp::Location> getReferencesForRenaming(
+    WorkspaceFolder* workspaceFolder, const lsp::RenameParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto moduleName = workspaceFolder->fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = workspaceFolder->fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
     auto position = textDocument->convertPosition(params.position);
-    workspaceFolder->checkStrict(moduleName);
+    workspaceFolder->checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = workspaceFolder->frontend.getSourceModule(moduleName);
     if (!sourceModule)
@@ -70,12 +72,12 @@ std::vector<lsp::Location> getReferencesForRenaming(WorkspaceFolder* workspaceFo
         referenceParams.textDocument = params.textDocument;
         referenceParams.position = params.position;
         referenceParams.context.includeDeclaration = true;
-        return workspaceFolder->references(referenceParams).value_or(std::vector<lsp::Location>{});
+        return workspaceFolder->references(referenceParams, cancellationToken).value_or(std::vector<lsp::Location>{});
     }
 }
 
 
-lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
+lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params, const LSPCancellationToken& cancellationToken)
 {
     // Verify the new name is valid (is an identifier)
     if (params.newName.length() == 0)
@@ -87,7 +89,7 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
         throw JsonRpcException(
             lsp::ErrorCode::RequestFailed, "The new name must be a valid identifier composed of characters, digits, and underscores only");
 
-    auto references = getReferencesForRenaming(this, params);
+    auto references = getReferencesForRenaming(this, params, cancellationToken);
     if (references.empty())
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "Unable to find symbol to rename");
 
@@ -104,8 +106,3 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params)
     return result;
 }
 
-lsp::RenameResult LanguageServer::rename(const lsp::RenameParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->rename(params);
-}

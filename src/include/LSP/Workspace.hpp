@@ -13,6 +13,8 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/LuauExt.hpp"
 
+using LSPCancellationToken = std::shared_ptr<Luau::FrontendCancellationToken>;
+
 struct Reference
 {
     Luau::ModuleName moduleName;
@@ -84,8 +86,8 @@ public:
     /// Whether the file has been specified in the configuration as a definitions file
     bool isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
 
-    lsp::DocumentDiagnosticReport documentDiagnostics(const lsp::DocumentDiagnosticParams& params,
-        const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken, bool allowUnmanagedFiles = false);
+    lsp::DocumentDiagnosticReport documentDiagnostics(
+        const lsp::DocumentDiagnosticParams& params, const LSPCancellationToken& cancellationToken, bool allowUnmanagedFiles = false);
     lsp::WorkspaceDiagnosticReport workspaceDiagnostics(const lsp::WorkspaceDiagnosticParams& params);
     void recomputeDiagnostics(const ClientConfiguration& config);
     void pushDiagnostics(const lsp::DocumentUri& uri, const size_t version);
@@ -95,10 +97,8 @@ public:
 
     void indexFiles(const ClientConfiguration& config);
 
-    Luau::CheckResult checkSimple(
-        const Luau::ModuleName& moduleName, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken = nullptr);
-    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, bool forAutocomplete = true,
-        const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken = nullptr);
+    Luau::CheckResult checkSimple(const Luau::ModuleName& moduleName, const LSPCancellationToken& cancellationToken);
+    Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, const LSPCancellationToken& cancellationToken, bool forAutocomplete = true);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
 
@@ -117,38 +117,40 @@ public:
     std::optional<std::string> getDocumentationForAstNode(const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope);
     std::optional<std::string> getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
         const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule);
-    std::vector<Reference> findAllTableReferences(const Luau::TypeId ty, std::optional<Luau::Name> property = std::nullopt);
-    std::vector<Reference> findAllFunctionReferences(const Luau::TypeId ty);
-    std::vector<Reference> findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName);
+    std::vector<Reference> findAllTableReferences(
+        const Luau::TypeId ty, const LSPCancellationToken& cancellationToken, std::optional<Luau::Name> property = std::nullopt);
+    std::vector<Reference> findAllFunctionReferences(const Luau::TypeId ty, const LSPCancellationToken& cancellationToken);
+    std::vector<Reference> findAllTypeReferences(
+        const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken);
 
-    std::vector<lsp::CompletionItem> completion(
-        const lsp::CompletionParams& params, const std::shared_ptr<Luau::FrontendCancellationToken>& cancellationToken);
+    std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken);
 
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
     lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params);
 
-    std::optional<lsp::Hover> hover(const lsp::HoverParams& params);
+    std::optional<lsp::Hover> hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken);
 
-    std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params);
+    std::optional<lsp::SignatureHelp> signatureHelp(const lsp::SignatureHelpParams& params, const LSPCancellationToken& cancellationToken);
 
-    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params);
+    lsp::DefinitionResult gotoDefinition(const lsp::DefinitionParams& params, const LSPCancellationToken& cancellationToken);
 
-    std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params);
+    std::optional<lsp::Location> gotoTypeDefinition(const lsp::TypeDefinitionParams& params, const LSPCancellationToken& cancellationToken);
 
-    lsp::ReferenceResult references(const lsp::ReferenceParams& params);
-    lsp::RenameResult rename(const lsp::RenameParams& params);
-    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params);
+    lsp::ReferenceResult references(const lsp::ReferenceParams& params, const LSPCancellationToken& cancellationToken);
+    lsp::RenameResult rename(const lsp::RenameParams& params, const LSPCancellationToken& cancellationToken);
+    lsp::InlayHintResult inlayHint(const lsp::InlayHintParams& params, const LSPCancellationToken& cancellationToken);
     std::vector<lsp::FoldingRange> foldingRange(const lsp::FoldingRangeParams& params);
 
-    std::vector<lsp::CallHierarchyItem> prepareCallHierarchy(const lsp::CallHierarchyPrepareParams& params);
+    std::vector<lsp::CallHierarchyItem> prepareCallHierarchy(
+        const lsp::CallHierarchyPrepareParams& params, const LSPCancellationToken& cancellationToken);
     std::vector<lsp::CallHierarchyIncomingCall> callHierarchyIncomingCalls(const lsp::CallHierarchyIncomingCallsParams& params);
     std::vector<lsp::CallHierarchyOutgoingCall> callHierarchyOutgoingCalls(const lsp::CallHierarchyOutgoingCallsParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);
-    std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params);
+    std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params, const LSPCancellationToken& cancellationToken);
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
@@ -158,3 +160,5 @@ public:
         return name == "$NULL_WORKSPACE";
     };
 };
+
+void throwIfCancelled(const LSPCancellationToken& cancellationToken);
