@@ -107,7 +107,8 @@ struct FindAllCallsVisitor : public Luau::AstVisitor
 };
 
 
-std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const lsp::CallHierarchyPrepareParams& params)
+std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(
+    const lsp::CallHierarchyPrepareParams& params, const LSPCancellationToken& cancellationToken)
 {
     // TODO: this is largely based off goto definition, maybe DRY?
 
@@ -118,7 +119,8 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ true);

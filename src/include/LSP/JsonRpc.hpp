@@ -41,6 +41,15 @@ public:
     }
 };
 
+class RequestCancelledException : public JsonRpcException
+{
+public:
+    explicit RequestCancelledException()
+        : JsonRpcException(lsp::ErrorCode::RequestCancelled, "Request cancelled by client")
+    {
+    }
+};
+
 class JsonRpcMessage
 {
 public:

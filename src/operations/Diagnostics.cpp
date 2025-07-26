@@ -21,7 +21,8 @@ static bool supportsRelatedDocuments(const lsp::ClientCapabilities& capabilities
 /// By default, this is called by the client for an open document. Hence we can expect that files are managed
 /// However, we sometimes call this as part of reverse-dependency updates (see updateTextDocument), where the file may be unmanaged
 /// In the default cause, we don't want to bother opening the file unnecessarily if it was closed.
-lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::DocumentDiagnosticParams& params, bool allowUnmanagedFiles)
+lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
+    const lsp::DocumentDiagnosticParams& params, const LSPCancellationToken& cancellationToken, bool allowUnmanagedFiles)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::documentDiagnostics", "LSP");
     if (!isReady)
@@ -46,7 +47,10 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(const lsp::Do
     // for no reason.
     // In the old solver, it doesn't really matter, because there is a differnce between module + moduleForAutocomplete. So we prefer
     // using checkSimple as we won't use the type graphs
-    Luau::CheckResult cr = FFlag::LuauSolverV2 ? checkStrict(moduleName) : checkSimple(moduleName);
+    Luau::CheckResult cr =
+        FFlag::LuauSolverV2 ? checkStrict(moduleName, cancellationToken, /* forAutocomplete= */ false) : checkSimple(moduleName, cancellationToken);
+
+    throwIfCancelled(cancellationToken);
 
     // If there was an error retrieving the source module
     // Bail early with an empty report - it is likely that the file was closed
@@ -167,7 +171,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
             documentReport.version = document->version();
 
         // Compute new check result
-        Luau::CheckResult cr = checkSimple(moduleName);
+        Luau::CheckResult cr = checkSimple(moduleName, /* cancellationToken= */ nullptr);
 
         // If there was an error retrieving the source module, disregard this file
         // TODO: should we file a diagnostic?
@@ -203,12 +207,6 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     return workspaceReport;
 }
 
-lsp::DocumentDiagnosticReport LanguageServer::documentDiagnostic(const lsp::DocumentDiagnosticParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->documentDiagnostics(params);
-}
-
 void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t version)
 {
     // Convert the diagnostics report into a series of diagnostics published for each relevant file
@@ -216,7 +214,7 @@ void WorkspaceFolder::pushDiagnostics(const lsp::DocumentUri& uri, const size_t 
 
     try
     {
-        auto diagnostics = documentDiagnostics(params);
+        auto diagnostics = documentDiagnostics(params, /* cancellationToken= */ nullptr);
         client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, version, diagnostics.items});
         if (!diagnostics.relatedDocuments.empty())
         {

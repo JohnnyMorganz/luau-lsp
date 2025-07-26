@@ -12,7 +12,7 @@ static lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string
     auto uri = fixture->newDocument("foo.luau", source);
     lsp::InlayHintParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
-    return fixture->workspace.inlayHint(params);
+    return fixture->workspace.inlayHint(params, /* cancellationToken= */ nullptr);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")
@@ -918,6 +918,15 @@ TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_f
     REQUIRE(result[1].textEdits.size() == 1);
     CHECK_EQ(result[1].textEdits[0].newText, ": string");
     CHECK_EQ(result[1].textEdits[0].range, lsp::Range{{6, 36}, {6, 36}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hints_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.inlayHint(lsp::InlayHintParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
 TEST_SUITE_END();

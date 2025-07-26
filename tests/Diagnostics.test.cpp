@@ -24,7 +24,7 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_sends_information_for_required_
         require(game.Testing.Required)
     )");
 
-    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}});
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
     CHECK_EQ(diagnostics.items.size(), 0);
     CHECK_EQ(diagnostics.relatedDocuments.size(), 1);
 }
@@ -48,7 +48,7 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_does_not_send_information_for_r
         require(game.Testing.Required)
     )");
 
-    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}});
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
     CHECK_EQ(diagnostics.items.size(), 0);
     CHECK_EQ(diagnostics.relatedDocuments.size(), 0);
 }
@@ -65,10 +65,10 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_marks_dependent_files_as_dirty"
         print(a.hello)
     )");
 
-    auto diagnosticsA = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
+    auto diagnosticsA = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
     CHECK_EQ(diagnosticsA.items.size(), 0);
 
-    auto diagnosticsB = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    auto diagnosticsB = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     CHECK_EQ(diagnosticsB.items.size(), 0);
 
     // We should see diagnostics in the dependent file after the update request
@@ -77,10 +77,10 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_marks_dependent_files_as_dirty"
         return { hello2 = true }
     )");
 
-    diagnosticsA = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
+    diagnosticsA = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
     CHECK_EQ(diagnosticsA.items.size(), 0);
 
-    diagnosticsB = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    diagnosticsB = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     CHECK_EQ(diagnosticsB.items.size(), 1);
     if (FFlag::LuauSolverV2)
         CHECK_EQ(diagnosticsB.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
@@ -103,8 +103,8 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_triggers_dependent_diagnostics_
     )");
 
     // Assumption: documents were already checked
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
 
     updateDocument(firstDocument, R"(
         --!strict
@@ -148,8 +148,8 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_does_not_update_workspace_diagn
 
     // Assumption: initial workspace diagnostics was triggered
     // We are using documentDiagnostics to replicate workspace diagnostics checking the file (and making it non-dirty)
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     client->workspaceDiagnosticsToken = "WORKSPACE-DIAGNOSTICS-PROGRESS-TOKEN";
 
     updateDocument(firstDocument, R"(
@@ -178,8 +178,8 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_auto_updates_workspace_diagnostic
 
     // Assumption: initial workspace diagnostics was triggered
     // We are using documentDiagnostics to replicate workspace diagnostics checking the file (and making it non-dirty)
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     client->workspaceDiagnosticsToken = "WORKSPACE-DIAGNOSTICS-PROGRESS-TOKEN";
 
     updateDocument(firstDocument, R"(
@@ -228,8 +228,8 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_does_not_update_workspace_diagnos
 
     // Assumption: initial workspace diagnostics was triggered
     // We are using documentDiagnostics to replicate workspace diagnostics checking the file (and making it non-dirty)
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}});
-    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}});
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{firstDocument}}, nullptr);
+    workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     client->workspaceDiagnosticsToken = "WORKSPACE-DIAGNOSTICS-PROGRESS-TOKEN";
 
     updateDocument(firstDocument, R"(
@@ -241,6 +241,15 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_does_not_update_workspace_diagnos
     // Check no workspace diagnostics progress on queue
     for (const auto& notification : client->notificationQueue)
         CHECK_NE(notification.first, "$/progress");
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, cancellationToken), RequestCancelledException);
 }
 
 TEST_SUITE_END();

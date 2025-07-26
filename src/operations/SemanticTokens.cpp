@@ -408,7 +408,8 @@ std::vector<size_t> packTokens(const TextDocument* textDocument, std::vector<Sem
     return result;
 }
 
-std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
+std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(
+    const lsp::SemanticTokensParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -417,7 +418,8 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
 
     // Run the type checker to ensure we are up to date
     // TODO: this relies on the autocomplete typechecker, which we don't really need for semantic tokens
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ true);
@@ -428,10 +430,4 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
     lsp::SemanticTokens result;
     result.data = packTokens(textDocument, tokens);
     return result;
-}
-
-std::optional<lsp::SemanticTokens> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->semanticTokens(params);
 }

@@ -205,4 +205,13 @@ struct ProgressParams
 };
 NLOHMANN_DEFINE_OPTIONAL(ProgressParams, token, value)
 
+struct CancelParams
+{
+    /**
+     * The request id to cancel.
+     */
+    std::variant<std::string, int> id;
+};
+NLOHMANN_DEFINE_OPTIONAL(CancelParams, id)
+
 } // namespace lsp

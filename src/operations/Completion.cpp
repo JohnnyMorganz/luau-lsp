@@ -460,7 +460,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     return std::nullopt;
 }
 
-std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
+std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::completion", "LSP");
     auto config = client->getConfiguration(rootUri);
@@ -505,6 +505,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             frontendOptions.runLintChecks = true;
         else
             frontendOptions.forAutocomplete = true;
+        frontendOptions.cancellationToken = cancellationToken;
 
         // Get parse information for this script
         frontend.parse(moduleName);
@@ -523,6 +524,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         // It is important to keep the fragmentResult in scope for the whole completion step
         // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
         fragmentStatusResult = Luau::tryFragmentAutocomplete(frontend, moduleName, position, fragmentContext, stringCompletionCB);
+        throwIfCancelled(cancellationToken);
         if (fragmentStatusResult.status == Luau::FragmentAutocompleteStatus::Success)
         {
             // Result is nullopt if there are no suggestions (i.e. comments)
@@ -537,7 +539,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     if (!fragmentWasSuccessful)
     {
         // We must perform check before autocompletion
-        checkStrict(moduleName, forAutocomplete);
+        checkStrict(moduleName, cancellationToken, forAutocomplete);
+
+        throwIfCancelled(cancellationToken);
+
         result = Luau::autocomplete(frontend, moduleName, position, stringCompletionCB);
     }
 
@@ -729,10 +734,4 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
 
     return items;
-}
-
-std::vector<lsp::CompletionItem> LanguageServer::completion(const lsp::CompletionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->completion(params);
 }

@@ -57,7 +57,7 @@ TEST_CASE_FIXTURE(Fixture, "services_show_up_in_auto_import")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     auto serviceImport = getItem(result, "ReplicatedStorage");
     REQUIRE(serviceImport);
@@ -87,7 +87,7 @@ TEST_CASE_FIXTURE(Fixture, "services_do_not_show_up_in_autocomplete_if_imports_i
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     CHECK_EQ(getItem(result, "ReplicatedStorage"), std::nullopt);
 }
 
@@ -105,7 +105,7 @@ TEST_CASE_FIXTURE(Fixture, "services_do_not_show_up_in_autocomplete_if_suggest_s
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     CHECK_EQ(getItem(result, "ReplicatedStorage"), std::nullopt);
 }
 
@@ -123,7 +123,7 @@ TEST_CASE_FIXTURE(Fixture, "service_does_not_show_up_in_autocomplete_if_already_
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     // item will exist as variable import, but it shouldn't be an auto import
     auto item = getItem(result, "ReplicatedStorage");
@@ -145,7 +145,7 @@ TEST_CASE_FIXTURE(Fixture, "service_auto_imports_are_inserted_alphabetically")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     auto beforeImport = getItem(result, "ReplicatedStorage");
     REQUIRE_EQ(beforeImport->additionalTextEdits.size(), 1);
@@ -170,7 +170,7 @@ TEST_CASE_FIXTURE(Fixture, "service_auto_imports_are_inserted_after_hot_comments
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     auto import = getItem(result, "ReplicatedStorage");
     REQUIRE(import);
@@ -211,7 +211,7 @@ TEST_CASE_FIXTURE(Fixture, "module_script_shows_up_in_auto_imports")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -259,7 +259,7 @@ TEST_CASE_FIXTURE(Fixture, "module_script_does_not_show_up_in_autocomplete_if_im
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     CHECK_EQ(filterAutoImports(result, "Module").size(), 0);
 }
@@ -298,7 +298,7 @@ TEST_CASE_FIXTURE(Fixture, "module_script_does_not_show_up_in_autocomplete_if_re
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
 
     CHECK_EQ(filterAutoImports(result, "Module").size(), 0);
 }
@@ -337,7 +337,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_reuses_service_if_already_defined")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -380,7 +380,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_separates_new_service_and_require_with_l
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -426,7 +426,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_separates_existing_service_and_new_requi
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -472,7 +472,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_will_prefer_relative_over_absolute_impo
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "SiblingModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -519,7 +519,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_will_force_absolute_import_depending_on
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "SiblingModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -569,7 +569,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_will_prefer_absolute_import_over_relati
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "OtherModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -620,7 +620,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_will_force_relative_import_depending_on
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "OtherModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -667,7 +667,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_of_modules_show_path_name")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 2);
@@ -710,7 +710,7 @@ TEST_CASE_FIXTURE(Fixture, "instance_auto_imports_creates_valid_identifier")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -758,7 +758,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_children_of_module")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "ChildModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -812,7 +812,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_descendant_of_module")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "DescendantModule");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -861,7 +861,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_parent_of_module")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -916,7 +916,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_ancestor_of_module")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result, "Module");
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1113,7 +1113,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1165,7 +1165,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1196,7 +1196,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1228,7 +1228,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments_2")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1343,7 +1343,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_imports_work_on_roblox_platform")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1372,7 +1372,7 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_are_inserted_after_services")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);
@@ -1401,7 +1401,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_empty_require_statement")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.completion(params);
+    auto result = workspace.completion(params, nullptr);
     auto imports = filterAutoImports(result);
 
     REQUIRE_EQ(imports.size(), 1);

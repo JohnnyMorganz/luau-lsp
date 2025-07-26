@@ -630,7 +630,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
     lsp::HoverParams params;
     params.textDocument = {document};
     params.position = lsp::Position{1, 16};
-    auto hover = workspace.hover(params);
+    auto hover = workspace.hover(params, nullptr);
 
     REQUIRE(hover);
     CHECK_EQ(hover->contents.value, codeBlock("luau", "local part: Part"));
@@ -649,7 +649,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
         }
     )");
 
-    auto hover2 = workspace.hover(params);
+    auto hover2 = workspace.hover(params, nullptr);
     REQUIRE(hover2);
     if (FFlag::LuauSolverV2)
         CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));

@@ -51,7 +51,7 @@ TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_empty")
     params.position = lsp::Position{0, 0};
     params.newName = "";
 
-    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "The new name must be a valid identifier", JsonRpcException);
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params, nullptr), "The new name must be a valid identifier", JsonRpcException);
 }
 
 TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_does_not_start_as_valid_identifier")
@@ -64,7 +64,7 @@ TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_does_not_start_as_valid_identifier"
     params.newName = "1234";
 
     REQUIRE_THROWS_WITH_AS(
-        workspace.rename(params), "The new name must be a valid identifier starting with a character or underscore", JsonRpcException);
+        workspace.rename(params, nullptr), "The new name must be a valid identifier starting with a character or underscore", JsonRpcException);
 }
 
 TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_not_a_valid_identifier")
@@ -76,8 +76,8 @@ TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_not_a_valid_identifier")
     params.position = lsp::Position{0, 0};
     params.newName = "testing123!";
 
-    REQUIRE_THROWS_WITH_AS(
-        workspace.rename(params), "The new name must be a valid identifier composed of characters, digits, and underscores only", JsonRpcException);
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params, nullptr),
+        "The new name must be a valid identifier composed of characters, digits, and underscores only", JsonRpcException);
 }
 
 TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter")
@@ -96,7 +96,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter")
     params.position = lsp::Position{1, 26};
     params.newName = "State";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -122,7 +122,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter_used_inside_of_type_al
     params.position = lsp::Position{1, 31};
     params.newName = "State";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -145,7 +145,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter_used_as_another_generi
     params.position = lsp::Position{1, 17};
     params.newName = "State";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -169,7 +169,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter_in_function_definition
     params.position = lsp::Position{1, 21};
     params.newName = "Value";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -197,7 +197,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_correctly_handle_shadowing_1")
     params.position = lsp::Position{2, 15};
     params.newName = "Value";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -227,7 +227,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_correctly_handle_shadowing_2")
     params.position = lsp::Position{3, 17};
     params.newName = "Value";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -257,7 +257,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_generic_type_correctly_handle_shadowing_3")
     params.position = lsp::Position{3, 20};
     params.newName = "Value";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -285,7 +285,7 @@ TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_also_rename_import
     params.position = lsp::Position{1, 14};
     params.newName = "ActualTypes";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -313,7 +313,7 @@ TEST_CASE_FIXTURE(Fixture, "rename_global_function_name")
     params.position = lsp::Position{4, 11};
     params.newName = "Test";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE(result->changes.size() == 1);
 
@@ -339,7 +339,7 @@ TEST_CASE_FIXTURE(Fixture, "disallow_renaming_of_global_from_type_definition")
     params.position = lsp::Position{1, 19}; // 'game'
     params.newName = "game2";
 
-    REQUIRE_THROWS_WITH_AS(workspace.rename(params), "Cannot rename a global variable", JsonRpcException);
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params, nullptr), "Cannot rename a global variable", JsonRpcException);
 }
 
 TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_local_function")
@@ -364,7 +364,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_local_
     params.position = lsp::Position{1, 27}; // 'useFunction' definition
     params.newName = "useFunction2";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
     CHECK_EQ(result->changes.begin()->first, uri);
@@ -393,7 +393,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_global
     params.position = lsp::Position{1, 20}; // 'useFunction' definition
     params.newName = "useFunction2";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
     CHECK_EQ(result->changes.begin()->first, uri);
@@ -421,7 +421,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_rename_cross_module_usages_of_a_returned_table"
     params.position = lsp::Position{1, 15}; // 'tbl' definition
     params.newName = "tbl2";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
     CHECK_EQ(result->changes.begin()->first, uri);
@@ -439,13 +439,22 @@ TEST_CASE_FIXTURE(Fixture, "response_json_is_valid_structure")
     params.position = lsp::Position{1, 15}; // 'value' definition
     params.newName = "value2";
 
-    auto result = workspace.rename(params);
+    auto result = workspace.rename(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->changes.size(), 1);
 
     json response = result;
     CHECK_EQ(response.dump(), R"({"changes":{")" + uri.toString() +
                                   R"(":[{"newText":"value2","range":{"end":{"character":19,"line":1},"start":{"character":14,"line":1}}}]}})");
+}
+
+TEST_CASE_FIXTURE(Fixture, "rename_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.rename(lsp::RenameParams{{{document}, lsp::Position{}}, "y"}, cancellationToken), RequestCancelledException);
 }
 
 TEST_SUITE_END();

@@ -19,7 +19,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_handles_overloaded_functions_and_pick
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 2);
 
@@ -44,7 +44,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_handles_overloaded_functions_and_pick
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 2);
 
@@ -74,7 +74,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_shows_for_call_metamethod")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 1);
 
@@ -86,6 +86,15 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_shows_for_call_metamethod")
 
     CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{13, 22});
     CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(1).label), std::vector<size_t>{24, 36});
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.signatureHelp(lsp::SignatureHelpParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
 TEST_SUITE_END();
