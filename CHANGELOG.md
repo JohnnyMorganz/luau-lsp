@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.683
+- Sync to upstream Luau 0.684
 - The release artifact for Linux x86_64 is renamed from `luau-lsp-linux.zip` to `luau-lsp-linux-x86_64.zip`
 
 ## [1.52.1] - 2025-07-12
