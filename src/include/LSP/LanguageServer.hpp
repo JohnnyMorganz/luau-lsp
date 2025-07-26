@@ -59,6 +59,9 @@ public:
     void processInputLoop();
     bool requestedShutdown();
 
+    // Visibile for testing only
+    void shutdown();
+
     // Dispatch handlers
 private:
     bool allWorkspacesReceivedConfiguration() const;
@@ -84,7 +87,6 @@ private:
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
-    Response onShutdown([[maybe_unused]] const id_type& id);
 
 private:
     bool isInitialized = false;

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed crash on server shutdown due to deadlock
+
 ## [1.53.0] - 2025-07-26
 
 ### Added

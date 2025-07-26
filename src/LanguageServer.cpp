@@ -175,7 +175,8 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "shutdown")
     {
-        response = onShutdown(id);
+        // NO-OP: shutdown is processed on the main loop
+        LUAU_ASSERT(false);
     }
     else if (method == "textDocument/completion")
     {
@@ -556,6 +557,12 @@ void LanguageServer::processInputLoop()
                 if (msg.is_request())
                     cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
 
+                if (msg.is_request() && msg.method == "shutdown")
+                {
+                    shutdown();
+                    return;
+                }
+
                 {
                     std::unique_lock guard(messagesMutex);
                     if (msg.is_notification() && msg.method == "$/cancelRequest")
@@ -845,8 +852,10 @@ void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesPar
         workspace->onDidChangeWatchedFiles(changes);
 }
 
-Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)
+void LanguageServer::shutdown()
 {
+    client->sendLogMessage(lsp::MessageType::Info, "Client requested shutdown");
+
     {
         std::unique_lock lock(messagesMutex);
         shutdownRequested = true;
@@ -854,5 +863,5 @@ Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)
 
     messagesCv.notify_all();
     messageProcessorThread.join();
-    return nullptr;
+    return;
 }
