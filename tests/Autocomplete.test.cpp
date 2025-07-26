@@ -1560,4 +1560,118 @@ TEST_CASE_FIXTURE(Fixture, "completion_respects_cancellation")
     CHECK_THROWS_AS(workspace.completion(lsp::CompletionParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
+static void enableSnippetSupport(lsp::ClientCapabilities& capabilities)
+{
+    capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+    capabilities.textDocument->completion = lsp::CompletionClientCapabilities{};
+    capabilities.textDocument->completion->completionItem = lsp::CompletionItemClientCapabilities{};
+    capabilities.textDocument->completion->completionItem->snippetSupport = true;
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_inserts_param_names_in_parentheses_for_call")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(x, y)
+        end
+
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto callEntry = getItem(result, "foo");
+
+    REQUIRE(callEntry);
+    REQUIRE(callEntry->insertText);
+    CHECK_EQ(*callEntry->insertText, "foo(${1:x}, ${2:y})$0");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_does_not_include_optional_parameters_for_call")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(x: string, y: number?)
+        end
+
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto callEntry = getItem(result, "foo");
+
+    REQUIRE(callEntry);
+    REQUIRE(callEntry->insertText);
+    CHECK_EQ(*callEntry->insertText, "foo(${1:x})$0");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_puts_cursor_after_call_for_function_with_no_arguments")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo()
+        end
+
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto callEntry = getItem(result, "foo");
+
+    REQUIRE(callEntry);
+    REQUIRE(callEntry->insertText);
+    CHECK_EQ(*callEntry->insertText, "foo()$0");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_still_puts_cursor_inside_of_call_if_there_are_arguments_but_they_are_all_optional")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(x: string?, y: number?)
+        end
+
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto callEntry = getItem(result, "foo");
+    REQUIRE(callEntry);
+    REQUIRE(callEntry->insertText);
+    CHECK_EQ(*callEntry->insertText, "foo($1)$0");
+
+    // Should be the same for the require global
+    auto requireEntry = getItem(result, "require");
+    REQUIRE(requireEntry);
+    REQUIRE(requireEntry->insertText);
+    CHECK_EQ(*requireEntry->insertText, "require($1)$0");
+}
+
 TEST_SUITE_END();

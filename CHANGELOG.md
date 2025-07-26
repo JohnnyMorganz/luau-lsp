@@ -16,6 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.684
 - The release artifact for Linux x86_64 is renamed from `luau-lsp-linux.zip` to `luau-lsp-linux-x86_64.zip`
 
+### Fixed
+
+- Autocomplete now properly respects Luau's ParenthesesRecommendation and puts the cursor inside of the parentheses when
+  autocompleting a function call where the arguments are all optional / any (e.g., `require()` or
+  `wait()`) ([#317](https://github.com/JohnnyMorganz/luau-lsp/issues/317))
+
 ## [1.52.1] - 2025-07-12
 
 ### Changed

@@ -394,6 +394,14 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
         detail += Luau::toString(*tail);
     }
 
+    // If Luau recommended we put the cursor inside, but we haven't recorded any arguments yet, then we are going to fail to do this.
+    // This can happen when all the arguments to function are optional or any (e.g., wait or require)
+    // Let's force a tabstop inside if this happens
+    if (entry.parens == Luau::ParenthesesRecommendation::CursorInside && parenthesesSnippet == "(")
+    {
+        parenthesesSnippet += "$1";
+    }
+
     detail += ")";
     parenthesesSnippet += ")";
 
