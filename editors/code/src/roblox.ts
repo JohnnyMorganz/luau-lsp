@@ -93,7 +93,7 @@ const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
           ),
       ]).catch((err) =>
         vscode.window.showErrorMessage(
-          "Failed to retrieve API information: " + err,
+          `Failed to retrieve API information: ${err}, cause: ${err.cause}`,
         ),
       );
     },

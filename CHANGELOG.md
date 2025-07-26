@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The language server now supports cancellation notifications from the client. This should help in cases where the
   server is stuck waiting for typechecking to complete.
+- Emit error cause when fetching fails to download API types
 
 ### Changed
 
