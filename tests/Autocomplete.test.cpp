@@ -1551,4 +1551,13 @@ TEST_CASE_FIXTURE(Fixture, "dont_mark_type_as_function_kind_when_autocompleting_
     CHECK_EQ(item.command, std::nullopt);
 }
 
+TEST_CASE_FIXTURE(Fixture, "completion_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.completion(lsp::CompletionParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();
