@@ -853,5 +853,6 @@ Response LanguageServer::onShutdown([[maybe_unused]] const id_type& id)
     }
 
     messagesCv.notify_all();
+    messageProcessorThread.join();
     return nullptr;
 }

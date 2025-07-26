@@ -20,6 +20,8 @@ TEST_CASE("language_server_handles_fflags_in_initialization_options")
 
     CHECK_EQ(FFlag::DebugLuauTimeTracing.value, true);
 
+    server.onRequest(1, "shutdown", {});
+
     // NOTE: Setting FFlags can virally affect other tests! We must reset here
     FFlag::DebugLuauTimeTracing.value = false;
 }
@@ -54,6 +56,8 @@ TEST_CASE("language_server_lazily_initializes_workspace_folders")
     server.onNotification("textDocument/didOpen", std::make_optional(openParams));
 
     CHECK(workspaceFolder->isReady);
+
+    server.onRequest(1, "shutdown", {});
 }
 
 TEST_SUITE_END();
