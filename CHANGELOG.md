@@ -11,16 +11,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The language server now supports cancellation notifications from the client. This should help in cases where the
   server is stuck waiting for typechecking to complete.
 
+### Changed
+
+- Sync to upstream Luau 0.684
+- The release artifact for Linux x86_64 is renamed from `luau-lsp-linux.zip` to `luau-lsp-linux-x86_64.zip`
+
+## [1.52.1] - 2025-07-12
+
+### Changed
+
+- Sync to upstream Luau 0.682
+
 ### Fixed
 
 - Fixed missing name for `timeout` parameter in `:WaitForChild()` when the new solver is enabled
 - (Attempted) fix for memory access crashes after the sourcemap changes
 - Fixed incorrect paths showing up for errors when using
   `luau-lsp analyze` ([#1146](https://github.com/JohnnyMorganz/luau-lsp/issues/1146))
-
-### Changed
-
-- Sync to upstream Luau 0.682
 
 ## [1.52.0] - 2025-07-05
 
@@ -1378,6 +1385,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

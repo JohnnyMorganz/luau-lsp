@@ -71,7 +71,7 @@ jobs:
             code-target: [win32-x64, win32-arm64]
             crash-reporting: true
           - os: ubuntu-22.04
-            artifact-name: luau-lsp-linux
+            artifact-name: luau-lsp-linux-x86_64
             code-target: [linux-x64]
             crash-reporting: false
           - os: ubuntu-22.04-arm
