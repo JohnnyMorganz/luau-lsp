@@ -19,7 +19,7 @@ TEST_CASE_FIXTURE(Fixture, "local_variable_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 14});
@@ -38,7 +38,7 @@ TEST_CASE_FIXTURE(Fixture, "local_variable_definition_pointing_to_a_table")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{1, 14});
@@ -61,7 +61,7 @@ TEST_CASE_FIXTURE(Fixture, "local_inlined_primitive_table_property_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 12});
@@ -83,7 +83,7 @@ TEST_CASE_FIXTURE(Fixture, "local_separate_primitive_table_property_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 10});
@@ -106,7 +106,7 @@ TEST_CASE_FIXTURE(Fixture, "local_inlined_function_table_property_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 12});
@@ -129,7 +129,7 @@ TEST_CASE_FIXTURE(Fixture, "local_separate_anonymous_function_table_property_def
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 10});
@@ -152,7 +152,7 @@ TEST_CASE_FIXTURE(Fixture, "local_named_function_table_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 19});
@@ -173,7 +173,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 8});
@@ -212,14 +212,14 @@ TEST_CASE_FIXTURE(Fixture, "methods_on_explicitly_defined_self")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{9, 22});
     CHECK_EQ(result[0].range.end, lsp::Position{9, 30});
 
     params.position.line += 1;
-    result = workspace.gotoDefinition(params);
+    result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{12, 22});
@@ -249,7 +249,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_inlined_function_table_property_definit
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 12});
@@ -280,7 +280,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_indirect_variable_inlined_function_tabl
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 12});
@@ -312,7 +312,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_table_property_referencing_local_variab
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{6, 12});
@@ -343,7 +343,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_separate_function_table_property_defini
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 10});
@@ -374,7 +374,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_named_function_table_property_definitio
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{3, 19});
@@ -403,7 +403,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 8});
@@ -430,13 +430,13 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition_after_ch
 
     // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
     // We should still be able to find the type references.
-    workspace.checkSimple(workspace.fileResolver.getModuleName(document));
+    workspace.checkSimple(workspace.fileResolver.getModuleName(document), /* cancellationToken= */ nullptr);
 
     auto params = lsp::DefinitionParams{};
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 8});
@@ -463,13 +463,13 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_imported_type_alias_definition_after_ch
 
     // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
     // We should still be able to find the type references.
-    workspace.checkSimple(workspace.fileResolver.getModuleName(document));
+    workspace.checkSimple(workspace.fileResolver.getModuleName(document), /* cancellationToken= */ nullptr);
 
     auto params = lsp::TypeDefinitionParams{};
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoTypeDefinition(params);
+    auto result = workspace.gotoTypeDefinition(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->uri, required);
     CHECK_EQ(result->range.start, lsp::Position{2, 8});
@@ -499,7 +499,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_a_named_function_returns_the_und
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 23});
@@ -527,7 +527,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_of_an_anonymous_function_returns_th
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, required);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 15});
@@ -545,7 +545,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_string_require_path")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("test.lua"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
@@ -575,7 +575,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_works_for_a_roblox_require_path")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, workspace.rootUri.resolvePath("source.luau"));
     CHECK_EQ(result[0].range.start, lsp::Position{0, 0});
@@ -598,7 +598,7 @@ TEST_CASE_FIXTURE(Fixture, "property_on_table_type_without_actual_definition")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 12});
@@ -625,7 +625,7 @@ TEST_CASE_FIXTURE(Fixture, "property_on_the_return_of_a_function_call")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoDefinition(params);
+    auto result = workspace.gotoDefinition(params, nullptr);
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range.start, lsp::Position{2, 12});
@@ -648,7 +648,7 @@ TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_returns_the_table_location")
     params.textDocument = lsp::TextDocumentIdentifier{document};
     params.position = position;
 
-    auto result = workspace.gotoTypeDefinition(params);
+    auto result = workspace.gotoTypeDefinition(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->uri, document);
     CHECK_EQ(result->range.start, lsp::Position{1, 23});

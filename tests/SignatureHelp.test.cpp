@@ -19,7 +19,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_handles_overloaded_functions_and_pick
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 2);
 
@@ -44,7 +44,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_handles_overloaded_functions_and_pick
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 2);
 
@@ -74,7 +74,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_shows_for_call_metamethod")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = marker;
 
-    auto result = workspace.signatureHelp(params);
+    auto result = workspace.signatureHelp(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 1);
 

@@ -26,7 +26,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_1")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllTableReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 10);
@@ -44,7 +44,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllTableReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 12);
@@ -64,7 +64,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_3")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllTableReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -84,7 +84,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_4")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllTableReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -109,7 +109,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{2, 12};
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -134,7 +134,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{4, 11};
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -157,7 +157,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 19}; // 'game' symbol
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -182,7 +182,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_type_definition_used_as_return_ty
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 14}; // 'Foo' symbol
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -214,7 +214,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_fun
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 28}; // 'useFunction' definition
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
     // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
@@ -267,7 +267,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_fu
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 20}; // 'useFunction' definition
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
     // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
@@ -319,7 +319,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 16}; // 'tbl' definition
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
     // The new solver does not store `require("useFunction.luau")` in the astTypes of a module

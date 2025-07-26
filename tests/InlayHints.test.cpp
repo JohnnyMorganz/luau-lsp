@@ -12,7 +12,7 @@ static lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string
     auto uri = fixture->newDocument("foo.luau", source);
     lsp::InlayHintParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
-    return fixture->workspace.inlayHint(params);
+    return fixture->workspace.inlayHint(params, /* cancellationToken= */ nullptr);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")

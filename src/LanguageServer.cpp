@@ -164,13 +164,7 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     if (const auto& it = cancellationTokens.find(id); it != cancellationTokens.end())
         cancellationToken = it->second;
 
-    if (!cancellationToken)
-    {
-        LUAU_ASSERT(!"Have a request with no cancellation token");
-        cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
-    }
-
-    if (cancellationToken->requested())
+    if (cancellationToken && cancellationToken->requested())
         throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
 
     Response response;
