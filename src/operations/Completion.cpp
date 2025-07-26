@@ -357,6 +357,11 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
 
     auto [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
 
+    // Include 'unknown' arguments as required types
+    for (auto arg : ftv->argTypes)
+        if (Luau::get<Luau::UnknownType>(follow(arg)))
+            minCount += 1;
+
     auto it = Luau::begin(ftv->argTypes);
     for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
     {
