@@ -448,4 +448,13 @@ TEST_CASE_FIXTURE(Fixture, "response_json_is_valid_structure")
                                   R"(":[{"newText":"value2","range":{"end":{"character":19,"line":1},"start":{"character":14,"line":1}}}]}})");
 }
 
+TEST_CASE_FIXTURE(Fixture, "rename_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.rename(lsp::RenameParams{{{document}, lsp::Position{}}, "y"}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();

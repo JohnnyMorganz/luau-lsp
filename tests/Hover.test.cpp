@@ -443,4 +443,13 @@ TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "hover_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.hover(lsp::HoverParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();

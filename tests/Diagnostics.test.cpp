@@ -243,4 +243,13 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_does_not_update_workspace_diagnos
         CHECK_NE(notification.first, "$/progress");
 }
 
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();

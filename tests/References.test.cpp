@@ -350,5 +350,13 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
     }
 }
 
+TEST_CASE_FIXTURE(Fixture, "references_respect_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.references(lsp::ReferenceParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
 
 TEST_SUITE_END();

@@ -655,4 +655,22 @@ TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_returns_the_table_location")
     CHECK_EQ(result->range.end, lsp::Position{3, 9});
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.gotoDefinition(lsp::DefinitionParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.gotoTypeDefinition(lsp::TypeDefinitionParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();

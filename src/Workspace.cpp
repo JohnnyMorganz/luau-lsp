@@ -16,7 +16,7 @@ LUAU_FASTFLAG(LuauSolverV2)
 void throwIfCancelled(const LSPCancellationToken& cancellationToken)
 {
     if (cancellationToken && cancellationToken->requested())
-        throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
+        throw RequestCancelledException();
 }
 
 const Luau::ModulePtr WorkspaceFolder::getModule(const Luau::ModuleName& moduleName, bool forAutocomplete) const

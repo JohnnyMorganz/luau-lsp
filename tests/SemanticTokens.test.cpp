@@ -132,4 +132,13 @@ TEST_CASE_FIXTURE(Fixture,
     CHECK_EQ(usage->tokenModifiers, lsp::SemanticTokenModifiers::None);
 }
 
+TEST_CASE_FIXTURE(Fixture, "semantic_tokens_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+    
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.semanticTokens(lsp::SemanticTokensParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();

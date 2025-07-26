@@ -920,4 +920,13 @@ TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_f
     CHECK_EQ(result[1].textEdits[0].range, lsp::Range{{6, 36}, {6, 36}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "inlay_hints_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.inlayHint(lsp::InlayHintParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
 TEST_SUITE_END();
