@@ -6711,6 +6711,12 @@ declare class Secret
 	function AddSuffix(self, suffix: string): Secret
 end
 
+declare class SecurityCapabilities
+	function Add(self, ...: (EnumSecurityCapability)): SecurityCapabilities
+	function Contains(self, ...: (EnumSecurityCapability)): SecurityCapabilities
+	function Remove(self, ...: (EnumSecurityCapability)): SecurityCapabilities
+end
+
 
 
 declare class TweenInfo
@@ -13301,6 +13307,10 @@ declare Secret: {
 
 declare Path2DControlPoint: {
 	new: (() -> Path2DControlPoint) & ((position: UDim2) -> Path2DControlPoint) & ((position: UDim2, leftTangent: UDim2, rightTangent: UDim2) -> Path2DControlPoint),
+}
+
+declare SecurityCapabilities: {
+	new: ((...EnumSecurityCapability) -> SecurityCapabilities),
 }
 
 
