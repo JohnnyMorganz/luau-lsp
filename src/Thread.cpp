@@ -1,21 +1,27 @@
 #include "Thread.hpp"
 
-#include <functional>
-#include <memory>
-
 #ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
+Thread::~Thread() = default;
 
-#ifdef _WIN32
-DWORD WINAPI winThreadFuncWrapper(LPVOID lpParam)
+Thread::Thread(Thread&& thread) noexcept
+    : m_thread(std::move(thread.m_thread))
 {
-    std::function<void()>* func = static_cast<std::function<void()>*>(lpParam);
-    (*func)();
-    delete func; // Clean up the allocated function object
-    return 0;
+}
+
+Thread& Thread::operator=(Thread&& other) noexcept
+{
+    m_thread = std::move(other.m_thread);
+    return *this;
+}
+
+bool Thread::joinable() const
+{
+    return m_thread.joinable();
+}
+
+void Thread::join()
+{
+    return m_thread.join();
 }
 #else
 static pthread_t NULL_THREAD = pthread_t();
@@ -40,7 +46,7 @@ void* posixThreadFuncWrapper(void* arg)
 
 Thread::~Thread()
 {
-    if (!thread_isnull(&m_threadId))
+    if (joinable())
         std::terminate();
 }
 
@@ -52,7 +58,7 @@ Thread::Thread(Thread&& thread) noexcept
 
 Thread& Thread::operator=(Thread&& other) noexcept
 {
-    if (!thread_isnull(&m_threadId))
+    if (joinable())
         std::terminate();
     m_threadId = other.m_threadId;
     other.m_threadId = NULL_THREAD;

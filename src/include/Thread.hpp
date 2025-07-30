@@ -1,23 +1,24 @@
 #pragma once
 
-#include <functional>
-
 #ifdef _WIN32
-#include <windows.h>
+#include <thread>
 #else
+#include <functional>
+#include <memory>
+#include <system_error>
 #include <pthread.h>
-#endif
 
 constexpr size_t MACOS_CUSTOM_THREAD_STACK_SIZE = 8 * 1024 * 1024; // 8 MB, default is 512KB
 
 void* posixThreadFuncWrapper(void* arg);
+#endif
+
 
 class Thread
 {
 protected:
 #ifdef _WIN32
-    HANDLE m_handle;
-    DWORD m_threadId;
+    std::thread m_thread;
 #else
     pthread_t m_threadId{};
 #endif
@@ -29,6 +30,13 @@ public:
     Thread& operator=(Thread&& other) noexcept;
     ~Thread();
 
+#ifdef _WIN32
+    template<typename Callable>
+    explicit Thread(Callable&& func)
+        : m_thread(func)
+    {
+    }
+#else
     template<typename Callable>
     explicit Thread(Callable&& func)
     {
@@ -63,6 +71,7 @@ public:
             throw std::system_error(ret, std::generic_category(), "error creating thread");
         }
     }
+#endif
 
     [[nodiscard]] bool joinable() const;
     void join();
