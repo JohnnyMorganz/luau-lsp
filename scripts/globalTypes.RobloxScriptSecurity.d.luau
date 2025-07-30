@@ -983,6 +983,15 @@ declare class EnumBorderMode_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumBorderMode?
 	function FromValue(self, Value: number): EnumBorderMode?
 end
+declare class EnumBorderStrokePosition extends EnumItem end
+declare class EnumBorderStrokePosition_INTERNAL extends Enum
+	Center: EnumBorderStrokePosition
+	Inner: EnumBorderStrokePosition
+	Outer: EnumBorderStrokePosition
+	function GetEnumItems(self): { EnumBorderStrokePosition }
+	function FromName(self, Name: string): EnumBorderStrokePosition?
+	function FromValue(self, Value: number): EnumBorderStrokePosition?
+end
 declare class EnumBreakReason extends EnumItem end
 declare class EnumBreakReason_INTERNAL extends Enum
 	Error: EnumBreakReason
@@ -1087,6 +1096,13 @@ declare class EnumCameraType_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumCameraType }
 	function FromName(self, Name: string): EnumCameraType?
 	function FromValue(self, Value: number): EnumCameraType?
+end
+declare class EnumCaptureGalleryPermission extends EnumItem end
+declare class EnumCaptureGalleryPermission_INTERNAL extends Enum
+	ReadAndUpload: EnumCaptureGalleryPermission
+	function GetEnumItems(self): { EnumCaptureGalleryPermission }
+	function FromName(self, Name: string): EnumCaptureGalleryPermission?
+	function FromValue(self, Value: number): EnumCaptureGalleryPermission?
 end
 declare class EnumCaptureType extends EnumItem end
 declare class EnumCaptureType_INTERNAL extends Enum
@@ -3709,6 +3725,16 @@ declare class EnumPathfindingUseImprovedSearch_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumPathfindingUseImprovedSearch?
 	function FromValue(self, Value: number): EnumPathfindingUseImprovedSearch?
 end
+declare class EnumPerformanceOverlayMode extends EnumItem end
+declare class EnumPerformanceOverlayMode_INTERNAL extends Enum
+	Decals: EnumPerformanceOverlayMode
+	Lights: EnumPerformanceOverlayMode
+	Overdraw: EnumPerformanceOverlayMode
+	Transparent: EnumPerformanceOverlayMode
+	function GetEnumItems(self): { EnumPerformanceOverlayMode }
+	function FromName(self, Name: string): EnumPerformanceOverlayMode?
+	function FromValue(self, Value: number): EnumPerformanceOverlayMode?
+end
 declare class EnumPermissionLevelShown extends EnumItem end
 declare class EnumPermissionLevelShown_INTERNAL extends Enum
 	Game: EnumPermissionLevelShown
@@ -4071,6 +4097,14 @@ declare class EnumRaycastFilterType_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumRaycastFilterType }
 	function FromName(self, Name: string): EnumRaycastFilterType?
 	function FromValue(self, Value: number): EnumRaycastFilterType?
+end
+declare class EnumReadCapturesFromGalleryResult extends EnumItem end
+declare class EnumReadCapturesFromGalleryResult_INTERNAL extends Enum
+	NeedPermission: EnumReadCapturesFromGalleryResult
+	Success: EnumReadCapturesFromGalleryResult
+	function GetEnumItems(self): { EnumReadCapturesFromGalleryResult }
+	function FromName(self, Name: string): EnumReadCapturesFromGalleryResult?
+	function FromValue(self, Value: number): EnumReadCapturesFromGalleryResult?
 end
 declare class EnumRecommendationActionType extends EnumItem end
 declare class EnumRecommendationActionType_INTERNAL extends Enum
@@ -5555,6 +5589,17 @@ declare class EnumUiMessageType_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumUiMessageType?
 	function FromValue(self, Value: number): EnumUiMessageType?
 end
+declare class EnumUploadCaptureResult extends EnumItem end
+declare class EnumUploadCaptureResult_INTERNAL extends Enum
+	CaptureModerated: EnumUploadCaptureResult
+	CaptureNotInGallery: EnumUploadCaptureResult
+	IneligibleCapture: EnumUploadCaptureResult
+	NeedPermission: EnumUploadCaptureResult
+	Success: EnumUploadCaptureResult
+	function GetEnumItems(self): { EnumUploadCaptureResult }
+	function FromName(self, Name: string): EnumUploadCaptureResult?
+	function FromValue(self, Value: number): EnumUploadCaptureResult?
+end
 declare class EnumUsageContext extends EnumItem end
 declare class EnumUsageContext_INTERNAL extends Enum
 	Default: EnumUsageContext
@@ -6042,6 +6087,7 @@ type ENUM_LIST = {
 	BodyPart: EnumBodyPart_INTERNAL,
 	BodyPartR15: EnumBodyPartR15_INTERNAL,
 	BorderMode: EnumBorderMode_INTERNAL,
+	BorderStrokePosition: EnumBorderStrokePosition_INTERNAL,
 	BreakReason: EnumBreakReason_INTERNAL,
 	BreakpointRemoveReason: EnumBreakpointRemoveReason_INTERNAL,
 	BulkMoveMode: EnumBulkMoveMode_INTERNAL,
@@ -6053,6 +6099,7 @@ type ENUM_LIST = {
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
 	CameraSpeedAdjustBinding: EnumCameraSpeedAdjustBinding_INTERNAL,
 	CameraType: EnumCameraType_INTERNAL,
+	CaptureGalleryPermission: EnumCaptureGalleryPermission_INTERNAL,
 	CaptureType: EnumCaptureType_INTERNAL,
 	CatalogCategoryFilter: EnumCatalogCategoryFilter_INTERNAL,
 	CatalogSortAggregation: EnumCatalogSortAggregation_INTERNAL,
@@ -6259,6 +6306,7 @@ type ENUM_LIST = {
 	PathStatus: EnumPathStatus_INTERNAL,
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
 	PathfindingUseImprovedSearch: EnumPathfindingUseImprovedSearch_INTERNAL,
+	PerformanceOverlayMode: EnumPerformanceOverlayMode_INTERNAL,
 	PermissionLevelShown: EnumPermissionLevelShown_INTERNAL,
 	PhysicsSimulationRate: EnumPhysicsSimulationRate_INTERNAL,
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod_INTERNAL,
@@ -6292,6 +6340,7 @@ type ENUM_LIST = {
 	QualityLevel: EnumQualityLevel_INTERNAL,
 	R15CollisionType: EnumR15CollisionType_INTERNAL,
 	RaycastFilterType: EnumRaycastFilterType_INTERNAL,
+	ReadCapturesFromGalleryResult: EnumReadCapturesFromGalleryResult_INTERNAL,
 	RecommendationActionType: EnumRecommendationActionType_INTERNAL,
 	RecommendationImpressionType: EnumRecommendationImpressionType_INTERNAL,
 	RecommendationItemVisibility: EnumRecommendationItemVisibility_INTERNAL,
@@ -6419,6 +6468,7 @@ type ENUM_LIST = {
 	UIFlexMode: EnumUIFlexMode_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
 	UiMessageType: EnumUiMessageType_INTERNAL,
+	UploadCaptureResult: EnumUploadCaptureResult_INTERNAL,
 	UsageContext: EnumUsageContext_INTERNAL,
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
@@ -6900,6 +6950,11 @@ declare class Object
 end
 
 declare class Capture extends Object
+	CaptureTime: DateTime
+	CaptureType: EnumCaptureType
+	LocalId: string
+	SourcePlaceId: number
+	SourceUniverseId: number
 end
 
 declare class ScreenshotCapture extends Capture
@@ -7412,7 +7467,7 @@ declare class AssetService extends Instance
 	function CreateMeshPartAsync(self, meshContent: Content, options: { [any]: any }?): MeshPart
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
-	function CreateSurfaceAppearance(self, content: { [any]: any }): SurfaceAppearance
+	function CreateSurfaceAppearanceAsync(self, content: { [any]: any }): SurfaceAppearance
 	function DeserializeInstance(self, serializedInstance: string): Instance
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetAudioMetadataAsync(self, idList: { any }): { any }
@@ -7926,7 +7981,7 @@ declare class AvatarCreationService extends Instance
 	AvatarModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	UgcValidationFailure: RBXScriptSignal<string, string>
 	UgcValidationSuccess: RBXScriptSignal<string, string, number>
-	function AutoSetupAvatarAsync(self, player: Player, model: Model): string
+	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: ((...any) -> ...any)?): string
 	function DeserializeAvatarModel(self, serializedModel: string): Instance
 	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [any]: any }): string
 	function GenerateAvatarAsync(self, avatarGenerationParams: { [any]: any }): string
@@ -8382,6 +8437,7 @@ declare class CaptureService extends Instance
 	CaptureBegan: RBXScriptSignal<EnumCaptureType>
 	CaptureEnded: RBXScriptSignal<EnumCaptureType>
 	CaptureSavedInternal: RBXScriptSignal<{ [any]: any }, string>
+	OpenCapturePermissionsPrompt: RBXScriptSignal<number, EnumCaptureGalleryPermission>
 	OpenSaveCapturesPrompt: RBXScriptSignal<number, { any }>
 	OpenShareCapturePrompt: RBXScriptSignal<number, any, string>
 	UserCaptureSaved: RBXScriptSignal<ContentId>
@@ -8402,13 +8458,16 @@ declare class CaptureService extends Instance
 	function IsCapturingVideo(self): boolean
 	function OnCaptureBegan(self): nil
 	function OnCaptureEnded(self): nil
+	function OnCapturePermissionsPromptFinished(self, promptId: number, wasAccepted: boolean): nil
 	function OnCaptureShared(self, capturePath: string): nil
 	function OnSavePromptFinished(self, promptId: number, results: { [any]: any }): nil
 	function OnSharePromptFinished(self, promptId: number, accepted: boolean): nil
 	function OnVideoCaptureShared(self, videoCapture: VideoCapture): nil
 	function PreVideoCaptureShared(self, videoCapture: VideoCapture): string
+	function PromptCaptureGalleryPermission(self, captureGalleryPermission: EnumCaptureGalleryPermission, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
 	function PromptSaveCapturesToGallery(self, captures: { any }, resultCallback: ((...any) -> ...any)): nil
 	function PromptShareCapture(self, captureContent: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
+	function ReadCapturesFromGalleryAsync(self, captureTypeFilters: { any }?): any
 	function RetrieveCaptures(self): { any }
 	function SaveCaptureToExternalStorage(self, capturePath: string): nil
 	function SaveCapturesToExternalStorageAsync(self, pathArr: { any }): number
@@ -8419,6 +8478,7 @@ declare class CaptureService extends Instance
 	function StopVideoCapture(self): nil
 	function StopVideoCaptureInternal(self): nil
 	function TakeCapture(self, onCaptureReady: ((...any) -> ...any), captureParams: { [any]: any }?): nil
+	function UploadCaptureAsync(self, capture: Capture): any
 end
 
 declare class ChangeHistoryService extends Instance
@@ -12013,6 +12073,9 @@ end
 declare class BanHistoryPages extends Pages
 end
 
+declare class CapturesPages extends Pages
+end
+
 declare class CatalogPages extends Pages
 end
 
@@ -12095,11 +12158,13 @@ declare class ParticleEmitter extends Instance
 end
 
 declare class PartyEmulatorService extends Instance
+	ConfigurationChanged: RBXScriptSignal<{ [any]: any }>
 	function CreateNewParty(self): string
 	function DeleteParty(self, partyId: string): nil
-	function GetCurrentConfiguration(self): { [any]: any }
 	function GetEmulatedPartyAsync(self, partyId: string): { any }
+	function GetEmulatedPartyConfiguration(self): { [any]: any }
 	function GetIsEmulationEnabled(self): boolean
+	function OnTestPlayerCountChanged(self, newPlayerCount: number): nil
 	function SetIsEmulationEnabled(self, isEnabled: boolean): nil
 	function SetPlayerPartyId(self, userId: number, partyId: string): nil
 	function applyPartyIdToPlayer(self, player: Player): nil
@@ -14220,6 +14285,7 @@ declare class TestService extends Instance
 	WarnCount: number
 	function Check(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function Checkpoint(self, text: string, source: Instance?, line: number?): nil
+	function CreateAndSavePropertySet(self, source: Instance, fileName: string): nil
 	function Done(self): nil
 	function Error(self, description: string, source: Instance?, line: number?): nil
 	function Fail(self, description: string, source: Instance?, line: number?): nil
@@ -14816,6 +14882,8 @@ end
 
 declare class UIStroke extends UIComponent
 	ApplyStrokeMode: EnumApplyStrokeMode
+	BorderOffset: UDim
+	BorderStrokePosition: EnumBorderStrokePosition
 	Color: Color3
 	Enabled: boolean
 	LineJoinMode: EnumLineJoinMode
