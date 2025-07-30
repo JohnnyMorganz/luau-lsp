@@ -10,7 +10,7 @@ static pthread_t thread_get_id(const pthread_t* t)
 
 static bool thread_isnull(const pthread_t* t)
 {
-    return thread_get_id(t) == nullptr;
+    return thread_get_id(t) == 0;
 }
 
 void* posixThreadFuncWrapper(void* arg)
