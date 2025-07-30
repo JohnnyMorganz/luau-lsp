@@ -30,7 +30,7 @@ LanguageServer::LanguageServer(Client* aClient, std::optional<Luau::Config> aDef
     , defaultConfig(std::move(aDefaultConfig))
     , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
 {
-    messageProcessorThread = std::thread(
+    messageProcessorThread = Thread(
         [this]
         {
             while (auto message = popMessage())

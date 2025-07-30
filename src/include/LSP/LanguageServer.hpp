@@ -1,5 +1,4 @@
 #include <optional>
-#include <thread>
 #include <queue>
 #include <condition_variable>
 
@@ -11,6 +10,8 @@
 
 #include "LSP/Client.hpp"
 #include "LSP/Workspace.hpp"
+
+#include "Thread.hpp"
 
 using json = nlohmann::json;
 using namespace json_rpc;
@@ -95,6 +96,6 @@ private:
     std::mutex messagesMutex;
     std::condition_variable messagesCv;
     std::queue<json_rpc::JsonRpcMessage> messages;
-    std::thread messageProcessorThread;
+    Thread messageProcessorThread;
     std::unordered_map<id_type, LSPCancellationToken> cancellationTokens;
 };
