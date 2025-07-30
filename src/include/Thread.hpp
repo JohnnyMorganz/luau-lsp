@@ -2,6 +2,9 @@
 
 #ifdef _WIN32
 #include <thread>
+
+using Thread = std::thread;
+
 #else
 #include <functional>
 #include <memory>

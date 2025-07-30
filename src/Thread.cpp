@@ -1,29 +1,6 @@
+#ifndef _WIN32
 #include "Thread.hpp"
 
-#ifdef _WIN32
-Thread::~Thread() = default;
-
-Thread::Thread(Thread&& thread) noexcept
-    : m_thread(std::move(thread.m_thread))
-{
-}
-
-Thread& Thread::operator=(Thread&& other) noexcept
-{
-    m_thread = std::move(other.m_thread);
-    return *this;
-}
-
-bool Thread::joinable() const
-{
-    return m_thread.joinable();
-}
-
-void Thread::join()
-{
-    return m_thread.join();
-}
-#else
 static pthread_t NULL_THREAD = pthread_t();
 
 static pthread_t thread_get_id(const pthread_t* t)
