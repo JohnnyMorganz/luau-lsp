@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"

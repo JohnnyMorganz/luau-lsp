@@ -9,7 +9,6 @@
 #include "Luau/TimeTrace.h"
 
 #include "LSP/Completion.hpp"
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"

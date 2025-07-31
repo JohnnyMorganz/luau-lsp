@@ -1,5 +1,4 @@
 #include "LSP/Workspace.hpp"
-#include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"

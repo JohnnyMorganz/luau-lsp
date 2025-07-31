@@ -1,7 +1,6 @@
 // Source: https://github.com/microsoft/vscode-languageserver-node/blob/main/textDocument/src/test/textdocument.test.ts
 
 #include "doctest.h"
-#include "LSP/LanguageServer.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Uri.hpp"
 #include "LSP/IostreamHelpers.hpp"

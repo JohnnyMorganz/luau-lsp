@@ -1,4 +1,3 @@
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
 #include "Luau/Ast.h"

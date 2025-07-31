@@ -1,5 +1,4 @@
 #include "LSP/SemanticTokens.hpp"
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
 #include "Luau/AstQuery.h"
