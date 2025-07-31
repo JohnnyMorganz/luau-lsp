@@ -575,7 +575,7 @@ void LanguageServer::processInputLoop()
                         client->sendTrace("Processed cancellation for " + msg.params->dump());
                         continue;
                     }
-                    messages.push(msg);
+                    messages.push(std::move(msg));
                 }
 
                 messagesCv.notify_one();
