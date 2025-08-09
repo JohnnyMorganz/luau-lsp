@@ -4,6 +4,17 @@
 
 #include <iostream>
 
+#ifdef LSP_BUILD_WITH_SENTRY
+// sentry.h pulls in <windows.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#endif
+#define SENTRY_BUILD_STATIC 1
+#include <sentry.h>
+#endif
+
+LUAU_FASTFLAG(LuauSolverV2)
 LUAU_FASTINT(LuauTarjanChildLimit)
 LUAU_FASTINT(LuauTableTypeMaximumStringifierLength)
 
@@ -53,6 +64,10 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, 
     {
         onWarning(std::string("Unknown FFlag: ") + key);
     }
+
+#ifdef LSP_BUILD_WITH_SENTRY
+    sentry_set_tag("luau.new_solver_enabled", FFlag::LuauSolverV2 ? "true" : "false");
+#endif
 }
 
 void registerFastFlagsCLI(std::unordered_map<std::string, std::string>& fastFlags)
