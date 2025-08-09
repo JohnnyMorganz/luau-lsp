@@ -5,13 +5,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 
-LUAU_FASTFLAG(LuauBetterScopeSelection)
-LUAU_FASTFLAG(LuauBlockDiffFragmentSelection)
-LUAU_FASTFLAG(LuauFragmentAcMemoryLeak)
-LUAU_FASTFLAG(LuauGlobalVariableModuleIsolation)
-LUAU_FASTFLAG(LuauFragmentAutocompleteIfRecommendations)
-LUAU_FASTFLAG(LuauPopulateRefinedTypesInFragmentFromOldSolver)
-
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     for (const auto& item : items)
@@ -33,16 +26,6 @@ struct FragmentAutocompleteFixture : Fixture
     {
         client->globalConfig.completion.enableFragmentAutocomplete = true;
     }
-
-    // IF THESE FLAGS ARE MODIFIED, MAKE SURE TO ALSO UPDATE VSCODE CLIENT EXTENSION (editors/code/src/extension.ts)
-    ScopedFastFlag sffs[6] = {
-        {FFlag::LuauBetterScopeSelection, true},
-        {FFlag::LuauBlockDiffFragmentSelection, true},
-        {FFlag::LuauFragmentAcMemoryLeak, true},
-        {FFlag::LuauGlobalVariableModuleIsolation, true},
-        {FFlag::LuauFragmentAutocompleteIfRecommendations, true},
-        {FFlag::LuauPopulateRefinedTypesInFragmentFromOldSolver, true},
-    };
 
     std::vector<lsp::CompletionItem> fragmentAutocomplete(const std::string& oldSource, const std::string& newSource, const lsp::Position& position)
     {
