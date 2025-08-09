@@ -2520,6 +2520,14 @@
                     "ReturnType": {
                         "Name": "SecurityCapabilities"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromCurrent",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
                 }
             ],
             "Name": "SecurityCapabilities"
