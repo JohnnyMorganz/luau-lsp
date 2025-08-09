@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.685
 
+### Fixed
+
+- Fixed crash due to an internal data race when managing cancellation tokens
+
 ## [1.53.1] - 2025-07-31
 
 ### Fixed

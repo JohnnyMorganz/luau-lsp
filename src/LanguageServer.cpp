@@ -161,8 +161,11 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         throw JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down");
 
     std::shared_ptr<Luau::FrontendCancellationToken> cancellationToken;
-    if (const auto& it = cancellationTokens.find(id); it != cancellationTokens.end())
-        cancellationToken = it->second;
+    {
+        std::unique_lock guard(messagesMutex);
+        if (const auto& it = cancellationTokens.find(id); it != cancellationTokens.end())
+            cancellationToken = it->second;
+    }
 
     if (cancellationToken && cancellationToken->requested())
         throw JsonRpcException(lsp::ErrorCode::RequestCancelled, "request cancelled by client");
@@ -554,9 +557,6 @@ void LanguageServer::processInputLoop()
                 auto msg = json_rpc::parse(jsonString);
                 id = msg.id;
 
-                if (msg.is_request())
-                    cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
-
                 if (msg.is_request() && msg.method == "shutdown")
                 {
                     shutdown();
@@ -565,7 +565,9 @@ void LanguageServer::processInputLoop()
 
                 {
                     std::unique_lock guard(messagesMutex);
-                    if (msg.is_notification() && msg.method == "$/cancelRequest")
+                    if (msg.is_request())
+                        cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
+                    else if (msg.is_notification() && msg.method == "$/cancelRequest")
                     {
                         ASSERT_PARAMS(msg.params, "$/cancelRequest")
                         auto params = msg.params->get<lsp::CancelParams>();
