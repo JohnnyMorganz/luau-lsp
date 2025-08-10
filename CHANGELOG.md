@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash due to an internal data race when managing cancellation tokens
+- Fixed server failing to start up due to incorrectly handling string-based RPC message
+  IDs ([#1175](https://github.com/JohnnyMorganz/luau-lsp/issues/1175))
 
 ## [1.53.1] - 2025-07-31
 

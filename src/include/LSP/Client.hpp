@@ -60,7 +60,7 @@ public:
     virtual void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
         const std::optional<ResponseHandler>& handler = std::nullopt);
     void sendResponse(const id_type& id, const json& result);
-    void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
+    virtual void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
     virtual void sendNotification(const std::string& method, const std::optional<json>& params) const;
 
     void sendProgress(const lsp::ProgressParams& params)

@@ -60,14 +60,16 @@ public:
     void processInputLoop();
     bool requestedShutdown();
 
-    // Visibile for testing only
+    // Visible for testing only
+    void handleMessage(const json_rpc::JsonRpcMessage& msg);
+
+    // Visible for testing only
     void shutdown();
 
     // Dispatch handlers
 private:
     bool allWorkspacesReceivedConfiguration() const;
     void clearCancellationToken(const json_rpc::JsonRpcMessage& msg);
-    void handleMessage(const json_rpc::JsonRpcMessage& msg);
     std::optional<json_rpc::JsonRpcMessage> popMessage();
 
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);

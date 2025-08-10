@@ -16,3 +16,8 @@ void TestClient::sendNotification(const std::string& method, const std::optional
 {
     notificationQueue.push_back(std::make_pair(method, params));
 }
+
+void TestClient::sendError(const std::optional<id_type>& id, const json_rpc::JsonRpcException& e)
+{
+    errorQueue.push_back(std::make_pair(id, e));
+}

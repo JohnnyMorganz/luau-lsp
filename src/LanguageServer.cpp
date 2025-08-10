@@ -456,6 +456,19 @@ static bool notificationRequiresWorkspace(std::string_view method)
     return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
 }
 
+static std::string id_to_string(const json_rpc::id_type& id)
+{
+    if (auto str = std::get_if<std::string>(&id))
+        return *str;
+    else if (auto num = std::get_if<int>(&id))
+        return std::to_string(*num);
+    else
+    {
+        LUAU_ASSERT(!"Unhandled ID type");
+        return "<unknown>"; // this function is only used for debugging purposes, so having a fallback is fine
+    }
+}
+
 void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
 {
     try
@@ -469,13 +482,13 @@ void LanguageServer::handleMessage(const json_rpc::JsonRpcMessage& msg)
                 return;
             }
 
-            client->sendTrace("Server now processing " + *msg.method + " (" + std::to_string(std::get<int>(msg.id.value())) + ")");
+            client->sendTrace("Server now processing " + *msg.method + " (" + id_to_string(*msg.id) + ")");
             onRequest(msg.id.value(), msg.method.value(), msg.params);
             clearCancellationToken(msg);
         }
         else if (msg.is_response())
         {
-            client->sendTrace("Server now processing response to request " + std::to_string(std::get<int>(msg.id.value())));
+            client->sendTrace("Server now processing response to request " + (msg.id ? id_to_string(*msg.id) : "<no id>"));
             client->handleResponse(msg);
 
             // Receiving configuration is always at the end of a response. Now we can check to see if we can process any postponed messages
