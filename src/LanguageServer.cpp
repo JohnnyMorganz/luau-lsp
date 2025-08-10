@@ -664,8 +664,7 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     result.serverInfo = lsp::InitializeResult::ServerInfo{LSP_NAME, LSP_VERSION};
 
     // Position Encoding
-    if (client->capabilities.general && client->capabilities.general->positionEncodings &&
-        client->capabilities.general->positionEncodings->size() > 0)
+    if (client->capabilities.general && client->capabilities.general->positionEncodings && !client->capabilities.general->positionEncodings->empty())
     {
         auto& encodings = *client->capabilities.general->positionEncodings;
         if (encodings[0] == lsp::PositionEncodingKind::UTF8 || encodings[0] == lsp::PositionEncodingKind::UTF16)
@@ -749,7 +748,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
     }
 
     nullWorkspace->hasConfiguration = true;
-    // Client does not support retrieving configuration information, so we just setup the workspaces with the default, global, configuration
+    // Client does not support retrieving configuration information, so we just set up the workspaces with the default, global, configuration
     if (!requestedConfiguration)
     {
         for (auto& folder : workspaceFolders)

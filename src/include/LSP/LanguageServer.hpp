@@ -49,7 +49,7 @@ private:
 public:
     explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig);
 
-    lsp::ServerCapabilities getServerCapabilities();
+    static lsp::ServerCapabilities getServerCapabilities();
 
     /// Finds the workspace which the file belongs to.
     /// If no workspace is found, the file is attached to the null workspace
