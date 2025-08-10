@@ -605,6 +605,7 @@ void LanguageServer::processInputLoop()
 
 bool LanguageServer::requestedShutdown()
 {
+    std::unique_lock lock(messagesMutex);
     return shutdownRequested;
 }
 
@@ -878,5 +879,4 @@ void LanguageServer::shutdown()
 
     messagesCv.notify_all();
     messageProcessorThread.join();
-    return;
 }
