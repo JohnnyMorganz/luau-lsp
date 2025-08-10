@@ -13404,6 +13404,7 @@ declare Path2DControlPoint: {
 
 declare SecurityCapabilities: {
 	new: ((...EnumSecurityCapability) -> SecurityCapabilities),
+	fromCurrent: (() -> SecurityCapabilities),
 }
 
 
