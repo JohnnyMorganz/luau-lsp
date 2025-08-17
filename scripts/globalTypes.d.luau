@@ -15544,7 +15544,7 @@ declare UDim2: {
 declare CFrame: {
 	identity: CFrame,
 	fromEulerAnglesYXZ: ((rx: number, ry: number, rz: number) -> CFrame),
-	fromEulerAngles: ((rx: number, ry: number, rz: number, order: EnumRotationOrder) -> CFrame),
+	fromEulerAngles: ((rx: number, ry: number, rz: number, order: EnumRotationOrder?) -> CFrame),
 	Angles: ((rx: number, ry: number, rz: number) -> CFrame),
 	fromMatrix: ((pos: Vector3, vX: Vector3, vY: Vector3, vZ: Vector3?) -> CFrame),
 	fromAxisAngle: ((v: Vector3, r: number) -> CFrame),

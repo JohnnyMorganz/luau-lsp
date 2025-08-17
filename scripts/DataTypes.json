@@ -917,7 +917,8 @@
                             "Type": {
                                 "Category": "Enum",
                                 "Name": "RotationOrder"
-                            }
+                            },
+                            "Default": "nil"
                         }
                     ],
                     "ReturnType": {
