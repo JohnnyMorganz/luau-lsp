@@ -293,6 +293,8 @@ static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label
             return lsp::CompletionItemKind::Folder;
         return lsp::CompletionItemKind::File;
     }
+    case Luau::AutocompleteEntryKind::HotComment:
+        return lsp::CompletionItemKind::Snippet;
     }
 
     return std::nullopt;
