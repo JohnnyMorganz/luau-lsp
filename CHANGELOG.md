@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.690
+- TextMate grammar syntax highlighting extended to support `read` / `write` modifiers in tables, type functions, and highlighting `buffer` / `thread` etc. as types ([Luau.tmLanguage #18](https://github.com/JohnnyMorganz/Luau.tmLanguage/pull/18), [Luau.tmLanguage #19](https://github.com/JohnnyMorganz/Luau.tmLanguage/pull/19))
 
 ## [1.53.2] - 2025-08-30
 
@@ -1419,6 +1420,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
