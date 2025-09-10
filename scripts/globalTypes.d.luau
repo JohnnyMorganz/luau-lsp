@@ -3914,8 +3914,8 @@ end
 declare class EnumPredictionMode extends EnumItem end
 declare class EnumPredictionMode_INTERNAL extends Enum
 	Auto: EnumPredictionMode
-	Forced: EnumPredictionMode
-	None: EnumPredictionMode
+	Off: EnumPredictionMode
+	On: EnumPredictionMode
 	function GetEnumItems(self): { EnumPredictionMode }
 	function FromName(self, Name: string): EnumPredictionMode?
 	function FromValue(self, Value: number): EnumPredictionMode?
@@ -7200,10 +7200,12 @@ declare class Instance extends Object
 	function HasTag(self, tag: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
+	function IsPredicted(self): boolean
 	function IsPropertyModified(self, property: string): boolean
 	function RemoveTag(self, tag: string): nil
 	function ResetPropertyToDefault(self, property: string): nil
 	function SetAttribute(self, attribute: string, value: any): nil
+	function SetPredictionMode(self, mode: EnumPredictionMode): nil
 	function WaitForChild(self, name: string): Instance
 	function WaitForChild(self, name: string, timeout: number): Instance?
 end
@@ -7345,6 +7347,13 @@ declare class AnimationFromVideoCreatorStudioService extends Instance
 end
 
 declare class AnimationRigData extends Instance
+	function GetLabels(self): { any }
+	function GetNames(self): { any }
+	function GetParents(self): { any }
+	function GetPostTransforms(self): { any }
+	function GetPreTransforms(self): { any }
+	function GetTransforms(self): { any }
+	function IsValidR15(self): boolean
 	function LoadFromHumanoid(self, humanoid: Instance): boolean
 	function LoadFromModel(self, model: Instance): boolean
 end
@@ -7408,6 +7417,7 @@ declare class Animator extends Instance
 	function LoadStreamAnimationV2(self, animation: TrackerStreamAnimation, player: Player?, shouldLookupPlayer: boolean?, shouldReplicate: boolean?): AnimationStreamTrack
 	function RegisterEvaluationParallelCallback(self, callback: ((...any) -> ...any)): nil
 	function StepAnimations(self, deltaTime: number): nil
+	function StepAnimationsInternal(self, deltaTime: number, options: { [any]: any }): nil
 	function SynchronizeWith(self, otherAnimator: Animator): nil
 end
 
@@ -8570,7 +8580,6 @@ declare class CaptureService extends Instance
 	function OnVideoCaptureShared(self, videoCapture: VideoCapture): nil
 	function PreCaptureShared(self, capture: Capture): string
 	function PreVideoCaptureShared(self, videoCapture: VideoCapture): string
-	function PromptCaptureGalleryPermission(self, captureGalleryPermission: EnumCaptureGalleryPermission, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
 	function PromptCaptureGalleryPermissionAsync(self, captureGalleryPermission: EnumCaptureGalleryPermission): boolean
 	function PromptSaveCapturesToGallery(self, captures: { any }, resultCallback: ((...any) -> ...any)): nil
 	function PromptShareCapture(self, captureContent: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
@@ -9691,6 +9700,8 @@ end
 
 declare class Decal extends FaceInstance
 	Color3: Color3
+	ColorMap: ContentId
+	ColorMapContent: Content
 	LocalTransparencyModifier: number
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
@@ -10909,6 +10920,7 @@ declare class HumanoidRigDescription extends Instance
 	NeckRangeMin: Vector3
 	NeckSize: number
 	NeckTposeAdjustment: CFrame
+	OriginOffset: CFrame
 	Pelvis: Instance
 	PelvisRangeMax: Vector3
 	PelvisRangeMin: Vector3
@@ -12195,6 +12207,8 @@ declare class PackageUIService extends Instance
 	OnConvertToPackageResult: RBXScriptSignal<boolean, string>
 	OnOpenConvertToPackagePlugin: RBXScriptSignal<{ Instance }, string, { Instance }>
 	function ConvertToMockPackage(self, instance: Instance): nil
+	function ConvertToPackageAsync(self, sourceRoot: Instance, name: string, cloneRoot: Instance): Instance
+	function ConvertToPackageClosedCallback(self, sourceRoot: Instance): nil
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function GetPackageInfo(self, packageAssetId: number): { [any]: any }
 	function PublishPackage(self, packageInstance: Instance, addUndoWayPoint: boolean): nil
@@ -12971,6 +12985,7 @@ end
 
 declare class RecommendationService extends Instance
 	function GenerateItemListAsync(self, generateRecommendationItemListRequest: { [any]: any }): RecommendationPages
+	function GetRecommendationItemAsync(self, itemId: string): { [any]: any }
 	function LogActionEvent(self, actionType: EnumRecommendationActionType, itemId: string, tracingId: string, actionEventDetails: { [any]: any }?): nil
 	function LogImpressionEvent(self, impressionType: EnumRecommendationImpressionType, itemId: string, tracingId: string, impressionEventDetails: { [any]: any }?): nil
 	function RegisterItemAsync(self, player: Player, registerRecommendationItemsRequest: { [any]: any }): { [any]: any }
@@ -13161,6 +13176,7 @@ end
 
 declare class RunService extends Instance
 	ClientGitHash: string
+	FixedHeartbeat: RBXScriptSignal<number>
 	Heartbeat: RBXScriptSignal<number>
 	PostSimulation: RBXScriptSignal<number>
 	PreAnimation: RBXScriptSignal<number>
@@ -13169,6 +13185,7 @@ declare class RunService extends Instance
 	RenderStepped: RBXScriptSignal<number>
 	RobloxGuiFocusedChanged: RBXScriptSignal<boolean>
 	RunState: EnumRunState
+	ServerFrame: number
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function GetControlAndVariantRolloutFlags(self): any
@@ -14650,7 +14667,10 @@ declare class TextFilterTranslatedResult extends Instance
 end
 
 declare class TextGenerator extends Instance
+	Seed: number
 	SystemPrompt: string
+	Temperature: number
+	TopP: number
 	function GenerateTextAsync(self, request: { [any]: any }): { [any]: any }
 end
 
@@ -15365,7 +15385,6 @@ declare class VideoDeviceInput extends Instance
 end
 
 declare class VideoPlayer extends Instance
-	Asset: ContentId
 	AutoLoadInStudio: boolean
 	AutoPlayInStudio: boolean
 	DidEnd: RBXScriptSignal<>
