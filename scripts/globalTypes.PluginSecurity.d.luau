@@ -3914,8 +3914,8 @@ end
 declare class EnumPredictionMode extends EnumItem end
 declare class EnumPredictionMode_INTERNAL extends Enum
 	Auto: EnumPredictionMode
-	Forced: EnumPredictionMode
-	None: EnumPredictionMode
+	Off: EnumPredictionMode
+	On: EnumPredictionMode
 	function GetEnumItems(self): { EnumPredictionMode }
 	function FromName(self, Name: string): EnumPredictionMode?
 	function FromValue(self, Value: number): EnumPredictionMode?
@@ -7195,10 +7195,12 @@ declare class Instance extends Object
 	function HasTag(self, tag: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
+	function IsPredicted(self): boolean
 	function IsPropertyModified(self, property: string): boolean
 	function RemoveTag(self, tag: string): nil
 	function ResetPropertyToDefault(self, property: string): nil
 	function SetAttribute(self, attribute: string, value: any): nil
+	function SetPredictionMode(self, mode: EnumPredictionMode): nil
 	function WaitForChild(self, name: string): Instance
 	function WaitForChild(self, name: string, timeout: number): Instance?
 end
@@ -8135,7 +8137,6 @@ declare class CaptureService extends Instance
 	UserCaptureSaved: RBXScriptSignal<ContentId>
 	function CaptureScreenshot(self, onCaptureReady: ((...any) -> ...any)): nil
 	function GetDeviceInfo(self): { [any]: any }
-	function PromptCaptureGalleryPermission(self, captureGalleryPermission: EnumCaptureGalleryPermission, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
 	function PromptCaptureGalleryPermissionAsync(self, captureGalleryPermission: EnumCaptureGalleryPermission): boolean
 	function PromptSaveCapturesToGallery(self, captures: { any }, resultCallback: ((...any) -> ...any)): nil
 	function PromptShareCapture(self, captureContent: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
@@ -9031,6 +9032,8 @@ end
 
 declare class Decal extends FaceInstance
 	Color3: Color3
+	ColorMap: ContentId
+	ColorMapContent: Content
 	LocalTransparencyModifier: number
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
@@ -11034,6 +11037,7 @@ declare class Workspace extends WorldRoot
 	AirDensity: number
 	AirTurbulenceIntensity: number
 	AllowThirdPartySales: boolean
+	AuthorityMode: EnumAuthorityMode
 	AvatarUnificationMode: EnumAvatarUnificationMode
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
@@ -11697,6 +11701,7 @@ end
 
 declare class RecommendationService extends Instance
 	function GenerateItemListAsync(self, generateRecommendationItemListRequest: { [any]: any }): RecommendationPages
+	function GetRecommendationItemAsync(self, itemId: string): { [any]: any }
 	function LogActionEvent(self, actionType: EnumRecommendationActionType, itemId: string, tracingId: string, actionEventDetails: { [any]: any }?): nil
 	function LogImpressionEvent(self, impressionType: EnumRecommendationImpressionType, itemId: string, tracingId: string, impressionEventDetails: { [any]: any }?): nil
 	function RegisterItemAsync(self, player: Player, registerRecommendationItemsRequest: { [any]: any }): { [any]: any }
@@ -11871,6 +11876,7 @@ declare class RtMessagingService extends Instance
 end
 
 declare class RunService extends Instance
+	FixedHeartbeat: RBXScriptSignal<number>
 	Heartbeat: RBXScriptSignal<number>
 	PostSimulation: RBXScriptSignal<number>
 	PreAnimation: RBXScriptSignal<number>
@@ -11878,6 +11884,7 @@ declare class RunService extends Instance
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
 	RunState: EnumRunState
+	ServerFrame: number
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function IsClient(self): boolean
@@ -12945,7 +12952,10 @@ declare class TextFilterTranslatedResult extends Instance
 end
 
 declare class TextGenerator extends Instance
+	Seed: number
 	SystemPrompt: string
+	Temperature: number
+	TopP: number
 	function GenerateTextAsync(self, request: { [any]: any }): { [any]: any }
 end
 
@@ -13433,7 +13443,6 @@ declare class VideoDeviceInput extends Instance
 end
 
 declare class VideoPlayer extends Instance
-	Asset: ContentId
 	AutoLoadInStudio: boolean
 	AutoPlayInStudio: boolean
 	DidEnd: RBXScriptSignal<>
