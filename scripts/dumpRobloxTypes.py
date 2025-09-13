@@ -282,6 +282,12 @@ EXTRA_MEMBERS = {
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
     ],
     "GuiService": ["SelectedObject: GuiObject?"],
+    "TextChatService": [
+        "ChatWindowConfiguration: ChatWindowConfiguration",
+        "ChatInputBarConfiguration: ChatInputBarConfiguration",
+        "BubbleChatConfiguration: BubbleChatConfiguration",
+        "ChannelTabsConfiguration: ChannelTabsConfiguration",
+    ],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
         "function GetAsync(self, key: string, options: DataStoreGetOptions?): (any, DataStoreKeyInfo)",
