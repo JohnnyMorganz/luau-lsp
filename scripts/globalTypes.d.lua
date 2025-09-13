@@ -14630,11 +14630,15 @@ declare class ChatWindowMessageProperties extends TextChatMessageProperties
 end
 
 declare class TextChatService extends Instance
+	BubbleChatConfiguration: BubbleChatConfiguration
 	BubbleDisplayed: RBXScriptSignal<Instance, TextChatMessage>
+	ChannelTabsConfiguration: ChannelTabsConfiguration
+	ChatInputBarConfiguration: ChatInputBarConfiguration
 	ChatTranslationEnabled: boolean
 	ChatTranslationFTUXShown: boolean
 	ChatTranslationToggleEnabled: boolean
 	ChatVersion: EnumChatVersion
+	ChatWindowConfiguration: ChatWindowConfiguration
 	CreateDefaultCommands: boolean
 	CreateDefaultTextChannels: boolean
 	HasSeenDeprecationDialog: boolean
