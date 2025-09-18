@@ -460,6 +460,7 @@ end
 declare class EnumAppUpdateStatus extends EnumItem end
 declare class EnumAppUpdateStatus_INTERNAL extends Enum
 	Available: EnumAppUpdateStatus
+	AvailableBetaProgram: EnumAppUpdateStatus
 	AvailableBoundChannel: EnumAppUpdateStatus
 	Failed: EnumAppUpdateStatus
 	NotAvailable: EnumAppUpdateStatus
@@ -1508,6 +1509,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	PlayerRemoved: EnumConnectionError
 	ReplacementReady: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
+	ScreentimeLockoutKick: EnumConnectionError
 	ServerEmpty: EnumConnectionError
 	ServerShutdown: EnumConnectionError
 	TeleportErrors: EnumConnectionError
@@ -3745,6 +3747,14 @@ declare class EnumPathfindingUseImprovedSearch_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumPathfindingUseImprovedSearch }
 	function FromName(self, Name: string): EnumPathfindingUseImprovedSearch?
 	function FromValue(self, Value: number): EnumPathfindingUseImprovedSearch?
+end
+declare class EnumPeoplePageLayout extends EnumItem end
+declare class EnumPeoplePageLayout_INTERNAL extends Enum
+	Card: EnumPeoplePageLayout
+	List: EnumPeoplePageLayout
+	function GetEnumItems(self): { EnumPeoplePageLayout }
+	function FromName(self, Name: string): EnumPeoplePageLayout?
+	function FromValue(self, Value: number): EnumPeoplePageLayout?
 end
 declare class EnumPerformanceOverlayMode extends EnumItem end
 declare class EnumPerformanceOverlayMode_INTERNAL extends Enum
@@ -6375,6 +6385,7 @@ type ENUM_LIST = {
 	PathStatus: EnumPathStatus_INTERNAL,
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
 	PathfindingUseImprovedSearch: EnumPathfindingUseImprovedSearch_INTERNAL,
+	PeoplePageLayout: EnumPeoplePageLayout_INTERNAL,
 	PerformanceOverlayMode: EnumPerformanceOverlayMode_INTERNAL,
 	PermissionLevelShown: EnumPermissionLevelShown_INTERNAL,
 	PhysicsSimulationRate: EnumPhysicsSimulationRate_INTERNAL,
@@ -7042,7 +7053,7 @@ declare class ConfigSnapshot extends Object
 	Error: EnumConfigSnapshotErrorState
 	Outdated: boolean
 	UpdateAvailable: RBXScriptSignal<>
-	function GetValue(self, key: string, defaultValue: any): any
+	function GetValue(self, key: string): any
 	function GetValueChangedSignal(self, key: string): RBXScriptSignal
 	function Refresh(self): nil
 end
@@ -7186,6 +7197,7 @@ declare class Instance extends Object
 	function GetChildren(self): { Instance }
 	function GetDescendants(self): { Instance }
 	function GetFullName(self): string
+	function GetPredictionMode(self): EnumPredictionMode
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
 	function GetStyled(self, name: string): any
 	function GetStyledPropertyChangedSignal(self, property: string): RBXScriptSignal
@@ -12042,6 +12054,7 @@ declare class SoundGroup extends Instance
 end
 
 declare class SoundService extends Instance
+	AcousticSimulationEnabled: boolean
 	AmbientReverb: EnumReverbType
 	CharacterSoundsUseNewApi: EnumRolloutState
 	DistanceFactor: number
@@ -13245,6 +13258,9 @@ declare class Wire extends Instance
 end
 
 declare class WrapTextureTransfer extends Instance
+	ReferenceCageMeshContent: Content
+	UVMaxBound: Vector2
+	UVMinBound: Vector2
 end
 
 declare class MLSession extends Object
