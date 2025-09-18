@@ -460,6 +460,7 @@ end
 declare class EnumAppUpdateStatus extends EnumItem end
 declare class EnumAppUpdateStatus_INTERNAL extends Enum
 	Available: EnumAppUpdateStatus
+	AvailableBetaProgram: EnumAppUpdateStatus
 	AvailableBoundChannel: EnumAppUpdateStatus
 	Failed: EnumAppUpdateStatus
 	NotAvailable: EnumAppUpdateStatus
@@ -1508,6 +1509,7 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	PlayerRemoved: EnumConnectionError
 	ReplacementReady: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
+	ScreentimeLockoutKick: EnumConnectionError
 	ServerEmpty: EnumConnectionError
 	ServerShutdown: EnumConnectionError
 	TeleportErrors: EnumConnectionError
@@ -3745,6 +3747,14 @@ declare class EnumPathfindingUseImprovedSearch_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumPathfindingUseImprovedSearch }
 	function FromName(self, Name: string): EnumPathfindingUseImprovedSearch?
 	function FromValue(self, Value: number): EnumPathfindingUseImprovedSearch?
+end
+declare class EnumPeoplePageLayout extends EnumItem end
+declare class EnumPeoplePageLayout_INTERNAL extends Enum
+	Card: EnumPeoplePageLayout
+	List: EnumPeoplePageLayout
+	function GetEnumItems(self): { EnumPeoplePageLayout }
+	function FromName(self, Name: string): EnumPeoplePageLayout?
+	function FromValue(self, Value: number): EnumPeoplePageLayout?
 end
 declare class EnumPerformanceOverlayMode extends EnumItem end
 declare class EnumPerformanceOverlayMode_INTERNAL extends Enum
@@ -6375,6 +6385,7 @@ type ENUM_LIST = {
 	PathStatus: EnumPathStatus_INTERNAL,
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
 	PathfindingUseImprovedSearch: EnumPathfindingUseImprovedSearch_INTERNAL,
+	PeoplePageLayout: EnumPeoplePageLayout_INTERNAL,
 	PerformanceOverlayMode: EnumPerformanceOverlayMode_INTERNAL,
 	PermissionLevelShown: EnumPermissionLevelShown_INTERNAL,
 	PhysicsSimulationRate: EnumPhysicsSimulationRate_INTERNAL,
@@ -7044,7 +7055,7 @@ declare class ConfigSnapshot extends Object
 	Error: EnumConfigSnapshotErrorState
 	Outdated: boolean
 	UpdateAvailable: RBXScriptSignal<>
-	function GetValue(self, key: string, defaultValue: any): any
+	function GetValue(self, key: string): any
 	function GetValueChangedSignal(self, key: string): RBXScriptSignal
 	function Refresh(self): nil
 end
@@ -7193,6 +7204,7 @@ declare class Instance extends Object
 	function GetDebugId(self, scopeLength: number?): string
 	function GetDescendants(self): { Instance }
 	function GetFullName(self): string
+	function GetPredictionMode(self): EnumPredictionMode
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
 	function GetStyled(self, name: string): any
 	function GetStyledPropertyChangedSignal(self, property: string): RBXScriptSignal
@@ -7274,6 +7286,7 @@ declare class AdService extends Instance
 	adGuiRegisterUI: RBXScriptSignal<Instance>
 	function CreateAdRewardFromDevProductId(self, devProductId: number): AdReward
 	function GetAdAvailabilityNowAsync(self, adFormat: EnumAdFormat): any
+	function GetAdAvailabilityNowForUniverseAsync(self, adFormat: EnumAdFormat, universeId: number, isUniversalAppDM: boolean): any
 	function GetAdTeleportInfo(self): any
 	function GetReportAdInfo(self): { any }
 	function HandleWhyThisAdClicked(self, advertiserName: string, payerName: string): nil
@@ -11047,7 +11060,6 @@ declare class ImportSession extends Instance
 end
 
 declare class AssetImportSession extends ImportSession
-	function AddKnownAssetsToCache(self, knownAssets: { [any]: any }): nil
 	function ApplyPreset(self, preset: { [any]: any }): nil
 	function CreatePresetFromData(self, importData: Instance): { [any]: any }
 	function GetImportTree(self): Instance
@@ -12503,6 +12515,8 @@ declare class Player extends Instance
 	HasVerifiedBadge: boolean
 	HealthDisplayDistance: number
 	Idled: RBXScriptSignal<number>
+	InstancePinned: RBXScriptSignal<string, number>
+	InstanceUnpinned: RBXScriptSignal<string, number>
 	LocaleId: string
 	MaximumSimulationRadius: number
 	MembershipType: EnumMembershipType
@@ -13718,6 +13732,7 @@ declare class SoundGroup extends Instance
 end
 
 declare class SoundService extends Instance
+	AcousticSimulationEnabled: boolean
 	AmbientReverb: EnumReverbType
 	AudioApiByDefault: EnumRolloutState
 	AudioInstanceAdded: RBXScriptSignal<Instance>
@@ -13998,6 +14013,7 @@ declare class Studio extends Instance
 	LocalAssetsFolder: QDir
 	LuaDebuggerEnabled: boolean
 	LuaDebuggerEnabledAtStartup: boolean
+	MaxFindReplaceAllResults: number
 	PermissionLevelShown: EnumPermissionLevelShown
 	PluginDebuggingEnabled: boolean
 	PluginsDir: QDir
@@ -14007,8 +14023,6 @@ declare class Studio extends Instance
 	ScriptEditorShouldShowPluginMethods: boolean
 	ScriptTimeoutLength: number
 	ShowCorePackagesInExplorer: boolean
-	StudioStreamingMaxRadius: number
-	StudioStreamingMinRadius: number
 	Theme: StudioTheme
 	ThemeChanged: RBXScriptSignal<>
 	["Active Color"]: Color3
@@ -14127,8 +14141,8 @@ declare class StudioAssetService extends Instance
 	OnPublishPackageResult: RBXScriptSignal<{ [any]: any }, string>
 	OnSaveToRoblox: RBXScriptSignal<{ Instance }, any, boolean>
 	OnUGCSubmitCompleted: RBXScriptSignal<boolean>
-	function AutoSetupAvatarAsync(self, modelId: ContentId, progressCallback: ((...any) -> ...any), notificationCallback: ((...any) -> ...any)?): Instance
-	function AutoSetupSerializedAvatarAsync(self, serializedInstance: string, publishInfo: { [any]: any }, telemetryMetadata: { [any]: any }, progressCallback: ((...any) -> ...any), notificationCallback: ((...any) -> ...any)?): Instance
+	function AutoSetupAvatarAsync(self, modelId: ContentId, progressCallback: ((...any) -> ...any), notificationCallback: ((...any) -> ...any)?, options: { [any]: any }?): Instance
+	function AutoSetupSerializedAvatarAsync(self, serializedInstance: string, publishInfo: { [any]: any }, telemetryMetadata: { [any]: any }, progressCallback: ((...any) -> ...any), notificationCallback: ((...any) -> ...any)?, options: { [any]: any }?): Instance
 	function CancelAutoSetupAvatarAsync(self, jobId: string): nil
 	function ConvertToPackageUpload(self, uploadUrl: string, cloneInstances: { Instance }, originalInstances: { Instance }): nil
 	function DEPRECATED_SerializeInstances(self, instances: { Instance }): string
@@ -14913,6 +14927,7 @@ declare class UGCValidationService extends Instance
 	function ValidateOverlappingVertices(self, meshId: string): boolean
 	function ValidatePartBBoxAfterFullFacs(self, headEditableMesh: EditableMesh, partEditableMesh: EditableMesh, headScale: Vector3, partScale: Vector3, boundsMaxMultiplier: number): boolean
 	function ValidatePartBBoxAfterFullFacsFromMeshIds(self, headMeshId: string, partMeshId: string, headScale: Vector3, partScale: Vector3, boundsMaxMultiplier: number): boolean
+	function ValidatePropertiesSensible(self, instance: Instance): any
 	function ValidateSkinnedEditableMesh(self, editableMesh: EditableMesh): boolean
 	function ValidateSkinnedMesh(self, meshId: string): boolean
 	function ValidateTextureAlpha(self, textureId: string, pixelWidth: number): boolean
@@ -15133,6 +15148,7 @@ declare class UserGameSettings extends Instance
 	OnScreenProfilerEnabled: boolean
 	OnboardingsCompleted: string
 	PartyVoiceVolume: number
+	PeoplePageLayout: EnumPeoplePageLayout
 	PerformanceStatsVisible: boolean
 	PerformanceStatsVisibleChanged: RBXScriptSignal<boolean>
 	PlayerHeight: number
@@ -15563,6 +15579,9 @@ declare class Wire extends Instance
 end
 
 declare class WrapTextureTransfer extends Instance
+	ReferenceCageMeshContent: Content
+	UVMaxBound: Vector2
+	UVMinBound: Vector2
 end
 
 declare class MLSession extends Object
