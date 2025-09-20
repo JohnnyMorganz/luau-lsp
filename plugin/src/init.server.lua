@@ -1,5 +1,6 @@
 --!strict
 local HttpService = game:GetService("HttpService")
+local ScriptEditorService = game:GetService("ScriptEditorService")
 assert(plugin, "This code must run inside of a plugin")
 
 if game:GetService("RunService"):IsRunning() then
@@ -98,7 +99,7 @@ type EncodedInstance = {
 
 local wasConnected
 SettingsButton.Click:Connect(function()
-	plugin:OpenScript(SettingsModule)
+	ScriptEditorService:OpenScriptDocumentAsync(SettingsModule)
 	wasConnected = connected.Value
 end)
 
