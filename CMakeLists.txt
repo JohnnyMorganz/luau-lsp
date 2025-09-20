@@ -7,7 +7,7 @@ option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 option(LSP_WERROR "Warnings as errors" ON)
 
-set(LSP_VERSION "1.53.4")
+set(LSP_VERSION "1.53.5")
 set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
