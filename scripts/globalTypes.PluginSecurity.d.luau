@@ -3681,6 +3681,7 @@ declare class EnumParticleEmitterShapeStyle_INTERNAL extends Enum
 end
 declare class EnumParticleFlipbookLayout extends EnumItem end
 declare class EnumParticleFlipbookLayout_INTERNAL extends Enum
+	Custom: EnumParticleFlipbookLayout
 	Grid2x2: EnumParticleFlipbookLayout
 	Grid4x4: EnumParticleFlipbookLayout
 	Grid8x8: EnumParticleFlipbookLayout
@@ -3923,7 +3924,7 @@ declare class EnumPositionAlignmentMode_INTERNAL extends Enum
 end
 declare class EnumPredictionMode extends EnumItem end
 declare class EnumPredictionMode_INTERNAL extends Enum
-	Auto: EnumPredictionMode
+	Automatic: EnumPredictionMode
 	Off: EnumPredictionMode
 	On: EnumPredictionMode
 	function GetEnumItems(self): { EnumPredictionMode }
@@ -4010,10 +4011,14 @@ declare class EnumProductPurchaseDecision_INTERNAL extends Enum
 end
 declare class EnumPromptCreateAssetResult extends EnumItem end
 declare class EnumPromptCreateAssetResult_INTERNAL extends Enum
+	ModeratedName: EnumPromptCreateAssetResult
 	NoUserInput: EnumPromptCreateAssetResult
 	PermissionDenied: EnumPromptCreateAssetResult
+	PurchaseFailure: EnumPromptCreateAssetResult
 	Success: EnumPromptCreateAssetResult
 	Timeout: EnumPromptCreateAssetResult
+	TokenInvalid: EnumPromptCreateAssetResult
+	UGCValidationFailed: EnumPromptCreateAssetResult
 	UnknownFailure: EnumPromptCreateAssetResult
 	UploadFailed: EnumPromptCreateAssetResult
 	function GetEnumItems(self): { EnumPromptCreateAssetResult }
@@ -5941,6 +5946,21 @@ declare class EnumVoiceChatState_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumVoiceChatState?
 	function FromValue(self, Value: number): EnumVoiceChatState?
 end
+declare class EnumVoiceClientLeaveReasons extends EnumItem end
+declare class EnumVoiceClientLeaveReasons_INTERNAL extends Enum
+	ClientNetworkDisconnected: EnumVoiceClientLeaveReasons
+	ClientShutdown: EnumVoiceClientLeaveReasons
+	ImguiDebugLeave: EnumVoiceClientLeaveReasons
+	LuaInitiated: EnumVoiceClientLeaveReasons
+	PlayerLeft: EnumVoiceClientLeaveReasons
+	PublishFailed: EnumVoiceClientLeaveReasons
+	RejoinReceived: EnumVoiceClientLeaveReasons
+	Unknown: EnumVoiceClientLeaveReasons
+	VoiceReboot: EnumVoiceClientLeaveReasons
+	function GetEnumItems(self): { EnumVoiceClientLeaveReasons }
+	function FromName(self, Name: string): EnumVoiceClientLeaveReasons?
+	function FromValue(self, Value: number): EnumVoiceClientLeaveReasons?
+end
 declare class EnumVoiceControlPath extends EnumItem end
 declare class EnumVoiceControlPath_INTERNAL extends Enum
 	Join: EnumVoiceControlPath
@@ -6578,6 +6598,7 @@ type ENUM_LIST = {
 	VirtualInputMode: EnumVirtualInputMode_INTERNAL,
 	VoiceChatDistanceAttenuationType: EnumVoiceChatDistanceAttenuationType_INTERNAL,
 	VoiceChatState: EnumVoiceChatState_INTERNAL,
+	VoiceClientLeaveReasons: EnumVoiceClientLeaveReasons_INTERNAL,
 	VoiceControlPath: EnumVoiceControlPath_INTERNAL,
 	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
@@ -7799,6 +7820,7 @@ declare class AvatarCollisionRules extends Instance
 end
 
 declare class AvatarCreationService extends Instance
+	AvatarAssetModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	AvatarModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: ((...any) -> ...any)?): string
 	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [any]: any }): string
@@ -7808,6 +7830,7 @@ declare class AvatarCreationService extends Instance
 	function LoadAvatar2DPreviewAsync(self, previewId: string): EditableImage
 	function LoadGeneratedAvatarAsync(self, generationId: string): HumanoidDescription
 	function PrepareAvatarForPreviewAsync(self, humanoidModel: Model): nil
+	function PromptCreateAvatarAssetAsync(self, tokenId: string, player: Player, assetInstance: Instance, assetType: EnumAvatarAssetType): any
 	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
@@ -9818,6 +9841,7 @@ declare class HandRigDescription extends Instance
 end
 
 declare class HapticEffect extends Instance
+	Ended: RBXScriptSignal<>
 	Looped: boolean
 	Position: Vector3
 	Radius: number
@@ -10554,6 +10578,9 @@ declare class MaterialVariant extends Instance
 	ColorMap: ContentId
 	ColorMapContent: Content
 	CustomPhysicalProperties: PhysicalProperties
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	MaterialPattern: EnumMaterialPattern
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
@@ -11185,6 +11212,8 @@ declare class ParticleEmitter extends Instance
 	FlipbookIncompatible: string
 	FlipbookLayout: EnumParticleFlipbookLayout
 	FlipbookMode: EnumParticleFlipbookMode
+	FlipbookSizeX: number
+	FlipbookSizeY: number
 	FlipbookStartRandom: boolean
 	Lifetime: NumberRange
 	LightEmission: number
@@ -12675,6 +12704,9 @@ declare class SurfaceAppearance extends Instance
 	Color: Color3
 	ColorMap: ContentId
 	ColorMapContent: Content
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
 	NormalMap: ContentId
@@ -12757,6 +12789,9 @@ end
 declare class TerrainDetail extends Instance
 	ColorMap: ContentId
 	ColorMapContent: Content
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	Face: EnumTerrainFace
 	MaterialPattern: EnumMaterialPattern
 	MetalnessMap: ContentId
