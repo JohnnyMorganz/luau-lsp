@@ -3681,6 +3681,7 @@ declare class EnumParticleEmitterShapeStyle_INTERNAL extends Enum
 end
 declare class EnumParticleFlipbookLayout extends EnumItem end
 declare class EnumParticleFlipbookLayout_INTERNAL extends Enum
+	Custom: EnumParticleFlipbookLayout
 	Grid2x2: EnumParticleFlipbookLayout
 	Grid4x4: EnumParticleFlipbookLayout
 	Grid8x8: EnumParticleFlipbookLayout
@@ -3923,7 +3924,7 @@ declare class EnumPositionAlignmentMode_INTERNAL extends Enum
 end
 declare class EnumPredictionMode extends EnumItem end
 declare class EnumPredictionMode_INTERNAL extends Enum
-	Auto: EnumPredictionMode
+	Automatic: EnumPredictionMode
 	Off: EnumPredictionMode
 	On: EnumPredictionMode
 	function GetEnumItems(self): { EnumPredictionMode }
@@ -4010,10 +4011,14 @@ declare class EnumProductPurchaseDecision_INTERNAL extends Enum
 end
 declare class EnumPromptCreateAssetResult extends EnumItem end
 declare class EnumPromptCreateAssetResult_INTERNAL extends Enum
+	ModeratedName: EnumPromptCreateAssetResult
 	NoUserInput: EnumPromptCreateAssetResult
 	PermissionDenied: EnumPromptCreateAssetResult
+	PurchaseFailure: EnumPromptCreateAssetResult
 	Success: EnumPromptCreateAssetResult
 	Timeout: EnumPromptCreateAssetResult
+	TokenInvalid: EnumPromptCreateAssetResult
+	UGCValidationFailed: EnumPromptCreateAssetResult
 	UnknownFailure: EnumPromptCreateAssetResult
 	UploadFailed: EnumPromptCreateAssetResult
 	function GetEnumItems(self): { EnumPromptCreateAssetResult }
@@ -5941,6 +5946,21 @@ declare class EnumVoiceChatState_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumVoiceChatState?
 	function FromValue(self, Value: number): EnumVoiceChatState?
 end
+declare class EnumVoiceClientLeaveReasons extends EnumItem end
+declare class EnumVoiceClientLeaveReasons_INTERNAL extends Enum
+	ClientNetworkDisconnected: EnumVoiceClientLeaveReasons
+	ClientShutdown: EnumVoiceClientLeaveReasons
+	ImguiDebugLeave: EnumVoiceClientLeaveReasons
+	LuaInitiated: EnumVoiceClientLeaveReasons
+	PlayerLeft: EnumVoiceClientLeaveReasons
+	PublishFailed: EnumVoiceClientLeaveReasons
+	RejoinReceived: EnumVoiceClientLeaveReasons
+	Unknown: EnumVoiceClientLeaveReasons
+	VoiceReboot: EnumVoiceClientLeaveReasons
+	function GetEnumItems(self): { EnumVoiceClientLeaveReasons }
+	function FromName(self, Name: string): EnumVoiceClientLeaveReasons?
+	function FromValue(self, Value: number): EnumVoiceClientLeaveReasons?
+end
 declare class EnumVoiceControlPath extends EnumItem end
 declare class EnumVoiceControlPath_INTERNAL extends Enum
 	Join: EnumVoiceControlPath
@@ -6578,6 +6598,7 @@ type ENUM_LIST = {
 	VirtualInputMode: EnumVirtualInputMode_INTERNAL,
 	VoiceChatDistanceAttenuationType: EnumVoiceChatDistanceAttenuationType_INTERNAL,
 	VoiceChatState: EnumVoiceChatState_INTERNAL,
+	VoiceClientLeaveReasons: EnumVoiceClientLeaveReasons_INTERNAL,
 	VoiceControlPath: EnumVoiceControlPath_INTERNAL,
 	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
@@ -7296,6 +7317,8 @@ declare class AdService extends Instance
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 	function SetAdGuiInteractivityHandlerInitialized(self): nil
 	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward, placementId: number?): EnumShowAdResult
+	function ShowRewardedVideoAdAtClientAsync(self, universeId: number): EnumShowAdResult
+	function SubmitAdNotification(self, universeId: number, isShowAdSuccessful: boolean, earnedReward: boolean, rewardProductName: string, rewardProductImageAssetId: number): nil
 	function UnregisterAdOpportunity(self, instance: Instance): nil
 	onDemandVideoPlayInUI: (data: { [any]: any }) -> VideoFrame
 end
@@ -8105,6 +8128,7 @@ declare class AvatarCollisionRules extends Instance
 end
 
 declare class AvatarCreationService extends Instance
+	AvatarAssetModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	AvatarModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	OpenSelfieConsent: RBXScriptSignal<>
 	UgcValidationFailure: RBXScriptSignal<string, string>
@@ -8119,6 +8143,7 @@ declare class AvatarCreationService extends Instance
 	function LoadAvatar2DPreviewAsync(self, previewId: string): EditableImage
 	function LoadGeneratedAvatarAsync(self, generationId: string): HumanoidDescription
 	function PrepareAvatarForPreviewAsync(self, humanoidModel: Model): nil
+	function PromptCreateAvatarAssetAsync(self, tokenId: string, player: Player, assetInstance: Instance, assetType: EnumAvatarAssetType): any
 	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
@@ -9059,6 +9084,7 @@ declare class ContentProvider extends Instance
 	function GetAssetFetchStatus(self, contentId: ContentId): EnumAssetFetchStatus
 	function GetAssetFetchStatusChangedSignal(self, contentId: ContentId): RBXScriptSignal
 	function GetDependencyContentIds(self, root: Instance): { any }
+	function GetDetailedFailedRequests(self): { any }
 	function GetFailedRequests(self): { any }
 	function ListEncryptedAssets(self): { any }
 	function PreloadAsync(self, contentIdList: { any }, callbackFunction: ((...any) -> ...any)?): nil
@@ -9880,6 +9906,7 @@ declare class GeometryService extends Instance
 	function HashMeshAsync(self, meshId: ContentId): string
 	function IntersectAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 	function SubtractAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
+	function TranscodeMesh(self, instance: Instance): nil
 	function UnionAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 end
 
@@ -10650,6 +10677,7 @@ declare class HandRigDescription extends Instance
 end
 
 declare class HapticEffect extends Instance
+	Ended: RBXScriptSignal<>
 	Looped: boolean
 	Position: Vector3
 	Radius: number
@@ -10730,7 +10758,9 @@ declare class HttpService extends Instance
 	function GetSecret(self, key: string): Secret
 	function GetUserAgent(self): string
 	function JSONDecode(self, input: string): any
+	function JSONDecodeAsync(self, input: string): any
 	function JSONEncode(self, input: any): string
+	function JSONEncodeAsync(self, obj: any): string
 	function PostAsync(self, url: any, data: string, content_type: EnumHttpContentType?, compress: boolean?, headers: any): string
 	function RequestAsync(self, options: HttpRequestOptions): HttpResponseData
 	function RequestInternal(self, options: { [any]: any }): Instance
@@ -11547,6 +11577,9 @@ declare class MaterialVariant extends Instance
 	ColorMap: ContentId
 	ColorMapContent: Content
 	CustomPhysicalProperties: PhysicalProperties
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	MaterialPattern: EnumMaterialPattern
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
@@ -12294,6 +12327,8 @@ declare class ParticleEmitter extends Instance
 	FlipbookIncompatible: string
 	FlipbookLayout: EnumParticleFlipbookLayout
 	FlipbookMode: EnumParticleFlipbookMode
+	FlipbookSizeX: number
+	FlipbookSizeY: number
 	FlipbookStartRandom: boolean
 	Lifetime: NumberRange
 	LightEmission: number
@@ -14348,6 +14383,9 @@ declare class SurfaceAppearance extends Instance
 	Color: Color3
 	ColorMap: ContentId
 	ColorMapContent: Content
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	MetalnessMap: ContentId
 	MetalnessMapContent: Content
 	NormalMap: ContentId
@@ -14449,6 +14487,9 @@ end
 declare class TerrainDetail extends Instance
 	ColorMap: ContentId
 	ColorMapContent: Content
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	Face: EnumTerrainFace
 	MaterialPattern: EnumMaterialPattern
 	MetalnessMap: ContentId
@@ -14670,6 +14711,7 @@ declare class TextChatService extends Instance
 	function SendExpChatLoadSuccess(self, loadingLatency: number): nil
 	function SendExpChatMessageClientRendered(self, textChatMessage: TextChatMessage): nil
 	function SendExpChatWindowScroll(self): nil
+	function SendExpChatWindowStatusChange(self, timeClosed: number, timeOpen: number, timeIdle: number): nil
 end
 
 declare class TextFilterResult extends Instance
@@ -15535,7 +15577,7 @@ declare class VoiceChatService extends Instance
 	function isInternalPublishPaused(self): boolean
 	function joinVoice(self): nil
 	function lastVoiceChatStats(self): { [any]: any }
-	function leaveVoice(self): nil
+	function leaveVoice(self, leaveReason: EnumVoiceClientLeaveReasons?): nil
 	function notifyServerACSCleanup(self): nil
 	function rejoinVoice(self): nil
 end
