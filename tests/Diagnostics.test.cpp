@@ -82,10 +82,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_marks_dependent_files_as_dirty"
 
     diagnosticsB = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{secondDocument}}, nullptr);
     CHECK_EQ(diagnosticsB.items.size(), 1);
-    if (FFlag::LuauSolverV2)
-        CHECK_EQ(diagnosticsB.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
-    else
-        CHECK_EQ(diagnosticsB.items[0].message, "TypeError: Key 'hello' not found in table '{| hello2: boolean |}'");
+    CHECK_EQ(diagnosticsB.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "text_document_update_triggers_dependent_diagnostics_in_push_based_diagnostics")
@@ -126,10 +123,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_triggers_dependent_diagnostics_
     pushedDiagnostics = secondNotification.second.value();
     CHECK_EQ(pushedDiagnostics.uri, secondDocument);
     CHECK_EQ(pushedDiagnostics.diagnostics.size(), 1);
-    if (FFlag::LuauSolverV2)
-        CHECK_EQ(pushedDiagnostics.diagnostics[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
-    else
-        CHECK_EQ(pushedDiagnostics.diagnostics[0].message, "TypeError: Key 'hello' not found in table '{| hello2: boolean |}'");
+    CHECK_EQ(pushedDiagnostics.diagnostics[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "text_document_update_does_not_update_workspace_diagnostics")
@@ -206,10 +200,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_auto_updates_workspace_diagnostic
     auto dependentDiagnostics = diagnostics.items[1];
     CHECK_EQ(dependentDiagnostics.uri, secondDocument);
     CHECK_EQ(dependentDiagnostics.items.size(), 1);
-    if (FFlag::LuauSolverV2)
-        CHECK_EQ(dependentDiagnostics.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
-    else
-        CHECK_EQ(dependentDiagnostics.items[0].message, "TypeError: Key 'hello' not found in table '{| hello2: boolean |}'");
+    CHECK_EQ(dependentDiagnostics.items[0].message, "TypeError: Key 'hello' not found in table '{ hello2: boolean }'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "text_document_save_does_not_update_workspace_diagnostics_if_setting_is_disabled")
