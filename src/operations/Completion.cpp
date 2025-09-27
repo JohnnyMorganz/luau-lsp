@@ -445,6 +445,13 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                         parentTy = localModule->astTypes.find(indexName->expr);
                     else if (auto indexExpr = node->as<Luau::AstExprIndexExpr>())
                         parentTy = localModule->astTypes.find(indexExpr->expr);
+                    else if (node->is<Luau::AstExprGlobal>())
+                    {
+                        // potentially autocompleting a property inside of a table literal
+                        if (ancestry.size() > 2)
+                            if (auto table = ancestry[ancestry.size() - 2]->as<Luau::AstExprTable>())
+                                parentTy = localModule->astTypes.find(table);
+                    }
                 }
 
                 if (parentTy)

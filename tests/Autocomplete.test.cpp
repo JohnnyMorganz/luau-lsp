@@ -112,6 +112,36 @@ TEST_CASE_FIXTURE(Fixture, "table_property_autocomplete_has_documentation")
     CHECK_EQ(item.documentation->value, "This is a property on the table!");
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_documentation_when_autocompleting_property_in_table")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        type Tbl = {
+            --- Some documentation
+            Property: number
+        }
+
+        local var: Tbl = {
+            Prop|
+        }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto propertyEntry = getItem(result, "Property");
+    REQUIRE(propertyEntry);
+    CHECK_EQ(propertyEntry->kind, lsp::CompletionItemKind::Field);
+    REQUIRE(propertyEntry->documentation);
+    CHECK_EQ(propertyEntry->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(propertyEntry->documentation->value);
+    CHECK_EQ(propertyEntry->documentation->value, "Some documentation");
+}
+
 TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_property_autocomplete_has_documentation")
 {
     auto oldSource = R"(
