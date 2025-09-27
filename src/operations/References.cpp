@@ -662,6 +662,21 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             return result;
         }
     }
+    else if (auto typeTable = node->as<Luau::AstTypeTable>())
+    {
+        if (auto possibleTableTy = module->astResolvedTypes.find(typeTable))
+        {
+            for (const auto& prop : typeTable->props)
+            {
+                if (prop.location.containsClosed(position))
+                {
+                    auto references = findAllTableReferences(Luau::follow(*possibleTableTy), cancellationToken, prop.name.value);
+                    references.push_back(Reference{moduleName, prop.location});
+                    return processReferences(fileResolver, references);
+                }
+            }
+        }
+    }
 
     return std::nullopt;
 }

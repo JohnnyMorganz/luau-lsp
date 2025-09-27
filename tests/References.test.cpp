@@ -119,6 +119,34 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
     CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(1).range);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property_in_a_type")
+{
+    // Finding reference of "name" defined in "Tbl"
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local T: Tbl
+        local x = T.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 14};
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 24}}, result->at(1).range);
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
 {
     auto source = R"(
@@ -348,6 +376,41 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
         CHECK_EQ(result->at(3).uri, user);
         CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 25}});
     }
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_an_exported_table_type_property")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        export type Table = {
+            Property: string
+        }
+        return {}
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local t: tbl.Table
+        local v = t.Property
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 13}; // 'Property' definition
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{2, 12}, {2, 20}});
+    CHECK_EQ(result->at(1).uri, user);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 20}, {4, 28}});
 }
 
 TEST_CASE_FIXTURE(Fixture, "references_respect_cancellation")
