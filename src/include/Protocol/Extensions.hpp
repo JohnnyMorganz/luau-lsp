@@ -28,4 +28,16 @@ struct CompilerRemarksParams
 NLOHMANN_DEFINE_OPTIONAL(CompilerRemarksParams, textDocument, optimizationLevel)
 
 using CompilerRemarksResult = std::string;
+
+struct RequireGraphParams
+{
+    TextDocumentIdentifier textDocument;
+    /// Whether the require graph should only include requires from the provided text document.
+    /// If false, compute the require graph of all indexed modules
+    bool fromTextDocumentOnly = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(RequireGraphParams, textDocument, fromTextDocumentOnly)
+
+/// Returns a dot-file representation
+using RequireGraphResult = std::string;
 } // namespace lsp

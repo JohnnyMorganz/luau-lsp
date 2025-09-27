@@ -154,6 +154,7 @@ public:
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);
+    lsp::RequireGraphResult requireGraph(const lsp::RequireGraphParams& params);
 
     bool isNullWorkspace() const
     {

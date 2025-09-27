@@ -86,6 +86,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
+        src/operations/RequireGraph.cpp
         src/transport/PipeTransport.cpp
         src/transport/StdioTransport.cpp
         extern/glob/match.cpp
@@ -126,6 +127,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/GoToDefinition.test.cpp
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
+        tests/RequireGraph.test.cpp
         tests/AnalyzeCli.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
