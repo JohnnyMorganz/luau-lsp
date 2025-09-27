@@ -37,7 +37,7 @@ DotFileOutput parseDotResult(const std::string& text)
     std::unordered_map<std::string_view, std::string_view> nodeIdMap;
 
     auto ARROW = std::string(" -> ");
-    for (int i = 1; i < lines.size() - 1; ++i)
+    for (auto i = 1; i < lines.size() - 1; ++i)
     {
         auto line = lines[i];
         if (line.find(ARROW) != std::string::npos)
