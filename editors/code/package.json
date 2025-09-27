@@ -123,6 +123,16 @@
       {
         "command": "luau-lsp.flushTimeTrace",
         "title": "Luau: Flush Time Trace Events to tracing.json"
+      },
+      {
+        "command": "luau-lsp.requireGraph",
+        "title": "Luau: View Require Graph",
+        "enablement": "resourceLangId == luau"
+      },
+      {
+        "command": "luau-lsp.requireGraphForFile",
+        "title": "Luau: View Require Graph for current file",
+        "enablement": "resourceLangId == luau"
       }
     ],
     "menus": {
@@ -699,7 +709,10 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@hpcc-js/wasm": "^2.26.2",
     "bytes": "^3.1.2",
+    "d3": "^7.9.0",
+    "d3-graphviz": "^5.6.0",
     "express": "^4.21.2",
     "undici": "^6.21.2",
     "vscode-languageclient": "^8.1.0-next.6"

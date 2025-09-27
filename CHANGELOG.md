@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Introduced commands `Luau: View Require Graph` and `Luau: View Require Graph for current file` to visualise the current graph of require dependencies within a whole project, or from a specific file. The graph is visualised with dot. Custom Editor Integrations may use the `luau-lsp/requireGraph` request to get the dot data. ([#1209](https://github.com/JohnnyMorganz/luau-lsp/issues/1209))
+
 ### Changed
 
 - Sync to upstream Luau 0.693

@@ -166,3 +166,15 @@ A custom LSP request message is implemented:
 - `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
 
 You can implement this request via a custom command to surface this information in your editor
+
+## Optional: Require Graph
+
+The Language server can generate a require graph from a single file, or of the whole workspace. The require graph visualises dependency links between modules. The require graph is generated in DOT format
+
+A custom LSP request message is implemented:
+
+- `luau-lsp/requireGraph`: `{ textDocument: TextDocumentIdentifier, fromTextDocumentOnly: boolean }`, returns `string` - DOT file output
+  - `textDocument`: the text document to generate the require graph for
+  - `fromTextDocumentOnly`: whether the require graph should only include the dependencies from the selected text document. If false, the graph includes all indexed modules from the selected text document's workspace
+
+You can implement this request via a custom command to surface this information in your editor. You may need a `dot` visualizer.

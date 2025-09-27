@@ -346,6 +346,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->compilerRemarks(params);
     }
+    else if (method == "luau-lsp/requireGraph")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/requireGraph")
+        auto params = baseParams->get<lsp::RequireGraphParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->requireGraph(params);
+    }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);

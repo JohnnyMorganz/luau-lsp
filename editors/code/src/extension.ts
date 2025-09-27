@@ -20,6 +20,8 @@ import {
   registerComputeCompilerRemarks,
 } from "./bytecode";
 
+import { registerRequireGraph } from "./requireGraph";
+
 import * as roblox from "./roblox";
 import * as utils from "./utils";
 
@@ -388,6 +390,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   clientDisposables.push(...registerComputeBytecode(context, client));
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
+  clientDisposables.push(...registerRequireGraph(context, client));
 
   console.log("LSP Setup");
   await client.start();
