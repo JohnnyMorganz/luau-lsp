@@ -157,6 +157,31 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
                     references.push_back(Reference{moduleName, expr->location});
             }
         }
+
+        for (const auto [type, referencedTy] : module->astResolvedTypes)
+        {
+            if (isSameTable(ty, Luau::follow(referencedTy)))
+            {
+                if (property)
+                {
+                    if (auto typeTable = type->as<Luau::AstTypeTable>())
+                    {
+                        for (const auto& prop : typeTable->props)
+                        {
+                            if (prop.name.value == *property)
+                            {
+                                references.push_back(Reference{moduleName, prop.location});
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    references.push_back(Reference{moduleName, type->location});
+                }
+            }
+        }
     }
 
     // If its a property, include its original declaration location if not yet found
@@ -671,7 +696,6 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                 if (prop.location.containsClosed(position))
                 {
                     auto references = findAllTableReferences(Luau::follow(*possibleTableTy), cancellationToken, prop.name.value);
-                    references.push_back(Reference{moduleName, prop.location});
                     return processReferences(fileResolver, references);
                 }
             }

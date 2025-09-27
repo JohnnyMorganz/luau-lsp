@@ -41,6 +41,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   local y = x.Property
   ```
 - Rename symbols now works on properties of table types (including across files)
+- Similarly, find all references on a property will now include the original table type definition if it exists. Rename
+  will also modify this table type property name. ([#1166](https://github.com/JohnnyMorganz/luau-lsp/issues/1166))
 
 ### Changed
 
