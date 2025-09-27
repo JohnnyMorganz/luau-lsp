@@ -35,7 +35,7 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
         // DEVIATION: the flip for superTp and subTp is expected
         // subTp is our custom created type pack, with a trailing ...any
         // so it is actually more general than superTp - we want to check if superTp can match against it.
-        return subtyping.isSubtype(superTp, subTp, scope).isSubtype;
+        return subtyping.isSubtype(superTp, subTp, scope, {}).isSubtype;
     }
     else
     {
