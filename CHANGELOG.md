@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.54.0] - 2025-09-27
+
 ### Added
 
 - Introduced commands `Luau: View Require Graph` and `Luau: View Require Graph for current file` to visualise the
@@ -14,16 +16,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   data. ([#1209](https://github.com/JohnnyMorganz/luau-lsp/issues/1209))
 - Documentation is now shown when autocompleting a property name inside of a table
   literal ([#1180](https://github.com/JohnnyMorganz/luau-lsp/issues/1180))
+
   ```luau
   type Tbl = {
     --- Some documentation
     Property: number
   }
-  
+
   local x: Tbl = {
     Prop|  -- will show 'Property' with documentation 'Some documentation'
   }
   ```
+
 - Documentation is now shown when autocompleting a type reference
   name ([#1180](https://github.com/JohnnyMorganz/luau-lsp/issues/1180))
   ```luau
@@ -32,14 +36,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   local x: Some| -- will show 'SomeType' with documentation 'Some documentation'
   ```
 - Find all references now works when starting from a property defined in a table type (including across files):
+
   ```luau
   type SomeTable = {
     Property: number, -- find all references will show the usage below
   }
-  
+
   local x: SomeTable
   local y = x.Property
   ```
+
 - Rename symbols now works on properties of table types (including across files)
 - Similarly, find all references on a property will now include the original table type definition if it exists. Rename
   will also modify this table type property name. ([#1166](https://github.com/JohnnyMorganz/luau-lsp/issues/1166))
@@ -251,11 +257,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added progress indicator for watched files changes
 - A Cloudflare page is now available to serve the type definition files and API documentations, due to GitHub
   ratelimiting ([#1059](https://github.com/JohnnyMorganz/luau-lsp/issues/1059))
-    - `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
-    - `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
-    - `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
-    - `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
-    - `https://luau-lsp.pages.dev/api-docs/en-us.json`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+  - `https://luau-lsp.pages.dev/api-docs/en-us.json`
 
 ### Changed
 
@@ -558,14 +564,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Overhauled the globbing mechanism leading to significant performance improvements in indexing, workspace diagnostics,
   and auto suggest requires, removing globbing as a bottleneck. Some results in example codebases ranging from 190 to
   1900 KLoC:
-    - Initial indexing: ~3.32x to ~7.1x speedup (43.60s -> 13.12s and 9.42s ->
-      1.33s) ([#829](https://github.com/JohnnyMorganz/luau-lsp/issues/829))
-    - Workspace diagnostics: ~2.39x to ~4.75x speedup (164.93s -> 69.07s and 8.49s ->
-      1.79s)
-    - Auto-suggest requires: ~4.77x speedup (1.15s ->
-      0.24s) ([#749](https://github.com/JohnnyMorganz/luau-lsp/issues/749))
-    - These improvements heavily depend on the amount of code you have matching ignore globs. Workspace diagnostics
-      improvements depends on the performance of Luau typechecking.
+  - Initial indexing: ~3.32x to ~7.1x speedup (43.60s -> 13.12s and 9.42s ->
+    1.33s) ([#829](https://github.com/JohnnyMorganz/luau-lsp/issues/829))
+  - Workspace diagnostics: ~2.39x to ~4.75x speedup (164.93s -> 69.07s and 8.49s ->
+    1.79s)
+  - Auto-suggest requires: ~4.77x speedup (1.15s ->
+    0.24s) ([#749](https://github.com/JohnnyMorganz/luau-lsp/issues/749))
+  - These improvements heavily depend on the amount of code you have matching ignore globs. Workspace diagnostics
+    improvements depends on the performance of Luau typechecking.
 
 ### Fixed
 
@@ -921,10 +927,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for viewing textual bytecode and compiler remarks using commands `Luau: Compute Bytecode for file` and
   `Luau: Compute Compiler Remarks for file`.
   This opens up a new view with bytecode/remarks inlined as comments in the source file
-    - Added configuration `luau-lsp.bytecode.vectorLib`, `luau-lsp.bytecode.vectorCtor` and
-      `luau-lsp.bytecode.vectorType` to configure compiler options when generating bytecode
-    - Custom editors should handle the `luau-lsp/bytecode` and `luau-lsp/compilerRemarks` LSP message to integrate
-      compiler remarks info in their editor
+  - Added configuration `luau-lsp.bytecode.vectorLib`, `luau-lsp.bytecode.vectorCtor` and
+    `luau-lsp.bytecode.vectorType` to configure compiler options when generating bytecode
+  - Custom editors should handle the `luau-lsp/bytecode` and `luau-lsp/compilerRemarks` LSP message to integrate
+    compiler remarks info in their editor
 - Added `luau-lsp.types.robloxSecurityLevel` to select what security level to use for the API types, out of: `None`,
   `LocalUserSecurity`, `PluginSecurity` and `RobloxScriptSecurity`
 
@@ -1157,11 +1163,11 @@ type Foo = {
   For example, adding `@example/constants` mapping to `C:/fakepath/constants.luau` will automatically resolve
   `require("@example/constants")`
 - Added support for Folding Ranges. The language server now signals the following foldable ranges in a document:
-    - Whole blocks, such as `do .. end`, `for - do .. end` `function() .. end` etc.
-    - Tables, and type tables `x = { .. }`
-    - Multiline function calls `foo(..)`
-    - Block comments `--[[ .. ]]`
-    - Custom comment regions denoted using `--#region` and `--#endregion`
+  - Whole blocks, such as `do .. end`, `for - do .. end` `function() .. end` etc.
+  - Tables, and type tables `x = { .. }`
+  - Multiline function calls `foo(..)`
+  - Block comments `--[[ .. ]]`
+  - Custom comment regions denoted using `--#region` and `--#endregion`
 - Added support for Call Hierarchies. Call Hierarchies allow you to view all incoming and outgoing calls of a function:
   i.e., all functions that call the current function, as well as all functions that the current function calls.
   This works at multiple levels, displaying ancestor and descendant functions.
@@ -1201,13 +1207,13 @@ type Foo = {
 - Added support for renaming types (both local and exported). If `luau-lsp.index.enabled` is disabled, this exported
   types renaming is disabled for correctness reasons.
 - Added more settings to auto-importing:
-    - `luau-lsp.completion.imports.enabled`: replaces `luau-lsp.completion.suggestImports` (default: false)
-    - `luau-lsp.completion.imports.suggestServices`: whether GetService imports are included in suggestions (default:
-      true)
-    - `luau-lsp.completion.imports.suggestRequires`: whether auto-requires are included in suggestions (default: true)
-    - `luau-lsp.completion.imports.requireStyle`: the style of require format (default: "auto")
-    - `luau-lsp.completion.imports.separateGroupsWithLine`: whether an empty line should be added in between services
-      and requires (default: false)
+  - `luau-lsp.completion.imports.enabled`: replaces `luau-lsp.completion.suggestImports` (default: false)
+  - `luau-lsp.completion.imports.suggestServices`: whether GetService imports are included in suggestions (default:
+    true)
+  - `luau-lsp.completion.imports.suggestRequires`: whether auto-requires are included in suggestions (default: true)
+  - `luau-lsp.completion.imports.requireStyle`: the style of require format (default: "auto")
+  - `luau-lsp.completion.imports.separateGroupsWithLine`: whether an empty line should be added in between services
+    and requires (default: false)
 
 ### Changed
 
@@ -1657,9 +1663,9 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-    - `luau-lsp.completion.enabled`: Autocomplete
-    - `luau-lsp.hover.enabled`: Hover
-    - `luau-lsp.signatureHelp.enabled`: Signature Help
+  - `luau-lsp.completion.enabled`: Autocomplete
+  - `luau-lsp.hover.enabled`: Hover
+  - `luau-lsp.signatureHelp.enabled`: Signature Help
 
 - Added configuration option `luau-lsp.hover.showTableKinds` (default: off) to indicate whether kinds (`{+ ... +}`,
   `{| ... |}`) are shown in hover information
@@ -1900,10 +1906,10 @@ local y = tbl.data -- Should give "This is some special information"
 - Can change the project file used to generate sourcemap in extension settings (defaults to `default.project.json`).
 - Can toggle whether non-script instances are included in the generated sourcemap (included by default).
 - Added support for "Find References"
-    - Currently only works for finding all references of a local variable in the current document. Cross-file references
-      will come in future.
+  - Currently only works for finding all references of a local variable in the current document. Cross-file references
+    will come in future.
 - Added support for "Rename"
-    - Currently only works for local variables in the current document. Cross-file references will come in future.
+  - Currently only works for local variables in the current document. Cross-file references will come in future.
 
 ### Changed
 
@@ -1922,9 +1928,9 @@ local y = tbl.data -- Should give "This is some special information"
 
 - Improved Go To Type Definition support
 - Improved overall Go To Definition support
-    - Can now handle function definitions in tables
-    - Can handle cross-file definitions
-    - Can handle deeply nested tables - multiple properties (incl. cross file support)
+  - Can now handle function definitions in tables
+  - Can handle cross-file definitions
+  - Can handle deeply nested tables - multiple properties (incl. cross file support)
 - Hovering over a property inside a table will now give you type information about the assigned expression, rather than
   just "string"
 
