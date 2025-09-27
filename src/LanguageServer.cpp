@@ -573,27 +573,38 @@ void LanguageServer::processInputLoop()
                 if (msg.is_request() && msg.method == "shutdown")
                 {
                     shutdown();
-                    return;
+                    client->sendResponse(*id, {});
                 }
-
+                else if (msg.is_notification() && msg.method == "exit")
                 {
-                    std::unique_lock guard(messagesMutex);
-                    if (msg.is_request())
-                        cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
-                    else if (msg.is_notification() && msg.method == "$/cancelRequest")
-                    {
-                        ASSERT_PARAMS(msg.params, "$/cancelRequest")
-                        auto params = msg.params->get<lsp::CancelParams>();
-                        if (const auto& it = cancellationTokens.find(params.id); it != cancellationTokens.end())
-                            it->second->cancel();
-
-                        client->sendTrace("Processed cancellation for " + msg.params->dump());
-                        continue;
-                    }
-                    messages.push(std::move(msg));
+                    // Exit the process loop
+                    std::exit(shutdownRequested ? 0 : 1);
                 }
+                else if (shutdownRequested)
+                {
+                    client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down"));
+                }
+                else
+                {
+                    {
+                        std::unique_lock guard(messagesMutex);
+                        if (msg.is_request())
+                            cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
+                        else if (msg.is_notification() && msg.method == "$/cancelRequest")
+                        {
+                            ASSERT_PARAMS(msg.params, "$/cancelRequest")
+                            auto params = msg.params->get<lsp::CancelParams>();
+                            if (const auto& it = cancellationTokens.find(params.id); it != cancellationTokens.end())
+                                it->second->cancel();
 
-                messagesCv.notify_one();
+                            client->sendTrace("Processed cancellation for " + msg.params->dump());
+                            continue;
+                        }
+                        messages.push(std::move(msg));
+                    }
+
+                    messagesCv.notify_one();
+                }
             }
             catch (const json::exception& e)
             {

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.693
 
+### Fixed
+
+- Fixed incorrect shutdown sequence leading to errors on reload (e.g., "Pending response rejected since connection got disposed", or "Stopping the server timed out") ([#1210](https://github.com/JohnnyMorganz/luau-lsp/issues/1210))
+
 ## [1.53.5] - 2025-09-20
 
 ### Fixed
