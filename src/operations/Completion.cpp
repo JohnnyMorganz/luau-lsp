@@ -414,8 +414,8 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
     return std::make_pair(detail, parenthesesSnippet);
 }
 
-std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
-    const std::string& name, const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule)
+std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
+    const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule, const Luau::Position& position)
 {
     if (entry.documentationSymbol)
         if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
@@ -424,6 +424,18 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     if (entry.type.has_value())
         if (auto documentation = getDocumentationForType(entry.type.value()))
             return documentation;
+
+    if (entry.kind == Luau::AutocompleteEntryKind::Type)
+    {
+        std::optional<Luau::AstName> importedPrefix = std::nullopt;
+        if (auto node = ancestry.back())
+            if (auto typeReference = node->as<Luau::AstTypeReference>())
+                importedPrefix = typeReference->prefix;
+
+        auto scope = Luau::findScopeAtPosition(*localModule, position);
+        if (auto documentation = getDocumentationForTypeReference(localModule->name, scope, importedPrefix, name, /* forAutocomplete= */ true))
+            return documentation;
+    }
 
     if (entry.prop)
     {
@@ -590,7 +602,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         }
 
         const auto localModule = fragmentWasSuccessful ? fragmentStatusResult.result->incrementalModule : getModule(moduleName, forAutocomplete);
-        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule))
+        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule, position))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);

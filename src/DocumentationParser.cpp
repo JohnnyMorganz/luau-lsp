@@ -450,33 +450,39 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     return std::nullopt;
 }
 
+std::optional<std::string> WorkspaceFolder::getDocumentationForTypeReference(const Luau::ModuleName& moduleName, const Luau::ScopePtr& scope,
+    const std::optional<Luau::AstName>& prefix, const Luau::Name& typeName, bool forAutocomplete)
+{
+    if (prefix)
+    {
+        auto importedModuleName = lookupImportedModule(*scope, prefix->value);
+        if (!importedModuleName)
+            return std::nullopt;
+        auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ forAutocomplete);
+        if (!importedModule)
+            return std::nullopt;
+        if (const auto it = importedModule->exportedTypeBindings.find(typeName);
+            it != importedModule->exportedTypeBindings.end() && it->second.definitionLocation)
+            return printMoonwaveDocumentation(getComments(*importedModuleName, *it->second.definitionLocation));
+        return std::nullopt;
+    }
+    else
+    {
+        auto typeLocation = lookupTypeLocation(*scope, typeName);
+        if (!typeLocation)
+            return std::nullopt;
+        return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
+    }
+}
+
 std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(
     const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
 {
-    auto config = client->getConfiguration(rootUri);
-
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
-        if (ref->prefix)
-        {
-            auto importedModuleName = lookupImportedModule(*scope, ref->prefix->value);
-            if (!importedModuleName)
-                return std::nullopt;
-            auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
-            if (!importedModule)
-                return std::nullopt;
-            if (const auto it = importedModule->exportedTypeBindings.find(ref->name.value);
-                it != importedModule->exportedTypeBindings.end() && it->second.definitionLocation)
-                return printMoonwaveDocumentation(getComments(*importedModuleName, *it->second.definitionLocation));
-            return std::nullopt;
-        }
-        else
-        {
-            auto typeLocation = lookupTypeLocation(*scope, ref->name.value);
-            if (!typeLocation)
-                return std::nullopt;
-            return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
-        }
+        auto config = client->getConfiguration(rootUri);
+        return getDocumentationForTypeReference(
+            moduleName, scope, ref->prefix, ref->name.value, /* forAutocomplete= */ config.hover.strictDatamodelTypes);
     }
     else if (auto alias = node->as<Luau::AstStatTypeAlias>())
     {

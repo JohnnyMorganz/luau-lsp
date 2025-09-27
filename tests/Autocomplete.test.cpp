@@ -254,6 +254,63 @@ TEST_CASE_FIXTURE(Fixture, "intersected_type_table_property_has_documentation")
     CHECK_EQ(item2.documentation->value, "Example sick string");
 }
 
+TEST_CASE_FIXTURE(Fixture, "type_reference_has_documentation")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --- Some documentation
+        type SomeType = number
+
+        local var: Some|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto typeEntry = getItem(result, "SomeType");
+    REQUIRE(typeEntry);
+    CHECK_EQ(typeEntry->kind, lsp::CompletionItemKind::Interface);
+    REQUIRE(typeEntry->documentation);
+    CHECK_EQ(typeEntry->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(typeEntry->documentation->value);
+    CHECK_EQ(typeEntry->documentation->value, "Some documentation");
+}
+
+TEST_CASE_FIXTURE(Fixture, "imported_type_reference_has_documentation")
+{
+    newDocument("library.luau", R"(
+        --- Some documentation
+        export type SomeExportedType = number
+        return {}
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local library = require("library.luau")
+
+        local var: library.Some|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto typeEntry = getItem(result, "SomeExportedType");
+    REQUIRE(typeEntry);
+    CHECK_EQ(typeEntry->kind, lsp::CompletionItemKind::Interface);
+    REQUIRE(typeEntry->documentation);
+    CHECK_EQ(typeEntry->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(typeEntry->documentation->value);
+    CHECK_EQ(typeEntry->documentation->value, "Some documentation");
+}
+
 TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_to_autocomplete_entry")
 {
     auto [source, marker] = sourceWithMarker(R"(

@@ -8,8 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Introduced commands `Luau: View Require Graph` and `Luau: View Require Graph for current file` to visualise the current graph of require dependencies within a whole project, or from a specific file. The graph is visualised with dot. Custom Editor Integrations may use the `luau-lsp/requireGraph` request to get the dot data. ([#1209](https://github.com/JohnnyMorganz/luau-lsp/issues/1209))
-- Documentation is now shown when autocompleting a property name inside of a table literal ([#1180](https://github.com/JohnnyMorganz/luau-lsp/issues/1180))
+- Introduced commands `Luau: View Require Graph` and `Luau: View Require Graph for current file` to visualise the
+  current graph of require dependencies within a whole project, or from a specific file. The graph is visualised with
+  dot. Custom Editor Integrations may use the `luau-lsp/requireGraph` request to get the dot
+  data. ([#1209](https://github.com/JohnnyMorganz/luau-lsp/issues/1209))
+- Documentation is now shown when autocompleting a property name inside of a table
+  literal ([#1180](https://github.com/JohnnyMorganz/luau-lsp/issues/1180))
   ```luau
   type Tbl = {
     --- Some documentation
@@ -19,6 +23,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   local x: Tbl = {
     Prop|  -- will show 'Property' with documentation 'Some documentation'
   }
+  ```
+- Documentation is now shown when autocompleting a type reference
+  name ([#1180](https://github.com/JohnnyMorganz/luau-lsp/issues/1180))
+  ```luau
+  --- Some documentation
+  type SomeType = number
+  local x: Some| -- will show 'SomeType' with documentation 'Some documentation'
   ```
 
 ### Changed
