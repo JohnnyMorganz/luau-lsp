@@ -111,6 +111,10 @@
         "title": "Luau: Reload Language Server"
       },
       {
+        "command": "luau-lsp.openWalkthrough",
+        "title": "Luau: Open Walkthrough"
+      },
+      {
         "command": "luau-lsp.computeBytecode",
         "title": "Luau: Compute Bytecode for file",
         "enablement": "resourceLangId == luau"
@@ -676,7 +680,51 @@
           "markdownDescription": "The `vectorType` to use when compiling bytecode"
         }
       }
-    }
+    },
+    "walkthroughs": [
+      {
+        "id": "getting-started",
+        "title": "Getting Started with Luau",
+        "description": "An initial setup guide for the Luau Language Server",
+        "steps": [
+          {
+            "id": "platform",
+            "title": "Select your Platform",
+            "description": "This extension provides out-of-the-box support for Roblox projects. If you are working in a separate environment, you may want to set your platform to ``standard``\n[Configure Platform](command:workbench.action.openSettings?%22luau-lsp.platform.type%22)",
+            "media": {
+              "markdown": "assets/walkthrough-select-your-platform.md"
+            }
+          },
+          {
+            "id": "definitions",
+            "title": "Register Custom Definitions",
+            "description": "If you work in an environment with custom global definitions, you can register these types to support type-checking and autocomplete\n[Configure Type Definitions](command:workbench.action.openSettings?%22luau-lsp.types%22)",
+            "media": {
+              "markdown": "assets/empty.md"
+            },
+            "when": "config.luau-lsp.platform.type != 'roblox'"
+          },
+          {
+            "id": "sourcemap",
+            "title": "Configure Sourcemap Generation",
+            "description": "A sourcemap provides a mapping between your paths on the file system to locations in the Roblox DataModel. By default, we automatically generate sourcemaps based on [Rojo](https://github.com/rojo-rbx/rojo) projects.\n[Configure Sourcemap Generation](command:workbench.action.openSettings?%22luau-lsp.sourcemap%22)",
+            "media": {
+              "markdown": "assets/walkthrough-sourcemap-generation.md"
+            },
+            "when": "config.luau-lsp.platform.type == 'roblox'"
+          },
+          {
+            "id": "companion-plugin",
+            "title": "Install the Companion Plugin",
+            "description": "A companion plugin is available in Roblox Studio. This allows type-checking and autocomplete to work on Instances that are only available in Studio, and not on your file system\n[Install Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)",
+            "media": {
+              "markdown": "assets/empty.md"
+            },
+            "when": "config.luau-lsp.platform.type == 'roblox'"
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

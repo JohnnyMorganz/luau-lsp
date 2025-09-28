@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `luau-lsp require-graph [--sourcemap PATH] <files>`. There are two
   output modes: `--output-mode=json` (default) and `--output-mode=dot`. The JSON output is currently experimental and is
   subject to change.
+- The VSCode extension now provides a Getting Started walkthrough to guide you through common configuration to change (platform, sourcemap, global types). You can access this walkthrough at any time by running `Luau: Open Walkthrough` ([#973](https://github.com/JohnnyMorganz/luau-lsp/issues/973))
 
 ### Fixed
 

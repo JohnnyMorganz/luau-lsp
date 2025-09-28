@@ -391,6 +391,15 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   clientDisposables.push(...registerComputeBytecode(context, client));
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
   clientDisposables.push(...registerRequireGraph(context, client));
+  clientDisposables.push(
+    vscode.commands.registerCommand("luau-lsp.openWalkthrough", () => {
+      return vscode.commands.executeCommand(
+        "workbench.action.openWalkthrough",
+        "JohnnyMorganz.luau-lsp#getting-started",
+        false,
+      );
+    }),
+  );
 
   console.log("LSP Setup");
   await client.start();
