@@ -6,6 +6,7 @@
 #include "Luau/ExperimentalFlags.h"
 #include "argparse/argparse.hpp"
 #include "LuauFileUtils.hpp"
+#include "LSP/RequireGraph.hpp"
 
 #include "LSP/Transport/StdioTransport.hpp"
 #ifndef _WIN32
@@ -282,8 +283,23 @@ int main(int argc, char** argv)
         .implicit_value(true);
     lsp_command.add_argument("--crash-report-directory").help("location to store database for crash reports").metavar("PATH");
 
+    // Require graph arguments
+    argparse::ArgumentParser require_graph_command("require-graph");
+    require_graph_command.set_assign_chars(":=");
+    require_graph_command.add_description("Output a dependency graph");
+    require_graph_command.add_parents(parent_parser);
+    require_graph_command.add_argument("--sourcemap").help("path to a Rojo-style instance sourcemap to understand the DataModel").metavar("PATH");
+    require_graph_command.add_argument("--base-luaurc").help("path to a .luaurc file which acts as the base default configuration").metavar("PATH");
+    require_graph_command.add_argument("--platform").help("platform-specific support features").choices("standard", "roblox");
+    require_graph_command.add_argument("--output-format")
+        .help("output dependency graph in a particular format")
+        .choices("json", "dot")
+        .default_value("json");
+    require_graph_command.add_argument("files").help("files to compute a dependency graph for").remaining();
+
     program.add_subparser(analyze_command);
     program.add_subparser(lsp_command);
+    program.add_subparser(require_graph_command);
 
     try
     {
@@ -312,9 +328,14 @@ int main(int argc, char** argv)
         processFFlags(analyze_command);
         return startAnalyze(analyze_command);
     }
+    else if (program.is_subcommand_used("require-graph"))
+    {
+        processFFlags(require_graph_command);
+        return startRequireGraph(require_graph_command);
+    }
 
     // No sub-command specified
-    std::cerr << "Specify a particular mode to run the program (analyze/lsp)" << '\n';
+    std::cerr << "Specify a particular mode to run the program (analyze/lsp/require-graph)" << '\n';
     std::cerr << program;
     return 1;
 }
