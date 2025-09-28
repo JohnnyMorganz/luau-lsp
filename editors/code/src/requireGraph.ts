@@ -40,8 +40,6 @@ const viewRequireGraph = async (
     ...params,
   });
 
-  console.log(dot);
-
   const nodeModulesPath = vscode.Uri.file(
     path.join(context.extensionPath, "node_modules"),
   );

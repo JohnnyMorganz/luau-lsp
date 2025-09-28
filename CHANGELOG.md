@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed broken visualization of require graph due to missing libraries
+
 ## [1.54.0] - 2025-09-27
 
 ### Added
@@ -1663,6 +1667,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
