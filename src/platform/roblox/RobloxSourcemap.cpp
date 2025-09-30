@@ -445,18 +445,30 @@ bool RobloxPlatform::updateSourceMap()
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 
+    // TODO: we assume the sourcemap file is in the workspace root
     auto sourcemapPath = workspaceFolder->rootUri.resolvePath(sourcemapFileName);
-    workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.toString());
 
-    // Read in the sourcemap
-    // TODO: we assume a sourcemap file in the workspace root
-    if (auto sourceMapContents = Luau::FileUtils::readFile(sourcemapPath.fsPath()))
+    if (Luau::FileUtils::exists(sourcemapPath.fsPath()))
     {
-        return updateSourceMapFromContents(sourceMapContents.value());
+        if (auto sourceMapContents = Luau::FileUtils::readFile(sourcemapPath.fsPath()))
+        {
+            workspaceFolder->client->sendTrace("Updating sourcemap contents from " + sourcemapPath.toString());
+            return updateSourceMapFromContents(sourceMapContents.value());
+        }
+        else
+        {
+            workspaceFolder->client->sendTrace("Sourcemap file failed to read");
+            return false;
+        }
+    }
+    else if (pluginInfo)
+    {
+        workspaceFolder->client->sendTrace("Creating sourcemap from plugin provided information");
+        return updateSourceMapFromContents("{\"name\":\"Default\",\"className\":\"DataModel\",\"children\":[]}");
     }
     else
     {
-        workspaceFolder->client->sendTrace("Sourcemap file failed to read");
+        workspaceFolder->client->sendTrace("No sourcemap file or plugin information found, cannot update sourcemap");
         return false;
     }
 }
