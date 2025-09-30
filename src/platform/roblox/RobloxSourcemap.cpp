@@ -464,6 +464,9 @@ bool RobloxPlatform::updateSourceMap()
     else if (pluginInfo)
     {
         workspaceFolder->client->sendTrace("Creating sourcemap from plugin provided information");
+        workspaceFolder->client->sendWindowMessage(
+            lsp::MessageType::Info, "Couldn't find " + sourcemapFileName + " for workspace '" + workspaceFolder->name +
+                                        "'. Using available datamodel info from companion plugin (require paths may be missing)");
         return updateSourceMapFromContents("{\"name\":\"Default\",\"className\":\"DataModel\",\"children\":[]}");
     }
     else
