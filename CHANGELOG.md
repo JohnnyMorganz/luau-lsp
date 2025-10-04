@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed broken visualization of require graph due to missing libraries
 
+### Changed
+
+- Sync to upstream Luau 0.694
+
 ## [1.54.0] - 2025-09-27
 
 ### Added
