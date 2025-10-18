@@ -1,7 +1,7 @@
 #include <LSP/Workspace.hpp>
 #include <LSP/LuauExt.hpp>
 #include <Luau/AstQuery.h>
-#include <Luau/Transpiler.h>
+#include "Luau/PrettyPrinter.h"
 
 using FunctionName = std::pair<std::string, std::optional<std::string>>;
 static FunctionName getFunctionName(Luau::AstExpr* expr)

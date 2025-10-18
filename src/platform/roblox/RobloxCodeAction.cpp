@@ -1,7 +1,7 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 
 lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
 {

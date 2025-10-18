@@ -2,7 +2,7 @@
 #include "LSP/Workspace.hpp"
 #include "Protocol/CodeAction.hpp"
 #include "LSP/LuauExt.hpp"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Platform/AutoImports.hpp"
 
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::DocumentUri& uri)

@@ -2,7 +2,7 @@
 
 #include "LSP/JsonTomlSyntaxParser.hpp"
 #include "Luau/Parser.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Fixture.h"
 
 using namespace toml::literals::toml_literals;

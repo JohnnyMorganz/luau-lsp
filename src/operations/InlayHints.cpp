@@ -3,7 +3,7 @@
 #include "Luau/Ast.h"
 #include "Luau/AstQuery.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "LSP/LuauExt.hpp"
 
 bool isLiteral(const Luau::AstExpr* expr)
