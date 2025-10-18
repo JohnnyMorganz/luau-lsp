@@ -5,7 +5,7 @@
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Luau/TypeInfer.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"

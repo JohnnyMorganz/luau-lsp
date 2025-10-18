@@ -2,7 +2,7 @@
 
 #include "LSP/Workspace.hpp"
 
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Protocol/LanguageFeatures.hpp"
 
 struct WorkspaceSymbolsVisitor : public Luau::AstVisitor

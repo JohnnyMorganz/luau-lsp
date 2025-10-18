@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.694
+- Sync to upstream Luau 696
 
 ## [1.54.0] - 2025-09-27
 
