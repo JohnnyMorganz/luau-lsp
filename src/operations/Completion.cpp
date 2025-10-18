@@ -391,13 +391,17 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
         snippetIndex++;
     }
 
-    if (auto tail = it.tail())
+    if (auto tail = it.tail(); tail && !Luau::isEmpty(*tail))
     {
-        if (comma)
+        tail = Luau::follow(tail);
+        if (auto vtp = Luau::get<Luau::VariadicTypePack>(tail); !vtp || !vtp->hidden)
         {
-            detail += ", ";
+            if (comma)
+            {
+                detail += ", ";
+            }
+            detail += Luau::toString(*tail);
         }
-        detail += Luau::toString(*tail);
     }
 
     // If Luau recommended we put the cursor inside, but we haven't recorded any arguments yet, then we are going to fail to do this.
