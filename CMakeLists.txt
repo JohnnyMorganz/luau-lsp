@@ -136,7 +136,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 if (MSVC)
     list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        list(APPEND LUTE_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
+        list(APPEND LUAU_LSP_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
     else()
         list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores; doesn't work with clang-cl
     endif()
