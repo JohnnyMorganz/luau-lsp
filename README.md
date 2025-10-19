@@ -6,8 +6,8 @@ An implementation of a language server for the [Luau](https://github.com/Roblox/
 
 Install the extension from the VSCode Marketplace or OpenVSX Registry:
 
-- VSCode Marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
-- OpenVSX Registry: https://open-vsx.org/extension/JohnnyMorganz/luau-lsp
+- VSCode Marketplace: <https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp>
+- OpenVSX Registry: <https://open-vsx.org/extension/JohnnyMorganz/luau-lsp>
 
 Alternatively, check out [Getting Started for Language Server Clients](https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md)
 to setup your own client for a different editor.
@@ -124,7 +124,16 @@ Crash Reporting is only available for Windows and macOS, and is not active for S
 
 ## Build From Source
 
+Submodules are required to build the project. You should use `--recurse-submodules` when you initally clone the project; e.g.
+
 ```sh
+git clone https://github.com/JohnnyMorganz/luau-lsp.git --recurse-submodules
+```
+
+To compile the project, execute the following commands in the project root directory.
+
+```sh
+git submodule update --init --recursive
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target Luau.LanguageServer.CLI --config Release
