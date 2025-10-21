@@ -1744,4 +1744,29 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_still_puts_cursor_inside_of_call_if_the
     CHECK_EQ(*requireEntry->insertText, "require($1)$0");
 }
 
+TEST_CASE_FIXTURE(Fixture, "autocomplete_label_does_not_show_hidden_variadics")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function isabsolute(path: string)
+        end
+
+        return isabs|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto func = getItem(result, "isabsolute");
+    REQUIRE(func);
+    REQUIRE(func->labelDetails);
+    CHECK_EQ(func->labelDetails->detail, "(path)");
+}
+
 TEST_SUITE_END();

@@ -479,6 +479,18 @@ type HumanoidDescriptionAccessory = {
     Order: number?,
     Puffiness: number?,
 }
+
+declare class ValueCurveKey
+    Interpolation: EnumKeyInterpolationMode
+    Time: number
+    Value: any
+    RightTangent: number
+    LeftTangent: number
+end
+
+declare ValueCurveKey: {
+    new: (time: number, value: any, interpolation: EnumKeyInterpolationMode) -> ValueCurveKey
+}
 """
 
 # More hardcoded types, but go at the end of the file
@@ -704,7 +716,7 @@ DataTypesDump = TypedDict(
 
 chosenSecurityLevel = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SECURITY_LEVEL
 assert (
-    chosenSecurityLevel in SECURITY_LEVELS
+        chosenSecurityLevel in SECURITY_LEVELS
 ), f"Unknown security level: {chosenSecurityLevel}"
 
 
@@ -789,7 +801,7 @@ def classIgnoredMembers(klassName: str):
     if klassName in EXTRA_MEMBERS:
         for member in EXTRA_MEMBERS[klassName]:
             if member.startswith("function "):
-                functionName = member[len("function ") :]
+                functionName = member[len("function "):]
                 functionName = functionName[: functionName.find("(")]
                 ignoredMembers.append(functionName)
             else:
@@ -802,12 +814,12 @@ def classIgnoredMembers(klassName: str):
 
 def filterMember(klassName: str, member: ApiMember):
     if not INCLUDE_DEPRECATED_METHODS and (
-        (
-            "Tags" in member
-            and member["Tags"] is not None
-            and "Deprecated" in member["Tags"]
-        )
-        or ("Deprecated" in member and member["Deprecated"])
+            (
+                    "Tags" in member
+                    and member["Tags"] is not None
+                    and "Deprecated" in member["Tags"]
+            )
+            or ("Deprecated" in member and member["Deprecated"])
     ):
         return False
     if member["Name"] in classIgnoredMembers(klassName):
@@ -815,13 +827,13 @@ def filterMember(klassName: str, member: ApiMember):
     if "Security" in member:
         if isinstance(member["Security"], str):
             if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
-                chosenSecurityLevel
+                    chosenSecurityLevel
             ):
                 return False
         else:
             if min(
-                SECURITY_LEVELS.index(member["Security"]["Read"]),
-                SECURITY_LEVELS.index(member["Security"]["Write"]),
+                    SECURITY_LEVELS.index(member["Security"]["Read"]),
+                    SECURITY_LEVELS.index(member["Security"]["Write"]),
             ) > SECURITY_LEVELS.index(chosenSecurityLevel):
                 return False
 
@@ -830,11 +842,11 @@ def filterMember(klassName: str, member: ApiMember):
 
 def shouldExcludeAsDeprecated(klass: ApiClass):
     return (
-        not INCLUDE_DEPRECATED_METHODS
-        and "Tags" in klass
-        and klass["Tags"] is not None
-        and "Deprecated" in klass["Tags"]
-        and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+            not INCLUDE_DEPRECATED_METHODS
+            and "Tags" in klass
+            and klass["Tags"] is not None
+            and "Deprecated" in klass["Tags"]
+            and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
     )
 
 
@@ -949,10 +961,10 @@ def printDataTypeConstructors(types: DataTypesDump):
         for member in members:
             if member["MemberType"] == "Function":
                 if (
-                    name == "BrickColor"
-                    and member["Name"] == "new"
-                    and len(member["Parameters"]) == 1
-                    and member["Parameters"][0]["Type"]["Name"] == "string"
+                        name == "BrickColor"
+                        and member["Name"] == "new"
+                        and len(member["Parameters"]) == 1
+                        and member["Parameters"][0]["Type"]["Name"] == "string"
                 ):
                     isBrickColorNew = True
                     continue
@@ -1023,8 +1035,8 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                     ]["Generic"]
 
                             if (
-                                "Parameters" in member
-                                and member["Parameters"] is not None
+                                    "Parameters" in member
+                                    and member["Parameters"] is not None
                             ):
                                 for param in member["Parameters"]:
                                     for otherParam in otherMember["Parameters"]:
@@ -1054,9 +1066,9 @@ def loadClassesIntoStructures(dump: ApiDump):
         isCreatable = True
         if "Tags" in klass and klass["Tags"] is not None:
             if (
-                "Deprecated" in klass
-                and not INCLUDE_DEPRECATED_METHODS
-                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+                    "Deprecated" in klass
+                    and not INCLUDE_DEPRECATED_METHODS
+                    and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
             ):
                 continue
             if "Service" in klass["Tags"]:

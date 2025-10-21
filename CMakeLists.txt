@@ -7,7 +7,7 @@ option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 option(LSP_WERROR "Warnings as errors" ON)
 
-set(LSP_VERSION "1.54.0")
+set(LSP_VERSION "1.55.0")
 set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
@@ -135,7 +135,11 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
     list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
-    list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        list(APPEND LUTE_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
+    else()
+        list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores; doesn't work with clang-cl
+    endif()
 else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall)
 endif ()

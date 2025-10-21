@@ -10,7 +10,7 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/Frontend.h"
 #include "Luau/TypeAttach.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
@@ -136,7 +136,7 @@ static bool analyzeFile(
 
         Luau::attachTypeData(*sm, *m);
 
-        std::string annotated = Luau::transpileWithTypes(*sm->root);
+        std::string annotated = Luau::prettyPrintWithTypes(*sm->root);
 
         printf("%s", annotated.c_str());
     }
