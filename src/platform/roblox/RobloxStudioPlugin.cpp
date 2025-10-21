@@ -26,7 +26,7 @@ void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
     workspaceFolder->client->sendLogMessage(lsp::MessageType::Info, "received full change from studio plugin");
 
     pluginNodeAllocator.clear();
-    pluginInfo = PluginNode::fromJson(dataModel, pluginNodeAllocator);
+    setPluginInfo(PluginNode::fromJson(dataModel, pluginNodeAllocator));
 
     // Mutate the sourcemap with the new information
     updateSourceMap();
@@ -38,7 +38,7 @@ void RobloxPlatform::onStudioPluginClear()
 
     // TODO: properly handle multi-workspace setup
     pluginNodeAllocator.clear();
-    pluginInfo = nullptr;
+    setPluginInfo(nullptr);
 
     // Mutate the sourcemap with the new information
     updateSourceMap();
