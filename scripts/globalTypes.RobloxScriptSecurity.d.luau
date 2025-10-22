@@ -1179,6 +1179,14 @@ declare class EnumCatalogSortType_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumCatalogSortType?
 	function FromValue(self, Value: number): EnumCatalogSortType?
 end
+declare class EnumCatalogTimedOptionFilter extends EnumItem end
+declare class EnumCatalogTimedOptionFilter_INTERNAL extends Enum
+	All: EnumCatalogTimedOptionFilter
+	TimedOptionOnly: EnumCatalogTimedOptionFilter
+	function GetEnumItems(self): { EnumCatalogTimedOptionFilter }
+	function FromName(self, Name: string): EnumCatalogTimedOptionFilter?
+	function FromValue(self, Value: number): EnumCatalogTimedOptionFilter?
+end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
 	CornerWedge: EnumCellBlock
@@ -1823,6 +1831,7 @@ end
 declare class EnumDeviceFeatureType extends EnumItem end
 declare class EnumDeviceFeatureType_INTERNAL extends Enum
 	DeviceCapture: EnumDeviceFeatureType
+	InExperienceFAE: EnumDeviceFeatureType
 	function GetEnumItems(self): { EnumDeviceFeatureType }
 	function FromName(self, Name: string): EnumDeviceFeatureType?
 	function FromValue(self, Value: number): EnumDeviceFeatureType?
@@ -3012,7 +3021,15 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	Tab: EnumKeyCode
 	Three: EnumKeyCode
 	Thumbstick1: EnumKeyCode
+	Thumbstick1Down: EnumKeyCode
+	Thumbstick1Left: EnumKeyCode
+	Thumbstick1Right: EnumKeyCode
+	Thumbstick1Up: EnumKeyCode
 	Thumbstick2: EnumKeyCode
+	Thumbstick2Down: EnumKeyCode
+	Thumbstick2Left: EnumKeyCode
+	Thumbstick2Right: EnumKeyCode
+	Thumbstick2Up: EnumKeyCode
 	Tilde: EnumKeyCode
 	Two: EnumKeyCode
 	U: EnumKeyCode
@@ -6199,6 +6216,7 @@ declare class EnumWebStreamClientType extends EnumItem end
 declare class EnumWebStreamClientType_INTERNAL extends Enum
 	RawStream: EnumWebStreamClientType
 	SSE: EnumWebStreamClientType
+	WebSocket: EnumWebStreamClientType
 	function GetEnumItems(self): { EnumWebStreamClientType }
 	function FromName(self, Name: string): EnumWebStreamClientType?
 	function FromValue(self, Value: number): EnumWebStreamClientType?
@@ -6377,6 +6395,7 @@ type ENUM_LIST = {
 	CatalogCategoryFilter: EnumCatalogCategoryFilter_INTERNAL,
 	CatalogSortAggregation: EnumCatalogSortAggregation_INTERNAL,
 	CatalogSortType: EnumCatalogSortType_INTERNAL,
+	CatalogTimedOptionFilter: EnumCatalogTimedOptionFilter_INTERNAL,
 	CellBlock: EnumCellBlock_INTERNAL,
 	CellMaterial: EnumCellMaterial_INTERNAL,
 	CellOrientation: EnumCellOrientation_INTERNAL,
@@ -8342,6 +8361,7 @@ declare class AvatarCreationService extends Instance
 	UgcValidationFailure: RBXScriptSignal<string, string>
 	UgcValidationSuccess: RBXScriptSignal<string, string, number>
 	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: ((...any) -> ...any)?): string
+	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: { [any]: any }, progressCallback: ((...any) -> ...any)?): string
 	function DeserializeAvatarModel(self, serializedModel: string): Instance
 	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [any]: any }): string
 	function GenerateAvatarAsync(self, avatarGenerationParams: { [any]: any }): string
@@ -8922,6 +8942,7 @@ declare class Chat extends Instance
 	Chatted: RBXScriptSignal<BasePart, string, EnumChatColor>
 	IsAutoMigrated: boolean
 	LoadDefaultChat: boolean
+	ReconcileCommunicationAccessCompleted: RBXScriptSignal<>
 	TimeoutChatAttempt: RBXScriptSignal<boolean, number>
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
@@ -8931,6 +8952,7 @@ declare class Chat extends Instance
 	function FilterStringForBroadcast(self, stringToFilter: string, playerFrom: Player): string
 	function GetShouldUseLuaChat(self): boolean
 	function InvokeChatCallback(self, callbackType: EnumChatCallbackType, callbackArguments: any): any
+	function ReconcileCommunicationAccess(self): nil
 	function RegisterChatCallback(self, callbackType: EnumChatCallbackType, callbackFunction: ((...any) -> ...any)): nil
 	function SetBubbleChatSettings(self, settings: any): nil
 end
@@ -10022,6 +10044,7 @@ end
 
 declare class FeatureRestrictionManager extends Instance
 	FeatureTimeoutAttempt: RBXScriptSignal<boolean, number, number, EnumFeatureRestrictionAbuseVector>
+	FeatureTimeoutRestored: RBXScriptSignal<EnumFeatureRestrictionAbuseVector>
 	ShowFeatureInterventionDetails: RBXScriptSignal<EnumFeatureRestrictionAbuseVector>
 	TimeoutChatAttempt: RBXScriptSignal<boolean, number>
 end
@@ -10529,6 +10552,7 @@ declare class PluginGui extends LayerCollector
 	InputEnded: RBXScriptSignal<InputObject, boolean>
 	MouseEnter: RBXScriptSignal<>
 	MouseLeave: RBXScriptSignal<>
+	Plugin: Plugin
 	PluginDragDropped: RBXScriptSignal<{ [any]: any }>
 	PluginDragEntered: RBXScriptSignal<{ [any]: any }>
 	PluginDragLeft: RBXScriptSignal<{ [any]: any }>
@@ -11312,6 +11336,7 @@ declare class AssetImportSession extends ImportSession
 	function ApplyPreset(self, preset: { [any]: any }): nil
 	function CreatePresetFromData(self, importData: Instance): { [any]: any }
 	function GetImportTree(self): Instance
+	function GetKeyframeSequences(self): { Instance }
 	function GetRigVisualization(self, importDataInstance: Instance): Instance
 	function GetUploadStatus(self): { [any]: any }
 	function HasAnimation(self): boolean
@@ -11582,10 +11607,12 @@ declare class LocalizationService extends Instance
 	SystemLocaleId: string
 	function GetCorescriptLocalizations(self): { Instance }
 	function GetCountryRegionForPlayerAsync(self, player: Player): string
+	function GetIsLoadingInternalTranslations(self): boolean
 	function GetTableEntries(self, instance: Instance?): { any }
 	function GetTranslatorForLocaleAsync(self, locale: string): Translator
 	function GetTranslatorForPlayer(self, player: Player): Translator
 	function GetTranslatorForPlayerAsync(self, player: Player): Translator
+	function IsLoadingInternalTranslationsSettingChanged(self, newIsLoadingInternalTranslations: boolean): nil
 	function PromptDownloadGameTableToCSV(self, table: Instance): nil
 	function PromptExportToCSVs(self): nil
 	function PromptImportFromCSVs(self): nil
@@ -12757,6 +12784,7 @@ declare class Player extends Instance
 	CharacterAppearanceId: number
 	CharacterAppearanceLoaded: RBXScriptSignal<Model>
 	CharacterRemoving: RBXScriptSignal<Model>
+	ChatAvailabilityStatus: string
 	ChatMode: EnumChatMode
 	Chatted: RBXScriptSignal<string, Player?>
 	CloudEditSelectionChanged: RBXScriptSignal<{ any }>
@@ -12962,6 +12990,7 @@ declare class Players extends Instance
 	function GetUserThumbnailAsync(self, userId: number, thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
 	function ReportAbuseV3(self, player: Player, jsonTags: string): nil
+	function ReportAvatarAbuse(self, targetUserId: number, tags: { [any]: any }): nil
 	function ReportChatAbuse(self, eligibleChatLines: { any }, targetChatLines: { any }, tags: { [any]: any }): nil
 	function ResetLocalPlayer(self): nil
 	function SetChatStyle(self, style: EnumChatStyle?): nil
@@ -14776,7 +14805,6 @@ declare class TestService extends Instance
 	function ConvertSlimAcrToObj(self, acrFullFilePath: string, objFileName: string): string
 	function CreateAndSavePropertySet(self, source: Instance): string
 	function CreateExtraAssetsFileFromPropertySet(self, psetFileName: string): string
-	function CreatePropertySetDiff(self, sourceA: Instance, sourceB: Instance): string
 	function Done(self): nil
 	function Error(self, description: string, source: Instance?, line: number?): nil
 	function Fail(self, description: string, source: Instance?, line: number?): nil
@@ -15148,6 +15176,7 @@ declare class UGCValidationService extends Instance
 	function CreateEditableMeshFromBinaryStringRobloxOnly(self, value: BinaryStringValue): EditableMesh
 	function DoesMeshHaveSkinningData(self, meshId: string): boolean
 	function FetchAssetWithFormat(self, url: ContentId, assetFormat: string): { Instance }
+	function FetchQualityResultsAsync(self, uploadModel: Model, desiredDatas: { any }): { [any]: any }
 	function GetBoundingBoxManipulationData(self, partMeshObjects: { any }, partCFs: { any }, meshScales: { any }): { [any]: any }
 	function GetCagingRelevancyMetrics(self, innerCageMeshId: string, outerCageMeshId: string, refMeshId: string, offsetInner: Vector3, offsetOuter: Vector3): any
 	function GetDynamicHeadEditableMeshInactiveControls(self, editableMesh: EditableMesh, controlNames: { any }): any
@@ -15911,6 +15940,7 @@ declare class WebStreamClient extends Object
 	MessageReceived: RBXScriptSignal<string>
 	Opened: RBXScriptSignal<number, string>
 	function Close(self): nil
+	function Send(self, data: string): nil
 end
 
 declare Instance: {
