@@ -106,7 +106,6 @@ class RobloxPlatform : public LSPPlatform
 private:
     // Plugin-provided DataModel information
     PluginNode* pluginInfo = nullptr;
-    Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
 
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
@@ -117,19 +116,24 @@ private:
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNode* sourceNode);
 
     void clearSourcemapTypes();
-    bool updateSourceMap();
 
 public:
     // The root source node from a parsed Rojo source map
     SourceNode* rootSourceNode = nullptr;
     Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
+    Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
 
     Luau::TypeArena instanceTypes;
 
-    /// For testing only
+    /// These are "private" but exposed for unit testing only
+    void setPluginInfo(PluginNode* info)
+    {
+        pluginInfo = info;
+    }
+    bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
-    /// For testing only
     void writePathsToMap(SourceNode* node, const std::string& base);
+
     std::optional<Uri> getRealPathFromSourceNode(const SourceNode* sourceNode) const;
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
