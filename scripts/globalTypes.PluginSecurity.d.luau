@@ -1179,6 +1179,14 @@ declare class EnumCatalogSortType_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumCatalogSortType?
 	function FromValue(self, Value: number): EnumCatalogSortType?
 end
+declare class EnumCatalogTimedOptionFilter extends EnumItem end
+declare class EnumCatalogTimedOptionFilter_INTERNAL extends Enum
+	All: EnumCatalogTimedOptionFilter
+	TimedOptionOnly: EnumCatalogTimedOptionFilter
+	function GetEnumItems(self): { EnumCatalogTimedOptionFilter }
+	function FromName(self, Name: string): EnumCatalogTimedOptionFilter?
+	function FromValue(self, Value: number): EnumCatalogTimedOptionFilter?
+end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
 	CornerWedge: EnumCellBlock
@@ -1823,6 +1831,7 @@ end
 declare class EnumDeviceFeatureType extends EnumItem end
 declare class EnumDeviceFeatureType_INTERNAL extends Enum
 	DeviceCapture: EnumDeviceFeatureType
+	InExperienceFAE: EnumDeviceFeatureType
 	function GetEnumItems(self): { EnumDeviceFeatureType }
 	function FromName(self, Name: string): EnumDeviceFeatureType?
 	function FromValue(self, Value: number): EnumDeviceFeatureType?
@@ -3012,7 +3021,15 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	Tab: EnumKeyCode
 	Three: EnumKeyCode
 	Thumbstick1: EnumKeyCode
+	Thumbstick1Down: EnumKeyCode
+	Thumbstick1Left: EnumKeyCode
+	Thumbstick1Right: EnumKeyCode
+	Thumbstick1Up: EnumKeyCode
 	Thumbstick2: EnumKeyCode
+	Thumbstick2Down: EnumKeyCode
+	Thumbstick2Left: EnumKeyCode
+	Thumbstick2Right: EnumKeyCode
+	Thumbstick2Up: EnumKeyCode
 	Tilde: EnumKeyCode
 	Two: EnumKeyCode
 	U: EnumKeyCode
@@ -6199,6 +6216,7 @@ declare class EnumWebStreamClientType extends EnumItem end
 declare class EnumWebStreamClientType_INTERNAL extends Enum
 	RawStream: EnumWebStreamClientType
 	SSE: EnumWebStreamClientType
+	WebSocket: EnumWebStreamClientType
 	function GetEnumItems(self): { EnumWebStreamClientType }
 	function FromName(self, Name: string): EnumWebStreamClientType?
 	function FromValue(self, Value: number): EnumWebStreamClientType?
@@ -6377,6 +6395,7 @@ type ENUM_LIST = {
 	CatalogCategoryFilter: EnumCatalogCategoryFilter_INTERNAL,
 	CatalogSortAggregation: EnumCatalogSortAggregation_INTERNAL,
 	CatalogSortType: EnumCatalogSortType_INTERNAL,
+	CatalogTimedOptionFilter: EnumCatalogTimedOptionFilter_INTERNAL,
 	CellBlock: EnumCellBlock_INTERNAL,
 	CellMaterial: EnumCellMaterial_INTERNAL,
 	CellOrientation: EnumCellOrientation_INTERNAL,
@@ -8023,6 +8042,7 @@ declare class AvatarCreationService extends Instance
 	AvatarAssetModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	AvatarModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
 	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: ((...any) -> ...any)?): string
+	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: { [any]: any }, progressCallback: ((...any) -> ...any)?): string
 	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [any]: any }): string
 	function GenerateAvatarAsync(self, avatarGenerationParams: { [any]: any }): string
 	function GetBatchTokenDetailsAsync(self, tokenIds: { any }): { any }
@@ -13858,6 +13878,7 @@ declare class WebStreamClient extends Object
 	MessageReceived: RBXScriptSignal<string>
 	Opened: RBXScriptSignal<number, string>
 	function Close(self): nil
+	function Send(self, data: string): nil
 end
 
 declare Instance: {
