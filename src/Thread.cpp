@@ -1,5 +1,6 @@
 #ifndef _WIN32
 #include "Thread.hpp"
+#include <exception>
 
 static pthread_t NULL_THREAD = pthread_t();
 
