@@ -2,6 +2,7 @@
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "ScopedFlags.h"
+#include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 
@@ -759,6 +760,48 @@ TEST_CASE_FIXTURE(Fixture, "child_properties_of_game_are_cleared_when_an_invalid
 
     REQUIRE_EQ(result2.errors.size(), 1);
     CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_is_missing")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    client->globalConfig.sourcemap.enabled = true;
+
+    // Verify that no sourcemap file exists - this ensures we're testing the fallback behavior
+    auto config = client->getConfiguration(workspace.rootUri);
+    auto sourcemapPath = workspace.rootUri.resolvePath(config.sourcemap.sourcemapFile);
+    REQUIRE_FALSE(Luau::FileUtils::exists(sourcemapPath.fsPath()));
+
+    // Set up plugin info with a Part child
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "TestPart",
+                    "ClassName": "Part"
+                }
+            ]
+        }
+    )");
+    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
+
+    // Update sourcemap successfully
+    REQUIRE(platform->updateSourceMap());
+
+    // Verify the plugin info was used
+    REQUIRE(platform->rootSourceNode);
+    CHECK_EQ(platform->rootSourceNode->className, "DataModel");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.TestPart
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("part")) == "Part");
 }
 
 TEST_SUITE_END();
