@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.698
 
+### Fixed
+
+- Fixed auto-indentation in VSCode when entering a block if there is a comment after the introduction token (e.g., `if true then -- comment`) ([#1222](https://github.com/JohnnyMorganz/luau-lsp/issues/1222))
+
 ## [1.55.0] - 2025-10-19
 
 ### Added
