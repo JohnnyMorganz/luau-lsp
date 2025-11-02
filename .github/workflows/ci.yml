@@ -52,10 +52,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
 
-      - name: Build Tests
+      - name: Build Tests (ASAN)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
+          cmake --build . --target Luau.LanguageServer.Test -j 3
+
+      - name: Build Tests
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
           cmake --build . --target Luau.LanguageServer.Test -j 3
 
       - name: Run Tests (Old Solver)
@@ -79,7 +87,7 @@ jobs:
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
       - name: Regenerate Types
@@ -174,7 +182,7 @@ jobs:
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
       - name: Run Luau Analyze (Plugin Source)
