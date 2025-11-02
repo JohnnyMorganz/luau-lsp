@@ -52,7 +52,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
 
+      - name: Build Tests (ASAN)
+        if: matrix.os != 'windows-latest'
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
+          cmake --build . --target Luau.LanguageServer.Test -j 3
+
       - name: Build Tests
+        if: matrix.os == 'windows-latest'
         run: |
           mkdir build && cd build
           cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
