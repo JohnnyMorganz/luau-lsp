@@ -96,7 +96,7 @@ public:
 
     // Create a WorkspaceFileResolver with a specific default configuration
     explicit WorkspaceFileResolver(Luau::Config defaultConfig)
-        : defaultConfig(std::move(defaultConfig)){};
+        : defaultConfig(std::move(defaultConfig)) {};
 
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
@@ -116,6 +116,7 @@ public:
     void clearConfigCache();
 
     static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
+    static std::optional<std::string> parseLuauConfig(const Uri& configPath, const std::string& contents, Luau::Config& result);
 
 private:
     const Luau::Config& readConfigRec(const Uri& path) const;

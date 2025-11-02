@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <iostream>
 #include "Luau/Ast.h"
+#include "Luau/LuauConfig.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "LSP/Utils.hpp"
 
@@ -129,6 +130,18 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configP
     return Luau::parseConfig(contents, result, opts);
 }
 
+std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(const Uri& configPath, const std::string& contents, Luau::Config& result)
+{
+    LUAU_ASSERT(configPath.parent());
+
+    Luau::ConfigOptions::AliasOptions aliasOpts;
+    aliasOpts.configLocation = configPath.parent()->fsPath();
+    aliasOpts.overwriteAliases = true;
+
+    // TODO: support interrupt callbacks based on TypeCheckLimits
+    return Luau::extractLuauConfig(contents, result, aliasOpts, Luau::InterruptCallbacks{});
+}
+
 const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
 {
     auto it = configCache.find(uri);
@@ -140,8 +153,33 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
         result = readConfigRec(*parent);
 
     auto configPath = uri.resolvePath(Luau::kConfigName);
+    auto luauConfigPath = uri.resolvePath(Luau::kLuauConfigName);
     auto robloxRcPath = uri.resolvePath(".robloxrc");
 
+    if (std::optional<std::string> contents = Luau::FileUtils::readFile(luauConfigPath.fsPath()))
+    {
+        std::optional<std::string> error = parseLuauConfig(configPath, *contents, result);
+        if (error)
+        {
+            if (client)
+            {
+                lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+                diagnostic.message = *error;
+                diagnostic.severity = lsp::DiagnosticSeverity::Error;
+                diagnostic.source = "Luau";
+                client->publishDiagnostics({configPath, std::nullopt, {diagnostic}});
+            }
+            else
+                // TODO: this should never be reached anymore
+                std::cerr << configPath.toString() << ": " << *error;
+        }
+        else
+        {
+            if (client)
+                // Clear errors presented for file
+                client->publishDiagnostics({configPath, std::nullopt, {}});
+        }
+    }
     if (std::optional<std::string> contents = Luau::FileUtils::readFile(configPath.fsPath()))
     {
         std::optional<std::string> error = parseConfig(configPath, *contents, result);

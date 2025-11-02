@@ -434,4 +434,24 @@ TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
     CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
 }
 
+TEST_CASE_FIXTURE(Fixture, "support_config_luau")
+{
+    TempDir t("file_resolver_supports_config_luau");
+    auto fooPath = t.touch_child("project/code/foo.luau");
+    auto luaurcPath = t.write_child("project/.config.luau", R"(
+        return {
+            luau = {
+                aliases = {
+                    test = "test"
+                }
+            }
+        }
+    )");
+
+    auto fooConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(fooPath)));
+
+    CHECK_EQ(fooConfig.aliases.size(), 1);
+    CHECK(fooConfig.aliases.find("test"));
+}
+
 TEST_SUITE_END();
