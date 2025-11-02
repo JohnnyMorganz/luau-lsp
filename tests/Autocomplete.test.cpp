@@ -1804,4 +1804,29 @@ TEST_CASE_FIXTURE(Fixture, "prioritise_properties_when_sorting_autocomplete_in_t
     }
 }
 
+TEST_CASE_FIXTURE(Fixture, "prioritise_relevant_keywords_when_inside_of_if")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        if true then
+            |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    for (const auto property : {"else", "elseif", "end"})
+    {
+        auto entry = getItem(result, property);
+        REQUIRE(entry);
+        CHECK_EQ(entry->sortText, SortText::PrioritisedSuggestion);
+    }
+}
+
 TEST_SUITE_END();

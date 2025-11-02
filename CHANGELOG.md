@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.698
 - Table properties are now prioritised above other autocomplete entries (again, fixing a dormant bug)
+- Contextual keywords (`else` / `elseif` / `end`) are prioritised over other autocomplete entries when inside of the relevant statement
 
 ### Fixed
 
