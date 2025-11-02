@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.698
+- Auto-imports are now enabled by default. Configure `luau-lsp.completion.imports.enabled` if you wish to disable it ([#619](https://github.com/JohnnyMorganz/luau-lsp/issues/619))
 - Table properties are now prioritised above other autocomplete entries (again, fixing a dormant bug)
 - Contextual keywords (`else` / `elseif` / `end`) are prioritised over other autocomplete entries when inside of the relevant statement
 

@@ -516,7 +516,7 @@
         "luau-lsp.completion.imports.enabled": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",
-          "default": false,
+          "default": true,
           "scope": "resource"
         },
         "luau-lsp.completion.imports.suggestServices": {
