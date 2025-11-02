@@ -113,7 +113,7 @@ TEST_CASE_FIXTURE(Fixture, "isIgnoredFile")
 
 TEST_CASE_FIXTURE(Fixture, "isDefinitionsFile")
 {
-    client->globalConfig.types.definitionFiles = {"globalTypes.d.luau"};
+    client->globalConfig.types.definitionFiles = {{"@roblox", "globalTypes.d.luau"}};
 
     CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("source.luau")), false);
     CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("globalTypes.d.luau")), true);

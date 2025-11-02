@@ -85,7 +85,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    auto definitionsFiles = program.get<std::vector<std::string>>("--definitions");
+    auto definitionsFiles = processDefinitionsFilePaths(program);
     auto documentationFiles = program.get<std::vector<std::string>>("--docs");
     auto baseLuaurc = program.present<std::string>("--base-luaurc");
     auto transportPipeFile = program.present<std::string>("--pipe");
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
         .help("A path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::string>>({})
         .append()
-        .metavar("PATH");
+        .metavar("@NAME=PATH");
     analyze_command.add_argument("--ignore")
         .help("file glob pattern for ignoring error outputs")
         .default_value<std::vector<std::string>>({})
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
         .help("path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::string>>({})
         .append()
-        .metavar("PATH");
+        .metavar("@NAME=PATH");
     lsp_command.add_argument("--docs", "--documentation")
         .help("path to a Luau documentation database for loaded definitions")
         .default_value<std::vector<std::string>>({})

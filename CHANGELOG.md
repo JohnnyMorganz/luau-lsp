@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.698
 - Auto-imports are now enabled by default. Configure `luau-lsp.completion.imports.enabled` if you wish to disable it ([#619](https://github.com/JohnnyMorganz/luau-lsp/issues/619))
+- Definitions files must now provide a name for the file in settings and command line: i.e.
+  `--definitions:@roblox=path/to/globalTypes.d.luau`. This is to support mapping global types back to their original
+  definitions file for documentation features. Please update your LSP settings (`luau-lsp.types.definitionFiles`) and command line arguments.
+  Backwards compatibility has been temporarily preserved, with random names generated.
 - Table properties are now prioritised above other autocomplete entries (again, fixing a dormant bug)
 - Contextual keywords (`else` / `elseif` / `end`) are prioritised over other autocomplete entries when inside of the relevant statement
 

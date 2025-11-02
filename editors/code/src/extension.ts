@@ -176,9 +176,18 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
 
   // Load extra type definitions
-  const definitionFiles = typesConfig.get<string[]>("definitionFiles");
+  // TODO: deprecate and remove support of array-based definitionFiles configuration
+  let definitionFiles = typesConfig.get<
+    { [packageName: string]: string } | string[]
+  >("definitionFiles");
   if (definitionFiles) {
-    for (let definitionPath of definitionFiles) {
+    if (Array.isArray(definitionFiles)) {
+      definitionFiles = Object.fromEntries(
+        definitionFiles.map((path, index) => ["roblox" + index, path]),
+      );
+    }
+
+    for (let [packageName, definitionPath] of Object.entries(definitionFiles)) {
       definitionPath = utils.resolvePath(definitionPath);
       let uri;
       if (vscode.workspace.workspaceFolders) {
@@ -190,10 +199,10 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
         uri = vscode.Uri.file(definitionPath);
       }
       if (await utils.exists(uri)) {
-        addArg(`--definitions=${uri.fsPath}`);
+        addArg(`--definitions:${packageName}=${uri.fsPath}`);
       } else {
         vscode.window.showWarningMessage(
-          `Definitions file at ${definitionPath} does not exist, types will not be provided from this file`,
+          `Definitions file '${packageName}' at ${definitionPath} does not exist, types will not be provided from this file`,
         );
       }
     }

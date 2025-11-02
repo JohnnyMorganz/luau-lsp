@@ -63,7 +63,7 @@ TEST_CASE("ignore_globs_from_settings_file_applied")
 {
     CliClient client;
     std::vector<std::string> ignoreGlobs;
-    std::vector<std::string> definitionPaths;
+    std::unordered_map<std::string, std::string> definitionPaths;
 
     auto configFile = R"({ "luau-lsp.ignoreGlobs": [ "/ignored/**" ] })";
 
@@ -77,14 +77,15 @@ TEST_CASE("definition_files_from_settings_file_applied")
 {
     CliClient client;
     std::vector<std::string> ignoreGlobs;
-    std::vector<std::string> definitionPaths;
+    std::unordered_map<std::string, std::string> definitionPaths;
 
     auto configFile = R"({ "luau-lsp.types.definitionFiles": [ "global_types/types.d.luau" ] })";
 
     applySettings(configFile, client, ignoreGlobs, definitionPaths);
 
     REQUIRE_EQ(definitionPaths.size(), 1);
-    CHECK_EQ(definitionPaths[0], "global_types/types.d.luau");
+    REQUIRE(definitionPaths.find("@roblox1") != definitionPaths.end());
+    CHECK_EQ(definitionPaths["@roblox1"], "global_types/types.d.luau");
 }
 
 TEST_CASE_FIXTURE(Fixture, "analysis_relative_file_paths")
@@ -94,6 +95,50 @@ TEST_CASE_FIXTURE(Fixture, "analysis_relative_file_paths")
 
     CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("test.luau")).relativePath, "test.luau");
     CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("folder/file.luau")).relativePath, "folder/file.luau");
+}
+
+TEST_CASE("parse_definitions_files_handles_new_syntax")
+{
+    argparse::ArgumentParser program("test");
+    program.set_assign_chars(":=");
+    program.add_argument("--definitions", "--defs")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
+
+    std::vector<std::string> arguments{
+        "", "--definitions:@roblox=example_path.d.luau", "--definitions:@lune=lune.d.luau", "--definitions:no_at_sign=path.d.luau"};
+    program.parse_args(arguments);
+
+    auto definitionsFiles = processDefinitionsFilePaths(program);
+
+    CHECK_EQ(definitionsFiles, std::unordered_map<std::string, std::string>{
+                                   {"@roblox", "example_path.d.luau"},
+                                   {"@lune", "lune.d.luau"},
+                                   {"@no_at_sign", "path.d.luau"},
+                               });
+}
+
+TEST_CASE("parse_definitions_files_handles_legacy_syntax")
+{
+    argparse::ArgumentParser program("test");
+    program.set_assign_chars(":=");
+    program.add_argument("--definitions", "--defs")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
+
+    std::vector<std::string> arguments{"", "--definitions=example_path.d.luau", "--definitions=lune.d.luau"};
+    program.parse_args(arguments);
+
+    auto definitionsFiles = processDefinitionsFilePaths(program);
+
+    CHECK_EQ(definitionsFiles, std::unordered_map<std::string, std::string>{
+                                   {"@roblox", "example_path.d.luau"},
+                                   {"@roblox1", "lune.d.luau"},
+                               });
 }
 
 TEST_SUITE_END();
