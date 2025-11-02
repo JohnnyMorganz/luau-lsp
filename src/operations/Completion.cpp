@@ -320,16 +320,16 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
 
     if (entry.wrongIndexType)
         return SortText::WrongIndexType;
-    if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
-        return SortText::CorrectTypeKind;
-    else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
-        return SortText::CorrectFunctionResult;
     else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
         return SortText::MetatableIndex;
     else if (entry.kind == Luau::AutocompleteEntryKind::Property)
         return SortText::TableProperties;
     else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
         return SortText::Keywords;
+    else if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
+        return SortText::CorrectTypeKind;
+    else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
+        return SortText::CorrectFunctionResult;
 
     return SortText::Default;
 }

@@ -4,6 +4,7 @@
 #include "ScopedFlags.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
+#include "LSP/Completion.hpp"
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -1767,6 +1768,40 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_label_does_not_show_hidden_variadics")
     REQUIRE(func);
     REQUIRE(func->labelDetails);
     CHECK_EQ(func->labelDetails->detail, "(path)");
+}
+
+TEST_CASE_FIXTURE(Fixture, "prioritise_properties_when_sorting_autocomplete_in_table")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        type Options = {
+            name: string,
+            description: string,
+            label: string
+        }
+        local function create(options: Options)
+        end
+
+        create({
+            |
+        })
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    for (const auto property : {"name", "description", "label"})
+    {
+        auto entry = getItem(result, property);
+        REQUIRE(entry);
+        CHECK_EQ(entry->sortText, SortText::TableProperties);
+    }
 }
 
 TEST_SUITE_END();
