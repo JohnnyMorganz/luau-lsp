@@ -235,8 +235,8 @@ const char* RobloxPlatform::handleSortText(
 
     // If calling a property on an Instance, then prioritise these properties
     else if (auto instanceType = completionGlobals.globalScope->lookupType("Instance");
-             instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
-             Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
+        instanceType && Luau::get<Luau::ExternType>(instanceType->type) && entry.containingExternType &&
+        Luau::isSubclass(entry.containingExternType.value(), Luau::get<Luau::ExternType>(instanceType->type)) && !entry.wrongIndexType)
     {
         if (auto it = std::find(std::begin(COMMON_INSTANCE_PROPERTIES), std::end(COMMON_INSTANCE_PROPERTIES), name);
             it != std::end(COMMON_INSTANCE_PROPERTIES))
@@ -281,6 +281,10 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
         {
             // ASSUMPTION: if the service was defined, it was defined with the exact same name
             if (contains(importsVisitor.serviceLineMap, service))
+                continue;
+
+            if ((!config.completion.imports.includedServices.empty() && !contains(config.completion.imports.includedServices, service)) ||
+                contains(config.completion.imports.excludedServices, service))
                 continue;
 
             size_t lineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);

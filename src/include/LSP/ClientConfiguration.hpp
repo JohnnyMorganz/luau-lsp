@@ -116,6 +116,10 @@ struct ClientCompletionImportsConfiguration
     bool enabled = false;
     /// Whether services should be suggested in auto-import
     bool suggestServices = true;
+    /// When non-empty, only show the services listed when auto-importing
+    std::vector<std::string> includedServices{};
+    /// Do not show any of the listed services when auto-importing
+    std::vector<std::string> excludedServices{};
     /// Whether requires should be suggested in auto-import
     bool suggestRequires = true;
     /// The style of the auto-imported require
@@ -126,8 +130,8 @@ struct ClientCompletionImportsConfiguration
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle,
-    stringRequires, separateGroupsWithLine, ignoreGlobs);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
+    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
 
 struct ClientCompletionConfiguration
 {

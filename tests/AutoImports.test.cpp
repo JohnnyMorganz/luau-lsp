@@ -131,6 +131,44 @@ TEST_CASE_FIXTURE(Fixture, "service_does_not_show_up_in_autocomplete_if_already_
     CHECK_EQ(item->additionalTextEdits.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "service_does_not_show_up_in_autocomplete_if_not_in_includes_list")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.includedServices = {"ServerScriptService"};
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK(getItem(result, "ServerScriptService"));
+    CHECK_FALSE(getItem(result, "ReplicatedStorage"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "service_does_not_show_up_in_autocomplete_if_in_excludes_list")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.excludedServices = {"ServerScriptService"};
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "ServerScriptService"));
+    CHECK(getItem(result, "ReplicatedStorage"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "service_auto_imports_are_inserted_alphabetically")
 {
     client->globalConfig.completion.imports.enabled = true;

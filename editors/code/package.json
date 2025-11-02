@@ -525,6 +525,24 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.imports.includedServices": {
+          "markdownDescription": "When non-empty, only show the services listed when auto-importing",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "resource"
+        },
+        "luau-lsp.completion.imports.excludedServices": {
+          "markdownDescription": "Do not show any of the listed services when auto-importing",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "resource"
+        },
         "luau-lsp.completion.imports.suggestRequires": {
           "markdownDescription": "Whether module requires are suggested in autocomplete",
           "type": "boolean",

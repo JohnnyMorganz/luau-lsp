@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - The server now accepts DataModel information from the Studio Plugin even when there is no sourcemap present ([#1216](https://github.com/JohnnyMorganz/luau-lsp/pull/1216))
+- Added `luau-lsp.completion.imports.includedServices` and `luau-lsp.completion.imports.excludedServices` to configure what services show up during auto-importing. If non-empty, only the services listed in `includedServices` will show up. None of the services listed in `excludedServices` will ever show up.
 
 ### Changed
 
