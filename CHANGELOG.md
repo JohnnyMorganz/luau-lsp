@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.56.0] - 2025-11-02
+
 ### Added
 
 - The server now accepts DataModel information from the Studio Plugin even when there is no sourcemap present ([#1216](https://github.com/JohnnyMorganz/luau-lsp/pull/1216))
@@ -1708,7 +1710,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
