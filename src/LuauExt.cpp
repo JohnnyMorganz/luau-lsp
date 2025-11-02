@@ -56,7 +56,7 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
 Luau::LoadDefinitionFileResult registerDefinitions(
     Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName, const std::string& definitions)
 {
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ false);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ true);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
