@@ -12,13 +12,14 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_sends_information_for_required_
     client->capabilities.textDocument->diagnostic->relatedDocumentSupport = true;
 
     // Don't show diagnostic for game indexing
-    loadDefinition("declare game: any");
+    loadDefinition("@extra", "declare game: any");
 
     registerDocumentForVirtualPath(newDocument("required.luau", R"(
         --!strict
         local x: string = 1
         return {}
-    )"), "game/Testing/Required");
+    )"),
+        "game/Testing/Required");
     auto document = newDocument("main.luau", R"(
         --!strict
         require(game.Testing.Required)
@@ -36,13 +37,14 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_does_not_send_information_for_r
     client->capabilities.textDocument->diagnostic->relatedDocumentSupport = false;
 
     // Don't show diagnostic for game indexing
-    loadDefinition("declare game: any");
+    loadDefinition("@extra", "declare game: any");
 
     registerDocumentForVirtualPath(newDocument("required.luau", R"(
         --!strict
         local x: string = 1
         return {}
-    )"), "game/Testing/Required");
+    )"),
+        "game/Testing/Required");
     auto document = newDocument("main.luau", R"(
         --!strict
         require(game.Testing.Required)

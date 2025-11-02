@@ -80,7 +80,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
                     !isIgnoredFile(dirtyUri, config))
                 {
                     auto dependencyDiags = documentDiagnostics(
-                        lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken=*/ nullptr, /* allowUnmanagedFiles= */ true);
+                        lsp::DocumentDiagnosticParams{{dirtyUri}}, /* cancellationToken=*/nullptr, /* allowUnmanagedFiles= */ true);
                     client->publishDiagnostics(lsp::PublishDiagnosticsParams{dirtyUri, std::nullopt, dependencyDiags.items});
                 }
             }
@@ -283,7 +283,7 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
 {
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
 
-    for (auto& file : config.types.definitionFiles)
+    for (auto& [_, file] : config.types.definitionFiles)
     {
         if (rootUri.resolvePath(resolvePath(file)) == path)
         {
@@ -474,10 +474,21 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     if (client->definitionsFiles.empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
-    for (const auto& definitionsFile : client->definitionsFiles)
+    // For backwards compatibility, we need to keep an ordering where a definitions file for '@roblox' is always processed first
+    std::vector<std::pair<std::string, std::string>> definitionsFilesToProcess{};
+    definitionsFilesToProcess.reserve(client->definitionsFiles.size());
+    if (auto it = client->definitionsFiles.find("@roblox"); it != client->definitionsFiles.end())
+        definitionsFilesToProcess.emplace_back(*it);
+    for (const auto& pair : client->definitionsFiles)
+    {
+        if (pair.first != "@roblox")
+            definitionsFilesToProcess.emplace_back(pair);
+    }
+
+    for (const auto& [packageName, definitionsFile] : definitionsFilesToProcess)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
-        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + resolvedFilePath);
+        client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + packageName + " - " + resolvedFilePath);
 
         auto definitionsContents = Luau::FileUtils::readFile(resolvedFilePath);
         if (!definitionsContents)
@@ -495,9 +506,9 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
+        auto result = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
         if (!FFlag::LuauSolverV2)
-            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents);
+            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         client->sendTrace("workspace: applying platform mutations on definitions");

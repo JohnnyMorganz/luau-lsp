@@ -35,11 +35,39 @@ struct ClientTypesConfiguration
     /// DEPRECATED: USE `platform.type` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
-    std::vector<std::string> definitionFiles{};
+    std::unordered_map<std::string, std::string> definitionFiles{};
     /// A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)
     std::vector<std::string> disabledGlobals{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles, disabledGlobals);
+
+// TODO: ser/de defined manually to retain backwards compatibility of 'definitionsFiles' being an array
+inline void to_json(nlohmann::json& nlohmann_json_j, const ClientTypesConfiguration& nlohmann_json_t)
+{
+    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, roblox, definitionFiles, disabledGlobals))
+}
+inline void from_json(const nlohmann::json& json, ClientTypesConfiguration& object)
+{
+    if (json.contains("roblox"))
+        json["roblox"].get_to(object.roblox);
+    if (json.contains("disabledGlobals"))
+        json["disabledGlobals"].get_to(object.disabledGlobals);
+    if (json.contains("definitionFiles"))
+    {
+        if (json["definitionFiles"].is_object())
+            json["definitionFiles"].get_to(object.definitionFiles);
+        else
+        {
+            // Backwards compatibility, randomise the packageName of the definitionFiles
+            size_t backwardsCompatibilityNameSuffix = 1;
+            for (const auto& definition : json["definitionFiles"].get<std::vector<std::string>>())
+            {
+                std::string packageName = "@roblox" + std::to_string(backwardsCompatibilityNameSuffix);
+                object.definitionFiles.emplace(packageName, definition);
+                backwardsCompatibilityNameSuffix += 1;
+            }
+        }
+    }
+}
 
 enum struct InlayHintsParameterNamesConfig
 {

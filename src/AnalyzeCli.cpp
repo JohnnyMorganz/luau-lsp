@@ -183,8 +183,8 @@ std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths
     return files;
 }
 
-void applySettings(
-    const std::string& settingsContents, CliClient& client, std::vector<std::string>& ignoreGlobPatterns, std::vector<std::string>& definitionsPaths)
+void applySettings(const std::string& settingsContents, CliClient& client, std::vector<std::string>& ignoreGlobPatterns,
+    std::unordered_map<std::string, std::string>& definitionsPaths)
 {
     client.configuration = dottedToClientConfiguration(settingsContents);
 
@@ -194,7 +194,7 @@ void applySettings(
     ignoreGlobPatterns.reserve(ignoreGlobPatterns.size() + ignoreGlobsConfiguration.size());
     ignoreGlobPatterns.insert(ignoreGlobPatterns.end(), ignoreGlobsConfiguration.cbegin(), ignoreGlobsConfiguration.cend());
     definitionsPaths.reserve(definitionsPaths.size() + definitionsFilesConfiguration.size());
-    definitionsPaths.insert(definitionsPaths.end(), definitionsFilesConfiguration.cbegin(), definitionsFilesConfiguration.cend());
+    definitionsPaths.insert(definitionsFilesConfiguration.begin(), definitionsFilesConfiguration.end());
 
     // Process any fflags
     registerFastFlagsCLI(client.configuration.fflags.override);
@@ -206,12 +206,45 @@ void applySettings(
                      "Please manually configure necessary FFlags\n";
 }
 
+std::unordered_map<std::string, std::string> processDefinitionsFilePaths(const argparse::ArgumentParser& program)
+{
+    std::unordered_map<std::string, std::string> definitionsFiles{};
+    size_t backwardsCompatibilityNameSuffix = 0;
+    for (const auto& definition : program.get<std::vector<std::string>>("--definitions"))
+    {
+        std::string packageName = definition;
+        std::string filePath = definition;
+
+        size_t eqIndex = definition.find('=');
+        if (eqIndex == std::string::npos)
+        {
+            // TODO: Remove Me - backwards compatibility
+            packageName = "@roblox";
+            if (backwardsCompatibilityNameSuffix > 0)
+                packageName += std::to_string(backwardsCompatibilityNameSuffix);
+            backwardsCompatibilityNameSuffix += 1;
+        }
+        else
+        {
+            packageName = definition.substr(0, eqIndex);
+            filePath = definition.substr(eqIndex + 1, definition.length());
+        }
+
+        if (!Luau::startsWith(packageName, "@"))
+            packageName = "@" + packageName;
+
+        definitionsFiles.emplace(packageName, filePath);
+    }
+
+    return definitionsFiles;
+}
+
 int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
     bool annotate = program.is_used("--annotate");
     auto sourcemapPath = program.present<std::string>("--sourcemap");
-    auto definitionsPaths = program.get<std::vector<std::string>>("--definitions");
+    auto definitionsPaths = processDefinitionsFilePaths(program);
     auto ignoreGlobPatterns = program.get<std::vector<std::string>>("--ignore");
     auto baseLuaurc = program.present<std::string>("--base-luaurc");
     auto settingsPath = program.present<std::string>("--settings");
@@ -325,7 +358,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
                         "definitions files; use `--platform=standard` to silence\n");
     }
 
-    for (auto& definitionsPath : definitionsPaths)
+    for (const auto& [packageName, definitionsPath] : definitionsPaths)
     {
         auto uri = fileResolver.rootUri.resolvePath(definitionsPath);
         if (!uri.exists())
@@ -341,7 +374,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
 
-        auto loadResult = types::registerDefinitions(frontend, frontend.globals, *definitionsContents);
+        auto loadResult = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
         if (!loadResult.success)
         {
             fprintf(stderr, "Failed to load definitions\n");

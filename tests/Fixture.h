@@ -44,7 +44,7 @@ struct Fixture
     void updateDocument(const Uri& uri, const std::string& newSource);
 
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
-    Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);
+    Luau::LoadDefinitionFileResult loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete = false);
     void loadSourcemap(const std::string& source);
     void loadLuaurc(const std::string& source);
     SourceNode* getRootSourceNode();
