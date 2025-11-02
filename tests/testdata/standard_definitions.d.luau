@@ -101,3 +101,23 @@ declare Instance: {
 }
 
 declare game: DataModel
+
+--- This is a documented table
+export type DocumentedTable = {
+    --- This is documented member1 of the table
+    member1: string,
+}
+
+--- This is a documented class
+declare class DocumentedClass
+    --- This is a documented member1 of the class
+    member1: string
+    --- This is a documented function1 of the class
+    function function1(self): number
+end
+
+--- This is a documented global function
+declare function DocumentedGlobalFunction(): number
+
+--- This is a documented global variable
+declare DocumentedGlobalVariable: number

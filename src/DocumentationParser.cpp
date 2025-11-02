@@ -306,6 +306,26 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return false;
     }
 
+    bool visit(Luau::AstStatDeclareExternType* klass) override
+    {
+        if (klass->location.begin >= pos)
+            return false;
+        if (klass->location.begin > closestPreviousNode)
+            closestPreviousNode = klass->location.begin;
+
+        for (const auto& item : klass->props)
+        {
+            if (item.ty->location.begin >= pos)
+                continue;
+            closestPreviousNode = std::max(closestPreviousNode, item.ty->location.begin);
+            item.ty->visit(this);
+            if (item.ty->location.end <= pos)
+                closestPreviousNode = std::max(closestPreviousNode, item.ty->location.end);
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         // If the position is after the block, then it can be ignored
@@ -353,17 +373,27 @@ std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module,
 /// Performs transformations so that the comments are normalised to lines inside of it (i.e., trimming whitespace, removing comment start/end)
 std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& moduleName, const Luau::Location& node)
 {
-    auto sourceModule = frontend.getSourceModule(moduleName);
-    if (!sourceModule)
-        return {};
+    Luau::SourceModule* sourceModule;
+    TextDocumentPtr textDocument{nullptr};
+
+    if (auto it = definitionsSourceModules.find(moduleName); it != definitionsSourceModules.end())
+    {
+        sourceModule = &it->second.second;
+        textDocument = TextDocumentPtr(&it->second.first);
+    }
+    else
+    {
+        sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return {};
+
+        textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
+        if (!textDocument)
+            return {};
+    }
 
     auto commentLocations = getCommentLocations(sourceModule, node);
     if (commentLocations.empty())
-        return {};
-
-    // Get relevant text document
-    auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
-    if (!textDocument)
         return {};
 
     std::vector<std::string> comments{};
@@ -446,6 +476,10 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv && !ttv->definitionModuleName.empty())
     {
         return printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    }
+    else if (auto etv = Luau::get<Luau::ExternType>(followedTy); etv && !etv->definitionModuleName.empty() && etv->definitionLocation)
+    {
+        return printMoonwaveDocumentation(getComments(etv->definitionModuleName, *etv->definitionLocation));
     }
     return std::nullopt;
 }

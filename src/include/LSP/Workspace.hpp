@@ -50,6 +50,11 @@ public:
     /// When a new request comes in and the workspace is not ready, we will prepare it then.
     bool isReady = false;
 
+private:
+    /// Mapping between a definitions package name to the TextDocument / SourceModule that contains this definitions.
+    /// Used for documentation comment lookup within definition files.
+    std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
+
 public:
     WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
