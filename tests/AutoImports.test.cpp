@@ -1449,25 +1449,6 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_empty_require_statement")
     CHECK_EQ(item->additionalTextEdits[0].range.start.line, 1);
 }
 
-TEST_CASE_FIXTURE(Fixture, "auto_imports_shows_up_in_tables_before_equals_sign")
-{
-    client->globalConfig.completion.imports.enabled = true;
-    auto [source, marker] = sourceWithMarker(R"(
-        create({
-            |
-        })
-    )");
-
-    auto uri = newDocument("foo.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params, nullptr);
-    CHECK(getItem(result, "ReplicatedStorage"));
-}
-
 TEST_CASE_FIXTURE(Fixture, "auto_imports_shows_up_in_tables_after_equals_sign")
 {
     client->globalConfig.completion.imports.enabled = true;
@@ -1485,6 +1466,23 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_shows_up_in_tables_after_equals_sign")
 
     auto result = workspace.completion(params, nullptr);
     CHECK(getItem(result, "ReplicatedStorage"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_completion_property")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    auto [source, marker] = sourceWithMarker(R"(
+        local x = foo.ba|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "ReplicatedStorage"));
 }
 
 TEST_SUITE_END();

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Reverted "Fixed auto-imports not showing up when autocompleting in array-like tables" due to it incorrectly suggesting auto-imports when indexing tables (e.g., `local x = tbl.pro|`)
+
 ## [1.56.0] - 2025-11-02
 
 ### Added
@@ -1710,6 +1714,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
