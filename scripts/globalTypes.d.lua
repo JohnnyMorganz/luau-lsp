@@ -364,6 +364,16 @@ declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumAnimationClipFromVideoStatus?
 	function FromValue(self, Value: number): EnumAnimationClipFromVideoStatus?
 end
+declare class EnumAnimationNodePlayMode extends EnumItem end
+declare class EnumAnimationNodePlayMode_INTERNAL extends Enum
+	Loop: EnumAnimationNodePlayMode
+	OnceAndHold: EnumAnimationNodePlayMode
+	OnceAndReset: EnumAnimationNodePlayMode
+	PingPong: EnumAnimationNodePlayMode
+	function GetEnumItems(self): { EnumAnimationNodePlayMode }
+	function FromName(self, Name: string): EnumAnimationNodePlayMode?
+	function FromValue(self, Value: number): EnumAnimationNodePlayMode?
+end
 declare class EnumAnimationNodeType extends EnumItem end
 declare class EnumAnimationNodeType_INTERNAL extends Enum
 	AddNode: EnumAnimationNodeType
@@ -558,10 +568,12 @@ declare class EnumAssetType_INTERNAL extends Enum
 	EarAccessory: EnumAssetType
 	EmoteAnimation: EnumAssetType
 	EyeAccessory: EnumAssetType
+	EyeMakeup: EnumAssetType
 	EyebrowAccessory: EnumAssetType
 	EyelashAccessory: EnumAssetType
 	Face: EnumAssetType
 	FaceAccessory: EnumAssetType
+	FaceMakeup: EnumAssetType
 	FallAnimation: EnumAssetType
 	FontFamily: EnumAssetType
 	FrontAccessory: EnumAssetType
@@ -577,6 +589,7 @@ declare class EnumAssetType_INTERNAL extends Enum
 	LeftArm: EnumAssetType
 	LeftLeg: EnumAssetType
 	LeftShoeAccessory: EnumAssetType
+	LipMakeup: EnumAssetType
 	Lua: EnumAssetType
 	Mesh: EnumAssetType
 	MeshPart: EnumAssetType
@@ -723,10 +736,12 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	DressSkirtAccessory: EnumAvatarAssetType
 	DynamicHead: EnumAvatarAssetType
 	EmoteAnimation: EnumAvatarAssetType
+	EyeMakeup: EnumAvatarAssetType
 	EyebrowAccessory: EnumAvatarAssetType
 	EyelashAccessory: EnumAvatarAssetType
 	Face: EnumAvatarAssetType
 	FaceAccessory: EnumAvatarAssetType
+	FaceMakeup: EnumAvatarAssetType
 	FallAnimation: EnumAvatarAssetType
 	FrontAccessory: EnumAvatarAssetType
 	Gear: EnumAvatarAssetType
@@ -739,6 +754,7 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	LeftArm: EnumAvatarAssetType
 	LeftLeg: EnumAvatarAssetType
 	LeftShoeAccessory: EnumAvatarAssetType
+	LipMakeup: EnumAvatarAssetType
 	MoodAnimation: EnumAvatarAssetType
 	NeckAccessory: EnumAvatarAssetType
 	Pants: EnumAvatarAssetType
@@ -2088,6 +2104,14 @@ declare class EnumExperienceEventStatus_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumExperienceEventStatus }
 	function FromName(self, Name: string): EnumExperienceEventStatus?
 	function FromValue(self, Value: number): EnumExperienceEventStatus?
+end
+declare class EnumExperienceStateCaptureSelectionMode extends EnumItem end
+declare class EnumExperienceStateCaptureSelectionMode_INTERNAL extends Enum
+	Default: EnumExperienceStateCaptureSelectionMode
+	SafetyHighlightMode: EnumExperienceStateCaptureSelectionMode
+	function GetEnumItems(self): { EnumExperienceStateCaptureSelectionMode }
+	function FromName(self, Name: string): EnumExperienceStateCaptureSelectionMode?
+	function FromValue(self, Value: number): EnumExperienceStateCaptureSelectionMode?
 end
 declare class EnumExperienceStateRecordingLoadMode extends EnumItem end
 declare class EnumExperienceStateRecordingLoadMode_INTERNAL extends Enum
@@ -4995,6 +5019,18 @@ declare class EnumStatus_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumStatus?
 	function FromValue(self, Value: number): EnumStatus?
 end
+declare class EnumStepFrequency extends EnumItem end
+declare class EnumStepFrequency_INTERNAL extends Enum
+	Hz1: EnumStepFrequency
+	Hz10: EnumStepFrequency
+	Hz15: EnumStepFrequency
+	Hz30: EnumStepFrequency
+	Hz5: EnumStepFrequency
+	Hz60: EnumStepFrequency
+	function GetEnumItems(self): { EnumStepFrequency }
+	function FromName(self, Name: string): EnumStepFrequency?
+	function FromValue(self, Value: number): EnumStepFrequency?
+end
 declare class EnumStreamOutBehavior extends EnumItem end
 declare class EnumStreamOutBehavior_INTERNAL extends Enum
 	Default: EnumStreamOutBehavior
@@ -6409,6 +6445,7 @@ type ENUM_LIST = {
 	AnalyticsProgressionStatus: EnumAnalyticsProgressionStatus_INTERNAL,
 	AnalyticsProgressionType: EnumAnalyticsProgressionType_INTERNAL,
 	AnimationClipFromVideoStatus: EnumAnimationClipFromVideoStatus_INTERNAL,
+	AnimationNodePlayMode: EnumAnimationNodePlayMode_INTERNAL,
 	AnimationNodeType: EnumAnimationNodeType_INTERNAL,
 	AnimationPriority: EnumAnimationPriority_INTERNAL,
 	AnimatorRetargetingMode: EnumAnimatorRetargetingMode_INTERNAL,
@@ -6559,6 +6596,7 @@ type ENUM_LIST = {
 	EnviromentalPhysicsThrottle: EnumEnviromentalPhysicsThrottle_INTERNAL,
 	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
 	ExperienceEventStatus: EnumExperienceEventStatus_INTERNAL,
+	ExperienceStateCaptureSelectionMode: EnumExperienceStateCaptureSelectionMode_INTERNAL,
 	ExperienceStateRecordingLoadMode: EnumExperienceStateRecordingLoadMode_INTERNAL,
 	ExperienceStateRecordingLoadSourceType: EnumExperienceStateRecordingLoadSourceType_INTERNAL,
 	ExperienceStateRecordingPlaybackMode: EnumExperienceStateRecordingPlaybackMode_INTERNAL,
@@ -6798,6 +6836,7 @@ type ENUM_LIST = {
 	StartCorner: EnumStartCorner_INTERNAL,
 	StateObjectFieldType: EnumStateObjectFieldType_INTERNAL,
 	Status: EnumStatus_INTERNAL,
+	StepFrequency: EnumStepFrequency_INTERNAL,
 	StreamOutBehavior: EnumStreamOutBehavior_INTERNAL,
 	StreamingIntegrityMode: EnumStreamingIntegrityMode_INTERNAL,
 	StreamingPauseMode: EnumStreamingPauseMode_INTERNAL,
@@ -8221,6 +8260,7 @@ declare class AudioPlayer extends Instance
 	Asset: ContentId
 	AudioContent: Content
 	AutoLoad: boolean
+	AutoPlay: boolean
 	Ended: RBXScriptSignal<>
 	IsMutedForCapture: boolean
 	IsPlaying: boolean
@@ -9988,6 +10028,7 @@ declare class ExperienceStateCaptureService extends Instance
 	IsInBackground: boolean
 	IsInCaptureMode: boolean
 	ItemSelectedInCaptureMode: RBXScriptSignal<Instance>
+	SelectionMode: EnumExperienceStateCaptureSelectionMode
 	function CanEnterCaptureMode(self): boolean
 	function ResetHighlight(self): nil
 	function ToggleCaptureMode(self): nil
@@ -10255,8 +10296,10 @@ end
 
 declare class GenerationService extends Instance
 	function GenerateMeshAsync(self, inputs: { [any]: any }, player: Player, options: { [any]: any }, intermediateResultCallback: ((...any) -> ...any)?): any
+	function GenerateModelAsync(self, inputs: { [any]: any }, schema: { [any]: any }, options: { [any]: any }?): any
 	function InternalGenerateMeshAsync(self, inputs: { [any]: any }, userId: number, options: { [any]: any }, intermediateResultCallback: ((...any) -> ...any)?): any
 	function LoadGeneratedMeshAsync(self, generationId: string): MeshPart
+	function LoadModelFromGlbAsync(self, glbPath: string): Model
 end
 
 declare class GenericChallengeService extends Instance
@@ -10281,6 +10324,7 @@ declare class GeometryService extends Instance
 	function HashMeshAsync(self, meshId: ContentId): string
 	function IntersectAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 	function SubtractAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
+	function SweepPartAsync(self, part: BasePart, cframes: { any }, options: { [any]: any }?): MeshPart
 	function TranscodeMesh(self, instance: Instance): nil
 	function TranscodeModel(self, instance: Instance): { any }
 	function UnionAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
@@ -11395,7 +11439,7 @@ declare class HumanoidRigDescription extends Instance
 	WaistRangeMin: Vector3
 	WaistSize: number
 	WaistTposeAdjustment: CFrame
-	function Automap(self, character: Instance): nil
+	function AutoRig(self, character: Instance): nil
 	function GetJointFromName(self, name: string): Instance
 	function GetJointNames(self): { any }
 	function GetR15JointNames(self): { any }
@@ -11915,6 +11959,7 @@ declare class MarketplaceService extends Instance
 	function PromptRobloxPurchase(self, assetId: number, equipIfPurchased: boolean): nil
 	function PromptSubscriptionPurchase(self, user: Player, subscriptionId: string): nil
 	function PromptThirdPartyPurchase(self, player: Instance, productId: string): nil
+	function RecommendTopProductsAsync(self, infoTypes: { any }): { any }
 	function ReportAssetSale(self, assetId: string, robuxAmount: number): nil
 	function ReportRobuxUpsellStarted(self): nil
 	function SignalAssetTypePurchased(self, player: Instance, assetType: EnumAssetType): nil
@@ -13604,7 +13649,6 @@ end
 
 declare class RunService extends Instance
 	ClientGitHash: string
-	FixedHeartbeat: RBXScriptSignal<number>
 	FrameNumber: number
 	Heartbeat: RBXScriptSignal<number>
 	Misprediction: RBXScriptSignal<number, { any }>
@@ -13618,6 +13662,7 @@ declare class RunService extends Instance
 	RunState: EnumRunState
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
+	function BindToSimulation(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?): RBXScriptConnection
 	function GetControlAndVariantRolloutFlags(self): any
 	function GetCoreScriptVersion(self): string
 	function GetRobloxClientChannel(self): string
@@ -14168,7 +14213,6 @@ declare class SoundService extends Instance
 	AmbientReverb: EnumReverbType
 	AudioApiByDefault: EnumRolloutState
 	AudioInstanceAdded: RBXScriptSignal<Instance>
-	AudioPlayerVolumeFix: EnumRolloutState
 	CharacterSoundsUseNewApi: EnumRolloutState
 	DefaultListenerLocation: EnumListenerLocation
 	DeviceListChanged: RBXScriptSignal<any>
@@ -14277,6 +14321,7 @@ declare class StarterPlayer extends Instance
 	CharacterUseJumpPower: boolean
 	CharacterWalkSpeed: number
 	ClassicDeath: boolean
+	CreateDefaultPlayerModule: boolean
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMovementMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
@@ -14776,6 +14821,10 @@ declare class StyleQuery extends Instance
 	IsActive: boolean
 	MaxSize: Vector2
 	MinSize: Vector2
+	function GetCondition(self, name: string): any
+	function GetConditions(self): { [any]: any }
+	function SetCondition(self, name: string, value: any): nil
+	function SetConditions(self, conditions: { [any]: any }): nil
 end
 
 declare class StylingService extends Instance
@@ -15188,6 +15237,7 @@ end
 declare class ThirdPartyUserService extends Instance
 	ActiveUserSignedOut: RBXScriptSignal<number>
 	FriendCommunicationRestrictionStatus: EnumChatRestrictionStatus
+	HasActiveUser: boolean
 	function GetUserPlatformName(self): string
 	function GetVoiceChatRestrictionStatus(self): EnumChatRestrictionStatus
 	function HaveActiveUser(self): boolean
