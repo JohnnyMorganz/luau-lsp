@@ -1,7 +1,7 @@
 #pragma once
-#include <iostream>
 #include <memory>
 #include "Platform/LSPPlatform.hpp"
+#include "Luau/TypeCheckLimits.h"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
 #include "Protocol/Structures.hpp"
@@ -11,7 +11,6 @@
 #include "Protocol/Extensions.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
-#include "LSP/LuauExt.hpp"
 
 using LSPCancellationToken = std::shared_ptr<Luau::FrontendCancellationToken>;
 
@@ -35,6 +34,7 @@ public:
     lsp::DocumentUri rootUri;
     WorkspaceFileResolver fileResolver;
     Luau::Frontend frontend;
+    Luau::TypeCheckLimits limits;
     std::optional<nlohmann::json> definitionsFileMetadata;
 
     /// Whether this workspace folder has received configuration data.
@@ -66,6 +66,7 @@ public:
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
               &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
+        , limits(Luau::TypeCheckLimits{})
     {
         fileResolver.client = client;
         fileResolver.rootUri = uri;

@@ -131,7 +131,7 @@ std::optional<Uri> resolveDirectoryAlias(
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString)
+std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
 {
     if (!context)
         return std::nullopt;
@@ -157,7 +157,7 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
 
     auto fileUri = baseUri->resolvePath(requiredString);
 
-    auto luauConfig = fileResolver->getConfig(context->name);
+    auto luauConfig = fileResolver->getConfig(context->name, limits);
     if (auto aliasedPath = resolveAlias(requiredString, luauConfig, *contextPath->parent()))
     {
         fileUri = aliasedPath.value();
@@ -196,13 +196,13 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::Mo
     return Luau::ModuleInfo{fileResolver->getModuleName(fileUri)};
 }
 
-std::optional<Luau::ModuleInfo> LSPPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
+std::optional<Luau::ModuleInfo> LSPPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
 {
     // Handle require("path") for compatibility
     if (auto* expr = node->as<Luau::AstExprConstantString>())
     {
         std::string requiredString(expr->value.data, expr->value.size);
-        return resolveStringRequire(context, requiredString);
+        return resolveStringRequire(context, requiredString, limits);
     }
 
     return std::nullopt;

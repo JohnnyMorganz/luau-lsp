@@ -89,7 +89,7 @@ std::unique_ptr<Luau::RequireNode> StringRequireSuggester::getNode(const Luau::M
 {
     if (auto realUri = platform->resolveToRealPath(name))
     {
-        auto config = configResolver->getConfig(name);
+        auto config = configResolver->getConfig(name, workspaceFolder->limits);
         return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, config);
     }
 

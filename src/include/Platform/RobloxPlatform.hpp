@@ -155,7 +155,7 @@ public:
 
     std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;
 
-    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
 
     void updateSourceNodeMap(const std::string& sourceMapContents);
 
