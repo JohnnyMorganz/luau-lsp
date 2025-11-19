@@ -107,7 +107,7 @@ void suggestStringRequires(const StringRequireAutoImporterContext& ctx, std::vec
     size_t minimumLineNumber = computeMinimumLineNumberForRequire(*ctx.importsVisitor, ctx.hotCommentsLineNumber);
 
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
-    auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from).aliases;
+    auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from, ctx.workspaceFolder->limits).aliases;
 
     for (const auto& [moduleName, sourceNode] : ctx.frontend->sourceNodes)
     {

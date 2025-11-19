@@ -101,10 +101,10 @@ static std::string mapContext(const std::string& context)
     return context;
 }
 
-std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
+std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
 {
 
-    if (auto parentResult = LSPPlatform::resolveModule(context, node))
+    if (auto parentResult = LSPPlatform::resolveModule(context, node, limits))
         return parentResult;
 
     if (auto* g = node->as<Luau::AstExprGlobal>())

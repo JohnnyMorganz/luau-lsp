@@ -76,9 +76,9 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node)
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
 {
-    return platform->resolveModule(context, node);
+    return platform->resolveModule(context, node, limits);
 }
 
 std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::ModuleName& name) const
@@ -100,7 +100,7 @@ std::string WorkspaceFileResolver::getHumanReadableModuleName(const Luau::Module
     }
 }
 
-const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name) const
+const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& name, const Luau::TypeCheckLimits& limits) const
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::getConfig", "Frontend");
     auto uri = getUri(name);

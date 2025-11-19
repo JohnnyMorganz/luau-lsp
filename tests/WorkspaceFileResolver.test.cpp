@@ -11,13 +11,14 @@ TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerScripts"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("PurchaseClient"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterPlayer/StarterPlayerScripts/PurchaseClient");
@@ -25,13 +26,14 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerGui"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GuiScript"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterGui/GuiScript");
@@ -39,13 +41,14 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 
 TEST_CASE("resolveModule handles LocalPlayer StarterGear")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/StarterGear"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GearScript"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterPack/GearScript");
@@ -69,7 +72,7 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstChild")
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/ReplicatedStorage/Testing");
@@ -93,7 +96,7 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     CHECK_FALSE(resolved.has_value());
 }
@@ -120,7 +123,7 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "ProjectRoot");
@@ -251,7 +254,7 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
 TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
     Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau");
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau", workspace.limits);
 
     REQUIRE(resolved.has_value());
 #ifdef _WIN32
@@ -264,7 +267,7 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
 {
     Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod");
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod", workspace.limits);
 
     REQUIRE(resolved.has_value());
 #ifdef _WIN32
@@ -292,8 +295,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
     auto projectOtherPath = t.touch_child("project/other.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name), Uri::file(projectLibUtilsPath));
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name), Uri::file(projectOtherPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name), Uri::file(projectLibUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name), Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau_file")
@@ -303,7 +306,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau
     auto projectOtherPath = t.touch_child("project/other/init.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other")->name), Uri::file(projectOtherPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name), Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_init_luau")
@@ -316,14 +319,14 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
     auto projectDirectoryInitPath = t.touch_child("project/directory/init.luau");
 
     Luau::ModuleInfo baseContext{projectDirectoryInitPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling")->name), Uri::file(projectSiblingPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling", workspace.limits)->name), Uri::file(projectSiblingPath));
 
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools")->name), Uri::file(toolsInitPath));
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file")->name), Uri::file(toolsFilePath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools", workspace.limits)->name), Uri::file(toolsInitPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file", workspace.limits)->name), Uri::file(toolsFilePath));
 
     CHECK_EQ(
-        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils")->name), Uri::file(t.path() + "/project/utils.lua"));
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils")->name),
+        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name), Uri::file(t.path() + "/project/utils.lua"));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils", workspace.limits)->name),
         Uri::file(projectDirectoryUtilsPath));
 }
 
@@ -334,7 +337,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
     auto luauPath = t.touch_child("project/luau.luau");
 
     Luau::ModuleInfo baseContext{mainPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./luau")->name), Uri::file(luauPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./luau", workspace.limits)->name), Uri::file(luauPath));
 }
 
 TEST_CASE("is_init_luau_file")
@@ -354,7 +357,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
     auto projectUtilsPath = t.touch_child("project/utils.luau");
 
     Luau::ModuleInfo baseContext{projectInitPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils")->name), Uri::file(projectUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils", workspace.limits)->name), Uri::file(projectUtilsPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaurc_files")
@@ -368,8 +371,8 @@ TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaur
         }
     })");
 
-    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)));
-    auto siblingConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(siblingFilePath)));
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)), workspace.limits);
+    auto siblingConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(siblingFilePath)), workspace.limits);
 
     CHECK_EQ(initConfig.aliases.size(), 0);
     CHECK_EQ(siblingConfig.aliases.size(), 1);
@@ -386,7 +389,7 @@ TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_s
         }
     })");
 
-    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)));
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)), workspace.limits);
 
     CHECK_EQ(initConfig.aliases.size(), 1);
     CHECK(initConfig.aliases.find("test"));
@@ -448,7 +451,7 @@ TEST_CASE_FIXTURE(Fixture, "support_config_luau")
         }
     )");
 
-    auto fooConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(fooPath)));
+    auto fooConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(fooPath)), workspace.limits);
 
     CHECK_EQ(fooConfig.aliases.size(), 1);
     CHECK(fooConfig.aliases.find("test"));

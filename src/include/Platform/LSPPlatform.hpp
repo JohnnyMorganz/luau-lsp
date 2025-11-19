@@ -57,8 +57,8 @@ public:
 
     [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const;
 
-    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString);
-    virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node);
+    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
+    virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits);
 
     virtual void handleCompletion(
         const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, std::vector<lsp::CompletionItem>& items)

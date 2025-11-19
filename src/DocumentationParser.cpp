@@ -1,5 +1,6 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+#include "LSP/LuauExt.hpp"
 #include "LuauFileUtils.hpp"
 #include <regex>
 #include <algorithm>

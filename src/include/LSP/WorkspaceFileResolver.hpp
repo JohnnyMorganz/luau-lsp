@@ -110,9 +110,9 @@ public:
     Uri getUri(const Luau::ModuleName& moduleName) const;
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
-    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;
-    const Luau::Config& getConfig(const Luau::ModuleName& name) const override;
+    const Luau::Config& getConfig(const Luau::ModuleName& name, const Luau::TypeCheckLimits& limits) const override;
     void clearConfigCache();
 
     static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
