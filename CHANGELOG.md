@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `.config.luau` resolution now respects resolution limits and timeouts ([#1246](https://github.com/JohnnyMorganz/luau-lsp/issues/1246))
 - Added `luau-lsp.completion.showKeywords` (default: `true`) to configure whether keywords (`if` / `then` / `and` etc.) are shown during autocomplete ([#1243](https://github.com/JohnnyMorganz/luau-lsp/issues/1243))
+- In VSCode, You can now override the built-in Roblox definitions by configuring an entry for `@roblox` in `luau-lsp.types.definitionFiles`
+- In VSCode, `luau-lsp.types.definitionFiles` and `luau-lsp.types.documentationFiles` now support external URLs (beginning with `https://` / `http://`). When an external link is used, the VSCode extension will download the types from the server. Types are cached for 1 day. You can force a redownload by running `Luau: Redownload API Types` command ([#970](https://github.com/JohnnyMorganz/luau-lsp/issues/970))
 
 ### Changed
 

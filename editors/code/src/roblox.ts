@@ -13,13 +13,6 @@ let pluginServer: Server | undefined = undefined;
 
 const API_DOCS = "https://luau-lsp.pages.dev/api-docs/en-us.json";
 
-const SECURITY_LEVELS = [
-  "None",
-  "LocalUserSecurity",
-  "PluginSecurity",
-  "RobloxScriptSecurity",
-];
-
 const globalTypesEndpointForSecurityLevel = (securityLevel: string) => {
   return `https://luau-lsp.pages.dev/type-definitions/globalTypes.${securityLevel}.d.luau`;
 };
@@ -46,86 +39,6 @@ const globalTypesUri = (
 
 const apiDocsUri = (context: vscode.ExtensionContext) => {
   return vscode.Uri.joinPath(context.globalStorageUri, "api-docs.json");
-};
-
-const downloadApiDefinitions = async (context: vscode.ExtensionContext) => {
-  return vscode.window.withProgress(
-    {
-      location: vscode.ProgressLocation.Window,
-      title: "Luau: Updating API Definitions",
-      cancellable: false,
-    },
-    async () => {
-      return Promise.all([
-        ...SECURITY_LEVELS.map((level) =>
-          fetch(globalTypesEndpointForSecurityLevel(level))
-            .then((r) => {
-              if (!r.ok) {
-                return Promise.reject(
-                  `fetching type definitions error: ${r.status} ${r.statusText}`,
-                );
-              }
-
-              return r.arrayBuffer();
-            })
-            .then((data) =>
-              vscode.workspace.fs.writeFile(
-                globalTypesUri(context, level, "Prod"),
-                new Uint8Array(data),
-              ),
-            ),
-        ),
-        fetch(API_DOCS)
-          .then((r) => {
-            if (!r.ok) {
-              return Promise.reject(
-                `fetching documentation error: ${r.status} ${r.statusText}`,
-              );
-            }
-
-            return r.arrayBuffer();
-          })
-          .then((data) =>
-            vscode.workspace.fs.writeFile(
-              apiDocsUri(context),
-              new Uint8Array(data),
-            ),
-          ),
-      ]).catch((err) =>
-        vscode.window.showErrorMessage(
-          `Failed to retrieve API information: ${err}, cause: ${err.cause}`,
-        ),
-      );
-    },
-  );
-};
-
-const updateApiInfo = async (context: vscode.ExtensionContext) => {
-  try {
-    const mustUpdate =
-      (
-        await Promise.all(
-          SECURITY_LEVELS.map(
-            async (level) =>
-              await utils.exists(globalTypesUri(context, level, "Prod")),
-          ),
-        )
-      ).some((doesExist) => !doesExist) ||
-      !(await utils.exists(apiDocsUri(context)));
-
-    // Update once a day
-    const lastUpdate = context.globalState.get<number>("last-api-update") ?? 0;
-    const currentTimeMs = Date.now();
-
-    if (mustUpdate || currentTimeMs - lastUpdate > 1000 * 60 * 60 * 24) {
-      context.globalState.update("last-api-update", currentTimeMs);
-      return downloadApiDefinitions(context);
-    }
-  } catch (err) {
-    vscode.window.showWarningMessage(
-      "Failed to retrieve API information: " + err,
-    );
-  }
 };
 
 const getRojoProjectFile = async (
@@ -515,22 +428,6 @@ export const onActivate = async (
   platformContext: PlatformContext,
   context: vscode.ExtensionContext,
 ) => {
-  context.subscriptions.push(
-    vscode.commands.registerCommand("luau-lsp.updateApi", async () => {
-      await downloadApiDefinitions(context);
-      vscode.window
-        .showInformationMessage(
-          "API Types have been updated, reload server to take effect.",
-          "Reload Language Server",
-        )
-        .then((command) => {
-          if (command === "Reload Language Server") {
-            vscode.commands.executeCommand("luau-lsp.reloadServer");
-          }
-        });
-    }),
-  );
-
   const startSourcemapGenerationForAllFolders = () => {
     if (vscode.workspace.workspaceFolders) {
       for (const folder of vscode.workspace.workspaceFolders) {
@@ -585,9 +482,7 @@ export const onActivate = async (
 };
 
 export const preLanguageServerStart = async (
-  _: PlatformContext,
   context: vscode.ExtensionContext,
-  addArg: AddArgCallback,
 ) => {
   // Load roblox type definitions
   const typesConfig = vscode.workspace.getConfiguration("luau-lsp.types");
@@ -601,16 +496,21 @@ export const preLanguageServerStart = async (
   ) {
     const securityLevel =
       typesConfig.get<string>("robloxSecurityLevel") ?? "PluginSecurity";
-    await updateApiInfo(context);
-    addArg(
-      `--definitions:@roblox=${globalTypesUri(context, securityLevel, "Prod").fsPath}`,
-      "Prod",
-    );
-    addArg(
-      `--definitions:@roblox=${globalTypesUri(context, securityLevel, "Debug").fsPath}`,
-      "Debug",
-    );
-    addArg(`--docs=${apiDocsUri(context).fsPath}`);
+
+    return {
+      definitions: {
+        ["@roblox"]: {
+          url: globalTypesEndpointForSecurityLevel(securityLevel),
+          outputUri: globalTypesUri(context, securityLevel, "Prod"),
+        },
+      },
+      documentation: [{ url: API_DOCS, outputUri: apiDocsUri(context) }],
+    };
+  } else {
+    return {
+      definition: undefined,
+      documentation: undefined,
+    };
   }
 };
 
