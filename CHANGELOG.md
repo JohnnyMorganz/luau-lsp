@@ -25,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.700
 
+### Fixed
+
+- Fix type mismatch issue for 'types.definitionsFiles' setting in VSCode ([#1253](https://github.com/JohnnyMorganz/luau-lsp/issues/1253))
+
 ## [1.56.1] - 2025-11-04
 
 ### Fixed
