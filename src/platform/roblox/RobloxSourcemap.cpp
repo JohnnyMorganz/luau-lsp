@@ -506,28 +506,19 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
-
-        // Write paths
-        std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
-        writePathsToMap(rootSourceNode, base);
     }
     catch (const std::exception& e)
     {
         // TODO: log message? NOTE: this function can be called from CLI
         std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
+        rootSourceNode = nullptr;
+        sourceNodeAllocator.clear();
     }
-}
 
-// TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
-// to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
-// Remove this once Luau has improved
-void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes)
-{
-    LUAU_TIMETRACE_SCOPE("RobloxPlatform::handleSourcemapUpdate", "LSP");
-    if (!rootSourceNode)
-        return;
+    // Write paths
+    std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
+    writePathsToMap(rootSourceNode, base);
 
-    // Mutate with plugin info
     if (pluginInfo)
     {
         if (rootSourceNode->className == "DataModel")
@@ -539,6 +530,16 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
         }
     }
+}
+
+// TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)
+// to another type. For the time being, we therefore make all our DataModel instance types marked as "any".
+// Remove this once Luau has improved
+void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes)
+{
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::handleSourcemapUpdate", "LSP");
+    if (!rootSourceNode)
+        return;
 
     // Create a type for the root source node
     getSourcemapType(globals, instanceTypes, rootSourceNode);
