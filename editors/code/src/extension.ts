@@ -436,6 +436,38 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     );
   }
 
+  // Handle base luaurc
+  const baseLuaurcConfig = serverConfiguration.get<string>("baseLuaurc");
+  if (baseLuaurcConfig) {
+    const baseLuaurcPath = utils.resolvePath(baseLuaurcConfig);
+    let uri;
+    if (vscode.workspace.workspaceFolders) {
+      uri = utils.resolveUri(
+        vscode.workspace.workspaceFolders[0].uri,
+        baseLuaurcPath,
+      );
+    } else {
+      uri = vscode.Uri.file(baseLuaurcPath);
+    }
+    if (await utils.exists(uri)) {
+      addArg(`--base-luaurc=${uri.fsPath}`);
+    } else {
+      vscode.window
+        .showWarningMessage(
+          `Base .luaurc file at ${baseLuaurcPath} does not exist`,
+          "Configure Settings",
+        )
+        .then((action) => {
+          if (action === "Configure Settings") {
+            vscode.commands.executeCommand(
+              "workbench.action.openSettings",
+              "luau-lsp.server.baseLuaurc",
+            );
+          }
+        });
+    }
+  }
+
   const run: Executable = {
     command: serverBinPath,
     args,

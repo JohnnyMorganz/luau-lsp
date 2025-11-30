@@ -196,6 +196,11 @@
             "usesOnlineServices"
           ]
         },
+        "luau-lsp.server.baseLuaurc": {
+          "markdownDescription": "Path to a `.luaurc` file which acts as the default baseline Luau configuration",
+          "type": "string",
+          "scope": "window"
+        },
         "luau-lsp.ignoreGlobs": {
           "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
           "type": "array",
