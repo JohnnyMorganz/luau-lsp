@@ -156,7 +156,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
             // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
-            if (idx == 0 && isMethod(ftv) && candidate->self)
+            if (idx == 0 && candidate->self)
                 continue;
 
             // Show parameter documentation
