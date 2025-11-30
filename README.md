@@ -138,3 +138,7 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target Luau.LanguageServer.CLI --config Release
 ```
+
+You can build `Luau.LanguageServer.Test` for unit tests.
+Some tests make assumptions about relative file paths.
+When running tests, ensure that your current working directory is set to the root of the repository.
