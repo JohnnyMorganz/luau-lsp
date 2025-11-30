@@ -253,7 +253,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   };
 
   const {
-    definition: builtinDefinitionFiles,
+    definitions: builtinDefinitionFiles,
     documentation: builtinDocumentationFiles,
   } = await roblox.preLanguageServerStart(context);
 
