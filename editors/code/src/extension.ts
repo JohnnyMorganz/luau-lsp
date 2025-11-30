@@ -168,6 +168,8 @@ const handleExternalFiles = async (
   },
   builtinDocumentationFiles: DownloadFileDefinition[],
 ) => {
+  const finalDefinitionFiles = new Map<string, string>();
+
   // Determine a list of external files to fetch
   const externalFiles: DownloadFileDefinition[] = [];
   for (let [packageName, definitionPath] of Object.entries(definitionFiles)) {
@@ -177,7 +179,9 @@ const handleExternalFiles = async (
         url: definitionPath,
         outputUri: outputLocation,
       });
-      definitionFiles[packageName] = outputLocation.fsPath;
+      finalDefinitionFiles.set(packageName, outputLocation.fsPath);
+    } else {
+      finalDefinitionFiles.set(packageName, definitionPath);
     }
   }
   documentationFiles = documentationFiles.map((documentationPath) => {
@@ -199,14 +203,18 @@ const handleExternalFiles = async (
   for (const [packageName, downloadDefinition] of Object.entries(
     builtinDefinitionFiles,
   )) {
-    if (!definitionFiles[packageName]) {
+    if (!finalDefinitionFiles.has(packageName)) {
       externalFiles.push(downloadDefinition);
-      definitionFiles[packageName] = downloadDefinition.outputUri.fsPath;
+      finalDefinitionFiles.set(
+        packageName,
+        downloadDefinition.outputUri.fsPath,
+      );
     }
   }
+
   if (builtinDocumentationFiles) {
     externalFiles.concat(builtinDocumentationFiles);
-    documentationFiles.concat(
+    documentationFiles = documentationFiles.concat(
       builtinDocumentationFiles.map((info) => info.outputUri.fsPath),
     );
   }
@@ -226,7 +234,11 @@ const handleExternalFiles = async (
     }
   }
 
-  return { definitionFiles, documentationFiles, externalFiles };
+  return {
+    definitionFiles: finalDefinitionFiles,
+    documentationFiles,
+    externalFiles,
+  };
 };
 
 const startLanguageServer = async (context: vscode.ExtensionContext) => {
@@ -264,7 +276,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   let definitionFilesConfig =
     typesConfig.get<{ [packageName: string]: string } | string[]>(
       "definitionFiles",
-    ) ?? [];
+    ) ?? {};
 
   if (Array.isArray(definitionFilesConfig)) {
     definitionFilesConfig = Object.fromEntries(
@@ -283,9 +295,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     builtinDocumentationFiles ?? [],
   );
 
-  for (let [packageName, definitionPath] of Object.entries(
-    result.definitionFiles,
-  )) {
+  for (let [packageName, definitionPath] of result.definitionFiles) {
     definitionPath = utils.resolvePath(definitionPath);
     let uri;
     if (vscode.workspace.workspaceFolders) {
