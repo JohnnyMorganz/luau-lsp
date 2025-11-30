@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `.config.luau` resolution now respects resolution limits and
+  timeouts ([#1246](https://github.com/JohnnyMorganz/luau-lsp/issues/1246))
+
 ### Changed
 
 - Sync to upstream Luau 0.701

@@ -116,8 +116,9 @@ public:
     void clearConfigCache();
 
     static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
-    static std::optional<std::string> parseLuauConfig(const Uri& configPath, const std::string& contents, Luau::Config& result);
+    static std::optional<std::string> parseLuauConfig(
+        const Uri& configPath, const std::string& contents, Luau::Config& result, const Luau::TypeCheckLimits& limits);
 
 private:
-    const Luau::Config& readConfigRec(const Uri& path) const;
+    const Luau::Config& readConfigRec(const Uri& path, const Luau::TypeCheckLimits& limits) const;
 };

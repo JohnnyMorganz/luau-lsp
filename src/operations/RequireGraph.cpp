@@ -2,7 +2,6 @@
 #include "LuauFileUtils.hpp"
 #include "Analyze/AnalyzeCli.hpp"
 #include "LSP/Workspace.hpp"
-#include "Luau/BytecodeBuilder.h"
 #include "Luau/Set.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "argparse/argparse.hpp"

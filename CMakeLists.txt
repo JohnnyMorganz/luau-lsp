@@ -135,22 +135,22 @@ target_sources(Luau.LanguageServer.Test PRIVATE
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
     list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         list(APPEND LUAU_LSP_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
-    else()
+    else ()
         list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores; doesn't work with clang-cl
-    endif()
+    endif ()
 else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall)
 endif ()
 
-if(LSP_WERROR)
-    if(MSVC)
+if (LSP_WERROR)
+    if (MSVC)
         list(APPEND LUAU_LSP_OPTIONS /WX) # Warnings are errors
-    else()
+    else ()
         list(APPEND LUAU_LSP_OPTIONS -Werror) # Warnings are errors
-    endif()
-endif()
+    endif ()
+endif ()
 
 if (LSP_BUILD_ASAN)
     if (MSVC)
@@ -188,7 +188,7 @@ target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
 target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_VERSION="${LSP_VERSION}")
 target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_NAME="${LSP_NAME}")
 target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
-target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler)
+target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler Luau.VM)
 
 set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
 target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)

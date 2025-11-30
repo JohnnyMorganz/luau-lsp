@@ -4,10 +4,17 @@
 #include "Luau/Ast.h"
 #include "Luau/LuauConfig.h"
 #include "LSP/WorkspaceFileResolver.hpp"
-#include "LSP/Utils.hpp"
 
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
+
+#include "lua.h"
+
+struct LuauConfigInterruptInfo
+{
+    Luau::TypeCheckLimits limits;
+    std::string module;
+};
 
 Luau::ModuleName WorkspaceFileResolver::getModuleName(const Uri& name) const
 {
@@ -76,7 +83,8 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
+std::optional<Luau::ModuleInfo> WorkspaceFileResolver::resolveModule(
+    const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
 {
     return platform->resolveModule(context, node, limits);
 }
@@ -112,7 +120,7 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
     if (!base)
         return defaultConfig;
 
-    return readConfigRec(*base);
+    return readConfigRec(*base, limits);
 }
 
 std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat)
@@ -130,7 +138,8 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configP
     return Luau::parseConfig(contents, result, opts);
 }
 
-std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(const Uri& configPath, const std::string& contents, Luau::Config& result)
+std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(
+    const Uri& configPath, const std::string& contents, Luau::Config& result, const Luau::TypeCheckLimits& limits)
 {
     LUAU_ASSERT(configPath.parent());
 
@@ -138,11 +147,25 @@ std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(const Uri& con
     aliasOpts.configLocation = configPath.parent()->fsPath();
     aliasOpts.overwriteAliases = true;
 
-    // TODO: support interrupt callbacks based on TypeCheckLimits
-    return Luau::extractLuauConfig(contents, result, aliasOpts, Luau::InterruptCallbacks{});
+    Luau::InterruptCallbacks callbacks;
+    LuauConfigInterruptInfo info{limits, configPath.fsPath()};
+    callbacks.initCallback = [&info](lua_State* L)
+    {
+        lua_setthreaddata(L, &info);
+    };
+    callbacks.interruptCallback = [](lua_State* L, int gc)
+    {
+        auto* info = static_cast<LuauConfigInterruptInfo*>(lua_getthreaddata(L));
+        if (info->limits.finishTime && Luau::TimeTrace::getClock() > *info->limits.finishTime)
+            throw Luau::TimeLimitError{info->module};
+        if (info->limits.cancellationToken && info->limits.cancellationToken->requested())
+            throw Luau::UserCancelError{info->module};
+    };
+
+    return Luau::extractLuauConfig(contents, result, aliasOpts, std::move(callbacks));
 }
 
-const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
+const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri, const Luau::TypeCheckLimits& limits) const
 {
     auto it = configCache.find(uri);
     if (it != configCache.end())
@@ -150,7 +173,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
 
     Luau::Config result = defaultConfig;
     if (const auto& parent = uri.parent())
-        result = readConfigRec(*parent);
+        result = readConfigRec(*parent, limits);
 
     auto configPath = uri.resolvePath(Luau::kConfigName);
     auto luauConfigPath = uri.resolvePath(Luau::kLuauConfigName);
@@ -158,7 +181,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri) const
 
     if (std::optional<std::string> contents = Luau::FileUtils::readFile(luauConfigPath.fsPath()))
     {
-        std::optional<std::string> error = parseLuauConfig(configPath, *contents, result);
+        std::optional<std::string> error = parseLuauConfig(configPath, *contents, result, limits);
         if (error)
         {
             if (client)
