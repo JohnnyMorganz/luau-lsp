@@ -505,6 +505,12 @@
           "default": false,
           "scope": "resource"
         },
+        "luau-lsp.completion.showKeywords": {
+          "markdownDescription": "Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.suggestImports": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",

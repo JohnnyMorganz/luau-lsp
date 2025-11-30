@@ -8,8 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `.config.luau` resolution now respects resolution limits and
-  timeouts ([#1246](https://github.com/JohnnyMorganz/luau-lsp/issues/1246))
+- `.config.luau` resolution now respects resolution limits and timeouts ([#1246](https://github.com/JohnnyMorganz/luau-lsp/issues/1246))
+- Added `luau-lsp.completion.showKeywords` (default: `true`) to configure whether keywords (`if` / `then` / `and` etc.) are shown during autocomplete ([#1243](https://github.com/JohnnyMorganz/luau-lsp/issues/1243))
 
 ### Changed
 
@@ -1731,6 +1731,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

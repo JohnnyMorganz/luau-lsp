@@ -179,12 +179,14 @@ struct ClientCompletionConfiguration
     bool fillCallArguments = true;
     /// Whether to show non-function properties when performing a method call with a colon
     bool showPropertiesOnMethodCall = false;
+    /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
+    bool showKeywords = true;
     /// Enables the experimental fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {

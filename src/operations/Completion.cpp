@@ -598,6 +598,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             !(Luau::get<Luau::FunctionType>(*entry.type) || Luau::isOverloadedFunction(*entry.type)))
             continue;
 
+        if (!config.completion.showKeywords && entry.kind == Luau::AutocompleteEntryKind::Keyword)
+            continue;
+
         lsp::CompletionItem item;
         item.label = name;
 

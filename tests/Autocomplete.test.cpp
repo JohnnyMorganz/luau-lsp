@@ -1829,4 +1829,24 @@ TEST_CASE_FIXTURE(Fixture, "prioritise_relevant_keywords_when_inside_of_if")
     }
 }
 
+TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
+{
+    client->globalConfig.completion.showKeywords = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    for (const auto property : {"do", "export", "for", "function", "if", "local", "repeat", "return", "while"})
+        CHECK_FALSE(getItem(result, property));
+}
+
 TEST_SUITE_END();
