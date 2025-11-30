@@ -513,6 +513,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
         rootSourceNode = nullptr;
         sourceNodeAllocator.clear();
+        return;
     }
 
     // Write paths
