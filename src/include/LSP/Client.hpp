@@ -21,6 +21,8 @@ struct BaseClient
 
     virtual ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
 
+    virtual void sendLogMessage(const lsp::MessageType& type, const std::string& message) const = 0;
+
     virtual void publishDiagnostics(const lsp::PublishDiagnosticsParams& params) = 0;
 };
 
@@ -74,7 +76,7 @@ public:
         const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt, std::optional<uint8_t> percentage = std::nullopt);
     void sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt);
 
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const;
+    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const override;
     void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
     void sendWindowMessage(const lsp::MessageType& type, const std::string& message) const;
 
