@@ -15,6 +15,7 @@ static std::string getMessageTypeString(const lsp::MessageType& type)
     case lsp::MessageType::Log:
         return "LOG";
     }
+    return "LOG";
 }
 
 struct CliClient : public BaseClient
