@@ -28,7 +28,7 @@
     "roblox"
   ],
   "activationEvents": [
-    "workspaceContains:{**/*.lua,**/*.luau}"
+    "workspaceContains:**/*.{lua,luau}"
   ],
   "main": "./dist/extension.js",
   "contributes": {
