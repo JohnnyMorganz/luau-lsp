@@ -31,8 +31,8 @@ void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
         client->sendTrace("workspace: sourcemap enabled");
         if (!workspaceFolder->isNullWorkspace() && !updateSourceMap())
         {
-            client->sendWindowMessage(lsp::MessageType::Error,
-                "Failed to load " + sourcemapFileName + " for workspace '" + workspaceFolder->name + "'. Instance information will not be available");
+            client->sendWindowMessage(lsp::MessageType::Error, "Failed to load " + sourcemapFileName + " for workspace '" + workspaceFolder->name +
+                                                                   "'. You can use the Studio Plugin for DataModel info instead");
         }
 
         if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
