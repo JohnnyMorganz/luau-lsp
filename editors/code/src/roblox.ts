@@ -199,7 +199,11 @@ const startSourcemapGeneration = async (
       });
     } else {
       // Check if the project file exists
-      const projectFile = await getRojoProjectFile(workspaceFolder, config, client);
+      const projectFile = await getRojoProjectFile(
+        workspaceFolder,
+        config,
+        client,
+      );
       if (!projectFile) {
         return;
       }
