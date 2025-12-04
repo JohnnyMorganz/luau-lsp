@@ -107,6 +107,10 @@
         "title": "Luau: Regenerate Sourcemap"
       },
       {
+        "command": "luau-lsp.setupStudioPlugin",
+        "title": "Luau: Setup Studio Companion Plugin"
+      },
+      {
         "command": "luau-lsp.reloadServer",
         "title": "Luau: Reload Language Server"
       },
