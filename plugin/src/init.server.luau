@@ -19,7 +19,6 @@ local Log = require(script.Log)
 local LSPManager = require(script.LSPManager)
 local Settings = require(script.Settings)
 local InstanceTracker = require(script.InstanceTracker)
-local InstanceEncoder = require(script.InstanceEncoder)
 local Assets = require(script.Assets)
 
 local toolbar = plugin:CreateToolbar("Luau")
@@ -30,8 +29,8 @@ local toolbar = plugin:CreateToolbar("Luau")
 local settings = Settings.new(script.Settings.DefaultSettings)
 
 --- Create the instance tracker with an include checker that uses current settings
-local instanceTracker = InstanceTracker.new(function(instance: Instance): boolean
-	return InstanceEncoder.shouldInclude(instance, settings:get("include"))
+local instanceTracker = InstanceTracker.new(function(): { Instance }
+	return settings:get("include")
 end)
 
 --- Create the LSP manager with injected dependencies

@@ -7,7 +7,6 @@ local Log = require(script.Parent.Log)
 local ServerEndpoints = require(script.Parent.ServerEndpoints)
 local Debounce = require(script.Parent.Debounce)
 local Signal = require(script.Parent.Signal)
-local InstanceEncoder = require(script.Parent.InstanceEncoder)
 local InstanceTracker = require(script.Parent.InstanceTracker)
 local Settings = require(script.Parent.Settings)
 
@@ -161,8 +160,7 @@ function LSPManager.sendFullDMInfo(self: LSPManager): boolean
 	assert(self._address, "LSPManager must be initialized before use")
 	Log.debug("Sending full DM info")
 
-	local includeList = self._settings:get("include")
-	local tree = InstanceEncoder.encode(game, includeList)
+	local tree = self._instanceTracker:encodeAll()
 
 	local result = ServerEndpoints.full(self._address, tree)
 

@@ -1,10 +1,12 @@
 --!strict
 
---- Tracks changes to Roblox Instances and notifies listeners.
+--- Tracks changes to Roblox Instances and notifies listeners with filtering based on include paths.
 --- Monitors name and parent property changes, as well as new descendants.
+--- Encodes Roblox Instances into a serializable format for the language server.
 
 local Log = require(script.Parent.Log)
 local Signal = require(script.Parent.Signal)
+local types = require(script.Parent.types)
 
 local InstanceTracker = {}
 InstanceTracker.__index = InstanceTracker
@@ -13,8 +15,8 @@ InstanceTracker.__index = InstanceTracker
 type InstanceTrackerData = {
 	--- Map of tracked instances to their associated connections.
 	_connections: { [Instance]: { RBXScriptConnection } },
-	--- Function to check if an instance should be included.
-	_includeChecker: (Instance) -> boolean,
+	--- Function that returns the list of instances to include.
+	_getIncludeList: () -> { Instance },
 	--- Signal fired when any tracked instance changes.
 	onChanged: Signal.Signal<Instance>,
 }
@@ -23,12 +25,12 @@ type InstanceTrackerData = {
 export type InstanceTracker = typeof(setmetatable({} :: InstanceTrackerData, InstanceTracker))
 
 --- Creates a new InstanceTracker instance.
---- @param includeChecker -- Function that returns true if an instance should be tracked.
+--- @param getIncludeList -- Function that returns the list of instances to include.
 --- @return InstanceTracker -- A new InstanceTracker ready to watch instances.
-function InstanceTracker.new(includeChecker: (Instance) -> boolean): InstanceTracker
+function InstanceTracker.new(getIncludeList: () -> { Instance }): InstanceTracker
 	local self = {
 		_connections = {},
-		_includeChecker = includeChecker,
+		_getIncludeList = getIncludeList,
 		onChanged = Signal.new() :: Signal.Signal<Instance>,
 	}
 	return setmetatable(self, InstanceTracker)
@@ -47,7 +49,7 @@ function InstanceTracker.track(self: InstanceTracker, instance: Instance): ()
 		Log.debug(`Instance {instance:GetFullName()} parent changed`)
 		self.onChanged:fire(instance)
 
-		if instance.Parent == nil or not self._includeChecker(instance) then
+		if instance.Parent == nil or not self.shouldInclude(instance, self._getIncludeList()) then
 			-- Instance is no longer tracked, stop tracking it and its descendants
 			self:untrack(instance)
 			for _, descendant in instance:GetDescendants() do
@@ -95,7 +97,7 @@ function InstanceTracker.watchAll(self: InstanceTracker, includeList: { Instance
 	-- Track new instances
 	self._connections[game] = {
 		game.DescendantAdded:Connect(function(instance)
-			if self._includeChecker(instance) then
+			if self.shouldInclude(instance, self._getIncludeList()) then
 				self:track(instance)
 				self.onChanged:fire(instance)
 			end
@@ -116,6 +118,70 @@ function InstanceTracker.unwatchAll(self: InstanceTracker): ()
 		self:untrack(instance)
 	end
 	self._connections = {}
+end
+
+--- Determines whether an Instance should be included in the encoded tree.
+--- An instance is included if it is within, contains, or is one of the
+--- provided include paths.
+--- @param instance -- The Instance to check.
+--- @param includeList -- The list of instances to include.
+--- @return boolean -- True if the instance should be included.
+function InstanceTracker.shouldInclude(instance: Instance, includeList: { Instance }): boolean
+	-- Ignore instances that are not part of any tree
+	if instance.Parent == nil then
+		return false
+	end
+
+	-- Check if this instance is within, contains, or is an included tree
+	for _, includedInstance in includeList do
+		if
+			instance == includedInstance
+			or instance:IsDescendantOf(includedInstance)
+			or instance:IsAncestorOf(includedInstance)
+		then
+			return true
+		end
+	end
+
+	-- Ignore all instances that are not explicitly included
+	return false
+end
+
+--- Recursively encodes an Instance and its children into a serializable table.
+--- Only includes children that pass the `shouldInclude` filter.
+--- @param self -- The InstanceTracker instance.
+--- @param instance -- The Instance to encode.
+--- @param includeList -- The list of instances to include.
+--- @return types.EncodedInstance -- The encoded representation.
+function InstanceTracker.encode(
+	self: InstanceTracker,
+	instance: Instance,
+	includeList: { Instance }
+): types.EncodedInstance
+	Log.debug(`Encoding {instance:GetFullName()}`)
+
+	local encoded: types.EncodedInstance = {
+		Name = instance.Name,
+		ClassName = instance.ClassName,
+		Children = {},
+	}
+
+	for _, child in instance:GetChildren() do
+		if not self.shouldInclude(child, includeList) then
+			continue
+		end
+
+		table.insert(encoded.Children, self:encode(child, includeList))
+	end
+
+	return encoded
+end
+
+--- Utility function to encode the entire DataModel into a serializable table.
+--- @param self -- The InstanceTracker instance.
+--- @return types.EncodedInstance -- The encoded representation of the DataModel.
+function InstanceTracker.encodeAll(self: InstanceTracker): types.EncodedInstance
+	return self:encode(game, self._getIncludeList())
 end
 
 --- Cleans up the InstanceTracker.
