@@ -3,10 +3,10 @@
 --- Manages the connection to the Luau Language Server.
 --- Handles connecting, disconnecting, and sending DataModel updates.
 
-local Log = require(script.Parent.Log)
+local Log = require(script.Parent.Utils.Log)
+local Debounce = require(script.Parent.Utils.Debounce)
+local Signal = require(script.Parent.Utils.Signal)
 local ServerEndpoints = require(script.Parent.ServerEndpoints)
-local Debounce = require(script.Parent.Debounce)
-local Signal = require(script.Parent.Signal)
 local InstanceTracker = require(script.Parent.InstanceTracker)
 local Settings = require(script.Parent.Settings)
 

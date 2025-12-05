@@ -4,8 +4,8 @@
 --- Monitors name and parent property changes, as well as new descendants.
 --- Encodes Roblox Instances into a serializable format for the language server.
 
-local Log = require(script.Parent.Log)
-local Signal = require(script.Parent.Signal)
+local Log = require(script.Parent.Utils.Log)
+local Signal = require(script.Parent.Utils.Signal)
 local types = require(script.Parent.types)
 
 local InstanceTracker = {}
