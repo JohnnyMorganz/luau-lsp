@@ -3,12 +3,12 @@
 --- Manages the connection to the Luau Language Server.
 --- Handles connecting, disconnecting, and sending DataModel updates.
 
-local Log = require(script.Parent.Utils.Log)
 local Debounce = require(script.Parent.Utils.Debounce)
-local Signal = require(script.Parent.Utils.Signal)
-local ServerEndpoints = require(script.Parent.ServerEndpoints)
 local InstanceTracker = require(script.Parent.InstanceTracker)
+local Log = require(script.Parent.Utils.Log)
+local ServerEndpoints = require(script.Parent.ServerEndpoints)
 local Settings = require(script.Parent.Settings)
+local Signal = require(script.Parent.Utils.Signal)
 
 local LSPManager = {}
 LSPManager.__index = LSPManager

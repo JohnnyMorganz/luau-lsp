@@ -14,11 +14,11 @@
 --- local host = settings:get("host")
 --- ```
 
-local TestService = game:GetService("TestService")
 local ScriptEditorService = game:GetService("ScriptEditorService")
+local TestService = game:GetService("TestService")
 
-local Log = require(script.Parent.Utils.Log)
 local Debounce = require(script.Parent.Utils.Debounce)
+local Log = require(script.Parent.Utils.Log)
 local Signal = require(script.Parent.Utils.Signal)
 local types = require(script.Parent.types)
 

@@ -15,11 +15,11 @@ if game:GetService("RunService"):IsRunning() then
 	return
 end
 
-local Log = require(script.Utils.Log)
-local LSPManager = require(script.LSPManager)
-local Settings = require(script.Settings)
-local InstanceTracker = require(script.InstanceTracker)
 local Assets = require(script.Assets)
+local InstanceTracker = require(script.InstanceTracker)
+local LSPManager = require(script.LSPManager)
+local Log = require(script.Utils.Log)
+local Settings = require(script.Settings)
 
 local toolbar = plugin:CreateToolbar("Luau")
 
