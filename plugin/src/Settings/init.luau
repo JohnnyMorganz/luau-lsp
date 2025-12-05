@@ -17,9 +17,9 @@
 local TestService = game:GetService("TestService")
 local ScriptEditorService = game:GetService("ScriptEditorService")
 
-local Log = require(script.Parent.Log)
-local Debounce = require(script.Parent.Debounce)
-local Signal = require(script.Parent.Signal)
+local Log = require(script.Parent.Utils.Log)
+local Debounce = require(script.Parent.Utils.Debounce)
+local Signal = require(script.Parent.Utils.Signal)
 local types = require(script.Parent.types)
 
 local Settings = {}
