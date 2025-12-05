@@ -26,11 +26,19 @@ Log._prefix = "[Luau Language Server]:"
 
 --- Maps log levels to their output functions.
 Log._levelMethod = {
-	[Log.Level.DEBUG] = print,
-	[Log.Level.INFO] = print,
-	[Log.Level.WARN] = warn,
-	[Log.Level.ERROR] = error,
-} :: { [number]: (...any) -> () }
+	[Log.Level.DEBUG] = function(...: any)
+		print(...)
+	end,
+	[Log.Level.INFO] = function(...: any)
+		print(...)
+	end,
+	[Log.Level.WARN] = function(...: any)
+		warn(...)
+	end,
+	[Log.Level.ERROR] = function(...: any)
+		error(...)
+	end,
+}
 
 --- The current minimum log level. Messages below this level are suppressed.
 Log._currentLevel = Log.Level.INFO
