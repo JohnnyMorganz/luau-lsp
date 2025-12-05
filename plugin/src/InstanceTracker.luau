@@ -50,17 +50,14 @@ function InstanceTracker.track(self: InstanceTracker, instance: Instance): ()
 		self.onChanged:fire(instance)
 
 		if instance.Parent == nil or not self.shouldInclude(instance, self._getIncludeList()) then
-			-- Instance is no longer tracked, stop tracking it and its descendants
+			-- Instance is no longer tracked, stop tracking it
 			self:untrack(instance)
-			for _, descendant in instance:GetDescendants() do
-				self:untrack(descendant)
-			end
 		end
 	end)
 	self._connections[instance] = { nameConnection, parentConnection }
 end
 
---- Stops tracking changes to a specific Instance.
+--- Stops tracking changes to a specific Instance and its children.
 --- Disconnects all associated event connections.
 --- @param self -- The InstanceTracker instance.
 --- @param instance -- The Instance to stop tracking.
@@ -69,7 +66,12 @@ function InstanceTracker.untrack(self: InstanceTracker, instance: Instance): ()
 
 	local connections = self._connections[instance]
 	if not connections then
+		-- We are already not tracking this instance
 		return
+	end
+
+	for _, child in instance:GetChildren() do
+		self:untrack(child)
 	end
 
 	for _, connection in connections do
