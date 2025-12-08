@@ -66,6 +66,9 @@ function ServerEndpoints.getFilePaths(address: string): types.Result<types.HttpR
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
 		Method = "GET" :: "GET",
 		Url = `{address}/get-file-paths`,
+		Headers = {
+			["Content-Type"] = "application/json",
+		},
 	})
 
 	return wrapHttpResult(success, result)
