@@ -142,4 +142,33 @@ TEST_CASE("package_name_is_recorded_onto_the_loaded_types")
     CHECK_EQ(ctv->definitionModuleName, "@example");
 }
 
+TEST_CASE("support_disabling_methods_in_extern_types_globals")
+{
+    Client client;
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt);
+
+    client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+
+    auto config = defaultTestClientConfiguration();
+    config.types.disabledGlobals = {
+        "game.BindToClose",
+    };
+
+    workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
+
+    auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
+        game:BindToClose(function() end)
+    )");
+
+    auto result = workspace.frontend.check(workspace.fileResolver.getModuleName(document));
+    REQUIRE_EQ(result.errors.size(), 1);
+
+    auto err = Luau::get<Luau::UnknownProperty>(result.errors[0]);
+    REQUIRE(err);
+    CHECK_EQ(Luau::toString(err->table), "DataModel");
+    CHECK_EQ(err->key, "BindToClose");
+}
+
 TEST_SUITE_END();
