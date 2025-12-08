@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "TempDir.h"
 #include "ScopedFlags.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
@@ -939,16 +938,15 @@ static void checkFolderCompletionExists(const std::vector<lsp::CompletionItem>& 
 
 TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_initial_values")
 {
-    TempDir t("require_default");
-    t.write_child("first.luau", "return {}");
-    t.write_child("second.luau", "return {}");
+    tempDir.write_child("first.luau", "return {}");
+    tempDir.write_child("second.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("|")
     )");
 
-    auto uri = newDocument(t.write_child("source.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("source.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -963,16 +961,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_default_shows_initial_values")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
 {
-    TempDir t("require_current_directory");
-    t.write_child("first.luau", "return {}");
-    t.write_child("second.luau", "return {}");
+    tempDir.write_child("first.luau", "return {}");
+    tempDir.write_child("second.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("./|")
     )");
 
-    auto uri = newDocument(t.write_child("source.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("source.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -989,16 +986,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
 {
-    TempDir t("require_parents");
-    t.write_child("parent_first.luau", "return {}");
-    t.write_child("parent_second.luau", "return {}");
+    tempDir.write_child("parent_first.luau", "return {}");
+    tempDir.write_child("parent_second.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("../|")
     )");
 
-    auto uri = newDocument(t.write_child("nested/source.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("nested/source.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1015,16 +1011,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_parent_directory")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
 {
-    TempDir t("require_nested");
-    t.write_child("sibling.luau", "return {}");
-    t.write_child("nested/child.luau", "return {}");
+    tempDir.write_child("sibling.luau", "return {}");
+    tempDir.write_child("nested/child.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("./nested/|")
     )");
 
-    auto uri = newDocument(t.touch_child("source.luau"), source);
+    auto uri = newDocument(tempDir.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1039,16 +1034,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_file_in_nested_directory")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_after_entering_then_exiting_child_folder")
 {
-    TempDir t("require_nested");
-    t.write_child("sibling.luau", "return {}");
-    t.write_child("nested/child.luau", "return {}");
+    tempDir.write_child("sibling.luau", "return {}");
+    tempDir.write_child("nested/child.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("./nested/../|")
     )");
 
-    auto uri = newDocument(t.touch_child("source.luau"), source);
+    auto uri = newDocument(tempDir.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1065,7 +1059,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_in_current_directory_afte
 
 TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
 {
-    TempDir t("aliases");
     loadLuaurc(R"(
     {
         "aliases": {
@@ -1079,7 +1072,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_contains_luaurc_aliases")
         local x = require("|")
     )");
 
-    auto uri = newDocument(t.touch_child("source.luau"), source);
+    auto uri = newDocument(tempDir.touch_child("source.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1123,9 +1116,8 @@ TEST_CASE_FIXTURE(Fixture, "string_require_doesnt_show_aliases_after_a_directory
 
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_alias")
 {
-    TempDir t("lune");
-    t.write_child("process.luau", "return {}");
-    t.write_child("net.luau", "return {}");
+    tempDir.write_child("lune/process.luau", "return {}");
+    tempDir.write_child("lune/net.luau", "return {}");
 
     std::string luaurc = R"(
     {
@@ -1133,7 +1125,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
             "lune": "{PATH}",
         }
     })";
-    replace(luaurc, "{PATH}", t.path());
+    replace(luaurc, "{PATH}", tempDir.path() + "/lune");
     loadLuaurc(luaurc);
 
     auto [source, marker] = sourceWithMarker(R"(
@@ -1157,16 +1149,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_files_under_a_luaurc_directory_
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolve_init_luau_relative_to_parent_directory")
 {
-    TempDir t("autocomplete_string_require_init_luau");
-    t.write_child("project/sibling.luau", "return {}");
-    t.write_child("project/directory/utils.luau", "return {}");
+    tempDir.write_child("project/sibling.luau", "return {}");
+    tempDir.write_child("project/directory/utils.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("./|")
     )");
 
-    auto uri = newDocument(t.touch_child("project/directory/init.luau"), source);
+    auto uri = newDocument(tempDir.touch_child("project/directory/init.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1200,16 +1191,15 @@ TEST_CASE_FIXTURE(Fixture, "string_require_shows_self_alias_if_in_init_file")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias_relative_to_current_file")
 {
-    TempDir t("autocomplete_string_require_self_alias");
-    t.write_child("project/sibling.luau", "return {}");
-    t.write_child("project/directory/utils.luau", "return {}");
+    tempDir.write_child("project/sibling.luau", "return {}");
+    tempDir.write_child("project/directory/utils.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("@self/|")
     )");
 
-    auto uri = newDocument(t.touch_child("project/directory/init.luau"), source);
+    auto uri = newDocument(tempDir.touch_child("project/directory/init.luau"), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1226,17 +1216,16 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_show_files_matching_ignore_g
 {
     client->globalConfig.completion.imports.ignoreGlobs = {"*.server.luau", "*.client.luau"};
 
-    TempDir t("string_require_completion_ignore_globs");
-    t.write_child("project/main.server.luau", "return {}");
-    t.write_child("project/client_main.client.luau", "return {}");
-    t.write_child("project/utils.luau", "return {}");
+    tempDir.write_child("project/main.server.luau", "return {}");
+    tempDir.write_child("project/client_main.client.luau", "return {}");
+    tempDir.write_child("project/utils.luau", "return {}");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("./|")
     )");
 
-    auto uri = newDocument(t.write_child("project/source.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("project/source.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};

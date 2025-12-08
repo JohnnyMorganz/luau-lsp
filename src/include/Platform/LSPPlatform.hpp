@@ -109,6 +109,11 @@ public:
         return false;
     }
 
+    virtual std::optional<json> handleRequest(const std::string& method, std::optional<json> params)
+    {
+        return std::nullopt;
+    }
+
     static std::unique_ptr<LSPPlatform> getPlatform(
         const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder = nullptr);
 

@@ -17,7 +17,8 @@ TempDir::TempDir(const std::string& name)
 
 TempDir::~TempDir()
 {
-    //    std::filesystem::remove_all(fullPath);
+    // Cleanup after test completion
+    std::filesystem::remove_all(fullPath);
 }
 
 std::string TempDir::path()

@@ -74,6 +74,7 @@ struct SourceNode
     std::vector<std::string> filePaths{};
     std::vector<SourceNode*> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    bool pluginManaged = false;
 
     // The corresponding TypeId for this sourcemap node
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
@@ -89,6 +90,9 @@ struct SourceNode
     // O(n) search for ancestor of name
     std::optional<const SourceNode*> findAncestor(const std::string& name) const;
 
+    bool containsFilePaths() const;
+    ordered_json toJson() const;
+
     static SourceNode* fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator);
 };
 
@@ -96,6 +100,7 @@ struct PluginNode
 {
     std::string name = "";
     std::string className = "";
+    std::vector<std::string> filePaths{};
     std::vector<PluginNode*> children{};
 
     static PluginNode* fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator);
@@ -133,8 +138,13 @@ public:
     bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
     void writePathsToMap(SourceNode* node, const std::string& base);
+    void updateSourcemapTypes();
 
     std::optional<Uri> getRealPathFromSourceNode(const SourceNode* sourceNode) const;
+
+    void clearPluginManagedNodesFromSourcemap(SourceNode* sourceNode);
+
+    bool hydrateSourcemapWithPluginInfo();
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
@@ -182,6 +192,7 @@ public:
     void onStudioPluginFullChange(const json& dataModel);
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
+    std::optional<json> handleRequest(const std::string& method, std::optional<json> params) override;
 
 
     using LSPPlatform::LSPPlatform;

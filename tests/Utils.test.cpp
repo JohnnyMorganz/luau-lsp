@@ -150,4 +150,50 @@ TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
     CHECK_EQ(paths.size(), 1);
 }
 
+TEST_CASE("writeFile writes content to a new file")
+{
+    TempDir t("write_file_new");
+    auto path = t.path() + "/test.txt";
+
+    bool success = Luau::FileUtils::writeFile(path, "hello world");
+    CHECK(success);
+
+    auto content = Luau::FileUtils::readFile(path);
+    REQUIRE(content);
+    CHECK_EQ(*content, "hello world");
+}
+
+TEST_CASE("writeFile overwrites an existing file")
+{
+    TempDir t("write_file_overwrite");
+    auto path = t.write_child("existing.txt", "original content");
+
+    bool success = Luau::FileUtils::writeFile(path, "new content");
+    CHECK(success);
+
+    auto content = Luau::FileUtils::readFile(path);
+    REQUIRE(content);
+    CHECK_EQ(*content, "new content");
+}
+
+TEST_CASE("writeFile writes empty content")
+{
+    TempDir t("write_file_empty");
+    auto path = t.path() + "/empty.txt";
+
+    bool success = Luau::FileUtils::writeFile(path, "");
+    CHECK(success);
+
+    auto content = Luau::FileUtils::readFile(path);
+    REQUIRE(content);
+    CHECK_EQ(*content, "");
+}
+
+TEST_CASE("writeFile returns false for invalid path")
+{
+    // Attempt to write to a non-existent directory
+    bool success = Luau::FileUtils::writeFile("/nonexistent/directory/path/file.txt", "content");
+    CHECK_FALSE(success);
+}
+
 TEST_SUITE_END();

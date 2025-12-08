@@ -9,25 +9,6 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
-static void mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginNode* pluginInstance, Luau::TypedAllocator<SourceNode>& allocator)
-{
-    // We currently perform purely additive changes where we add in new children
-    for (const auto& dmChild : pluginInstance->children)
-    {
-        if (auto existingChildNode = sourceNode->findChild(dmChild->name))
-        {
-            mutateSourceNodeWithPluginInfo(*existingChildNode, dmChild, allocator);
-        }
-        else
-        {
-            auto childNode = allocator.allocate(SourceNode(dmChild->name, dmChild->className, {}, {}));
-            mutateSourceNodeWithPluginInfo(childNode, dmChild, allocator);
-
-            sourceNode->children.push_back(childNode);
-        }
-    }
-}
-
 static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
 {
     std::optional<Luau::TypeFun> baseType;
@@ -408,12 +389,21 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMapFromContents", "LSP");
     workspaceFolder->client->sendTrace("Sourcemap file read successfully");
 
-    clearSourcemapTypes();
     updateSourceNodeMap(sourceMapContents);
 
     workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
 
-    // Recreate instance types
+    updateSourcemapTypes();
+
+    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
+
+    return true;
+}
+
+void RobloxPlatform::updateSourcemapTypes()
+{
+    clearSourcemapTypes();
+
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 
@@ -428,15 +418,11 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
         handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
     }
 
-    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
-
     if (expressiveTypes)
     {
         workspaceFolder->client->sendTrace("Refreshing diagnostics from sourcemap update as strictDatamodelTypes is enabled");
         workspaceFolder->recomputeDiagnostics(config);
     }
-
-    return true;
 }
 
 bool RobloxPlatform::updateSourceMap()
@@ -506,30 +492,18 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
+
+        // Mutate with plugin info
+        hydrateSourcemapWithPluginInfo();
+
+        // Write paths
+        std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
+        writePathsToMap(rootSourceNode, base);
     }
     catch (const std::exception& e)
     {
         // TODO: log message? NOTE: this function can be called from CLI
         std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
-        rootSourceNode = nullptr;
-        sourceNodeAllocator.clear();
-        return;
-    }
-
-    // Write paths
-    std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
-    writePathsToMap(rootSourceNode, base);
-
-    if (pluginInfo)
-    {
-        if (rootSourceNode->className == "DataModel")
-        {
-            mutateSourceNodeWithPluginInfo(rootSourceNode, pluginInfo, sourceNodeAllocator);
-        }
-        else
-        {
-            std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
-        }
     }
 }
 

@@ -4,7 +4,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
-#include "TempDir.h"
 #include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
@@ -277,64 +276,86 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extens
 #endif
 }
 
-TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file_integration_test")
+TEST_CASE("string_require_resolves_relative_to_file_integration_test")
 {
+    // This integration test needs access to real test data files, so we create a workspace
+    // rooted in the actual project directory rather than using Fixture's temp directory
+    TestClient client;
+    client.globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
+    client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+
+    auto cwd = Luau::FileUtils::getCurrentWorkingDirectory();
+    REQUIRE(cwd);
+
+    WorkspaceFolder workspace(&client, "$TEST_WORKSPACE", Uri::file(*cwd), std::nullopt);
+    workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
+    workspace.setupWithConfiguration(client.globalConfig);
+    workspace.isReady = true;
+
     auto moduleName = workspace.fileResolver.getModuleName(workspace.rootUri.resolvePath("tests/testdata/requires/relative_to_file/main.luau"));
     auto result = workspace.frontend.check(moduleName);
 
-    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    REQUIRE_EQ(result.errors.size(), 0);
 
-    CHECK_EQ(Luau::toString(requireType(getModule(moduleName), "other")), "number");
+    auto module = workspace.frontend.moduleResolver.getModule(moduleName);
+    REQUIRE(module);
+    REQUIRE(module->hasModuleScope());
+
+    auto binding = module->getModuleScope()->linearSearchForBinding("other");
+    REQUIRE(binding);
+    CHECK_EQ(Luau::toString(Luau::follow(binding->typeId)), "number");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
 {
-    TempDir t("string_require_relative_to_file");
-    auto projectLibMainPath = t.touch_child("project/lib/main.luau");
-    auto projectLibUtilsPath = t.touch_child("project/lib/utils.luau");
-    auto projectOtherPath = t.touch_child("project/other.luau");
+    auto projectLibMainPath = tempDir.touch_child("project/lib/main.luau");
+    auto projectLibUtilsPath = tempDir.touch_child("project/lib/utils.luau");
+    auto projectOtherPath = tempDir.touch_child("project/other.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name), Uri::file(projectLibUtilsPath));
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name), Uri::file(projectOtherPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name),
+        Uri::file(projectLibUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name),
+        Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau_file")
 {
-    TempDir t("string_require_resolve_directory_as_init");
-    auto projectLibMainPath = t.touch_child("project/lib/main.luau");
-    auto projectOtherPath = t.touch_child("project/other/init.luau");
+    auto projectLibMainPath = tempDir.touch_child("project/lib/main.luau");
+    auto projectOtherPath = tempDir.touch_child("project/other/init.luau");
 
     Luau::ModuleInfo baseContext{projectLibMainPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name), Uri::file(projectOtherPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name),
+        Uri::file(projectOtherPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_init_luau")
 {
-    TempDir t("resolve_init_luau_relative_to_directory");
-    auto toolsInitPath = t.touch_child("tools/init.luau");
-    auto toolsFilePath = t.touch_child("tools/file.luau");
-    auto projectSiblingPath = t.touch_child("project/sibling.luau");
-    auto projectDirectoryUtilsPath = t.touch_child("project/directory/utils.luau");
-    auto projectDirectoryInitPath = t.touch_child("project/directory/init.luau");
+    auto toolsInitPath = tempDir.touch_child("tools/init.luau");
+    auto toolsFilePath = tempDir.touch_child("tools/file.luau");
+    auto projectSiblingPath = tempDir.touch_child("project/sibling.luau");
+    auto projectDirectoryUtilsPath = tempDir.touch_child("project/directory/utils.luau");
+    auto projectDirectoryInitPath = tempDir.touch_child("project/directory/init.luau");
 
     Luau::ModuleInfo baseContext{projectDirectoryInitPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling", workspace.limits)->name), Uri::file(projectSiblingPath));
-
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools", workspace.limits)->name), Uri::file(toolsInitPath));
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file", workspace.limits)->name), Uri::file(toolsFilePath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling", workspace.limits)->name),
+        Uri::file(projectSiblingPath));
 
     CHECK_EQ(
-        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name), Uri::file(t.path() + "/project/utils.lua"));
+        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools", workspace.limits)->name), Uri::file(toolsInitPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file", workspace.limits)->name),
+        Uri::file(toolsFilePath));
+
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name),
+        Uri::file(tempDir.path() + "/project/utils.lua"));
     CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils", workspace.limits)->name),
         Uri::file(projectDirectoryUtilsPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
 {
-    TempDir t("resolve_file_named_luau");
-    auto mainPath = t.touch_child("project/main.luau");
-    auto luauPath = t.touch_child("project/luau.luau");
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto luauPath = tempDir.touch_child("project/luau.luau");
 
     Luau::ModuleInfo baseContext{mainPath};
     CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./luau", workspace.limits)->name), Uri::file(luauPath));
@@ -352,20 +373,19 @@ TEST_CASE("is_init_luau_file")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
 {
-    TempDir t("resolve_init_luau_self_alias");
-    auto projectInitPath = t.touch_child("project/init.luau");
-    auto projectUtilsPath = t.touch_child("project/utils.luau");
+    auto projectInitPath = tempDir.touch_child("project/init.luau");
+    auto projectUtilsPath = tempDir.touch_child("project/utils.luau");
 
     Luau::ModuleInfo baseContext{projectInitPath};
-    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils", workspace.limits)->name), Uri::file(projectUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils", workspace.limits)->name),
+        Uri::file(projectUtilsPath));
 }
 
 TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaurc_files")
 {
-    TempDir t("init_luau_files_should_not_be_aware_of_sibling_luaurc_files");
-    auto initPath = t.touch_child("project/code/init.luau");
-    auto siblingFilePath = t.touch_child("project/code/sibling.luau");
-    auto luaurcPath = t.write_child("project/code/.luaurc", R"({
+    auto initPath = tempDir.touch_child("project/code/init.luau");
+    auto siblingFilePath = tempDir.touch_child("project/code/sibling.luau");
+    tempDir.write_child("project/code/.luaurc", R"({
         "aliases": {
             "test": "test"
         }
@@ -381,9 +401,8 @@ TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaur
 
 TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_sibling_to_its_parent_directory")
 {
-    TempDir t("init_luau_files_are_aware_of_luaurc_files_that_are_sibling_to_its_parent_directory");
-    auto initPath = t.touch_child("project/code/init.luau");
-    auto luaurcPath = t.write_child("project/.luaurc", R"({
+    auto initPath = tempDir.touch_child("project/code/init.luau");
+    tempDir.write_child("project/.luaurc", R"({
         "aliases": {
             "test": "test"
         }
@@ -397,8 +416,7 @@ TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_s
 
 TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
 {
-    TempDir t("resolve_json_modules");
-    auto path = t.write_child("settings.json", R"({"value": 1})");
+    auto path = tempDir.write_child("settings.json", R"({"value": 1})");
 
     auto sourcemap = std::string(R"(
     {
@@ -418,8 +436,7 @@ TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
 
 TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
 {
-    TempDir t("resolve_toml_modules");
-    auto path = t.write_child("settings.toml", R"(value = 1)");
+    auto path = tempDir.write_child("settings.toml", R"(value = 1)");
 
     auto sourcemap = std::string(R"(
     {
@@ -439,9 +456,8 @@ TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
 
 TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 {
-    TempDir t("file_resolver_supports_config_luau");
-    auto fooPath = t.touch_child("project/code/foo.luau");
-    auto luaurcPath = t.write_child("project/.config.luau", R"(
+    auto fooPath = tempDir.touch_child("project/code/foo.luau");
+    tempDir.write_child("project/.config.luau", R"(
         return {
             luau = {
                 aliases = {

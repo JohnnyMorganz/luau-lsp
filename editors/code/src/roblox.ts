@@ -360,6 +360,21 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     res.sendStatus(200);
   });
 
+  app.get("/get-file-paths", async (req, res) => {
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
+    try {
+      // Request file paths from LSP
+      const response = await client.sendRequest("$/plugin/getFilePaths");
+      res.json(response);
+    } catch (error) {
+      console.error("Error getting file paths:", error);
+      res.status(500).json({ error: "Failed to get file paths from LSP" });
+    }
+  });
+
   const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (res.headersSent) {
       return next(err);

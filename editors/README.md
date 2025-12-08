@@ -120,10 +120,11 @@ The Language Server will operate without a sourcemap available, but will not res
 ## Optional: Roblox Studio plugin
 
 A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
-for users who would like intellisense for non-filesystem based DataModel instances.
+for users who would like intellisense for non-Rojo and non-filesystem based DataModel instances.
 
-The companion plugin sends HTTP post requests to the following endpoints on localhost at the user-defined port:
+The companion plugin sends HTTP requests to the following endpoints on localhost at the user-defined port:
 
+- `GET /get-file-paths`
 - `POST /full`
 - `POST /clear`
 
@@ -132,8 +133,12 @@ The Language Server listens to the following notifications from a language clien
 - `$/plugin/full`
 - `$/plugin/clear`
 
+The Language Server handles the following requests from a language client:
+
+- `$/plugin/getFilePaths`
+
 It is optional to implement support for the companion plugin. This involves creating a HTTP listener on your language
-client, which then sends the corresponding LSP notification to the server.
+client, which then sends the corresponding LSP notification/request to the server.
 
 The `POST /full` request receives a full DataModel tree with the following body:
 
