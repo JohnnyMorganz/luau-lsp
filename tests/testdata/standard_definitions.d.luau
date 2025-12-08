@@ -93,6 +93,7 @@ declare class ServiceProvider extends Instance
 end
 
 declare class DataModel extends ServiceProvider
+    function BindToClose(self, func: ((...any) -> ...any)): nil
 end
 
 declare Instance: {

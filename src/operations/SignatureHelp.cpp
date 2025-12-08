@@ -9,7 +9,6 @@
 
 LUAU_FASTINT(LuauTypeInferRecursionLimit)
 LUAU_FASTINT(LuauTypeInferIterationLimit)
-LUAU_FASTFLAG(LuauPassBindableGenericsByReference)
 
 // Taken from Luau/Autocomplete.cpp
 static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp, Luau::NotNull<Luau::Scope> scope, Luau::TypeArena* typeArena,
@@ -17,7 +16,6 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
 {
     Luau::InternalErrorReporter iceReporter;
     Luau::UnifierSharedState unifierState(&iceReporter);
-    Luau::SimplifierPtr simplifier = newSimplifier(Luau::NotNull{typeArena}, builtinTypes);
     Luau::Normalizer normalizer{
         typeArena, builtinTypes, Luau::NotNull{&unifierState}, FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old};
 
@@ -31,15 +29,12 @@ static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp,
         unifierState.counters.recursionLimit = FInt::LuauTypeInferRecursionLimit;
         unifierState.counters.iterationLimit = FInt::LuauTypeInferIterationLimit;
 
-        Luau::Subtyping subtyping{builtinTypes, Luau::NotNull{typeArena}, Luau::NotNull{simplifier.get()}, Luau::NotNull{&normalizer}, Luau::NotNull{&typeFunctionRuntime}, Luau::NotNull{&iceReporter}};
+        Luau::Subtyping subtyping{builtinTypes, Luau::NotNull{typeArena}, Luau::NotNull{&normalizer}, Luau::NotNull{&typeFunctionRuntime}, Luau::NotNull{&iceReporter}};
 
         // DEVIATION: the flip for superTp and subTp is expected
         // subTp is our custom created type pack, with a trailing ...any
         // so it is actually more general than superTp - we want to check if superTp can match against it.
-        if (FFlag::LuauPassBindableGenericsByReference)
-            return subtyping.isSubtype(superTp, subTp, scope, {}).isSubtype;
-        else
-            return subtyping.isSubtype_DEPRECATED(superTp, subTp, scope).isSubtype;
+        return subtyping.isSubtype(superTp, subTp, scope, {}).isSubtype;
     }
     else
     {
