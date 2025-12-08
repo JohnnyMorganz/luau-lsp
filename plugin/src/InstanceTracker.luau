@@ -49,7 +49,7 @@ function InstanceTracker.track(self: InstanceTracker, instance: Instance): ()
 		Log.debug(`Instance {instance:GetFullName()} parent changed`)
 		self.onChanged:fire(instance)
 
-		if instance.Parent == nil or not self.shouldInclude(instance, self._getIncludeList()) then
+		if instance.Parent == nil or not self:shouldInclude(instance) then
 			-- Instance is no longer tracked, stop tracking it
 			self:untrack(instance)
 		end
@@ -83,12 +83,11 @@ end
 --- Starts tracking all instances in the provided include list.
 --- Also watches for new descendants being added to the DataModel.
 --- @param self -- The InstanceTracker instance.
---- @param includeList -- The list of root instances to track.
-function InstanceTracker.watchAll(self: InstanceTracker, includeList: { Instance }): ()
+function InstanceTracker.watchAll(self: InstanceTracker): ()
 	Log.debug("Watching changes")
 
 	-- Track initial instances
-	for _, instance in includeList do
+	for _, instance in self._getIncludeList() do
 		self:track(instance)
 
 		for _, descendant in instance:GetDescendants() do
@@ -99,7 +98,7 @@ function InstanceTracker.watchAll(self: InstanceTracker, includeList: { Instance
 	-- Track new instances
 	self._connections[game] = {
 		game.DescendantAdded:Connect(function(instance)
-			if self.shouldInclude(instance, self._getIncludeList()) then
+			if self:shouldInclude(instance) then
 				self:track(instance)
 				self.onChanged:fire(instance)
 			end
@@ -126,16 +125,16 @@ end
 --- An instance is included if it is within, contains, or is one of the
 --- provided include paths.
 --- @param instance -- The Instance to check.
---- @param includeList -- The list of instances to include.
+--- @param includeList? -- The list of instances to include.
 --- @return boolean -- True if the instance should be included.
-function InstanceTracker.shouldInclude(instance: Instance, includeList: { Instance }): boolean
+function InstanceTracker.shouldInclude(self: InstanceTracker, instance: Instance, includeList: { Instance }?): boolean
 	-- Ignore instances that are not part of any tree
 	if instance.Parent == nil then
 		return false
 	end
 
 	-- Check if this instance is within, contains, or is an included tree
-	for _, includedInstance in includeList do
+	for _, includedInstance in (includeList or self._getIncludeList()) :: { Instance } do
 		if
 			instance == includedInstance
 			or instance:IsDescendantOf(includedInstance)
@@ -169,7 +168,7 @@ function InstanceTracker.encode(
 	}
 
 	for _, child in instance:GetChildren() do
-		if not self.shouldInclude(child, includeList) then
+		if not self:shouldInclude(child, includeList) then
 			continue
 		end
 

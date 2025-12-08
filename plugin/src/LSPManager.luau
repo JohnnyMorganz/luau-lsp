@@ -120,8 +120,7 @@ function LSPManager.connect(self: LSPManager): boolean
 		return false
 	end
 
-	local includeList = self._settings:get("include")
-	self._instanceTracker:watchAll(includeList)
+	self._instanceTracker:watchAll()
 
 	self._connected = true
 	self.onConnectionChanged:fire(true)
