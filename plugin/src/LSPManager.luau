@@ -1,4 +1,6 @@
 --!strict
+local HttpService = game:GetService("HttpService")
+local supportsFileSync, InstanceFileSyncService = pcall(game.GetService, game, "InstanceFileSyncService")
 
 --- Manages the connection to the Luau Language Server.
 --- Handles connecting, disconnecting, and sending DataModel updates.
@@ -64,6 +66,15 @@ function LSPManager.init(self: LSPManager): ()
 		-- TODO: Send a delta for this instance instead of resending the full tree
 		self:deferredSendFullDMInfo()
 	end)
+
+	if supportsFileSync and InstanceFileSyncService then
+		-- TODO: When the service type exists, remove the any cast
+		(InstanceFileSyncService :: any).StatusChanged:Connect(function(instance: Instance): ()
+			if self._instanceTracker:shouldInclude(instance) then
+				self:deferredSendFullDMInfo()
+			end
+		end)
+	end
 end
 
 --- Returns whether the plugin is currently connected to the language server.
@@ -151,6 +162,59 @@ function LSPManager.disconnect(self: LSPManager): ()
 	Log.info("Successfully disconnected")
 end
 
+--- Get a mapping of instances to their Luau file paths.
+--- @param self -- The LSPManager instance.
+--- @return { [Instance]: { string } } -- A mapping of instances to their Luau file paths.
+function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }
+	if not supportsFileSync then
+		Log.debug("InstanceFileSyncService not supported yet")
+		return {}
+	end
+
+	assert(self._address, "LSPManager must be initialized before use")
+	Log.debug("Getting file paths")
+
+	local result = ServerEndpoints.getFilePaths(self._address)
+	if not result.ok then
+		self:_logHttpError("Getting file paths", result.error)
+		return {}
+	end
+
+	local decodeSuccess, decodeResult = pcall(HttpService.JSONDecode, HttpService, result.value.Body)
+	if not decodeSuccess then
+		Log.warn(`Failed to decode file paths response: {decodeResult}`)
+		return {}
+	end
+
+	if typeof(decodeResult) ~= "table" then
+		Log.warn(`File paths response is not a table: {typeof(decodeResult)}`)
+		return {}
+	end
+
+	local filePaths: { string }? = decodeResult["files"]
+	if not filePaths then
+		Log.warn("No file paths found in response")
+		return {}
+	end
+
+	local instanceFilePaths = {}
+
+	for _, filePath in filePaths do
+		-- TODO: When the service type exists, remove the any cast
+		local getSuccess, instance =
+			pcall((InstanceFileSyncService :: any).GetSyncedInstance, InstanceFileSyncService, filePath)
+		if getSuccess and instance then
+			if instanceFilePaths[instance] then
+				table.insert(instanceFilePaths[instance], filePath)
+			else
+				instanceFilePaths[instance] = { filePath }
+			end
+		end
+	end
+
+	return instanceFilePaths
+end
+
 --- Sends the complete DataModel tree to the language server.
 --- Called on initial connection and when changes are detected.
 --- @param self -- The LSPManager instance.
@@ -159,7 +223,7 @@ function LSPManager.sendFullDMInfo(self: LSPManager): boolean
 	assert(self._address, "LSPManager must be initialized before use")
 	Log.debug("Sending full DM info")
 
-	local tree = self._instanceTracker:encodeAll()
+	local tree = self._instanceTracker:encodeAll(self:getFilePaths())
 
 	local result = ServerEndpoints.full(self._address, tree)
 

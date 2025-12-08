@@ -59,4 +59,16 @@ function ServerEndpoints.clear(address: string): types.Result<types.HttpResponse
 	return wrapHttpResult(success, result)
 end
 
+--- Gets the Luau file paths within the workspace from the language server.
+--- @param address -- The full server address (e.g., "http://localhost:3667").
+--- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
+function ServerEndpoints.getFilePaths(address: string): types.Result<types.HttpResponse, string>
+	local success, result = pcall(HttpService.RequestAsync, HttpService, {
+		Method = "GET" :: "GET",
+		Url = `{address}/get-file-paths`,
+	})
+
+	return wrapHttpResult(success, result)
+end
+
 return ServerEndpoints
