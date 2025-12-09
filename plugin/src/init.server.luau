@@ -72,7 +72,7 @@ if
 	or (supportsFileSync and InstanceFileSyncService and #(InstanceFileSyncService :: any):GetAllInstances() > 0)
 then
 	Log.debug("Starting automatically")
-	lspManager:connect()
+	lspManager:autoConnect()
 end
 
 --- Clean up connections when the plugin is unloaded.
