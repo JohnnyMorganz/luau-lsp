@@ -89,9 +89,13 @@ function LSPManager.init(self: LSPManager): ()
 		-- TODO: When the service type exists, remove the any cast
 		self._statusChangedConnection = (InstanceFileSyncService :: any).StatusChanged:Connect(
 			function(instance: Instance): ()
-				if self._connected and self._instanceTracker:shouldInclude(instance) then
+				if not self._instanceTracker:shouldInclude(instance) then
+					return
+				end
+
+				if self._connected then
 					self:deferredSendFullDMInfo()
-				elseif (not self._connected) and #(InstanceFileSyncService :: any):GetAllInstances() > 0 then
+				elseif #(InstanceFileSyncService :: any):GetAllInstances() > 0 then
 					Log.debug("Syncing instances, queueing auto connect")
 					self:autoConnect()
 				end
