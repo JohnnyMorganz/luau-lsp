@@ -196,4 +196,40 @@ TEST_CASE("writeFile returns false for invalid path")
     CHECK_FALSE(success);
 }
 
+TEST_CASE("writeFile only writes when content differs from existing file")
+{
+    TempDir t("write_file_skip");
+    auto path = t.write_child("same_content.txt", "unchanged content");
+
+    // Set an older modification time so we can verify it's not updated
+    auto oldTime = std::filesystem::last_write_time(path) - std::chrono::seconds(10);
+    std::filesystem::last_write_time(path, oldTime);
+    auto timeBefore = std::filesystem::last_write_time(path);
+
+    // Write the same content - should succeed but not actually write
+    bool success = Luau::FileUtils::writeFile(path, "unchanged content");
+    CHECK(success);
+
+    // File modification time should be unchanged
+    auto timeAfterUnchanged = std::filesystem::last_write_time(path);
+    CHECK_EQ(timeBefore, timeAfterUnchanged);
+
+    // Content should still be the same
+    auto contentUnchanged = Luau::FileUtils::readFile(path);
+    REQUIRE(contentUnchanged);
+    CHECK_EQ(*contentUnchanged, "unchanged content");
+
+    // Write different content - should actually write
+    success = Luau::FileUtils::writeFile(path, "modified content");
+    CHECK(success);
+
+    // File modification time should be updated
+    auto timeAfterModified = std::filesystem::last_write_time(path);
+    CHECK_NE(timeBefore, timeAfterModified);
+
+    auto contentModified = Luau::FileUtils::readFile(path);
+    REQUIRE(contentModified);
+    CHECK_EQ(*contentModified, "modified content");
+}
+
 TEST_SUITE_END();

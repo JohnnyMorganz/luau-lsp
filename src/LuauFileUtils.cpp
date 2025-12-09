@@ -96,6 +96,12 @@ std::optional<std::string> readFile(const std::string& name)
 
 bool writeFile(const std::string& name, const std::string& content)
 {
+    // Skip write if file already has the same content
+    if (auto existingContent = readFile(name))
+    {
+        if (*existingContent == content)
+            return true;
+    }
 #ifdef _WIN32
     FILE* file = _wfsopen(fromUtf8(name).c_str(), L"wb", _SH_DENYWR);
 #else
