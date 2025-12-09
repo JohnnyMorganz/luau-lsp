@@ -504,6 +504,8 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         // TODO: log message? NOTE: this function can be called from CLI
         std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
+        rootSourceNode = nullptr;
+        sourceNodeAllocator.clear();
     }
 }
 
