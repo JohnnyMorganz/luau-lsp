@@ -27,6 +27,8 @@ type LSPManagerData = {
 	_settings: Settings.Settings,
 	--- Reference to the InstanceTracker instance.
 	_instanceTracker: InstanceTracker.InstanceTracker,
+	--- The connection to the InstanceFileSyncService's StatusChanged event
+	_statusChangedConnection: RBXScriptConnection?,
 	--- Signal fired when connection state changes.
 	onConnectionChanged: Signal.Signal<boolean>,
 }
@@ -69,11 +71,13 @@ function LSPManager.init(self: LSPManager): ()
 
 	if supportsFileSync and InstanceFileSyncService then
 		-- TODO: When the service type exists, remove the any cast
-		(InstanceFileSyncService :: any).StatusChanged:Connect(function(instance: Instance): ()
-			if self._instanceTracker:shouldInclude(instance) then
-				self:deferredSendFullDMInfo()
+		self._statusChangedConnection = (InstanceFileSyncService :: any).StatusChanged:Connect(
+			function(instance: Instance): ()
+				if self._instanceTracker:shouldInclude(instance) then
+					self:deferredSendFullDMInfo()
+				end
 			end
-		end)
+		)
 	end
 end
 
@@ -275,6 +279,10 @@ function LSPManager.unload(self: LSPManager): ()
 	self:disconnect()
 	self.onConnectionChanged:destroy()
 	self._instanceTracker:unload()
+	if self._statusChangedConnection then
+		self._statusChangedConnection:Disconnect()
+		self._statusChangedConnection = nil
+	end
 end
 
 return LSPManager
