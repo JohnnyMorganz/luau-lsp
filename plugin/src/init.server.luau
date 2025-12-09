@@ -23,7 +23,7 @@ local Settings = require(script.Settings)
 
 local toolbar = plugin:CreateToolbar("Luau")
 
---#region Instance Creation
+--#region Setup
 
 --- Create the settings manager
 local settings = Settings.new(script.Settings.DefaultSettings)
@@ -35,10 +35,6 @@ end)
 
 --- Create the LSP manager with injected dependencies
 local lspManager = LSPManager.new(settings, instanceTracker)
-
---#endregion
-
---#region Startup
 
 --- Handle settings changes by updating the LSP connection.
 --- If already connected, silently reconnect with new settings.
@@ -68,6 +64,7 @@ end)
 settings:init()
 lspManager:init()
 
+-- Auto-connect if set.
 if settings:get("startAutomatically") then
 	Log.debug("Starting automatically")
 	lspManager:connect()
@@ -102,7 +99,7 @@ end
 local ConnectButton = toolbar:CreateButton(
 	"Luau Language Server Setup",
 	"Toggle Menu",
-	Assets.Icon,
+	if lspManager:isConnected() then Assets.ConnectedIcon else Assets.Icon,
 	"Luau Language Server"
 ) :: PluginToolbarButton
 ConnectButton.ClickableWhenViewportHidden = true
