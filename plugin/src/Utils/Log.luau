@@ -22,7 +22,7 @@ Log.Level = {
 }
 
 --- Prefix prepended to all log messages for identification.
-Log._prefix = "[Luau Language Server]:"
+Log._prefix = "[Luau LSP] "
 
 --- Maps log levels to their output functions.
 Log._levelMethod = {
@@ -38,6 +38,14 @@ Log._levelMethod = {
 	[Log.Level.ERROR] = function(...: any)
 		error(...)
 	end,
+}
+
+--- Maps log levels to their prefix strings.
+Log._levelPrefix = {
+	[Log.Level.DEBUG] = "DEBUG:",
+	[Log.Level.INFO] = "INFO: ",
+	[Log.Level.WARN] = "WARN: ",
+	[Log.Level.ERROR] = "ERROR:",
 }
 
 --- The current minimum log level. Messages below this level are suppressed.
@@ -58,12 +66,9 @@ function Log._log(level: number, ...: any): ()
 		return
 	end
 
-	local method = Log._levelMethod[level]
-	if method then
-		method(Log._prefix, ...)
-	else
-		print(Log._prefix, ...)
-	end
+	local method = Log._levelMethod[level] or Log._levelMethod[Log.Level.INFO]
+	local levelPrefix = Log._levelPrefix[level] or Log._levelPrefix[Log.Level.INFO]
+	method(Log._prefix .. levelPrefix, ...)
 end
 
 --- Logs a debug message. Only shown when log level is DEBUG.
@@ -89,7 +94,7 @@ end
 --- @param ... -- The values to include in the error message.
 function Log.error(...): never
 	-- In order to type this as never, we can't use _log here
-	error(`{Log._prefix} {table.concat({ ... }, " ")}`, 2)
+	error(`{Log._prefix}{Log._levelPrefix[Log.Level.ERROR]} {table.concat({ ... }, " ")}`, 2)
 end
 
 return Log
