@@ -74,14 +74,18 @@ const getRojoProjectFile = async (
   if (foundProjectFiles.length === 0) {
     // If the plugin is not enabled, provide a one-click setup button
     let options: string[] = [];
-    if (!vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")) {
+    if (
+      !vscode.workspace
+        .getConfiguration("luau-lsp.plugin")
+        .get<boolean>("enabled")
+    ) {
       options.push("Setup Plugin");
     }
     options.push("Configure Settings");
     vscode.window
       .showWarningMessage(
-          `Unable to find project file ${projectFile} for Rojo sourcemap generation. Configure a file in settings, or use the Studio Plugin for DataModel info instead`,
-        ...options
+        `Unable to find project file ${projectFile} for Rojo sourcemap generation. Configure a file in settings, or use the Studio Plugin for DataModel info instead`,
+        ...options,
       )
       .then((value) => {
         if (value === "Setup Plugin") {
@@ -268,7 +272,11 @@ const startSourcemapGeneration = async (
           ) {
             output +=
               "Rojo not found. Configure your Rojo path in settings, or use the Studio Plugin for DataModel info instead";
-            if (!vscode.workspace.getConfiguration("luau-lsp.plugin").get<boolean>("enabled")) {
+            if (
+              !vscode.workspace
+                .getConfiguration("luau-lsp.plugin")
+                .get<boolean>("enabled")
+            ) {
               options.push("Setup Plugin");
             }
             options.push("Configure Settings");
