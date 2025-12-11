@@ -9,11 +9,17 @@ static bool mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginN
 {
     bool didUpdateSourcemap = false;
 
-    bool shouldUpdateFilePaths = sourceNode->pluginManaged || !pluginInstance->filePaths.empty();
-    if (shouldUpdateFilePaths && sourceNode->filePaths != pluginInstance->filePaths)
+    // Update paths if managed or syncing
+    if ((sourceNode->pluginManaged || !pluginInstance->filePaths.empty()) && sourceNode->filePaths != pluginInstance->filePaths)
     {
         didUpdateSourcemap = true;
         sourceNode->filePaths = pluginInstance->filePaths;
+    }
+    // Update class if managed (eg: renaming foo.client.lua to foo.server.luau needs the foo node to change class)
+    if (sourceNode->pluginManaged && sourceNode->className != pluginInstance->className)
+    {
+        didUpdateSourcemap = true;
+        sourceNode->className = pluginInstance->className;
     }
 
     std::unordered_set<std::string> pluginChildNames;
