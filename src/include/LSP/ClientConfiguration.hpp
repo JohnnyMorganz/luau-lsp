@@ -141,7 +141,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsStringReq
 struct ClientCompletionImportsConfiguration
 {
     /// Whether we should suggest automatic imports in completions
-    bool enabled = false;
+    bool enabled = true;
     /// Whether services should be suggested in auto-import
     bool suggestServices = true;
     /// When non-empty, only show the services listed when auto-importing
