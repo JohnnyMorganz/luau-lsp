@@ -772,6 +772,9 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         for (auto& folder : workspaceFolders)
             folder->hasConfiguration = true;
     }
+
+    for (auto& workspace : workspaceFolders)
+        workspace->lazyInitialize();
 }
 
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
