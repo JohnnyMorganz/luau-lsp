@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `Instance:IsPropertyModified()` and `Instance:ResetPropertyToDefault()` will now typecheck and autocomplete against real properties ([#1273](https://github.com/JohnnyMorganz/luau-lsp/issues/1273))
+
 ## [1.57.1] - 2025-11-30
 
 ### Fixed
