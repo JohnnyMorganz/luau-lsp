@@ -176,6 +176,28 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
     return call.args.data[0];
 }
+
+std::optional<Luau::AstExpr*> matchLoadLibrary(const Luau::AstExprCall& call)
+{
+	const char* loadLibrary = "LoadLibrary";
+
+    if (call.args.size != 1)
+        return std::nullopt;
+
+	const Luau::AstExprLocal* funcAsLocal = call.func->as<Luau::AstExprLocal>();
+
+    if (!funcAsLocal || funcAsLocal->local->name != loadLibrary)
+        return std::nullopt;
+
+    if (call.args.size != 1)
+        return std::nullopt;
+
+	if (call.args.size > 1)
+		return std::nullopt; // TODO: We don't have support for NamedImports yet
+
+    return call.args.data[0];
+}
+
 } // namespace types
 
 struct FindNodeType : public Luau::AstVisitor
@@ -750,6 +772,18 @@ bool isGetService(const Luau::AstExpr* expr)
             if (index->index == "GetService")
                 if (auto name = index->expr->as<Luau::AstExprGlobal>())
                     if (name->name == "game")
+                        return true;
+
+    return false;
+}
+
+bool isOvertureCall(const Luau::AstExpr* expr)
+{
+    if (auto call = expr->as<Luau::AstExprCall>())
+        if (auto index = call->func->as<Luau::AstExprIndexName>())
+            if (index->index == "LoadLibrary")
+                if (auto local = index->expr->as<Luau::AstExprLocal>())
+                    if (local->local->name == "Overture")
                         return true;
 
     return false;

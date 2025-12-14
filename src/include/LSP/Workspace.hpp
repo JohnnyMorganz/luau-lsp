@@ -55,6 +55,9 @@ private:
     /// Used for documentation comment lookup within definition files.
     std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
 
+	/// Mapping from library names to their virutal paths for Overture libraries
+	std::unordered_map<std::string, std::string> overtureLibraryVirtualPaths{};
+
 public:
     WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
@@ -77,6 +80,9 @@ public:
 
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
+
+    // Loads Overture library name to virtual path mappings from .meta.json files
+    void loadOvertureLibraryMappings();
 
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
@@ -132,6 +138,8 @@ public:
         const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken);
 
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken);
+
+    std::optional<Luau::ModuleName> getOvertureLibraryPath(const std::string& libraryName) const;
 
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
