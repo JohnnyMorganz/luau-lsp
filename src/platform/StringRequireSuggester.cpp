@@ -76,11 +76,19 @@ std::vector<Luau::RequireAlias> FileRequireNode::getAvailableAliases() const
     std::vector<Luau::RequireAlias> results;
 
     for (const auto& [_, aliasInfo] : mainRequirerNodeConfig.aliases)
-        results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
+    {
+        auto alias = Luau::RequireAlias{aliasInfo.originalCase};
+        alias.tags = {"Alias"};
+        results.emplace_back(alias);
+    }
 
     // Include @self alias for init.lua files
     if (isInitLuauFile(uri))
-        results.emplace_back(Luau::RequireAlias{"self", {"Alias"}});
+    {
+        auto alias = Luau::RequireAlias{"self"};
+        alias.tags = {"Alias"};
+        results.emplace_back(alias);
+    }
 
     return results;
 }
