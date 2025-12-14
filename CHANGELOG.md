@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.703
+- VSCode: add more pointers towards using the Studio Plugin when Rojo information is not available ([#1279](https://github.com/JohnnyMorganz/luau-lsp/pull/1279))
 
 ### Fixed
 
