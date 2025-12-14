@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `Instance:IsPropertyModified()` and `Instance:ResetPropertyToDefault()` will now typecheck and autocomplete against real properties ([#1273](https://github.com/JohnnyMorganz/luau-lsp/issues/1273))
 
+### Fixed
+
+- Fixed missing newline in log messages when using `luau-lsp analyze` ([#1284](https://github.com/JohnnyMorganz/luau-lsp/pull/1284))
+- Fixed crash when configuring `luau-lsp.types.disabledGlobals` on a global extern type property ([#1286](https://github.com/JohnnyMorganz/luau-lsp/pull/1286))
+
 ## [1.57.1] - 2025-11-30
 
 ### Fixed
@@ -1754,6 +1759,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
