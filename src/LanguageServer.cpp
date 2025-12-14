@@ -663,6 +663,9 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
         }
     }
 
+    // Update the solver mode for null workspace after FFlags are configured
+    nullWorkspace->frontend.setLuauSolverMode(FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old);
+
     // Configure workspaces
     if (params.workspaceFolders.has_value())
     {

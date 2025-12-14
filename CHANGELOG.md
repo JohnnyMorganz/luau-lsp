@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed crash when configuring `luau-lsp.types.disabledGlobals` on a global extern type property ([#1286](https://github.com/JohnnyMorganz/luau-lsp/pull/1286))
 - Changes to `.config.luau` will now correctly reset the configuration cache and reload configuration ([#1277](https://github.com/JohnnyMorganz/luau-lsp/issues/1277))
 - Studio Plugin: fixed some issues with untracking where connections are not cleaned up ([#1280](https://github.com/JohnnyMorganz/luau-lsp/pull/1280))
+- Fixed incorrect old solver mode configured for the null workspace (default workspace when a Luau file is not part of an opened folder) when `FFlag::LuauUseWorkspacePropToChooseSolver` and new solver is enabled. This would lead to features such as autocompletion not working. ([#1292](https://github.com/JohnnyMorganz/luau-lsp/issues/1292))
 
 ## [1.57.1] - 2025-11-30
 
