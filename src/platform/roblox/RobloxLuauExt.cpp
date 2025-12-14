@@ -293,8 +293,10 @@ void MagicEnumItemIsA::refine(const Luau::MagicRefinementContext& context)
     asMutable(*discriminantTy)->ty.emplace<Luau::BoundType>(Luau::follow(tfun->type));
 }
 
-// Magic function for `instance:GetPropertyChangedSignal()`, so that we can perform type checking on the provided property
-struct MagicGetPropertyChangedSignal final : Luau::MagicFunction
+// Magic function for one-argument methods where the first argument expects an instance property name
+// Supports type checking on the provided property
+// Applies for `Instance:GetPropertyChangedSignal()`, `Instance:IsPropertyModified()`, `Instance:ResetPropertyToDefault()`
+struct MagicInstancePropertyCheck final : Luau::MagicFunction
 {
     std::optional<Luau::WithPredicate<Luau::TypePackId>> handleOldSolver(struct Luau::TypeChecker& typeChecker,
         const std::shared_ptr<struct Luau::Scope>& scope, const class Luau::AstExprCall& expr,
@@ -302,7 +304,7 @@ struct MagicGetPropertyChangedSignal final : Luau::MagicFunction
     bool infer(const Luau::MagicFunctionCallContext& context) override;
 };
 
-std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicGetPropertyChangedSignal::handleOldSolver(struct Luau::TypeChecker& typeChecker,
+std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstancePropertyCheck::handleOldSolver(struct Luau::TypeChecker& typeChecker,
     const std::shared_ptr<struct Luau::Scope>& scope, const class Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
 {
     if (expr.args.size != 1)
@@ -329,7 +331,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicGetPropertyChangedSign
     return std::nullopt;
 }
 
-bool MagicGetPropertyChangedSignal::infer(const Luau::MagicFunctionCallContext& context)
+bool MagicInstancePropertyCheck::infer(const Luau::MagicFunctionCallContext& context)
 {
     if (context.callSite->args.size != 1)
         return false;
@@ -506,7 +508,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
         if (auto* ctv = Luau::getMutable<Luau::ExternType>(objectType->type))
         {
             attachMagicFunctionSafe(ctv->props, "IsA", std::make_shared<MagicInstanceIsA>());
-            attachMagicFunctionSafe(ctv->props, "GetPropertyChangedSignal", std::make_shared<MagicGetPropertyChangedSignal>());
+            attachMagicFunctionSafe(ctv->props, "GetPropertyChangedSignal", std::make_shared<MagicInstancePropertyCheck>());
 
             attachTagSafe(ctv->props, "IsA", "ClassNames");
             attachTagSafe(ctv->props, "GetPropertyChangedSignal", "Properties");
@@ -524,12 +526,17 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             attachMagicFunctionSafe(ctv->props, "FindFirstAncestorWhichIsA", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
             attachMagicFunctionSafe(ctv->props, "FindFirstAncestorOfClass", std::make_shared<MagicInstanceFindFirstXWhichIsA>());
             attachMagicFunctionSafe(ctv->props, "Clone", std::make_shared<MagicInstanceClone>());
+            attachMagicFunctionSafe(ctv->props, "IsPropertyModified", std::make_shared<MagicInstancePropertyCheck>());
+            attachMagicFunctionSafe(ctv->props, "ResetPropertyToDefault", std::make_shared<MagicInstancePropertyCheck>());
 
             // Autocomplete ClassNames for :IsA("") and counterparts
             attachTagSafe(ctv->props, "FindFirstChildWhichIsA", "ClassNames");
             attachTagSafe(ctv->props, "FindFirstChildOfClass", "ClassNames");
             attachTagSafe(ctv->props, "FindFirstAncestorWhichIsA", "ClassNames");
             attachTagSafe(ctv->props, "FindFirstAncestorOfClass", "ClassNames");
+
+            attachTagSafe(ctv->props, "IsPropertyModified", "Properties");
+            attachTagSafe(ctv->props, "ResetPropertyToDefault", "Properties");
 
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
