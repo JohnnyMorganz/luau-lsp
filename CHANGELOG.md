@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `Instance:IsPropertyModified()` and `Instance:ResetPropertyToDefault()` will now typecheck and autocomplete against real properties ([#1273](https://github.com/JohnnyMorganz/luau-lsp/issues/1273))
 
+### Changed
+
+- Sync to upstream Luau 0.703
+
 ### Fixed
 
 - Fixed missing newline in log messages when using `luau-lsp analyze` ([#1284](https://github.com/JohnnyMorganz/luau-lsp/pull/1284))
