@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.58.0] - 2025-12-14
+
 ### Added
 
 - `Instance:IsPropertyModified()` and `Instance:ResetPropertyToDefault()` will now typecheck and autocomplete against real properties ([#1273](https://github.com/JohnnyMorganz/luau-lsp/issues/1273))
@@ -1769,7 +1771,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
