@@ -663,6 +663,9 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
         }
     }
 
+    // Update the solver mode for null workspace after FFlags are configured
+    nullWorkspace->frontend.setLuauSolverMode(FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old);
+
     // Configure workspaces
     if (params.workspaceFolders.has_value())
     {
@@ -755,6 +758,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         std::vector<lsp::FileSystemWatcher> watchers{};
         watchers.push_back(lsp::FileSystemWatcher{"**/.luaurc"});
         watchers.push_back(lsp::FileSystemWatcher{"**/.robloxrc"});
+        watchers.push_back(lsp::FileSystemWatcher{"**/.config.luau"});
         watchers.push_back(lsp::FileSystemWatcher{"**/*.{lua,luau}"});
         client->registerCapability(
             "didChangedWatchedFilesCapability", "workspace/didChangeWatchedFiles", lsp::DidChangeWatchedFilesRegistrationOptions{watchers});
