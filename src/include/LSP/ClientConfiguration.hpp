@@ -157,9 +157,11 @@ struct ClientCompletionImportsConfiguration
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{};
+    /// Whether to suggest imports based on Rotriever package dependencies
+    bool suggestRotrieverImports = true;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
-    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
+    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs, suggestRotrieverImports);
 
 struct ClientCompletionConfiguration
 {

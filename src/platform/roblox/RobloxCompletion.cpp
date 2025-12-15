@@ -1,4 +1,5 @@
 #include "Platform/RobloxPlatform.hpp"
+#include "Platform/RotrieverResolver.hpp"
 
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
@@ -76,17 +77,37 @@ static lsp::CompletionItem createSuggestService(const std::string& service, size
 
 static std::string optimiseAbsoluteRequire(const std::string& path)
 {
-    if (!Luau::startsWith(path, "game/"))
-        return path;
+    std::string result = path;
 
-    auto parts = Luau::split(path, '/');
-    if (parts.size() > 2)
+    // Strip "game/" prefix
+    if (Luau::startsWith(result, "game/"))
     {
-        auto service = std::string(parts[1]);
-        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
+        auto parts = Luau::split(result, '/');
+        if (parts.size() > 2)
+        {
+            auto service = std::string(parts[1]);
+            result = service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
+        }
     }
 
-    return path;
+    // Optimize _Workspace paths to shorter aliases
+    // CorePackages/Workspace/Packages/_Workspace/*/ModuleName -> CorePackages/Packages/ModuleName
+    const std::string workspaceMarker = "/Workspace/Packages/_Workspace/";
+    if (auto pos = result.find(workspaceMarker); pos != std::string::npos)
+    {
+        // Get the prefix (e.g., "CorePackages")
+        auto prefix = result.substr(0, pos);
+        // Get everything after _Workspace/ (e.g., "SomePackage/ModuleName")
+        auto remainder = result.substr(pos + workspaceMarker.length());
+        // Find the module name (after the package folder)
+        if (auto slashPos = remainder.find('/'); slashPos != std::string::npos)
+        {
+            auto moduleName = remainder.substr(slashPos + 1);
+            result = prefix + "/Packages/" + moduleName;
+        }
+    }
+
+    return result;
 }
 
 std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
@@ -263,6 +284,105 @@ std::optional<lsp::CompletionItemKind> RobloxPlatform::handleEntryKind(const Lua
     return std::nullopt;
 }
 
+// Create: local PackageName = require(Packages.PackageName)
+static lsp::CompletionItem createRotrieverPackageSuggestion(
+    const std::string& packageName, const std::string& packagesLocalName, size_t lineNumber, bool prependNewline = false)
+{
+    auto requirePath = packagesLocalName + "." + packageName;
+    auto importText = "local " + packageName + " = require(" + requirePath + ")\n";
+    if (prependNewline)
+        importText = "\n" + importText;
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = packageName;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = "Auto-import package";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = packageName;
+    item.sortText = SortText::AutoImportsRotriever;
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
+// Check if a module path is exported from a package and return the package path and export name
+// Returns {packagePath, exportName} or nullopt if not exported from any package
+static std::optional<std::pair<std::string, std::string>> findPackageExport(
+    const std::string& modulePath, const std::unordered_map<std::string, std::vector<std::string>>& packageExports)
+{
+    // Get the module name (last component of the path)
+    std::string moduleName = modulePath;
+    if (auto lastSlash = modulePath.rfind('/'); lastSlash != std::string::npos)
+        moduleName = modulePath.substr(lastSlash + 1);
+
+    // Check each package to see if it exports this module
+    for (const auto& [packagePath, exports] : packageExports)
+    {
+        // The module path must start with the package path
+        if (!Luau::startsWith(modulePath, packagePath + "/"))
+            continue;
+
+        // Check if the module name is in the exports
+        if (std::find(exports.begin(), exports.end(), moduleName) != exports.end())
+        {
+            return std::make_pair(packagePath, moduleName);
+        }
+    }
+
+    return std::nullopt;
+}
+
+// Create: local ExportName = require(PackagePath).ExportName (for workspace packages)
+static lsp::CompletionItem createPackageExportSuggestion(
+    const std::string& exportName, const std::string& packagePath, size_t lineNumber, bool prependNewline = false)
+{
+    auto scriptPath = convertToScriptPath(packagePath);
+    auto importText = "local " + exportName + " = require(" + scriptPath + ")." + exportName + "\n";
+    if (prependNewline)
+        importText = "\n" + importText;
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = exportName;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = "Auto-import from package";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = exportName;
+    item.sortText = SortText::AutoImportsRotriever; // Prioritize package exports
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
+// Create: local ExportName = require(Packages.PackageName).ExportName
+static lsp::CompletionItem createRotrieverExportSuggestion(const std::string& exportName, const std::string& packageName,
+    const std::string& packagesLocalName, size_t lineNumber, bool prependNewline = false)
+{
+    auto requirePath = packagesLocalName + "." + packageName;
+    auto importText = "local " + exportName + " = require(" + requirePath + ")." + exportName + "\n";
+    if (prependNewline)
+        importText = "\n" + importText;
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = exportName;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = "Auto-import from " + packageName;
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = exportName;
+    item.sortText = SortText::AutoImportsRotriever;
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
 void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
     size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
@@ -270,6 +390,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
     // Find all import calls
     RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.client = workspaceFolder->client;
     importsVisitor.visit(module.root);
 
     if (config.completion.imports.suggestServices && !completingTypeReferencePrefix)
@@ -318,6 +439,8 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
         {
             size_t minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
+            const auto& packageExports = workspaceFolder->getPackageExports();
+
             for (auto& [path, node] : virtualPathsToSourceNodes)
             {
                 auto name = Luau::LanguageServer::AutoImports::makeValidVariableName(node->name);
@@ -327,6 +450,18 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 if (auto scriptFilePath = getRealPathFromSourceNode(node);
                     scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
                     continue;
+
+                // Check if this module is exported from a package (init.lua pattern)
+                // If so, use require(Package).export instead of require(Package.Module)
+                if (auto pkgExport = findPackageExport(path, packageExports))
+                {
+                    auto& [packagePath, exportName] = *pkgExport;
+                    size_t lineNumber = computeBestLineForRequire(importsVisitor, textDocument, exportName, minimumLineNumber);
+                    bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+
+                    items.emplace_back(createPackageExportSuggestion(exportName, packagePath, lineNumber, prependNewline));
+                    continue; // Don't also add the direct path import
+                }
 
                 std::string requirePath;
                 std::vector<lsp::TextEdit> textEdits;
@@ -375,6 +510,52 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
 
                 items.emplace_back(Luau::LanguageServer::AutoImports::createSuggestRequire(
                     name, textEdits, isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute, path, require));
+            }
+        }
+    }
+
+    // Suggest Rotriever package imports (prioritized over regular auto-imports)
+    // Check if enabled and if the current file is in a Rotriever package
+    if (config.completion.imports.suggestRotrieverImports)
+    {
+        if (auto* currentPackage = workspaceFolder->findRotrieverPackageForFile(textDocument.uri()))
+        {
+            size_t minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
+
+            // TODO: Detect the actual "Packages" local variable name from the file
+            // For now, assume "Packages" as it's the common convention
+            const std::string packagesLocalName = "Packages";
+
+            // For each dependency of this package, suggest the package and its exports
+            for (const auto& [depName, dep] : currentPackage->dependencies)
+            {
+                size_t lineNumber = computeBestLineForRequire(importsVisitor, textDocument, depName, minimumLineNumber);
+                bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+
+                // 1. Suggest the package itself (e.g., GameTile)
+                if (!importsVisitor.containsRequire(depName))
+                {
+                    items.emplace_back(createRotrieverPackageSuggestion(depName, packagesLocalName, lineNumber, prependNewline));
+                }
+
+                // 2. Suggest the package's exports (e.g., GameTileView, AppGameTile)
+                // Look up the dependency package in discovered packages to get its exports
+                for (const auto& [pkgRoot, pkg] : workspaceFolder->getRotrieverPackages())
+                {
+                    // Check if this package matches the dependency
+                    if (pkgRoot.fsPath() == dep.resolvedPath.fsPath())
+                    {
+                        for (const auto& exportName : pkg.exports)
+                        {
+                            // Skip if already imported
+                            if (importsVisitor.containsRequire(exportName))
+                                continue;
+
+                            items.emplace_back(createRotrieverExportSuggestion(exportName, depName, packagesLocalName, lineNumber, prependNewline));
+                        }
+                        break;
+                    }
+                }
             }
         }
     }

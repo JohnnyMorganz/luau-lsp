@@ -18,6 +18,7 @@ NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SER
 struct RobloxFindImportsVisitor : public Luau::LanguageServer::AutoImports::FindImportsVisitor
 {
 public:
+    BaseClient* client = nullptr;
     std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
     std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
     std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};

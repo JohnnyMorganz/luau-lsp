@@ -19,6 +19,7 @@ lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::Docume
 
     // Find all `local X = game:GetService("Service")`
     RobloxFindImportsVisitor visitor;
+    visitor.client = workspaceFolder->client;
     visitor.visit(sourceModule->root);
 
     if (visitor.serviceLineMap.empty())
