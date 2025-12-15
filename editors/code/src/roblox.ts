@@ -12,6 +12,18 @@ import * as utils from "./utils";
 let pluginServer: Server | undefined = undefined;
 
 const API_DOCS = "https://luau-lsp.pages.dev/api-docs/en-us.json";
+const STUDIO_PLUGIN_URL =
+  "https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion";
+
+const setupStudioPlugin = async (client: LanguageClient | undefined) => {
+  // Enable the plugin server
+  await vscode.workspace
+    .getConfiguration("luau-lsp.plugin")
+    .update("enabled", true);
+  startPluginServer(client);
+  // Open the studio plugin in the browser for the user to install
+  vscode.env.openExternal(vscode.Uri.parse(STUDIO_PLUGIN_URL));
+};
 
 const globalTypesEndpointForSecurityLevel = (securityLevel: string) => {
   return `https://luau-lsp.pages.dev/type-definitions/globalTypes.${securityLevel}.d.luau`;
@@ -44,6 +56,7 @@ const apiDocsUri = (context: vscode.ExtensionContext) => {
 const getRojoProjectFile = async (
   workspaceFolder: vscode.WorkspaceFolder,
   config: vscode.WorkspaceConfiguration,
+  client: LanguageClient | undefined,
 ) => {
   let projectFile =
     config.get<string>("rojoProjectFile") ?? "default.project.json";
@@ -59,13 +72,25 @@ const getRojoProjectFile = async (
   );
 
   if (foundProjectFiles.length === 0) {
+    // If the plugin is not enabled, provide a one-click setup button
+    let options: string[] = [];
+    if (
+      !vscode.workspace
+        .getConfiguration("luau-lsp.plugin")
+        .get<boolean>("enabled")
+    ) {
+      options.push("Setup Plugin");
+    }
+    options.push("Configure Settings");
     vscode.window
       .showWarningMessage(
-        `Unable to find project file ${projectFile} for Rojo sourcemap generation. Please configure a file in settings`,
-        "Configure Settings",
+        `Unable to find project file ${projectFile} for Rojo sourcemap generation. Configure a file in settings, or use the Studio Plugin for DataModel info instead`,
+        ...options,
       )
       .then((value) => {
-        if (value === "Configure Settings") {
+        if (value === "Setup Plugin") {
+          setupStudioPlugin(client);
+        } else if (value === "Configure Settings") {
           vscode.commands.executeCommand(
             "workbench.action.openWorkspaceSettings",
             "luau-lsp.sourcemap",
@@ -183,7 +208,11 @@ const startSourcemapGeneration = async (
       });
     } else {
       // Check if the project file exists
-      const projectFile = await getRojoProjectFile(workspaceFolder, config);
+      const projectFile = await getRojoProjectFile(
+        workspaceFolder,
+        config,
+        client,
+      );
       if (!projectFile) {
         return;
       }
@@ -242,7 +271,14 @@ const startSourcemapGeneration = async (
             stderr.includes("ENOENT")
           ) {
             output +=
-              "Rojo not found. Please install Rojo to your PATH or disable sourcemap autogeneration";
+              "Rojo not found. Configure your Rojo path in settings, or use the Studio Plugin for DataModel info instead";
+            if (
+              !vscode.workspace
+                .getConfiguration("luau-lsp.plugin")
+                .get<boolean>("enabled")
+            ) {
+              options.push("Setup Plugin");
+            }
             options.push("Configure Settings");
           } else {
             output += stderr;
@@ -252,6 +288,8 @@ const startSourcemapGeneration = async (
         vscode.window.showWarningMessage(output, ...options).then((value) => {
           if (value === "Retry") {
             startSourcemapGeneration(client, workspaceFolder);
+          } else if (value === "Setup Plugin") {
+            setupStudioPlugin(client);
           } else if (value === "Configure Settings") {
             vscode.commands.executeCommand(
               "workbench.action.openWorkspaceSettings",
@@ -452,6 +490,12 @@ export const onActivate = async (
     vscode.commands.registerCommand(
       "luau-lsp.regenerateSourcemap",
       startSourcemapGenerationForAllFolders,
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("luau-lsp.setupStudioPlugin", () =>
+      setupStudioPlugin(platformContext.client),
     ),
   );
 

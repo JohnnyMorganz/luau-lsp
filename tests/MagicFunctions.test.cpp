@@ -152,4 +152,46 @@ TEST_CASE_FIXTURE(Fixture, "typeof_refines_for_instance")
     CHECK(Luau::toString(requireType("realObj")) == "Instance");
 }
 
+TEST_CASE_FIXTURE(Fixture, "is_property_modified")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:IsPropertyModified("Anchored")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+}
+
+TEST_CASE_FIXTURE(Fixture, "is_property_modified_unknown_property")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:IsPropertyModified("unknown")
+    )");
+
+    LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+}
+
+TEST_CASE_FIXTURE(Fixture, "reset_property_to_default")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:ResetPropertyToDefault("Anchored")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+}
+
+TEST_CASE_FIXTURE(Fixture, "reset_property_to_default_unknown_property")
+{
+    auto result = check(R"(
+        local x = Instance.new("Part")
+        local y = x:ResetPropertyToDefault("unknown")
+    )");
+
+    LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+}
+
 TEST_SUITE_END();

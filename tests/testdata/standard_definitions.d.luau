@@ -66,6 +66,8 @@ declare class Instance extends Object
     function GetFullName(self): string
     function IsAncestorOf(self, descendant: Instance): boolean
     function IsDescendantOf(self, ancestor: Instance): boolean
+    function IsPropertyModified(self, property: string): boolean
+    function ResetPropertyToDefault(self, property: string): nil
     function SetAttribute(self, attribute: string, value: any): nil
     function WaitForChild(self, name: string): Instance
     function WaitForChild(self, name: string, timeout: number): Instance?
