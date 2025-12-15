@@ -360,18 +360,15 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     res.sendStatus(200);
   });
 
-  app.get("/get-file-paths", async (req, res) => {
-    if (!client) {
-      return res.sendStatus(500);
-    }
-
+  app.get("/get-file-paths", async (_req, res) => {
     try {
-      // Request file paths from LSP
-      const response = await client.sendRequest("$/plugin/getFilePaths");
-      res.json(response);
+      const uris = await vscode.workspace.findFiles("**/*.{lua,luau}");
+      res.json({
+        files: uris.map((uri: vscode.Uri) => uri.fsPath),
+      });
     } catch (error) {
       console.error("Error getting file paths:", error);
-      res.status(500).json({ error: "Failed to get file paths from LSP" });
+      res.status(500).json({ error: "Failed to get file paths" });
     }
   });
 
