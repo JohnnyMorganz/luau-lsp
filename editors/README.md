@@ -133,12 +133,8 @@ The Language Server listens to the following notifications from a language clien
 - `$/plugin/full`
 - `$/plugin/clear`
 
-The Language Server handles the following requests from a language client:
-
-- `$/plugin/getFilePaths`
-
 It is optional to implement support for the companion plugin. This involves creating a HTTP listener on your language
-client, which then sends the corresponding LSP notification/request to the server.
+client, which then sends the corresponding LSP notification to the server.
 
 The `POST /full` request receives a full DataModel tree with the following body:
 

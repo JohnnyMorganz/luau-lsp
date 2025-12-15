@@ -1073,56 +1073,6 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autogenerate_writes_file_when_plugin_info_
     CHECK(hasServerStorage);
 }
 
-TEST_CASE_FIXTURE(Fixture, "plugin_get_file_paths_request_returns_workspace_luau_files")
-{
-    // Create some Luau files in the temp directory
-    tempDir.write_child("src/init.luau", "return {}");
-    tempDir.write_child("src/utils/helper.lua", "return {}");
-    tempDir.write_child("src/client/main.luau", "return {}");
-    tempDir.write_child("README.md", "# Test"); // Non-Luau file should be excluded
-
-    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
-
-    // Call the request handler
-    auto result = platform->handleRequest("$/plugin/getFilePaths", std::nullopt);
-
-    REQUIRE(result.has_value());
-    REQUIRE(result->contains("files"));
-
-    auto& files = (*result)["files"];
-    CHECK_GE(files.size(), 3);
-
-    // Convert to set for easier checking
-    std::unordered_set<std::string> fileSet;
-    for (const auto& file : files)
-    {
-        fileSet.insert(file.get<std::string>());
-    }
-
-    // Verify Luau/Lua files are included (paths are normalized)
-    bool hasInitLuau = false;
-    bool hasHelperLua = false;
-    bool hasMainLuau = false;
-    bool hasReadme = false;
-
-    for (const auto& file : fileSet)
-    {
-        if (file.find("init.luau") != std::string::npos)
-            hasInitLuau = true;
-        if (file.find("helper.lua") != std::string::npos)
-            hasHelperLua = true;
-        if (file.find("main.luau") != std::string::npos)
-            hasMainLuau = true;
-        if (file.find("README.md") != std::string::npos)
-            hasReadme = true;
-    }
-
-    CHECK(hasInitLuau);
-    CHECK(hasHelperLua);
-    CHECK(hasMainLuau);
-    CHECK_FALSE(hasReadme); // Markdown file should NOT be included
-}
-
 TEST_CASE_FIXTURE(Fixture, "plugin_info_updates_file_paths_on_existing_nodes")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;

@@ -1,9 +1,7 @@
 #include "doctest.h"
 #include "LSP/LanguageServer.hpp"
-#include "LSP/JsonRpc.hpp"
 #include "Protocol/Lifecycle.hpp"
 #include "TestClient.h"
-#include "TempDir.h"
 
 TEST_SUITE_BEGIN("LanguageServer");
 
@@ -78,58 +76,6 @@ TEST_CASE("language_server_can_process_string_ids")
     server.shutdown();
 
     REQUIRE(client.errorQueue.empty());
-}
-
-TEST_CASE("language_server_routes_platform_specific_requests")
-{
-    TempDir t("lsp_platform_request");
-    TestClient client;
-    client.globalConfig.index.enabled = false;
-    LanguageServer server(&client, std::nullopt);
-
-    auto workspaceUri = Uri::file(t.path());
-    lsp::InitializeParams initializeParams;
-    std::vector<lsp::WorkspaceFolder> workspaceFolders;
-    workspaceFolders.emplace_back(lsp::WorkspaceFolder{workspaceUri, "project"});
-    initializeParams.workspaceFolders = workspaceFolders;
-
-    server.onRequest(0, "initialize", initializeParams);
-    server.onNotification("initialized", std::make_optional(lsp::InitializedParams{}));
-
-    // Force workspace to be ready
-    lsp::DidOpenTextDocumentParams openParams;
-    openParams.textDocument = {workspaceUri.resolvePath("init.luau"), "luau", 0, "print()"};
-    server.onNotification("textDocument/didOpen", std::make_optional(openParams));
-
-    // $/plugin/getFilePaths should be routed to RobloxPlatform
-    server.onRequest(1, "$/plugin/getFilePaths", std::nullopt);
-
-    server.shutdown();
-
-    // Should not have any errors - the request was handled
-    CHECK(client.errorQueue.empty());
-}
-
-TEST_CASE("language_server_throws_method_not_found_for_unknown_methods")
-{
-    TempDir t("lsp_unknown_method");
-    TestClient client;
-    client.globalConfig.index.enabled = false;
-    LanguageServer server(&client, std::nullopt);
-
-    auto workspaceUri = Uri::file(t.path());
-    lsp::InitializeParams initializeParams;
-    std::vector<lsp::WorkspaceFolder> workspaceFolders;
-    workspaceFolders.emplace_back(lsp::WorkspaceFolder{workspaceUri, "project"});
-    initializeParams.workspaceFolders = workspaceFolders;
-
-    server.onRequest(0, "initialize", initializeParams);
-    server.onNotification("initialized", std::make_optional(lsp::InitializedParams{}));
-
-    // Unknown method should throw
-    CHECK_THROWS_AS(server.onRequest(1, "$/unknown/nonexistent", std::nullopt), JsonRpcException);
-
-    server.shutdown();
 }
 
 TEST_SUITE_END();

@@ -199,32 +199,3 @@ bool RobloxPlatform::handleNotification(const std::string& method, std::optional
 
     return false;
 }
-
-std::optional<json> RobloxPlatform::handleRequest(const std::string& method, std::optional<json> params)
-{
-    if (method == "$/plugin/getFilePaths")
-    {
-        // Custom request to get all Luau file paths in the workspace for plugin communication
-        json result;
-        std::vector<std::string> allFiles;
-
-        // Recursively traverse the workspace directory to find all .lua and .luau files
-        std::string workspacePath = workspaceFolder->rootUri.fsPath();
-
-        Luau::FileUtils::traverseDirectoryRecursive(workspacePath,
-            [&](const std::string& path)
-            {
-                auto uri = Uri::file(path);
-                auto ext = uri.extension();
-                if (ext == ".lua" || ext == ".luau")
-                {
-                    allFiles.push_back(Luau::FileUtils::normalizePath(resolvePath(path)));
-                }
-            });
-
-        result["files"] = allFiles;
-        return result;
-    }
-
-    return std::nullopt;
-}
