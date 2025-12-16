@@ -215,7 +215,7 @@ struct ClientIndexConfiguration
     // available for features such as "Find All References" and "Rename"
     bool enabled = true;
     /// The maximum amount of files that can be indexed
-    size_t maxFiles = 10000;
+    size_t maxFiles = 50000;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled, maxFiles);

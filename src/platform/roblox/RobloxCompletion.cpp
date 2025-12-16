@@ -614,15 +614,6 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         // Check if the package itself is already imported (we'll reuse it instead of require)
                         bool packageAlreadyImported = importsVisitor.containsRequire(depName);
 
-                        // If the package is already imported, insert new lines AFTER the package import
-                        // Otherwise, use the computed line number
-                        size_t exportLineNumber = lineNumber;
-                        if (packageAlreadyImported)
-                        {
-                            if (auto pkgLine = importsVisitor.getRequireLine(depName))
-                                exportLineNumber = std::max(lineNumber, *pkgLine + 1);
-                        }
-
                         // Suggest value exports (functions, tables, etc.)
                         for (const auto& exportPath : pkg.exports)
                         {
@@ -636,7 +627,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                                 continue;
 
                             items.emplace_back(createRotrieverExportSuggestion(
-                                exportPath, depName, packagesLocalName, exportLineNumber, prependNewline, packageAlreadyImported, setupEdits));
+                                exportPath, depName, packagesLocalName, lineNumber, prependNewline, packageAlreadyImported, setupEdits));
                         }
 
                         // Suggest type exports (from "export type" statements)
@@ -654,7 +645,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                                 continue;
 
                             items.emplace_back(createRotrieverTypeExportSuggestion(
-                                typePath, depName, packagesLocalName, exportLineNumber, prependNewline, packageAlreadyImported, setupEdits));
+                                typePath, depName, packagesLocalName, lineNumber, prependNewline, packageAlreadyImported, setupEdits));
                         }
                         break;
                     }
