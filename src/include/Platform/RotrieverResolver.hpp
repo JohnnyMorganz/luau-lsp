@@ -6,7 +6,6 @@
 #include <optional>
 
 #include "LSP/Uri.hpp"
-#include "Luau/Ast.h"
 
 namespace Luau::LanguageServer
 {
@@ -17,6 +16,15 @@ struct RotrieverDependency
     std::string name; // e.g., "GameTile"
     std::string path; // e.g., "../game-tile"
     Uri resolvedPath; // Absolute path to the dependency
+};
+
+/// Parsed exports from a package's init.lua
+struct RotrieverExports
+{
+    /// Value exports from the return table (e.g., {"GameTileView", "Events.gamePlayIntent"})
+    std::vector<std::string> values;
+    /// Type exports from "export type" statements (e.g., {"GameTileProps", "GameInfoModel"})
+    std::vector<std::string> types;
 };
 
 /// A parsed rotriever.toml package
@@ -33,6 +41,10 @@ struct RotrieverPackage
     /// Names exported from this package's init.lua
     /// e.g., {"GameTileView", "GameTileConstants", ...}
     std::vector<std::string> exports;
+
+    /// Type names exported via "export type" statements
+    /// e.g., {"GameTileProps", "GameInfoModel", ...}
+    std::vector<std::string> typeExports;
 };
 
 /// Parses rotriever.toml files and package exports
@@ -43,13 +55,9 @@ public:
     /// Returns the parsed package, or nullopt on failure
     std::optional<RotrieverPackage> parseManifest(const Uri& manifestPath);
 
-    /// Parse the init.lua file to extract exported names (reads and parses the file)
-    /// Returns the list of exported names (keys in the return table)
-    static std::vector<std::string> parseExports(const Uri& initLuaPath);
-
-    /// Extract exports from an already-parsed AST root
-    /// This is useful when the module is already indexed by the Frontend
-    static std::vector<std::string> extractExportsFromAst(Luau::AstStatBlock* root);
+    /// Parse the init.lua file to extract exported names and types
+    /// Returns both value exports (from return table) and type exports (from export type)
+    static RotrieverExports parseExports(const Uri& initLuaPath);
 
     /// Debug: print package info to stderr
     static void debugPrint(const RotrieverPackage& package);

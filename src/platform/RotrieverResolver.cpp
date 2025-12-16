@@ -101,59 +101,43 @@ std::optional<RotrieverPackage> RotrieverResolver::parseManifest(const Uri& mani
     }
 }
 
-std::vector<std::string> RotrieverResolver::extractExportsFromAst(Luau::AstStatBlock* root)
+// Check if an expression is require(script.X) and return X if so
+static std::optional<std::string> getScriptRequireName(Luau::AstExpr* expr)
 {
-    std::vector<std::string> exports;
+    auto* call = expr->as<Luau::AstExprCall>();
+    if (!call || call->args.size != 1)
+        return std::nullopt;
 
-    if (!root)
-        return exports;
+    // Check for require(...)
+    auto* requireGlobal = call->func->as<Luau::AstExprGlobal>();
+    if (!requireGlobal || std::string(requireGlobal->name.value) != "require")
+        return std::nullopt;
 
-    // Walk the AST to find return statements at the top level
-    for (Luau::AstStat* stat : root->body)
-    {
-        auto* returnStat = stat->as<Luau::AstStatReturn>();
-        if (!returnStat)
-            continue;
+    // Check for script.X
+    auto* indexExpr = call->args.data[0]->as<Luau::AstExprIndexName>();
+    if (!indexExpr)
+        return std::nullopt;
 
-        // Check if we have a single return value that's a table
-        if (returnStat->list.size != 1)
-            continue;
+    auto* scriptGlobal = indexExpr->expr->as<Luau::AstExprGlobal>();
+    if (!scriptGlobal || std::string(scriptGlobal->name.value) != "script")
+        return std::nullopt;
 
-        auto* tableExpr = returnStat->list.data[0]->as<Luau::AstExprTable>();
-        if (!tableExpr)
-            continue;
-
-        // Extract the keys from the table
-        for (const auto& item : tableExpr->items)
-        {
-            // We only care about Record items (foo = bar)
-            if (item.kind != Luau::AstExprTable::Item::Record)
-                continue;
-
-            // The key should be a constant string for Record items
-            if (auto* keyStr = item.key->as<Luau::AstExprConstantString>())
-            {
-                std::string key(keyStr->value.data, keyStr->value.size);
-                exports.push_back(std::move(key));
-            }
-        }
-
-        // We found the return statement, no need to continue
-        break;
-    }
-
-    return exports;
+    return std::string(indexExpr->index.value);
 }
 
-std::vector<std::string> RotrieverResolver::parseExports(const Uri& initLuaPath)
+// Recursively parse exports from an init.lua file
+// prefix: the key prefix for nested exports (e.g., "Events" -> "Events.gamePlayIntent")
+// maxDepth: prevent infinite recursion
+static void parseExportsRecursive(
+    const Uri& initLuaPath, const std::string& prefix, std::vector<std::string>& valueExports, std::vector<std::string>& typeExports, int maxDepth)
 {
+    if (maxDepth <= 0)
+        return;
+
     // Read the file
     auto contents = Luau::FileUtils::readFile(initLuaPath.fsPath());
     if (!contents)
-    {
-        std::cerr << "RotrieverResolver: Failed to read init.lua at " << initLuaPath.fsPath() << std::endl;
-        return {};
-    }
+        return;
 
     try
     {
@@ -163,19 +147,87 @@ std::vector<std::string> RotrieverResolver::parseExports(const Uri& initLuaPath)
         Luau::ParseResult result = Luau::Parser::parse(contents->c_str(), contents->size(), names, allocator);
 
         if (!result.errors.empty())
+            return;
+
+        // Walk the AST to find exported types and return statements
+        for (Luau::AstStat* stat : result.root->body)
         {
-            std::cerr << "RotrieverResolver: Parse errors in " << initLuaPath.fsPath() << std::endl;
-            return {};
+            // Check for export type declarations
+            if (auto* typeAlias = stat->as<Luau::AstStatTypeAlias>())
+            {
+                if (typeAlias->exported)
+                {
+                    std::string typeName(typeAlias->name.value);
+                    std::string fullTypeName = prefix.empty() ? typeName : (prefix + "." + typeName);
+                    typeExports.push_back(fullTypeName);
+                }
+                continue;
+            }
         }
 
-        return RotrieverResolver::extractExportsFromAst(result.root);
+        // Second pass: find return statements for value exports
+        for (Luau::AstStat* stat : result.root->body)
+        {
+            auto* returnStat = stat->as<Luau::AstStatReturn>();
+            if (!returnStat)
+                continue;
+
+            // Check if we have a single return value that's a table
+            if (returnStat->list.size != 1)
+                continue;
+
+            auto* tableExpr = returnStat->list.data[0]->as<Luau::AstExprTable>();
+            if (!tableExpr)
+                continue;
+
+            // Extract the keys from the table
+            for (const auto& item : tableExpr->items)
+            {
+                // We only care about Record items (foo = bar)
+                if (item.kind != Luau::AstExprTable::Item::Record)
+                    continue;
+
+                // The key should be a constant string for Record items
+                auto* keyStr = item.key->as<Luau::AstExprConstantString>();
+                if (!keyStr)
+                    continue;
+
+                std::string key(keyStr->value.data, keyStr->value.size);
+                std::string fullKey = prefix.empty() ? key : (prefix + "." + key);
+
+                // Always add the direct export
+                valueExports.push_back(fullKey);
+
+                // Check if the value is require(script.X) - indicating a sub-module
+                if (auto subModuleName = getScriptRequireName(item.value))
+                {
+                    // Recursively parse the sub-module
+                    // The sub-module should be at parentDir/subModuleName/init.lua
+                    auto parentDir = initLuaPath.parent();
+                    if (parentDir)
+                    {
+                        auto subModulePath = parentDir->resolvePath(*subModuleName + "/init.lua");
+                        parseExportsRecursive(subModulePath, fullKey, valueExports, typeExports, maxDepth - 1);
+                    }
+                }
+            }
+
+            // We found the return statement, no need to continue
+            break;
+        }
     }
     catch (const std::exception& e)
     {
         std::cerr << "RotrieverResolver: Exception parsing " << initLuaPath.fsPath() << ": " << e.what() << std::endl;
     }
+}
 
-    return {};
+RotrieverExports RotrieverResolver::parseExports(const Uri& initLuaPath)
+{
+    RotrieverExports exports;
+    // Parse with max depth of 3 to prevent excessive recursion
+    parseExportsRecursive(initLuaPath, "", exports.values, exports.types, 3);
+    return exports;
 }
 
 void RotrieverResolver::debugPrint(const RotrieverPackage& package)

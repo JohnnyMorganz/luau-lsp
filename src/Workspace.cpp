@@ -391,44 +391,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
         "Indexed " + std::to_string(frontend.stats.files) + " files (" + std::to_string(frontend.stats.lines) +
             " lines)\n Time read: " + std::to_string(frontend.stats.timeRead) + "\n Time parse: " + std::to_string(frontend.stats.timeParse));
 
-    // Discover package exports from init.lua files using the indexed ASTs
-    discoverPackageExports();
-
     client->sendWorkDoneProgressEnd(kIndexProgressToken, "Indexed " + std::to_string(moduleNames.size()) + " files");
     client->sendTrace("workspace: indexing all files COMPLETED");
-}
-
-void WorkspaceFolder::discoverPackageExports()
-{
-    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::discoverPackageExports", "LSP");
-
-    client->sendTrace("workspace: discovering package exports from init.lua files");
-    packageExports.clear();
-
-    for (const auto& [moduleName, sourceModule] : frontend.sourceModules)
-    {
-        // Check if this is an init.lua file
-        if (!endsWith(moduleName, "/init.lua") && !endsWith(moduleName, "/init.luau") && !endsWith(moduleName, "/init"))
-            continue;
-
-        // Get the package path (parent directory of init.lua)
-        std::string packagePath = moduleName;
-        if (auto lastSlash = packagePath.rfind('/'); lastSlash != std::string::npos)
-            packagePath = packagePath.substr(0, lastSlash);
-
-        // Extract exports from the already-parsed AST
-        if (sourceModule && sourceModule->root)
-        {
-            auto exports = Luau::LanguageServer::RotrieverResolver::extractExportsFromAst(sourceModule->root);
-            if (!exports.empty())
-            {
-                packageExports[packagePath] = std::move(exports);
-            }
-        }
-    }
-
-    client->sendLogMessage(lsp::MessageType::Info, "Discovered exports from " + std::to_string(packageExports.size()) + " packages");
-    client->sendTrace("workspace: discovering package exports COMPLETED");
 }
 
 void WorkspaceFolder::discoverRotrieverPackages()
@@ -455,10 +419,13 @@ void WorkspaceFolder::discoverRotrieverPackages()
                 {
                     // Try to parse exports from the package's init.lua
                     auto initLuaPath = result->packageRoot.resolvePath(result->contentRoot + "/init.lua");
-                    result->exports = Luau::LanguageServer::RotrieverResolver::parseExports(initLuaPath);
+                    auto exports = Luau::LanguageServer::RotrieverResolver::parseExports(initLuaPath);
+                    result->exports = std::move(exports.values);
+                    result->typeExports = std::move(exports.types);
 
-                    client->sendLogMessage(lsp::MessageType::Info,
-                        "Discovered Rotriever package: " + result->name + " (" + std::to_string(result->exports.size()) + " exports)");
+                    client->sendLogMessage(lsp::MessageType::Info, "Discovered Rotriever package: " + result->name + " (" +
+                                                                       std::to_string(result->exports.size()) + " exports, " +
+                                                                       std::to_string(result->typeExports.size()) + " types)");
                     rotrieverPackages.emplace(result->packageRoot, std::move(*result));
                 }
                 else

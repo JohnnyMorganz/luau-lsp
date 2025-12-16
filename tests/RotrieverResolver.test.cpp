@@ -11,7 +11,7 @@ TEST_SUITE_BEGIN("RotrieverResolver");
 TEST_CASE("parse_simple_rotriever_toml")
 {
     TempDir tempDir("rotriever_test");
-    
+
     // Create a simple rotriever.toml
     auto tomlPath = tempDir.path() + "/rotriever.toml";
     {
@@ -30,25 +30,25 @@ Promise = { path = "../promise" }
 JestGlobals = { path = "../jest-globals" }
 )";
     }
-    
+
     RotrieverResolver resolver;
     auto result = resolver.parseManifest(Uri::file(tomlPath));
-    
+
     REQUIRE(result.has_value());
-    
+
     auto& package = *result;
-    
+
     CHECK_EQ(package.name, "TestPackage");
     CHECK_EQ(package.version, "1.0.0");
     CHECK_EQ(package.contentRoot, "src");
-    
+
     // Check dependencies
     REQUIRE_EQ(package.dependencies.size(), 2);
     CHECK(package.dependencies.find("React") != package.dependencies.end());
     CHECK(package.dependencies.find("Promise") != package.dependencies.end());
     CHECK_EQ(package.dependencies.at("React").path, "../react");
     CHECK_EQ(package.dependencies.at("Promise").path, "../promise");
-    
+
     // Check dev dependencies
     REQUIRE_EQ(package.devDependencies.size(), 1);
     CHECK(package.devDependencies.find("JestGlobals") != package.devDependencies.end());
@@ -58,7 +58,7 @@ JestGlobals = { path = "../jest-globals" }
 TEST_CASE("parse_rotriever_toml_with_defaults")
 {
     TempDir tempDir("rotriever_test");
-    
+
     // Minimal rotriever.toml without content_root
     auto tomlPath = tempDir.path() + "/rotriever.toml";
     {
@@ -69,10 +69,10 @@ name = "MinimalPackage"
 version = "0.1.0"
 )";
     }
-    
+
     RotrieverResolver resolver;
     auto result = resolver.parseManifest(Uri::file(tomlPath));
-    
+
     REQUIRE(result.has_value());
     CHECK_EQ(result->name, "MinimalPackage");
     CHECK_EQ(result->contentRoot, "src"); // Default value
@@ -84,14 +84,14 @@ TEST_CASE("parse_nonexistent_file_returns_nullopt")
 {
     RotrieverResolver resolver;
     auto result = resolver.parseManifest(Uri::file("/nonexistent/rotriever.toml"));
-    
+
     CHECK_FALSE(result.has_value());
 }
 
 TEST_CASE("resolved_paths_are_absolute")
 {
     TempDir tempDir("rotriever_test");
-    
+
     auto tomlPath = tempDir.path() + "/rotriever.toml";
     {
         std::ofstream file(tomlPath);
@@ -104,15 +104,15 @@ version = "1.0.0"
 SiblingPackage = { path = "../sibling" }
 )";
     }
-    
+
     RotrieverResolver resolver;
     auto result = resolver.parseManifest(Uri::file(tomlPath));
-    
+
     REQUIRE(result.has_value());
     REQUIRE(result->dependencies.find("SiblingPackage") != result->dependencies.end());
-    
+
     auto& dep = result->dependencies.at("SiblingPackage");
-    
+
     // The resolved path should be absolute, not relative
     CHECK_FALSE(dep.resolvedPath.fsPath().empty());
     // It should start with /
@@ -122,7 +122,7 @@ SiblingPackage = { path = "../sibling" }
 TEST_CASE("parse_complex_rotriever_toml_like_lua_apps")
 {
     TempDir tempDir("rotriever_test");
-    
+
     // Create a complex rotriever.toml similar to lua-apps
     auto tomlPath = tempDir.path() + "/rotriever.toml";
     {
@@ -145,32 +145,32 @@ Promise = { path = "../../proxy-packages/promise" }
 JestGlobals = { path = "../../proxy-packages/jest-globals-3" }
 )";
     }
-    
+
     RotrieverResolver resolver;
     auto result = resolver.parseManifest(Uri::file(tomlPath));
-    
+
     REQUIRE(result.has_value());
-    
+
     auto& package = *result;
-    
+
     CHECK_EQ(package.name, "GameCollections");
     CHECK_EQ(package.version, "0.1.0");
     CHECK_EQ(package.contentRoot, "src");
-    
+
     // Check all dependencies parsed
     REQUIRE_EQ(package.dependencies.size(), 3);
     CHECK(package.dependencies.find("React") != package.dependencies.end());
     CHECK(package.dependencies.find("GameTile") != package.dependencies.end());
     CHECK(package.dependencies.find("Promise") != package.dependencies.end());
-    
+
     // Check path values
     CHECK_EQ(package.dependencies.at("GameTile").path, "../game-tile");
     CHECK_EQ(package.dependencies.at("React").path, "../../proxy-packages/react");
-    
+
     // Check dev dependencies
     REQUIRE_EQ(package.devDependencies.size(), 1);
     CHECK(package.devDependencies.find("JestGlobals") != package.devDependencies.end());
-    
+
     // Debug print for manual verification
     RotrieverResolver::debugPrint(package);
 }
@@ -178,7 +178,7 @@ JestGlobals = { path = "../../proxy-packages/jest-globals-3" }
 TEST_CASE("parseExports_simple_table")
 {
     TempDir tempDir("rotriever_exports_test");
-    
+
     auto initLuaPath = tempDir.path() + "/init.lua";
     {
         std::ofstream file(initLuaPath);
@@ -193,19 +193,19 @@ return {
 }
 )";
     }
-    
+
     auto exports = RotrieverResolver::parseExports(Uri::file(initLuaPath));
-    
-    REQUIRE_EQ(exports.size(), 3);
-    CHECK(std::find(exports.begin(), exports.end(), "Foo") != exports.end());
-    CHECK(std::find(exports.begin(), exports.end(), "Bar") != exports.end());
-    CHECK(std::find(exports.begin(), exports.end(), "SomeConstant") != exports.end());
+
+    REQUIRE_EQ(exports.values.size(), 3);
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "Foo") != exports.values.end());
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "Bar") != exports.values.end());
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "SomeConstant") != exports.values.end());
 }
 
 TEST_CASE("parseExports_complex_like_game_tile")
 {
     TempDir tempDir("rotriever_exports_test");
-    
+
     auto initLuaPath = tempDir.path() + "/init.lua";
     {
         std::ofstream file(initLuaPath);
@@ -221,25 +221,26 @@ return {
 }
 )";
     }
-    
+
     auto exports = RotrieverResolver::parseExports(Uri::file(initLuaPath));
-    
-    REQUIRE_EQ(exports.size(), 3);
-    CHECK(std::find(exports.begin(), exports.end(), "AppGameTile") != exports.end());
-    CHECK(std::find(exports.begin(), exports.end(), "GameTileConstants") != exports.end());
-    CHECK(std::find(exports.begin(), exports.end(), "GameTileView") != exports.end());
+
+    REQUIRE_EQ(exports.values.size(), 3);
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "AppGameTile") != exports.values.end());
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "GameTileConstants") != exports.values.end());
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "GameTileView") != exports.values.end());
 }
 
 TEST_CASE("parseExports_nonexistent_file")
 {
     auto exports = RotrieverResolver::parseExports(Uri::file("/nonexistent/init.lua"));
-    CHECK_EQ(exports.size(), 0);
+    CHECK_EQ(exports.values.size(), 0);
+    CHECK_EQ(exports.types.size(), 0);
 }
 
 TEST_CASE("parseExports_no_return_table")
 {
     TempDir tempDir("rotriever_exports_test");
-    
+
     auto initLuaPath = tempDir.path() + "/init.lua";
     {
         std::ofstream file(initLuaPath);
@@ -250,15 +251,15 @@ return function()
 end
 )";
     }
-    
+
     auto exports = RotrieverResolver::parseExports(Uri::file(initLuaPath));
-    CHECK_EQ(exports.size(), 0);
+    CHECK_EQ(exports.values.size(), 0);
 }
 
 TEST_CASE("parseExports_with_conditional_exports")
 {
     TempDir tempDir("rotriever_exports_test");
-    
+
     auto initLuaPath = tempDir.path() + "/init.lua";
     {
         std::ofstream file(initLuaPath);
@@ -275,15 +276,45 @@ return {
 }
 )";
     }
-    
+
     auto exports = RotrieverResolver::parseExports(Uri::file(initLuaPath));
-    
+
     // We should get at least the simple exports
     // Note: The conditional export might not be parsed as a simple Record item
-    CHECK(exports.size() >= 2);
-    CHECK(std::find(exports.begin(), exports.end(), "Foo") != exports.end());
-    CHECK(std::find(exports.begin(), exports.end(), "Bar") != exports.end());
+    CHECK(exports.values.size() >= 2);
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "Foo") != exports.values.end());
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "Bar") != exports.values.end());
+}
+
+TEST_CASE("parseExports_with_type_exports")
+{
+    TempDir tempDir("rotriever_exports_test");
+
+    auto initLuaPath = tempDir.path() + "/init.lua";
+    {
+        std::ofstream file(initLuaPath);
+        file << R"(
+export type GameInfoModel = { name: string, id: number }
+export type GameTileProps = { gameId: number }
+
+local Foo = require(script.Foo)
+
+return {
+    Foo = Foo,
+}
+)";
+    }
+
+    auto exports = RotrieverResolver::parseExports(Uri::file(initLuaPath));
+
+    // Should have 1 value export
+    REQUIRE_EQ(exports.values.size(), 1);
+    CHECK(std::find(exports.values.begin(), exports.values.end(), "Foo") != exports.values.end());
+
+    // Should have 2 type exports
+    REQUIRE_EQ(exports.types.size(), 2);
+    CHECK(std::find(exports.types.begin(), exports.types.end(), "GameInfoModel") != exports.types.end());
+    CHECK(std::find(exports.types.begin(), exports.types.end(), "GameTileProps") != exports.types.end());
 }
 
 TEST_SUITE_END();
-

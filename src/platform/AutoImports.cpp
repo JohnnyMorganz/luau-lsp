@@ -10,6 +10,17 @@ bool FindImportsVisitor::containsRequire(const std::string& module) const
     return false;
 }
 
+std::optional<size_t> FindImportsVisitor::getRequireLine(const std::string& module) const
+{
+    for (const auto& map : requiresMap)
+    {
+        auto it = map.find(module);
+        if (it != map.end())
+            return it->second->location.end.line;
+    }
+    return std::nullopt;
+}
+
 bool FindImportsVisitor::visit(Luau::AstStatLocal* local)
 {
     if (local->vars.size != 1 || local->values.size != 1)

@@ -36,6 +36,11 @@ public:
     }
 
     bool containsRequire(const std::string& module) const;
+
+    /// Get the line number where a specific require is defined (end line)
+    /// Returns nullopt if the require doesn't exist
+    std::optional<size_t> getRequireLine(const std::string& module) const;
+
     bool visit(Luau::AstStatLocal* local) override;
     bool visit(Luau::AstStatBlock* block) override;
 };
@@ -47,4 +52,4 @@ lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vec
 size_t computeMinimumLineNumberForRequire(const FindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
 size_t computeBestLineForRequire(
     const FindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
-}
+} // namespace Luau::LanguageServer::AutoImports

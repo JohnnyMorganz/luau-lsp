@@ -23,6 +23,17 @@ public:
     std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
     std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
 
+    /// The name of the "Packages" local variable (e.g., "Packages")
+    /// Empty if not found
+    std::string packagesLocalName;
+    /// Line where the Packages local is defined
+    std::optional<size_t> packagesDefinitionLine = std::nullopt;
+    /// The name of the package ancestor local (e.g., "GameCollections")
+    /// Used to generate `local PackageName = script:FindFirstAncestor("PackageName")`
+    std::string packageAncestorLocalName;
+    /// Line where the package ancestor local is defined
+    std::optional<size_t> packageAncestorDefinitionLine = std::nullopt;
+
     size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber)
     {
         if (firstServiceDefinitionLine)
@@ -38,32 +49,106 @@ public:
         return lineNumber;
     }
 
+    /// Check if this is a script:FindFirstAncestor("PackageName") call
+    static std::optional<std::string> getFindFirstAncestorName(Luau::AstExpr* expr)
+    {
+        auto* call = expr->as<Luau::AstExprCall>();
+        if (!call || call->args.size != 1)
+            return std::nullopt;
+
+        // Check for script:FindFirstAncestor(...)
+        auto* indexExpr = call->func->as<Luau::AstExprIndexName>();
+        if (!indexExpr || std::string(indexExpr->index.value) != "FindFirstAncestor")
+            return std::nullopt;
+
+        auto* scriptGlobal = indexExpr->expr->as<Luau::AstExprGlobal>();
+        if (!scriptGlobal || std::string(scriptGlobal->name.value) != "script")
+            return std::nullopt;
+
+        // Get the string argument
+        auto* arg = call->args.data[0]->as<Luau::AstExprConstantString>();
+        if (!arg)
+            return std::nullopt;
+
+        return std::string(arg->value.data, arg->value.size);
+    }
+
+    /// Check if this is X.Parent where X is a known local
+    std::optional<std::string> getParentOfLocal(Luau::AstExpr* expr) const
+    {
+        auto* indexExpr = expr->as<Luau::AstExprIndexName>();
+        if (!indexExpr || std::string(indexExpr->index.value) != "Parent")
+            return std::nullopt;
+
+        auto* localRef = indexExpr->expr->as<Luau::AstExprLocal>();
+        if (!localRef)
+            return std::nullopt;
+
+        return std::string(localRef->local->name.value);
+    }
+
     bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
     {
-        if (!isGetService(expr))
-            return false;
+        // Check for GetService pattern
+        if (isGetService(expr))
+        {
+            firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
+                                             ? startLine
+                                             : firstServiceDefinitionLine.value();
+            lastServiceDefinitionLine =
+                !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
+            serviceLineMap.emplace(std::string(localName->name.value), local);
+            return true;
+        }
 
-        firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
-                                         ? startLine
-                                         : firstServiceDefinitionLine.value();
-        lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
-        serviceLineMap.emplace(std::string(localName->name.value), local);
+        // Check for script:FindFirstAncestor("PackageName") pattern
+        if (auto ancestorName = getFindFirstAncestorName(expr))
+        {
+            packageAncestorLocalName = std::string(localName->name.value);
+            packageAncestorDefinitionLine = startLine;
+            return true;
+        }
 
-        return true;
+        // Check for X.Parent pattern (usually Packages = PackageName.Parent)
+        if (auto parentOf = getParentOfLocal(expr))
+        {
+            // This is likely the "Packages" local
+            packagesLocalName = std::string(localName->name.value);
+            packagesDefinitionLine = endLine;
+            return true;
+        }
+
+        return false;
+    }
+
+    [[nodiscard]] bool hasPackagesLocal() const
+    {
+        return !packagesLocalName.empty();
     }
 
     [[nodiscard]] size_t getMinimumRequireLine() const override
     {
-        if (lastServiceDefinitionLine)
-            return *lastServiceDefinitionLine + 1;
+        size_t minLine = 0;
 
-        return 0;
+        // After last service definition (e.g., game:GetService)
+        if (lastServiceDefinitionLine)
+            minLine = *lastServiceDefinitionLine + 1;
+
+        // After Packages definition (e.g., local Packages = X.Parent)
+        if (packagesDefinitionLine && *packagesDefinitionLine >= minLine)
+            minLine = *packagesDefinitionLine + 1;
+
+        return minLine;
     }
 
     [[nodiscard]] bool shouldPrependNewline(size_t lineNumber) const override
     {
-        return lastServiceDefinitionLine && lineNumber - *lastServiceDefinitionLine == 1;
+        // Add newline separator if inserting right after services or Packages definition
+        if (lastServiceDefinitionLine && lineNumber - *lastServiceDefinitionLine == 1)
+            return true;
+        if (packagesDefinitionLine && lineNumber - *packagesDefinitionLine == 1)
+            return true;
+        return false;
     }
 };
 
