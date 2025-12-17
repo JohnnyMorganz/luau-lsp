@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.58.0] - 2025-12-14
+
+### Added
+
+- `Instance:IsPropertyModified()` and `Instance:ResetPropertyToDefault()` will now typecheck and autocomplete against real properties ([#1273](https://github.com/JohnnyMorganz/luau-lsp/issues/1273))
+- Studio Plugin: You can now configure `host` in Settings to change from localhost ([#1280](https://github.com/JohnnyMorganz/luau-lsp/pull/1280))
+
+### Changed
+
+- Sync to upstream Luau 0.703
+- VSCode: add more pointers towards using the Studio Plugin when Rojo information is not available ([#1279](https://github.com/JohnnyMorganz/luau-lsp/pull/1279))
+- Studio Plugin: `Settings.debug` is replaced with `Settings.logLevel` ([#1280](https://github.com/JohnnyMorganz/luau-lsp/pull/1280))
+
+### Fixed
+
+- Fixed missing newline in log messages when using `luau-lsp analyze` ([#1284](https://github.com/JohnnyMorganz/luau-lsp/pull/1284))
+- Fixed crash when configuring `luau-lsp.types.disabledGlobals` on a global extern type property ([#1286](https://github.com/JohnnyMorganz/luau-lsp/pull/1286))
+- Changes to `.config.luau` will now correctly reset the configuration cache and reload configuration ([#1277](https://github.com/JohnnyMorganz/luau-lsp/issues/1277))
+- Studio Plugin: fixed some issues with untracking where connections are not cleaned up ([#1280](https://github.com/JohnnyMorganz/luau-lsp/pull/1280))
+- Fixed incorrect old solver mode configured for the null workspace (default workspace when a Luau file is not part of an opened folder) when `FFlag::LuauUseWorkspacePropToChooseSolver` and new solver is enabled. This would lead to features such as autocompletion not working. ([#1292](https://github.com/JohnnyMorganz/luau-lsp/issues/1292))
+
 ## [1.57.1] - 2025-11-30
 
 ### Fixed
