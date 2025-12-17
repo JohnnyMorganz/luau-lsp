@@ -76,6 +76,7 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
 
 std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::string& source, const Luau::ModuleName& moduleName) const
 {
+    // Only match LoadLibrary calls with a single string argument (no NamedImports)
     std::regex pattern("local\\s+(\\w+)\\s*=\\s*Overture:LoadLibrary\\s*\\(\\s*\"([^\"]+)\"\\s*\\)");
 
     std::string result = source;
@@ -98,16 +99,10 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
         {
             if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
             {
-                std::string requireExpr = *libraryPath;
-                bool quoted = requireExpr.size() >= 2 &&
-                              ((requireExpr.front() == '"' && requireExpr.back() == '"') ||
-                               (requireExpr.front() == '\'' && requireExpr.back() == '\''));
-                if (!quoted)
-                    requireExpr = '"' + requireExpr + '"';
+                const std::string requireExpr = *libraryPath;
+                replacement = "local " + varName + " = require(" + requireExpr + ")";
 
-                replacement = "local " + varName + ": typeof(require(" + requireExpr + ")) = Overture:LoadLibrary(\"" + libName + "\")";
-
-                std::cerr << "[Transform] In file: " << moduleName << "\n"; //! remove this when we have an rc
+                std::cerr << "[Transform] In file: " << moduleName << "\n"; //TODO: remove this when we have a rc
                 std::cerr << "  Original: " << match.str() << "\n";
                 std::cerr << "  Replaced: " << replacement << "\n";
             }

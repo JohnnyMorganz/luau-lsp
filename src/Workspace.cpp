@@ -355,12 +355,11 @@ std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const st
 
 static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* folder, Client* client, std::unordered_map<std::string, std::string>& libraries)
 {
-    Uri jsonPath = rootUri.resolvePath(".luau-lsp/overture-libraries.json");
+    Uri jsonPath = rootUri.resolvePath("oLibrariesMap.json");
     if (!jsonPath.exists())
     {
-        if (client)
-        {
-            client->sendTrace("workspace: overture-libraries.json not found. Run the 'Index Overture Libraries' task to generate it");
+		if (client) {
+            client->sendTrace("workspace: oLibrariesMap.json not found. Run the 'Index Overture Libraries' task to generate it");
         }
         return;
     }
@@ -383,14 +382,14 @@ static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* f
             libraries[key] = value.get<std::string>();
         }
 
-        if (client)
-            client->sendTrace("workspace: loaded " + std::to_string(libraries.size()) + " Overture libraries from JSON");
+		if (client) {
+            client->sendTrace("workspace: loaded " + std::to_string(libraries.size()) + " oLibraries from json");
+        }
     }
     catch (const std::exception& e)
     {
-        if (client)
-        {
-            client->sendTrace("workspace: failed to parse overture-libraries.json: " + std::string(e.what()));
+		if (client) {
+            client->sendTrace("workspace: exception occurred when loading oLibrariesMap.json: " + std::string(e.what()));
         }
     }
 }
