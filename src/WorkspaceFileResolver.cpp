@@ -1,12 +1,15 @@
 #include <optional>
 #include <unordered_map>
 #include <iostream>
+#include <regex>
 #include "Luau/Ast.h"
 #include "Luau/LuauConfig.h"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "LSP/Workspace.hpp"
 
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
+#include "Platform/StringRequireAutoImporter.hpp"
 
 #include "lua.h"
 
@@ -71,6 +74,64 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
     return TextDocumentPtr(nullptr);
 }
 
+std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::string& source, const Luau::ModuleName& moduleName) const
+{
+    std::regex pattern("local\\s+(\\w+)\\s*=\\s*Overture:LoadLibrary\\s*\\(\\s*\"([^\"]+)\"\\s*\\)");
+
+    std::string result = source;
+    std::smatch match;
+
+    // Process matches in reverse order to maintain correct string positions during replacement
+    std::vector<std::pair<size_t, std::pair<size_t, std::string>>> replacements;
+    std::string::const_iterator searchStart(source.cbegin());
+
+    while (std::regex_search(searchStart, source.cend(), match, pattern))
+    {
+        std::string varName = match[1].str();
+        std::string libName = match[2].str();
+
+        size_t matchPos = std::distance(source.cbegin(), match[0].first);
+        size_t matchLen = match[0].length();
+
+        std::string replacement = match.str();
+        if (workspace)
+        {
+            if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
+            {
+                auto fromUri = getUri(moduleName);
+                auto toUri = getUri(*libraryPath);
+                auto aliases = getConfig(moduleName, workspace->limits).aliases;
+
+                // Prefer absolute (aliased) require when possible, else relative
+                auto requirePair = Luau::LanguageServer::AutoImports::computeRequirePath(
+                    fromUri, toUri, aliases, ImportRequireStyle::AlwaysAbsolute);
+
+                std::string requireStr = '"' + requirePair.first + '"';
+                replacement = "local " + varName + " = require(" + requireStr + ")"; // TODO: I'd like this to be a typecast if possible
+
+                std::cerr << "[Transform] In file: " << moduleName << "\n";
+                std::cerr << "  Original: " << match.str() << "\n";
+                std::cerr << "  Replaced: " << replacement << "\n";
+            }
+            else
+            {
+                std::cerr << "[Transform] Library path not found for: " << libName << " in " << moduleName << "\n";
+            }
+        }
+
+        replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
+        searchStart = match.suffix().first;
+    }
+
+    for (auto it = replacements.rbegin(); it != replacements.rend(); ++it)
+    {
+        result.replace(it->first, it->second.first, it->second.second);
+    }
+
+    return result;
+}
+
+
 std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::ModuleName& name)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFileResolver::readSource", "LSP");
@@ -78,7 +139,11 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     auto sourceType = platform->sourceCodeTypeFromPath(uri);
 
     if (auto source = platform->readSourceCode(name, uri))
-        return Luau::SourceCode{*source, sourceType};
+    {
+        // Transform Overture:LoadLibrary calls to require calls
+        std::string transformedSource = transformOvertureLoadLibrary(*source, name);
+        return Luau::SourceCode{transformedSource, sourceType};
+    }
 
     return std::nullopt;
 }

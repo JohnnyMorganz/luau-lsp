@@ -85,6 +85,7 @@ public:
     Uri rootUri;
 
     LSPPlatform* platform = nullptr;
+    class WorkspaceFolder* workspace = nullptr;
 
     // Currently opened files where content is managed by client
     mutable std::unordered_map<Uri, TextDocument, UriHash> managedFiles{};
@@ -114,6 +115,8 @@ public:
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;
     const Luau::Config& getConfig(const Luau::ModuleName& name, const Luau::TypeCheckLimits& limits) const override;
     void clearConfigCache();
+
+    std::string transformOvertureLoadLibrary(const std::string& source, const Luau::ModuleName& moduleName) const;
 
     static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
     static std::optional<std::string> parseLuauConfig(
