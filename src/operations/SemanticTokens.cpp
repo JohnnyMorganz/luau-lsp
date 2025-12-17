@@ -2,6 +2,7 @@
 #include "LSP/Workspace.hpp"
 
 #include "Luau/AstQuery.h"
+#include "Luau/Parser.h"
 #include "LSP/LuauExt.hpp"
 
 static void fillBuiltinGlobals(std::unordered_map<Luau::AstName, Luau::TypeId>& builtins, const Luau::AstNameTable& names, const Luau::ScopePtr& env)
@@ -420,12 +421,27 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(
     checkStrict(moduleName, cancellationToken);
     throwIfCancelled(cancellationToken);
 
-    auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = getModule(moduleName, /* forAutocomplete: */ true);
-    if (!sourceModule || !module)
+	// We have to do this because otherwise we get weird syntax highlighting because of the transformed code
+    auto originalSource = textDocument->getText();
+    auto allocator = std::make_shared<Luau::Allocator>();
+    auto names = std::make_shared<Luau::AstNameTable>(*allocator);
+    Luau::ParseResult parseResult = Luau::Parser::parse(originalSource.c_str(), originalSource.size(), *names, *allocator, {});
+
+    if (!parseResult.root)
         return std::nullopt;
 
-    auto tokens = getSemanticTokens(frontend, module, sourceModule);
+    // Use the transformed module for type information, but the original AST for positions
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
+    if (!module)
+        return std::nullopt;
+
+    // Create a temporary SourceModule from the original source
+    Luau::SourceModule originalSourceModule;
+    originalSourceModule.root = parseResult.root;
+    originalSourceModule.allocator = allocator;
+    originalSourceModule.names = names;
+
+    auto tokens = getSemanticTokens(frontend, module, &originalSourceModule);
     lsp::SemanticTokens result;
     result.data = packTokens(textDocument, tokens);
     return result;
