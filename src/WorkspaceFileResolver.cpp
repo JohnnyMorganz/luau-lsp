@@ -98,18 +98,16 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
         {
             if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
             {
-                auto fromUri = getUri(moduleName);
-                auto toUri = getUri(*libraryPath);
-                auto aliases = getConfig(moduleName, workspace->limits).aliases;
+                std::string requireExpr = *libraryPath;
+                bool quoted = requireExpr.size() >= 2 &&
+                              ((requireExpr.front() == '"' && requireExpr.back() == '"') ||
+                               (requireExpr.front() == '\'' && requireExpr.back() == '\''));
+                if (!quoted)
+                    requireExpr = '"' + requireExpr + '"';
 
-                // Prefer absolute (aliased) require when possible, else relative
-                auto requirePair = Luau::LanguageServer::AutoImports::computeRequirePath(
-                    fromUri, toUri, aliases, ImportRequireStyle::AlwaysAbsolute);
+                replacement = "local " + varName + ": typeof(require(" + requireExpr + ")) = Overture:LoadLibrary(\"" + libName + "\")";
 
-                std::string requireStr = '"' + requirePair.first + '"';
-                replacement = "local " + varName + ": typeof(require(" + requireStr + ")) = Overture:LoadLibrary(\"" + libName + "\")";
-
-                std::cerr << "[Transform] In file: " << moduleName << "\n"; //! remove this on when we have an rc
+                std::cerr << "[Transform] In file: " << moduleName << "\n"; //! remove this when we have an rc
                 std::cerr << "  Original: " << match.str() << "\n";
                 std::cerr << "  Replaced: " << replacement << "\n";
             }
@@ -140,8 +138,12 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
 
     if (auto source = platform->readSourceCode(name, uri))
     {
-        // Transform Overture:LoadLibrary calls to require calls
-        std::string transformedSource = transformOvertureLoadLibrary(*source, name);
+        // Only transform Overture:LoadLibrary calls for files that are currently open in the editor
+        std::string transformedSource = *source;
+        if (managedFiles.find(uri) != managedFiles.end())
+        {
+            transformedSource = transformOvertureLoadLibrary(*source, name);
+        }
         return Luau::SourceCode{transformedSource, sourceType};
     }
 

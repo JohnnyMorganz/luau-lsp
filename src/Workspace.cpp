@@ -353,6 +353,48 @@ std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const st
     return std::nullopt;
 }
 
+static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* folder, Client* client, std::unordered_map<std::string, std::string>& libraries)
+{
+    Uri jsonPath = rootUri.resolvePath(".luau-lsp/overture-libraries.json");
+    if (!jsonPath.exists())
+    {
+        if (client)
+        {
+            client->sendTrace("workspace: overture-libraries.json not found. Run the 'Index Overture Libraries' task to generate it");
+        }
+        return;
+    }
+
+    try
+    {
+        std::ifstream file(jsonPath.fsPath());
+        if (!file.is_open())
+            return;
+
+        nlohmann::json data = nlohmann::json::parse(file);
+        if (!data.is_object())
+            return;
+
+        for (const auto& [key, value] : data.items())
+        {
+            if (!value.is_string())
+                continue;
+
+            libraries[key] = value.get<std::string>();
+        }
+
+        if (client)
+            client->sendTrace("workspace: loaded " + std::to_string(libraries.size()) + " Overture libraries from JSON");
+    }
+    catch (const std::exception& e)
+    {
+        if (client)
+        {
+            client->sendTrace("workspace: failed to parse overture-libraries.json: " + std::string(e.what()));
+        }
+    }
+}
+
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::indexFiles", "LSP");
@@ -368,6 +410,9 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
     std::vector<Luau::ModuleName> moduleNames;
     overtureLibraryVirtualPaths.clear();
+
+    // Load Overture libraries from pre-generated JSON (values are already module names)
+    loadOvertureLibrariesFromJson(rootUri, this, client, overtureLibraryVirtualPaths);
 
     bool sentMessage = false;
     Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
@@ -392,114 +437,6 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
             {
                 auto moduleName = fileResolver.getModuleName(uri);
                 moduleNames.emplace_back(moduleName);
-            }
-
-            // Scan for Overture library .meta.json files during the same traversal to avoid a second full walk
-            if (ext == ".json")
-            {
-                auto filename = uri.filename();
-                static constexpr std::string_view META_JSON_SUFFIX = ".meta.json";
-
-                if (filename.size() > META_JSON_SUFFIX.size() &&
-                    filename.substr(filename.size() - META_JSON_SUFFIX.size()) == META_JSON_SUFFIX)
-                {
-                    try
-                    {
-                        std::ifstream file(path);
-                        if (!file.is_open())
-                            return;
-
-                        nlohmann::json metadata = nlohmann::json::parse(file);
-
-                        if (metadata.contains("properties") && metadata["properties"].is_object() &&
-                            metadata["properties"].contains("Tags"))
-                        {
-                            const auto& tags = metadata["properties"]["Tags"];
-                            if (!tags.is_array())
-                                return;
-
-                            bool isOvertureLibrary = false;
-                            for (const auto& tag : tags)
-                            {
-                                if (tag.is_string())
-                                {
-                                    std::string tagValue = tag.get<std::string>();
-                                    if (tagValue == "oLibrary")
-                                    {
-                                        isOvertureLibrary = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (isOvertureLibrary)
-                            {
-                                // Extract library name from .meta.json filename
-                                std::string libraryName = filename.substr(0, filename.size() - META_JSON_SUFFIX.size());
-
-                                auto parentOpt = uri.parent();
-                                if (!parentOpt)
-                                    return;
-
-                                Uri parentUri = *parentOpt;
-                                Uri moduleFileUri;
-
-                                // Try some common patterns first
-                                Uri sameNameLuauUri = parentUri.resolvePath(libraryName + ".luau");
-                                Uri sameNameLuaUri = parentUri.resolvePath(libraryName + ".lua");
-                                Uri initLuauUri = parentUri.resolvePath("init.luau");
-                                Uri initLuaUri = parentUri.resolvePath("init.lua");
-
-                                if (sameNameLuauUri.exists())
-                                    moduleFileUri = sameNameLuauUri;
-                                else if (sameNameLuaUri.exists())
-                                    moduleFileUri = sameNameLuaUri;
-                                else if (initLuauUri.exists())
-                                    moduleFileUri = initLuauUri;
-                                else if (initLuaUri.exists())
-                                    moduleFileUri = initLuaUri;
-                                else
-                                {
-                                    // Fallback to find any .lua/.luau file in the directory
-                                    bool foundFile = false;
-                                    std::filesystem::path parentPath = parentUri.fsPath();
-                                    try
-                                    {
-                                        for (const auto& entry : std::filesystem::directory_iterator(parentPath))
-                                        {
-                                            if (foundFile)
-                                                break;
-
-                                            const auto& p = entry.path();
-                                            std::string extCandidate = p.extension().string();
-                                            if (extCandidate == ".luau" || extCandidate == ".lua")
-                                            {
-                                                moduleFileUri = Uri::file(p.string());
-                                                foundFile = true;
-                                            }
-                                        }
-                                    }
-                                    catch (const std::exception& e)
-                                    {
-                                        client->sendTrace("workspace: error iterating directory: " + std::string(e.what()));
-                                    }
-
-                                    if (!foundFile)
-                                        return;
-                                }
-
-                                auto virtualPath = fileResolver.getModuleName(moduleFileUri);
-
-                                if (!virtualPath.empty())
-                                    overtureLibraryVirtualPaths[libraryName] = virtualPath;
-                            }
-                        }
-                    }
-                    catch (const std::exception& e)
-                    {
-                        client->sendTrace("workspace: failed to parse .meta.json at " + path + ": " + e.what());
-                    }
-                }
             }
         });
 
