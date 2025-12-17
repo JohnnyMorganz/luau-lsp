@@ -136,6 +136,7 @@ public:
     std::vector<Reference> findAllTypeReferences(
         const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken);
 
+    std::optional<std::vector<lsp::CompletionItem>> tryCompleteOvertureLoadLibrary(const TextDocument* textDocument, const lsp::Position& position);
     std::vector<lsp::CompletionItem> completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken);
 
     std::optional<Luau::ModuleName> getOvertureLibraryPath(const std::string& libraryName) const;

@@ -1,5 +1,6 @@
 #include <unordered_set>
 #include <utility>
+#include <regex>
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
@@ -502,6 +503,40 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     return std::nullopt;
 }
 
+std::optional<std::vector<lsp::CompletionItem>> WorkspaceFolder::tryCompleteOvertureLoadLibrary(
+    const TextDocument* textDocument, const lsp::Position& position)
+{
+    if (!textDocument)
+        return std::nullopt;
+
+    // Get the line where the cursor is
+    std::string lineContent = textDocument->getLine(position.line);
+    if (lineContent.empty())
+        return std::nullopt;
+
+    std::string textUpToCursor = lineContent.substr(0, position.character);
+
+    std::regex libraryNamePattern(R"(Overture:LoadLibrary\s*\(\s*[\"']([^\"]*)$)");
+    std::smatch libraryMatch;
+    if (std::regex_search(textUpToCursor, libraryMatch, libraryNamePattern))
+    {
+        std::vector<lsp::CompletionItem> items;
+
+        for (const auto& [libraryName, _] : overtureLibraryVirtualPaths)
+        {
+            lsp::CompletionItem item;
+            item.label = libraryName;
+            item.kind = lsp::CompletionItemKind::Class;
+            item.detail = "oLibrary";
+            items.push_back(item);
+        }
+
+        return items;
+    }
+
+    return std::nullopt;
+}
+
 std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::completion", "LSP");
@@ -521,6 +556,11 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+
+    // Check if we're inside a LoadLibrary string literal
+    auto loadLibraryCompletions = tryCompleteOvertureLoadLibrary(textDocument, params.position);
+    if (loadLibraryCompletions)
+        return *loadLibraryCompletions;
 
     std::unordered_set<std::string> tags;
 
