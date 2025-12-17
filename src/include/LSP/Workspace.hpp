@@ -81,9 +81,6 @@ public:
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);
 
-    // Loads Overture library name to virtual path mappings from .meta.json files
-    void loadOvertureLibraryMappings();
-
     void openTextDocument(const lsp::DocumentUri& uri, const lsp::DidOpenTextDocumentParams& params);
     void updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params);
     void onDidSaveTextDocument(const lsp::DocumentUri& uri, const lsp::DidSaveTextDocumentParams& params);
