@@ -421,7 +421,7 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(
     checkStrict(moduleName, cancellationToken);
     throwIfCancelled(cancellationToken);
 
-	// We have to do this because otherwise we get weird syntax highlighting because of the transformed code
+    // We have to do this because otherwise we get weird syntax highlighting because of the transformed code
     auto originalSource = textDocument->getText();
     auto allocator = std::make_shared<Luau::Allocator>();
     auto names = std::make_shared<Luau::AstNameTable>(*allocator);

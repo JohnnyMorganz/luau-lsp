@@ -534,6 +534,43 @@ std::optional<std::vector<lsp::CompletionItem>> WorkspaceFolder::tryCompleteOver
         return items;
     }
 
+    std::regex overtureGetPattern(R"(Overture:Get\s*\(\s*[\"']([^\"']*)[\"']\s*,\s*[\"']([^\"]*)$)");
+    std::smatch getMatch;
+    if (std::regex_search(textUpToCursor, getMatch, overtureGetPattern))
+    {
+        return std::nullopt;
+    }
+
+    std::regex overtureGetClassPattern(R"(Overture:Get\s*\(\s*[\"']([^\"]*)$)");
+    std::smatch classMatch;
+    if (std::regex_search(textUpToCursor, classMatch, overtureGetClassPattern))
+    {
+        // Get Roblox class names from the global types
+        std::vector<lsp::CompletionItem> items;
+        std::string partial = classMatch[1].str();
+
+        if (frontend.globals.globalScope)
+        {
+            for (const auto& [name, binding] : frontend.globals.globalScope->exportedTypeBindings)
+            {
+                std::string className = name.c_str();
+
+                // Filter by partial match
+				// TODO: Case insensitive match?
+                if (partial.empty() || className.find(partial) != std::string::npos)
+                {
+                    lsp::CompletionItem item;
+                    item.label = className;
+                    item.kind = lsp::CompletionItemKind::Class;
+                    items.push_back(item);
+                }
+            }
+        }
+
+        if (!items.empty())
+            return items;
+    }
+
     return std::nullopt;
 }
 

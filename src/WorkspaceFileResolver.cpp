@@ -199,7 +199,7 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
                     const std::string typeExpr = "typeof(require(" + requireExpr + "))";
                     replacement = "local " + varName + ": " + typeExpr + " = Overture:LoadLibrary(\"" + libName + "\")";
 
-                    std::cerr << "[Transform] In file: " << moduleName << "\n"; //TODO: remove this when we have a rc
+                    std::cerr << "[Transform] In file: " << moduleName << "\n";
                     std::cerr << "  Original: " << match.str() << "\n";
                     std::cerr << "  Replaced: " << replacement << "\n";
                 }
@@ -211,6 +211,57 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
 
             replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
             searchStart = match.suffix().first;
+        }
+    }
+
+    {
+        std::regex getPattern(R"(local\s+(\w+)\s*=\s*Overture\s*:\s*Get\s*\(\s*\"([^\"]+)\"\s*,\s*\"([^\"]+)\"(?:\s*,\s*[^)]+)?\s*\))");
+        std::string::const_iterator getSearchStart(source.cbegin());
+        std::smatch getMatch;
+        while (std::regex_search(getSearchStart, source.cend(), getMatch, getPattern))
+        {
+            std::string varName = getMatch[1].str();
+            std::string className = getMatch[2].str();
+            std::string instanceName = getMatch[3].str();
+
+            size_t matchPos = std::distance(source.cbegin(), getMatch[0].first);
+            size_t matchLen = getMatch[0].length();
+
+            // Check if already replaced
+            bool alreadyReplaced = false;
+            for (const auto& r : replacements)
+            {
+                if (matchPos >= r.first && matchPos < r.first + r.second.first)
+                {
+                    alreadyReplaced = true;
+                    break;
+                }
+            }
+
+            if (!alreadyReplaced)
+            {
+                std::string originalCall = getMatch.str();
+                std::string thirdArgPart;
+
+                size_t secondQuoteEnd = originalCall.rfind('"');
+                size_t commaAfterSecond = originalCall.find(',', secondQuoteEnd);
+
+                if (commaAfterSecond != std::string::npos)
+                {
+                    thirdArgPart = originalCall.substr(commaAfterSecond);
+                }
+
+                // Type the variable based on the ClassName
+                std::string replacement = "local " + varName + ": " + className + " = Overture:Get(\"" + className + "\", \"" + instanceName + "\"" + thirdArgPart + ")";
+
+                std::cerr << "[Transform] In file: " << moduleName << "\n";
+                std::cerr << "  Original: " << originalCall << "\n";
+                std::cerr << "  Replaced: " << replacement << "\n";
+
+                replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
+            }
+
+            getSearchStart = getMatch.suffix().first;
         }
     }
 
