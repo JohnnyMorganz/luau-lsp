@@ -2,13 +2,13 @@ name: Pull Latest API Dump
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "10 0 * * *" # Runs at 00:10 UTC every day
-  push:
-    branches:
-      - "main"
-    paths:
-      - "scripts/dumpRobloxTypes.py"
+#   schedule:
+#     - cron: "10 0 * * *" # Runs at 00:10 UTC every day
+#   push:
+#     branches:
+#       - "main"
+#     paths:
+#       - "scripts/dumpRobloxTypes.py"
 
 jobs:
   sync:

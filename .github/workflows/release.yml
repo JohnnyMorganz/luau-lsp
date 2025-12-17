@@ -52,14 +52,6 @@ jobs:
           asset_name: Luau.rbxm
           asset_content_type: application/octet-stream
 
-      - name: Publish Plugin to Roblox
-        env:
-          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
-        working-directory: plugin
-        run: |
-          rojo build test.project.json --output plugin_place.rbxl
-          lune run cloud/execute_task.luau plugin_place.rbxl cloud/publishing_task.luau
-
   dist:
     needs: ["create-release"]
     strategy:
@@ -137,13 +129,13 @@ jobs:
               chmod 777 editors/code/bin/crashpad_handler
           fi
 
-      - name: Setup Sentry CLI
-        uses: matbour/setup-sentry-cli@v2
-        if: matrix.crash-reporting == true
-        with:
-          token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          organization: luau-lsp
-          project: luau-lsp
+    #   - name: Setup Sentry CLI
+    #     uses: matbour/setup-sentry-cli@v2
+    #     if: matrix.crash-reporting == true
+    #     with:
+    #       token: ${{ secrets.SENTRY_AUTH_TOKEN }} //! we can use our own sentry here
+    #       organization: luau-lsp
+    #       project: luau-lsp
 
       - name: Upload debug symbols
         shell: bash
@@ -193,11 +185,3 @@ jobs:
 
       - run: npm ci
         working-directory: editors/code
-
-      - name: Publish Extension
-        working-directory: editors/code
-        run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
-
-      - name: Publish OpenVSX Extension
-        working-directory: editors/code
-        run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
