@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <regex>
+#include <sstream>
 #include "Luau/Ast.h"
 #include "Luau/LuauConfig.h"
 #include "LSP/WorkspaceFileResolver.hpp"
@@ -76,47 +77,145 @@ TextDocumentPtr WorkspaceFileResolver::getOrCreateTextDocumentFromModuleName(con
 
 std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::string& source, const Luau::ModuleName& moduleName) const
 {
-    // Only match LoadLibrary calls with a single string argument (no NamedImports)
-    std::regex pattern("local\\s+(\\w+)\\s*=\\s*Overture:LoadLibrary\\s*\\(\\s*\"([^\"]+)\"\\s*\\)");
+    std::regex singlePattern("local\\s+(\\w+)\\s*=\\s*Overture:LoadLibrary\\s*\\(\\s*\"([^\"]+)\"\\s*\\)");
+    std::regex namedPattern("local\\s+([\\w,\\s]+)\\s*=\\s*Overture:LoadLibrary\\s*\\(\\s*\"([^\"]+)\"\\s*,\\s*\\{([^}]+)\\}\\s*\\)");
 
     std::string result = source;
-    std::smatch match;
-
-    // Process matches in reverse order to maintain correct string positions during replacement
     std::vector<std::pair<size_t, std::pair<size_t, std::string>>> replacements;
-    std::string::const_iterator searchStart(source.cbegin());
 
-    while (std::regex_search(searchStart, source.cend(), match, pattern))
+    auto extractFunctionNames = [](const std::string& arrayStr) -> std::vector<std::string>
     {
-        std::string varName = match[1].str();
-        std::string libName = match[2].str();
-
-        size_t matchPos = std::distance(source.cbegin(), match[0].first);
-        size_t matchLen = match[0].length();
-
-        std::string replacement = match.str();
-        if (workspace)
+        std::vector<std::string> names;
+        std::regex namePattern("\"([^\"]+)\"");
+        std::sregex_iterator iter(arrayStr.begin(), arrayStr.end(), namePattern);
+        std::sregex_iterator end;
+        for (; iter != end; ++iter)
         {
-            if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
-            {
-                const std::string requireExpr = *libraryPath;
-                const std::string typeExpr = "typeof(require(" + requireExpr + "))";
-                replacement = "local " + varName + ": " + typeExpr + " = Overture:LoadLibrary(\"" + libName + "\")";
-
-                std::cerr << "[Transform] In file: " << moduleName << "\n"; //TODO: remove this when we have a rc
-                std::cerr << "  Original: " << match.str() << "\n";
-                std::cerr << "  Replaced: " << replacement << "\n";
-            }
-            else
-            {
-                std::cerr << "[Transform] Library path not found for: " << libName << " in " << moduleName << "\n";
-            }
+            names.push_back((*iter)[1].str());
         }
+        return names;
+    };
 
-        replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
-        searchStart = match.suffix().first;
+    auto splitVarNames = [](const std::string& varList) -> std::vector<std::string>
+    {
+        std::vector<std::string> names;
+        std::stringstream ss(varList);
+        std::string name;
+        while (std::getline(ss, name, ','))
+        {
+            // Trim whitespace
+            name.erase(0, name.find_first_not_of(" \t\n\r"));
+            name.erase(name.find_last_not_of(" \t\n\r") + 1);
+            if (!name.empty())
+                names.push_back(name);
+        }
+        return names;
+    };
+
+    {
+        std::string::const_iterator searchStart(source.cbegin());
+        std::smatch match;
+        while (std::regex_search(searchStart, source.cend(), match, namedPattern))
+        {
+            std::string varList = match[1].str();
+            std::string libName = match[2].str();
+            std::string arrayStr = match[3].str();
+
+            size_t matchPos = std::distance(source.cbegin(), match[0].first);
+            size_t matchLen = match[0].length();
+
+            std::string replacement = match.str();
+            if (workspace)
+            {
+                if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
+                {
+                    auto varNames = splitVarNames(varList);
+                    auto fnNames = extractFunctionNames(arrayStr);
+
+                    if (varNames.size() == fnNames.size() && !varNames.empty())
+                    {
+                        const std::string requireExpr = *libraryPath;
+                        std::string typeAnnotations;
+
+                        for (size_t i = 0; i < varNames.size(); ++i)
+                        {
+                            if (i > 0)
+                                typeAnnotations += ", ";
+                            typeAnnotations += varNames[i] + ": typeof(require(" + requireExpr + ")." + fnNames[i] + ")";
+                        }
+
+                        replacement = "local " + typeAnnotations + " = Overture:LoadLibrary(\"" + libName + "\", {" + arrayStr + "})";
+
+                        std::cerr << "[Transform] In file: " << moduleName << "\n";
+                        std::cerr << "  Original: " << match.str() << "\n";
+                        std::cerr << "  Replaced: " << replacement << "\n";
+                    }
+                }
+                else
+                {
+                    std::cerr << "[Transform] Library path not found for: " << libName << " in " << moduleName << "\n";
+                }
+            }
+
+            replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
+            searchStart = match.suffix().first;
+        }
     }
 
+    {
+        std::string::const_iterator searchStart(source.cbegin());
+        std::smatch match;
+        while (std::regex_search(searchStart, source.cend(), match, singlePattern))
+        {
+            std::string varName = match[1].str();
+            std::string libName = match[2].str();
+
+            size_t matchPos = std::distance(source.cbegin(), match[0].first);
+            size_t matchLen = match[0].length();
+
+            // Skip if already replaced by NamedImports
+            bool alreadyReplaced = false;
+            for (const auto& r : replacements)
+            {
+                if (matchPos >= r.first && matchPos < r.first + r.second.first)
+                {
+                    alreadyReplaced = true;
+                    break;
+                }
+            }
+
+            if (alreadyReplaced)
+            {
+                searchStart = match.suffix().first;
+                continue;
+            }
+
+            std::string replacement = match.str();
+            if (workspace)
+            {
+                if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
+                {
+                    const std::string requireExpr = *libraryPath;
+                    const std::string typeExpr = "typeof(require(" + requireExpr + "))";
+                    replacement = "local " + varName + ": " + typeExpr + " = Overture:LoadLibrary(\"" + libName + "\")";
+
+                    std::cerr << "[Transform] In file: " << moduleName << "\n"; //TODO: remove this when we have a rc
+                    std::cerr << "  Original: " << match.str() << "\n";
+                    std::cerr << "  Replaced: " << replacement << "\n";
+                }
+                else
+                {
+                    std::cerr << "[Transform] Library path not found for: " << libName << " in " << moduleName << "\n";
+                }
+            }
+
+            replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
+            searchStart = match.suffix().first;
+        }
+    }
+
+    // Apply replacements in reverse order
+    std::sort(replacements.begin(), replacements.end());
     for (auto it = replacements.rbegin(); it != replacements.rend(); ++it)
     {
         result.replace(it->first, it->second.first, it->second.second);
