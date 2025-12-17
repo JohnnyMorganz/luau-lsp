@@ -107,9 +107,9 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
                     fromUri, toUri, aliases, ImportRequireStyle::AlwaysAbsolute);
 
                 std::string requireStr = '"' + requirePair.first + '"';
-                replacement = "local " + varName + " = require(" + requireStr + ")"; // TODO: I'd like this to be a typecast if possible
+                replacement = "local " + varName + ": typeof(require(" + requireStr + ")) = Overture:LoadLibrary(\"" + libName + "\")";
 
-                std::cerr << "[Transform] In file: " << moduleName << "\n";
+                std::cerr << "[Transform] In file: " << moduleName << "\n"; //! remove this on when we have an rc
                 std::cerr << "  Original: " << match.str() << "\n";
                 std::cerr << "  Replaced: " << replacement << "\n";
             }
