@@ -423,9 +423,14 @@ void WorkspaceFolder::discoverRotrieverPackages()
                     result->exports = std::move(exports.values);
                     result->typeExports = std::move(exports.types);
 
+                    // Discover internal modules for intra-package imports
+                    auto contentRootUri = result->packageRoot.resolvePath(result->contentRoot);
+                    result->internalModules = Luau::LanguageServer::RotrieverResolver::discoverInternalModules(contentRootUri);
+
                     client->sendLogMessage(lsp::MessageType::Info, "Discovered Rotriever package: " + result->name + " (" +
                                                                        std::to_string(result->exports.size()) + " exports, " +
-                                                                       std::to_string(result->typeExports.size()) + " types)");
+                                                                       std::to_string(result->typeExports.size()) + " types, " +
+                                                                       std::to_string(result->internalModules.size()) + " internal modules)");
                     rotrieverPackages.emplace(result->packageRoot, std::move(*result));
                 }
                 else

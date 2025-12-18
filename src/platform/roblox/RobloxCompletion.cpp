@@ -9,6 +9,8 @@
 #include "Platform/AutoImports.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
+#include <algorithm>
+
 LUAU_FASTFLAG(LuauSolverV2)
 
 static constexpr const char* COMMON_SERVICES[] = {
@@ -298,7 +300,7 @@ static lsp::CompletionItem createRotrieverPackageSuggestion(const std::string& p
     lsp::CompletionItem item;
     item.label = packageName;
     item.kind = lsp::CompletionItemKind::Module;
-    item.detail = "Auto-import package";
+    item.detail = "[rotriever] package";
 
     // Build documentation showing all the edits
     std::string docText;
@@ -355,7 +357,7 @@ static lsp::CompletionItem createRotrieverExportSuggestion(const std::string& ex
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Module;
     // Show the full path in detail for nested exports
-    item.detail = exportPath == localName ? ("Auto-import from " + packageName) : ("Auto-import " + packageName + "." + exportPath);
+    item.detail = exportPath == localName ? ("[rotriever] " + packageName) : ("[rotriever] " + packageName + "." + exportPath);
 
     // Build documentation showing all the edits
     std::string docText;
@@ -370,6 +372,111 @@ static lsp::CompletionItem createRotrieverExportSuggestion(const std::string& ex
     // Add setup edits first, then the require edit
     for (const auto& edit : setupEdits)
         item.additionalTextEdits.emplace_back(edit);
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
+// Create: local ModuleName = require(script.Parent.Path.To.Module)
+// For internal module imports within the same package
+static lsp::CompletionItem createInternalModuleSuggestion(
+    const std::string& moduleName, const std::string& scriptPath, size_t lineNumber, bool prependNewline)
+{
+    auto importText = "local " + moduleName + " = require(" + scriptPath + ")\n";
+    if (prependNewline)
+        importText = "\n" + importText;
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = moduleName;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = "[module]";
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = moduleName;
+    item.sortText = SortText::AutoImports; // Same priority as relative imports
+
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
+// Create: local ExportName = require(script.Parent.Path.To.Module).ExportPath
+// Or if module already imported: local ExportName = ModuleName.ExportPath
+// For value exports from internal modules within the same package
+static lsp::CompletionItem createRotrieverInternalExportSuggestion(const std::string& exportPath, const std::string& moduleName,
+    const std::string& scriptPath, size_t lineNumber, bool prependNewline, bool moduleAlreadyImported)
+{
+    // For nested exports like "Hooks.useButton", the local name is the last part
+    std::string localName = exportPath;
+    if (auto lastDot = exportPath.rfind('.'); lastDot != std::string::npos)
+        localName = exportPath.substr(lastDot + 1);
+
+    std::string importText;
+    if (prependNewline)
+        importText = "\n";
+
+    if (moduleAlreadyImported)
+    {
+        // Module already imported, just reference it directly
+        importText += "local " + localName + " = " + moduleName + "." + exportPath + "\n";
+    }
+    else
+    {
+        // Need to require the module
+        importText += "local " + localName + " = require(" + scriptPath + ")." + exportPath + "\n";
+    }
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = localName;
+    item.kind = lsp::CompletionItemKind::Module;
+    item.detail = exportPath == localName ? ("[module] " + moduleName) : ("[module] " + moduleName + "." + exportPath);
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = localName;
+    item.sortText = SortText::AutoImports;
+
+    item.additionalTextEdits.emplace_back(textEdit);
+
+    return item;
+}
+
+// Create type import from internal module:
+//   local ModuleName = require(script.Parent.Path.To.Module)
+//   type TypeName = ModuleName.TypePath
+// For type exports from internal modules within the same package
+static lsp::CompletionItem createRotrieverInternalTypeExportSuggestion(const std::string& typePath, const std::string& moduleName,
+    const std::string& scriptPath, size_t lineNumber, bool prependNewline, bool moduleAlreadyImported)
+{
+    // For nested types like "Types.ButtonProps", the local name is the last part
+    std::string localName = typePath;
+    if (auto lastDot = typePath.rfind('.'); lastDot != std::string::npos)
+        localName = typePath.substr(lastDot + 1);
+
+    std::string importText;
+    if (prependNewline)
+        importText = "\n";
+
+    // Only add the require line if the module isn't already imported
+    if (!moduleAlreadyImported)
+        importText += "local " + moduleName + " = require(" + scriptPath + ")\n";
+
+    importText += "type " + localName + " = " + moduleName + "." + typePath + "\n";
+
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    lsp::TextEdit textEdit{range, importText};
+
+    lsp::CompletionItem item;
+    item.label = localName;
+    item.kind = lsp::CompletionItemKind::Interface; // Use Interface for types
+    item.detail = typePath == localName ? ("[module] " + moduleName) : ("[module] " + moduleName + "." + typePath);
+    item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
+    item.insertText = localName;
+    item.sortText = SortText::AutoImports;
+
     item.additionalTextEdits.emplace_back(textEdit);
 
     return item;
@@ -410,7 +517,7 @@ static lsp::CompletionItem createRotrieverTypeExportSuggestion(const std::string
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Interface; // Use Interface for types
     // Show the full path in detail for nested types
-    item.detail = typePath == localName ? ("Auto-import type from " + packageName) : ("Auto-import type " + packageName + "." + typePath);
+    item.detail = typePath == localName ? ("[rotriever] package " + packageName) : ("[rotriever] package " + packageName + "." + typePath);
 
     // Build documentation showing all the edits
     std::string docText;
@@ -590,16 +697,32 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
             // For each dependency of this package, suggest the package and its exports
             for (const auto& [depName, dep] : currentPackage->dependencies)
             {
-                size_t lineNumber = computeBestLineForRequire(importsVisitor, textDocument, depName, minimumLineNumber);
-                // Adjust line number if we're inserting setup edits before the requires
-                if (!importsVisitor.hasPackagesLocal() && lineNumber >= setupInsertLine)
-                    lineNumber += setupLineOffset;
+                // Check if the package itself is already imported
+                bool packageAlreadyImported = importsVisitor.containsRequire(depName);
+
+                // Compute line number for inserting the require/type statement
+                // If the package is already imported, insert after its definition line
+                // Otherwise, use the standard best line computation
+                size_t lineNumber = minimumLineNumber;
+                if (packageAlreadyImported)
+                {
+                    // Insert after the package definition line
+                    if (auto defLine = importsVisitor.getRequireDefinitionLine(depName))
+                        lineNumber = *defLine + 1;
+                }
+                else
+                {
+                    lineNumber = computeBestLineForRequire(importsVisitor, textDocument, depName, minimumLineNumber);
+                    // Adjust line number if we're inserting setup edits before the requires
+                    if (!importsVisitor.hasPackagesLocal() && lineNumber >= setupInsertLine)
+                        lineNumber += setupLineOffset;
+                }
 
                 bool prependNewline = importsVisitor.hasPackagesLocal() && config.completion.imports.separateGroupsWithLine &&
                                       importsVisitor.shouldPrependNewline(lineNumber);
 
                 // 1. Suggest the package itself (e.g., GameTile)
-                if (!importsVisitor.containsRequire(depName))
+                if (!packageAlreadyImported)
                 {
                     items.emplace_back(createRotrieverPackageSuggestion(depName, packagesLocalName, lineNumber, prependNewline, setupEdits));
                 }
@@ -611,9 +734,6 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                     // Check if this package matches the dependency
                     if (pkgRoot.fsPath() == dep.resolvedPath.fsPath())
                     {
-                        // Check if the package itself is already imported (we'll reuse it instead of require)
-                        bool packageAlreadyImported = importsVisitor.containsRequire(depName);
-
                         // Suggest value exports (functions, tables, etc.)
                         for (const auto& exportPath : pkg.exports)
                         {
@@ -649,6 +769,103 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         }
                         break;
                     }
+                }
+            }
+
+            // Suggest internal modules from the current package
+            // Compute the current file's relative path within the package
+            auto contentRootUri = currentPackage->packageRoot.resolvePath(currentPackage->contentRoot);
+            std::string currentFileRelativePath = textDocument.uri().lexicallyRelative(contentRootUri);
+
+            // Remove file extension from current file path
+            if (auto ext = textDocument.uri().extension(); !ext.empty() && currentFileRelativePath.size() > ext.size())
+                currentFileRelativePath = currentFileRelativePath.substr(0, currentFileRelativePath.size() - ext.size());
+
+            // Check if we have a package ancestor local (e.g., local SduiSharedUtilities = script:FindFirstAncestor("SduiSharedUtilities"))
+            // If so, use that pattern for internal requires instead of script.Parent... paths
+            bool usePackageAncestorLocal = importsVisitor.hasPackageAncestorLocal();
+            std::string packageAncestorLocalName = importsVisitor.packageAncestorLocalName;
+
+            for (const auto& internalModule : currentPackage->internalModules)
+            {
+                // Skip if this is the current file
+                if (internalModule.relativePath == currentFileRelativePath)
+                    continue;
+
+                // Compute the require path based on whether we have a package ancestor local
+                std::string requirePath;
+                if (usePackageAncestorLocal)
+                {
+                    // Use PackageAncestorLocal.ModulePath pattern (e.g., SduiSharedUtilities.SduiProtobufResponseHelpers)
+                    // Convert relative path from "/" to "." separators
+                    requirePath = packageAncestorLocalName;
+                    std::string modulePath = internalModule.relativePath;
+                    std::replace(modulePath.begin(), modulePath.end(), '/', '.');
+                    requirePath += "." + modulePath;
+                }
+                else
+                {
+                    // Use script.Parent... pattern
+                    requirePath =
+                        Luau::LanguageServer::RotrieverResolver::computeScriptRelativePath(currentFileRelativePath, internalModule.relativePath);
+                }
+
+                // Check if the module itself is already imported
+                bool moduleAlreadyImported = importsVisitor.containsRequire(internalModule.name);
+
+                // Compute line number for inserting the require/type statement
+                // If the module is already imported, insert after its definition line
+                // Otherwise, use the standard best line computation
+                size_t lineNumber = minimumLineNumber;
+                if (moduleAlreadyImported)
+                {
+                    // Insert after the module definition line
+                    if (auto defLine = importsVisitor.getRequireDefinitionLine(internalModule.name))
+                        lineNumber = *defLine + 1;
+                }
+                else
+                {
+                    lineNumber = computeBestLineForRequire(importsVisitor, textDocument, internalModule.name, minimumLineNumber);
+                }
+
+                bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+
+                // 1. Suggest the module itself (if not already imported)
+                if (!moduleAlreadyImported)
+                {
+                    items.emplace_back(createInternalModuleSuggestion(internalModule.name, requirePath, lineNumber, prependNewline));
+                }
+
+                // 2. Suggest value exports from the module
+                for (const auto& exportPath : internalModule.exports)
+                {
+                    // For nested exports like "Hooks.useButton", get the local name
+                    std::string localName = exportPath;
+                    if (auto lastDot = exportPath.rfind('.'); lastDot != std::string::npos)
+                        localName = exportPath.substr(lastDot + 1);
+
+                    // Skip if already imported
+                    if (importsVisitor.containsRequire(localName))
+                        continue;
+
+                    items.emplace_back(createRotrieverInternalExportSuggestion(
+                        exportPath, internalModule.name, requirePath, lineNumber, prependNewline, moduleAlreadyImported));
+                }
+
+                // 3. Suggest type exports from the module
+                for (const auto& typePath : internalModule.typeExports)
+                {
+                    // For nested types, get the local name
+                    std::string localName = typePath;
+                    if (auto lastDot = typePath.rfind('.'); lastDot != std::string::npos)
+                        localName = typePath.substr(lastDot + 1);
+
+                    // Skip if already imported
+                    if (importsVisitor.containsRequire(localName))
+                        continue;
+
+                    items.emplace_back(createRotrieverInternalTypeExportSuggestion(
+                        typePath, internalModule.name, requirePath, lineNumber, prependNewline, moduleAlreadyImported));
                 }
             }
         }

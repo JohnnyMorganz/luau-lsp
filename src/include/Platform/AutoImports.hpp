@@ -36,6 +36,9 @@ public:
     }
 
     bool containsRequire(const std::string& module) const;
+    /// Get the line number where a specific require/local is defined
+    /// Returns std::nullopt if the module is not found
+    std::optional<size_t> getRequireDefinitionLine(const std::string& module) const;
     bool visit(Luau::AstStatLocal* local) override;
     bool visit(Luau::AstStatBlock* block) override;
 };

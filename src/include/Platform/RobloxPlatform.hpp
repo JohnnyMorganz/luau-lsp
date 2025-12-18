@@ -126,6 +126,11 @@ public:
         return !packagesLocalName.empty();
     }
 
+    [[nodiscard]] bool hasPackageAncestorLocal() const
+    {
+        return !packageAncestorLocalName.empty();
+    }
+
     [[nodiscard]] size_t getMinimumRequireLine() const override
     {
         size_t minLine = 0;

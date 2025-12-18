@@ -10,6 +10,16 @@ bool FindImportsVisitor::containsRequire(const std::string& module) const
     return false;
 }
 
+std::optional<size_t> FindImportsVisitor::getRequireDefinitionLine(const std::string& module) const
+{
+    for (const auto& map : requiresMap)
+    {
+        if (auto it = map.find(module); it != map.end())
+            return it->second->location.end.line;
+    }
+    return std::nullopt;
+}
+
 bool FindImportsVisitor::visit(Luau::AstStatLocal* local)
 {
     if (local->vars.size != 1 || local->values.size != 1)
@@ -156,4 +166,4 @@ size_t computeBestLineForRequire(
 
     return lineNumber;
 }
-}
+} // namespace Luau::LanguageServer::AutoImports

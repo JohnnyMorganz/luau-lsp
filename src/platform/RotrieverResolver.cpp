@@ -230,6 +230,120 @@ RotrieverExports RotrieverResolver::parseExports(const Uri& initLuaPath)
     return exports;
 }
 
+std::vector<RotrieverInternalModule> RotrieverResolver::discoverInternalModules(const Uri& contentRoot)
+{
+    std::vector<RotrieverInternalModule> modules;
+    const std::string contentRootPath = contentRoot.fsPath();
+
+    Luau::FileUtils::traverseDirectoryRecursive(contentRootPath,
+        [&](const std::string& path)
+        {
+            auto uri = Uri::file(path);
+            auto ext = uri.extension();
+
+            // Only consider .lua and .luau files
+            if (ext != ".lua" && ext != ".luau")
+                return;
+
+            // Skip init files - they represent directories, not standalone modules
+            auto filename = uri.filename();
+            if (filename == "init" || filename == "init.lua" || filename == "init.luau")
+                return;
+
+            // Compute the relative path from contentRoot
+            std::string relativePath = uri.lexicallyRelative(contentRoot);
+
+            // Remove the file extension from the relative path
+            if (relativePath.size() > ext.size())
+                relativePath = relativePath.substr(0, relativePath.size() - ext.size());
+
+            // Extract the module name (last component of the path)
+            std::string moduleName = relativePath;
+            if (auto lastSlash = moduleName.rfind('/'); lastSlash != std::string::npos)
+                moduleName = moduleName.substr(lastSlash + 1);
+
+            // Parse exports from this module file
+            auto moduleExports = parseExports(uri);
+
+            modules.push_back(RotrieverInternalModule{
+                std::move(moduleName),
+                std::move(relativePath),
+                uri,
+                std::move(moduleExports.values),
+                std::move(moduleExports.types),
+            });
+        });
+
+    // Also discover directories with init.lua/init.luau files as modules
+    Luau::FileUtils::traverseDirectoryRecursive(contentRootPath,
+        [&](const std::string& path)
+        {
+            auto uri = Uri::file(path);
+            auto filename = uri.filename();
+
+            // Check for init files
+            if (filename != "init.lua" && filename != "init.luau")
+                return;
+
+            // Get the directory containing the init file
+            auto parentDir = uri.parent();
+            if (!parentDir)
+                return;
+
+            // Skip the contentRoot's own init.lua (that's the package entry point)
+            if (parentDir->fsPath() == contentRootPath)
+                return;
+
+            // Compute the relative path from contentRoot to the directory
+            std::string relativePath = parentDir->lexicallyRelative(contentRoot);
+
+            // Extract the module name (directory name)
+            std::string moduleName = relativePath;
+            if (auto lastSlash = moduleName.rfind('/'); lastSlash != std::string::npos)
+                moduleName = moduleName.substr(lastSlash + 1);
+
+            // Parse exports from the init file
+            auto moduleExports = parseExports(uri);
+
+            modules.push_back(RotrieverInternalModule{
+                std::move(moduleName),
+                std::move(relativePath),
+                *parentDir,
+                std::move(moduleExports.values),
+                std::move(moduleExports.types),
+            });
+        });
+
+    return modules;
+}
+
+std::string RotrieverResolver::computeScriptRelativePath(const std::string& fromRelativePath, const std::string& toRelativePath)
+{
+    auto fromParts = Luau::split(fromRelativePath, '/');
+    auto toParts = Luau::split(toRelativePath, '/');
+
+    // Find the length of the common prefix
+    size_t commonLen = 0;
+    // Compare all but the last part of fromParts (the filename) with toParts
+    while (commonLen < fromParts.size() - 1 && commonLen < toParts.size() && fromParts[commonLen] == toParts[commonLen])
+        commonLen++;
+
+    // Build the path: start with "script"
+    std::string result = "script";
+
+    // Add .Parent for each level we need to go up from the source file's directory
+    // fromParts.size() - 1 gives us the depth of the directory containing the source file
+    // We need to go up (fromParts.size() - 1 - commonLen) levels
+    for (size_t i = commonLen; i < fromParts.size() - 1; i++)
+        result += ".Parent";
+
+    // Add the destination path components after the common prefix
+    for (size_t i = commonLen; i < toParts.size(); i++)
+        result += "." + std::string(toParts[i]);
+
+    return result;
+}
+
 void RotrieverResolver::debugPrint(const RotrieverPackage& package)
 {
     std::cerr << "=== Rotriever Package ===" << std::endl;
