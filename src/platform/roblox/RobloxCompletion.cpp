@@ -300,7 +300,8 @@ static lsp::CompletionItem createRotrieverPackageSuggestion(const std::string& p
     lsp::CompletionItem item;
     item.label = packageName;
     item.kind = lsp::CompletionItemKind::Module;
-    item.detail = "[rotriever] package";
+    item.detail = "[" + packagesLocalName + "]";
+    item.labelDetails = {item.detail, std::nullopt};
 
     // Build documentation showing all the edits
     std::string docText;
@@ -357,7 +358,8 @@ static lsp::CompletionItem createRotrieverExportSuggestion(const std::string& ex
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Module;
     // Show the full path in detail for nested exports
-    item.detail = exportPath == localName ? ("[rotriever] " + packageName) : ("[rotriever] " + packageName + "." + exportPath);
+    item.detail = exportPath == localName ? ("[" + packageName + "]") : ("[" + packageName + "] " + exportPath);
+    item.labelDetails = {item.detail, std::nullopt};
 
     // Build documentation showing all the edits
     std::string docText;
@@ -392,7 +394,8 @@ static lsp::CompletionItem createInternalModuleSuggestion(
     lsp::CompletionItem item;
     item.label = moduleName;
     item.kind = lsp::CompletionItemKind::Module;
-    item.detail = "[module]";
+    item.detail = "[" + scriptPath + "]";
+    item.labelDetails = {item.detail, std::nullopt};
     item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
     item.insertText = moduleName;
     item.sortText = SortText::AutoImports; // Same priority as relative imports
@@ -434,7 +437,8 @@ static lsp::CompletionItem createRotrieverInternalExportSuggestion(const std::st
     lsp::CompletionItem item;
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Module;
-    item.detail = exportPath == localName ? ("[module] " + moduleName) : ("[module] " + moduleName + "." + exportPath);
+    item.detail = exportPath == localName ? ("[" + moduleName + "]") : ("[" + moduleName + "] " + exportPath);
+    item.labelDetails = {item.detail, std::nullopt};
     item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
     item.insertText = localName;
     item.sortText = SortText::AutoImports;
@@ -472,7 +476,8 @@ static lsp::CompletionItem createRotrieverInternalTypeExportSuggestion(const std
     lsp::CompletionItem item;
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Interface; // Use Interface for types
-    item.detail = typePath == localName ? ("[module] " + moduleName) : ("[module] " + moduleName + "." + typePath);
+    item.detail = typePath == localName ? ("[" + moduleName + "]") : ("[" + moduleName + "] " + typePath);
+    item.labelDetails = {item.detail, std::nullopt};
     item.documentation = {lsp::MarkupKind::Markdown, codeBlock("luau", textEdit.newText)};
     item.insertText = localName;
     item.sortText = SortText::AutoImports;
@@ -517,7 +522,8 @@ static lsp::CompletionItem createRotrieverTypeExportSuggestion(const std::string
     item.label = localName;
     item.kind = lsp::CompletionItemKind::Interface; // Use Interface for types
     // Show the full path in detail for nested types
-    item.detail = typePath == localName ? ("[rotriever] package " + packageName) : ("[rotriever] package " + packageName + "." + typePath);
+    item.detail = typePath == localName ? ("[" + packageName + "]") : ("[" + packageName + "] " + typePath);
+    item.labelDetails = {item.detail, std::nullopt};
 
     // Build documentation showing all the edits
     std::string docText;
@@ -694,13 +700,19 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 setupLineOffset = linesAdded;
             }
 
+            // Compute the line number for type imports (after all requires)
+            size_t typeLineNumber = computeLineForTypeImport(importsVisitor, minimumLineNumber);
+            // Adjust type line number if we're inserting setup edits before the requires
+            if (!importsVisitor.hasPackagesLocal() && typeLineNumber >= setupInsertLine)
+                typeLineNumber += setupLineOffset;
+
             // For each dependency of this package, suggest the package and its exports
             for (const auto& [depName, dep] : currentPackage->dependencies)
             {
                 // Check if the package itself is already imported
                 bool packageAlreadyImported = importsVisitor.containsRequire(depName);
 
-                // Compute line number for inserting the require/type statement
+                // Compute line number for inserting the require statement
                 // If the package is already imported, insert after its definition line
                 // Otherwise, use the standard best line computation
                 size_t lineNumber = minimumLineNumber;
@@ -751,6 +763,9 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         }
 
                         // Suggest type exports (from "export type" statements)
+                        // Type imports go after all requires, so use typeLineNumber
+                        bool typePrependNewline = config.completion.imports.separateGroupsWithLine &&
+                                                  importsVisitor.getLastRequireLine().has_value();
                         for (const auto& typePath : pkg.typeExports)
                         {
                             // For nested types, get the local name
@@ -765,7 +780,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                                 continue;
 
                             items.emplace_back(createRotrieverTypeExportSuggestion(
-                                typePath, depName, packagesLocalName, lineNumber, prependNewline, packageAlreadyImported, setupEdits));
+                                typePath, depName, packagesLocalName, typeLineNumber, typePrependNewline, packageAlreadyImported, setupEdits));
                         }
                         break;
                     }
@@ -785,6 +800,11 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
             // If so, use that pattern for internal requires instead of script.Parent... paths
             bool usePackageAncestorLocal = importsVisitor.hasPackageAncestorLocal();
             std::string packageAncestorLocalName = importsVisitor.packageAncestorLocalName;
+
+            // For internal modules, also compute a type-specific line number
+            size_t internalTypeLineNumber = computeLineForTypeImport(importsVisitor, minimumLineNumber);
+            bool internalTypePrependNewline = config.completion.imports.separateGroupsWithLine &&
+                                              importsVisitor.getLastRequireLine().has_value();
 
             for (const auto& internalModule : currentPackage->internalModules)
             {
@@ -813,7 +833,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 // Check if the module itself is already imported
                 bool moduleAlreadyImported = importsVisitor.containsRequire(internalModule.name);
 
-                // Compute line number for inserting the require/type statement
+                // Compute line number for inserting the require statement
                 // If the module is already imported, insert after its definition line
                 // Otherwise, use the standard best line computation
                 size_t lineNumber = minimumLineNumber;
@@ -853,6 +873,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                 }
 
                 // 3. Suggest type exports from the module
+                // Type imports go after all requires, so use internalTypeLineNumber
                 for (const auto& typePath : internalModule.typeExports)
                 {
                     // For nested types, get the local name
@@ -865,7 +886,7 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
                         continue;
 
                     items.emplace_back(createRotrieverInternalTypeExportSuggestion(
-                        typePath, internalModule.name, requirePath, lineNumber, prependNewline, moduleAlreadyImported));
+                        typePath, internalModule.name, requirePath, internalTypeLineNumber, internalTypePrependNewline, moduleAlreadyImported));
                 }
             }
         }

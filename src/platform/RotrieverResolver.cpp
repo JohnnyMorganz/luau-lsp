@@ -176,7 +176,56 @@ static void parseExportsRecursive(
             if (returnStat->list.size != 1)
                 continue;
 
-            auto* tableExpr = returnStat->list.data[0]->as<Luau::AstExprTable>();
+            // Try to extract the table expression from the return value
+            // Handles various patterns:
+            //   return { ... }
+            //   return { ... } :: Type
+            //   return table.freeze({ ... })
+            //   return Object.freeze({ ... })
+            Luau::AstExpr* returnExpr = returnStat->list.data[0];
+
+            // Unwrap type assertions: return { ... } :: Type
+            if (auto* typeAssertion = returnExpr->as<Luau::AstExprTypeAssertion>())
+                returnExpr = typeAssertion->expr;
+
+            auto* tableExpr = returnExpr->as<Luau::AstExprTable>();
+
+            // If not a direct table, check for table.freeze({ ... }) or Object.freeze({ ... })
+            if (!tableExpr)
+            {
+                if (auto* call = returnExpr->as<Luau::AstExprCall>())
+                {
+                    // Check if it's X.freeze(...) where X is "table" or "Object"
+                    if (auto* indexExpr = call->func->as<Luau::AstExprIndexName>())
+                    {
+                        std::string methodName(indexExpr->index.value);
+                        if (methodName == "freeze" && call->args.size == 1)
+                        {
+                            Luau::AstExpr* freezeArg = call->args.data[0];
+
+                            // Unwrap type assertion on the argument too
+                            if (auto* argTypeAssertion = freezeArg->as<Luau::AstExprTypeAssertion>())
+                                freezeArg = argTypeAssertion->expr;
+
+                            // Check if it's table.freeze or Object.freeze (global)
+                            if (auto* globalExpr = indexExpr->expr->as<Luau::AstExprGlobal>())
+                            {
+                                std::string globalName(globalExpr->name.value);
+                                if (globalName == "table" || globalName == "Object")
+                                {
+                                    tableExpr = freezeArg->as<Luau::AstExprTable>();
+                                }
+                            }
+                            // Also check if it's a local reference (e.g., local Object = require(...))
+                            else if (indexExpr->expr->as<Luau::AstExprLocal>())
+                            {
+                                tableExpr = freezeArg->as<Luau::AstExprTable>();
+                            }
+                        }
+                    }
+                }
+            }
+
             if (!tableExpr)
                 continue;
 
