@@ -485,6 +485,7 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
     if (auto realPath = getRealPathFromSourceNode(node))
     {
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
+        overtureLibraryVirtualPaths.insert_or_assign();
     }
 
     for (auto& child : node->children)
@@ -500,6 +501,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     rootSourceNode = nullptr;
     sourceNodeAllocator.clear();
     realPathsToSourceNodes.clear();
+    overtureLibraryVirtualPaths.clear();
     virtualPathsToSourceNodes.clear();
 
     try

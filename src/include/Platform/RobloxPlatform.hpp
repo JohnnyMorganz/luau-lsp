@@ -107,6 +107,7 @@ private:
     // Plugin-provided DataModel information
     PluginNode* pluginInfo = nullptr;
 
+    mutable std::unordered_map<std::string, std::string> overtureLibraryVirtualPaths{};
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
     mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
 

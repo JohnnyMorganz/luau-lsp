@@ -55,9 +55,6 @@ private:
     /// Used for documentation comment lookup within definition files.
     std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
 
-	/// Mapping from library names to their virutal paths for Overture libraries
-	std::unordered_map<std::string, std::string> overtureLibraryVirtualPaths{};
-
 public:
     WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
         : client(client)
