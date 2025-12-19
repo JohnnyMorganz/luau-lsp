@@ -509,7 +509,6 @@ std::optional<std::vector<lsp::CompletionItem>> WorkspaceFolder::tryCompleteOver
     if (!textDocument)
         return std::nullopt;
 
-    // Get the line where the cursor is
     std::string lineContent = textDocument->getLine(position.line);
     if (lineContent.empty())
         return std::nullopt;
@@ -522,7 +521,7 @@ std::optional<std::vector<lsp::CompletionItem>> WorkspaceFolder::tryCompleteOver
     {
         std::vector<lsp::CompletionItem> items;
 
-        for (const auto& [libraryName, _] : overtureLibraryVirtualPaths)
+        for (const auto& libraryName : platform->getOvertureLibraries())
         {
             lsp::CompletionItem item;
             item.label = libraryName;

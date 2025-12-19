@@ -347,10 +347,7 @@ static const char* kIndexProgressToken = "luau/indexFiles";
 
 std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const std::string& libraryName) const
 {
-    auto it = overtureLibraryVirtualPaths.find(libraryName);
-    if (it != overtureLibraryVirtualPaths.end())
-        return it->second;
-    return std::nullopt;
+    return platform->getOvertureLibraryPath(libraryName);
 }
 
 static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* folder, Client* client, std::unordered_map<std::string, std::string>& libraries)
@@ -408,10 +405,6 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing");
 
     std::vector<Luau::ModuleName> moduleNames;
-    overtureLibraryVirtualPaths.clear();
-
-    // Load Overture libraries from pre-generated JSON (values are already module names)
-    loadOvertureLibrariesFromJson(rootUri, this, client, overtureLibraryVirtualPaths);
 
     bool sentMessage = false;
     Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),

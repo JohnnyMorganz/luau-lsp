@@ -2,10 +2,15 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
+#include "LSP/Utils.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
+
+#include <algorithm>
+#include <filesystem>
+#include <functional>
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -476,6 +481,188 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
+std::optional<Luau::ModuleName> RobloxPlatform::getOvertureLibraryPath(const std::string& libraryName) const
+{
+	auto it = overtureLibraryVirtualPaths.find(libraryName);
+	if (it != overtureLibraryVirtualPaths.end())
+		return it->second;
+	return std::nullopt;
+}
+
+std::vector<std::string> RobloxPlatform::getOvertureLibraries() const
+{
+	std::vector<std::string> libraries;
+	for (const auto& [name, _] : overtureLibraryVirtualPaths)
+	{
+		libraries.push_back(name);
+	}
+	return libraries;
+}
+
+static bool isOvertureLibrary(const json& meta)
+{
+	if (!meta.is_object())
+		return false;
+
+	if (meta.contains("Tags") && meta["Tags"].is_array())
+	{
+		for (const auto& tag : meta["Tags"])
+		{
+			if (tag.is_string())
+			{
+				std::string tagStr = tag.get<std::string>();
+
+				if (tagStr == "oLibrary")
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+static std::optional<std::string> findOvertureLibraryModule(const Uri& metaDir, const std::string& baseName)
+{
+	std::vector<std::string> candidates = {baseName + ".luau", baseName + ".lua", "init.luau", "init.lua"};
+
+	for (const auto& candidate : candidates)
+	{
+		Uri candidatePath = metaDir.resolvePath(candidate);
+		if (candidatePath.exists())
+		{
+			return candidate;
+		}
+	}
+
+	return std::nullopt;
+}
+
+static void findOvertureLibraries(const Uri& workspaceRoot, RobloxPlatform* platform,
+	const std::unordered_map<std::string, std::string>& fsToVirtualPaths)
+{
+	LUAU_TIMETRACE_SCOPE("RobloxPlatform::findOvertureLibraries", "LSP");
+
+	std::vector<Uri> metaFiles;
+
+	std::vector<std::string> stack;
+	stack.push_back(workspaceRoot.fsPath());
+
+	while (!stack.empty())
+	{
+		std::string dirPath = stack.back();
+		stack.pop_back();
+
+		std::filesystem::directory_iterator dirIter;
+		try
+		{
+			dirIter = std::filesystem::directory_iterator(dirPath);
+		}
+		catch (const std::exception&)
+		{
+			continue;
+		}
+
+		for (const auto& entry : dirIter)
+		{
+			std::string filename = entry.path().filename().string();
+
+			if (entry.is_directory())
+			{
+				stack.push_back(entry.path().string());
+			}
+			else if (entry.is_regular_file() && endsWith(filename, ".meta.json"))
+			{
+				metaFiles.push_back(Uri::file(entry.path().string()));
+			}
+		}
+	}
+
+	for (const auto& metaFilePath : metaFiles)
+	{
+		if (auto metaContents = Luau::FileUtils::readFile(metaFilePath.fsPath()))
+		{
+			try
+			{
+				json meta = json::parse(metaContents.value());
+				if (!isOvertureLibrary(meta))
+					continue;
+
+				std::string metaFileName = metaFilePath.filename();
+				size_t dotPos = metaFileName.rfind(".meta.json");
+				if (dotPos == std::string::npos)
+					continue;
+
+				std::string baseName = metaFileName.substr(0, dotPos);
+				auto metaDirOpt = metaFilePath.parent();
+				if (!metaDirOpt)
+					continue;
+				Uri metaDir = *metaDirOpt;
+
+				if (auto moduleFile = findOvertureLibraryModule(metaDir, baseName))
+				{
+					Uri moduleFilePath = metaDir.resolvePath(*moduleFile);
+					std::string relativeModulePath = moduleFilePath.lexicallyRelative(workspaceRoot);
+
+					auto virtualPath = fsToVirtualPaths.find(relativeModulePath);
+					std::string virtualPathStr = virtualPath != fsToVirtualPaths.end() ? virtualPath->second : relativeModulePath;
+
+					platform->addOvertureLibrary(baseName, virtualPathStr);
+				}
+			}
+			catch (const std::exception&)
+			{
+				continue;
+			}
+		}
+	}
+}
+
+static std::unordered_map<std::string, std::string> buildFsToVirtualMap(const json& sourcemap)
+{
+	std::unordered_map<std::string, std::string> map;
+
+	std::function<void(const json&, const std::string&)> traverse = [&](const json& node, const std::string& base)
+	{
+		if (!node.is_object())
+			return;
+
+		if (node.contains("filePaths") && node["filePaths"].is_array())
+		{
+			for (const auto& filePath : node["filePaths"])
+			{
+				if (filePath.is_string())
+				{
+					std::string pathStr = filePath.get<std::string>();
+					if (!endsWith(pathStr, ".meta.json"))
+					{
+						map[pathStr] = base;
+					}
+				}
+			}
+		}
+
+		if (node.contains("children") && node["children"].is_array())
+		{
+			for (const auto& child : node["children"])
+			{
+				if (!child.is_object())
+					continue;
+
+				std::string childName = child.contains("name") && child["name"].is_string() ? child["name"].get<std::string>() : "";
+
+				if (childName.empty())
+					continue;
+
+				std::string childPath = base + "/" + childName;
+				traverse(child, childPath);
+			}
+		}
+	};
+
+	traverse(sourcemap, "game");
+	return map;
+}
+
 void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
@@ -485,7 +672,6 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
     if (auto realPath = getRealPathFromSourceNode(node))
     {
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
-        overtureLibraryVirtualPaths.insert_or_assign();
     }
 
     for (auto& child : node->children)
@@ -508,6 +694,23 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
+
+        auto fsToVirtualPaths = buildFsToVirtualMap(j);
+        findOvertureLibraries(workspaceFolder->rootUri, this, fsToVirtualPaths);
+
+        if (!overtureLibraryVirtualPaths.empty())
+        {
+            std::string libraryDump = "Found " + std::to_string(overtureLibraryVirtualPaths.size()) + " Overture libraries:\n";
+            for (const auto& [name, path] : overtureLibraryVirtualPaths)
+            {
+                libraryDump += "  " + name + " -> " + path + "\n";
+            }
+            workspaceFolder->client->sendTrace(libraryDump);
+        }
+        else
+        {
+            workspaceFolder->client->sendTrace("No Overture libraries found");
+        }
     }
     catch (const std::exception& e)
     {
@@ -518,7 +721,6 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         return;
     }
 
-    // Write paths
     std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
     writePathsToMap(rootSourceNode, base);
 
