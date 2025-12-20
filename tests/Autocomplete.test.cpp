@@ -684,6 +684,52 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_does_not_include_childre
     checkStringCompletionExists(result, "ClassName");
 }
 
+TEST_CASE_FIXTURE(Fixture, "is_property_modified_includes_properties")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = Instance.new("Part")
+        x:IsPropertyModified("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
+TEST_CASE_FIXTURE(Fixture, "reset_property_to_default_includes_properties")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = Instance.new("Part")
+        x:ResetPropertyToDefault("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_first_child_on_datamodel_contains_children")
 {
     loadSourcemap(R"(
