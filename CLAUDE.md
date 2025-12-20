@@ -102,14 +102,13 @@ Located in `extern/` and `luau/`:
 
 ## Testing Patterns
 
-Tests use the `Fixture` class from `tests/Fixture.h`:
+Tests use the `Fixture` class from `tests/Fixture.h` with doctest's `TEST_CASE_FIXTURE`:
 
 ```cpp
-TEST_CASE("FeatureName")
+TEST_CASE_FIXTURE(Fixture, "FeatureName")
 {
-    Fixture fix;
-    auto uri = fix.newDocument("test.luau", "local x = 1");
-    // Test operations using fix.workspace
+    auto uri = newDocument("test.luau", "local x = 1");
+    // Test operations using workspace
 }
 ```
 
