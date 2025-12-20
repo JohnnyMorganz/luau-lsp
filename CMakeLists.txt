@@ -87,6 +87,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
         src/operations/RequireGraph.cpp
+        src/operations/OnTypeFormatting.cpp
         src/transport/PipeTransport.cpp
         src/transport/StdioTransport.cpp
         extern/glob/match.cpp
@@ -102,6 +103,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Fixture.cpp
         tests/TempDir.cpp
         tests/TestClient.cpp
+        tests/TestUtils.cpp
         tests/Autocomplete.test.cpp
         tests/AutoImports.test.cpp
         tests/Bytecode.test.cpp
@@ -129,6 +131,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
         tests/RequireGraph.test.cpp
+        tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
