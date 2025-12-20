@@ -10,11 +10,14 @@ import sys
 # API Endpoints
 DATA_TYPES = open("DataTypes.json", "r")
 CORRECTIONS = open("Corrections.json", "r")
-API_DUMP_URL = "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/API-Dump.json"
+API_DUMP_URL = "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/Full-API-Dump.json"
+LUAU_TYPES_URL = "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/LuauTypes.d.luau"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
-INCLUDE_DEPRECATED_METHODS = False
-DEFAULT_SECURITY_LEVEL = "RobloxScriptSecurity"
+# Whether to include deprecated members that cannot be assigned the @deprecated attribute (i.e. deprecated non-functions). 
+# Deprecated functions will always be defined, with their corresponding @deprecated attribute.
+INCLUDE_DEPRECATED_MEMBERS = False
+
 SECURITY_LEVELS = [
     "None",
     "LocalUserSecurity",
@@ -24,6 +27,8 @@ SECURITY_LEVELS = [
     "RobloxSecurity",
     "NotAccessibleSecurity",
 ]
+
+DEFAULT_SECURITY_LEVEL = "RobloxScriptSecurity"
 
 # Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
 OVERRIDE_DEPRECATED_REMOVAL = [
@@ -37,6 +42,46 @@ OVERRIDE_DEPRECATED_REMOVAL = [
     # "RocketPropulsion",
     "BevelMesh",  # superclass of BlockMesh
 ]
+
+# Labeled sections of the LuauTypes.d.luau to remove entirely
+DELETED_LUAU_SECTIONS = [
+    "TestEZ", # Implied to be injected into modules suffixed with .test
+    "BehaviorScript", # Related to upcoming server authority changes, not usable currently.
+]
+
+# Manual corrections to the RobloxGlobals in LuauTypes.d.luau
+# Also used as a fallback failsafe for some of the functions.
+LUAU_SNIPPET_PATCHES = {
+    "declare function collectgarbage(mode: string): number":
+        "@[deprecated{ use = \"gcinfo\" }]\ndeclare function collectgarbage(mode: \"count\"): number",
+    
+    "declare function delay(delay: number?, callback: () -> ())":
+        "@[deprecated{ use = \"task.delay\" }]\ndeclare function delay(delay: number?, callback: (dt: number, gt: number) -> ())",
+    
+    "declare function stats()":
+        "@[deprecated{ use = [[game:GetService(\"Stats\")]] }]\ndeclare function stats(): Stats",
+    
+    "declare function wait(delay: number?): (number, number)": 
+        "@[deprecated{ use = \"task.wait\" }]\ndeclare function wait(delay: number?): (number, number)",
+    
+    "declare function printidentity(prefix: string?)":
+        "@deprecated declare function printidentity(prefix: string?)",
+
+    "declare function version(): string":
+        "@deprecated declare function version(): string",
+    
+    "declare game: any": "declare game: DataModel",
+    "declare workspace: any": "declare workspace: Workspace",
+    "declare script: any": "declare script: LuaSourceContainer",
+
+    "declare ElapsedTime: typeof(elapsedTime)": "",
+    "declare Delay: typeof(delay)": "",
+    "declare Stats: typeof(stats)": "",
+    "declare Version: typeof(version)": "",
+    "declare Wait: typeof(wait)": "",
+    "declare Workspace: any": "",
+    "declare Game: any": "",
+}
 
 TYPE_INDEX = {
     "Tuple": "any",
@@ -126,6 +171,9 @@ EXTRA_MEMBERS = {
         "GameSettings: UserGameSettings",
         'function GetService(self, service: "UserGameSettings"): UserGameSettings',
     ],
+    "Object": [
+        "function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>",
+    ],
     "Instance": [
         "Parent: Instance?",
         "AncestryChanged: RBXScriptSignal<Instance, Instance?>",
@@ -142,7 +190,6 @@ EXTRA_MEMBERS = {
         "function GetAttribute(self, attribute: string): unknown?",
         "function GetAttributes(self): { [string]: unknown }",
         "function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>",
-        "function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>",
     ],
     "Model": ["PrimaryPart: BasePart?"],
     "RemoteEvent": [
@@ -219,6 +266,10 @@ EXTRA_MEMBERS = {
         "function ReserveServer(self, placeId: number): (string, string)",
         "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
         "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
+    ],
+    "Players": [
+        "function BanAsync(self, config: BanConfigType)",
+        "function UnbanAsync(self, config: UnbanConfigType)"
     ],
     "TeleportOptions": [
         "function GetTeleportData(self): TeleportData?",
@@ -362,6 +413,18 @@ EXTRA_MEMBERS = {
         "GroundSensor: ControllerSensor?",
         "RootPart: BasePart?",
     ],
+    "EditableImage": [
+        "function DrawImageProjected(self, mesh: EditableMesh, projection: ProjectionParams, brushConfig: BrushConfig)"
+    ],
+    "CaptureService": [
+        "function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams) -> EnumVideoCaptureStartResult",
+        "function TakeCapture(self, onCaptureReady: (capture: Capture) -> (), params: CaptureParams) -> ()",
+    ],
+    "ReflectionService": [
+        "function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClass?",
+        "function GetClasses(self, filter: ReflectionClassFilter?): { ReflectedClass }",
+        "function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedProperty }"
+    ]
 }
 
 # Hardcoded types
@@ -380,6 +443,18 @@ type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
 type AdReward = any
+
+-- Forward declare types from LuauTypes.d.luau used in
+-- EXTRA_MEMBERS, in case any of them fail to arrive.
+type BanConfigType = any
+type UnbanConfigType = any
+type CaptureParams = any
+type ProjectionParams = any
+type BrushConfig = any
+type ReflectedClass = any
+type ReflectedProperty = any
+type ReflectionClassFilter = any
+type ReflectionMemberFilter = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -404,16 +479,6 @@ declare debug: {
     resetmemorycategory: () -> (),
 }
 
-declare task: {
-    cancel: (thread: thread) -> (),
-    defer: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
-    spawn: <A..., R...>(f: thread | ((A...) -> R...), A...) -> thread,
-    delay: <A..., R...>(sec: number?, f: thread | ((A...) -> R...), A...) -> thread,
-    wait: (sec: number?) -> number,
-    synchronize: () -> (),
-    desynchronize: () -> (),
-}
-
 declare utf8: {
     char: (...number) -> string,
     charpattern: string,
@@ -426,18 +491,10 @@ declare utf8: {
     offset: (string, number, number?) -> number?,
 }
 
-declare shared: any
-
-declare function collectgarbage(mode: "count"): number
 declare function warn<T...>(...: T...)
-declare function tick(): number
-declare function time(): number
-declare function elapsedTime(): number
-declare function wait(seconds: number?): (number, number)
-declare function delay<T...>(delayTime: number?, callback: (T...) -> ())
-declare function spawn<T...>(callback: (T...) -> ())
-declare function version(): string
-declare function printidentity(prefix: string?)
+
+@[deprecated { use = "task.spawn" }]
+declare function spawn(callback: (dt: number, gt: number) -> ())
 """
 
 POST_DATATYPES_BASE = """
@@ -528,12 +585,11 @@ declare SharedTable: {
     update: (st: SharedTable, key: string | number, f: (any) -> any) -> (),
 }
 
-declare game: DataModel
-declare workspace: Workspace
-declare plugin: Plugin
-declare script: LuaSourceContainer
 declare function settings(): GlobalSettings
 declare function UserSettings(): UserSettings
+
+@deprecated declare function PluginManager(): PluginManager
+@deprecated declare function DebuggerManager(): DebuggerManager
 """
 
 CLASSES = {}  # All loaded classes from the API Dump, including corrections
@@ -580,6 +636,26 @@ CorrectionsClass = TypedDict(
 
 CorrectionsDump = TypedDict("CorrectionsDump", {"Classes": List[CorrectionsClass]})
 
+ApiSecurityLevel = Union[
+    Literal["None"],
+    Literal["LocalUserSecurity"],
+    Literal["PluginSecurity"],
+    Literal["WritePlayerSecurity"],
+    Literal["RobloxScriptSecurity"],
+    Literal["RobloxSecurity"],
+    Literal["NotAccessibleSecurity"],
+]
+
+ApiDeprecatedInfo = TypedDict(
+    "ApiDeprecatedInfo",
+    {
+        "PreferredDescriptorName": str,
+        "ThreadSafety": str,
+    }
+)
+
+ApiTags = Optional[List[str | ApiDeprecatedInfo]]
+
 ApiValueType = TypedDict(
     "ApiValueType",
     {
@@ -603,17 +679,22 @@ ApiParameter = TypedDict(
     },
 )
 
-ApiPropertySecurityLevel = TypedDict("PropertySecurity", {"Read": str, "Write": str})
+ApiPropertySecurityLevel = TypedDict(
+    "ApiPropertySecurityLevel", 
+    {
+        "Read": ApiSecurityLevel,
+        "Write": ApiSecurityLevel
+    }
+)
 
 ApiProperty = TypedDict(
     "ApiProperty",
     {
         "Name": str,
         "MemberType": Literal["Property"],
-        "Deprecated": Optional[bool],
         "Description": Optional[str],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Category": str,  # TODO: stricter type?
+        "Tags": ApiTags,
+        "Category": str,
         "ValueType": ApiValueType,
         "Security": ApiPropertySecurityLevel,
     },
@@ -624,13 +705,12 @@ ApiFunction = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Function"],
-        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
+        "Security": ApiSecurityLevel,
+        "Tags": ApiTags,
     },
 )
 
@@ -639,11 +719,10 @@ ApiEvent = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Event"],
-        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
+        "Security": ApiSecurityLevel,
+        "Tags": ApiTags,
     },
 )
 
@@ -652,13 +731,12 @@ ApiCallback = TypedDict(
     {
         "Name": str,
         "MemberType": Literal["Callback"],
-        "Deprecated": Optional[bool],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
         "ReturnType": Union[ApiValueType, List[ApiValueType]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
-        "Security": str,
+        "Tags": ApiTags,
+        "Security": ApiSecurityLevel,
     },
 )
 
@@ -672,7 +750,7 @@ ApiClass = TypedDict(
         "MemoryCategory": str,  # TODO: stricter type?
         "Superclass": str,
         "Members": List[ApiMember],
-        "Tags": Optional[List[str]],  # TODO: stricter type?
+        "Tags": ApiTags,
     },
 )
 
@@ -719,10 +797,11 @@ assert (
         chosenSecurityLevel in SECURITY_LEVELS
 ), f"Unknown security level: {chosenSecurityLevel}"
 
+# Cache for looking up members by name when resolving deprecations
+classesWithMemberName: dict[str, List[ApiClass]] = {}
 
 def isIdentifier(name: str):
     return re.match(r"^[a-zA-Z_]+[a-zA-Z_0-9]*$", name)  # TODO: 'function'
-
 
 def escapeName(name: str):
     """Escape a name string to be property-compatible"""
@@ -759,7 +838,7 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     )
 
     if name[-1] == "?":
-        return resolveType({"Name": name[:-1], "Category": category}) + "?"
+        return resolveType({"Name": name[:-1], "Category": category or "Primitive"}) + "?"
 
     if category == "Enum":
         return "Enum" + name
@@ -794,6 +873,54 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
     else:
         return resolveType(member["ReturnType"])
 
+def resolveDeprecation(member: ApiMember, klass: ApiClass) -> str:
+    tags: Optional[List[Union[str, ApiDeprecatedInfo]]] = None
+    
+    if "Tags" in member:
+        tags = member["Tags"]
+    
+    result = ""
+
+    if tags is not None:
+        for tag in tags:
+            if tag == "Deprecated":
+                result = f"@deprecated\n\t\t"
+            elif not isinstance(tag, str) and "PreferredDescriptorName" in tag:
+                preferred = tag["PreferredDescriptorName"]
+                matchingClasses = classesWithMemberName.get(preferred)
+
+                if matchingClasses is None:
+                    # Check if the class itself contains the preferred member
+                    # This happens if the preferred member is deprecated too.
+                    if preferred in [member["Name"] for member in klass["Members"]]:
+                        matchingClasses = [klass]
+
+                if matchingClasses is not None:
+                    bestClass: Optional[ApiClass] = None
+
+                    if klass in matchingClasses:
+                        bestClass = klass
+                    else:
+                        # TODO: Better selection logic
+                        bestClass = matchingClasses[0]
+
+                    if bestClass is not None:
+                        bestMember: Optional[ApiMember] = None
+
+                        for member in bestClass["Members"]:
+                            if member["Name"] == preferred:
+                                bestMember = member
+                                break
+                        
+                        if bestMember is not None:
+                            # Use the classname and member name, we found a different class to point to!
+                            result = f"@[deprecated {{use = \"{bestClass['Name']}{':' if bestMember["MemberType"] == "Function" else '.'}{preferred}\"}}]\n\t\t"
+                            break
+
+                result = f"@[deprecated {{use = \"{preferred}\"}}]\n\t\t"
+                break
+
+    return result
 
 def classIgnoredMembers(klassName: str):
     ignoredMembers = []
@@ -813,17 +940,23 @@ def classIgnoredMembers(klassName: str):
 
 
 def filterMember(klassName: str, member: ApiMember):
-    if not INCLUDE_DEPRECATED_METHODS and (
-            (
-                    "Tags" in member
-                    and member["Tags"] is not None
-                    and "Deprecated" in member["Tags"]
-            )
-            or ("Deprecated" in member and member["Deprecated"])
+    if not INCLUDE_DEPRECATED_MEMBERS and (
+        "Tags" in member and
+        member["Tags"] is not None
+        and "Deprecated" in member["Tags"]
+        and member["MemberType"] != "Function"
     ):
         return False
+    
+    if ("Tags" in member and
+        member["Tags"] is not None
+        and "NotScriptable" in member["Tags"]):
+        return False
+    
     if member["Name"] in classIgnoredMembers(klassName):
         return False
+    
+
     if "Security" in member:
         if isinstance(member["Security"], str):
             if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
@@ -840,21 +973,8 @@ def filterMember(klassName: str, member: ApiMember):
     return True
 
 
-def shouldExcludeAsDeprecated(klass: ApiClass):
-    return (
-            not INCLUDE_DEPRECATED_METHODS
-            and "Tags" in klass
-            and klass["Tags"] is not None
-            and "Deprecated" in klass["Tags"]
-            and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
-    )
-
-
-def declareClass(klass: ApiClass) -> str:
+def declareClass(klass: Union[ApiClass, DataType]) -> str:
     if klass["Name"] in IGNORED_INSTANCES:
-        return ""
-
-    if shouldExcludeAsDeprecated(klass):
         return ""
 
     out = "declare class " + klass["Name"]
@@ -868,7 +988,7 @@ def declareClass(klass: ApiClass) -> str:
                 f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
             )
         elif member["MemberType"] == "Function":
-            return f"\tfunction {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
+            return f"\t{resolveDeprecation(member, klass)}function {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
         elif member["MemberType"] == "Event":
             parameters = ", ".join(
                 map(lambda x: resolveType(x["Type"]), member["Parameters"])
@@ -888,7 +1008,7 @@ def declareClass(klass: ApiClass) -> str:
             f"\t{member}\n" for member in EXTRA_MEMBERS[klass["Name"]]
         ]
 
-    out += "".join(sorted(memberDefinitions))
+    out += "".join(memberDefinitions)
     out += "end"
 
     return out
@@ -928,11 +1048,6 @@ def printEnums(dump: ApiDump):
 
 
 def printClasses(dump: ApiDump):
-    # Forward declare "deprecated" classes in case they are still used
-    for klass in dump["Classes"]:
-        if shouldExcludeAsDeprecated(klass):
-            print(f"export type {klass['Name']} = any")
-
     for klass in dump["Classes"]:
         if klass["Name"] in IGNORED_INSTANCES:
             continue
@@ -941,7 +1056,7 @@ def printClasses(dump: ApiDump):
         print()
 
 
-def printDataTypes(types: List[DataType]):
+def printDataTypes(types: List[DataType], dump: ApiDump):
     for klass in types:
         print(declareClass(klass))
         print()
@@ -985,7 +1100,12 @@ def printDataTypeConstructors(types: DataTypesDump):
 
             functions["new"].append(
                 {
-                    "Parameters": [{"Name": "name", "Type": {"Name": colors}}],
+                    "MemberType": "Function",
+                    "Description": None,
+                    "TupleReturns": None,
+                    "Security": "None",
+                    "Tags": None,
+                    "Parameters": [{"Name": "name", "Type": {"Category": "Primitive", "Name": colors}, "Default": None}],
                     "ReturnType": {"Name": "BrickColor", "Category": "DataType"},
                     "Name": "new",
                 }
@@ -1057,6 +1177,19 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                             break
                 break
 
+def loadMembersIntoStructures(klass: ApiClass):
+    for member in klass["Members"]:
+        name = member["Name"]
+        tags = member["Tags"] if "Tags" in member else None
+
+        if (tags is not None and "Deprecated" in tags):
+            continue
+
+        if name not in classesWithMemberName:
+            classesWithMemberName[name] = [klass]
+        else:
+            classesWithMemberName[name].append(klass)
+            
 
 def loadClassesIntoStructures(dump: ApiDump):
     for klass in dump["Classes"]:
@@ -1066,9 +1199,9 @@ def loadClassesIntoStructures(dump: ApiDump):
         isCreatable = True
         if "Tags" in klass and klass["Tags"] is not None:
             if (
-                    "Deprecated" in klass
-                    and not INCLUDE_DEPRECATED_METHODS
-                    and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+                "Deprecated" in klass
+                and not INCLUDE_DEPRECATED_MEMBERS
+                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
             ):
                 continue
             if "Service" in klass["Tags"]:
@@ -1079,6 +1212,7 @@ def loadClassesIntoStructures(dump: ApiDump):
             CREATABLE.append(klass["Name"])
 
         CLASSES[klass["Name"]] = klass
+        loadMembersIntoStructures(klass)
 
 
 def processBrickColors(colors):
@@ -1091,6 +1225,57 @@ def printJsonPrologue():
     print("--#METADATA#" + json.dumps(data, indent=None))
     print()
 
+def printLuauTypes():
+    luauTypes: str = requests.get(LUAU_TYPES_URL).text
+
+    # Split luauTypes into lines
+    luauLines = luauTypes.splitlines()
+
+    while not luauLines[0].startswith("-- SECTION BEGIN:"):
+        luauLines.pop(0)
+    
+    # Begin capturing sections from SECTION BEGIN to SECTION END
+    luauSections: dict[str, list[str]] = dict()
+    sectionNames: list[str] = []
+    currentSection = None
+
+    for line in luauLines:
+        if line.startswith("-- SECTION BEGIN:"):
+            currentSection = []
+        elif line.startswith("-- SECTION END:"):
+            sectionName = line[16:]
+
+            if currentSection is not None:
+                luauSections[sectionName] = currentSection
+                currentSection = None
+            
+            sectionNames.append(sectionName)
+        elif currentSection is not None:
+            if line in LUAU_SNIPPET_PATCHES.keys():
+                line = LUAU_SNIPPET_PATCHES[line]
+            
+            line = line.replace("Enum.", "Enum")
+            currentSection.append(line)
+
+    # Reconstruct luauTypes
+    writtenLines: set[str] = set()
+    luauTypes = ""
+
+    for sectionName in sectionNames:
+        if sectionName not in DELETED_LUAU_SECTIONS:
+            sectionLines = luauSections[sectionName]
+
+            for line in sectionLines:
+                writtenLines.add(line)
+            
+            luauTypes += "\n".join(sectionLines) + "\n"
+    
+    # Fail-safe: Append any patches that were not written
+    for patch in LUAU_SNIPPET_PATCHES.values():
+        if patch not in writtenLines:
+            luauTypes += patch + "\n"
+    
+    print(luauTypes)
 
 # Load BrickColors
 brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
@@ -1110,8 +1295,9 @@ applyCorrections(dump, corrections)
 printJsonPrologue()
 print(START_BASE)
 printEnums(dump)
-printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]))
+printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]), dump)
 print(POST_DATATYPES_BASE)
+printLuauTypes()
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
 print(END_BASE)
