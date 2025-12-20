@@ -10,29 +10,29 @@ option(LSP_WERROR "Warnings as errors" ON)
 set(LSP_VERSION "1.58.0")
 set(LSP_NAME "Luau")
 
-if(LSP_STATIC_CRT)
+if (LSP_STATIC_CRT)
     cmake_policy(SET CMP0091 NEW)
     set(LUAU_STATIC_CRT ON)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
+endif ()
 
-if(LUAU_ENABLE_TIME_TRACE)
+if (LUAU_ENABLE_TIME_TRACE)
     add_definitions(-DLUAU_ENABLE_TIME_TRACE)
-endif()
+endif ()
 
-if(LSP_BUILD_WITH_SENTRY)
+if (LSP_BUILD_WITH_SENTRY)
     add_definitions(-DLSP_BUILD_WITH_SENTRY)
-endif()
+endif ()
 
 project(Luau.LanguageServer LANGUAGES CXX)
 
 # Sentry setup
-if(LSP_BUILD_WITH_SENTRY)
+if (LSP_BUILD_WITH_SENTRY)
     add_subdirectory(extern/sentry-native)
     set(BUILD_SHARED_LIBS OFF)
     set(SENTRY_BUILD_RUNTIMESTATIC ON)
     set(CRASHPAD_ENABLE_STACKTRACE ON)
-endif()
+endif ()
 
 add_subdirectory(luau)
 add_library(Luau.LanguageServer STATIC)
@@ -40,128 +40,127 @@ add_executable(Luau.LanguageServer.CLI)
 add_executable(Luau.LanguageServer.Test)
 
 target_sources(Luau.LanguageServer PRIVATE
-    src/LanguageServer.cpp
-    src/JsonRpc.cpp
-    src/Uri.cpp
-    src/WorkspaceFileResolver.cpp
-    src/Workspace.cpp
-    src/TextDocument.cpp
-    src/Client.cpp
-    src/DocumentationParser.cpp
-    src/LuauExt.cpp
-    src/LuauFileUtils.cpp
-    src/IostreamHelpers.cpp
-    src/Utils.cpp
-    src/Flags.cpp
-    src/Thread.cpp
-    src/JsonTomlSyntaxParser.cpp
-    src/CliConfigurationParser.cpp
-    src/platform/AutoImports.cpp
-    src/platform/LSPPlatform.cpp
-    src/platform/StringRequireAutoImporter.cpp
-    src/platform/StringRequireSuggester.cpp
-    src/platform/roblox/RobloxCodeAction.cpp
-    src/platform/roblox/RobloxColorProvider.cpp
-    src/platform/roblox/RobloxCompletion.cpp
-    src/platform/roblox/RobloxFileResolver.cpp
-    src/platform/roblox/RobloxLanguageServer.cpp
-    src/platform/roblox/RobloxLuauExt.cpp
-    src/platform/roblox/RobloxSourcemap.cpp
-    src/platform/roblox/RobloxSourceNode.cpp
-    src/platform/roblox/RobloxStudioPlugin.cpp
-    src/operations/Diagnostics.cpp
-    src/operations/Completion.cpp
-    src/operations/DocumentSymbol.cpp
-    src/operations/DocumentLink.cpp
-    src/operations/ColorProvider.cpp
-    src/operations/GotoDefinition.cpp
-    src/operations/Hover.cpp
-    src/operations/SignatureHelp.cpp
-    src/operations/References.cpp
-    src/operations/Rename.cpp
-    src/operations/InlayHints.cpp
-    src/operations/SemanticTokens.cpp
-    src/operations/CodeAction.cpp
-    src/operations/WorkspaceSymbol.cpp
-    src/operations/FoldingRange.cpp
-    src/operations/CallHierarchy.cpp
-    src/operations/Bytecode.cpp
-    src/operations/RequireGraph.cpp
-    src/transport/PipeTransport.cpp
-    src/transport/StdioTransport.cpp
-    extern/glob/match.cpp
+        src/LanguageServer.cpp
+        src/JsonRpc.cpp
+        src/Uri.cpp
+        src/WorkspaceFileResolver.cpp
+        src/Workspace.cpp
+        src/TextDocument.cpp
+        src/Client.cpp
+        src/DocumentationParser.cpp
+        src/LuauExt.cpp
+        src/LuauFileUtils.cpp
+        src/IostreamHelpers.cpp
+        src/Utils.cpp
+        src/Flags.cpp
+        src/Thread.cpp
+        src/JsonTomlSyntaxParser.cpp
+        src/CliConfigurationParser.cpp
+        src/platform/AutoImports.cpp
+        src/platform/LSPPlatform.cpp
+        src/platform/StringRequireAutoImporter.cpp
+        src/platform/StringRequireSuggester.cpp
+        src/platform/roblox/RobloxCodeAction.cpp
+        src/platform/roblox/RobloxColorProvider.cpp
+        src/platform/roblox/RobloxCompletion.cpp
+        src/platform/roblox/RobloxFileResolver.cpp
+        src/platform/roblox/RobloxLanguageServer.cpp
+        src/platform/roblox/RobloxLuauExt.cpp
+        src/platform/roblox/RobloxSourcemap.cpp
+        src/platform/roblox/RobloxSourceNode.cpp
+        src/platform/roblox/RobloxStudioPlugin.cpp
+        src/operations/Diagnostics.cpp
+        src/operations/Completion.cpp
+        src/operations/DocumentSymbol.cpp
+        src/operations/DocumentLink.cpp
+        src/operations/ColorProvider.cpp
+        src/operations/GotoDefinition.cpp
+        src/operations/Hover.cpp
+        src/operations/SignatureHelp.cpp
+        src/operations/References.cpp
+        src/operations/Rename.cpp
+        src/operations/InlayHints.cpp
+        src/operations/SemanticTokens.cpp
+        src/operations/CodeAction.cpp
+        src/operations/WorkspaceSymbol.cpp
+        src/operations/FoldingRange.cpp
+        src/operations/CallHierarchy.cpp
+        src/operations/Bytecode.cpp
+        src/operations/RequireGraph.cpp
+        src/transport/PipeTransport.cpp
+        src/transport/StdioTransport.cpp
+        extern/glob/match.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE
-    src/main.cpp
-    src/AnalyzeCli.cpp
+        src/main.cpp
+        src/AnalyzeCli.cpp
 )
 
 target_sources(Luau.LanguageServer.Test PRIVATE
-    tests/main.cpp
-    tests/Fixture.cpp
-    tests/TempDir.cpp
-    tests/TestClient.cpp
-    tests/Autocomplete.test.cpp
-    tests/AutoImports.test.cpp
-    tests/MagicFunctions.test.cpp
-    tests/Documentation.test.cpp
-    tests/TextDocument.test.cpp
-    tests/Uri.test.cpp
-    tests/Utils.test.cpp
-    tests/WorkspaceFileResolver.test.cpp
-    tests/SemanticTokens.test.cpp
-    tests/Sourcemap.test.cpp
-    tests/References.test.cpp
-    tests/Rename.test.cpp
-    tests/ColorProvider.test.cpp
-    tests/LuauExt.test.cpp
-    tests/CliConfigurationParser.test.cpp
-    tests/Hover.test.cpp
-    tests/LanguageServer.test.cpp
-    tests/InlayHints.test.cpp
-    tests/JsonTomlSyntaxParser.test.cpp
-    tests/Definitions.test.cpp
-    tests/SignatureHelp.test.cpp
-    tests/Diagnostics.test.cpp
-    tests/GoToDefinition.test.cpp
-    tests/Glob.test.cpp
-    tests/Workspace.test.cpp
-    tests/RequireGraph.test.cpp
-    tests/AnalyzeCli.test.cpp
-    src/AnalyzeCli.cpp # For testing
+        tests/main.cpp
+        tests/Fixture.cpp
+        tests/TempDir.cpp
+        tests/TestClient.cpp
+        tests/Autocomplete.test.cpp
+        tests/AutoImports.test.cpp
+        tests/MagicFunctions.test.cpp
+        tests/Documentation.test.cpp
+        tests/TextDocument.test.cpp
+        tests/Uri.test.cpp
+        tests/Utils.test.cpp
+        tests/WorkspaceFileResolver.test.cpp
+        tests/SemanticTokens.test.cpp
+        tests/Sourcemap.test.cpp
+        tests/References.test.cpp
+        tests/Rename.test.cpp
+        tests/ColorProvider.test.cpp
+        tests/LuauExt.test.cpp
+        tests/CliConfigurationParser.test.cpp
+        tests/Hover.test.cpp
+        tests/LanguageServer.test.cpp
+        tests/InlayHints.test.cpp
+        tests/JsonTomlSyntaxParser.test.cpp
+        tests/Definitions.test.cpp
+        tests/SignatureHelp.test.cpp
+        tests/Diagnostics.test.cpp
+        tests/GoToDefinition.test.cpp
+        tests/Glob.test.cpp
+        tests/Workspace.test.cpp
+        tests/RequireGraph.test.cpp
+        tests/AnalyzeCli.test.cpp
+        src/AnalyzeCli.cpp # For testing
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
-if(MSVC)
+if (MSVC)
     list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         list(APPEND LUAU_LSP_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
-    else()
+    else ()
         list(APPEND LUAU_LSP_OPTIONS /MP) # Distribute compilation across multiple cores; doesn't work with clang-cl
-    endif()
-else()
+    endif ()
+else ()
     list(APPEND LUAU_LSP_OPTIONS -Wall)
-endif()
+endif ()
 
-if(LSP_WERROR)
-    if(MSVC)
+if (LSP_WERROR)
+    if (MSVC)
         list(APPEND LUAU_LSP_OPTIONS /WX) # Warnings are errors
-    else()
+    else ()
         list(APPEND LUAU_LSP_OPTIONS -Werror) # Warnings are errors
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(LSP_BUILD_ASAN)
-    if(MSVC)
+if (LSP_BUILD_ASAN)
+    if (MSVC)
         list(APPEND LUAU_LSP_OPTIONS /fsanitize=address)
         target_compile_options(Luau.Ast PRIVATE /fsanitize=address)
         target_compile_options(Luau.Analysis PRIVATE /fsanitize=address)
         target_compile_options(Luau.Compiler PRIVATE /fsanitize=address)
         target_compile_options(Luau.Config PRIVATE /fsanitize=address)
         target_compile_options(Luau.VM PRIVATE /fsanitize=address)
-    else()
+    else ()
         list(APPEND LUAU_LSP_OPTIONS -fsanitize=address)
         target_compile_options(Luau.Ast PRIVATE -fsanitize=address)
         target_compile_options(Luau.Analysis PRIVATE -fsanitize=address)
@@ -176,8 +175,8 @@ if(LSP_BUILD_ASAN)
         target_link_options(Luau.Compiler PRIVATE -fsanitize=address)
         target_link_options(Luau.Config PRIVATE -fsanitize=address)
         target_link_options(Luau.VM PRIVATE -fsanitize=address)
-    endif()
-endif()
+    endif ()
+endif ()
 
 set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include)
 
@@ -199,15 +198,15 @@ target_compile_options(Luau.LanguageServer.Test PRIVATE ${LUAU_LSP_OPTIONS})
 target_include_directories(Luau.LanguageServer.Test PRIVATE tests ${EXTERN_INCLUDES} extern/doctest)
 target_link_libraries(Luau.LanguageServer.Test PRIVATE Luau.Ast Luau.Analysis Luau.LanguageServer)
 
-if(LSP_BUILD_WITH_SENTRY)
+if (LSP_BUILD_WITH_SENTRY)
     target_link_libraries(Luau.LanguageServer PRIVATE sentry)
     target_link_libraries(Luau.LanguageServer.CLI PRIVATE sentry)
 
     add_custom_command(
-        TARGET Luau.LanguageServer.CLI POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "$<TARGET_FILE:crashpad_handler>"
-        "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>"
-        COMMENT "Copying crashpad_handler to output directory"
+            TARGET Luau.LanguageServer.CLI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:crashpad_handler>"
+            "$<TARGET_FILE_DIR:Luau.LanguageServer.CLI>"
+            COMMENT "Copying crashpad_handler to output directory"
     )
-endif()
+endif ()
