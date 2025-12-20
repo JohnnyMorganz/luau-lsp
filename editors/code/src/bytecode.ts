@@ -22,7 +22,7 @@ export type BytecodeParams = {
 };
 
 export const BytecodeRequest = new RequestType<BytecodeParams, string, void>(
-  "luau-lsp/bytecode"
+  "luau-lsp/bytecode",
 );
 
 export type CompilerRemarksParams = {
@@ -78,7 +78,7 @@ export const getOptimizationLevel = async (): Promise<OptimizationLevel> => {
     {
       title: "Select Optimization Level",
       placeHolder: "Select optimization level",
-    }
+    },
   );
 
   return optimizationLevel?.label === "None"
@@ -119,7 +119,7 @@ export const getCodeGenTarget = async (): Promise<CodeGenTarget> => {
     {
       title: "Select CodeGen target",
       placeHolder: "Select CodeGen target",
-    }
+    },
   );
 
   return (optimizationLevel?.label as CodeGenTarget) ?? "host";
@@ -157,7 +157,7 @@ const getBytecodeInfo = (
     CompilerRemarksParams | BytecodeParams | CodeGenParams,
     string,
     void
-  >
+  >,
 ) => {
   const tdcp = new (class implements vscode.TextDocumentContentProvider {
     readonly uri = vscode.Uri.parse(`${scheme}://bytecode/${fileName}.luau`);
@@ -167,12 +167,12 @@ const getBytecodeInfo = (
       vscode.workspace.onDidChangeTextDocument(
         this.onDidChangeTextDocument,
         this,
-        context.subscriptions
+        context.subscriptions,
       );
       vscode.window.onDidChangeActiveTextEditor(
         this.onDidChangeActiveTextEditor,
         this,
-        context.subscriptions
+        context.subscriptions,
       );
     }
 
@@ -197,7 +197,7 @@ const getBytecodeInfo = (
 
       const params = {
         textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(
-          editor.document
+          editor.document,
         ),
         optimizationLevel,
         codeGenTarget,
@@ -230,14 +230,14 @@ const getBytecodeInfo = (
             preserveFocus: true,
           });
         }
-      }
+      },
     ),
   ];
 };
 
 export const registerComputeBytecode = (
   context: vscode.ExtensionContext,
-  client: LanguageClient
+  client: LanguageClient,
 ): vscode.Disposable[] => {
   return getBytecodeInfo(
     context,
@@ -245,13 +245,13 @@ export const registerComputeBytecode = (
     "luau-lsp.computeBytecode",
     BYTECODE_SCHEME,
     "bytecode",
-    BytecodeRequest
+    BytecodeRequest,
   );
 };
 
 export const registerComputeCompilerRemarks = (
   context: vscode.ExtensionContext,
-  client: LanguageClient
+  client: LanguageClient,
 ): vscode.Disposable[] => {
   return getBytecodeInfo(
     context,
@@ -259,13 +259,13 @@ export const registerComputeCompilerRemarks = (
     "luau-lsp.computeCompilerRemarks",
     COMPILER_REMARKS_SCHEME,
     "compiler-remarks",
-    ComputeCompilerRemarksRequest
+    ComputeCompilerRemarksRequest,
   );
 };
 
 export const registerComputeCodeGen = (
   context: vscode.ExtensionContext,
-  client: LanguageClient
+  client: LanguageClient,
 ): vscode.Disposable[] => {
   return getBytecodeInfo(
     context,
@@ -273,6 +273,6 @@ export const registerComputeCodeGen = (
     "luau-lsp.computeCodeGen",
     CODEGEN_SCHEME,
     "codeGen",
-    ComputeCodeGenRequest
+    ComputeCodeGenRequest,
   );
 };
