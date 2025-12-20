@@ -914,7 +914,7 @@ def resolveDeprecation(member: ApiMember, klass: ApiClass) -> str:
                         
                         if bestMember is not None:
                             # Use the classname and member name, we found a different class to point to!
-                            result = f"@[deprecated {{use = \"{bestClass['Name']}{':' if bestMember["MemberType"] == "Function" else '.'}{preferred}\"}}]\n\t\t"
+                            result = f"@[deprecated {{use = \"{bestClass['Name']}{':' if bestMember['MemberType'] == 'Function' else '.'}{preferred}\"}}]\n\t\t"
                             break
 
                 result = f"@[deprecated {{use = \"{preferred}\"}}]\n\t\t"
