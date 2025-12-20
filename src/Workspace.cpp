@@ -203,7 +203,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     {
         platform->onDidChangeWatchedFiles(change);
 
-        if (change.uri.filename() == ".luaurc" || change.uri.filename() == ".robloxrc")
+        if (change.uri.filename() == ".luaurc" || change.uri.filename() == ".robloxrc" || change.uri.filename() == ".config.luau")
         {
             client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
             fileResolver.clearConfigCache();
@@ -436,7 +436,7 @@ static void clearDisabledGlobals(const Client* client, const Luau::GlobalTypes& 
                     if (contains(ctv->props, *method))
                     {
                         client->sendLogMessage(lsp::MessageType::Info, "disabling globals: erasing global - " + disabledGlobal);
-                        ttv->props.erase(*method);
+                        ctv->props.erase(*method);
                     }
                     else
                         client->sendLogMessage(lsp::MessageType::Warning, "disabling globals: could not find method - " + disabledGlobal);

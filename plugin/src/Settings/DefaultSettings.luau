@@ -3,6 +3,9 @@
 --- Make sure that `luau-lsp.plugin.enabled` is set to `true` in VSCode for the plugin to connect
 
 return {
+	--- The host to connect to the language server.
+	host = "http://localhost",
+
 	--- The port to connect to the language server.
 	--- In VSCode, this is configured using `luau-lsp.plugin.port`
 	--- Note, this port is *different* to your Rojo port
@@ -29,4 +32,8 @@ return {
 		game:GetService("LocalizationService"),
 		game:GetService("TestService"),
 	},
+
+	--- The log level to use for the language server.
+	--- Valid values are "DEBUG", "INFO", "WARN", "ERROR"
+	logLevel = "INFO",
 }

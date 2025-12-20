@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.57.1",
+  "version": "1.58.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -105,6 +105,10 @@
       {
         "command": "luau-lsp.regenerateSourcemap",
         "title": "Luau: Regenerate Sourcemap"
+      },
+      {
+        "command": "luau-lsp.setupStudioPlugin",
+        "title": "Luau: Setup Studio Companion Plugin"
       },
       {
         "command": "luau-lsp.reloadServer",
