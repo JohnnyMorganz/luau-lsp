@@ -91,7 +91,7 @@ export const getOptimizationLevel = async (): Promise<OptimizationLevel> => {
 };
 
 export const getCodeGenTarget = async (): Promise<CodeGenTarget> => {
-  const optimizationLevel = await vscode.window.showQuickPick(
+  const codeGenTargetSelection = await vscode.window.showQuickPick(
     [
       {
         label: "host",
@@ -122,7 +122,7 @@ export const getCodeGenTarget = async (): Promise<CodeGenTarget> => {
     },
   );
 
-  return (optimizationLevel?.label as CodeGenTarget) ?? "host";
+  return (codeGenTargetSelection?.label as CodeGenTarget) ?? "host";
 };
 
 let optimizationLevel = OptimizationLevel.O2;

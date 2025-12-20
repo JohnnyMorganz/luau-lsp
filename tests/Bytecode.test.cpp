@@ -52,8 +52,8 @@ end
 
     auto result = workspace.compilerRemarks(params);
 
-    // Result should be a string (may or may not contain remarks depending on code)
-    CHECK(result.size() >= 0);
+    // Result should contain the source code at minimum
+    CHECK(!result.empty());
 }
 
 TEST_CASE_FIXTURE(Fixture, "codegen_returns_assembly_output")

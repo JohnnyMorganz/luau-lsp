@@ -72,6 +72,8 @@ static Luau::CodeGen::AssemblyOptions::Target getCodeGenTarget(const lsp::CodeGe
     case lsp::CodeGenTarget::X64_SystemV:
         return Luau::CodeGen::AssemblyOptions::Target::X64_SystemV;
     }
+
+    return Luau::CodeGen::AssemblyOptions::Target::Host;
 }
 
 static std::string computeBytecodeOutput(const Luau::ModuleName& moduleName, const std::string& source, const ClientConfiguration& config,
@@ -153,7 +155,7 @@ lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerR
     return computeBytecodeOutput(moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CompilerRemarks);
 }
 
-lsp::CompilerRemarksResult WorkspaceFolder::codeGen(const lsp::CodegenParams& params)
+lsp::CodegenResult WorkspaceFolder::codeGen(const lsp::CodegenParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
