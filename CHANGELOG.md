@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added command `Luau: Compute CodeGen instructions for file` to emit annotated codegen instructions, similar to the bytecode command. External editors can implement this by using the `luau-lsp/codeGen` request. ([#617](https://github.com/JohnnyMorganz/luau-lsp/issues/617))
 
+### Fixed
+
+- Fixed non-adjacent comments (such as section headers separated by blank lines) being incorrectly included in hover documentation ([#310](https://github.com/JohnnyMorganz/luau-lsp/issues/310))
+
 ## [1.58.0] - 2025-12-14
 
 ### Added
