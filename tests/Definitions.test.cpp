@@ -2,6 +2,7 @@
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LuauFileUtils.hpp"
+#include "Luau/Parser.h"
 
 using namespace Luau::LanguageServer;
 
@@ -169,6 +170,25 @@ TEST_CASE("support_disabling_methods_in_extern_types_globals")
     REQUIRE(err);
     CHECK_EQ(Luau::toString(err->table), "DataModel");
     CHECK_EQ(err->key, "BindToClose");
+}
+
+TEST_CASE("luau_parse_test")
+{
+    std::string source = R"(
+        local x = "hello{
+    )";
+
+    Luau::Allocator allocator;
+    Luau::AstNameTable names(allocator);
+    Luau::ParseResult result = Luau::Parser::parse(source.c_str(), source.size(), names, allocator);
+
+    Luau::SourceModule sourceModule;
+    sourceModule.name = "hello";
+    sourceModule.root = result.root;
+
+    auto ancestry = Luau::findAstAncestryOfPosition(sourceModule, Luau::Position{1, 24});
+
+    CHECK_EQ(result.errors.size(), 1);
 }
 
 TEST_SUITE_END();

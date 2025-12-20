@@ -5,6 +5,7 @@
 #include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "Plugin/PluginManager.hpp"
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/TimeTrace.h"
@@ -53,6 +54,9 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     }
     auto& textDocument = fileResolver.managedFiles.at(uri);
     textDocument.update(params.contentChanges, params.textDocument.version);
+
+    // Invalidate plugin cache for this document - forces re-transformation on next access
+    fileResolver.invalidatePluginDocument(uri);
 
     // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
     std::vector<Luau::ModuleName> markedDirty{};
@@ -599,6 +603,28 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     client->sendTrace("workspace: apply platform-specific configuration");
 
     platform->setupWithConfiguration(configuration);
+
+    // Configure plugins
+    if (configuration.plugins.enabled && !configuration.plugins.paths.empty())
+    {
+        client->sendTrace("workspace: configuring plugins");
+
+        // Always recreate the plugin manager to ensure clean state
+        fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(client);
+
+        size_t loadedCount = fileResolver.pluginManager->configure(configuration.plugins.paths, configuration.plugins.timeoutMs);
+        client->sendLogMessage(lsp::MessageType::Info, "Loaded " + std::to_string(loadedCount) + " of " +
+            std::to_string(configuration.plugins.paths.size()) + " plugins");
+
+        // Clear plugin document cache when plugins change
+        fileResolver.clearPluginDocuments();
+    }
+    else if (fileResolver.pluginManager)
+    {
+        // Plugins disabled - clear plugin manager and caches
+        fileResolver.pluginManager.reset();
+        fileResolver.clearPluginDocuments();
+    }
 
     if (configuration.index.enabled)
         indexFiles(configuration);

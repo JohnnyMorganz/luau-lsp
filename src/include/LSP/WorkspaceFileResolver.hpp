@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <unordered_map>
+#include <memory>
 #include <utility>
 #include "Luau/FileResolver.h"
 #include "Luau/StringUtils.h"
@@ -9,6 +10,8 @@
 #include "LSP/Uri.hpp"
 #include "LSP/TextDocument.hpp"
 #include "Platform/LSPPlatform.hpp"
+#include "Plugin/PluginManager.hpp"
+#include "Plugin/PluginTextDocument.hpp"
 
 
 // A wrapper around a text document pointer
@@ -79,12 +82,18 @@ struct WorkspaceFileResolver
 private:
     mutable std::unordered_map<Uri, Luau::Config, UriHash> configCache{};
 
+    // Cache for plugin-transformed documents
+    mutable std::unordered_map<Uri, std::unique_ptr<Luau::LanguageServer::Plugin::PluginTextDocument>, UriHash> pluginDocuments{};
+
 public:
     Luau::Config defaultConfig;
     BaseClient* client;
     Uri rootUri;
 
     LSPPlatform* platform = nullptr;
+
+    // Plugin manager for source transformations
+    std::unique_ptr<Luau::LanguageServer::Plugin::PluginManager> pluginManager;
 
     // Currently opened files where content is managed by client
     mutable std::unordered_map<Uri, TextDocument, UriHash> managedFiles{};
@@ -99,10 +108,20 @@ public:
         : defaultConfig(std::move(defaultConfig)) {};
 
     /// The file is managed by the client, so FS will be out of date
+    /// Returns the original TextDocument (without plugin transformation)
+    const TextDocument* getManagedTextDocument(const lsp::DocumentUri& uri) const;
+
+    /// Returns a TextDocument, potentially plugin-transformed if plugins are active
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
     const TextDocument* getTextDocumentFromModuleName(const Luau::ModuleName& name) const;
 
     TextDocumentPtr getOrCreateTextDocumentFromModuleName(const Luau::ModuleName& name);
+
+    /// Invalidate plugin cache for a URI - forces re-transformation on next access
+    void invalidatePluginDocument(const lsp::DocumentUri& uri);
+
+    /// Clear all plugin document caches
+    void clearPluginDocuments();
 
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path

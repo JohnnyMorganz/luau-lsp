@@ -711,6 +711,28 @@
           "default": "Vector3",
           "scope": "resource",
           "markdownDescription": "The `vectorType` to use when compiling bytecode"
+        },
+        "luau-lsp.plugins.enabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Enable source code transformation plugins. Plugins are Luau scripts that can transform source code before type checking."
+        },
+        "luau-lsp.plugins.paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "scope": "resource",
+          "markdownDescription": "Paths to Luau plugin scripts. Plugins are executed in order and can transform source code before type checking."
+        },
+        "luau-lsp.plugins.timeoutMs": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 100,
+          "scope": "resource",
+          "markdownDescription": "Timeout in milliseconds for plugin execution. If a plugin takes longer than this, it will be terminated."
         }
       }
     },
