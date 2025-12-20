@@ -203,6 +203,14 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "Random",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "Green",
                     "Parameters": [],
                     "ReturnType": {
@@ -681,9 +689,12 @@
                     "Parameters": [
                         {
                             "Name": "axes",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "Axis | EnumNormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {
@@ -906,7 +917,8 @@
                             "Type": {
                                 "Category": "Enum",
                                 "Name": "RotationOrder"
-                            }
+                            },
+                            "Default": "nil"
                         }
                     ],
                     "ReturnType": {
@@ -1347,9 +1359,12 @@
                     "Parameters": [
                         {
                             "Name": "normalIds",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "NormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {
@@ -2486,6 +2501,37 @@
                 }
             ],
             "Name": "Path2DControlPoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Variadic": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromCurrent",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                }
+            ],
+            "Name": "SecurityCapabilities"
         }
     ],
     "DataTypes": [
@@ -2773,7 +2819,7 @@
                         }
                     ],
                     "ReturnType": {
-                        "Name": "Vector2"
+                        "Name": "number"
                     }
                 },
                 {
@@ -3760,6 +3806,7 @@
                         },
                         {
                             "Name": "epsilon",
+                            "Default": "0.00001",
                             "Type": {
                                 "Name": "number"
                             }
@@ -4101,6 +4148,7 @@
                         },
                         {
                             "Name": "epsilon",
+                            "Default": "0.00001",
                             "Type": {
                                 "Name": "number"
                             }
@@ -5000,7 +5048,7 @@
                     "Name": "AssetTypes",
                     "ValueType": {
                         "Name": "Array",
-                        "Generic": "Enum.AssetType"
+                        "Generic": "Enum.AvatarAssetType"
                     }
                 }
             ],
@@ -5348,6 +5396,65 @@
                 }
             ],
             "Name": "Path2DControlPoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "Add",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Remove",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Contains",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                }
+            ],
+            "Name": "SecurityCapabilities"
         }
     ]
 }

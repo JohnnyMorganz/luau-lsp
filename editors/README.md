@@ -25,11 +25,12 @@ $ luau-lsp --help
 
 ## Configuring Definitions and Documentation
 
-You can add in built-in definitions by passing the `--definitions=PATH` argument.
+You can add in built-in definitions by passing the `--definitions:@name=PATH` argument.
+The `name` should be a unique reference to the definitions file.
 This can be done multiple times:
 
 ```sh
-$ luau-lsp lsp --definitions=/path/to/globalTypes.d.luau
+$ luau-lsp lsp --definition:@roblox=/path/to/globalTypes.d.luau
 ```
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
@@ -170,3 +171,15 @@ A custom LSP request message is implemented:
 `codeGenTarget` can be one of: `"host" | "a64" | "a64_nofeatures" | "x64_windows" | "x64_systemv"`
 
 You can implement this request via a custom command to surface this information in your editor
+
+## Optional: Require Graph
+
+The Language server can generate a require graph from a single file, or of the whole workspace. The require graph visualises dependency links between modules. The require graph is generated in DOT format
+
+A custom LSP request message is implemented:
+
+- `luau-lsp/requireGraph`: `{ textDocument: TextDocumentIdentifier, fromTextDocumentOnly: boolean }`, returns `string` - DOT file output
+  - `textDocument`: the text document to generate the require graph for
+  - `fromTextDocumentOnly`: whether the require graph should only include the dependencies from the selected text document. If false, the graph includes all indexed modules from the selected text document's workspace
+
+You can implement this request via a custom command to surface this information in your editor. You may need a `dot` visualizer.

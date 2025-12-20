@@ -1,23 +1,20 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
 
-std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const std::string& name) const
+#include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
+
+std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const Uri& uri) const
 {
-    if (isVirtualPath(name))
-    {
-        return name;
-    }
-    else
-    {
-        auto sourceNode = getSourceNodeFromRealPath(name);
-        if (!sourceNode)
-            return std::nullopt;
-        return getVirtualPathFromSourceNode(sourceNode.value());
-    }
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::resolveToVirtualPath", "LSP");
+    if (const auto sourceNode = getSourceNodeFromRealPath(uri))
+        return getVirtualPathFromSourceNode(*sourceNode);
+    return std::nullopt;
 }
 
-std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
+std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& name) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::resolveToRealPath", "LSP");
     if (isVirtualPath(name))
     {
         if (auto sourceNode = getSourceNodeFromVirtualPath(name))
@@ -27,37 +24,36 @@ std::optional<std::filesystem::path> RobloxPlatform::resolveToRealPath(const Lua
     }
     else
     {
-        return name;
+        return fileResolver->getUri(name);
     }
 
     return std::nullopt;
 }
 
-Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const std::filesystem::path& path) const
+Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const Uri& path) const
 {
-    if (auto sourceNode = getSourceNodeFromRealPath(path.generic_string()))
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::sourceCodeTypeFromPath", "LSP");
+    if (auto sourceNode = getSourceNodeFromRealPath(path))
         return (*sourceNode)->sourceCodeType();
 
-    auto filename = path.filename().generic_string();
+    auto filename = path.filename();
 
-    if (endsWith(filename, ".server.lua") || endsWith(filename, ".server.luau"))
+    if (endsWith(filename, ".server.lua") || endsWith(filename, ".server.luau") || endsWith(filename, ".client.lua") ||
+        endsWith(filename, ".client.luau"))
     {
         return Luau::SourceCode::Type::Script;
-    }
-    else if (endsWith(filename, ".client.lua") || endsWith(filename, ".client.luau"))
-    {
-        return Luau::SourceCode::Type::Local;
     }
 
     return Luau::SourceCode::Type::Module;
 }
 
-std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const
+std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName& name, const Uri& path) const
 {
+    LUAU_TIMETRACE_SCOPE("RobloxPlatform::readSourceCode", "LSP");
     if (auto parentResult = LSPPlatform::readSourceCode(name, path))
         return parentResult;
 
-    auto source = readFile(path);
+    auto source = Luau::FileUtils::readFile(path.fsPath());
     if (!source)
         return std::nullopt;
 
@@ -70,7 +66,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         catch (const std::exception& e)
         {
             // TODO: display diagnostic?
-            std::cerr << "Failed to load JSON module: " << path.generic_string() << " - " << e.what() << '\n';
+            std::cerr << "Failed to load JSON module: " << path.toString() << " - " << e.what() << '\n';
             return std::nullopt;
         }
     }
@@ -80,12 +76,12 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         {
             std::string tomlSource(*source);
             std::istringstream tomlSourceStream(tomlSource, std::ios_base::binary | std::ios_base::in);
-            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.generic_string()));
+            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.fsPath()));
         }
         catch (const std::exception& e)
         {
             // TODO: display diagnostic?
-            std::cerr << "Failed to load TOML module: " << path.generic_string() << " - " << e.what() << '\n';
+            std::cerr << "Failed to load TOML module: " << path.toString() << " - " << e.what() << '\n';
             return std::nullopt;
         }
     }
@@ -105,9 +101,10 @@ static std::string mapContext(const std::string& context)
     return context;
 }
 
-std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) {
+std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
+{
 
-    if (auto parentResult = LSPPlatform::resolveModule(context, node))
+    if (auto parentResult = LSPPlatform::resolveModule(context, node, limits))
         return parentResult;
 
     if (auto* g = node->as<Luau::AstExprGlobal>())
@@ -117,7 +114,11 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::Module
 
         if (g->name == "script")
         {
-            if (auto virtualPath = resolveToVirtualPath(context->name))
+            if (isVirtualPath(context->name))
+            {
+                return Luau::ModuleInfo{context->name};
+            }
+            else if (auto virtualPath = resolveToVirtualPath(fileResolver->getUri(context->name)))
             {
                 return Luau::ModuleInfo{virtualPath.value()};
             }

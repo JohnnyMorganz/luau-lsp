@@ -12,7 +12,7 @@ static lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string
     auto uri = fixture->newDocument("foo.luau", source);
     lsp::InlayHintParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
-    return fixture->workspace.inlayHint(params);
+    return fixture->workspace.inlayHint(params, /* cancellationToken= */ nullptr);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")
@@ -149,6 +149,37 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_local_definition")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        local x = 1 :: Unknown
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 15});
+    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "respect_hide_inlay_hints_for_error_type_configuration_local_definition")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.hideHintsForErrorTypes = true;
+    auto source = R"(
+        local x = 1 :: Unknown
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_in_for_loop")
 {
     client->globalConfig.inlayHints.variableTypes = true;
@@ -281,6 +312,47 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     CHECK_EQ(result[1].paddingLeft, false);
     CHECK_EQ(result[1].paddingRight, false);
     CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_for_loop")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        for i,v in UNKNOWN do
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 2);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 13});
+    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, false);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+
+    CHECK_EQ(result[1].position, lsp::Position{1, 15});
+    CHECK_EQ(result[1].label, ": *error-type*");
+    CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[1].tooltip, std::nullopt);
+    CHECK_EQ(result[1].paddingLeft, false);
+    CHECK_EQ(result[1].paddingRight, false);
+    CHECK_EQ(result[1].textEdits.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "respect_hide_inlay_hints_for_error_type_configuration_for_loop")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.hideHintsForErrorTypes = true;
+    auto source = R"(
+        for i,v in UNKNOWN do
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 0);
 }
 
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_type")
@@ -588,6 +660,30 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_variable_matches_parameter_name")
     REQUIRE_EQ(result.size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_variable_matches_parameter_name_and_hidden_configuration_is_disabled")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    client->globalConfig.inlayHints.hideHintsForMatchingParameterNames = false;
+    auto source = R"(
+        local function id(value: string)
+        end
+
+        local value = "testing"
+        id(value)
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 11});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_indexed_expression_matches_parameter_name")
 {
     client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
@@ -601,6 +697,30 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hint_if_indexed_expression_matches_parame
 
     auto result = processInlayHint(this, source);
     REQUIRE_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_indexed_expression_matches_parameter_name_and_hidden_configuration_is_disabled")
+{
+    client->globalConfig.inlayHints.parameterNames = InlayHintsParameterNamesConfig::All;
+    client->globalConfig.inlayHints.hideHintsForMatchingParameterNames = false;
+    auto source = R"(
+        local function id(value: string)
+        end
+
+        local _ = { value = "testing"}
+        id(_.value)
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{5, 11});
+    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK_EQ(result[0].paddingLeft, false);
+    CHECK_EQ(result[0].paddingRight, true);
+    CHECK_EQ(result[0].textEdits.size(), 0);
 }
 
 TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_configuration")
@@ -798,6 +918,15 @@ TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_f
     REQUIRE(result[1].textEdits.size() == 1);
     CHECK_EQ(result[1].textEdits[0].newText, ": string");
     CHECK_EQ(result[1].textEdits[0].range, lsp::Range{{6, 36}, {6, 36}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hints_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.inlayHint(lsp::InlayHintParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
 TEST_SUITE_END();

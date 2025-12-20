@@ -171,13 +171,17 @@ struct InitializedParams
 {
 };
 inline void from_json(const json&, InitializedParams&){};
+inline void to_json(json& j, const InitializedParams& u)
+{
+    j = json{};
+};
 
 struct SetTraceParams
 {
     /**
      * The new value that should be assigned to the trace setting.
      */
-    TraceValue value;
+    TraceValue value = TraceValue::Off;
 };
 NLOHMANN_DEFINE_OPTIONAL(SetTraceParams, value)
 

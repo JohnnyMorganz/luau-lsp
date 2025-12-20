@@ -1,5 +1,7 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+#include "LSP/LuauExt.hpp"
+#include "LuauFileUtils.hpp"
 #include <regex>
 #include <algorithm>
 
@@ -14,30 +16,7 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-/// Converts an HTML string provided as an input to markdown
-/// TODO: currently, this just strips tags, rather than do anything special
-std::string convertHtmlToMarkdown(const std::string& input)
-{
-    // TODO - Tags to support:
-    // <code></code> - as well as <code class="language-lua">
-    // <pre></pre>
-    // <em></em> / <i></i>
-    // <ul><li></li></ul>
-    // <ol><li></li></ol>
-    // <a href=""></a>
-    // <strong></strong> / <b></b>
-    // <img alt="" src="" />
-    // Also need to unescape HTML characters
-
-
-    // Yes, regex is bad, but I really cannot be bothered right now
-    std::regex strip("<[^>]*>");
-    return std::regex_replace(input, strip, "");
-}
-
-
-void parseDocumentation(
-    const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const std::shared_ptr<Client>& client)
+void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const Client* client)
 {
     if (documentationFiles.empty())
     {
@@ -48,7 +27,7 @@ void parseDocumentation(
     for (auto& documentationFile : documentationFiles)
     {
         auto resolvedFilePath = resolvePath(documentationFile);
-        if (auto contents = readFile(resolvedFilePath))
+        if (auto contents = Luau::FileUtils::readFile(resolvedFilePath))
         {
             try
             {
@@ -64,9 +43,6 @@ void parseDocumentation(
                         info.at("learn_more_link").get_to(learnMoreLink);
                     if (info.contains("code_sample"))
                         info.at("code_sample").get_to(codeSample);
-
-                    documentation = convertHtmlToMarkdown(documentation);
-
                     if (info.contains("keys"))
                     {
                         Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
@@ -105,15 +81,15 @@ void parseDocumentation(
             }
             catch (const std::exception& e)
             {
-                client->sendLogMessage(lsp::MessageType::Error,
-                    "Failed to load documentation database for " + resolvedFilePath.generic_string() + ": " + std::string(e.what()));
+                client->sendLogMessage(
+                    lsp::MessageType::Error, "Failed to load documentation database for " + resolvedFilePath + ": " + std::string(e.what()));
                 client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
             }
         }
         else
         {
-            client->sendLogMessage(lsp::MessageType::Error,
-                "Failed to read documentation file for " + resolvedFilePath.generic_string() + ". Documentation will not be provided");
+            client->sendLogMessage(
+                lsp::MessageType::Error, "Failed to read documentation file for " + resolvedFilePath + ". Documentation will not be provided");
             client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
         }
     }
@@ -331,6 +307,26 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
         return false;
     }
 
+    bool visit(Luau::AstStatDeclareExternType* klass) override
+    {
+        if (klass->location.begin >= pos)
+            return false;
+        if (klass->location.begin > closestPreviousNode)
+            closestPreviousNode = klass->location.begin;
+
+        for (const auto& item : klass->props)
+        {
+            if (item.ty->location.begin >= pos)
+                continue;
+            closestPreviousNode = std::max(closestPreviousNode, item.ty->location.begin);
+            item.ty->visit(this);
+            if (item.ty->location.end <= pos)
+                closestPreviousNode = std::max(closestPreviousNode, item.ty->location.end);
+        }
+
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         // If the position is after the block, then it can be ignored
@@ -357,6 +353,11 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
     {
         return true;
     }
+
+    bool visit(Luau::AstTypePack* ty) override
+    {
+        return true;
+    }
 };
 
 std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module, const Luau::Location& node)
@@ -373,17 +374,27 @@ std::vector<Luau::Comment> getCommentLocations(const Luau::SourceModule* module,
 /// Performs transformations so that the comments are normalised to lines inside of it (i.e., trimming whitespace, removing comment start/end)
 std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& moduleName, const Luau::Location& node)
 {
-    auto sourceModule = frontend.getSourceModule(moduleName);
-    if (!sourceModule)
-        return {};
+    Luau::SourceModule* sourceModule;
+    TextDocumentPtr textDocument{nullptr};
+
+    if (auto it = definitionsSourceModules.find(moduleName); it != definitionsSourceModules.end())
+    {
+        sourceModule = &it->second.second;
+        textDocument = TextDocumentPtr(&it->second.first);
+    }
+    else
+    {
+        sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return {};
+
+        textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
+        if (!textDocument)
+            return {};
+    }
 
     auto commentLocations = getCommentLocations(sourceModule, node);
     if (commentLocations.empty())
-        return {};
-
-    // Get relevant text document
-    auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
-    if (!textDocument)
         return {};
 
     std::vector<std::string> comments{};
@@ -404,6 +415,10 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
             if (Luau::startsWith(commentText, "--- "))
             {
                 comments.emplace_back(commentText.substr(4));
+            }
+            else if (commentText == "---")
+            {
+                comments.emplace_back("\n");
             }
         }
         else if (comment.type == Luau::Lexeme::Type::BlockComment)
@@ -462,6 +477,51 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForType(const Luau::
     else if (auto ttv = Luau::get<Luau::TableType>(followedTy); ttv && !ttv->definitionModuleName.empty())
     {
         return printMoonwaveDocumentation(getComments(ttv->definitionModuleName, ttv->definitionLocation));
+    }
+    else if (auto etv = Luau::get<Luau::ExternType>(followedTy); etv && !etv->definitionModuleName.empty() && etv->definitionLocation)
+    {
+        return printMoonwaveDocumentation(getComments(etv->definitionModuleName, *etv->definitionLocation));
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> WorkspaceFolder::getDocumentationForTypeReference(const Luau::ModuleName& moduleName, const Luau::ScopePtr& scope,
+    const std::optional<Luau::AstName>& prefix, const Luau::Name& typeName, bool forAutocomplete)
+{
+    if (prefix)
+    {
+        auto importedModuleName = lookupImportedModule(*scope, prefix->value);
+        if (!importedModuleName)
+            return std::nullopt;
+        auto importedModule = getModule(*importedModuleName, /* forAutocomplete: */ forAutocomplete);
+        if (!importedModule)
+            return std::nullopt;
+        if (const auto it = importedModule->exportedTypeBindings.find(typeName);
+            it != importedModule->exportedTypeBindings.end() && it->second.definitionLocation)
+            return printMoonwaveDocumentation(getComments(*importedModuleName, *it->second.definitionLocation));
+        return std::nullopt;
+    }
+    else
+    {
+        auto typeLocation = lookupTypeLocation(*scope, typeName);
+        if (!typeLocation)
+            return std::nullopt;
+        return printMoonwaveDocumentation(getComments(moduleName, *typeLocation));
+    }
+}
+
+std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(
+    const Luau::ModuleName& moduleName, const Luau::AstNode* node, const Luau::ScopePtr scope)
+{
+    if (auto ref = node->as<Luau::AstTypeReference>())
+    {
+        auto config = client->getConfiguration(rootUri);
+        return getDocumentationForTypeReference(
+            moduleName, scope, ref->prefix, ref->name.value, /* forAutocomplete= */ config.hover.strictDatamodelTypes);
+    }
+    else if (auto alias = node->as<Luau::AstStatTypeAlias>())
+    {
+        return printMoonwaveDocumentation(getComments(moduleName, alias->location));
     }
     return std::nullopt;
 }

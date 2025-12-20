@@ -1,5 +1,4 @@
 #include "LSP/SemanticTokens.hpp"
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
 #include "Luau/AstQuery.h"
@@ -193,11 +192,23 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         if (func->self)
             localMap.insert_or_assign(func->self, AstLocalInfo::Self);
 
+        bool first = true;
         for (auto arg : func->args)
         {
-            tokens.emplace_back(
-                SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
-            localMap.insert_or_assign(arg, AstLocalInfo::Parameter);
+            if (first && !func->self && arg->name == "self")
+            {
+                tokens.emplace_back(SemanticToken{
+                    arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Property, lsp::SemanticTokenModifiers::DefaultLibrary});
+                localMap.insert_or_assign(arg, AstLocalInfo::Self);
+            }
+            else
+            {
+                tokens.emplace_back(
+                    SemanticToken{arg->location.begin, arg->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
+                localMap.insert_or_assign(arg, AstLocalInfo::Parameter);
+            }
+
+            first = false;
         }
         return true;
     }
@@ -289,16 +300,17 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         }
 
         auto ty = Luau::follow(*parentTy);
-        if (auto propInformation = lookupProp(ty, std::string(index->index.value)))
+        if (auto propInformation = lookupProp(ty, std::string(index->index.value)); propInformation && propInformation->second.readTy)
         {
             auto prop = propInformation->second;
+
             auto defaultType = lsp::SemanticTokenTypes::Property;
             if (parentIsEnum)
                 defaultType = lsp::SemanticTokenTypes::Enum;
             else if (Luau::hasTag(prop.tags, "EnumItem"))
                 defaultType = lsp::SemanticTokenTypes::EnumMember;
 
-            auto type = inferTokenType(prop.type(), defaultType);
+            auto type = inferTokenType(*prop.readTy, defaultType);
             auto modifiers = lsp::SemanticTokenModifiers::None;
             if (parentIsBuiltin)
             {
@@ -395,7 +407,8 @@ std::vector<size_t> packTokens(const TextDocument* textDocument, std::vector<Sem
     return result;
 }
 
-std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::SemanticTokensParams& params)
+std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(
+    const lsp::SemanticTokensParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -404,7 +417,8 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
 
     // Run the type checker to ensure we are up to date
     // TODO: this relies on the autocomplete typechecker, which we don't really need for semantic tokens
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ true);
@@ -415,10 +429,4 @@ std::optional<lsp::SemanticTokens> WorkspaceFolder::semanticTokens(const lsp::Se
     lsp::SemanticTokens result;
     result.data = packTokens(textDocument, tokens);
     return result;
-}
-
-std::optional<lsp::SemanticTokens> LanguageServer::semanticTokens(const lsp::SemanticTokensParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->semanticTokens(params);
 }

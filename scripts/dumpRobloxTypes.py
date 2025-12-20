@@ -19,6 +19,7 @@ SECURITY_LEVELS = [
     "None",
     "LocalUserSecurity",
     "PluginSecurity",
+    "WritePlayerSecurity",
     "RobloxScriptSecurity",
     "RobloxSecurity",
     "NotAccessibleSecurity",
@@ -34,6 +35,7 @@ OVERRIDE_DEPRECATED_REMOVAL = [
     "BodyThrust",
     "BodyVelocity",
     # "RocketPropulsion",
+    "BevelMesh",  # superclass of BlockMesh
 ]
 
 TYPE_INDEX = {
@@ -60,214 +62,12 @@ TYPE_INDEX = {
 
 IGNORED_INSTANCES: List[str] = [
     "RBXScriptSignal",  # Redefined using generics
-    "BlockMesh",  # its superclass is marked as deprecated but it isn't, so its broken
     "Enum",  # redefined explicitly
     "EnumItem",  # redefined explicitly
     "GlobalSettings",  # redefined explicitly
     "SharedTable",  # redefined explicitly as the RobloxLsp type is incomplete
+    "RaycastResult",  # Redefined using generics
 ]
-
-# Methods / Properties ignored in classes. Commonly used to add corrections
-IGNORED_MEMBERS = {
-    "Instance": [
-        "Parent",
-        "FindFirstChild",
-        "FindFirstChildOfClass",
-        "FindFirstChildWhichIsA",
-        "FindFirstAncestor",
-        "FindFirstAncestorOfClass",
-        "FindFirstAncestorWhichIsA",
-        "FindFirstDescendant",
-        "GetActor",
-        "WaitForChild",
-        "GetAttribute",
-        "GetAttributes",
-        "AncestryChanged",
-        "GetAttributeChangedSignal",
-        "GetPropertyChangedSignal",
-    ],
-    "Model": ["PrimaryPart"],
-    "RemoteEvent": [
-        "FireAllClients",
-        "FireClient",
-        "FireServer",
-        "OnClientEvent",
-        "OnServerEvent",
-    ],
-    "UnreliableRemoteEvent": [
-        "FireAllClients",
-        "FireClient",
-        "FireServer",
-        "OnClientEvent",
-        "OnServerEvent",
-    ],
-    "RemoteFunction": [
-        "InvokeClient",
-        "InvokeServer",
-        "OnClientInvoke",
-        "OnServerInvoke",
-    ],
-    "BindableEvent": [
-        "Fire",
-        "Event",
-    ],
-    "BindableFunction": [
-        "Invoke",
-        "OnInvoke",
-    ],
-    "Players": [
-        "PlayerChatted",
-        "GetPlayerByUserId",
-        "GetPlayerFromCharacter",
-    ],
-    "ContextActionService": ["BindAction", "BindActionAtPriority"],
-    "Plugin": ["OpenScript"],
-    "PluginToolbar": [
-        "CreateButton",
-    ],
-    "WorldRoot": [
-        "Raycast",
-        "ArePartsTouchingOthers",
-        "BulkMoveTo",
-        "GetPartBoundsInBox",
-        "GetPartBoundsInRadius",
-        "GetPartsInPart",
-    ],
-    "HttpService": ["RequestAsync"],
-    "HumanoidDescription": [
-        "GetAccessories",
-        "SetAccessories",
-        "GetEmotes",
-        "SetEmotes",
-        "GetEquippedEmotes",
-        "SetEquippedEmotes",
-    ],
-    "TeleportOptions": [
-        "GetTeleportData",
-        "SetTeleportData",
-    ],
-    "TeleportService": [
-        "GetLocalPlayerTeleportData",
-        "GetPlayerPlaceInstanceAsync",
-        "Teleport",
-        "TeleportAsync",
-        "TeleportPartyAsync",
-        "TeleportToPlaceInstance",
-        "TeleportToPrivateServer",
-        "TeleportToSpawnByName",
-        "ReserveServer",
-        "LocalPlayerArrivedFromTeleport",
-        "TeleportInitFailed",
-    ],
-    "UserService": {"GetUserInfosByUserIdsAsync"},
-    "Studio": {"Theme"},
-    "BasePlayerGui": [
-        "GetGuiObjectsAtPosition",
-        "GetGuiObjectsInCircle",
-    ],
-    "Path": [
-        "GetWaypoints",
-    ],
-    "CollectionService": [
-        "GetAllTags",
-        "GetTags",
-        "GetInstanceAddedSignal",
-        "GetInstanceRemovedSignal",
-    ],
-    "UserInputService": [
-        "GetConnectedGamepads",
-        "GetGamepadState",
-        "GetKeysPressed",
-        "GetMouseButtonsPressed",
-        "GetNavigationGamepads",
-        "GetSupportedGamepadKeyCodes",
-    ],
-    "Humanoid": [
-        "RootPart",
-        "SeatPart",
-        "WalkToPart",
-        "GetAccessories",
-    ],
-    "Player": [
-        "Character",
-        "Chatted",
-        "GetJoinData",
-    ],
-    "InstanceAdornment": ["Adornee"],
-    "BasePart": [
-        "GetConnectedParts",
-        "GetJoints",
-        "GetNetworkOwner",
-        "GetTouchingParts",
-        "SubtractAsync",
-        "UnionAsync",
-    ],
-    "Team": ["GetPlayers"],
-    "Teams": ["GetTeams"],
-    "Camera": [
-        "CameraSubject",
-        "GetPartsObscuringTarget",
-    ],
-    "RunService": [
-        "BindToRenderStep",
-    ],
-    "GuiService": ["SelectedObject"],
-    "GlobalDataStore": [
-        "GetAsync",
-        "IncrementAsync",
-        "RemoveAsync",
-        "SetAsync",
-        "UpdateAsync",
-    ],
-    "OrderedDataStore": [
-        "GetAsync",
-        "GetSortedAsync",
-        "RemoveAsync",
-        "SetAsync",
-        "UpdateAsync",
-    ],
-    "Highlight": ["Adornee"],
-    "PartAdornment": ["Adornee"],
-    "JointInstance": [
-        "Part0",
-        "Part1",
-    ],
-    "ObjectValue": [
-        "Value",
-        "Changed",
-    ],
-    "Actor": [
-        "SendMessage",
-    ],
-    "Seat": [
-        "Occupant",
-    ],
-    "VehicleSeat": [
-        "Occupant",
-    ],
-    "Beam": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Trail": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Constraint": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "PathfindingLink": [
-        "Attachment0",
-        "Attachment1",
-    ],
-    "Vector3": [
-        "Angle",
-    ],
-    "ControllerPartSensor": [
-        "SensedPart",
-    ],
-}
 
 # Extra members to add in to classes, commonly used to add in metamethods, and add corrections
 EXTRA_MEMBERS = {
@@ -281,6 +81,7 @@ EXTRA_MEMBERS = {
         "function __idiv(self, other: Vector3 | number): Vector3",
     ],
     "Vector2": [
+        "function FuzzyEq(self, other: Vector2, epsilon: number?): boolean",
         "function __add(self, other: Vector2): Vector2",
         "function __sub(self, other: Vector2): Vector2",
         "function __mul(self, other: Vector2 | number): Vector2",
@@ -389,9 +190,6 @@ EXTRA_MEMBERS = {
     ],
     "WorldRoot": [
         "function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?",
-        "function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?",
-        "function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?",
-        "function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?",
         "function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean",
         "function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil",
         "function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }",
@@ -460,6 +258,7 @@ EXTRA_MEMBERS = {
     "Player": [
         "Character: Model?",
         "Chatted: RBXScriptSignal<string, Player?>",
+        "ReplicationFocus: Instance?",
         "function GetJoinData(self): { LaunchData: string?, Members: {number}?, SourceGameId: number?, SourcePlaceId: number?, TeleportData: TeleportData? }",
     ],
     "InstanceAdornment": ["Adornee: Instance?"],
@@ -483,6 +282,12 @@ EXTRA_MEMBERS = {
         "function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()",
     ],
     "GuiService": ["SelectedObject: GuiObject?"],
+    "TextChatService": [
+        "ChatWindowConfiguration: ChatWindowConfiguration",
+        "ChatInputBarConfiguration: ChatInputBarConfiguration",
+        "BubbleChatConfiguration: BubbleChatConfiguration",
+        "ChannelTabsConfiguration: ChannelTabsConfiguration",
+    ],
     "GlobalDataStore": [
         # GetAsync we received from upstream didn't have a second return value of DataStoreKeyInfo
         "function GetAsync(self, key: string, options: DataStoreGetOptions?): (any, DataStoreKeyInfo)",
@@ -545,13 +350,24 @@ EXTRA_MEMBERS = {
     "ControllerPartSensor": [
         "SensedPart: BasePart?",
     ],
+    "Sound": [
+        "SoundGroup: SoundGroup?",
+    ],
+    "StudioService": [
+        "function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?"
+    ],
+    "ControllerManager": [
+        "ActiveController: ControllerBase?",
+        "ClimbSensor: ControllerSensor?",
+        "GroundSensor: ControllerSensor?",
+        "RootPart: BasePart?",
+    ],
 }
 
 # Hardcoded types
 # These will go before anything else, and are useful to define for other tools
 START_BASE = """
-type Content = string
-type ContentId = any
+type ContentId = string
 type ProtectedString = string
 type BinaryString = string
 type QDir = string
@@ -563,9 +379,12 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
+    function FromValue(self,Number: number): any
+    function FromName(self,Name: string): any
 end
 
 declare class EnumItem
@@ -660,11 +479,31 @@ type HumanoidDescriptionAccessory = {
     Order: number?,
     Puffiness: number?,
 }
+
+declare class ValueCurveKey
+    Interpolation: EnumKeyInterpolationMode
+    Time: number
+    Value: any
+    RightTangent: number
+    LeftTangent: number
+end
+
+declare ValueCurveKey: {
+    new: (time: number, value: any, interpolation: EnumKeyInterpolationMode) -> ValueCurveKey
+}
 """
 
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+export type RaycastResult<T = BasePart> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Material: EnumMaterial,
+    Distance: number,
+}
+
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings
     Game: GameSettings
@@ -877,7 +716,7 @@ DataTypesDump = TypedDict(
 
 chosenSecurityLevel = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SECURITY_LEVEL
 assert (
-    chosenSecurityLevel in SECURITY_LEVELS
+        chosenSecurityLevel in SECURITY_LEVELS
 ), f"Unknown security level: {chosenSecurityLevel}"
 
 
@@ -956,28 +795,45 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
         return resolveType(member["ReturnType"])
 
 
+def classIgnoredMembers(klassName: str):
+    ignoredMembers = []
+
+    if klassName in EXTRA_MEMBERS:
+        for member in EXTRA_MEMBERS[klassName]:
+            if member.startswith("function "):
+                functionName = member[len("function "):]
+                functionName = functionName[: functionName.find("(")]
+                ignoredMembers.append(functionName)
+            else:
+                colon = member.find(":")
+                assert colon != -1, member
+                ignoredMembers.append(member[:colon])
+
+    return ignoredMembers
+
+
 def filterMember(klassName: str, member: ApiMember):
     if not INCLUDE_DEPRECATED_METHODS and (
-        (
-            "Tags" in member
-            and member["Tags"] is not None
-            and "Deprecated" in member["Tags"]
-        )
-        or ("Deprecated" in member and member["Deprecated"])
+            (
+                    "Tags" in member
+                    and member["Tags"] is not None
+                    and "Deprecated" in member["Tags"]
+            )
+            or ("Deprecated" in member and member["Deprecated"])
     ):
         return False
-    if klassName in IGNORED_MEMBERS and member["Name"] in IGNORED_MEMBERS[klassName]:
+    if member["Name"] in classIgnoredMembers(klassName):
         return False
     if "Security" in member:
         if isinstance(member["Security"], str):
             if SECURITY_LEVELS.index(member["Security"]) > SECURITY_LEVELS.index(
-                chosenSecurityLevel
+                    chosenSecurityLevel
             ):
                 return False
         else:
             if min(
-                SECURITY_LEVELS.index(member["Security"]["Read"]),
-                SECURITY_LEVELS.index(member["Security"]["Write"]),
+                    SECURITY_LEVELS.index(member["Security"]["Read"]),
+                    SECURITY_LEVELS.index(member["Security"]["Write"]),
             ) > SECURITY_LEVELS.index(chosenSecurityLevel):
                 return False
 
@@ -986,11 +842,11 @@ def filterMember(klassName: str, member: ApiMember):
 
 def shouldExcludeAsDeprecated(klass: ApiClass):
     return (
-        not INCLUDE_DEPRECATED_METHODS
-        and "Tags" in klass
-        and klass["Tags"] is not None
-        and "Deprecated" in klass["Tags"]
-        and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+            not INCLUDE_DEPRECATED_METHODS
+            and "Tags" in klass
+            and klass["Tags"] is not None
+            and "Deprecated" in klass["Tags"]
+            and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
     )
 
 
@@ -1054,6 +910,9 @@ def printEnums(dump: ApiDump):
         items.sort()
         for item in items:
             out += f"\t{escapeName(item)}: Enum{enum}\n"
+        out += f"\tfunction GetEnumItems(self): {{ Enum{enum} }}\n"
+        out += f"\tfunction FromName(self, Name: string): Enum{enum}?\n"
+        out += f"\tfunction FromValue(self, Value: number): Enum{enum}?\n"
         out += "end\n"
     print(out)
     print()
@@ -1102,10 +961,10 @@ def printDataTypeConstructors(types: DataTypesDump):
         for member in members:
             if member["MemberType"] == "Function":
                 if (
-                    name == "BrickColor"
-                    and member["Name"] == "new"
-                    and len(member["Parameters"]) == 1
-                    and member["Parameters"][0]["Type"]["Name"] == "string"
+                        name == "BrickColor"
+                        and member["Name"] == "new"
+                        and len(member["Parameters"]) == 1
+                        and member["Parameters"][0]["Type"]["Name"] == "string"
                 ):
                     isBrickColorNew = True
                     continue
@@ -1176,8 +1035,8 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                     ]["Generic"]
 
                             if (
-                                "Parameters" in member
-                                and member["Parameters"] is not None
+                                    "Parameters" in member
+                                    and member["Parameters"] is not None
                             ):
                                 for param in member["Parameters"]:
                                     for otherParam in otherMember["Parameters"]:
@@ -1207,9 +1066,9 @@ def loadClassesIntoStructures(dump: ApiDump):
         isCreatable = True
         if "Tags" in klass and klass["Tags"] is not None:
             if (
-                "Deprecated" in klass
-                and not INCLUDE_DEPRECATED_METHODS
-                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
+                    "Deprecated" in klass
+                    and not INCLUDE_DEPRECATED_METHODS
+                    and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
             ):
                 continue
             if "Service" in klass["Tags"]:

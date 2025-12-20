@@ -1,6 +1,5 @@
 #pragma once
 #include <optional>
-#include <filesystem>
 #include <unordered_map>
 #include <utility>
 #include "Luau/FileResolver.h"
@@ -40,6 +39,11 @@ public:
         return document != nullptr;
     }
 
+    const TextDocument* operator*() const
+    {
+        return document;
+    }
+
     const TextDocument* operator->() const
     {
         return document;
@@ -73,17 +77,17 @@ struct WorkspaceFileResolver
     , Luau::ConfigResolver
 {
 private:
-    mutable std::unordered_map<std::string, Luau::Config> configCache{};
+    mutable std::unordered_map<Uri, Luau::Config, UriHash> configCache{};
 
 public:
     Luau::Config defaultConfig;
-    std::shared_ptr<BaseClient> client;
+    BaseClient* client;
     Uri rootUri;
 
     LSPPlatform* platform = nullptr;
 
     // Currently opened files where content is managed by client
-    mutable std::unordered_map</* DocumentUri */ std::string, TextDocument> managedFiles{};
+    mutable std::unordered_map<Uri, TextDocument, UriHash> managedFiles{};
 
     WorkspaceFileResolver()
     {
@@ -92,10 +96,7 @@ public:
 
     // Create a WorkspaceFileResolver with a specific default configuration
     explicit WorkspaceFileResolver(Luau::Config defaultConfig)
-        : defaultConfig(std::move(defaultConfig)){};
-
-    // Handle normalisation to simplify lookup
-    static std::string normalisedUriString(const lsp::DocumentUri& uri);
+        : defaultConfig(std::move(defaultConfig)) {};
 
     /// The file is managed by the client, so FS will be out of date
     const TextDocument* getTextDocument(const lsp::DocumentUri& uri) const;
@@ -106,15 +107,18 @@ public:
     // Return the corresponding module name from a file Uri
     // We first try and find a virtual file path which matches it, and return that. Otherwise, we use the file system path
     Luau::ModuleName getModuleName(const Uri& name) const;
+    Uri getUri(const Luau::ModuleName& moduleName) const;
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override;
-    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
     std::string getHumanReadableModuleName(const Luau::ModuleName& name) const override;
-    const Luau::Config& getConfig(const Luau::ModuleName& name) const override;
+    const Luau::Config& getConfig(const Luau::ModuleName& name, const Luau::TypeCheckLimits& limits) const override;
     void clearConfigCache();
 
-    static std::optional<std::string> parseConfig(const std::filesystem::path& configPath, const std::string& contents, Luau::Config& result);
+    static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
+    static std::optional<std::string> parseLuauConfig(
+        const Uri& configPath, const std::string& contents, Luau::Config& result, const Luau::TypeCheckLimits& limits);
 
 private:
-    const Luau::Config& readConfigRec(const std::filesystem::path& path) const;
+    const Luau::Config& readConfigRec(const Uri& path, const Luau::TypeCheckLimits& limits) const;
 };

@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "0 0 * * *" # Runs at 00:00 UTC every day
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: "10.15"
+
 jobs:
   dist:
     strategy:
@@ -14,12 +17,15 @@ jobs:
           - os: windows-latest
             artifact-name: luau-lsp-win64
             code-target: [win32-x64]
-          - os: ubuntu-20.04
+            crash-reporting: true
+          - os: ubuntu-22.04
             artifact-name: luau-lsp-linux
             code-target: [linux-x64]
+            crash-reporting: false
           - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
+            crash-reporting: true
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -27,22 +33,38 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: true
+          submodules: recursive
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: Set Nightly Version
+        shell: bash
+        run: |
+          DATE=$(date +%Y%m%d)
+          VERSION="0.$DATE.0"
+          sed -i.bak "s/set(LSP_VERSION .*/set(LSP_VERSION \"$VERSION\")/g" CMakeLists.txt
+          jq ".version = \"$VERSION\"" editors/code/package.json > tmp.json && mv tmp.json editors/code/package.json
+
       - name: Build Server
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLUAU_ENABLE_TIME_TRACE:BOOL=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON -DLUAU_ENABLE_TIME_TRACE:BOOL=ON -DLSP_BUILD_WITH_SENTRY:BOOL=${{ matrix.crash-reporting }} ..
           cmake --build . --config RelWithDebInfo --target Luau.LanguageServer.CLI -j 3
 
       - name: (MacOS) Verify universal build
         if: matrix.os == 'macos-latest'
         run: lipo -archs build/luau-lsp
+
+      - name: (MacOS) Separate debug symbols
+        if: matrix.os == 'macos-latest'
+        run: dsymutil build/luau-lsp && strip -S build/luau-lsp
+
+      - name: (Linux) Separate debug symbols
+        if: matrix.os == 'ubuntu-22.04'
+        run: objcopy --only-keep-debug build/luau-lsp build/luau-lsp.dbg && objcopy --strip-debug build/luau-lsp
 
       - name: Copy Build into Extension
         shell: bash
@@ -56,6 +78,31 @@ jobs:
             cp build/luau-lsp editors/code/bin/server
             chmod 777 editors/code/bin/server
           fi
+
+      - name: Copy Crashpad Handler into Extension
+        shell: bash
+        if: matrix.crash-reporting == true
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+              cp build/RelWithDebInfo/crashpad_handler.exe editors/code/bin/crashpad_handler.exe
+          else
+              cp build/crashpad_handler editors/code/bin/crashpad_handler
+              chmod 777 editors/code/bin/crashpad_handler
+          fi
+
+      - name: Setup Sentry CLI
+        uses: matbour/setup-sentry-cli@v2
+        if: matrix.crash-reporting == true
+        with:
+          token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          organization: luau-lsp
+          project: luau-lsp
+
+      - name: Upload debug symbols
+        shell: bash
+        if: matrix.crash-reporting == true
+        run: |
+          sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
         shell: bash

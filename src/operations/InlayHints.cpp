@@ -1,10 +1,9 @@
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
 #include "Luau/Ast.h"
 #include "Luau/AstQuery.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "LSP/LuauExt.hpp"
 
 bool isLiteral(const Luau::AstExpr* expr)
@@ -94,6 +93,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (var->name == "_")
                         continue;
 
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
+                        continue;
+
                     auto typeString = Luau::toString(followedTy, stringOptions);
 
                     // If the stringified type is equivalent to the variable name, don't bother
@@ -135,6 +137,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     // If the variable is named "_", don't include an inlay hint
                     if (var->name == "_")
+                        continue;
+
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
                         continue;
 
                     auto typeString = Luau::toString(followedTy, stringOptions);
@@ -273,7 +278,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     std::string stringifiedParam = Luau::toString(param);
                     if (auto indexName = param->as<Luau::AstExprIndexName>())
                         stringifiedParam = Luau::toString(indexName->index);
-                    if (Luau::equalsLower(stringifiedParam, paramName))
+                    if (config.inlayHints.hideHintsForMatchingParameterNames && Luau::equalsLower(stringifiedParam, paramName))
                         createHint = false;
                 }
 
@@ -311,7 +316,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     }
 };
 
-lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params)
+lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -321,7 +326,8 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    checkStrict(moduleName, cancellationToken, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
@@ -332,10 +338,4 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
-}
-
-lsp::InlayHintResult LanguageServer::inlayHint(const lsp::InlayHintParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->inlayHint(params);
 }

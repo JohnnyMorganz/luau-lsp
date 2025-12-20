@@ -289,7 +289,8 @@ lsp::Position TextDocument::convertPosition(const Luau::Position& position) cons
 {
     auto lineOffsets = getLineOffsets();
     auto line = position.line;
-    std::string currentContent = _content.substr(lineOffsets[line], position.column);
+    LUAU_ASSERT(line < lineOffsets.size());
+    std::string currentContent = _content.substr(line < lineOffsets.size() ? lineOffsets[line] : lineOffsets.back(), position.column);
     return lsp::Position{line, lspLength(currentContent)};
 }
 

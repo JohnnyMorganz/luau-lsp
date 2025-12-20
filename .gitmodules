@@ -1,3 +1,6 @@
 [submodule "luau"]
 	path = luau
 	url = https://github.com/Roblox/luau.git
+[submodule "extern/sentry-native"]
+	path = extern/sentry-native
+	url = https://github.com/getsentry/sentry-native.git

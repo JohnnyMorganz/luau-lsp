@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime
 
 CHANGELOG_FILE = "CHANGELOG.md"
-MAIN_CPP_FILE = "src/main.cpp"
+MAKE_FILE = "CMakeLists.txt"
 PACKAGE_JSON_FILE = "editors/code/package.json"
 PACKAGE_LOCK_JSON_FILE = "editors/code/package-lock.json"
 
@@ -33,22 +33,17 @@ with open(CHANGELOG_FILE, "w") as file:
     file.writelines(new_changelog_lines)
 
 # Update version in main.cpp
-new_main_cpp_lines: list[str] = []
-with open(MAIN_CPP_FILE, "r") as file:
-    lines = file.readlines()
-
-    for line in lines:
-        if line.strip().startswith('argparse::ArgumentParser program("luau-lsp", '):
-            new_line = (
-                line[0 : line.find(line.strip())]
-                + f'argparse::ArgumentParser program("luau-lsp", "{VERSION}");\n'
-            )
-            new_main_cpp_lines.append(new_line)
+new_make_file_lines: list[str] = []
+with open(MAKE_FILE, "r") as file:
+    for line in file:
+        if line.startswith("set(LSP_VERSION"):
+            new_line = f"set(LSP_VERSION \"{VERSION}\")\n"
+            new_make_file_lines.append(new_line)
         else:
-            new_main_cpp_lines.append(line)
+            new_make_file_lines.append(line)
 
-with open(MAIN_CPP_FILE, "w") as file:
-    file.writelines(new_main_cpp_lines)
+with open(MAKE_FILE, "w") as file:
+    file.writelines(new_make_file_lines)
 
 # Update version in package.json
 package_json_data = None
@@ -73,7 +68,7 @@ subprocess.run(
         "git",
         "add",
         CHANGELOG_FILE,
-        MAIN_CPP_FILE,
+        MAKE_FILE,
         PACKAGE_JSON_FILE,
         PACKAGE_LOCK_JSON_FILE,
     ],

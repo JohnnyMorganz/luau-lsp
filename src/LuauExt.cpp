@@ -5,7 +5,7 @@
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Luau/TypeInfer.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
@@ -26,7 +26,7 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
         if (auto mtvName = Luau::getName(mtv->metatable))
             name = *mtvName;
     }
-    else if (auto parentClass = Luau::get<Luau::ClassType>(ty))
+    else if (auto parentClass = Luau::get<Luau::ExternType>(ty))
     {
         name = parentClass->name;
     }
@@ -53,10 +53,10 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
     return std::nullopt;
 }
 
-Luau::LoadDefinitionFileResult registerDefinitions(Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions)
+Luau::LoadDefinitionFileResult registerDefinitions(
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName, const std::string& definitions)
 {
-    // TODO: packageName shouldn't just be "@roblox"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ true);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
@@ -222,6 +222,21 @@ struct FindNodeType : public Luau::AstVisitor
         return visit(static_cast<Luau::AstNode*>(node));
     }
 
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return visit(static_cast<Luau::AstNode*>(node));
+    }
+
+    bool visit(Luau::AstGenericType* node) override
+    {
+        return false;
+    }
+
+    bool visit(Luau::AstGenericTypePack* node) override
+    {
+        return false;
+    }
+
     bool visit(Luau::AstStatBlock* block) override
     {
         visit(static_cast<Luau::AstNode*>(block));
@@ -285,11 +300,16 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
+    const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
-    if (auto ctv = Luau::get<Luau::ClassType>(parentType))
+    if (seenSet.contains(parentType))
+        return std::nullopt;
+    seenSet.insert(parentType);
+
+    if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
-        if (auto prop = Luau::lookupClassProp(ctv, name))
+        if (auto prop = Luau::lookupExternTypeProp(ctv, name))
             return std::make_pair(parentType, *prop);
     }
     else if (auto tbl = Luau::get<Luau::TableType>(parentType))
@@ -304,12 +324,12 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
         if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
-            if (indexIt != mtable->props.end())
+            if (indexIt != mtable->props.end() && indexIt->second.readTy)
             {
-                Luau::TypeId followed = Luau::follow(indexIt->second.type());
+                Luau::TypeId followed = Luau::follow(*indexIt->second.readTy);
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
-                    return lookupProp(followed, name);
+                    return lookupProp(followed, name, seenSet);
                 }
                 else if (Luau::get<Luau::FunctionType>(followed))
                 {
@@ -332,7 +352,7 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     {
         for (Luau::TypeId ty : i->parts)
         {
-            if (auto prop = lookupProp(Luau::follow(ty), name))
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet))
                 return prop;
         }
     }
@@ -341,6 +361,12 @@ std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::Ty
     //     // Find the corresponding ty
     // }
     return std::nullopt;
+}
+
+std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+{
+    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    return lookupProp(parentType, name, seenSet);
 }
 
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name)
@@ -636,6 +662,11 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstTypePack* type) override
+    {
+        return true;
+    }
+
     bool visit(Luau::AstTypeReference* typeReference) override
     {
         // TODO: this is not *completely* correct in the case of shadowing, as it is just a name comparison
@@ -670,6 +701,11 @@ struct FindTypeReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return true;
+    }
+
     bool visit(class Luau::AstTypeReference* node) override
     {
         if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
@@ -694,6 +730,14 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
     {
         if (ftv->definition)
             return ftv->definition->originalNameLocation;
+    }
+    else if (auto ttv = Luau::get<Luau::TableType>(type))
+    {
+        return ttv->definitionLocation;
+    }
+    else if (auto ctv = Luau::get<Luau::ExternType>(type))
+    {
+        return ctv->definitionLocation;
     }
 
     return std::nullopt;
@@ -770,15 +814,16 @@ std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
     std::optional<Luau::TypeId> metatable;
     if (const auto mtType = Luau::get<Luau::MetatableType>(type))
         metatable = mtType->metatable;
-    else if (const auto classType = Luau::get<Luau::ClassType>(type))
+    else if (const auto classType = Luau::get<Luau::ExternType>(type))
         metatable = classType->metatable;
 
     if (!metatable)
         return std::nullopt;
 
     auto unwrapped = Luau::follow(*metatable);
-    if (auto prop = lookupProp(unwrapped, "__call")) {
-        return prop->second.type();
+    if (auto prop = lookupProp(unwrapped, "__call"); prop && prop->second.readTy)
+    {
+        return prop->second.readTy;
     }
 
     return std::nullopt;

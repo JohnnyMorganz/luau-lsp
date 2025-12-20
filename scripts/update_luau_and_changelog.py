@@ -9,7 +9,7 @@ CHANGELOG_FILE = "CHANGELOG.md"
 
 # Update submodule
 subprocess.run(
-    ["git", "submodule", "update", "--remote"],
+    ["git", "submodule", "update", "--remote", "luau"],
     check=True,
     stdout=sys.stderr,
     stderr=sys.stderr,

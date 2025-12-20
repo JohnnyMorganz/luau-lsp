@@ -37,10 +37,10 @@
     ["<", ">"]
   ],
 
-  "autoCloseBefore": ">}])",
+  "autoCloseBefore": ">}])` \n\t",
 
   "indentationRules": {
-    "increaseIndentPattern": "^((?!(\\-\\-)).)*((\\b(function|do|repeat)\\b((?!\\b(end|until)\\b).)*)|(\\{\\s*)|(\\b(then|else)\\b[;\\s]*))$",
+    "increaseIndentPattern": "^((?!(\\-\\-)).)*((\\b(function|do|repeat)\\b((?!\\b(end|until)\\b).)*)|(\\{\\s*)|(\\b(then|else)\\b[;\\s]*))(\\-\\-.*)*$",
     "decreaseIndentPattern": "^\\s*((\\b(end|until)\\b)|(\\})|(\\))|(\\b(else)\\b[;\\s]*))"
   }
 }

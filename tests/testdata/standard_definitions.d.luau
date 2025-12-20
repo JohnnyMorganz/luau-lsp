@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage"]}
+--#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage","ServerScriptService","Workspace"]}
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -66,6 +66,8 @@ declare class Instance extends Object
     function GetFullName(self): string
     function IsAncestorOf(self, descendant: Instance): boolean
     function IsDescendantOf(self, ancestor: Instance): boolean
+    function IsPropertyModified(self, property: string): boolean
+    function ResetPropertyToDefault(self, property: string): nil
     function SetAttribute(self, attribute: string, value: any): nil
     function WaitForChild(self, name: string): Instance
     function WaitForChild(self, name: string, timeout: number): Instance?
@@ -82,11 +84,18 @@ end
 declare class ReplicatedStorage extends Instance
 end
 
+declare class ServerScriptService extends Instance
+end
+
+declare class Workspace extends Instance
+end
+
 declare class ServiceProvider extends Instance
     function GetService(self, className: string): Instance
 end
 
 declare class DataModel extends ServiceProvider
+    function BindToClose(self, func: ((...any) -> ...any)): nil
 end
 
 declare Instance: {
@@ -95,3 +104,23 @@ declare Instance: {
 }
 
 declare game: DataModel
+
+--- This is a documented table
+export type DocumentedTable = {
+    --- This is documented member1 of the table
+    member1: string,
+}
+
+--- This is a documented class
+declare class DocumentedClass
+    --- This is a documented member1 of the class
+    member1: string
+    --- This is a documented function1 of the class
+    function function1(self): number
+end
+
+--- This is a documented global function
+declare function DocumentedGlobalFunction(): number
+
+--- This is a documented global variable
+declare DocumentedGlobalVariable: number

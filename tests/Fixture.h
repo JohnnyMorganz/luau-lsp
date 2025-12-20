@@ -21,6 +21,8 @@
 
 #include <optional>
 
+#include "TestClient.h"
+
 // TODO: the rest should be part of this namespace...
 namespace Luau::LanguageServer
 {
@@ -31,20 +33,21 @@ Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::
 struct Fixture
 {
     std::unique_ptr<Luau::SourceModule> sourceModule;
-
-    std::shared_ptr<Client> client;
+    std::unique_ptr<TestClient> client;
     WorkspaceFolder workspace;
 
     explicit Fixture();
     ~Fixture();
 
     Uri newDocument(const std::string& name, const std::string& source);
+    void registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath);
+    void updateDocument(const Uri& uri, const std::string& newSource);
 
     Luau::AstStatBlock* parse(const std::string& source, const Luau::ParseOptions& parseOptions = {});
-    Luau::LoadDefinitionFileResult loadDefinition(const std::string& source, bool forAutocomplete = false);
+    Luau::LoadDefinitionFileResult loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete = false);
     void loadSourcemap(const std::string& source);
     void loadLuaurc(const std::string& source);
-    SourceNodePtr getRootSourceNode();
+    SourceNode* getRootSourceNode();
 
     // Single file operations
     Luau::CheckResult check(Luau::Mode mode, std::string source);

@@ -2,7 +2,9 @@
 #include "Luau/StringUtils.h"
 #include "Platform/RobloxPlatform.hpp"
 #include <algorithm>
-#include <fstream>
+
+#include "Luau/TimeTrace.h"
+#include "LuauFileUtils.hpp"
 
 std::optional<std::string> getParentPath(const std::string& path)
 {
@@ -22,7 +24,7 @@ std::optional<std::string> getParentPath(const std::string& path)
 
 /// Returns a path at the ancestor point.
 /// i.e., for game/ReplicatedStorage/Module/Child/Foo, and ancestor == Module, returns game/ReplicatedStorage/Module
-std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNodePtr& rootSourceNode)
+std::optional<std::string> getAncestorPath(const std::string& path, const std::string& ancestorName, const SourceNode* rootSourceNode)
 {
     // We want to remove the child from the path name in case the ancestor has the same name as the child
     auto parentPath = getParentPath(path);
@@ -53,30 +55,33 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     return std::nullopt;
 }
 
-std::string convertToScriptPath(const std::string& path)
+std::string convertToScriptPath(std::string path)
 {
-    std::filesystem::path p(path);
     std::string output = "";
-    for (auto it = p.begin(); it != p.end(); ++it)
+#ifdef _WIN32
+    std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+    std::vector<std::string_view> components = Luau::split(path, '/');
+    for (auto it = components.begin(); it != components.end(); ++it)
     {
-        auto str = it->string();
-        if (str.find(' ') != std::string::npos)
-            output += "[\"" + str + "\"]";
-        else if (str == ".")
+        auto str = *it;
+        if (str == ".")
         {
-            if (it == p.begin())
+            if (it == components.begin())
                 output += "script";
         }
         else if (str == "..")
         {
-            if (it == p.begin())
+            if (it == components.begin())
                 output += "script.Parent";
             else
                 output += ".Parent";
         }
+        else if (!Luau::isIdentifier(str))
+            output += "[\"" + std::string(str) + "\"]";
         else
         {
-            if (it != p.begin())
+            if (it != components.begin())
                 output += ".";
             output += str;
         }
@@ -90,27 +95,7 @@ std::string codeBlock(const std::string& language, const std::string& code)
     return "```" + language + "\n" + code + "\n" + "```";
 }
 
-std::optional<std::string> readFile(const std::filesystem::path& filePath)
-{
-    std::ifstream fileContents;
-    fileContents.open(filePath);
-
-    std::string output;
-    std::stringstream buffer;
-
-    if (fileContents)
-    {
-        buffer << fileContents.rdbuf();
-        output = buffer.str();
-        return output;
-    }
-    else
-    {
-        return std::nullopt;
-    }
-}
-
-std::optional<std::filesystem::path> getHomeDirectory()
+std::optional<std::string> getHomeDirectory()
 {
     if (const char* home = getenv("HOME"))
     {
@@ -127,12 +112,12 @@ std::optional<std::filesystem::path> getHomeDirectory()
 }
 
 // Resolves a filesystem path, including any tilde expansion
-std::filesystem::path resolvePath(const std::filesystem::path& path)
+std::string resolvePath(const std::string& path)
 {
-    if (Luau::startsWith(path.generic_string(), "~/"))
+    if (Luau::startsWith(path, "~/"))
     {
         if (auto home = getHomeDirectory())
-            return home.value() / path.string().substr(2);
+            return Luau::FileUtils::joinPaths(*home, path.substr(2));
         else
             // TODO: should we error / return an optional here instead?
             return path;
@@ -159,7 +144,6 @@ std::string removePrefix(const std::string& str, const std::string& prefix)
     return str;
 }
 
-
 void trim_end(std::string& str)
 {
     str.erase(str.find_last_not_of(" \n\r\t") + 1);
@@ -171,7 +155,7 @@ void trim(std::string& str)
     trim_end(str);
 }
 
-std::string& toLower(std::string& str)
+std::string toLower(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c)
@@ -192,6 +176,13 @@ std::string_view getFirstLine(const std::string_view& str)
 bool endsWith(const std::string_view& str, const std::string_view& suffix)
 {
     return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
+}
+
+std::string removeSuffix(const std::string& str, const std::string_view& suffix)
+{
+    if (endsWith(str, suffix))
+        return str.substr(0, str.length() - suffix.size());
+    return str;
 }
 
 bool replace(std::string& str, const std::string& from, const std::string& to)

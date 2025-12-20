@@ -6,19 +6,23 @@ An implementation of a language server for the [Luau](https://github.com/Roblox/
 
 Install the extension from the VSCode Marketplace or OpenVSX Registry:
 
-- VSCode Marketplace: https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp
-- OpenVSX Registry: https://open-vsx.org/extension/JohnnyMorganz/luau-lsp
+- VSCode Marketplace: <https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp>
+- OpenVSX Registry: <https://open-vsx.org/extension/JohnnyMorganz/luau-lsp>
 
 Alternatively, check out [Getting Started for Language Server Clients](https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md)
-to setup your own client for a different editor
+to setup your own client for a different editor.
+
+A [Nightly Release](https://github.com/JohnnyMorganz/luau-lsp/actions/workflows/nightly.yml) runs every day with the latest changes on main.
+You can download the relevant release for your platform and manually install the `.vsix`.
+The nightly release builds with debug symbols and profiling instrumentation for debugging.
 
 ### For General Users
 
-The language server should be immediately usable for general Luau code after installation.
-String require support is provided for module paths, using `require("module")`.
+The language server will start working immediately for general Luau code. There is built-in support
+for Luau's generalised [require-by-string semantics](https://rfcs.luau.org/new-require-by-string-semantics.html), using `require("./module")`.
 
-Type definitions can be provided by configuring `luau-lsp.types.definitionFiles`, with corresponding
-documentation added using `luau-lsp.types.documentationFiles`.
+To provide global type definitions for a custom environment, specify `luau-lsp.types.definitionFiles`.
+Corresponding documentation is configured using `luau-lsp.types.documentationFiles`.
 
 If you use Luau in a different environment and are interested in using the language server, or
 looking for any specific features, please get in touch!
@@ -42,7 +46,8 @@ The following settings are configurable for sourcemap generation:
 - `luau-lsp.sourcemap.sourcemapFile`: What sourcemap file to use (default: `sourcemap.json`)
 
 If you do not use Rojo, you can still use the Luau Language Server, you just need to manually generate a `sourcemap.json`
-file for your particular project layout.
+file for your particular project layout. You can configure `luau-lsp.sourcemap.generatorCommand` to run a custom generator.
+If your generator does not support file watching, enable `luau-lsp.sourcemap.useVSCodeWatcher`.
 
 > Note: in the diagnostics type checker, the types for DataModel (DM) instances will resolve to `any`. This is a current limitation to reduce false positives.
 > However, autocomplete and hover intellisense will correctly resolve the DM type.
@@ -57,6 +62,13 @@ The tool can run standalone, similar to [`luau-analyze`](https://github.com/John
 The entry point for the analysis tool is `luau-lsp analyze`.
 
 Install the binary and run `luau-lsp --help` for more information.
+
+## Configuration
+
+There are 2 types of configuration styles for the language server. General configuration is provided by `.luaurc` files,
+which allow you to configure language strictness, lints, and require aliases. More information is available in Luau's [RFC documentation](https://rfcs.luau.org/config-luaurc.html).
+
+The second configuration style is specific to the language server. See `luau-lsp` in your editor's settings for more details.
 
 ## Supported Features
 
@@ -92,10 +104,41 @@ They can be investigated at a later time:
 - [ ] Formatting (see [stylua](https://github.com/JohnnyMorganz/StyLua))
 - [ ] Type Hierarchy (Luau currently does not provide any [public] ways to define type hierarchies)
 
+## Crash Reporting
+
+The language server implements opt-in crash reporting, using [Sentry](https://sentry.io/).
+
+On VSCode, this is configured via the setting `luau-lsp.server.crashReporting.enabled`.
+When a crash is encountered, an out-of-process crash handler will upload the crash details to Sentry via HTTP.
+
+When a crash is reported, the report stores the following information:
+
+- Crash reason and thread stack trace
+- Device metadata: OS name, version and CPU architecture
+- Dynamic libraries loaded into the process (including filesystem paths)
+
+This information is transferred through a [Minidump](https://docs.sentry.io/platforms/native/guides/minidumps/#what-is-a-minidump) file.
+This file is not stored after processing. No general usage data is recorded.
+
+Crash Reporting is only available for Windows and macOS, and is not active for Standalone mode (`luau-lsp analyze`)
+
 ## Build From Source
 
+Submodules are required to build the project. You should use `--recurse-submodules` when you initally clone the project; e.g.
+
 ```sh
+git clone https://github.com/JohnnyMorganz/luau-lsp.git --recurse-submodules
+```
+
+To compile the project, execute the following commands in the project root directory.
+
+```sh
+git submodule update --init --recursive
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --target Luau.LanguageServer.CLI --config Release
 ```
+
+You can build `Luau.LanguageServer.Test` for unit tests.
+Some tests make assumptions about relative file paths.
+When running tests, ensure that your current working directory is set to the root of the repository.

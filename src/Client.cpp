@@ -1,7 +1,19 @@
 #include "LSP/Client.hpp"
+#include "LSP/Transport/StdioTransport.hpp"
+#include "Protocol/WorkDoneProgress.hpp"
 
 #include <iostream>
 #include <optional>
+
+Client::Client()
+    : transport(std::make_unique<StdioTransport>())
+{
+}
+
+Client::Client(std::unique_ptr<Transport> transport)
+    : transport(std::move(transport))
+{
+}
 
 void Client::sendRequest(
     const id_type& id, const std::string& method, const std::optional<json>& params, const std::optional<ResponseHandler>& handler)
@@ -42,7 +54,7 @@ void Client::sendError(const std::optional<id_type>& id, const JsonRpcException&
     sendRawMessage(msg);
 }
 
-void Client::sendNotification(const std::string& method, const std::optional<json>& params)
+void Client::sendNotification(const std::string& method, const std::optional<json>& params) const
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -53,7 +65,60 @@ void Client::sendNotification(const std::string& method, const std::optional<jso
     sendRawMessage(msg);
 }
 
-void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message)
+static bool supportsWorkDoneProgress(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.window && capabilities.window->workDoneProgress;
+}
+
+void Client::createWorkDoneProgress(const lsp::ProgressToken& token)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    // TODO: handle responses?
+    sendRequest(nextRequestId++, "window/workDoneProgress/create", lsp::WorkDoneProgressCreateParams{token});
+}
+
+void Client::sendWorkDoneProgressBegin(
+    const lsp::ProgressToken& token, const std::string& title, std::optional<std::string> message, std::optional<uint8_t> percentage)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressBegin workDone;
+    workDone.title = title;
+    workDone.cancellable = false;
+    workDone.message = message;
+    workDone.percentage = percentage;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
+}
+
+void Client::sendWorkDoneProgressReport(const lsp::ProgressToken& token, std::optional<std::string> message, std::optional<uint8_t> percentage)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressReport workDone;
+    workDone.cancellable = false;
+    workDone.message = message;
+    workDone.percentage = percentage;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
+}
+
+void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message)
+{
+    if (!supportsWorkDoneProgress(capabilities))
+        return;
+
+    lsp::WorkDoneProgressEnd workDone;
+    workDone.message = message;
+
+    sendProgress(lsp::ProgressParams{token, workDone});
+}
+
+void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message) const
 {
     json params{
         {"type", type},
@@ -72,7 +137,7 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     sendNotification("$/logTrace", params);
 }
 
-void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
+void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message) const
 {
     lsp::ShowMessageParams params{type, message};
     sendNotification("window/showMessage", params);
@@ -94,17 +159,14 @@ void Client::unregisterCapability(const std::string& registrationId, const std::
 
 ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
 {
-    auto key = uri.toString();
-    if (configStore.find(key) != configStore.end())
-    {
-        return configStore.at(key);
-    }
+    if (configStore.find(uri) != configStore.end())
+        return configStore[uri];
     return globalConfig;
 }
 
 void Client::removeConfiguration(const lsp::DocumentUri& uri)
 {
-    configStore.erase(uri.toString());
+    configStore.erase(uri);
 }
 
 void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
@@ -138,10 +200,10 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
                         config = *configIt;
 
                     ClientConfiguration* oldConfig = nullptr;
-                    if (auto it = configStore.find(uri.toString()); it != configStore.end())
+                    if (auto it = configStore.find(uri); it != configStore.end())
                         oldConfig = &it->second;
 
-                    configStore.insert_or_assign(uri.toString(), config);
+                    configStore.insert_or_assign(uri, config);
                     sendLogMessage(lsp::MessageType::Info, "loaded configuration for " + uri.toString());
                     if (configChangedCallback)
                         configChangedCallback(uri, config, oldConfig);
@@ -190,9 +252,9 @@ void Client::setTrace(const lsp::SetTraceParams& params)
     traceMode = params.value;
 }
 
-bool Client::readRawMessage(std::string& output)
+bool Client::readRawMessage(std::string& output) const
 {
-    return json_rpc::readRawMessage(std::cin, output);
+    return json_rpc::readRawMessage(transport.get(), output);
 }
 
 void Client::handleResponse(const JsonRpcMessage& message)
@@ -222,7 +284,7 @@ void Client::handleResponse(const JsonRpcMessage& message)
     }
 }
 
-void Client::sendRawMessage(const json& message)
+void Client::sendRawMessage(const json& message) const
 {
-    json_rpc::sendRawMessage(std::cout, message);
+    json_rpc::sendRawMessage(transport.get(), message);
 }

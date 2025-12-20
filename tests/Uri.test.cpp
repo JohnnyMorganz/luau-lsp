@@ -10,6 +10,11 @@
 #define IF_WINDOWS(X, Y) Y
 #endif
 
+std::ostream& operator<<(std::ostream& stream, const Uri& uri)
+{
+    return stream << uri.toString();
+}
+
 TEST_SUITE_BEGIN("UriTests");
 
 TEST_CASE("file#toString")
@@ -42,7 +47,7 @@ TEST_CASE("file#fsPath (win-special)")
 
     CHECK_EQ(Uri::file("c:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("c:/win/path/").fsPath(), "c:\\win\\path\\");
-    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "C:/win/path"); // DEVIATION: c:\\win\\path
+    CHECK_EQ(Uri::file("C:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("/c:/win/path").fsPath(), "c:\\win\\path");
     CHECK_EQ(Uri::file("./c/win/path").fsPath(), "\\.\\c\\win\\path");
 #endif
@@ -134,7 +139,7 @@ TEST_CASE("parse")
     CHECK_EQ(value.path, "/files/c#/p.cs");
     CHECK_EQ(value.fragment, "");
     CHECK_EQ(value.query, "");
-    CHECK_EQ(value.fsPath(), "//shares/files/c#/p.cs"); // DEVIATION: IF_WINDOWS("\\\\shares\\files\\c#\\p.cs", "//shares/files/c#/p.cs")
+    CHECK_EQ(value.fsPath(), IF_WINDOWS("\\\\shares\\files\\c#\\p.cs", "//shares/files/c#/p.cs"));
 
     value = Uri::parse("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/"
                        "resources/app/plugins/c%23/plugin.json");
@@ -232,7 +237,7 @@ TEST_CASE("URI#file, win-speciale")
     value = Uri::file("\\\\localhost\\c$\\GitDevelopment\\express");
     CHECK_EQ(value.scheme, "file");
     CHECK_EQ(value.path, "/c$/GitDevelopment/express");
-    CHECK_EQ(value.fsPath(), "//localhost/c$/GitDevelopment/express"); // DEVIATION: \\\\localhost\\c$\\GitDevelopment\\express
+    CHECK_EQ(value.fsPath(), "\\\\localhost\\c$\\GitDevelopment\\express");
     CHECK_EQ(value.query, "");
     CHECK_EQ(value.fragment, "");
     CHECK_EQ(value.toString(), "file://localhost/c%24/GitDevelopment/express");
@@ -357,10 +362,8 @@ TEST_CASE("correctFileUriToFilePath2")
     test("file:///c:/Source/Z%C3%BCrich%20or%20Zurich%20(%CB%88zj%CA%8A%C9%99r%C9%AAk,/Code/resources/app/plugins",
         IF_WINDOWS("c:\\Source\\Zürich or Zurich (ˈzjʊərɪk,\\Code\\resources\\app\\plugins",
             "c:/Source/Zürich or Zurich (ˈzjʊərɪk,/Code/resources/app/plugins"));
-    test("file://monacotools/folder/isi.txt",
-        "//monacotools/folder/isi.txt"); // DEVIATION: IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt")
-    test("file://monacotools1/certificates/SSL/",
-        "//monacotools1/certificates/SSL/"); // DEVIATION: IF_WINDOWS("\\\\monacotools1\\certificates\\SSL\\", "//monacotools1/certificates/SSL/")
+    test("file://monacotools/folder/isi.txt", IF_WINDOWS("\\\\monacotools\\folder\\isi.txt", "//monacotools/folder/isi.txt"));
+    test("file://monacotools1/certificates/SSL/", IF_WINDOWS("\\\\monacotools1\\certificates\\SSL\\", "//monacotools1/certificates/SSL/"));
 }
 
 TEST_CASE("URI - http, query & toString'")
@@ -505,6 +508,76 @@ TEST_CASE("luau-lsp custom: encodeURIComponent #555")
         IF_WINDOWS(
             "file:///c%3A/Users/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk",
             "file:///home/leoni/OneDrive/%D0%A0%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%20%D1%81%D1%82%D0%BE%D0%BB/Creations/RobloxProjects/Nelsk"));
+}
+
+TEST_CASE("luau-lsp custom: two file paths are equal on case-insensitive file systems")
+{
+    auto uri = Uri::file(IF_WINDOWS("c:\\Users\\testing", "/home/testing"));
+    auto uri2 = Uri::file(IF_WINDOWS("C:\\USERS\\TESTING", "/HOME/TESTING"));
+
+#if defined(_WIN32) || defined(__APPLE__)
+    CHECK(uri == uri2);
+    CHECK(UriHash()(uri) == UriHash()(uri2));
+#else
+    CHECK(uri != uri2);
+    CHECK(UriHash()(uri) != UriHash()(uri2));
+#endif
+}
+
+TEST_CASE("luau-lsp custom: lexicallyRelative")
+{
+    // NOTE: We will only ever deal with absolute URIs
+    CHECK_EQ(Uri::file("/a/d").lexicallyRelative(Uri::file("/a/b/c")), "../../d");
+    CHECK_EQ(Uri::file("/a/b/c").lexicallyRelative(Uri::file("/a/d")), "../b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a")), "b/c");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c/x/y")), "../..");
+    CHECK_EQ(Uri::file("/a/b/c/").lexicallyRelative(Uri::file("/a/b/c")), ".");
+    CHECK_EQ(Uri::file("/a/b").lexicallyRelative(Uri::file("/c/d")), "../../a/b");
+
+#ifdef _WIN32
+    CHECK_EQ(Uri::file("C:/project/file").lexicallyRelative(Uri::file("c:/project")), "file");
+#endif
+}
+
+TEST_CASE("Uri::extension")
+{
+    CHECK_EQ(Uri::parse("file://a/b/init.lua").extension(), ".lua");
+    CHECK_EQ(Uri::parse("file://a/b/init.luau").extension(), ".luau");
+    CHECK_EQ(Uri::parse("file://a/b/init.server.luau").extension(), ".luau");
+    CHECK_EQ(Uri::parse("file://a/b/init.server").extension(), ".server");
+    CHECK_EQ(Uri::parse("file://a/b/init").extension(), "");
+    CHECK_EQ(Uri::parse("file://a/b/").extension(), "");
+    CHECK_EQ(Uri::parse("file://a/b//").extension(), "");
+}
+
+TEST_CASE("Uri::resolvePath")
+{
+    CHECK_EQ(Uri::parse("foo://a/foo/bar").resolvePath("x").toString(), "foo://a/foo/bar/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("x").toString(), "foo://a/foo/bar/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("/x").toString(), "foo://a/x");
+    CHECK_EQ(Uri::parse("foo://a/foo/bar/").resolvePath("x/").toString(), "foo://a/foo/bar/x");
+
+    CHECK_EQ(Uri::parse("foo://a").resolvePath("x/").toString(), "foo://a/x");
+    CHECK_EQ(Uri::parse("foo://a").resolvePath("/x/").toString(), "foo://a/x");
+
+    CHECK_EQ(Uri::parse("foo://a/b").resolvePath("/x/..//y/.").toString(), "foo://a/y");
+    CHECK_EQ(Uri::parse("foo://a/b").resolvePath("x/..//y/.").toString(), "foo://a/b/y");
+    CHECK_EQ(Uri::parse("untitled:untitled-1").resolvePath("../foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:").resolvePath("foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:").resolvePath("..").toString(), "untitled:");
+    // TODO: LSP Deviation
+    //    CHECK_EQ(Uri::parse("untitled:").resolvePath("/foo").toString(), "untitled:foo");
+    CHECK_EQ(Uri::parse("untitled:/").resolvePath("/foo").toString(), "untitled:/foo");
+}
+
+TEST_CASE("Uri::isDirectory handles filesystem errors")
+{
+    CHECK_FALSE(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).isDirectory());
+}
+
+TEST_CASE("Uri::exists handles filesystem errors")
+{
+    CHECK_NOTHROW(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
 }
 
 TEST_SUITE_END();

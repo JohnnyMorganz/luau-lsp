@@ -35,9 +35,39 @@ struct ClientTypesConfiguration
     /// DEPRECATED: USE `platform.type` INSTEAD
     bool roblox = true;
     /// Any definition files to load globally
-    std::vector<std::filesystem::path> definitionFiles{};
+    std::unordered_map<std::string, std::string> definitionFiles{};
+    /// A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)
+    std::vector<std::string> disabledGlobals{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientTypesConfiguration, roblox, definitionFiles);
+
+// TODO: ser/de defined manually to retain backwards compatibility of 'definitionsFiles' being an array
+inline void to_json(nlohmann::json& nlohmann_json_j, const ClientTypesConfiguration& nlohmann_json_t)
+{
+    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, roblox, definitionFiles, disabledGlobals))
+}
+inline void from_json(const nlohmann::json& json, ClientTypesConfiguration& object)
+{
+    if (json.contains("roblox"))
+        json["roblox"].get_to(object.roblox);
+    if (json.contains("disabledGlobals"))
+        json["disabledGlobals"].get_to(object.disabledGlobals);
+    if (json.contains("definitionFiles"))
+    {
+        if (json["definitionFiles"].is_object())
+            json["definitionFiles"].get_to(object.definitionFiles);
+        else
+        {
+            // Backwards compatibility, randomise the packageName of the definitionFiles
+            size_t backwardsCompatibilityNameSuffix = 1;
+            for (const auto& definition : json["definitionFiles"].get<std::vector<std::string>>())
+            {
+                std::string packageName = "@roblox" + std::to_string(backwardsCompatibilityNameSuffix);
+                object.definitionFiles.emplace(packageName, definition);
+                backwardsCompatibilityNameSuffix += 1;
+            }
+        }
+    }
+}
 
 enum struct InlayHintsParameterNamesConfig
 {
@@ -57,6 +87,8 @@ struct ClientInlayHintsConfiguration
     bool variableTypes = false;
     bool parameterTypes = false;
     bool functionReturnTypes = false;
+    bool hideHintsForErrorTypes = false;
+    bool hideHintsForMatchingParameterNames = true;
     size_t typeHintMaxLength = 50;
     /// Whether type inlay hints should be made insertable
     bool makeInsertable = true;
@@ -64,7 +96,8 @@ struct ClientInlayHintsConfiguration
     inline bool operator==(const ClientInlayHintsConfiguration& rhs) const
     {
         return this->parameterNames == rhs.parameterNames && this->variableTypes == rhs.variableTypes && this->parameterTypes == rhs.parameterTypes &&
-               this->functionReturnTypes == rhs.functionReturnTypes && this->typeHintMaxLength == rhs.typeHintMaxLength;
+               this->functionReturnTypes == rhs.functionReturnTypes && this->hideHintsForErrorTypes == rhs.hideHintsForErrorTypes &&
+               this->hideHintsForMatchingParameterNames == rhs.hideHintsForMatchingParameterNames && this->typeHintMaxLength == rhs.typeHintMaxLength;
     }
 
     inline bool operator!=(const ClientInlayHintsConfiguration& rhs) const
@@ -72,8 +105,8 @@ struct ClientInlayHintsConfiguration
         return !(*this == rhs);
     }
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes, typeHintMaxLength, makeInsertable);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientInlayHintsConfiguration, parameterNames, variableTypes, parameterTypes, functionReturnTypes,
+    hideHintsForErrorTypes, hideHintsForMatchingParameterNames, typeHintMaxLength, makeInsertable);
 
 struct ClientHoverConfiguration
 {
@@ -98,23 +131,35 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ImportRequireStyle, {
                                                      {ImportRequireStyle::AlwaysAbsolute, "alwaysAbsolute"},
                                                  })
 
+struct ClientCompletionImportsStringRequiresConfiguration
+{
+    // Whether to use string requires when auto-importing requires (roblox platform only)
+    bool enabled = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsStringRequiresConfiguration, enabled);
+
 struct ClientCompletionImportsConfiguration
 {
     /// Whether we should suggest automatic imports in completions
-    bool enabled = false;
+    bool enabled = true;
     /// Whether services should be suggested in auto-import
     bool suggestServices = true;
+    /// When non-empty, only show the services listed when auto-importing
+    std::vector<std::string> includedServices{};
+    /// Do not show any of the listed services when auto-importing
+    std::vector<std::string> excludedServices{};
     /// Whether requires should be suggested in auto-import
     bool suggestRequires = true;
     /// The style of the auto-imported require
     ImportRequireStyle requireStyle = ImportRequireStyle::Auto;
+    ClientCompletionImportsStringRequiresConfiguration stringRequires;
     /// Whether services and requires should be separated by an empty line
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
-    ClientCompletionImportsConfiguration, enabled, suggestServices, suggestRequires, requireStyle, separateGroupsWithLine, ignoreGlobs);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
+    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
 
 struct ClientCompletionConfiguration
 {
@@ -134,10 +179,14 @@ struct ClientCompletionConfiguration
     bool fillCallArguments = true;
     /// Whether to show non-function properties when performing a method call with a colon
     bool showPropertiesOnMethodCall = false;
+    /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
+    bool showKeywords = true;
+    /// Enables the experimental fragment autocomplete system for performance improvements
+    bool enableFragmentAutocomplete = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {
@@ -152,9 +201,11 @@ struct ClientRequireConfiguration
     std::unordered_map<std::string, std::string> fileAliases;
     // DEPRECATED: USE .luaurc INSTEAD. A mapping of custom require prefixes to directory paths
     std::unordered_map<std::string, std::string> directoryAliases;
+    // DEPRECATED: USE NEW REQUIRE-BY-STRING SEMANTICS INSTEAD.
+    bool useOriginalRequireByStringSemantics = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases, useOriginalRequireByStringSemantics);
 
 struct ClientIndexConfiguration
 {

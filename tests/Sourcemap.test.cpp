@@ -1,38 +1,32 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "ScopedFlags.h"
+#include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("SourcemapTests");
 
 TEST_CASE("getScriptFilePath")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.lua"};
+    SourceNode node("test", "ModuleScript", {"test.lua"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.lua");
 }
 
 TEST_CASE("getScriptFilePath returns json file if node is populated by JSON")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.json"};
+    SourceNode node("test", "ModuleScript", {"test.json"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.json");
 }
 
 TEST_CASE("getScriptFilePath returns toml file if node is populated by TOML")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"test.toml"};
+    SourceNode node("test", "ModuleScript", {"test.toml"}, {});
     CHECK_EQ(node.getScriptFilePath(), "test.toml");
 }
 
 TEST_CASE("getScriptFilePath doesn't pick .meta.json")
 {
-    SourceNode node;
-    node.className = "ModuleScript";
-    node.filePaths = {"init.meta.json", "init.lua"};
+    SourceNode node("init", "ModuleScript", {"init.meta.json", "init.lua"}, {});
     CHECK_EQ(node.getScriptFilePath(), "init.lua");
 }
 
@@ -138,7 +132,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_works_without_sourcemap")
 }
 
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_with_sourcemap")
+TEST_CASE_FIXTURE(Fixture, "find_first_child_supports_recursive_parameter_with_sourcemap")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
     loadSourcemap(R"(
@@ -157,14 +151,54 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_
             }
         )");
 
-    // TODO: Support recursive datamodel lookup - https://github.com/JohnnyMorganz/luau-lsp/issues/689
     auto result = check(R"(
         --!strict
         local template = game:FindFirstChild("Head", true)
     )");
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
-    CHECK(Luau::toString(requireType("template")) == "Instance?");
+    CHECK(Luau::toString(requireType("template")) == "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_first_child_performs_bfs_and_picks_closest_matching_child_first")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+            {
+                "name": "Game",
+                "className": "DataModel",
+                "children": [
+                    {
+                        "name": "Long",
+                        "className": "Folder",
+                        "children": [
+                            {
+                                "name": "Short",
+                                "className": "Folder",
+                                "children": [
+                                    {"name": "Head", "className": "Folder"}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "TemplateR15",
+                        "className": "Part",
+                        "children": [
+                            {"name": "Head", "className": "Part"}
+                        ]
+                    }
+                ]
+            }
+        )");
+
+    auto result = check(R"(
+        --!strict
+        local template = game:FindFirstChild("Head", true)
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("template")) == "Part");
 }
 
 TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_without_sourcemap")
@@ -180,7 +214,7 @@ TEST_CASE_FIXTURE(Fixture, "find_first_child_still_supports_recursive_parameter_
 }
 
 
-TEST_CASE_FIXTURE(Fixture, "find_first_child_finds_direct_child_recursively")
+TEST_CASE_FIXTURE(Fixture, "find_first_child_finds_direct_child_when_searching_recursively")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
     loadSourcemap(R"(
@@ -464,8 +498,8 @@ TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///home/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///home/project");
     loadSourcemap(R"(
         {
             "name": "Game",
@@ -475,7 +509,7 @@ TEST_CASE_FIXTURE(Fixture, "get_virtual_module_name_from_real_path")
     )");
 #endif
 
-    auto uri = Uri::file(workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+    auto uri = workspace.rootUri.resolvePath("Foo/Test.luau");
 
     CHECK_EQ(workspace.fileResolver.getModuleName(uri), "game/MainScript");
 }
@@ -493,8 +527,8 @@ TEST_CASE_FIXTURE(Fixture, "get_real_path_from_virtual_name")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///random/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///random/project");
     loadSourcemap(R"(
         {
             "name": "Game",
@@ -504,7 +538,7 @@ TEST_CASE_FIXTURE(Fixture, "get_real_path_from_virtual_name")
     )");
 #endif
 
-    CHECK_EQ(workspace.platform->resolveToRealPath("game/MainScript"), workspace.rootUri.fsPath() / "Foo" / "Test.luau");
+    CHECK_EQ(workspace.platform->resolveToRealPath("game/MainScript"), workspace.rootUri.resolvePath("Foo/Test.luau"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subchild_with_lower_case_drive_letter")
@@ -520,8 +554,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///random/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///random/project");
     loadSourcemap(R"(
         {
             "name": "RootNode",
@@ -538,7 +572,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_is_normalised_to_match_root_uri_subch
     auto normalisedPath = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->getRealPathFromSourceNode(rootNode);
     REQUIRE(normalisedPath);
 
-    CHECK_EQ((workspace.rootUri.fsPath() / *filePath).generic_string(), normalisedPath->generic_string());
+    CHECK_EQ(workspace.rootUri.resolvePath(*filePath), normalisedPath);
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
@@ -554,8 +588,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
         }
     )");
 #else
-    workspace.rootUri = Uri::parse("/home/project");
-    workspace.fileResolver.rootUri = Uri::parse("/home/project");
+    workspace.rootUri = Uri::parse("file:///home/project");
+    workspace.fileResolver.rootUri = Uri::parse("file:///home/project");
     loadSourcemap(R"(
         {
             "name": "RootNode",
@@ -572,6 +606,202 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_path_matches_ignore_globs")
     REQUIRE(filePath);
 
     CHECK(workspace.isIgnoredFileForAutoImports(*filePath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
+{
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto document = newDocument("foo.luau", R"(
+        local part = game.Workspace.Part
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = {document};
+    params.position = lsp::Position{1, 16};
+    auto hover = workspace.hover(params, nullptr);
+
+    REQUIRE(hover);
+    CHECK_EQ(hover->contents.value, codeBlock("luau", "local part: Part"));
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part2", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto hover2 = workspace.hover(params, nullptr);
+    REQUIRE(hover2);
+    if (FFlag::LuauSolverV2)
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: any"));
+    else
+        CHECK_EQ(hover2->contents.value, codeBlock("luau", "local part: *error-type*"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Workspace",
+                    "className": "Workspace",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.Workspace.Part
+        part.Parent = Instance.new("TextLabel")
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+}
+
+TEST_CASE_FIXTURE(Fixture, "child_properties_of_services_are_cleared_when_the_service_is_removed_from_sourcemap")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto source = R"(
+        --!strict
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        print(ReplicatedStorage.Part)
+    )";
+
+    auto result = check(source);
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": []
+        }
+    )");
+
+    auto result2 = check(source);
+
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "child_properties_of_game_are_cleared_when_an_invalid_sourcemap_is_given")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Part",
+                    "className": "Part"
+                }
+            ]
+        }
+    )");
+
+    auto source = R"(
+        --!strict
+        print(game.Part)
+    )";
+
+    auto result = check(source);
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    loadSourcemap("");
+
+    auto result2 = check(source);
+
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_is_missing")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    client->globalConfig.sourcemap.enabled = true;
+
+    // Verify that no sourcemap file exists - this ensures we're testing the fallback behavior
+    auto config = client->getConfiguration(workspace.rootUri);
+    auto sourcemapPath = workspace.rootUri.resolvePath(config.sourcemap.sourcemapFile);
+    REQUIRE_FALSE(Luau::FileUtils::exists(sourcemapPath.fsPath()));
+
+    // Set up plugin info with a Part child
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "TestPart",
+                    "ClassName": "Part"
+                }
+            ]
+        }
+    )");
+    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
+
+    // Update sourcemap successfully
+    REQUIRE(platform->updateSourceMap());
+
+    // Verify the plugin info was used
+    REQUIRE(platform->rootSourceNode);
+    CHECK_EQ(platform->rootSourceNode->className, "DataModel");
+
+    auto result = check(R"(
+        --!strict
+        local part = game.TestPart
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("part")) == "Part");
 }
 
 TEST_SUITE_END();

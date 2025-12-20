@@ -1,12 +1,68 @@
 #include "LSP/Workspace.hpp"
-#include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
 #include <algorithm>
 
-lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params)
+struct LocationInformation
+{
+    std::optional<std::string> definitionModuleName;
+    std::optional<Luau::Location> location;
+    Luau::TypeId ty;
+};
+
+static std::optional<LocationInformation> findLocationForSymbol(
+    const Luau::ModulePtr& module, const Luau::Position& position, const Luau::Symbol& symbol)
+{
+    auto scope = Luau::findScopeAtPosition(*module, position);
+    auto ty = scope->lookup(symbol);
+    if (!ty)
+        return std::nullopt;
+    ty = Luau::follow(*ty);
+    return LocationInformation{Luau::getDefinitionModuleName(*ty), getLocation(*ty), *ty};
+}
+
+static std::optional<LocationInformation> findLocationForIndex(const Luau::ModulePtr& module, const Luau::AstExpr* base, const Luau::Name& name)
+{
+    auto baseTy = module->astTypes.find(base);
+    if (!baseTy)
+        return std::nullopt;
+    auto baseTyFollowed = Luau::follow(*baseTy);
+    auto propInformation = lookupProp(baseTyFollowed, name);
+    if (!propInformation)
+        return std::nullopt;
+
+    auto [realBaseTy, prop] = *propInformation;
+    auto location = prop.location ? prop.location : prop.typeLocation;
+
+    if (!prop.readTy)
+        return std::nullopt;
+
+    return LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, *prop.readTy};
+}
+
+static std::optional<LocationInformation> findLocationForExpr(
+    const Luau::ModulePtr& module, const Luau::AstExpr* expr, const Luau::Position& position)
+{
+    auto scope = Luau::findScopeAtPosition(*module, position);
+
+    if (auto local = expr->as<Luau::AstExprLocal>())
+        return findLocationForSymbol(module, position, local->local);
+    else if (auto global = expr->as<Luau::AstExprGlobal>())
+        return findLocationForSymbol(module, position, global->name);
+    else if (auto indexname = expr->as<Luau::AstExprIndexName>())
+        return findLocationForIndex(module, indexname->expr, indexname->index.value);
+    else if (auto indexexpr = expr->as<Luau::AstExprIndexExpr>())
+    {
+        if (auto string = indexexpr->index->as<Luau::AstExprConstantString>())
+            return findLocationForIndex(module, indexexpr->expr, std::string(string->value.data, string->value.size));
+    }
+
+    return std::nullopt;
+}
+
+lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params, const LSPCancellationToken& cancellationToken)
 {
     lsp::DefinitionResult result{};
 
@@ -17,7 +73,8 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
@@ -32,9 +89,23 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         if (binding->location.begin == Luau::Position{0, 0} && binding->location.end == Luau::Position{0, 0})
             return result;
 
-        // TODO: can we maybe get further references if it points to something like `local X = require(...)`?
+        // Follow through the binding reference if it is a function type
+        // This is particularly useful for `local X = require(...)` where `X` is a function - we want the actual function definition
+        // TODO: Can we get further references for other types?
+        auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(binding->typeId));
+        if (ftv && ftv->definition && ftv->definition->definitionModuleName)
+        {
+            if (auto document = fileResolver.getOrCreateTextDocumentFromModuleName(ftv->definition->definitionModuleName.value()))
+            {
+                result.emplace_back(lsp::Location{document->uri(), lsp::Range{document->convertPosition(ftv->definition->originalNameLocation.begin),
+                                                                       document->convertPosition(ftv->definition->originalNameLocation.end)}});
+                return result;
+            }
+        }
+
         result.emplace_back(lsp::Location{params.textDocument.uri,
             lsp::Range{textDocument->convertPosition(binding->location.begin), textDocument->convertPosition(binding->location.end)}});
+        return result;
     }
 
     auto node = findNodeOrTypeAtPosition(*sourceModule, position);
@@ -43,62 +114,28 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
     if (auto expr = node->asExpr())
     {
-        std::optional<Luau::ModuleName> definitionModuleName = std::nullopt;
-        std::optional<Luau::Location> location = std::nullopt;
-
-        if (auto lvalue = Luau::tryGetLValue(*expr))
+        auto locationInformation = findLocationForExpr(module, expr, position);
+        if (locationInformation)
         {
-            const Luau::LValue* current = &*lvalue;
-            std::vector<std::string> keys{}; // keys in reverse order
-            while (auto field = Luau::get<Luau::Field>(*current))
+            auto [definitionModuleName, location, _] = *locationInformation;
+            if (location)
             {
-                keys.push_back(field->key);
-                current = Luau::baseof(*current);
-            }
-
-            const auto* symbol = Luau::get<Luau::Symbol>(*current);
-            auto scope = Luau::findScopeAtPosition(*module, position);
-            if (!scope)
-                return result;
-
-            auto baseType = scope->lookup(*symbol);
-            if (!baseType)
-                return result;
-            baseType = Luau::follow(*baseType);
-
-            definitionModuleName = Luau::getDefinitionModuleName(*baseType);
-            location = getLocation(*baseType);
-
-            std::vector<Luau::Property> properties{};
-            for (auto it = keys.rbegin(); it != keys.rend(); ++it)
-            {
-                auto base = properties.empty() ? *baseType : Luau::follow(properties.back().type());
-                auto propInformation = lookupProp(base, *it);
-                if (!propInformation)
-                    return result;
-
-                auto [baseTy, prop] = propInformation.value();
-                definitionModuleName = Luau::getDefinitionModuleName(baseTy);
-                location = prop.location;
-                properties.push_back(prop);
-            }
-        }
-
-        if (location)
-        {
-            if (definitionModuleName)
-            {
-                if (auto file = platform->resolveToRealPath(*definitionModuleName))
+                if (definitionModuleName)
                 {
-                    auto document = fileResolver.getTextDocumentFromModuleName(*definitionModuleName);
-                    auto uri = document ? document->uri() : Uri::file(*file);
-                    result.emplace_back(lsp::Location{uri, lsp::Range{toUTF16(document, location->begin), toUTF16(document, location->end)}});
+                    if (auto uri = platform->resolveToRealPath(*definitionModuleName))
+                    {
+                        if (auto document = fileResolver.getOrCreateTextDocumentFromModuleName(*definitionModuleName))
+                        {
+                            result.emplace_back(lsp::Location{
+                                *uri, lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}});
+                        }
+                    }
                 }
-            }
-            else
-            {
-                result.emplace_back(lsp::Location{params.textDocument.uri,
-                    lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+                else
+                {
+                    result.emplace_back(lsp::Location{params.textDocument.uri,
+                        lsp::Range{textDocument->convertPosition(location->begin), textDocument->convertPosition(location->end)}});
+                }
             }
         }
     }
@@ -106,6 +143,7 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     {
         auto uri = params.textDocument.uri;
         TextDocumentPtr referenceTextDocument(textDocument);
+        std::optional<Luau::Location> location = std::nullopt;
 
         auto scope = Luau::findScopeAtPosition(*module, position);
         if (!scope)
@@ -115,31 +153,49 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         {
             if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
             {
-                auto fileName = platform->resolveToRealPath(*importedName);
-                if (!fileName)
+                auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
+                if (!importedModule)
                     return result;
-                uri = Uri::file(*fileName);
 
-                // TODO: fix "forAutocomplete"
-                if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true); importedModule && importedModule->hasModuleScope())
-                    scope = importedModule->getModuleScope();
-                else
+                const auto it = importedModule->exportedTypeBindings.find(reference->name.value);
+                if (it == importedModule->exportedTypeBindings.end() || !it->second.definitionLocation)
                     return result;
 
                 referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
-                if (!referenceTextDocument)
-                    return result;
+                location = *it->second.definitionLocation;
             }
             else
                 return result;
         }
+        else
+        {
+            location = lookupTypeLocation(*scope, reference->name.value);
+        }
 
-        auto location = lookupTypeLocation(*scope, reference->name.value);
-        if (!location)
+        if (!referenceTextDocument || !location)
             return result;
 
-        result.emplace_back(lsp::Location{
-            uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
+        result.emplace_back(lsp::Location{referenceTextDocument->uri(),
+            lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
+    }
+
+    // Fallback: if no results found so far, we can try checking if this is within a require statement
+    if (result.empty())
+    {
+        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+        if (ancestry.size() >= 2)
+        {
+            if (auto call = ancestry[ancestry.size() - 2]->as<Luau::AstExprCall>(); call && types::matchRequire(*call))
+            {
+                if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *call))
+                {
+                    if (auto uri = platform->resolveToRealPath(moduleInfo->name))
+                    {
+                        result.emplace_back(lsp::Location{*uri, lsp::Range{{0, 0}, {0, 0}}});
+                    }
+                }
+            }
+        }
     }
 
     // Remove duplicate elements within the result
@@ -154,7 +210,8 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
     return result;
 }
 
-std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
+std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(
+    const lsp::TypeDefinitionParams& params, const LSPCancellationToken& cancellationToken)
 {
     // If its a binding, we should find its assigned type if possible, and then find the definition of that type
     // If its a type, then just find the definintion of that type (i.e. the type alias)
@@ -166,7 +223,8 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     // TODO: fix "forAutocomplete"
@@ -178,13 +236,13 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     if (!node)
         return std::nullopt;
 
-    auto findTypeLocation = [this, textDocument, &module, &position, &params](Luau::AstType* type) -> std::optional<lsp::Location>
+    auto findTypeLocation = [this, textDocument, &module, &position](Luau::AstType* type) -> std::optional<lsp::Location>
     {
         // TODO: should we only handle references here? what if its an actual type
         if (auto reference = type->as<Luau::AstTypeReference>())
         {
-            auto uri = params.textDocument.uri;
             TextDocumentPtr referenceTextDocument(textDocument);
+            std::optional<Luau::Location> location = std::nullopt;
 
             auto scope = Luau::findScopeAtPosition(*module, position);
             if (!scope)
@@ -194,32 +252,30 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
             {
                 if (auto importedName = lookupImportedModule(*scope, reference->prefix.value().value))
                 {
-                    auto fileName = platform->resolveToRealPath(*importedName);
-                    if (!fileName)
+                    auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
+                    if (!importedModule)
                         return std::nullopt;
-                    uri = Uri::file(*fileName);
 
-                    // TODO: fix "forAutocomplete"
-                    if (auto importedModule = getModule(*importedName, /* forAutocomplete: */ true);
-                        importedModule && importedModule->hasModuleScope())
-                        scope = importedModule->getModuleScope();
-                    else
+                    const auto it = importedModule->exportedTypeBindings.find(reference->name.value);
+                    if (it == importedModule->exportedTypeBindings.end() || !it->second.definitionLocation)
                         return std::nullopt;
 
                     referenceTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(*importedName);
-                    if (!referenceTextDocument)
-                        return std::nullopt;
+                    location = *it->second.definitionLocation;
                 }
                 else
                     return std::nullopt;
             }
+            else
+            {
+                location = lookupTypeLocation(*scope, reference->name.value);
+            }
 
-            auto location = lookupTypeLocation(*scope, reference->name.value);
-            if (!location)
+            if (!referenceTextDocument || !location)
                 return std::nullopt;
 
-            return lsp::Location{
-                uri, lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}};
+            return lsp::Location{referenceTextDocument->uri(),
+                lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}};
         }
         return std::nullopt;
     };
@@ -232,28 +288,23 @@ std::optional<lsp::Location> WorkspaceFolder::gotoTypeDefinition(const lsp::Type
     {
         return findTypeLocation(typeAlias->type);
     }
-    else if (auto localExpr = node->as<Luau::AstExprLocal>())
+    else if (auto expr = node->asExpr())
     {
-        if (auto local = localExpr->local)
+        if (auto ty = module->astTypes.find(expr))
         {
-            if (auto annotation = local->annotation)
+            auto followedTy = Luau::follow(*ty);
+            auto definitionModuleName = Luau::getDefinitionModuleName(followedTy);
+            auto location = getLocation(followedTy);
+
+            if (definitionModuleName && location)
             {
-                return findTypeLocation(annotation);
+                auto document = fileResolver.getOrCreateTextDocumentFromModuleName(*definitionModuleName);
+                if (document)
+                    return lsp::Location{
+                        document->uri(), lsp::Range{document->convertPosition(location->begin), document->convertPosition(location->end)}};
             }
         }
     }
 
     return std::nullopt;
-}
-
-lsp::DefinitionResult LanguageServer::gotoDefinition(const lsp::DefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoDefinition(params);
-}
-
-std::optional<lsp::Location> LanguageServer::gotoTypeDefinition(const lsp::TypeDefinitionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->gotoTypeDefinition(params);
 }

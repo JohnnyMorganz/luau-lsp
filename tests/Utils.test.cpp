@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "LSP/Utils.hpp"
+#include "LuauFileUtils.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "TempDir.h"
 
 TEST_SUITE_BEGIN("UtilsTest");
 
@@ -21,18 +23,16 @@ TEST_CASE("getAncestorPath handles when ancestor is root of DataModel node")
 
 TEST_CASE("getAncestorPath handles when ancestor is root of non-DataModel node")
 {
-    SourceNode node;
-    node.name = "Foo";
+    SourceNode node("Foo", "ClassName", {}, {});
 
-    CHECK_EQ(getAncestorPath("ProjectRoot/Bar", "Foo", std::make_shared<SourceNode>(node)), "ProjectRoot");
+    CHECK_EQ(getAncestorPath("ProjectRoot/Bar", "Foo", &node), "ProjectRoot");
 }
 
 TEST_CASE("getAncestorPath handles when ancestor is root of non-DataModel node and its name has multiple occurrences")
 {
-    SourceNode node;
-    node.name = "Foo";
+    SourceNode node("Foo", "ClassName", {}, {});
 
-    CHECK_EQ(getAncestorPath("ProjectRoot/Bar/Foo/Baz", "Foo", std::make_shared<SourceNode>(node)), "ProjectRoot/Bar/Foo");
+    CHECK_EQ(getAncestorPath("ProjectRoot/Bar/Foo/Baz", "Foo", &node), "ProjectRoot/Bar/Foo");
 }
 
 TEST_CASE("getAncestorPath returns nothing when ancestorName == current name, and no ancestor of name found")
@@ -65,9 +65,19 @@ TEST_CASE("convertToScriptPath handles whitespaces in path")
     CHECK_EQ(convertToScriptPath("game/Replicated Storage/Common"), "game[\"Replicated Storage\"].Common");
 }
 
+TEST_CASE("convertToScriptPath handles non-identifier characters in path")
+{
+    CHECK_EQ(convertToScriptPath("game/ReplicatedStorage/Packages/react-spring"), "game.ReplicatedStorage.Packages[\"react-spring\"]");
+}
+
 TEST_CASE("convertToScriptPath handles relative paths")
 {
-    CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent.Child.Foo");
+    CHECK_EQ(convertToScriptPath("../Child/Foo"), "script.Parent.Child.Foo");
+}
+
+TEST_CASE("convertToScriptPath handles path where name contains dot")
+{
+    CHECK_EQ(convertToScriptPath("../Child.Foo"), "script.Parent[\"Child.Foo\"]");
 }
 
 TEST_CASE("getHomeDirectory finds a home directory")
@@ -84,7 +94,7 @@ TEST_CASE("resolvePath resolves paths including tilde expansions")
     auto home = getHomeDirectory();
     REQUIRE(home);
 
-    CHECK_EQ(resolvePath("~/foo.lua"), home.value() / "foo.lua");
+    CHECK_EQ(resolvePath("~/foo.lua"), Luau::FileUtils::joinPaths(*home, "foo.lua"));
 }
 
 TEST_CASE("isDataModel returns true when path starts with game")
@@ -106,6 +116,38 @@ TEST_CASE("getFirstLine returns string when there is no newline")
 {
     CHECK_EQ(getFirstLine(""), "");
     CHECK_EQ(getFirstLine("testing"), "testing");
+}
+
+TEST_CASE("readFile can handle non-ASCII characters in path")
+{
+    auto path = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii/ō.luau");
+    auto result = Luau::FileUtils::readFile(path);
+    REQUIRE(result);
+    CHECK_EQ(*result, "local _ = 1");
+}
+
+TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
+{
+    auto basePath = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii");
+
+    std::vector<std::string> paths;
+    Luau::FileUtils::traverseDirectoryRecursive(basePath,
+        [&](const auto& path)
+        {
+            paths.push_back(path);
+        });
+
+    CHECK_EQ(paths.size(), 2);
+
+    paths.clear();
+    auto nonAsciiBasePath = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii/Рабочий стол");
+    Luau::FileUtils::traverseDirectoryRecursive(nonAsciiBasePath,
+        [&](const auto& path)
+        {
+            paths.push_back(path);
+        });
+
+    CHECK_EQ(paths.size(), 1);
 }
 
 TEST_SUITE_END();

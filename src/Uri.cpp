@@ -1,10 +1,34 @@
 // Based off https://github.com/microsoft/vscode-uri/blob/6dec22d7dcc6c63c30343d3a8d56050d0078cb6a/src/uri.ts
-#include <filesystem>
-#include <regex>
 #include <optional>
 #include <cctype>
 #include "LSP/Uri.hpp"
 #include "LSP/Utils.hpp"
+#include "Luau/StringUtils.h"
+#include "LuauFileUtils.hpp"
+
+// implements a bit of https://tools.ietf.org/html/rfc3986#section-5
+static std::string _referenceResolution(const std::string& scheme, const std::string& path)
+{
+    std::string res = path;
+
+    // the slash-character is our 'default base' as we don't
+    // support constructing URIs relative to other URIs. This
+    // also means that we alter and potentially break paths.
+    // see https://tools.ietf.org/html/rfc3986#section-5.1.4
+    if (scheme == "https" || scheme == "http" || scheme == "file")
+    {
+        if (res.empty())
+        {
+            res = "/";
+        }
+        else if (res[0] != '/')
+        {
+            res = '/' + path;
+        }
+    }
+
+    return res;
+}
 
 static std::string decodeURIComponent(const std::string& str)
 {
@@ -34,17 +58,19 @@ static std::string decodeURIComponent(const std::string& str)
 
 static std::string percentDecode(const std::string& str)
 {
-    const std::regex REGEX_EXPR(R"((%[0-9A-Za-z][0-9A-Za-z])+)");
     std::string out;
-    auto it = str.cbegin();
-    auto end = str.cend();
-
-    for (std::smatch match; std::regex_search(it, end, match, REGEX_EXPR); it = match[0].second)
+    for (size_t i = 0; i < str.length(); ++i)
     {
-        out += match.prefix();
-        out += decodeURIComponent(match.str());
+        if (str[i] == '%' && i + 2 < str.length() && isxdigit(str[i + 1]) && isxdigit(str[i + 2]))
+        {
+            out += decodeURIComponent(str.substr(i, 3));
+            i += 2;
+        }
+        else
+        {
+            out += str[i];
+        }
     }
-    out.append(it, end);
     return out;
 }
 
@@ -216,32 +242,120 @@ static std::string encodeURIComponentMinimal(const std::string& path, bool, bool
     return res.has_value() ? *res : path;
 }
 
+static Uri kNullUri = {"", "", "", "", ""};
+
+Uri::Uri(const std::string& scheme, std::string authority, const std::string& path, std::string query, std::string fragment)
+    : scheme(std::move(scheme))
+    , authority(std::move(authority))
+    , path(_referenceResolution(scheme, path))
+    , query(std::move(query))
+    , fragment(std::move(fragment))
+{
+    // TODO: validate?
+}
+
+bool Uri::operator==(const Uri& other) const
+{
+#if defined(_WIN32) || defined(__APPLE__)
+    return scheme == other.scheme && authority == other.authority && toLower(path) == toLower(other.path) && query == other.query &&
+           fragment == other.fragment;
+#else
+    return scheme == other.scheme && authority == other.authority && path == other.path && query == other.query && fragment == other.fragment;
+#endif
+}
+
+bool Uri::operator!=(const Uri& other) const
+{
+    return !operator==(other);
+}
+
 Uri Uri::parse(const std::string& value)
 {
-    const std::regex REGEX_EXPR(R"(^(([^:\/?#]+?):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
-    std::smatch match;
-    if (std::regex_match(value, match, REGEX_EXPR))
+    std::string scheme;
+    std::string authority;
+    std::string path;
+    std::string query;
+    std::string fragment;
+
+    size_t current_pos = 0;
+    size_t scheme_end = value.find(':');
+    if (scheme_end != std::string::npos)
     {
-        // match[0] is whole string
-        return {match[2], percentDecode(match[4]), percentDecode(match[5]), percentDecode(match[7]), percentDecode(match[9])};
+        scheme = value.substr(0, scheme_end);
+        current_pos = scheme_end + 1;
     }
     else
     {
-        // TODO: should we error?
-        return {"", "", "", "", ""};
+        return kNullUri;
     }
+
+    if (current_pos < value.length() && value.substr(current_pos, 2) == "//")
+    {
+        current_pos += 2;
+        size_t authority_end = value.find_first_of("/?#", current_pos);
+        if (authority_end != std::string::npos)
+        {
+            authority = value.substr(current_pos, authority_end - current_pos);
+            current_pos = authority_end;
+        }
+        else
+        {
+            authority = value.substr(current_pos);
+            current_pos = value.length();
+        }
+    }
+
+    size_t path_end = value.find_first_of("?#", current_pos);
+    if (path_end != std::string::npos)
+    {
+        path = value.substr(current_pos, path_end - current_pos);
+        current_pos = path_end;
+    }
+    else
+    {
+        path = value.substr(current_pos);
+        current_pos = value.length();
+    }
+
+    if (current_pos < value.length() && value[current_pos] == '?')
+    {
+        current_pos++;
+        size_t fragment_start = value.find('#', current_pos);
+        if (fragment_start != std::string::npos)
+        {
+            query = value.substr(current_pos, fragment_start - current_pos);
+            current_pos = fragment_start;
+        }
+        else
+        {
+            query = value.substr(current_pos);
+            current_pos = value.length();
+        }
+    }
+
+    if (current_pos < value.length() && value[current_pos] == '#')
+        fragment = value.substr(current_pos + 1);
+
+    return {scheme, percentDecode(authority), percentDecode(path), percentDecode(query), percentDecode(fragment)};
 }
 
-Uri Uri::file(const std::filesystem::path& fsPath)
+Uri Uri::file(std::string_view fsPath)
 {
     std::string authority = "";
-    auto path = fsPath.string();
+    std::string path = std::string(fsPath);
 
 // normalize to fwd-slashes on windows,
 // on other systems bwd-slashes are valid
 // filename character, eg /f\oo/ba\r.txt
 #ifdef _WIN32
     std::replace(path.begin(), path.end(), '\\', '/');
+
+    // For legacy reasons, VSCode uses a lower-case driver letter for Windows paths
+    // We make it lower case here to normalise for all cases
+    if (path.length() >= 2 && path[1] == ':' && isupper(path[0]))
+    {
+        path = std::string(1, tolower(path[0])) + path.substr(1);
+    }
 #endif
 
     // check for authority as used in UNC shares
@@ -265,20 +379,25 @@ Uri Uri::file(const std::filesystem::path& fsPath)
     return Uri("file", authority, path, "", "");
 }
 
-std::filesystem::path Uri::fsPath() const
+std::string Uri::fsPath() const
 {
+    std::string value;
     if (!authority.empty() && path.length() > 1 && scheme == "file")
     {
-        return "//" + authority + path;
+        value = "//" + authority + path;
     }
     else if (path.length() >= 3 && path.at(0) == '/' && isalpha(path.at(1)) && path.at(2) == ':')
     {
-        return path.substr(1);
+        value = path.substr(1);
     }
     else
     {
-        return path;
+        value = path;
     }
+#ifdef _WIN32
+    std::replace(value.begin(), value.end(), '/', '\\');
+#endif
+    return value;
 }
 
 // Encodes the Uri into a string representation
@@ -319,6 +438,7 @@ std::string Uri::toStringUncached(bool skipEncoding) const
             }
             res += '@';
         }
+        mutAuthority = toLower(mutAuthority);
         toLower(mutAuthority);
         idx = mutAuthority.rfind(':');
         if (idx == std::string::npos)
@@ -382,6 +502,170 @@ std::string Uri::toString(bool skipEncoding) const
     }
 }
 
+std::optional<Uri> Uri::parent() const
+{
+    auto parentParent = getParentPath(path);
+    if (!parentParent)
+        return std::nullopt;
+    return Uri(scheme, authority, *parentParent, query, fragment);
+}
+
+std::string Uri::filename() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    return std::string(components.back());
+}
+
+std::string Uri::extension() const
+{
+    auto components = Luau::split(path, '/');
+    if (components.empty())
+        return "";
+
+    auto parts = Luau::split(components.back(), '.');
+    if (parts.size() <= 1)
+        return "";
+
+    return "." + std::string(parts.back());
+}
+
+bool Uri::isFile() const
+{
+    if (scheme != "file")
+        return false;
+
+    return Luau::FileUtils::isFile(fsPath());
+}
+
+bool Uri::isDirectory() const
+{
+    if (scheme != "file")
+        return false;
+
+    return Luau::FileUtils::isDirectory(fsPath());
+}
+
+bool Uri::exists() const
+{
+    if (scheme != "file")
+        return false;
+
+    return Luau::FileUtils::exists(fsPath());
+}
+
+std::string Uri::lexicallyRelative(const Uri& base) const
+{
+    if (base.scheme != scheme || base.authority != authority)
+    {
+        // Different scheme or authority, target is already relative
+        return path;
+    }
+
+    // Split paths into components
+    std::vector<std::string_view> basePathComponents = Luau::split(base.path, '/');
+    std::vector<std::string_view> targetPathComponents = Luau::split(path, '/');
+
+    size_t min_size = std::min(basePathComponents.size(), targetPathComponents.size());
+    size_t common_components = 0;
+
+    // Find the common path components
+    for (size_t i = 0; i < min_size; ++i)
+    {
+#if defined(_WIN32) || defined(__APPLE__)
+        auto equal = toLower(std::string(basePathComponents[i])) == toLower(std::string(targetPathComponents[i]));
+#else
+        auto equal = basePathComponents[i] == targetPathComponents[i];
+#endif
+        if (equal)
+            common_components++;
+        else
+            break;
+    }
+
+    // Handle if they are the same path
+    if (common_components == basePathComponents.size() && common_components == targetPathComponents.size())
+        return ".";
+
+    std::string relative_path;
+    for (size_t i = common_components; i < basePathComponents.size(); ++i)
+    {
+        relative_path += "..";
+        if (i < basePathComponents.size() - 1 || common_components < targetPathComponents.size())
+            relative_path += "/";
+    }
+    for (size_t i = common_components; i < targetPathComponents.size(); ++i)
+    {
+        relative_path += targetPathComponents[i];
+        if (i < targetPathComponents.size() - 1)
+            relative_path += "/";
+    }
+
+    return relative_path;
+}
+
+Uri Uri::resolvePath(std::string_view otherPath) const
+{
+    auto resolvedPath = this->path;
+    bool slashAdded = false;
+
+    if (Luau::FileUtils::isAbsolutePath(otherPath))
+        resolvedPath = otherPath;
+    else
+    {
+        if ((resolvedPath.empty() && authority.empty()) || (!resolvedPath.empty() && resolvedPath.back() == '/'))
+            resolvedPath += otherPath;
+        else
+        {
+            resolvedPath += '/';
+            resolvedPath += otherPath;
+        }
+    }
+
+    // We assume that the base is at least absolute, otherwise normalizePath will compute a relative path
+    // If it's not, then modify it to prevent relative paths
+    if (!Luau::FileUtils::isAbsolutePath(resolvedPath))
+    {
+        resolvedPath = "/" + resolvedPath;
+        slashAdded = true;
+    }
+
+    resolvedPath = Luau::FileUtils::normalizePath(resolvedPath);
+
+    if (slashAdded)
+        resolvedPath = resolvedPath.substr(1);
+
+    return {scheme, authority, resolvedPath, query, fragment};
+}
+
+bool Uri::isAncestorOf(const Uri& other) const
+{
+    if (scheme != other.scheme || authority != other.authority)
+        return false;
+
+#if defined(_WIN32) || defined(__APPLE__)
+    return Luau::startsWith(toLower(other.path), toLower(path));
+#else
+    return Luau::startsWith(other.path, path);
+#endif
+}
+
+size_t UriHash::operator()(const Uri& uri) const
+{
+    size_t hashValue = std::hash<std::string>()(uri.scheme);
+    hashValue ^= std::hash<std::string>()(uri.authority) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#if defined(_WIN32) || defined(__APPLE__)
+    hashValue ^= std::hash<std::string>()(toLower(uri.path)) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#else
+    hashValue ^= std::hash<std::string>()(uri.path) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+#endif
+    hashValue ^= std::hash<std::string>()(uri.query) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    hashValue ^= std::hash<std::string>()(uri.fragment) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+    return hashValue;
+}
+
 void from_json(const json& j, Uri& u)
 {
     u = Uri::parse(j.get<std::string>());
@@ -390,4 +674,9 @@ void from_json(const json& j, Uri& u)
 void to_json(json& j, const Uri& u)
 {
     j = u.toString();
+}
+
+bool isInitLuauFile(const Uri& uri)
+{
+    return uri.filename() == "init" || Luau::startsWith(uri.filename(), "init.");
 }

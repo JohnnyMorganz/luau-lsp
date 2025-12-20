@@ -1,8 +1,7 @@
---#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "Animation", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationRigData", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioReverb", "AudioSearchParams", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "Camera", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CylinderMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilter", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "RelativeGui", "ScrollingFrame", "TextBox", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "IKControl", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "Vector3Curve", "VideoDeviceInput", "VideoPlayer", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire"], "SERVICES": ["AccountService", "AchievementService", "ActivityHistoryEventService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppLifecycleObserverService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetService", "AudioFocusService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "AvatarPreloader", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "Chat", "ChatbotUIService", "CloudCRUDService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommandService", "CommerceService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "ConversationalAIAcceptanceService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EventIngestService", "ExampleService", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "ExplorerServiceVisibilityService", "FaceAnimatorService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FeatureRestrictionManager", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GamepadService", "GenericChallengeService", "Geometry", "GeometryService", "GoogleAnalyticsConfiguration", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HeatmapService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaWebService", "LuauScriptAnalyzerService", "MLModelDeliveryService", "MarketplaceService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PatchBundlerFileWatch", "PathfindingService", "PerformanceControlService", "PermissionsService", "PhysicsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "ReflectionService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkRbxAnalyticsService", "RomarkService", "RtMessagingService", "RunService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionService", "SharedTableRegistry", "ShorelineUpgraderService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioUserService", "StudioWidgetsService", "StylingService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TelemetryService", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UnvalidatedAssetService", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService", "WebViewService"]}
+--#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPortal", "AdvancedDragger", "Animation", "AnimationGraphDefinition", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationNodeDefinition", "AnimationRigData", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChannelMixer", "AudioChannelSplitter", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioGate", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioRecorder", "AudioReverb", "AudioSearchParams", "AudioSpeechToText", "AudioTextToSpeech", "AudioTremolo", "AvatarAccessoryRules", "AvatarAnimationRules", "AvatarBodyRules", "AvatarClothingRules", "AvatarCollisionRules", "AvatarRules", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "CompositeValueCurve", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CustomLog", "BlockMesh", "CylinderMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "Dragger", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilter", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "RelativeGui", "ScrollingFrame", "TextBox", "VideoDisplay", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "PyramidHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HandRigDescription", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "HumanoidRigDescription", "IKControl", "InputAction", "InputBinding", "InputContext", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "Script", "LocalScript", "ModuleScript", "MakeupDescription", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Camera", "Model", "Actor", "HopperBin", "Tool", "Flag", "WorldModel", "PartOperationAsset", "ParticleEmitter", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "StyleQuery", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TextGenerator", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "ValueCurve", "Vector3Curve", "VideoDeviceInput", "VideoPlayer", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire", "WrapTextureTransfer"], "SERVICES": ["AccountService", "AchievementService", "ActivityHistoryEventService", "AdService", "AnalyticsService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppLifecycleObserverService", "AppRatingPromptService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetQualityService", "AssetService", "AudioFocusService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "AvatarSettings", "BadgeService", "CoreGui", "StarterGui", "BrowserService", "BugReporterService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SlimContentProvider", "SolidModelContentProvider", "CalloutService", "CaptureService", "ChangeHistoryService", "ChangeHistoryStreamingService", "Chat", "ChatbotUIService", "CloudCRUDService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommerceService", "ConfigService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "ConversationalAIAcceptanceService", "CookiesService", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataModelPatchService", "DataStoreService", "Debris", "DebugSettings", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EncodingService", "EventIngestService", "ExampleV2Service", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "ExperienceStateRecordingService", "ExplorerServiceVisibilityService", "FaceAnimatorService", "FacialAgeEstimationService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FeatureRestrictionManager", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GameSettings", "GamepadService", "GenerationService", "GenericChallengeService", "Geometry", "GeometryService", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HarmonyService", "HeapProfilerService", "HeatmapService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "IncrementalPatchBuilder", "InsertService", "InstanceExtensionsService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LSPFileSyncService", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LiveSyncService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaSettings", "LuaWebService", "LuauScriptAnalyzerService", "MLModelDeliveryService", "MLService", "MarketplaceService", "MatchmakingService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MicroProfilerService", "ModerationService", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "PartyEmulatorService", "PatchBundlerFileWatch", "PathfindingService", "PerformanceControlService", "PermissionsService", "PhysicsService", "PhysicsSettings", "PlaceAssetIdsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlayerDataService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "ProcessInstancePhysicsService", "ProximityPromptService", "PublishService", "RbxAnalyticsService", "RecommendationService", "ReflectionService", "RemoteCommandService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RomarkRbxAnalyticsService", "RomarkService", "RtMessagingService", "RunService", "RuntimeContentService", "RuntimeScriptService", "SafetyService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptService", "Selection", "SelectionHighlightManager", "SerializationService", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionCheckService", "SessionService", "SharedTableRegistry", "SlimService", "SmoothVoxelsUpgraderService", "SnippetService", "SocialService", "SoundService", "SoundShimService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "StreamingService", "Studio", "StudioAssetService", "StudioCameraService", "StudioData", "StudioDeviceEmulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioTestService", "StudioUserService", "StudioWidgetsService", "StylingService", "SystemThemeService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TelemetryService", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UniqueIdLookupService", "UnvalidatedAssetService", "UserGameSettings", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoScreenCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService", "WebSocketService", "WebViewService"]}
 
 
-type Content = string
-type ContentId = any
+type ContentId = string
 type ProtectedString = string
 type BinaryString = string
 type QDir = string
@@ -14,9 +13,12 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
+    function FromValue(self,Number: number): any
+    function FromName(self,Name: string): any
 end
 
 declare class EnumItem
@@ -75,6 +77,9 @@ declare class EnumAccessModifierType extends EnumItem end
 declare class EnumAccessModifierType_INTERNAL extends Enum
 	Allow: EnumAccessModifierType
 	Deny: EnumAccessModifierType
+	function GetEnumItems(self): { EnumAccessModifierType }
+	function FromName(self, Name: string): EnumAccessModifierType?
+	function FromValue(self, Value: number): EnumAccessModifierType?
 end
 declare class EnumAccessoryType extends EnumItem end
 declare class EnumAccessoryType_INTERNAL extends Enum
@@ -98,12 +103,27 @@ declare class EnumAccessoryType_INTERNAL extends Enum
 	TShirt: EnumAccessoryType
 	Unknown: EnumAccessoryType
 	Waist: EnumAccessoryType
+	function GetEnumItems(self): { EnumAccessoryType }
+	function FromName(self, Name: string): EnumAccessoryType?
+	function FromValue(self, Value: number): EnumAccessoryType?
+end
+declare class EnumActionOnAutoResumeSync extends EnumItem end
+declare class EnumActionOnAutoResumeSync_INTERNAL extends Enum
+	DontResume: EnumActionOnAutoResumeSync
+	KeepLocal: EnumActionOnAutoResumeSync
+	KeepStudio: EnumActionOnAutoResumeSync
+	function GetEnumItems(self): { EnumActionOnAutoResumeSync }
+	function FromName(self, Name: string): EnumActionOnAutoResumeSync?
+	function FromValue(self, Value: number): EnumActionOnAutoResumeSync?
 end
 declare class EnumActionOnStopSync extends EnumItem end
 declare class EnumActionOnStopSync_INTERNAL extends Enum
 	AlwaysAsk: EnumActionOnStopSync
 	DeleteLocalFiles: EnumActionOnStopSync
 	KeepLocalFiles: EnumActionOnStopSync
+	function GetEnumItems(self): { EnumActionOnStopSync }
+	function FromName(self, Name: string): EnumActionOnStopSync?
+	function FromValue(self, Value: number): EnumActionOnStopSync?
 end
 declare class EnumActionType extends EnumItem end
 declare class EnumActionType_INTERNAL extends Enum
@@ -112,18 +132,40 @@ declare class EnumActionType_INTERNAL extends Enum
 	Nothing: EnumActionType
 	Pause: EnumActionType
 	Win: EnumActionType
+	function GetEnumItems(self): { EnumActionType }
+	function FromName(self, Name: string): EnumActionType?
+	function FromValue(self, Value: number): EnumActionType?
 end
 declare class EnumActuatorRelativeTo extends EnumItem end
 declare class EnumActuatorRelativeTo_INTERNAL extends Enum
 	Attachment0: EnumActuatorRelativeTo
 	Attachment1: EnumActuatorRelativeTo
 	World: EnumActuatorRelativeTo
+	function GetEnumItems(self): { EnumActuatorRelativeTo }
+	function FromName(self, Name: string): EnumActuatorRelativeTo?
+	function FromValue(self, Value: number): EnumActuatorRelativeTo?
 end
 declare class EnumActuatorType extends EnumItem end
 declare class EnumActuatorType_INTERNAL extends Enum
 	Motor: EnumActuatorType
 	None: EnumActuatorType
 	Servo: EnumActuatorType
+	function GetEnumItems(self): { EnumActuatorType }
+	function FromName(self, Name: string): EnumActuatorType?
+	function FromValue(self, Value: number): EnumActuatorType?
+end
+declare class EnumAdAvailabilityResult extends EnumItem end
+declare class EnumAdAvailabilityResult_INTERNAL extends Enum
+	DeviceIneligible: EnumAdAvailabilityResult
+	ExperienceIneligible: EnumAdAvailabilityResult
+	InternalError: EnumAdAvailabilityResult
+	IsAvailable: EnumAdAvailabilityResult
+	NoFill: EnumAdAvailabilityResult
+	PlayerIneligible: EnumAdAvailabilityResult
+	PublisherIneligible: EnumAdAvailabilityResult
+	function GetEnumItems(self): { EnumAdAvailabilityResult }
+	function FromName(self, Name: string): EnumAdAvailabilityResult?
+	function FromValue(self, Value: number): EnumAdAvailabilityResult?
 end
 declare class EnumAdEventType extends EnumItem end
 declare class EnumAdEventType_INTERNAL extends Enum
@@ -133,10 +175,23 @@ declare class EnumAdEventType_INTERNAL extends Enum
 	UserCompletedVideo: EnumAdEventType
 	VideoLoaded: EnumAdEventType
 	VideoRemoved: EnumAdEventType
+	function GetEnumItems(self): { EnumAdEventType }
+	function FromName(self, Name: string): EnumAdEventType?
+	function FromValue(self, Value: number): EnumAdEventType?
+end
+declare class EnumAdFormat extends EnumItem end
+declare class EnumAdFormat_INTERNAL extends Enum
+	RewardedVideo: EnumAdFormat
+	function GetEnumItems(self): { EnumAdFormat }
+	function FromName(self, Name: string): EnumAdFormat?
+	function FromValue(self, Value: number): EnumAdFormat?
 end
 declare class EnumAdShape extends EnumItem end
 declare class EnumAdShape_INTERNAL extends Enum
 	HorizontalRectangle: EnumAdShape
+	function GetEnumItems(self): { EnumAdShape }
+	function FromName(self, Name: string): EnumAdShape?
+	function FromValue(self, Value: number): EnumAdShape?
 end
 declare class EnumAdTeleportMethod extends EnumItem end
 declare class EnumAdTeleportMethod_INTERNAL extends Enum
@@ -144,6 +199,9 @@ declare class EnumAdTeleportMethod_INTERNAL extends Enum
 	PortalForward: EnumAdTeleportMethod
 	UIBackButton: EnumAdTeleportMethod
 	Undefined: EnumAdTeleportMethod
+	function GetEnumItems(self): { EnumAdTeleportMethod }
+	function FromName(self, Name: string): EnumAdTeleportMethod?
+	function FromValue(self, Value: number): EnumAdTeleportMethod?
 end
 declare class EnumAdUIEventType extends EnumItem end
 declare class EnumAdUIEventType_INTERNAL extends Enum
@@ -156,22 +214,45 @@ declare class EnumAdUIEventType_INTERNAL extends Enum
 	PlayEventTriggered: EnumAdUIEventType
 	VolumeButtonClicked: EnumAdUIEventType
 	WhyThisAdClicked: EnumAdUIEventType
+	function GetEnumItems(self): { EnumAdUIEventType }
+	function FromName(self, Name: string): EnumAdUIEventType?
+	function FromValue(self, Value: number): EnumAdUIEventType?
 end
 declare class EnumAdUIType extends EnumItem end
 declare class EnumAdUIType_INTERNAL extends Enum
 	Image: EnumAdUIType
 	None: EnumAdUIType
 	Video: EnumAdUIType
+	function GetEnumItems(self): { EnumAdUIType }
+	function FromName(self, Name: string): EnumAdUIType?
+	function FromValue(self, Value: number): EnumAdUIType?
 end
 declare class EnumAdUnitStatus extends EnumItem end
 declare class EnumAdUnitStatus_INTERNAL extends Enum
 	Active: EnumAdUnitStatus
 	Inactive: EnumAdUnitStatus
+	function GetEnumItems(self): { EnumAdUnitStatus }
+	function FromName(self, Name: string): EnumAdUnitStatus?
+	function FromValue(self, Value: number): EnumAdUnitStatus?
 end
 declare class EnumAdornCullingMode extends EnumItem end
 declare class EnumAdornCullingMode_INTERNAL extends Enum
 	Automatic: EnumAdornCullingMode
 	Never: EnumAdornCullingMode
+	function GetEnumItems(self): { EnumAdornCullingMode }
+	function FromName(self, Name: string): EnumAdornCullingMode?
+	function FromValue(self, Value: number): EnumAdornCullingMode?
+end
+declare class EnumAdornShading extends EnumItem end
+declare class EnumAdornShading_INTERNAL extends Enum
+	AlwaysOnTop: EnumAdornShading
+	Default: EnumAdornShading
+	Shaded: EnumAdornShading
+	XRay: EnumAdornShading
+	XRayShaded: EnumAdornShading
+	function GetEnumItems(self): { EnumAdornShading }
+	function FromName(self, Name: string): EnumAdornShading?
+	function FromValue(self, Value: number): EnumAdornShading?
 end
 declare class EnumAlignType extends EnumItem end
 declare class EnumAlignType_INTERNAL extends Enum
@@ -181,28 +262,44 @@ declare class EnumAlignType_INTERNAL extends Enum
 	PrimaryAxisLookAt: EnumAlignType
 	PrimaryAxisParallel: EnumAlignType
 	PrimaryAxisPerpendicular: EnumAlignType
+	function GetEnumItems(self): { EnumAlignType }
+	function FromName(self, Name: string): EnumAlignType?
+	function FromValue(self, Value: number): EnumAlignType?
 end
 declare class EnumAlphaMode extends EnumItem end
 declare class EnumAlphaMode_INTERNAL extends Enum
 	Overlay: EnumAlphaMode
+	TintMask: EnumAlphaMode
 	Transparency: EnumAlphaMode
+	function GetEnumItems(self): { EnumAlphaMode }
+	function FromName(self, Name: string): EnumAlphaMode?
+	function FromValue(self, Value: number): EnumAlphaMode?
 end
 declare class EnumAnalyticsCustomFieldKeys extends EnumItem end
 declare class EnumAnalyticsCustomFieldKeys_INTERNAL extends Enum
 	CustomField01: EnumAnalyticsCustomFieldKeys
 	CustomField02: EnumAnalyticsCustomFieldKeys
 	CustomField03: EnumAnalyticsCustomFieldKeys
+	function GetEnumItems(self): { EnumAnalyticsCustomFieldKeys }
+	function FromName(self, Name: string): EnumAnalyticsCustomFieldKeys?
+	function FromValue(self, Value: number): EnumAnalyticsCustomFieldKeys?
 end
 declare class EnumAnalyticsEconomyAction extends EnumItem end
 declare class EnumAnalyticsEconomyAction_INTERNAL extends Enum
 	Acquire: EnumAnalyticsEconomyAction
 	Default: EnumAnalyticsEconomyAction
 	Spend: EnumAnalyticsEconomyAction
+	function GetEnumItems(self): { EnumAnalyticsEconomyAction }
+	function FromName(self, Name: string): EnumAnalyticsEconomyAction?
+	function FromValue(self, Value: number): EnumAnalyticsEconomyAction?
 end
 declare class EnumAnalyticsEconomyFlowType extends EnumItem end
 declare class EnumAnalyticsEconomyFlowType_INTERNAL extends Enum
 	Sink: EnumAnalyticsEconomyFlowType
 	Source: EnumAnalyticsEconomyFlowType
+	function GetEnumItems(self): { EnumAnalyticsEconomyFlowType }
+	function FromName(self, Name: string): EnumAnalyticsEconomyFlowType?
+	function FromValue(self, Value: number): EnumAnalyticsEconomyFlowType?
 end
 declare class EnumAnalyticsEconomyTransactionType extends EnumItem end
 declare class EnumAnalyticsEconomyTransactionType_INTERNAL extends Enum
@@ -212,6 +309,9 @@ declare class EnumAnalyticsEconomyTransactionType_INTERNAL extends Enum
 	Onboarding: EnumAnalyticsEconomyTransactionType
 	Shop: EnumAnalyticsEconomyTransactionType
 	TimedReward: EnumAnalyticsEconomyTransactionType
+	function GetEnumItems(self): { EnumAnalyticsEconomyTransactionType }
+	function FromName(self, Name: string): EnumAnalyticsEconomyTransactionType?
+	function FromValue(self, Value: number): EnumAnalyticsEconomyTransactionType?
 end
 declare class EnumAnalyticsLogLevel extends EnumItem end
 declare class EnumAnalyticsLogLevel_INTERNAL extends Enum
@@ -221,6 +321,9 @@ declare class EnumAnalyticsLogLevel_INTERNAL extends Enum
 	Information: EnumAnalyticsLogLevel
 	Trace: EnumAnalyticsLogLevel
 	Warning: EnumAnalyticsLogLevel
+	function GetEnumItems(self): { EnumAnalyticsLogLevel }
+	function FromName(self, Name: string): EnumAnalyticsLogLevel?
+	function FromValue(self, Value: number): EnumAnalyticsLogLevel?
 end
 declare class EnumAnalyticsProgressionStatus extends EnumItem end
 declare class EnumAnalyticsProgressionStatus_INTERNAL extends Enum
@@ -229,6 +332,9 @@ declare class EnumAnalyticsProgressionStatus_INTERNAL extends Enum
 	Complete: EnumAnalyticsProgressionStatus
 	Default: EnumAnalyticsProgressionStatus
 	Fail: EnumAnalyticsProgressionStatus
+	function GetEnumItems(self): { EnumAnalyticsProgressionStatus }
+	function FromName(self, Name: string): EnumAnalyticsProgressionStatus?
+	function FromValue(self, Value: number): EnumAnalyticsProgressionStatus?
 end
 declare class EnumAnalyticsProgressionType extends EnumItem end
 declare class EnumAnalyticsProgressionType_INTERNAL extends Enum
@@ -236,6 +342,9 @@ declare class EnumAnalyticsProgressionType_INTERNAL extends Enum
 	Custom: EnumAnalyticsProgressionType
 	Fail: EnumAnalyticsProgressionType
 	Start: EnumAnalyticsProgressionType
+	function GetEnumItems(self): { EnumAnalyticsProgressionType }
+	function FromName(self, Name: string): EnumAnalyticsProgressionType?
+	function FromValue(self, Value: number): EnumAnalyticsProgressionType?
 end
 declare class EnumAnimationClipFromVideoStatus extends EnumItem end
 declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
@@ -251,6 +360,73 @@ declare class EnumAnimationClipFromVideoStatus_INTERNAL extends Enum
 	Processing: EnumAnimationClipFromVideoStatus
 	Success: EnumAnimationClipFromVideoStatus
 	Timeout: EnumAnimationClipFromVideoStatus
+	function GetEnumItems(self): { EnumAnimationClipFromVideoStatus }
+	function FromName(self, Name: string): EnumAnimationClipFromVideoStatus?
+	function FromValue(self, Value: number): EnumAnimationClipFromVideoStatus?
+end
+declare class EnumAnimationNodeBlend2DInputMode extends EnumItem end
+declare class EnumAnimationNodeBlend2DInputMode_INTERNAL extends Enum
+	Cartesian: EnumAnimationNodeBlend2DInputMode
+	Polar: EnumAnimationNodeBlend2DInputMode
+	function GetEnumItems(self): { EnumAnimationNodeBlend2DInputMode }
+	function FromName(self, Name: string): EnumAnimationNodeBlend2DInputMode?
+	function FromValue(self, Value: number): EnumAnimationNodeBlend2DInputMode?
+end
+declare class EnumAnimationNodeInterruptible extends EnumItem end
+declare class EnumAnimationNodeInterruptible_INTERNAL extends Enum
+	Always: EnumAnimationNodeInterruptible
+	ClipFinished: EnumAnimationNodeInterruptible
+	Expression: EnumAnimationNodeInterruptible
+	function GetEnumItems(self): { EnumAnimationNodeInterruptible }
+	function FromName(self, Name: string): EnumAnimationNodeInterruptible?
+	function FromValue(self, Value: number): EnumAnimationNodeInterruptible?
+end
+declare class EnumAnimationNodePlayMode extends EnumItem end
+declare class EnumAnimationNodePlayMode_INTERNAL extends Enum
+	Loop: EnumAnimationNodePlayMode
+	OnceAndHold: EnumAnimationNodePlayMode
+	OnceAndReset: EnumAnimationNodePlayMode
+	PingPong: EnumAnimationNodePlayMode
+	function GetEnumItems(self): { EnumAnimationNodePlayMode }
+	function FromName(self, Name: string): EnumAnimationNodePlayMode?
+	function FromValue(self, Value: number): EnumAnimationNodePlayMode?
+end
+declare class EnumAnimationNodeTransitionType extends EnumItem end
+declare class EnumAnimationNodeTransitionType_INTERNAL extends Enum
+	CrossFade: EnumAnimationNodeTransitionType
+	DeadBlend: EnumAnimationNodeTransitionType
+	InertialBlend: EnumAnimationNodeTransitionType
+	function GetEnumItems(self): { EnumAnimationNodeTransitionType }
+	function FromName(self, Name: string): EnumAnimationNodeTransitionType?
+	function FromValue(self, Value: number): EnumAnimationNodeTransitionType?
+end
+declare class EnumAnimationNodeType extends EnumItem end
+declare class EnumAnimationNodeType_INTERNAL extends Enum
+	AddNode: EnumAnimationNodeType
+	Blend1DNode: EnumAnimationNodeType
+	Blend2DNode: EnumAnimationNodeType
+	BlendNode: EnumAnimationNodeType
+	ClipNode: EnumAnimationNodeType
+	GraphOutput: EnumAnimationNodeType
+	InvalidNode: EnumAnimationNodeType
+	MaskNode: EnumAnimationNodeType
+	PrioritySelectNode: EnumAnimationNodeType
+	RandomSequenceNode: EnumAnimationNodeType
+	SelectNode: EnumAnimationNodeType
+	SequenceNode: EnumAnimationNodeType
+	SpeedNode: EnumAnimationNodeType
+	SubtractNode: EnumAnimationNodeType
+	function GetEnumItems(self): { EnumAnimationNodeType }
+	function FromName(self, Name: string): EnumAnimationNodeType?
+	function FromValue(self, Value: number): EnumAnimationNodeType?
+end
+declare class EnumAnimationNodeWaitFor extends EnumItem end
+declare class EnumAnimationNodeWaitFor_INTERNAL extends Enum
+	ClipFinished: EnumAnimationNodeWaitFor
+	Expression: EnumAnimationNodeWaitFor
+	function GetEnumItems(self): { EnumAnimationNodeWaitFor }
+	function FromName(self, Name: string): EnumAnimationNodeWaitFor?
+	function FromValue(self, Value: number): EnumAnimationNodeWaitFor?
 end
 declare class EnumAnimationPriority extends EnumItem end
 declare class EnumAnimationPriority_INTERNAL extends Enum
@@ -261,24 +437,57 @@ declare class EnumAnimationPriority_INTERNAL extends Enum
 	Core: EnumAnimationPriority
 	Idle: EnumAnimationPriority
 	Movement: EnumAnimationPriority
+	function GetEnumItems(self): { EnumAnimationPriority }
+	function FromName(self, Name: string): EnumAnimationPriority?
+	function FromValue(self, Value: number): EnumAnimationPriority?
 end
 declare class EnumAnimatorRetargetingMode extends EnumItem end
 declare class EnumAnimatorRetargetingMode_INTERNAL extends Enum
 	Default: EnumAnimatorRetargetingMode
 	Disabled: EnumAnimatorRetargetingMode
 	Enabled: EnumAnimatorRetargetingMode
+	function GetEnumItems(self): { EnumAnimatorRetargetingMode }
+	function FromName(self, Name: string): EnumAnimatorRetargetingMode?
+	function FromValue(self, Value: number): EnumAnimatorRetargetingMode?
+end
+declare class EnumAnnotationChannelContentPreference extends EnumItem end
+declare class EnumAnnotationChannelContentPreference_INTERNAL extends Enum
+	All: EnumAnnotationChannelContentPreference
+	None: EnumAnnotationChannelContentPreference
+	Unknown: EnumAnnotationChannelContentPreference
+	function GetEnumItems(self): { EnumAnnotationChannelContentPreference }
+	function FromName(self, Name: string): EnumAnnotationChannelContentPreference?
+	function FromValue(self, Value: number): EnumAnnotationChannelContentPreference?
 end
 declare class EnumAnnotationEditingMode extends EnumItem end
 declare class EnumAnnotationEditingMode_INTERNAL extends Enum
 	None: EnumAnnotationEditingMode
 	PlacingNew: EnumAnnotationEditingMode
 	WritingNew: EnumAnnotationEditingMode
+	function GetEnumItems(self): { EnumAnnotationEditingMode }
+	function FromName(self, Name: string): EnumAnnotationEditingMode?
+	function FromValue(self, Value: number): EnumAnnotationEditingMode?
 end
-declare class EnumAnnotationRequestResult extends EnumItem end
-declare class EnumAnnotationRequestResult_INTERNAL extends Enum
-	ErrorInternalFailure: EnumAnnotationRequestResult
-	ErrorNotFound: EnumAnnotationRequestResult
-	Success: EnumAnnotationRequestResult
+declare class EnumAnnotationPlaceContentPreference extends EnumItem end
+declare class EnumAnnotationPlaceContentPreference_INTERNAL extends Enum
+	All: EnumAnnotationPlaceContentPreference
+	MentionsAndReplies: EnumAnnotationPlaceContentPreference
+	None: EnumAnnotationPlaceContentPreference
+	Unknown: EnumAnnotationPlaceContentPreference
+	function GetEnumItems(self): { EnumAnnotationPlaceContentPreference }
+	function FromName(self, Name: string): EnumAnnotationPlaceContentPreference?
+	function FromValue(self, Value: number): EnumAnnotationPlaceContentPreference?
+end
+declare class EnumAnnotationRequestStatus extends EnumItem end
+declare class EnumAnnotationRequestStatus_INTERNAL extends Enum
+	ErrorInternalFailure: EnumAnnotationRequestStatus
+	ErrorModerated: EnumAnnotationRequestStatus
+	ErrorNotFound: EnumAnnotationRequestStatus
+	Loading: EnumAnnotationRequestStatus
+	Success: EnumAnnotationRequestStatus
+	function GetEnumItems(self): { EnumAnnotationRequestStatus }
+	function FromName(self, Name: string): EnumAnnotationRequestStatus?
+	function FromValue(self, Value: number): EnumAnnotationRequestStatus?
 end
 declare class EnumAnnotationRequestType extends EnumItem end
 declare class EnumAnnotationRequestType_INTERNAL extends Enum
@@ -287,6 +496,9 @@ declare class EnumAnnotationRequestType_INTERNAL extends Enum
 	Edit: EnumAnnotationRequestType
 	Resolve: EnumAnnotationRequestType
 	Unknown: EnumAnnotationRequestType
+	function GetEnumItems(self): { EnumAnnotationRequestType }
+	function FromName(self, Name: string): EnumAnnotationRequestType?
+	function FromValue(self, Value: number): EnumAnnotationRequestType?
 end
 declare class EnumAppLifecycleManagerState extends EnumItem end
 declare class EnumAppLifecycleManagerState_INTERNAL extends Enum
@@ -294,6 +506,9 @@ declare class EnumAppLifecycleManagerState_INTERNAL extends Enum
 	Detached: EnumAppLifecycleManagerState
 	Hidden: EnumAppLifecycleManagerState
 	Inactive: EnumAppLifecycleManagerState
+	function GetEnumItems(self): { EnumAppLifecycleManagerState }
+	function FromName(self, Name: string): EnumAppLifecycleManagerState?
+	function FromValue(self, Value: number): EnumAppLifecycleManagerState?
 end
 declare class EnumAppShellActionType extends EnumItem end
 declare class EnumAppShellActionType_INTERNAL extends Enum
@@ -308,6 +523,9 @@ declare class EnumAppShellActionType_INTERNAL extends Enum
 	TapConversationEntry: EnumAppShellActionType
 	TapGamePageTab: EnumAppShellActionType
 	TapHomePageTab: EnumAppShellActionType
+	function GetEnumItems(self): { EnumAppShellActionType }
+	function FromName(self, Name: string): EnumAppShellActionType?
+	function FromValue(self, Value: number): EnumAppShellActionType?
 end
 declare class EnumAppShellFeature extends EnumItem end
 declare class EnumAppShellFeature_INTERNAL extends Enum
@@ -318,30 +536,46 @@ declare class EnumAppShellFeature_INTERNAL extends Enum
 	Landing: EnumAppShellFeature
 	More: EnumAppShellFeature
 	None: EnumAppShellFeature
+	function GetEnumItems(self): { EnumAppShellFeature }
+	function FromName(self, Name: string): EnumAppShellFeature?
+	function FromValue(self, Value: number): EnumAppShellFeature?
 end
 declare class EnumAppUpdateStatus extends EnumItem end
 declare class EnumAppUpdateStatus_INTERNAL extends Enum
 	Available: EnumAppUpdateStatus
+	AvailableBetaProgram: EnumAppUpdateStatus
 	AvailableBoundChannel: EnumAppUpdateStatus
 	Failed: EnumAppUpdateStatus
 	NotAvailable: EnumAppUpdateStatus
 	NotSupported: EnumAppUpdateStatus
 	Unknown: EnumAppUpdateStatus
+	function GetEnumItems(self): { EnumAppUpdateStatus }
+	function FromName(self, Name: string): EnumAppUpdateStatus?
+	function FromValue(self, Value: number): EnumAppUpdateStatus?
 end
 declare class EnumApplyStrokeMode extends EnumItem end
 declare class EnumApplyStrokeMode_INTERNAL extends Enum
 	Border: EnumApplyStrokeMode
 	Contextual: EnumApplyStrokeMode
+	function GetEnumItems(self): { EnumApplyStrokeMode }
+	function FromName(self, Name: string): EnumApplyStrokeMode?
+	function FromValue(self, Value: number): EnumApplyStrokeMode?
 end
 declare class EnumAspectType extends EnumItem end
 declare class EnumAspectType_INTERNAL extends Enum
 	FitWithinMaxSize: EnumAspectType
 	ScaleWithParentSize: EnumAspectType
+	function GetEnumItems(self): { EnumAspectType }
+	function FromName(self, Name: string): EnumAspectType?
+	function FromValue(self, Value: number): EnumAspectType?
 end
 declare class EnumAssetCreatorType extends EnumItem end
 declare class EnumAssetCreatorType_INTERNAL extends Enum
 	Group: EnumAssetCreatorType
 	User: EnumAssetCreatorType
+	function GetEnumItems(self): { EnumAssetCreatorType }
+	function FromName(self, Name: string): EnumAssetCreatorType?
+	function FromValue(self, Value: number): EnumAssetCreatorType?
 end
 declare class EnumAssetFetchStatus extends EnumItem end
 declare class EnumAssetFetchStatus_INTERNAL extends Enum
@@ -350,6 +584,9 @@ declare class EnumAssetFetchStatus_INTERNAL extends Enum
 	None: EnumAssetFetchStatus
 	Success: EnumAssetFetchStatus
 	TimedOut: EnumAssetFetchStatus
+	function GetEnumItems(self): { EnumAssetFetchStatus }
+	function FromName(self, Name: string): EnumAssetFetchStatus?
+	function FromValue(self, Value: number): EnumAssetFetchStatus?
 end
 declare class EnumAssetType extends EnumItem end
 declare class EnumAssetType_INTERNAL extends Enum
@@ -365,10 +602,12 @@ declare class EnumAssetType_INTERNAL extends Enum
 	EarAccessory: EnumAssetType
 	EmoteAnimation: EnumAssetType
 	EyeAccessory: EnumAssetType
+	EyeMakeup: EnumAssetType
 	EyebrowAccessory: EnumAssetType
 	EyelashAccessory: EnumAssetType
 	Face: EnumAssetType
 	FaceAccessory: EnumAssetType
+	FaceMakeup: EnumAssetType
 	FallAnimation: EnumAssetType
 	FontFamily: EnumAssetType
 	FrontAccessory: EnumAssetType
@@ -384,6 +623,7 @@ declare class EnumAssetType_INTERNAL extends Enum
 	LeftArm: EnumAssetType
 	LeftLeg: EnumAssetType
 	LeftShoeAccessory: EnumAssetType
+	LipMakeup: EnumAssetType
 	Lua: EnumAssetType
 	Mesh: EnumAssetType
 	MeshPart: EnumAssetType
@@ -412,18 +652,46 @@ declare class EnumAssetType_INTERNAL extends Enum
 	Video: EnumAssetType
 	WaistAccessory: EnumAssetType
 	WalkAnimation: EnumAssetType
+	function GetEnumItems(self): { EnumAssetType }
+	function FromName(self, Name: string): EnumAssetType?
+	function FromValue(self, Value: number): EnumAssetType?
 end
 declare class EnumAssetTypeVerification extends EnumItem end
 declare class EnumAssetTypeVerification_INTERNAL extends Enum
 	Always: EnumAssetTypeVerification
 	ClientOnly: EnumAssetTypeVerification
 	Default: EnumAssetTypeVerification
+	function GetEnumItems(self): { EnumAssetTypeVerification }
+	function FromName(self, Name: string): EnumAssetTypeVerification?
+	function FromValue(self, Value: number): EnumAssetTypeVerification?
 end
 declare class EnumAudioApiRollout extends EnumItem end
 declare class EnumAudioApiRollout_INTERNAL extends Enum
 	Automatic: EnumAudioApiRollout
 	Disabled: EnumAudioApiRollout
 	Enabled: EnumAudioApiRollout
+	function GetEnumItems(self): { EnumAudioApiRollout }
+	function FromName(self, Name: string): EnumAudioApiRollout?
+	function FromValue(self, Value: number): EnumAudioApiRollout?
+end
+declare class EnumAudioCaptureMode extends EnumItem end
+declare class EnumAudioCaptureMode_INTERNAL extends Enum
+	function GetEnumItems(self): { EnumAudioCaptureMode }
+	function FromName(self, Name: string): EnumAudioCaptureMode?
+	function FromValue(self, Value: number): EnumAudioCaptureMode?
+end
+declare class EnumAudioChannelLayout extends EnumItem end
+declare class EnumAudioChannelLayout_INTERNAL extends Enum
+	Mono: EnumAudioChannelLayout
+	Quad: EnumAudioChannelLayout
+	Stereo: EnumAudioChannelLayout
+	Surround_5: EnumAudioChannelLayout
+	Surround_5_1: EnumAudioChannelLayout
+	Surround_7_1: EnumAudioChannelLayout
+	Surround_7_1_4: EnumAudioChannelLayout
+	function GetEnumItems(self): { EnumAudioChannelLayout }
+	function FromName(self, Name: string): EnumAudioChannelLayout?
+	function FromValue(self, Value: number): EnumAudioChannelLayout?
 end
 declare class EnumAudioFilterType extends EnumItem end
 declare class EnumAudioFilterType_INTERNAL extends Enum
@@ -436,30 +704,54 @@ declare class EnumAudioFilterType_INTERNAL extends Enum
 	Lowpass12dB: EnumAudioFilterType
 	Lowpass24dB: EnumAudioFilterType
 	Lowpass48dB: EnumAudioFilterType
+	Lowpass6dB: EnumAudioFilterType
 	Notch: EnumAudioFilterType
 	Peak: EnumAudioFilterType
+	function GetEnumItems(self): { EnumAudioFilterType }
+	function FromName(self, Name: string): EnumAudioFilterType?
+	function FromValue(self, Value: number): EnumAudioFilterType?
 end
 declare class EnumAudioSimulationFidelity extends EnumItem end
 declare class EnumAudioSimulationFidelity_INTERNAL extends Enum
 	Automatic: EnumAudioSimulationFidelity
 	None: EnumAudioSimulationFidelity
+	function GetEnumItems(self): { EnumAudioSimulationFidelity }
+	function FromName(self, Name: string): EnumAudioSimulationFidelity?
+	function FromValue(self, Value: number): EnumAudioSimulationFidelity?
 end
 declare class EnumAudioSubType extends EnumItem end
 declare class EnumAudioSubType_INTERNAL extends Enum
 	Music: EnumAudioSubType
 	SoundEffect: EnumAudioSubType
+	function GetEnumItems(self): { EnumAudioSubType }
+	function FromName(self, Name: string): EnumAudioSubType?
+	function FromValue(self, Value: number): EnumAudioSubType?
 end
 declare class EnumAudioWindowSize extends EnumItem end
 declare class EnumAudioWindowSize_INTERNAL extends Enum
 	Large: EnumAudioWindowSize
 	Medium: EnumAudioWindowSize
 	Small: EnumAudioWindowSize
+	function GetEnumItems(self): { EnumAudioWindowSize }
+	function FromName(self, Name: string): EnumAudioWindowSize?
+	function FromValue(self, Value: number): EnumAudioWindowSize?
+end
+declare class EnumAuthorityMode extends EnumItem end
+declare class EnumAuthorityMode_INTERNAL extends Enum
+	Automatic: EnumAuthorityMode
+	Server: EnumAuthorityMode
+	function GetEnumItems(self): { EnumAuthorityMode }
+	function FromName(self, Name: string): EnumAuthorityMode?
+	function FromValue(self, Value: number): EnumAuthorityMode?
 end
 declare class EnumAutoIndentRule extends EnumItem end
 declare class EnumAutoIndentRule_INTERNAL extends Enum
 	Absolute: EnumAutoIndentRule
 	Off: EnumAutoIndentRule
 	Relative: EnumAutoIndentRule
+	function GetEnumItems(self): { EnumAutoIndentRule }
+	function FromName(self, Name: string): EnumAutoIndentRule?
+	function FromValue(self, Value: number): EnumAutoIndentRule?
 end
 declare class EnumAutomaticSize extends EnumItem end
 declare class EnumAutomaticSize_INTERNAL extends Enum
@@ -467,6 +759,9 @@ declare class EnumAutomaticSize_INTERNAL extends Enum
 	X: EnumAutomaticSize
 	XY: EnumAutomaticSize
 	Y: EnumAutomaticSize
+	function GetEnumItems(self): { EnumAutomaticSize }
+	function FromName(self, Name: string): EnumAutomaticSize?
+	function FromValue(self, Value: number): EnumAutomaticSize?
 end
 declare class EnumAvatarAssetType extends EnumItem end
 declare class EnumAvatarAssetType_INTERNAL extends Enum
@@ -475,10 +770,12 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	DressSkirtAccessory: EnumAvatarAssetType
 	DynamicHead: EnumAvatarAssetType
 	EmoteAnimation: EnumAvatarAssetType
+	EyeMakeup: EnumAvatarAssetType
 	EyebrowAccessory: EnumAvatarAssetType
 	EyelashAccessory: EnumAvatarAssetType
 	Face: EnumAvatarAssetType
 	FaceAccessory: EnumAvatarAssetType
+	FaceMakeup: EnumAvatarAssetType
 	FallAnimation: EnumAvatarAssetType
 	FrontAccessory: EnumAvatarAssetType
 	Gear: EnumAvatarAssetType
@@ -491,6 +788,7 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	LeftArm: EnumAvatarAssetType
 	LeftLeg: EnumAvatarAssetType
 	LeftShoeAccessory: EnumAvatarAssetType
+	LipMakeup: EnumAvatarAssetType
 	MoodAnimation: EnumAvatarAssetType
 	NeckAccessory: EnumAvatarAssetType
 	Pants: EnumAvatarAssetType
@@ -510,6 +808,9 @@ declare class EnumAvatarAssetType_INTERNAL extends Enum
 	Torso: EnumAvatarAssetType
 	WaistAccessory: EnumAvatarAssetType
 	WalkAnimation: EnumAvatarAssetType
+	function GetEnumItems(self): { EnumAvatarAssetType }
+	function FromName(self, Name: string): EnumAvatarAssetType?
+	function FromValue(self, Value: number): EnumAvatarAssetType?
 end
 declare class EnumAvatarChatServiceFeature extends EnumItem end
 declare class EnumAvatarChatServiceFeature_INTERNAL extends Enum
@@ -524,6 +825,9 @@ declare class EnumAvatarChatServiceFeature_INTERNAL extends Enum
 	UserVerifiedForVoice: EnumAvatarChatServiceFeature
 	UserVideo: EnumAvatarChatServiceFeature
 	UserVideoEligible: EnumAvatarChatServiceFeature
+	function GetEnumItems(self): { EnumAvatarChatServiceFeature }
+	function FromName(self, Name: string): EnumAvatarChatServiceFeature?
+	function FromValue(self, Value: number): EnumAvatarChatServiceFeature?
 end
 declare class EnumAvatarContextMenuOption extends EnumItem end
 declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
@@ -531,6 +835,9 @@ declare class EnumAvatarContextMenuOption_INTERNAL extends Enum
 	Emote: EnumAvatarContextMenuOption
 	Friend: EnumAvatarContextMenuOption
 	InspectMenu: EnumAvatarContextMenuOption
+	function GetEnumItems(self): { EnumAvatarContextMenuOption }
+	function FromName(self, Name: string): EnumAvatarContextMenuOption?
+	function FromValue(self, Value: number): EnumAvatarContextMenuOption?
 end
 declare class EnumAvatarGenerationError extends EnumItem end
 declare class EnumAvatarGenerationError_INTERNAL extends Enum
@@ -541,34 +848,186 @@ declare class EnumAvatarGenerationError_INTERNAL extends Enum
 	Offensive: EnumAvatarGenerationError
 	Timeout: EnumAvatarGenerationError
 	Unknown: EnumAvatarGenerationError
+	function GetEnumItems(self): { EnumAvatarGenerationError }
+	function FromName(self, Name: string): EnumAvatarGenerationError?
+	function FromValue(self, Value: number): EnumAvatarGenerationError?
 end
 declare class EnumAvatarItemType extends EnumItem end
 declare class EnumAvatarItemType_INTERNAL extends Enum
 	Asset: EnumAvatarItemType
 	Bundle: EnumAvatarItemType
+	function GetEnumItems(self): { EnumAvatarItemType }
+	function FromName(self, Name: string): EnumAvatarItemType?
+	function FromValue(self, Value: number): EnumAvatarItemType?
 end
 declare class EnumAvatarPromptResult extends EnumItem end
 declare class EnumAvatarPromptResult_INTERNAL extends Enum
 	Failed: EnumAvatarPromptResult
 	PermissionDenied: EnumAvatarPromptResult
 	Success: EnumAvatarPromptResult
+	function GetEnumItems(self): { EnumAvatarPromptResult }
+	function FromName(self, Name: string): EnumAvatarPromptResult?
+	function FromValue(self, Value: number): EnumAvatarPromptResult?
+end
+declare class EnumAvatarSettingsAccessoryLimitMethod extends EnumItem end
+declare class EnumAvatarSettingsAccessoryLimitMethod_INTERNAL extends Enum
+	PreviewRemove: EnumAvatarSettingsAccessoryLimitMethod
+	PreviewScale: EnumAvatarSettingsAccessoryLimitMethod
+	Remove: EnumAvatarSettingsAccessoryLimitMethod
+	Scale: EnumAvatarSettingsAccessoryLimitMethod
+	function GetEnumItems(self): { EnumAvatarSettingsAccessoryLimitMethod }
+	function FromName(self, Name: string): EnumAvatarSettingsAccessoryLimitMethod?
+	function FromValue(self, Value: number): EnumAvatarSettingsAccessoryLimitMethod?
+end
+declare class EnumAvatarSettingsAccessoryMode extends EnumItem end
+declare class EnumAvatarSettingsAccessoryMode_INTERNAL extends Enum
+	CustomLimit: EnumAvatarSettingsAccessoryMode
+	PlayerChoice: EnumAvatarSettingsAccessoryMode
+	function GetEnumItems(self): { EnumAvatarSettingsAccessoryMode }
+	function FromName(self, Name: string): EnumAvatarSettingsAccessoryMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsAccessoryMode?
+end
+declare class EnumAvatarSettingsAnimationClipsMode extends EnumItem end
+declare class EnumAvatarSettingsAnimationClipsMode_INTERNAL extends Enum
+	CustomClips: EnumAvatarSettingsAnimationClipsMode
+	PlayerChoice: EnumAvatarSettingsAnimationClipsMode
+	function GetEnumItems(self): { EnumAvatarSettingsAnimationClipsMode }
+	function FromName(self, Name: string): EnumAvatarSettingsAnimationClipsMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsAnimationClipsMode?
+end
+declare class EnumAvatarSettingsAnimationPacksMode extends EnumItem end
+declare class EnumAvatarSettingsAnimationPacksMode_INTERNAL extends Enum
+	PlayerChoice: EnumAvatarSettingsAnimationPacksMode
+	StandardR15: EnumAvatarSettingsAnimationPacksMode
+	StandardR6: EnumAvatarSettingsAnimationPacksMode
+	function GetEnumItems(self): { EnumAvatarSettingsAnimationPacksMode }
+	function FromName(self, Name: string): EnumAvatarSettingsAnimationPacksMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsAnimationPacksMode?
+end
+declare class EnumAvatarSettingsAppearanceMode extends EnumItem end
+declare class EnumAvatarSettingsAppearanceMode_INTERNAL extends Enum
+	CustomBody: EnumAvatarSettingsAppearanceMode
+	CustomParts: EnumAvatarSettingsAppearanceMode
+	PlayerChoice: EnumAvatarSettingsAppearanceMode
+	function GetEnumItems(self): { EnumAvatarSettingsAppearanceMode }
+	function FromName(self, Name: string): EnumAvatarSettingsAppearanceMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsAppearanceMode?
+end
+declare class EnumAvatarSettingsBuildMode extends EnumItem end
+declare class EnumAvatarSettingsBuildMode_INTERNAL extends Enum
+	CustomBuild: EnumAvatarSettingsBuildMode
+	PlayerChoice: EnumAvatarSettingsBuildMode
+	function GetEnumItems(self): { EnumAvatarSettingsBuildMode }
+	function FromName(self, Name: string): EnumAvatarSettingsBuildMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsBuildMode?
+end
+declare class EnumAvatarSettingsClothingMode extends EnumItem end
+declare class EnumAvatarSettingsClothingMode_INTERNAL extends Enum
+	CustomLimit: EnumAvatarSettingsClothingMode
+	PlayerChoice: EnumAvatarSettingsClothingMode
+	function GetEnumItems(self): { EnumAvatarSettingsClothingMode }
+	function FromName(self, Name: string): EnumAvatarSettingsClothingMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsClothingMode?
+end
+declare class EnumAvatarSettingsCollisionMode extends EnumItem end
+declare class EnumAvatarSettingsCollisionMode_INTERNAL extends Enum
+	Default: EnumAvatarSettingsCollisionMode
+	Legacy: EnumAvatarSettingsCollisionMode
+	SingleCollider: EnumAvatarSettingsCollisionMode
+	function GetEnumItems(self): { EnumAvatarSettingsCollisionMode }
+	function FromName(self, Name: string): EnumAvatarSettingsCollisionMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsCollisionMode?
+end
+declare class EnumAvatarSettingsCustomAccessoryMode extends EnumItem end
+declare class EnumAvatarSettingsCustomAccessoryMode_INTERNAL extends Enum
+	CustomAccessories: EnumAvatarSettingsCustomAccessoryMode
+	PlayerChoice: EnumAvatarSettingsCustomAccessoryMode
+	function GetEnumItems(self): { EnumAvatarSettingsCustomAccessoryMode }
+	function FromName(self, Name: string): EnumAvatarSettingsCustomAccessoryMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsCustomAccessoryMode?
+end
+declare class EnumAvatarSettingsCustomBodyType extends EnumItem end
+declare class EnumAvatarSettingsCustomBodyType_INTERNAL extends Enum
+	AvatarReference: EnumAvatarSettingsCustomBodyType
+	BundleId: EnumAvatarSettingsCustomBodyType
+	function GetEnumItems(self): { EnumAvatarSettingsCustomBodyType }
+	function FromName(self, Name: string): EnumAvatarSettingsCustomBodyType?
+	function FromValue(self, Value: number): EnumAvatarSettingsCustomBodyType?
+end
+declare class EnumAvatarSettingsCustomClothingMode extends EnumItem end
+declare class EnumAvatarSettingsCustomClothingMode_INTERNAL extends Enum
+	CustomClothing: EnumAvatarSettingsCustomClothingMode
+	PlayerChoice: EnumAvatarSettingsCustomClothingMode
+	function GetEnumItems(self): { EnumAvatarSettingsCustomClothingMode }
+	function FromName(self, Name: string): EnumAvatarSettingsCustomClothingMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsCustomClothingMode?
+end
+declare class EnumAvatarSettingsHitAndTouchDetectionMode extends EnumItem end
+declare class EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL extends Enum
+	UseCollider: EnumAvatarSettingsHitAndTouchDetectionMode
+	UseParts: EnumAvatarSettingsHitAndTouchDetectionMode
+	function GetEnumItems(self): { EnumAvatarSettingsHitAndTouchDetectionMode }
+	function FromName(self, Name: string): EnumAvatarSettingsHitAndTouchDetectionMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsHitAndTouchDetectionMode?
+end
+declare class EnumAvatarSettingsJumpMode extends EnumItem end
+declare class EnumAvatarSettingsJumpMode_INTERNAL extends Enum
+	JumpHeight: EnumAvatarSettingsJumpMode
+	JumpPower: EnumAvatarSettingsJumpMode
+	function GetEnumItems(self): { EnumAvatarSettingsJumpMode }
+	function FromName(self, Name: string): EnumAvatarSettingsJumpMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsJumpMode?
+end
+declare class EnumAvatarSettingsLegacyCollisionMode extends EnumItem end
+declare class EnumAvatarSettingsLegacyCollisionMode_INTERNAL extends Enum
+	InnerBoxColliders: EnumAvatarSettingsLegacyCollisionMode
+	R6Colliders: EnumAvatarSettingsLegacyCollisionMode
+	function GetEnumItems(self): { EnumAvatarSettingsLegacyCollisionMode }
+	function FromName(self, Name: string): EnumAvatarSettingsLegacyCollisionMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsLegacyCollisionMode?
+end
+declare class EnumAvatarSettingsScaleMode extends EnumItem end
+declare class EnumAvatarSettingsScaleMode_INTERNAL extends Enum
+	CustomScale: EnumAvatarSettingsScaleMode
+	PlayerChoice: EnumAvatarSettingsScaleMode
+	function GetEnumItems(self): { EnumAvatarSettingsScaleMode }
+	function FromName(self, Name: string): EnumAvatarSettingsScaleMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsScaleMode?
 end
 declare class EnumAvatarThumbnailCustomizationType extends EnumItem end
 declare class EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum
 	Closeup: EnumAvatarThumbnailCustomizationType
 	FullBody: EnumAvatarThumbnailCustomizationType
+	function GetEnumItems(self): { EnumAvatarThumbnailCustomizationType }
+	function FromName(self, Name: string): EnumAvatarThumbnailCustomizationType?
+	function FromValue(self, Value: number): EnumAvatarThumbnailCustomizationType?
 end
 declare class EnumAvatarUnificationMode extends EnumItem end
 declare class EnumAvatarUnificationMode_INTERNAL extends Enum
 	Default: EnumAvatarUnificationMode
 	Disabled: EnumAvatarUnificationMode
 	Enabled: EnumAvatarUnificationMode
+	function GetEnumItems(self): { EnumAvatarUnificationMode }
+	function FromName(self, Name: string): EnumAvatarUnificationMode?
+	function FromValue(self, Value: number): EnumAvatarUnificationMode?
 end
 declare class EnumAxis extends EnumItem end
 declare class EnumAxis_INTERNAL extends Enum
 	X: EnumAxis
 	Y: EnumAxis
 	Z: EnumAxis
+	function GetEnumItems(self): { EnumAxis }
+	function FromName(self, Name: string): EnumAxis?
+	function FromValue(self, Value: number): EnumAxis?
+end
+declare class EnumBenefitType extends EnumItem end
+declare class EnumBenefitType_INTERNAL extends Enum
+	AvatarAsset: EnumBenefitType
+	AvatarBundle: EnumBenefitType
+	DeveloperProduct: EnumBenefitType
+	function GetEnumItems(self): { EnumBenefitType }
+	function FromName(self, Name: string): EnumBenefitType?
+	function FromValue(self, Value: number): EnumBenefitType?
 end
 declare class EnumBinType extends EnumItem end
 declare class EnumBinType_INTERNAL extends Enum
@@ -577,6 +1036,9 @@ declare class EnumBinType_INTERNAL extends Enum
 	Grab: EnumBinType
 	Hammer: EnumBinType
 	Script: EnumBinType
+	function GetEnumItems(self): { EnumBinType }
+	function FromName(self, Name: string): EnumBinType?
+	function FromValue(self, Value: number): EnumBinType?
 end
 declare class EnumBodyPart extends EnumItem end
 declare class EnumBodyPart_INTERNAL extends Enum
@@ -586,6 +1048,9 @@ declare class EnumBodyPart_INTERNAL extends Enum
 	RightArm: EnumBodyPart
 	RightLeg: EnumBodyPart
 	Torso: EnumBodyPart
+	function GetEnumItems(self): { EnumBodyPart }
+	function FromName(self, Name: string): EnumBodyPart?
+	function FromValue(self, Value: number): EnumBodyPart?
 end
 declare class EnumBodyPartR15 extends EnumItem end
 declare class EnumBodyPartR15_INTERNAL extends Enum
@@ -606,12 +1071,27 @@ declare class EnumBodyPartR15_INTERNAL extends Enum
 	RootPart: EnumBodyPartR15
 	Unknown: EnumBodyPartR15
 	UpperTorso: EnumBodyPartR15
+	function GetEnumItems(self): { EnumBodyPartR15 }
+	function FromName(self, Name: string): EnumBodyPartR15?
+	function FromValue(self, Value: number): EnumBodyPartR15?
 end
 declare class EnumBorderMode extends EnumItem end
 declare class EnumBorderMode_INTERNAL extends Enum
 	Inset: EnumBorderMode
 	Middle: EnumBorderMode
 	Outline: EnumBorderMode
+	function GetEnumItems(self): { EnumBorderMode }
+	function FromName(self, Name: string): EnumBorderMode?
+	function FromValue(self, Value: number): EnumBorderMode?
+end
+declare class EnumBorderStrokePosition extends EnumItem end
+declare class EnumBorderStrokePosition_INTERNAL extends Enum
+	Center: EnumBorderStrokePosition
+	Inner: EnumBorderStrokePosition
+	Outer: EnumBorderStrokePosition
+	function GetEnumItems(self): { EnumBorderStrokePosition }
+	function FromName(self, Name: string): EnumBorderStrokePosition?
+	function FromValue(self, Value: number): EnumBorderStrokePosition?
 end
 declare class EnumBreakReason extends EnumItem end
 declare class EnumBreakReason_INTERNAL extends Enum
@@ -619,17 +1099,26 @@ declare class EnumBreakReason_INTERNAL extends Enum
 	Other: EnumBreakReason
 	SpecialBreakpoint: EnumBreakReason
 	UserBreakpoint: EnumBreakReason
+	function GetEnumItems(self): { EnumBreakReason }
+	function FromName(self, Name: string): EnumBreakReason?
+	function FromValue(self, Value: number): EnumBreakReason?
 end
 declare class EnumBreakpointRemoveReason extends EnumItem end
 declare class EnumBreakpointRemoveReason_INTERNAL extends Enum
 	Requested: EnumBreakpointRemoveReason
 	ScriptChanged: EnumBreakpointRemoveReason
 	ScriptRemoved: EnumBreakpointRemoveReason
+	function GetEnumItems(self): { EnumBreakpointRemoveReason }
+	function FromName(self, Name: string): EnumBreakpointRemoveReason?
+	function FromValue(self, Value: number): EnumBreakpointRemoveReason?
 end
 declare class EnumBulkMoveMode extends EnumItem end
 declare class EnumBulkMoveMode_INTERNAL extends Enum
 	FireAllEvents: EnumBulkMoveMode
 	FireCFrameChanged: EnumBulkMoveMode
+	function GetEnumItems(self): { EnumBulkMoveMode }
+	function FromName(self, Name: string): EnumBulkMoveMode?
+	function FromValue(self, Value: number): EnumBulkMoveMode?
 end
 declare class EnumBundleType extends EnumItem end
 declare class EnumBundleType_INTERNAL extends Enum
@@ -638,11 +1127,17 @@ declare class EnumBundleType_INTERNAL extends Enum
 	DynamicHead: EnumBundleType
 	DynamicHeadAvatar: EnumBundleType
 	Shoes: EnumBundleType
+	function GetEnumItems(self): { EnumBundleType }
+	function FromName(self, Name: string): EnumBundleType?
+	function FromValue(self, Value: number): EnumBundleType?
 end
 declare class EnumButton extends EnumItem end
 declare class EnumButton_INTERNAL extends Enum
 	Dismount: EnumButton
 	Jump: EnumButton
+	function GetEnumItems(self): { EnumButton }
+	function FromName(self, Name: string): EnumButton?
+	function FromValue(self, Value: number): EnumButton?
 end
 declare class EnumButtonStyle extends EnumItem end
 declare class EnumButtonStyle_INTERNAL extends Enum
@@ -652,27 +1147,42 @@ declare class EnumButtonStyle_INTERNAL extends Enum
 	RobloxRoundButton: EnumButtonStyle
 	RobloxRoundDefaultButton: EnumButtonStyle
 	RobloxRoundDropdownButton: EnumButtonStyle
+	function GetEnumItems(self): { EnumButtonStyle }
+	function FromName(self, Name: string): EnumButtonStyle?
+	function FromValue(self, Value: number): EnumButtonStyle?
 end
 declare class EnumCageType extends EnumItem end
 declare class EnumCageType_INTERNAL extends Enum
 	Inner: EnumCageType
 	Outer: EnumCageType
+	function GetEnumItems(self): { EnumCageType }
+	function FromName(self, Name: string): EnumCageType?
+	function FromValue(self, Value: number): EnumCageType?
 end
 declare class EnumCameraMode extends EnumItem end
 declare class EnumCameraMode_INTERNAL extends Enum
 	Classic: EnumCameraMode
 	LockFirstPerson: EnumCameraMode
+	function GetEnumItems(self): { EnumCameraMode }
+	function FromName(self, Name: string): EnumCameraMode?
+	function FromValue(self, Value: number): EnumCameraMode?
 end
 declare class EnumCameraPanMode extends EnumItem end
 declare class EnumCameraPanMode_INTERNAL extends Enum
 	Classic: EnumCameraPanMode
 	EdgeBump: EnumCameraPanMode
+	function GetEnumItems(self): { EnumCameraPanMode }
+	function FromName(self, Name: string): EnumCameraPanMode?
+	function FromValue(self, Value: number): EnumCameraPanMode?
 end
 declare class EnumCameraSpeedAdjustBinding extends EnumItem end
 declare class EnumCameraSpeedAdjustBinding_INTERNAL extends Enum
 	AltScroll: EnumCameraSpeedAdjustBinding
 	None: EnumCameraSpeedAdjustBinding
 	RmbScroll: EnumCameraSpeedAdjustBinding
+	function GetEnumItems(self): { EnumCameraSpeedAdjustBinding }
+	function FromName(self, Name: string): EnumCameraSpeedAdjustBinding?
+	function FromValue(self, Value: number): EnumCameraSpeedAdjustBinding?
 end
 declare class EnumCameraType extends EnumItem end
 declare class EnumCameraType_INTERNAL extends Enum
@@ -684,6 +1194,24 @@ declare class EnumCameraType_INTERNAL extends Enum
 	Scriptable: EnumCameraType
 	Track: EnumCameraType
 	Watch: EnumCameraType
+	function GetEnumItems(self): { EnumCameraType }
+	function FromName(self, Name: string): EnumCameraType?
+	function FromValue(self, Value: number): EnumCameraType?
+end
+declare class EnumCaptureGalleryPermission extends EnumItem end
+declare class EnumCaptureGalleryPermission_INTERNAL extends Enum
+	ReadAndUpload: EnumCaptureGalleryPermission
+	function GetEnumItems(self): { EnumCaptureGalleryPermission }
+	function FromName(self, Name: string): EnumCaptureGalleryPermission?
+	function FromValue(self, Value: number): EnumCaptureGalleryPermission?
+end
+declare class EnumCaptureType extends EnumItem end
+declare class EnumCaptureType_INTERNAL extends Enum
+	Screenshot: EnumCaptureType
+	Video: EnumCaptureType
+	function GetEnumItems(self): { EnumCaptureType }
+	function FromName(self, Name: string): EnumCaptureType?
+	function FromValue(self, Value: number): EnumCaptureType?
 end
 declare class EnumCatalogCategoryFilter extends EnumItem end
 declare class EnumCatalogCategoryFilter_INTERNAL extends Enum
@@ -693,6 +1221,9 @@ declare class EnumCatalogCategoryFilter_INTERNAL extends Enum
 	None: EnumCatalogCategoryFilter
 	Premium: EnumCatalogCategoryFilter
 	Recommended: EnumCatalogCategoryFilter
+	function GetEnumItems(self): { EnumCatalogCategoryFilter }
+	function FromName(self, Name: string): EnumCatalogCategoryFilter?
+	function FromValue(self, Value: number): EnumCatalogCategoryFilter?
 end
 declare class EnumCatalogSortAggregation extends EnumItem end
 declare class EnumCatalogSortAggregation_INTERNAL extends Enum
@@ -702,6 +1233,9 @@ declare class EnumCatalogSortAggregation_INTERNAL extends Enum
 	PastDay: EnumCatalogSortAggregation
 	PastMonth: EnumCatalogSortAggregation
 	PastWeek: EnumCatalogSortAggregation
+	function GetEnumItems(self): { EnumCatalogSortAggregation }
+	function FromName(self, Name: string): EnumCatalogSortAggregation?
+	function FromValue(self, Value: number): EnumCatalogSortAggregation?
 end
 declare class EnumCatalogSortType extends EnumItem end
 declare class EnumCatalogSortType_INTERNAL extends Enum
@@ -711,6 +1245,17 @@ declare class EnumCatalogSortType_INTERNAL extends Enum
 	PriceLowToHigh: EnumCatalogSortType
 	RecentlyCreated: EnumCatalogSortType
 	Relevance: EnumCatalogSortType
+	function GetEnumItems(self): { EnumCatalogSortType }
+	function FromName(self, Name: string): EnumCatalogSortType?
+	function FromValue(self, Value: number): EnumCatalogSortType?
+end
+declare class EnumCatalogTimedOptionFilter extends EnumItem end
+declare class EnumCatalogTimedOptionFilter_INTERNAL extends Enum
+	All: EnumCatalogTimedOptionFilter
+	TimedOptionOnly: EnumCatalogTimedOptionFilter
+	function GetEnumItems(self): { EnumCatalogTimedOptionFilter }
+	function FromName(self, Name: string): EnumCatalogTimedOptionFilter?
+	function FromValue(self, Value: number): EnumCatalogTimedOptionFilter?
 end
 declare class EnumCellBlock extends EnumItem end
 declare class EnumCellBlock_INTERNAL extends Enum
@@ -719,6 +1264,9 @@ declare class EnumCellBlock_INTERNAL extends Enum
 	InverseCornerWedge: EnumCellBlock
 	Solid: EnumCellBlock
 	VerticalWedge: EnumCellBlock
+	function GetEnumItems(self): { EnumCellBlock }
+	function FromName(self, Name: string): EnumCellBlock?
+	function FromValue(self, Value: number): EnumCellBlock?
 end
 declare class EnumCellMaterial extends EnumItem end
 declare class EnumCellMaterial_INTERNAL extends Enum
@@ -740,6 +1288,9 @@ declare class EnumCellMaterial_INTERNAL extends Enum
 	Water: EnumCellMaterial
 	WoodLog: EnumCellMaterial
 	WoodPlank: EnumCellMaterial
+	function GetEnumItems(self): { EnumCellMaterial }
+	function FromName(self, Name: string): EnumCellMaterial?
+	function FromValue(self, Value: number): EnumCellMaterial?
 end
 declare class EnumCellOrientation extends EnumItem end
 declare class EnumCellOrientation_INTERNAL extends Enum
@@ -747,6 +1298,9 @@ declare class EnumCellOrientation_INTERNAL extends Enum
 	NegZ: EnumCellOrientation
 	X: EnumCellOrientation
 	Z: EnumCellOrientation
+	function GetEnumItems(self): { EnumCellOrientation }
+	function FromName(self, Name: string): EnumCellOrientation?
+	function FromValue(self, Value: number): EnumCellOrientation?
 end
 declare class EnumCenterDialogType extends EnumItem end
 declare class EnumCenterDialogType_INTERNAL extends Enum
@@ -754,6 +1308,9 @@ declare class EnumCenterDialogType_INTERNAL extends Enum
 	PlayerInitiatedDialog: EnumCenterDialogType
 	QuitDialog: EnumCenterDialogType
 	UnsolicitedDialog: EnumCenterDialogType
+	function GetEnumItems(self): { EnumCenterDialogType }
+	function FromName(self, Name: string): EnumCenterDialogType?
+	function FromValue(self, Value: number): EnumCenterDialogType?
 end
 declare class EnumCharacterControlMode extends EnumItem end
 declare class EnumCharacterControlMode_INTERNAL extends Enum
@@ -761,6 +1318,9 @@ declare class EnumCharacterControlMode_INTERNAL extends Enum
 	Legacy: EnumCharacterControlMode
 	LuaCharacterController: EnumCharacterControlMode
 	NoCharacterController: EnumCharacterControlMode
+	function GetEnumItems(self): { EnumCharacterControlMode }
+	function FromName(self, Name: string): EnumCharacterControlMode?
+	function FromValue(self, Value: number): EnumCharacterControlMode?
 end
 declare class EnumChatCallbackType extends EnumItem end
 declare class EnumChatCallbackType_INTERNAL extends Enum
@@ -768,6 +1328,9 @@ declare class EnumChatCallbackType_INTERNAL extends Enum
 	OnClientSendingMessage: EnumChatCallbackType
 	OnCreatingChatWindow: EnumChatCallbackType
 	OnServerReceivingMessage: EnumChatCallbackType
+	function GetEnumItems(self): { EnumChatCallbackType }
+	function FromName(self, Name: string): EnumChatCallbackType?
+	function FromValue(self, Value: number): EnumChatCallbackType?
 end
 declare class EnumChatColor extends EnumItem end
 declare class EnumChatColor_INTERNAL extends Enum
@@ -775,40 +1338,61 @@ declare class EnumChatColor_INTERNAL extends Enum
 	Green: EnumChatColor
 	Red: EnumChatColor
 	White: EnumChatColor
+	function GetEnumItems(self): { EnumChatColor }
+	function FromName(self, Name: string): EnumChatColor?
+	function FromValue(self, Value: number): EnumChatColor?
 end
 declare class EnumChatMode extends EnumItem end
 declare class EnumChatMode_INTERNAL extends Enum
 	Menu: EnumChatMode
 	TextAndMenu: EnumChatMode
+	function GetEnumItems(self): { EnumChatMode }
+	function FromName(self, Name: string): EnumChatMode?
+	function FromValue(self, Value: number): EnumChatMode?
 end
 declare class EnumChatPrivacyMode extends EnumItem end
 declare class EnumChatPrivacyMode_INTERNAL extends Enum
 	AllUsers: EnumChatPrivacyMode
 	Friends: EnumChatPrivacyMode
 	NoOne: EnumChatPrivacyMode
+	function GetEnumItems(self): { EnumChatPrivacyMode }
+	function FromName(self, Name: string): EnumChatPrivacyMode?
+	function FromValue(self, Value: number): EnumChatPrivacyMode?
 end
 declare class EnumChatRestrictionStatus extends EnumItem end
 declare class EnumChatRestrictionStatus_INTERNAL extends Enum
 	NotRestricted: EnumChatRestrictionStatus
 	Restricted: EnumChatRestrictionStatus
 	Unknown: EnumChatRestrictionStatus
+	function GetEnumItems(self): { EnumChatRestrictionStatus }
+	function FromName(self, Name: string): EnumChatRestrictionStatus?
+	function FromValue(self, Value: number): EnumChatRestrictionStatus?
 end
 declare class EnumChatStyle extends EnumItem end
 declare class EnumChatStyle_INTERNAL extends Enum
 	Bubble: EnumChatStyle
 	Classic: EnumChatStyle
 	ClassicAndBubble: EnumChatStyle
+	function GetEnumItems(self): { EnumChatStyle }
+	function FromName(self, Name: string): EnumChatStyle?
+	function FromValue(self, Value: number): EnumChatStyle?
 end
 declare class EnumChatVersion extends EnumItem end
 declare class EnumChatVersion_INTERNAL extends Enum
 	LegacyChatService: EnumChatVersion
 	TextChatService: EnumChatVersion
+	function GetEnumItems(self): { EnumChatVersion }
+	function FromName(self, Name: string): EnumChatVersion?
+	function FromValue(self, Value: number): EnumChatVersion?
 end
 declare class EnumClientAnimatorThrottlingMode extends EnumItem end
 declare class EnumClientAnimatorThrottlingMode_INTERNAL extends Enum
 	Default: EnumClientAnimatorThrottlingMode
 	Disabled: EnumClientAnimatorThrottlingMode
 	Enabled: EnumClientAnimatorThrottlingMode
+	function GetEnumItems(self): { EnumClientAnimatorThrottlingMode }
+	function FromName(self, Name: string): EnumClientAnimatorThrottlingMode?
+	function FromValue(self, Value: number): EnumClientAnimatorThrottlingMode?
 end
 declare class EnumCloseReason extends EnumItem end
 declare class EnumCloseReason_INTERNAL extends Enum
@@ -818,6 +1402,9 @@ declare class EnumCloseReason_INTERNAL extends Enum
 	RobloxMaintenance: EnumCloseReason
 	ServerEmpty: EnumCloseReason
 	Unknown: EnumCloseReason
+	function GetEnumItems(self): { EnumCloseReason }
+	function FromName(self, Name: string): EnumCloseReason?
+	function FromValue(self, Value: number): EnumCloseReason?
 end
 declare class EnumCollaboratorStatus extends EnumItem end
 declare class EnumCollaboratorStatus_INTERNAL extends Enum
@@ -825,6 +1412,9 @@ declare class EnumCollaboratorStatus_INTERNAL extends Enum
 	None: EnumCollaboratorStatus
 	PrivateScripting: EnumCollaboratorStatus
 	Scripting: EnumCollaboratorStatus
+	function GetEnumItems(self): { EnumCollaboratorStatus }
+	function FromName(self, Name: string): EnumCollaboratorStatus?
+	function FromValue(self, Value: number): EnumCollaboratorStatus?
 end
 declare class EnumCollisionFidelity extends EnumItem end
 declare class EnumCollisionFidelity_INTERNAL extends Enum
@@ -832,11 +1422,17 @@ declare class EnumCollisionFidelity_INTERNAL extends Enum
 	Default: EnumCollisionFidelity
 	Hull: EnumCollisionFidelity
 	PreciseConvexDecomposition: EnumCollisionFidelity
+	function GetEnumItems(self): { EnumCollisionFidelity }
+	function FromName(self, Name: string): EnumCollisionFidelity?
+	function FromValue(self, Value: number): EnumCollisionFidelity?
 end
 declare class EnumCommandPermission extends EnumItem end
 declare class EnumCommandPermission_INTERNAL extends Enum
 	LocalUser: EnumCommandPermission
 	Plugin: EnumCommandPermission
+	function GetEnumItems(self): { EnumCommandPermission }
+	function FromName(self, Name: string): EnumCommandPermission?
+	function FromValue(self, Value: number): EnumCommandPermission?
 end
 declare class EnumCompileTarget extends EnumItem end
 declare class EnumCompileTarget_INTERNAL extends Enum
@@ -844,6 +1440,19 @@ declare class EnumCompileTarget_INTERNAL extends Enum
 	CoreScript: EnumCompileTarget
 	CoreScriptRaw: EnumCompileTarget
 	Studio: EnumCompileTarget
+	function GetEnumItems(self): { EnumCompileTarget }
+	function FromName(self, Name: string): EnumCompileTarget?
+	function FromValue(self, Value: number): EnumCompileTarget?
+end
+declare class EnumCompletionAcceptanceBehavior extends EnumItem end
+declare class EnumCompletionAcceptanceBehavior_INTERNAL extends Enum
+	Insert: EnumCompletionAcceptanceBehavior
+	InsertOnEnterReplaceOnTab: EnumCompletionAcceptanceBehavior
+	Replace: EnumCompletionAcceptanceBehavior
+	ReplaceOnEnterInsertOnTab: EnumCompletionAcceptanceBehavior
+	function GetEnumItems(self): { EnumCompletionAcceptanceBehavior }
+	function FromName(self, Name: string): EnumCompletionAcceptanceBehavior?
+	function FromValue(self, Value: number): EnumCompletionAcceptanceBehavior?
 end
 declare class EnumCompletionItemKind extends EnumItem end
 declare class EnumCompletionItemKind_INTERNAL extends Enum
@@ -872,6 +1481,9 @@ declare class EnumCompletionItemKind_INTERNAL extends Enum
 	Unit: EnumCompletionItemKind
 	Value: EnumCompletionItemKind
 	Variable: EnumCompletionItemKind
+	function GetEnumItems(self): { EnumCompletionItemKind }
+	function FromName(self, Name: string): EnumCompletionItemKind?
+	function FromValue(self, Value: number): EnumCompletionItemKind?
 end
 declare class EnumCompletionItemTag extends EnumItem end
 declare class EnumCompletionItemTag_INTERNAL extends Enum
@@ -886,12 +1498,39 @@ declare class EnumCompletionItemTag_INTERNAL extends Enum
 	PutCursorInParens: EnumCompletionItemTag
 	RobloxPermissions: EnumCompletionItemTag
 	TypeCorrect: EnumCompletionItemTag
+	function GetEnumItems(self): { EnumCompletionItemTag }
+	function FromName(self, Name: string): EnumCompletionItemTag?
+	function FromValue(self, Value: number): EnumCompletionItemTag?
 end
 declare class EnumCompletionTriggerKind extends EnumItem end
 declare class EnumCompletionTriggerKind_INTERNAL extends Enum
 	Invoked: EnumCompletionTriggerKind
 	TriggerCharacter: EnumCompletionTriggerKind
 	TriggerForIncompleteCompletions: EnumCompletionTriggerKind
+	function GetEnumItems(self): { EnumCompletionTriggerKind }
+	function FromName(self, Name: string): EnumCompletionTriggerKind?
+	function FromValue(self, Value: number): EnumCompletionTriggerKind?
+end
+declare class EnumCompositeValueCurveType extends EnumItem end
+declare class EnumCompositeValueCurveType_INTERNAL extends Enum
+	ColorHSV: EnumCompositeValueCurveType
+	ColorRGB: EnumCompositeValueCurveType
+	NumberRange: EnumCompositeValueCurveType
+	Rect: EnumCompositeValueCurveType
+	UDim: EnumCompositeValueCurveType
+	UDim2: EnumCompositeValueCurveType
+	Vector2: EnumCompositeValueCurveType
+	Vector3: EnumCompositeValueCurveType
+	function GetEnumItems(self): { EnumCompositeValueCurveType }
+	function FromName(self, Name: string): EnumCompositeValueCurveType?
+	function FromValue(self, Value: number): EnumCompositeValueCurveType?
+end
+declare class EnumCompressionAlgorithm extends EnumItem end
+declare class EnumCompressionAlgorithm_INTERNAL extends Enum
+	Zstd: EnumCompressionAlgorithm
+	function GetEnumItems(self): { EnumCompressionAlgorithm }
+	function FromName(self, Name: string): EnumCompressionAlgorithm?
+	function FromValue(self, Value: number): EnumCompressionAlgorithm?
 end
 declare class EnumComputerCameraMovementMode extends EnumItem end
 declare class EnumComputerCameraMovementMode_INTERNAL extends Enum
@@ -900,15 +1539,35 @@ declare class EnumComputerCameraMovementMode_INTERNAL extends Enum
 	Default: EnumComputerCameraMovementMode
 	Follow: EnumComputerCameraMovementMode
 	Orbital: EnumComputerCameraMovementMode
+	function GetEnumItems(self): { EnumComputerCameraMovementMode }
+	function FromName(self, Name: string): EnumComputerCameraMovementMode?
+	function FromValue(self, Value: number): EnumComputerCameraMovementMode?
 end
 declare class EnumComputerMovementMode extends EnumItem end
 declare class EnumComputerMovementMode_INTERNAL extends Enum
 	ClickToMove: EnumComputerMovementMode
 	Default: EnumComputerMovementMode
 	KeyboardMouse: EnumComputerMovementMode
+	function GetEnumItems(self): { EnumComputerMovementMode }
+	function FromName(self, Name: string): EnumComputerMovementMode?
+	function FromValue(self, Value: number): EnumComputerMovementMode?
+end
+declare class EnumConfigSnapshotErrorState extends EnumItem end
+declare class EnumConfigSnapshotErrorState_INTERNAL extends Enum
+	LoadFailed: EnumConfigSnapshotErrorState
+	None: EnumConfigSnapshotErrorState
+	function GetEnumItems(self): { EnumConfigSnapshotErrorState }
+	function FromName(self, Name: string): EnumConfigSnapshotErrorState?
+	function FromValue(self, Value: number): EnumConfigSnapshotErrorState?
 end
 declare class EnumConnectionError extends EnumItem end
 declare class EnumConnectionError_INTERNAL extends Enum
+	AlreadyConnected: EnumConnectionError
+	AndroidAnticheatKick: EnumConnectionError
+	AndroidEmulatorKick: EnumConnectionError
+	AndroidRootedKick: EnumConnectionError
+	ConnectErrors: EnumConnectionError
+	ConnectionBanned: EnumConnectionError
 	DisconnectBadhash: EnumConnectionError
 	DisconnectBlockedIP: EnumConnectionError
 	DisconnectBySecurityPolicy: EnumConnectionError
@@ -943,13 +1602,21 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	DisconnectSecurityKeyMismatch: EnumConnectionError
 	DisconnectSendPacketError: EnumConnectionError
 	DisconnectTimeout: EnumConnectionError
+	DisconnectVerboselyModeratedGame: EnumConnectionError
 	DisconnectWrongVersion: EnumConnectionError
+	DisconnectionNotification: EnumConnectionError
+	IPRecentlyConnected: EnumConnectionError
+	IncompatibleProtocolVersion: EnumConnectionError
+	InvalidPassword: EnumConnectionError
 	NetworkInternal: EnumConnectionError
 	NetworkMisbehavior: EnumConnectionError
 	NetworkSecurity: EnumConnectionError
 	NetworkSend: EnumConnectionError
 	NetworkTimeout: EnumConnectionError
+	NoFreeIncomingConnections: EnumConnectionError
 	OK: EnumConnectionError
+	OurSystemRequiresSecurity: EnumConnectionError
+	PhantomFreeze: EnumConnectionError
 	PlacelaunchCreatorBan: EnumConnectionError
 	PlacelaunchCustomMessage: EnumConnectionError
 	PlacelaunchDisabled: EnumConnectionError
@@ -970,6 +1637,8 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	PlayerRemoved: EnumConnectionError
 	ReplacementReady: EnumConnectionError
 	ReplicatorTimeout: EnumConnectionError
+	ScreentimeLockoutKick: EnumConnectionError
+	SecurityKeyMismatch: EnumConnectionError
 	ServerEmpty: EnumConnectionError
 	ServerShutdown: EnumConnectionError
 	TeleportErrors: EnumConnectionError
@@ -981,33 +1650,52 @@ declare class EnumConnectionError_INTERNAL extends Enum
 	TeleportIsTeleporting: EnumConnectionError
 	TeleportUnauthorized: EnumConnectionError
 	Unknown: EnumConnectionError
+	function GetEnumItems(self): { EnumConnectionError }
+	function FromName(self, Name: string): EnumConnectionError?
+	function FromValue(self, Value: number): EnumConnectionError?
 end
 declare class EnumConnectionState extends EnumItem end
 declare class EnumConnectionState_INTERNAL extends Enum
 	Connected: EnumConnectionState
 	Disconnected: EnumConnectionState
+	function GetEnumItems(self): { EnumConnectionState }
+	function FromName(self, Name: string): EnumConnectionState?
+	function FromValue(self, Value: number): EnumConnectionState?
 end
 declare class EnumContentSourceType extends EnumItem end
 declare class EnumContentSourceType_INTERNAL extends Enum
 	None: EnumContentSourceType
 	Object: EnumContentSourceType
+	Opaque: EnumContentSourceType
 	Uri: EnumContentSourceType
+	function GetEnumItems(self): { EnumContentSourceType }
+	function FromName(self, Name: string): EnumContentSourceType?
+	function FromValue(self, Value: number): EnumContentSourceType?
 end
 declare class EnumContextActionPriority extends EnumItem end
 declare class EnumContextActionPriority_INTERNAL extends Enum
 	High: EnumContextActionPriority
 	Low: EnumContextActionPriority
 	Medium: EnumContextActionPriority
+	function GetEnumItems(self): { EnumContextActionPriority }
+	function FromName(self, Name: string): EnumContextActionPriority?
+	function FromValue(self, Value: number): EnumContextActionPriority?
 end
 declare class EnumContextActionResult extends EnumItem end
 declare class EnumContextActionResult_INTERNAL extends Enum
 	Pass: EnumContextActionResult
 	Sink: EnumContextActionResult
+	function GetEnumItems(self): { EnumContextActionResult }
+	function FromName(self, Name: string): EnumContextActionResult?
+	function FromValue(self, Value: number): EnumContextActionResult?
 end
 declare class EnumControlMode extends EnumItem end
 declare class EnumControlMode_INTERNAL extends Enum
 	Classic: EnumControlMode
 	MouseLockSwitch: EnumControlMode
+	function GetEnumItems(self): { EnumControlMode }
+	function FromName(self, Name: string): EnumControlMode?
+	function FromValue(self, Value: number): EnumControlMode?
 end
 declare class EnumCoreGuiType extends EnumItem end
 declare class EnumCoreGuiType_INTERNAL extends Enum
@@ -1019,6 +1707,9 @@ declare class EnumCoreGuiType_INTERNAL extends Enum
 	Health: EnumCoreGuiType
 	PlayerList: EnumCoreGuiType
 	SelfView: EnumCoreGuiType
+	function GetEnumItems(self): { EnumCoreGuiType }
+	function FromName(self, Name: string): EnumCoreGuiType?
+	function FromValue(self, Value: number): EnumCoreGuiType?
 end
 declare class EnumCreateAssetResult extends EnumItem end
 declare class EnumCreateAssetResult_INTERNAL extends Enum
@@ -1026,35 +1717,53 @@ declare class EnumCreateAssetResult_INTERNAL extends Enum
 	Success: EnumCreateAssetResult
 	Unknown: EnumCreateAssetResult
 	UploadFailed: EnumCreateAssetResult
+	function GetEnumItems(self): { EnumCreateAssetResult }
+	function FromName(self, Name: string): EnumCreateAssetResult?
+	function FromValue(self, Value: number): EnumCreateAssetResult?
 end
 declare class EnumCreateOutfitFailure extends EnumItem end
 declare class EnumCreateOutfitFailure_INTERNAL extends Enum
 	InvalidName: EnumCreateOutfitFailure
 	Other: EnumCreateOutfitFailure
 	OutfitLimitReached: EnumCreateOutfitFailure
+	function GetEnumItems(self): { EnumCreateOutfitFailure }
+	function FromName(self, Name: string): EnumCreateOutfitFailure?
+	function FromValue(self, Value: number): EnumCreateOutfitFailure?
 end
 declare class EnumCreatorType extends EnumItem end
 declare class EnumCreatorType_INTERNAL extends Enum
 	Group: EnumCreatorType
 	User: EnumCreatorType
+	function GetEnumItems(self): { EnumCreatorType }
+	function FromName(self, Name: string): EnumCreatorType?
+	function FromValue(self, Value: number): EnumCreatorType?
 end
 declare class EnumCreatorTypeFilter extends EnumItem end
 declare class EnumCreatorTypeFilter_INTERNAL extends Enum
 	All: EnumCreatorTypeFilter
 	Group: EnumCreatorTypeFilter
 	User: EnumCreatorTypeFilter
+	function GetEnumItems(self): { EnumCreatorTypeFilter }
+	function FromName(self, Name: string): EnumCreatorTypeFilter?
+	function FromValue(self, Value: number): EnumCreatorTypeFilter?
 end
 declare class EnumCurrencyType extends EnumItem end
 declare class EnumCurrencyType_INTERNAL extends Enum
 	Default: EnumCurrencyType
 	Robux: EnumCurrencyType
 	Tix: EnumCurrencyType
+	function GetEnumItems(self): { EnumCurrencyType }
+	function FromName(self, Name: string): EnumCurrencyType?
+	function FromValue(self, Value: number): EnumCurrencyType?
 end
 declare class EnumCustomCameraMode extends EnumItem end
 declare class EnumCustomCameraMode_INTERNAL extends Enum
 	Classic: EnumCustomCameraMode
 	Default: EnumCustomCameraMode
 	Follow: EnumCustomCameraMode
+	function GetEnumItems(self): { EnumCustomCameraMode }
+	function FromName(self, Name: string): EnumCustomCameraMode?
+	function FromValue(self, Value: number): EnumCustomCameraMode?
 end
 declare class EnumDataStoreRequestType extends EnumItem end
 declare class EnumDataStoreRequestType_INTERNAL extends Enum
@@ -1063,10 +1772,21 @@ declare class EnumDataStoreRequestType_INTERNAL extends Enum
 	GetVersionAsync: EnumDataStoreRequestType
 	ListAsync: EnumDataStoreRequestType
 	OnUpdate: EnumDataStoreRequestType
+	OrderedList: EnumDataStoreRequestType
+	OrderedRead: EnumDataStoreRequestType
+	OrderedRemove: EnumDataStoreRequestType
+	OrderedWrite: EnumDataStoreRequestType
 	RemoveVersionAsync: EnumDataStoreRequestType
 	SetIncrementAsync: EnumDataStoreRequestType
 	SetIncrementSortedAsync: EnumDataStoreRequestType
+	StandardList: EnumDataStoreRequestType
+	StandardRead: EnumDataStoreRequestType
+	StandardRemove: EnumDataStoreRequestType
+	StandardWrite: EnumDataStoreRequestType
 	UpdateAsync: EnumDataStoreRequestType
+	function GetEnumItems(self): { EnumDataStoreRequestType }
+	function FromName(self, Name: string): EnumDataStoreRequestType?
+	function FromValue(self, Value: number): EnumDataStoreRequestType?
 end
 declare class EnumDebuggerEndReason extends EnumItem end
 declare class EnumDebuggerEndReason_INTERNAL extends Enum
@@ -1078,17 +1798,26 @@ declare class EnumDebuggerEndReason_INTERNAL extends Enum
 	ServerProtocolMismatch: EnumDebuggerEndReason
 	ServerShutdown: EnumDebuggerEndReason
 	Timeout: EnumDebuggerEndReason
+	function GetEnumItems(self): { EnumDebuggerEndReason }
+	function FromName(self, Name: string): EnumDebuggerEndReason?
+	function FromValue(self, Value: number): EnumDebuggerEndReason?
 end
 declare class EnumDebuggerExceptionBreakMode extends EnumItem end
 declare class EnumDebuggerExceptionBreakMode_INTERNAL extends Enum
 	Always: EnumDebuggerExceptionBreakMode
 	Never: EnumDebuggerExceptionBreakMode
 	Unhandled: EnumDebuggerExceptionBreakMode
+	function GetEnumItems(self): { EnumDebuggerExceptionBreakMode }
+	function FromName(self, Name: string): EnumDebuggerExceptionBreakMode?
+	function FromValue(self, Value: number): EnumDebuggerExceptionBreakMode?
 end
 declare class EnumDebuggerFrameType extends EnumItem end
 declare class EnumDebuggerFrameType_INTERNAL extends Enum
 	C: EnumDebuggerFrameType
 	Lua: EnumDebuggerFrameType
+	function GetEnumItems(self): { EnumDebuggerFrameType }
+	function FromName(self, Name: string): EnumDebuggerFrameType?
+	function FromValue(self, Value: number): EnumDebuggerFrameType?
 end
 declare class EnumDebuggerPauseReason extends EnumItem end
 declare class EnumDebuggerPauseReason_INTERNAL extends Enum
@@ -1098,6 +1827,9 @@ declare class EnumDebuggerPauseReason_INTERNAL extends Enum
 	Requested: EnumDebuggerPauseReason
 	SingleStep: EnumDebuggerPauseReason
 	Unknown: EnumDebuggerPauseReason
+	function GetEnumItems(self): { EnumDebuggerPauseReason }
+	function FromName(self, Name: string): EnumDebuggerPauseReason?
+	function FromValue(self, Value: number): EnumDebuggerPauseReason?
 end
 declare class EnumDebuggerStatus extends EnumItem end
 declare class EnumDebuggerStatus_INTERNAL extends Enum
@@ -1110,11 +1842,25 @@ declare class EnumDebuggerStatus_INTERNAL extends Enum
 	RpcError: EnumDebuggerStatus
 	Success: EnumDebuggerStatus
 	Timeout: EnumDebuggerStatus
+	function GetEnumItems(self): { EnumDebuggerStatus }
+	function FromName(self, Name: string): EnumDebuggerStatus?
+	function FromValue(self, Value: number): EnumDebuggerStatus?
+end
+declare class EnumDefaultScriptSyncFileType extends EnumItem end
+declare class EnumDefaultScriptSyncFileType_INTERNAL extends Enum
+	Lua: EnumDefaultScriptSyncFileType
+	Luau: EnumDefaultScriptSyncFileType
+	function GetEnumItems(self): { EnumDefaultScriptSyncFileType }
+	function FromName(self, Name: string): EnumDefaultScriptSyncFileType?
+	function FromValue(self, Value: number): EnumDefaultScriptSyncFileType?
 end
 declare class EnumDevCameraOcclusionMode extends EnumItem end
 declare class EnumDevCameraOcclusionMode_INTERNAL extends Enum
 	Invisicam: EnumDevCameraOcclusionMode
 	Zoom: EnumDevCameraOcclusionMode
+	function GetEnumItems(self): { EnumDevCameraOcclusionMode }
+	function FromName(self, Name: string): EnumDevCameraOcclusionMode?
+	function FromValue(self, Value: number): EnumDevCameraOcclusionMode?
 end
 declare class EnumDevComputerCameraMovementMode extends EnumItem end
 declare class EnumDevComputerCameraMovementMode_INTERNAL extends Enum
@@ -1123,6 +1869,9 @@ declare class EnumDevComputerCameraMovementMode_INTERNAL extends Enum
 	Follow: EnumDevComputerCameraMovementMode
 	Orbital: EnumDevComputerCameraMovementMode
 	UserChoice: EnumDevComputerCameraMovementMode
+	function GetEnumItems(self): { EnumDevComputerCameraMovementMode }
+	function FromName(self, Name: string): EnumDevComputerCameraMovementMode?
+	function FromValue(self, Value: number): EnumDevComputerCameraMovementMode?
 end
 declare class EnumDevComputerMovementMode extends EnumItem end
 declare class EnumDevComputerMovementMode_INTERNAL extends Enum
@@ -1130,6 +1879,9 @@ declare class EnumDevComputerMovementMode_INTERNAL extends Enum
 	KeyboardMouse: EnumDevComputerMovementMode
 	Scriptable: EnumDevComputerMovementMode
 	UserChoice: EnumDevComputerMovementMode
+	function GetEnumItems(self): { EnumDevComputerMovementMode }
+	function FromName(self, Name: string): EnumDevComputerMovementMode?
+	function FromValue(self, Value: number): EnumDevComputerMovementMode?
 end
 declare class EnumDevTouchCameraMovementMode extends EnumItem end
 declare class EnumDevTouchCameraMovementMode_INTERNAL extends Enum
@@ -1137,6 +1889,9 @@ declare class EnumDevTouchCameraMovementMode_INTERNAL extends Enum
 	Follow: EnumDevTouchCameraMovementMode
 	Orbital: EnumDevTouchCameraMovementMode
 	UserChoice: EnumDevTouchCameraMovementMode
+	function GetEnumItems(self): { EnumDevTouchCameraMovementMode }
+	function FromName(self, Name: string): EnumDevTouchCameraMovementMode?
+	function FromValue(self, Value: number): EnumDevTouchCameraMovementMode?
 end
 declare class EnumDevTouchMovementMode extends EnumItem end
 declare class EnumDevTouchMovementMode_INTERNAL extends Enum
@@ -1147,14 +1902,19 @@ declare class EnumDevTouchMovementMode_INTERNAL extends Enum
 	Thumbpad: EnumDevTouchMovementMode
 	Thumbstick: EnumDevTouchMovementMode
 	UserChoice: EnumDevTouchMovementMode
+	function GetEnumItems(self): { EnumDevTouchMovementMode }
+	function FromName(self, Name: string): EnumDevTouchMovementMode?
+	function FromValue(self, Value: number): EnumDevTouchMovementMode?
 end
 declare class EnumDeveloperMemoryTag extends EnumItem end
 declare class EnumDeveloperMemoryTag_INTERNAL extends Enum
 	Animation: EnumDeveloperMemoryTag
+	BaseParts: EnumDeveloperMemoryTag
 	GeometryCSG: EnumDeveloperMemoryTag
 	GraphicsMeshParts: EnumDeveloperMemoryTag
 	GraphicsParticles: EnumDeveloperMemoryTag
 	GraphicsParts: EnumDeveloperMemoryTag
+	GraphicsSlimModels: EnumDeveloperMemoryTag
 	GraphicsSolidModels: EnumDeveloperMemoryTag
 	GraphicsSpatialHash: EnumDeveloperMemoryTag
 	GraphicsTerrain: EnumDeveloperMemoryTag
@@ -1167,16 +1927,22 @@ declare class EnumDeveloperMemoryTag_INTERNAL extends Enum
 	LuaHeap: EnumDeveloperMemoryTag
 	Navigation: EnumDeveloperMemoryTag
 	PhysicsCollision: EnumDeveloperMemoryTag
-	PhysicsParts: EnumDeveloperMemoryTag
 	Script: EnumDeveloperMemoryTag
 	Signals: EnumDeveloperMemoryTag
 	Sounds: EnumDeveloperMemoryTag
 	StreamingSounds: EnumDeveloperMemoryTag
 	TerrainVoxels: EnumDeveloperMemoryTag
+	function GetEnumItems(self): { EnumDeveloperMemoryTag }
+	function FromName(self, Name: string): EnumDeveloperMemoryTag?
+	function FromValue(self, Value: number): EnumDeveloperMemoryTag?
 end
 declare class EnumDeviceFeatureType extends EnumItem end
 declare class EnumDeviceFeatureType_INTERNAL extends Enum
 	DeviceCapture: EnumDeviceFeatureType
+	InExperienceFAE: EnumDeviceFeatureType
+	function GetEnumItems(self): { EnumDeviceFeatureType }
+	function FromName(self, Name: string): EnumDeviceFeatureType?
+	function FromValue(self, Value: number): EnumDeviceFeatureType?
 end
 declare class EnumDeviceForm extends EnumItem end
 declare class EnumDeviceForm_INTERNAL extends Enum
@@ -1185,12 +1951,18 @@ declare class EnumDeviceForm_INTERNAL extends Enum
 	Phone: EnumDeviceForm
 	Tablet: EnumDeviceForm
 	VR: EnumDeviceForm
+	function GetEnumItems(self): { EnumDeviceForm }
+	function FromName(self, Name: string): EnumDeviceForm?
+	function FromValue(self, Value: number): EnumDeviceForm?
 end
 declare class EnumDeviceLevel extends EnumItem end
 declare class EnumDeviceLevel_INTERNAL extends Enum
 	High: EnumDeviceLevel
 	Low: EnumDeviceLevel
 	Medium: EnumDeviceLevel
+	function GetEnumItems(self): { EnumDeviceLevel }
+	function FromName(self, Name: string): EnumDeviceLevel?
+	function FromValue(self, Value: number): EnumDeviceLevel?
 end
 declare class EnumDeviceType extends EnumItem end
 declare class EnumDeviceType_INTERNAL extends Enum
@@ -1198,28 +1970,52 @@ declare class EnumDeviceType_INTERNAL extends Enum
 	Phone: EnumDeviceType
 	Tablet: EnumDeviceType
 	Unknown: EnumDeviceType
+	function GetEnumItems(self): { EnumDeviceType }
+	function FromName(self, Name: string): EnumDeviceType?
+	function FromValue(self, Value: number): EnumDeviceType?
 end
 declare class EnumDialogBehaviorType extends EnumItem end
 declare class EnumDialogBehaviorType_INTERNAL extends Enum
 	MultiplePlayers: EnumDialogBehaviorType
 	SinglePlayer: EnumDialogBehaviorType
+	function GetEnumItems(self): { EnumDialogBehaviorType }
+	function FromName(self, Name: string): EnumDialogBehaviorType?
+	function FromValue(self, Value: number): EnumDialogBehaviorType?
 end
 declare class EnumDialogPurpose extends EnumItem end
 declare class EnumDialogPurpose_INTERNAL extends Enum
 	Help: EnumDialogPurpose
 	Quest: EnumDialogPurpose
 	Shop: EnumDialogPurpose
+	function GetEnumItems(self): { EnumDialogPurpose }
+	function FromName(self, Name: string): EnumDialogPurpose?
+	function FromValue(self, Value: number): EnumDialogPurpose?
 end
 declare class EnumDialogTone extends EnumItem end
 declare class EnumDialogTone_INTERNAL extends Enum
 	Enemy: EnumDialogTone
 	Friendly: EnumDialogTone
 	Neutral: EnumDialogTone
+	function GetEnumItems(self): { EnumDialogTone }
+	function FromName(self, Name: string): EnumDialogTone?
+	function FromValue(self, Value: number): EnumDialogTone?
+end
+declare class EnumDisplaySize extends EnumItem end
+declare class EnumDisplaySize_INTERNAL extends Enum
+	Large: EnumDisplaySize
+	Medium: EnumDisplaySize
+	Small: EnumDisplaySize
+	function GetEnumItems(self): { EnumDisplaySize }
+	function FromName(self, Name: string): EnumDisplaySize?
+	function FromValue(self, Value: number): EnumDisplaySize?
 end
 declare class EnumDominantAxis extends EnumItem end
 declare class EnumDominantAxis_INTERNAL extends Enum
 	Height: EnumDominantAxis
 	Width: EnumDominantAxis
+	function GetEnumItems(self): { EnumDominantAxis }
+	function FromName(self, Name: string): EnumDominantAxis?
+	function FromValue(self, Value: number): EnumDominantAxis?
 end
 declare class EnumDraftStatusCode extends EnumItem end
 declare class EnumDraftStatusCode_INTERNAL extends Enum
@@ -1227,6 +2023,9 @@ declare class EnumDraftStatusCode_INTERNAL extends Enum
 	DraftOutdated: EnumDraftStatusCode
 	OK: EnumDraftStatusCode
 	ScriptRemoved: EnumDraftStatusCode
+	function GetEnumItems(self): { EnumDraftStatusCode }
+	function FromName(self, Name: string): EnumDraftStatusCode?
+	function FromValue(self, Value: number): EnumDraftStatusCode?
 end
 declare class EnumDragDetectorDragStyle extends EnumItem end
 declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
@@ -1239,40 +2038,61 @@ declare class EnumDragDetectorDragStyle_INTERNAL extends Enum
 	TranslatePlane: EnumDragDetectorDragStyle
 	TranslatePlaneOrLine: EnumDragDetectorDragStyle
 	TranslateViewPlane: EnumDragDetectorDragStyle
+	function GetEnumItems(self): { EnumDragDetectorDragStyle }
+	function FromName(self, Name: string): EnumDragDetectorDragStyle?
+	function FromValue(self, Value: number): EnumDragDetectorDragStyle?
 end
 declare class EnumDragDetectorPermissionPolicy extends EnumItem end
 declare class EnumDragDetectorPermissionPolicy_INTERNAL extends Enum
 	Everybody: EnumDragDetectorPermissionPolicy
 	Nobody: EnumDragDetectorPermissionPolicy
 	Scriptable: EnumDragDetectorPermissionPolicy
+	function GetEnumItems(self): { EnumDragDetectorPermissionPolicy }
+	function FromName(self, Name: string): EnumDragDetectorPermissionPolicy?
+	function FromValue(self, Value: number): EnumDragDetectorPermissionPolicy?
 end
 declare class EnumDragDetectorResponseStyle extends EnumItem end
 declare class EnumDragDetectorResponseStyle_INTERNAL extends Enum
 	Custom: EnumDragDetectorResponseStyle
 	Geometric: EnumDragDetectorResponseStyle
 	Physical: EnumDragDetectorResponseStyle
+	function GetEnumItems(self): { EnumDragDetectorResponseStyle }
+	function FromName(self, Name: string): EnumDragDetectorResponseStyle?
+	function FromValue(self, Value: number): EnumDragDetectorResponseStyle?
 end
 declare class EnumDraggerCoordinateSpace extends EnumItem end
 declare class EnumDraggerCoordinateSpace_INTERNAL extends Enum
 	Object: EnumDraggerCoordinateSpace
 	World: EnumDraggerCoordinateSpace
+	function GetEnumItems(self): { EnumDraggerCoordinateSpace }
+	function FromName(self, Name: string): EnumDraggerCoordinateSpace?
+	function FromValue(self, Value: number): EnumDraggerCoordinateSpace?
 end
 declare class EnumDraggerMovementMode extends EnumItem end
 declare class EnumDraggerMovementMode_INTERNAL extends Enum
 	Geometric: EnumDraggerMovementMode
 	Physical: EnumDraggerMovementMode
+	function GetEnumItems(self): { EnumDraggerMovementMode }
+	function FromName(self, Name: string): EnumDraggerMovementMode?
+	function FromValue(self, Value: number): EnumDraggerMovementMode?
 end
 declare class EnumDraggingScrollBar extends EnumItem end
 declare class EnumDraggingScrollBar_INTERNAL extends Enum
 	Horizontal: EnumDraggingScrollBar
 	None: EnumDraggingScrollBar
 	Vertical: EnumDraggingScrollBar
+	function GetEnumItems(self): { EnumDraggingScrollBar }
+	function FromName(self, Name: string): EnumDraggingScrollBar?
+	function FromValue(self, Value: number): EnumDraggingScrollBar?
 end
 declare class EnumEasingDirection extends EnumItem end
 declare class EnumEasingDirection_INTERNAL extends Enum
 	In: EnumEasingDirection
 	InOut: EnumEasingDirection
 	Out: EnumEasingDirection
+	function GetEnumItems(self): { EnumEasingDirection }
+	function FromName(self, Name: string): EnumEasingDirection?
+	function FromValue(self, Value: number): EnumEasingDirection?
 end
 declare class EnumEasingStyle extends EnumItem end
 declare class EnumEasingStyle_INTERNAL extends Enum
@@ -1287,18 +2107,27 @@ declare class EnumEasingStyle_INTERNAL extends Enum
 	Quart: EnumEasingStyle
 	Quint: EnumEasingStyle
 	Sine: EnumEasingStyle
+	function GetEnumItems(self): { EnumEasingStyle }
+	function FromName(self, Name: string): EnumEasingStyle?
+	function FromValue(self, Value: number): EnumEasingStyle?
 end
 declare class EnumEditableStatus extends EnumItem end
 declare class EnumEditableStatus_INTERNAL extends Enum
 	Allowed: EnumEditableStatus
 	Disallowed: EnumEditableStatus
 	Unknown: EnumEditableStatus
+	function GetEnumItems(self): { EnumEditableStatus }
+	function FromName(self, Name: string): EnumEditableStatus?
+	function FromValue(self, Value: number): EnumEditableStatus?
 end
 declare class EnumElasticBehavior extends EnumItem end
 declare class EnumElasticBehavior_INTERNAL extends Enum
 	Always: EnumElasticBehavior
 	Never: EnumElasticBehavior
 	WhenScrollable: EnumElasticBehavior
+	function GetEnumItems(self): { EnumElasticBehavior }
+	function FromName(self, Name: string): EnumElasticBehavior?
+	function FromValue(self, Value: number): EnumElasticBehavior?
 end
 declare class EnumEnviromentalPhysicsThrottle extends EnumItem end
 declare class EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum
@@ -1309,22 +2138,89 @@ declare class EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum
 	Skip2: EnumEnviromentalPhysicsThrottle
 	Skip4: EnumEnviromentalPhysicsThrottle
 	Skip8: EnumEnviromentalPhysicsThrottle
+	function GetEnumItems(self): { EnumEnviromentalPhysicsThrottle }
+	function FromName(self, Name: string): EnumEnviromentalPhysicsThrottle?
+	function FromValue(self, Value: number): EnumEnviromentalPhysicsThrottle?
 end
 declare class EnumExperienceAuthScope extends EnumItem end
 declare class EnumExperienceAuthScope_INTERNAL extends Enum
 	CreatorAssetsCreate: EnumExperienceAuthScope
 	DefaultScope: EnumExperienceAuthScope
+	function GetEnumItems(self): { EnumExperienceAuthScope }
+	function FromName(self, Name: string): EnumExperienceAuthScope?
+	function FromValue(self, Value: number): EnumExperienceAuthScope?
+end
+declare class EnumExperienceEventStatus extends EnumItem end
+declare class EnumExperienceEventStatus_INTERNAL extends Enum
+	Active: EnumExperienceEventStatus
+	Cancelled: EnumExperienceEventStatus
+	Moderated: EnumExperienceEventStatus
+	Unknown: EnumExperienceEventStatus
+	Unpublished: EnumExperienceEventStatus
+	function GetEnumItems(self): { EnumExperienceEventStatus }
+	function FromName(self, Name: string): EnumExperienceEventStatus?
+	function FromValue(self, Value: number): EnumExperienceEventStatus?
+end
+declare class EnumExperienceStateCaptureSelectionMode extends EnumItem end
+declare class EnumExperienceStateCaptureSelectionMode_INTERNAL extends Enum
+	Default: EnumExperienceStateCaptureSelectionMode
+	SafetyHighlightMode: EnumExperienceStateCaptureSelectionMode
+	function GetEnumItems(self): { EnumExperienceStateCaptureSelectionMode }
+	function FromName(self, Name: string): EnumExperienceStateCaptureSelectionMode?
+	function FromValue(self, Value: number): EnumExperienceStateCaptureSelectionMode?
+end
+declare class EnumExperienceStateRecordingLoadMode extends EnumItem end
+declare class EnumExperienceStateRecordingLoadMode_INTERNAL extends Enum
+	ContiguousSlice: EnumExperienceStateRecordingLoadMode
+	NewReplay: EnumExperienceStateRecordingLoadMode
+	NoncontiguousSlice: EnumExperienceStateRecordingLoadMode
+	function GetEnumItems(self): { EnumExperienceStateRecordingLoadMode }
+	function FromName(self, Name: string): EnumExperienceStateRecordingLoadMode?
+	function FromValue(self, Value: number): EnumExperienceStateRecordingLoadMode?
+end
+declare class EnumExperienceStateRecordingLoadSourceType extends EnumItem end
+declare class EnumExperienceStateRecordingLoadSourceType_INTERNAL extends Enum
+	File: EnumExperienceStateRecordingLoadSourceType
+	S3Url: EnumExperienceStateRecordingLoadSourceType
+	function GetEnumItems(self): { EnumExperienceStateRecordingLoadSourceType }
+	function FromName(self, Name: string): EnumExperienceStateRecordingLoadSourceType?
+	function FromValue(self, Value: number): EnumExperienceStateRecordingLoadSourceType?
+end
+declare class EnumExperienceStateRecordingPlaybackMode extends EnumItem end
+declare class EnumExperienceStateRecordingPlaybackMode_INTERNAL extends Enum
+	Playing: EnumExperienceStateRecordingPlaybackMode
+	Rewinding: EnumExperienceStateRecordingPlaybackMode
+	Stopped: EnumExperienceStateRecordingPlaybackMode
+	Undefined: EnumExperienceStateRecordingPlaybackMode
+	function GetEnumItems(self): { EnumExperienceStateRecordingPlaybackMode }
+	function FromName(self, Name: string): EnumExperienceStateRecordingPlaybackMode?
+	function FromValue(self, Value: number): EnumExperienceStateRecordingPlaybackMode?
 end
 declare class EnumExplosionType extends EnumItem end
 declare class EnumExplosionType_INTERNAL extends Enum
 	Craters: EnumExplosionType
 	NoCraters: EnumExplosionType
+	function GetEnumItems(self): { EnumExplosionType }
+	function FromName(self, Name: string): EnumExplosionType?
+	function FromValue(self, Value: number): EnumExplosionType?
 end
 declare class EnumFACSDataLod extends EnumItem end
 declare class EnumFACSDataLod_INTERNAL extends Enum
 	LOD0: EnumFACSDataLod
 	LOD1: EnumFACSDataLod
 	LODCount: EnumFACSDataLod
+	function GetEnumItems(self): { EnumFACSDataLod }
+	function FromName(self, Name: string): EnumFACSDataLod?
+	function FromValue(self, Value: number): EnumFACSDataLod?
+end
+declare class EnumFacialAgeEstimationResultType extends EnumItem end
+declare class EnumFacialAgeEstimationResultType_INTERNAL extends Enum
+	Cancel: EnumFacialAgeEstimationResultType
+	Complete: EnumFacialAgeEstimationResultType
+	Error: EnumFacialAgeEstimationResultType
+	function GetEnumItems(self): { EnumFacialAgeEstimationResultType }
+	function FromName(self, Name: string): EnumFacialAgeEstimationResultType?
+	function FromValue(self, Value: number): EnumFacialAgeEstimationResultType?
 end
 declare class EnumFacialAnimationStreamingState extends EnumItem end
 declare class EnumFacialAnimationStreamingState_INTERNAL extends Enum
@@ -1333,17 +2229,90 @@ declare class EnumFacialAnimationStreamingState_INTERNAL extends Enum
 	Place: EnumFacialAnimationStreamingState
 	Server: EnumFacialAnimationStreamingState
 	Video: EnumFacialAnimationStreamingState
+	function GetEnumItems(self): { EnumFacialAnimationStreamingState }
+	function FromName(self, Name: string): EnumFacialAnimationStreamingState?
+	function FromValue(self, Value: number): EnumFacialAnimationStreamingState?
+end
+declare class EnumFacsActionUnit extends EnumItem end
+declare class EnumFacsActionUnit_INTERNAL extends Enum
+	ChinRaiser: EnumFacsActionUnit
+	ChinRaiserUpperLip: EnumFacsActionUnit
+	Corrugator: EnumFacsActionUnit
+	EyesLookDown: EnumFacsActionUnit
+	EyesLookLeft: EnumFacsActionUnit
+	EyesLookRight: EnumFacsActionUnit
+	EyesLookUp: EnumFacsActionUnit
+	FlatPucker: EnumFacsActionUnit
+	Funneler: EnumFacsActionUnit
+	JawDrop: EnumFacsActionUnit
+	JawLeft: EnumFacsActionUnit
+	JawRight: EnumFacsActionUnit
+	LeftBrowLowerer: EnumFacsActionUnit
+	LeftCheekPuff: EnumFacsActionUnit
+	LeftCheekRaiser: EnumFacsActionUnit
+	LeftDimpler: EnumFacsActionUnit
+	LeftEyeClosed: EnumFacsActionUnit
+	LeftEyeUpperLidRaiser: EnumFacsActionUnit
+	LeftInnerBrowRaiser: EnumFacsActionUnit
+	LeftLipCornerDown: EnumFacsActionUnit
+	LeftLipCornerPuller: EnumFacsActionUnit
+	LeftLipStretcher: EnumFacsActionUnit
+	LeftLowerLipDepressor: EnumFacsActionUnit
+	LeftNoseWrinkler: EnumFacsActionUnit
+	LeftOuterBrowRaiser: EnumFacsActionUnit
+	LeftUpperLipRaiser: EnumFacsActionUnit
+	LipPresser: EnumFacsActionUnit
+	LipsTogether: EnumFacsActionUnit
+	LowerLipSuck: EnumFacsActionUnit
+	MouthLeft: EnumFacsActionUnit
+	MouthRight: EnumFacsActionUnit
+	Pucker: EnumFacsActionUnit
+	RightBrowLowerer: EnumFacsActionUnit
+	RightCheekPuff: EnumFacsActionUnit
+	RightCheekRaiser: EnumFacsActionUnit
+	RightDimpler: EnumFacsActionUnit
+	RightEyeClosed: EnumFacsActionUnit
+	RightEyeUpperLidRaiser: EnumFacsActionUnit
+	RightInnerBrowRaiser: EnumFacsActionUnit
+	RightLipCornerDown: EnumFacsActionUnit
+	RightLipCornerPuller: EnumFacsActionUnit
+	RightLipStretcher: EnumFacsActionUnit
+	RightLowerLipDepressor: EnumFacsActionUnit
+	RightNoseWrinkler: EnumFacsActionUnit
+	RightOuterBrowRaiser: EnumFacsActionUnit
+	RightUpperLipRaiser: EnumFacsActionUnit
+	TongueDown: EnumFacsActionUnit
+	TongueOut: EnumFacsActionUnit
+	TongueUp: EnumFacsActionUnit
+	UpperLipSuck: EnumFacsActionUnit
+	function GetEnumItems(self): { EnumFacsActionUnit }
+	function FromName(self, Name: string): EnumFacsActionUnit?
+	function FromValue(self, Value: number): EnumFacsActionUnit?
+end
+declare class EnumFeatureRestrictionAbuseVector extends EnumItem end
+declare class EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum
+	Communication: EnumFeatureRestrictionAbuseVector
+	ExperienceChat: EnumFeatureRestrictionAbuseVector
+	function GetEnumItems(self): { EnumFeatureRestrictionAbuseVector }
+	function FromName(self, Name: string): EnumFeatureRestrictionAbuseVector?
+	function FromValue(self, Value: number): EnumFeatureRestrictionAbuseVector?
 end
 declare class EnumFieldOfViewMode extends EnumItem end
 declare class EnumFieldOfViewMode_INTERNAL extends Enum
 	Diagonal: EnumFieldOfViewMode
 	MaxAxis: EnumFieldOfViewMode
 	Vertical: EnumFieldOfViewMode
+	function GetEnumItems(self): { EnumFieldOfViewMode }
+	function FromName(self, Name: string): EnumFieldOfViewMode?
+	function FromValue(self, Value: number): EnumFieldOfViewMode?
 end
 declare class EnumFillDirection extends EnumItem end
 declare class EnumFillDirection_INTERNAL extends Enum
 	Horizontal: EnumFillDirection
 	Vertical: EnumFillDirection
+	function GetEnumItems(self): { EnumFillDirection }
+	function FromName(self, Name: string): EnumFillDirection?
+	function FromValue(self, Value: number): EnumFillDirection?
 end
 declare class EnumFilterErrorType extends EnumItem end
 declare class EnumFilterErrorType_INTERNAL extends Enum
@@ -1366,28 +2335,51 @@ declare class EnumFilterErrorType_INTERNAL extends Enum
 	UnfinishedQuote: EnumFilterErrorType
 	UnknownBespokeFilter: EnumFilterErrorType
 	WildcardInProperty: EnumFilterErrorType
+	function GetEnumItems(self): { EnumFilterErrorType }
+	function FromName(self, Name: string): EnumFilterErrorType?
+	function FromValue(self, Value: number): EnumFilterErrorType?
 end
 declare class EnumFilterResult extends EnumItem end
 declare class EnumFilterResult_INTERNAL extends Enum
 	Accepted: EnumFilterResult
 	Rejected: EnumFilterResult
+	function GetEnumItems(self): { EnumFilterResult }
+	function FromName(self, Name: string): EnumFilterResult?
+	function FromValue(self, Value: number): EnumFilterResult?
+end
+declare class EnumFilterType extends EnumItem end
+declare class EnumFilterType_INTERNAL extends Enum
+	Exclude: EnumFilterType
+	Include: EnumFilterType
+	function GetEnumItems(self): { EnumFilterType }
+	function FromName(self, Name: string): EnumFilterType?
+	function FromValue(self, Value: number): EnumFilterType?
 end
 declare class EnumFinishRecordingOperation extends EnumItem end
 declare class EnumFinishRecordingOperation_INTERNAL extends Enum
 	Append: EnumFinishRecordingOperation
 	Cancel: EnumFinishRecordingOperation
 	Commit: EnumFinishRecordingOperation
+	function GetEnumItems(self): { EnumFinishRecordingOperation }
+	function FromName(self, Name: string): EnumFinishRecordingOperation?
+	function FromValue(self, Value: number): EnumFinishRecordingOperation?
 end
 declare class EnumFluidFidelity extends EnumItem end
 declare class EnumFluidFidelity_INTERNAL extends Enum
 	Automatic: EnumFluidFidelity
 	UseCollisionGeometry: EnumFluidFidelity
 	UsePreciseGeometry: EnumFluidFidelity
+	function GetEnumItems(self): { EnumFluidFidelity }
+	function FromName(self, Name: string): EnumFluidFidelity?
+	function FromValue(self, Value: number): EnumFluidFidelity?
 end
 declare class EnumFluidForces extends EnumItem end
 declare class EnumFluidForces_INTERNAL extends Enum
 	Default: EnumFluidForces
 	Experimental: EnumFluidForces
+	function GetEnumItems(self): { EnumFluidForces }
+	function FromName(self, Name: string): EnumFluidForces?
+	function FromValue(self, Value: number): EnumFluidForces?
 end
 declare class EnumFont extends EnumItem end
 declare class EnumFont_INTERNAL extends Enum
@@ -1444,6 +2436,9 @@ declare class EnumFont_INTERNAL extends Enum
 	TitilliumWeb: EnumFont
 	Ubuntu: EnumFont
 	Unknown: EnumFont
+	function GetEnumItems(self): { EnumFont }
+	function FromName(self, Name: string): EnumFont?
+	function FromValue(self, Value: number): EnumFont?
 end
 declare class EnumFontSize extends EnumItem end
 declare class EnumFontSize_INTERNAL extends Enum
@@ -1462,11 +2457,17 @@ declare class EnumFontSize_INTERNAL extends Enum
 	Size8: EnumFontSize
 	Size9: EnumFontSize
 	Size96: EnumFontSize
+	function GetEnumItems(self): { EnumFontSize }
+	function FromName(self, Name: string): EnumFontSize?
+	function FromValue(self, Value: number): EnumFontSize?
 end
 declare class EnumFontStyle extends EnumItem end
 declare class EnumFontStyle_INTERNAL extends Enum
 	Italic: EnumFontStyle
 	Normal: EnumFontStyle
+	function GetEnumItems(self): { EnumFontStyle }
+	function FromName(self, Name: string): EnumFontStyle?
+	function FromValue(self, Value: number): EnumFontStyle?
 end
 declare class EnumFontWeight extends EnumItem end
 declare class EnumFontWeight_INTERNAL extends Enum
@@ -1479,11 +2480,17 @@ declare class EnumFontWeight_INTERNAL extends Enum
 	Regular: EnumFontWeight
 	SemiBold: EnumFontWeight
 	Thin: EnumFontWeight
+	function GetEnumItems(self): { EnumFontWeight }
+	function FromName(self, Name: string): EnumFontWeight?
+	function FromValue(self, Value: number): EnumFontWeight?
 end
 declare class EnumForceLimitMode extends EnumItem end
 declare class EnumForceLimitMode_INTERNAL extends Enum
 	Magnitude: EnumForceLimitMode
 	PerAxis: EnumForceLimitMode
+	function GetEnumItems(self): { EnumForceLimitMode }
+	function FromName(self, Name: string): EnumForceLimitMode?
+	function FromValue(self, Value: number): EnumForceLimitMode?
 end
 declare class EnumFormFactor extends EnumItem end
 declare class EnumFormFactor_INTERNAL extends Enum
@@ -1491,6 +2498,9 @@ declare class EnumFormFactor_INTERNAL extends Enum
 	Custom: EnumFormFactor
 	Plate: EnumFormFactor
 	Symmetric: EnumFormFactor
+	function GetEnumItems(self): { EnumFormFactor }
+	function FromName(self, Name: string): EnumFormFactor?
+	function FromValue(self, Value: number): EnumFormFactor?
 end
 declare class EnumFrameStyle extends EnumItem end
 declare class EnumFrameStyle_INTERNAL extends Enum
@@ -1501,12 +2511,18 @@ declare class EnumFrameStyle_INTERNAL extends Enum
 	DropShadow: EnumFrameStyle
 	RobloxRound: EnumFrameStyle
 	RobloxSquare: EnumFrameStyle
+	function GetEnumItems(self): { EnumFrameStyle }
+	function FromName(self, Name: string): EnumFrameStyle?
+	function FromValue(self, Value: number): EnumFrameStyle?
 end
 declare class EnumFramerateManagerMode extends EnumItem end
 declare class EnumFramerateManagerMode_INTERNAL extends Enum
 	Automatic: EnumFramerateManagerMode
 	Off: EnumFramerateManagerMode
 	On: EnumFramerateManagerMode
+	function GetEnumItems(self): { EnumFramerateManagerMode }
+	function FromName(self, Name: string): EnumFramerateManagerMode?
+	function FromValue(self, Value: number): EnumFramerateManagerMode?
 end
 declare class EnumFriendRequestEvent extends EnumItem end
 declare class EnumFriendRequestEvent_INTERNAL extends Enum
@@ -1514,6 +2530,9 @@ declare class EnumFriendRequestEvent_INTERNAL extends Enum
 	Deny: EnumFriendRequestEvent
 	Issue: EnumFriendRequestEvent
 	Revoke: EnumFriendRequestEvent
+	function GetEnumItems(self): { EnumFriendRequestEvent }
+	function FromName(self, Name: string): EnumFriendRequestEvent?
+	function FromValue(self, Value: number): EnumFriendRequestEvent?
 end
 declare class EnumFriendStatus extends EnumItem end
 declare class EnumFriendStatus_INTERNAL extends Enum
@@ -1522,18 +2541,27 @@ declare class EnumFriendStatus_INTERNAL extends Enum
 	FriendRequestSent: EnumFriendStatus
 	NotFriend: EnumFriendStatus
 	Unknown: EnumFriendStatus
+	function GetEnumItems(self): { EnumFriendStatus }
+	function FromName(self, Name: string): EnumFriendStatus?
+	function FromValue(self, Value: number): EnumFriendStatus?
 end
 declare class EnumFunctionalTestResult extends EnumItem end
 declare class EnumFunctionalTestResult_INTERNAL extends Enum
 	Error: EnumFunctionalTestResult
 	Passed: EnumFunctionalTestResult
 	Warning: EnumFunctionalTestResult
+	function GetEnumItems(self): { EnumFunctionalTestResult }
+	function FromName(self, Name: string): EnumFunctionalTestResult?
+	function FromValue(self, Value: number): EnumFunctionalTestResult?
 end
 declare class EnumGameAvatarType extends EnumItem end
 declare class EnumGameAvatarType_INTERNAL extends Enum
 	PlayerChoice: EnumGameAvatarType
 	R15: EnumGameAvatarType
 	R6: EnumGameAvatarType
+	function GetEnumItems(self): { EnumGameAvatarType }
+	function FromName(self, Name: string): EnumGameAvatarType?
+	function FromValue(self, Value: number): EnumGameAvatarType?
 end
 declare class EnumGamepadType extends EnumItem end
 declare class EnumGamepadType_INTERNAL extends Enum
@@ -1541,11 +2569,17 @@ declare class EnumGamepadType_INTERNAL extends Enum
 	PS5: EnumGamepadType
 	Unknown: EnumGamepadType
 	XboxOne: EnumGamepadType
+	function GetEnumItems(self): { EnumGamepadType }
+	function FromName(self, Name: string): EnumGamepadType?
+	function FromValue(self, Value: number): EnumGamepadType?
 end
 declare class EnumGearGenreSetting extends EnumItem end
 declare class EnumGearGenreSetting_INTERNAL extends Enum
 	AllGenres: EnumGearGenreSetting
 	MatchingGenreOnly: EnumGearGenreSetting
+	function GetEnumItems(self): { EnumGearGenreSetting }
+	function FromName(self, Name: string): EnumGearGenreSetting?
+	function FromValue(self, Value: number): EnumGearGenreSetting?
 end
 declare class EnumGearType extends EnumItem end
 declare class EnumGearType_INTERNAL extends Enum
@@ -1558,6 +2592,9 @@ declare class EnumGearType_INTERNAL extends Enum
 	RangedWeapons: EnumGearType
 	SocialItems: EnumGearType
 	Transport: EnumGearType
+	function GetEnumItems(self): { EnumGearType }
+	function FromName(self, Name: string): EnumGearType?
+	function FromValue(self, Value: number): EnumGearType?
 end
 declare class EnumGenre extends EnumItem end
 declare class EnumGenre_INTERNAL extends Enum
@@ -1575,6 +2612,9 @@ declare class EnumGenre_INTERNAL extends Enum
 	Tutorial: EnumGenre
 	War: EnumGenre
 	WildWest: EnumGenre
+	function GetEnumItems(self): { EnumGenre }
+	function FromName(self, Name: string): EnumGenre?
+	function FromValue(self, Value: number): EnumGenre?
 end
 declare class EnumGraphicsMode extends EnumItem end
 declare class EnumGraphicsMode_INTERNAL extends Enum
@@ -1584,12 +2624,28 @@ declare class EnumGraphicsMode_INTERNAL extends Enum
 	NoGraphics: EnumGraphicsMode
 	OpenGL: EnumGraphicsMode
 	Vulkan: EnumGraphicsMode
+	function GetEnumItems(self): { EnumGraphicsMode }
+	function FromName(self, Name: string): EnumGraphicsMode?
+	function FromValue(self, Value: number): EnumGraphicsMode?
 end
 declare class EnumGraphicsOptimizationMode extends EnumItem end
 declare class EnumGraphicsOptimizationMode_INTERNAL extends Enum
 	Balanced: EnumGraphicsOptimizationMode
 	Performance: EnumGraphicsOptimizationMode
 	Quality: EnumGraphicsOptimizationMode
+	function GetEnumItems(self): { EnumGraphicsOptimizationMode }
+	function FromName(self, Name: string): EnumGraphicsOptimizationMode?
+	function FromValue(self, Value: number): EnumGraphicsOptimizationMode?
+end
+declare class EnumGroupMembershipStatus extends EnumItem end
+declare class EnumGroupMembershipStatus_INTERNAL extends Enum
+	AlreadyMember: EnumGroupMembershipStatus
+	JoinRequestPending: EnumGroupMembershipStatus
+	Joined: EnumGroupMembershipStatus
+	None: EnumGroupMembershipStatus
+	function GetEnumItems(self): { EnumGroupMembershipStatus }
+	function FromName(self, Name: string): EnumGroupMembershipStatus?
+	function FromValue(self, Value: number): EnumGroupMembershipStatus?
 end
 declare class EnumGuiState extends EnumItem end
 declare class EnumGuiState_INTERNAL extends Enum
@@ -1597,6 +2653,9 @@ declare class EnumGuiState_INTERNAL extends Enum
 	Idle: EnumGuiState
 	NonInteractable: EnumGuiState
 	Press: EnumGuiState
+	function GetEnumItems(self): { EnumGuiState }
+	function FromName(self, Name: string): EnumGuiState?
+	function FromValue(self, Value: number): EnumGuiState?
 end
 declare class EnumGuiType extends EnumItem end
 declare class EnumGuiType_INTERNAL extends Enum
@@ -1605,30 +2664,66 @@ declare class EnumGuiType_INTERNAL extends Enum
 	Custom: EnumGuiType
 	CustomBillboards: EnumGuiType
 	PlayerNameplates: EnumGuiType
+	function GetEnumItems(self): { EnumGuiType }
+	function FromName(self, Name: string): EnumGuiType?
+	function FromValue(self, Value: number): EnumGuiType?
+end
+declare class EnumHandRigDescriptionSide extends EnumItem end
+declare class EnumHandRigDescriptionSide_INTERNAL extends Enum
+	Left: EnumHandRigDescriptionSide
+	None: EnumHandRigDescriptionSide
+	Right: EnumHandRigDescriptionSide
+	function GetEnumItems(self): { EnumHandRigDescriptionSide }
+	function FromName(self, Name: string): EnumHandRigDescriptionSide?
+	function FromValue(self, Value: number): EnumHandRigDescriptionSide?
 end
 declare class EnumHandlesStyle extends EnumItem end
 declare class EnumHandlesStyle_INTERNAL extends Enum
 	Movement: EnumHandlesStyle
 	Resize: EnumHandlesStyle
+	function GetEnumItems(self): { EnumHandlesStyle }
+	function FromName(self, Name: string): EnumHandlesStyle?
+	function FromValue(self, Value: number): EnumHandlesStyle?
 end
 declare class EnumHapticEffectType extends EnumItem end
 declare class EnumHapticEffectType_INTERNAL extends Enum
+	Custom: EnumHapticEffectType
 	GameplayCollision: EnumHapticEffectType
 	GameplayExplosion: EnumHapticEffectType
 	UIClick: EnumHapticEffectType
 	UIHover: EnumHapticEffectType
 	UINotification: EnumHapticEffectType
+	function GetEnumItems(self): { EnumHapticEffectType }
+	function FromName(self, Name: string): EnumHapticEffectType?
+	function FromValue(self, Value: number): EnumHapticEffectType?
+end
+declare class EnumHashAlgorithm extends EnumItem end
+declare class EnumHashAlgorithm_INTERNAL extends Enum
+	Blake2b: EnumHashAlgorithm
+	Blake3: EnumHashAlgorithm
+	Md5: EnumHashAlgorithm
+	Sha1: EnumHashAlgorithm
+	Sha256: EnumHashAlgorithm
+	function GetEnumItems(self): { EnumHashAlgorithm }
+	function FromName(self, Name: string): EnumHashAlgorithm?
+	function FromValue(self, Value: number): EnumHashAlgorithm?
 end
 declare class EnumHighlightDepthMode extends EnumItem end
 declare class EnumHighlightDepthMode_INTERNAL extends Enum
 	AlwaysOnTop: EnumHighlightDepthMode
 	Occluded: EnumHighlightDepthMode
+	function GetEnumItems(self): { EnumHighlightDepthMode }
+	function FromName(self, Name: string): EnumHighlightDepthMode?
+	function FromValue(self, Value: number): EnumHighlightDepthMode?
 end
 declare class EnumHorizontalAlignment extends EnumItem end
 declare class EnumHorizontalAlignment_INTERNAL extends Enum
 	Center: EnumHorizontalAlignment
 	Left: EnumHorizontalAlignment
 	Right: EnumHorizontalAlignment
+	function GetEnumItems(self): { EnumHorizontalAlignment }
+	function FromName(self, Name: string): EnumHorizontalAlignment?
+	function FromValue(self, Value: number): EnumHorizontalAlignment?
 end
 declare class EnumHoverAnimateSpeed extends EnumItem end
 declare class EnumHoverAnimateSpeed_INTERNAL extends Enum
@@ -1637,6 +2732,9 @@ declare class EnumHoverAnimateSpeed_INTERNAL extends Enum
 	Slow: EnumHoverAnimateSpeed
 	VeryFast: EnumHoverAnimateSpeed
 	VerySlow: EnumHoverAnimateSpeed
+	function GetEnumItems(self): { EnumHoverAnimateSpeed }
+	function FromName(self, Name: string): EnumHoverAnimateSpeed?
+	function FromValue(self, Value: number): EnumHoverAnimateSpeed?
 end
 declare class EnumHttpCachePolicy extends EnumItem end
 declare class EnumHttpCachePolicy_INTERNAL extends Enum
@@ -1645,11 +2743,17 @@ declare class EnumHttpCachePolicy_INTERNAL extends Enum
 	Full: EnumHttpCachePolicy
 	InternalRedirectRefresh: EnumHttpCachePolicy
 	None: EnumHttpCachePolicy
+	function GetEnumItems(self): { EnumHttpCachePolicy }
+	function FromName(self, Name: string): EnumHttpCachePolicy?
+	function FromValue(self, Value: number): EnumHttpCachePolicy?
 end
 declare class EnumHttpCompression extends EnumItem end
 declare class EnumHttpCompression_INTERNAL extends Enum
 	Gzip: EnumHttpCompression
 	None: EnumHttpCompression
+	function GetEnumItems(self): { EnumHttpCompression }
+	function FromName(self, Name: string): EnumHttpCompression?
+	function FromValue(self, Value: number): EnumHttpCompression?
 end
 declare class EnumHttpContentType extends EnumItem end
 declare class EnumHttpContentType_INTERNAL extends Enum
@@ -1658,22 +2762,31 @@ declare class EnumHttpContentType_INTERNAL extends Enum
 	ApplicationXml: EnumHttpContentType
 	TextPlain: EnumHttpContentType
 	TextXml: EnumHttpContentType
+	function GetEnumItems(self): { EnumHttpContentType }
+	function FromName(self, Name: string): EnumHttpContentType?
+	function FromValue(self, Value: number): EnumHttpContentType?
 end
 declare class EnumHttpError extends EnumItem end
 declare class EnumHttpError_INTERNAL extends Enum
 	Aborted: EnumHttpError
 	ConnectFail: EnumHttpError
+	ConnectionClosed: EnumHttpError
+	CreatorEnvironmentsNotSupportedByService: EnumHttpError
 	DnsResolve: EnumHttpError
 	InvalidRedirect: EnumHttpError
 	InvalidUrl: EnumHttpError
 	NetFail: EnumHttpError
 	OK: EnumHttpError
 	OutOfMemory: EnumHttpError
+	ServerProtocolError: EnumHttpError
 	SslConnectFail: EnumHttpError
 	SslVerificationFail: EnumHttpError
 	TimedOut: EnumHttpError
 	TooManyRedirects: EnumHttpError
 	Unknown: EnumHttpError
+	function GetEnumItems(self): { EnumHttpError }
+	function FromName(self, Name: string): EnumHttpError?
+	function FromValue(self, Value: number): EnumHttpError?
 end
 declare class EnumHttpRequestType extends EnumItem end
 declare class EnumHttpRequestType_INTERNAL extends Enum
@@ -1684,28 +2797,43 @@ declare class EnumHttpRequestType_INTERNAL extends Enum
 	Localization: EnumHttpRequestType
 	MarketplaceService: EnumHttpRequestType
 	Players: EnumHttpRequestType
+	function GetEnumItems(self): { EnumHttpRequestType }
+	function FromName(self, Name: string): EnumHttpRequestType?
+	function FromValue(self, Value: number): EnumHttpRequestType?
 end
 declare class EnumHumanoidCollisionType extends EnumItem end
 declare class EnumHumanoidCollisionType_INTERNAL extends Enum
 	InnerBox: EnumHumanoidCollisionType
 	OuterBox: EnumHumanoidCollisionType
+	function GetEnumItems(self): { EnumHumanoidCollisionType }
+	function FromName(self, Name: string): EnumHumanoidCollisionType?
+	function FromValue(self, Value: number): EnumHumanoidCollisionType?
 end
 declare class EnumHumanoidDisplayDistanceType extends EnumItem end
 declare class EnumHumanoidDisplayDistanceType_INTERNAL extends Enum
 	None: EnumHumanoidDisplayDistanceType
 	Subject: EnumHumanoidDisplayDistanceType
 	Viewer: EnumHumanoidDisplayDistanceType
+	function GetEnumItems(self): { EnumHumanoidDisplayDistanceType }
+	function FromName(self, Name: string): EnumHumanoidDisplayDistanceType?
+	function FromValue(self, Value: number): EnumHumanoidDisplayDistanceType?
 end
 declare class EnumHumanoidHealthDisplayType extends EnumItem end
 declare class EnumHumanoidHealthDisplayType_INTERNAL extends Enum
 	AlwaysOff: EnumHumanoidHealthDisplayType
 	AlwaysOn: EnumHumanoidHealthDisplayType
 	DisplayWhenDamaged: EnumHumanoidHealthDisplayType
+	function GetEnumItems(self): { EnumHumanoidHealthDisplayType }
+	function FromName(self, Name: string): EnumHumanoidHealthDisplayType?
+	function FromValue(self, Value: number): EnumHumanoidHealthDisplayType?
 end
 declare class EnumHumanoidRigType extends EnumItem end
 declare class EnumHumanoidRigType_INTERNAL extends Enum
 	R15: EnumHumanoidRigType
 	R6: EnumHumanoidRigType
+	function GetEnumItems(self): { EnumHumanoidRigType }
+	function FromName(self, Name: string): EnumHumanoidRigType?
+	function FromValue(self, Value: number): EnumHumanoidRigType?
 end
 declare class EnumHumanoidStateType extends EnumItem end
 declare class EnumHumanoidStateType_INTERNAL extends Enum
@@ -1726,18 +2854,27 @@ declare class EnumHumanoidStateType_INTERNAL extends Enum
 	Seated: EnumHumanoidStateType
 	StrafingNoPhysics: EnumHumanoidStateType
 	Swimming: EnumHumanoidStateType
+	function GetEnumItems(self): { EnumHumanoidStateType }
+	function FromName(self, Name: string): EnumHumanoidStateType?
+	function FromValue(self, Value: number): EnumHumanoidStateType?
 end
 declare class EnumIKCollisionsMode extends EnumItem end
 declare class EnumIKCollisionsMode_INTERNAL extends Enum
 	IncludeContactedMechanisms: EnumIKCollisionsMode
 	NoCollisions: EnumIKCollisionsMode
 	OtherMechanismsAnchored: EnumIKCollisionsMode
+	function GetEnumItems(self): { EnumIKCollisionsMode }
+	function FromName(self, Name: string): EnumIKCollisionsMode?
+	function FromValue(self, Value: number): EnumIKCollisionsMode?
 end
 declare class EnumIKControlConstraintSupport extends EnumItem end
 declare class EnumIKControlConstraintSupport_INTERNAL extends Enum
 	Default: EnumIKControlConstraintSupport
 	Disabled: EnumIKControlConstraintSupport
 	Enabled: EnumIKControlConstraintSupport
+	function GetEnumItems(self): { EnumIKControlConstraintSupport }
+	function FromName(self, Name: string): EnumIKControlConstraintSupport?
+	function FromValue(self, Value: number): EnumIKControlConstraintSupport?
 end
 declare class EnumIKControlType extends EnumItem end
 declare class EnumIKControlType_INTERNAL extends Enum
@@ -1745,6 +2882,9 @@ declare class EnumIKControlType_INTERNAL extends Enum
 	Position: EnumIKControlType
 	Rotation: EnumIKControlType
 	Transform: EnumIKControlType
+	function GetEnumItems(self): { EnumIKControlType }
+	function FromName(self, Name: string): EnumIKControlType?
+	function FromValue(self, Value: number): EnumIKControlType?
 end
 declare class EnumIXPLoadingStatus extends EnumItem end
 declare class EnumIXPLoadingStatus_INTERNAL extends Enum
@@ -1755,12 +2895,18 @@ declare class EnumIXPLoadingStatus_INTERNAL extends Enum
 	Initialized: EnumIXPLoadingStatus
 	None: EnumIXPLoadingStatus
 	Pending: EnumIXPLoadingStatus
+	function GetEnumItems(self): { EnumIXPLoadingStatus }
+	function FromName(self, Name: string): EnumIXPLoadingStatus?
+	function FromValue(self, Value: number): EnumIXPLoadingStatus?
 end
 declare class EnumImageAlphaType extends EnumItem end
 declare class EnumImageAlphaType_INTERNAL extends Enum
 	Default: EnumImageAlphaType
 	LockCanvasAlpha: EnumImageAlphaType
 	LockCanvasColor: EnumImageAlphaType
+	function GetEnumItems(self): { EnumImageAlphaType }
+	function FromName(self, Name: string): EnumImageAlphaType?
+	function FromValue(self, Value: number): EnumImageAlphaType?
 end
 declare class EnumImageCombineType extends EnumItem end
 declare class EnumImageCombineType_INTERNAL extends Enum
@@ -1769,12 +2915,18 @@ declare class EnumImageCombineType_INTERNAL extends Enum
 	BlendSourceOver: EnumImageCombineType
 	Multiply: EnumImageCombineType
 	Overwrite: EnumImageCombineType
+	function GetEnumItems(self): { EnumImageCombineType }
+	function FromName(self, Name: string): EnumImageCombineType?
+	function FromValue(self, Value: number): EnumImageCombineType?
 end
 declare class EnumInOut extends EnumItem end
 declare class EnumInOut_INTERNAL extends Enum
 	Center: EnumInOut
 	Edge: EnumInOut
 	Inset: EnumInOut
+	function GetEnumItems(self): { EnumInOut }
+	function FromName(self, Name: string): EnumInOut?
+	function FromValue(self, Value: number): EnumInOut?
 end
 declare class EnumInfoType extends EnumItem end
 declare class EnumInfoType_INTERNAL extends Enum
@@ -1783,6 +2935,9 @@ declare class EnumInfoType_INTERNAL extends Enum
 	GamePass: EnumInfoType
 	Product: EnumInfoType
 	Subscription: EnumInfoType
+	function GetEnumItems(self): { EnumInfoType }
+	function FromName(self, Name: string): EnumInfoType?
+	function FromValue(self, Value: number): EnumInfoType?
 end
 declare class EnumInitialDockState extends EnumItem end
 declare class EnumInitialDockState_INTERNAL extends Enum
@@ -1791,18 +2946,45 @@ declare class EnumInitialDockState_INTERNAL extends Enum
 	Left: EnumInitialDockState
 	Right: EnumInitialDockState
 	Top: EnumInitialDockState
+	function GetEnumItems(self): { EnumInitialDockState }
+	function FromName(self, Name: string): EnumInitialDockState?
+	function FromValue(self, Value: number): EnumInitialDockState?
+end
+declare class EnumInputActionType extends EnumItem end
+declare class EnumInputActionType_INTERNAL extends Enum
+	Bool: EnumInputActionType
+	Direction1D: EnumInputActionType
+	Direction2D: EnumInputActionType
+	Direction3D: EnumInputActionType
+	ViewportPosition: EnumInputActionType
+	function GetEnumItems(self): { EnumInputActionType }
+	function FromName(self, Name: string): EnumInputActionType?
+	function FromValue(self, Value: number): EnumInputActionType?
 end
 declare class EnumInputType extends EnumItem end
 declare class EnumInputType_INTERNAL extends Enum
 	Constant: EnumInputType
 	NoInput: EnumInputType
 	Sin: EnumInputType
+	function GetEnumItems(self): { EnumInputType }
+	function FromName(self, Name: string): EnumInputType?
+	function FromValue(self, Value: number): EnumInputType?
+end
+declare class EnumIntermediateMeshGenerationResult extends EnumItem end
+declare class EnumIntermediateMeshGenerationResult_INTERNAL extends Enum
+	HighQualityMesh: EnumIntermediateMeshGenerationResult
+	function GetEnumItems(self): { EnumIntermediateMeshGenerationResult }
+	function FromName(self, Name: string): EnumIntermediateMeshGenerationResult?
+	function FromValue(self, Value: number): EnumIntermediateMeshGenerationResult?
 end
 declare class EnumInterpolationThrottlingMode extends EnumItem end
 declare class EnumInterpolationThrottlingMode_INTERNAL extends Enum
 	Default: EnumInterpolationThrottlingMode
 	Disabled: EnumInterpolationThrottlingMode
 	Enabled: EnumInterpolationThrottlingMode
+	function GetEnumItems(self): { EnumInterpolationThrottlingMode }
+	function FromName(self, Name: string): EnumInterpolationThrottlingMode?
+	function FromValue(self, Value: number): EnumInterpolationThrottlingMode?
 end
 declare class EnumInviteState extends EnumItem end
 declare class EnumInviteState_INTERNAL extends Enum
@@ -1810,6 +2992,9 @@ declare class EnumInviteState_INTERNAL extends Enum
 	Declined: EnumInviteState
 	Missed: EnumInviteState
 	Placed: EnumInviteState
+	function GetEnumItems(self): { EnumInviteState }
+	function FromName(self, Name: string): EnumInviteState?
+	function FromValue(self, Value: number): EnumInviteState?
 end
 declare class EnumItemLineAlignment extends EnumItem end
 declare class EnumItemLineAlignment_INTERNAL extends Enum
@@ -1818,16 +3003,25 @@ declare class EnumItemLineAlignment_INTERNAL extends Enum
 	End: EnumItemLineAlignment
 	Start: EnumItemLineAlignment
 	Stretch: EnumItemLineAlignment
+	function GetEnumItems(self): { EnumItemLineAlignment }
+	function FromName(self, Name: string): EnumItemLineAlignment?
+	function FromValue(self, Value: number): EnumItemLineAlignment?
 end
 declare class EnumJoinSource extends EnumItem end
 declare class EnumJoinSource_INTERNAL extends Enum
 	CreatedItemAttribution: EnumJoinSource
+	function GetEnumItems(self): { EnumJoinSource }
+	function FromName(self, Name: string): EnumJoinSource?
+	function FromValue(self, Value: number): EnumJoinSource?
 end
 declare class EnumJointCreationMode extends EnumItem end
 declare class EnumJointCreationMode_INTERNAL extends Enum
 	All: EnumJointCreationMode
 	None: EnumJointCreationMode
 	Surface: EnumJointCreationMode
+	function GetEnumItems(self): { EnumJointCreationMode }
+	function FromName(self, Name: string): EnumJointCreationMode?
+	function FromValue(self, Value: number): EnumJointCreationMode?
 end
 declare class EnumKeyCode extends EnumItem end
 declare class EnumKeyCode_INTERNAL extends Enum
@@ -1937,6 +3131,7 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	MouseLeftButton: EnumKeyCode
 	MouseMiddleButton: EnumKeyCode
 	MouseNoButton: EnumKeyCode
+	MousePosition: EnumKeyCode
 	MouseRightButton: EnumKeyCode
 	MouseX: EnumKeyCode
 	MouseY: EnumKeyCode
@@ -1982,7 +3177,15 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	Tab: EnumKeyCode
 	Three: EnumKeyCode
 	Thumbstick1: EnumKeyCode
+	Thumbstick1Down: EnumKeyCode
+	Thumbstick1Left: EnumKeyCode
+	Thumbstick1Right: EnumKeyCode
+	Thumbstick1Up: EnumKeyCode
 	Thumbstick2: EnumKeyCode
+	Thumbstick2Down: EnumKeyCode
+	Thumbstick2Left: EnumKeyCode
+	Thumbstick2Right: EnumKeyCode
+	Thumbstick2Up: EnumKeyCode
 	Tilde: EnumKeyCode
 	Two: EnumKeyCode
 	U: EnumKeyCode
@@ -2092,27 +3295,42 @@ declare class EnumKeyCode_INTERNAL extends Enum
 	Y: EnumKeyCode
 	Z: EnumKeyCode
 	Zero: EnumKeyCode
+	function GetEnumItems(self): { EnumKeyCode }
+	function FromName(self, Name: string): EnumKeyCode?
+	function FromValue(self, Value: number): EnumKeyCode?
 end
 declare class EnumKeyInterpolationMode extends EnumItem end
 declare class EnumKeyInterpolationMode_INTERNAL extends Enum
 	Constant: EnumKeyInterpolationMode
 	Cubic: EnumKeyInterpolationMode
 	Linear: EnumKeyInterpolationMode
+	function GetEnumItems(self): { EnumKeyInterpolationMode }
+	function FromName(self, Name: string): EnumKeyInterpolationMode?
+	function FromValue(self, Value: number): EnumKeyInterpolationMode?
 end
 declare class EnumKeywordFilterType extends EnumItem end
 declare class EnumKeywordFilterType_INTERNAL extends Enum
 	Exclude: EnumKeywordFilterType
 	Include: EnumKeywordFilterType
+	function GetEnumItems(self): { EnumKeywordFilterType }
+	function FromName(self, Name: string): EnumKeywordFilterType?
+	function FromValue(self, Value: number): EnumKeywordFilterType?
 end
 declare class EnumLanguage extends EnumItem end
 declare class EnumLanguage_INTERNAL extends Enum
 	Default: EnumLanguage
+	function GetEnumItems(self): { EnumLanguage }
+	function FromName(self, Name: string): EnumLanguage?
+	function FromValue(self, Value: number): EnumLanguage?
 end
 declare class EnumLeftRight extends EnumItem end
 declare class EnumLeftRight_INTERNAL extends Enum
 	Center: EnumLeftRight
 	Left: EnumLeftRight
 	Right: EnumLeftRight
+	function GetEnumItems(self): { EnumLeftRight }
+	function FromName(self, Name: string): EnumLeftRight?
+	function FromValue(self, Value: number): EnumLeftRight?
 end
 declare class EnumLexemeType extends EnumItem end
 declare class EnumLexemeType_INTERNAL extends Enum
@@ -2135,11 +3353,17 @@ declare class EnumLexemeType_INTERNAL extends Enum
 	RightParenthesis: EnumLexemeType
 	Star: EnumLexemeType
 	TildeEqual: EnumLexemeType
+	function GetEnumItems(self): { EnumLexemeType }
+	function FromName(self, Name: string): EnumLexemeType?
+	function FromValue(self, Value: number): EnumLexemeType?
 end
 declare class EnumLightingStyle extends EnumItem end
 declare class EnumLightingStyle_INTERNAL extends Enum
 	Realistic: EnumLightingStyle
 	Soft: EnumLightingStyle
+	function GetEnumItems(self): { EnumLightingStyle }
+	function FromName(self, Name: string): EnumLightingStyle?
+	function FromValue(self, Value: number): EnumLightingStyle?
 end
 declare class EnumLimb extends EnumItem end
 declare class EnumLimb_INTERNAL extends Enum
@@ -2150,17 +3374,26 @@ declare class EnumLimb_INTERNAL extends Enum
 	RightLeg: EnumLimb
 	Torso: EnumLimb
 	Unknown: EnumLimb
+	function GetEnumItems(self): { EnumLimb }
+	function FromName(self, Name: string): EnumLimb?
+	function FromValue(self, Value: number): EnumLimb?
 end
 declare class EnumLineJoinMode extends EnumItem end
 declare class EnumLineJoinMode_INTERNAL extends Enum
 	Bevel: EnumLineJoinMode
 	Miter: EnumLineJoinMode
 	Round: EnumLineJoinMode
+	function GetEnumItems(self): { EnumLineJoinMode }
+	function FromName(self, Name: string): EnumLineJoinMode?
+	function FromValue(self, Value: number): EnumLineJoinMode?
 end
 declare class EnumListDisplayMode extends EnumItem end
 declare class EnumListDisplayMode_INTERNAL extends Enum
 	Horizontal: EnumListDisplayMode
 	Vertical: EnumListDisplayMode
+	function GetEnumItems(self): { EnumListDisplayMode }
+	function FromName(self, Name: string): EnumListDisplayMode?
+	function FromValue(self, Value: number): EnumListDisplayMode?
 end
 declare class EnumListenerLocation extends EnumItem end
 declare class EnumListenerLocation_INTERNAL extends Enum
@@ -2168,6 +3401,9 @@ declare class EnumListenerLocation_INTERNAL extends Enum
 	Character: EnumListenerLocation
 	Default: EnumListenerLocation
 	None: EnumListenerLocation
+	function GetEnumItems(self): { EnumListenerLocation }
+	function FromName(self, Name: string): EnumListenerLocation?
+	function FromValue(self, Value: number): EnumListenerLocation?
 end
 declare class EnumListenerType extends EnumItem end
 declare class EnumListenerType_INTERNAL extends Enum
@@ -2175,6 +3411,9 @@ declare class EnumListenerType_INTERNAL extends Enum
 	Camera: EnumListenerType
 	ObjectCFrame: EnumListenerType
 	ObjectPosition: EnumListenerType
+	function GetEnumItems(self): { EnumListenerType }
+	function FromName(self, Name: string): EnumListenerType?
+	function FromValue(self, Value: number): EnumListenerType?
 end
 declare class EnumLiveEditingAtomicUpdateResponse extends EnumItem end
 declare class EnumLiveEditingAtomicUpdateResponse_INTERNAL extends Enum
@@ -2182,36 +3421,73 @@ declare class EnumLiveEditingAtomicUpdateResponse_INTERNAL extends Enum
 	FailureHashMismatch: EnumLiveEditingAtomicUpdateResponse
 	FailureOperationIllegal: EnumLiveEditingAtomicUpdateResponse
 	Success: EnumLiveEditingAtomicUpdateResponse
+	function GetEnumItems(self): { EnumLiveEditingAtomicUpdateResponse }
+	function FromName(self, Name: string): EnumLiveEditingAtomicUpdateResponse?
+	function FromValue(self, Value: number): EnumLiveEditingAtomicUpdateResponse?
 end
 declare class EnumLiveEditingBroadcastMessageType extends EnumItem end
 declare class EnumLiveEditingBroadcastMessageType_INTERNAL extends Enum
 	Error: EnumLiveEditingBroadcastMessageType
 	Normal: EnumLiveEditingBroadcastMessageType
 	Warning: EnumLiveEditingBroadcastMessageType
+	function GetEnumItems(self): { EnumLiveEditingBroadcastMessageType }
+	function FromName(self, Name: string): EnumLiveEditingBroadcastMessageType?
+	function FromValue(self, Value: number): EnumLiveEditingBroadcastMessageType?
 end
 declare class EnumLoadCharacterLayeredClothing extends EnumItem end
 declare class EnumLoadCharacterLayeredClothing_INTERNAL extends Enum
 	Default: EnumLoadCharacterLayeredClothing
 	Disabled: EnumLoadCharacterLayeredClothing
 	Enabled: EnumLoadCharacterLayeredClothing
+	function GetEnumItems(self): { EnumLoadCharacterLayeredClothing }
+	function FromName(self, Name: string): EnumLoadCharacterLayeredClothing?
+	function FromValue(self, Value: number): EnumLoadCharacterLayeredClothing?
 end
 declare class EnumLoadDynamicHeads extends EnumItem end
 declare class EnumLoadDynamicHeads_INTERNAL extends Enum
 	Default: EnumLoadDynamicHeads
 	Disabled: EnumLoadDynamicHeads
 	Enabled: EnumLoadDynamicHeads
+	function GetEnumItems(self): { EnumLoadDynamicHeads }
+	function FromName(self, Name: string): EnumLoadDynamicHeads?
+	function FromValue(self, Value: number): EnumLoadDynamicHeads?
 end
 declare class EnumLocationType extends EnumItem end
 declare class EnumLocationType_INTERNAL extends Enum
 	Camera: EnumLocationType
 	Character: EnumLocationType
 	ObjectPosition: EnumLocationType
+	function GetEnumItems(self): { EnumLocationType }
+	function FromName(self, Name: string): EnumLocationType?
+	function FromValue(self, Value: number): EnumLocationType?
+end
+declare class EnumLuauTypeCheckMode extends EnumItem end
+declare class EnumLuauTypeCheckMode_INTERNAL extends Enum
+	Default: EnumLuauTypeCheckMode
+	NoCheck: EnumLuauTypeCheckMode
+	Nonstrict: EnumLuauTypeCheckMode
+	Strict: EnumLuauTypeCheckMode
+	function GetEnumItems(self): { EnumLuauTypeCheckMode }
+	function FromName(self, Name: string): EnumLuauTypeCheckMode?
+	function FromValue(self, Value: number): EnumLuauTypeCheckMode?
+end
+declare class EnumMakeupType extends EnumItem end
+declare class EnumMakeupType_INTERNAL extends Enum
+	Eye: EnumMakeupType
+	Face: EnumMakeupType
+	Lip: EnumMakeupType
+	function GetEnumItems(self): { EnumMakeupType }
+	function FromName(self, Name: string): EnumMakeupType?
+	function FromValue(self, Value: number): EnumMakeupType?
 end
 declare class EnumMarketplaceBulkPurchasePromptStatus extends EnumItem end
 declare class EnumMarketplaceBulkPurchasePromptStatus_INTERNAL extends Enum
 	Aborted: EnumMarketplaceBulkPurchasePromptStatus
 	Completed: EnumMarketplaceBulkPurchasePromptStatus
 	Error: EnumMarketplaceBulkPurchasePromptStatus
+	function GetEnumItems(self): { EnumMarketplaceBulkPurchasePromptStatus }
+	function FromName(self, Name: string): EnumMarketplaceBulkPurchasePromptStatus?
+	function FromValue(self, Value: number): EnumMarketplaceBulkPurchasePromptStatus?
 end
 declare class EnumMarketplaceItemPurchaseStatus extends EnumItem end
 declare class EnumMarketplaceItemPurchaseStatus_INTERNAL extends Enum
@@ -2228,16 +3504,34 @@ declare class EnumMarketplaceItemPurchaseStatus_INTERNAL extends Enum
 	SoldOut: EnumMarketplaceItemPurchaseStatus
 	Success: EnumMarketplaceItemPurchaseStatus
 	SystemError: EnumMarketplaceItemPurchaseStatus
+	function GetEnumItems(self): { EnumMarketplaceItemPurchaseStatus }
+	function FromName(self, Name: string): EnumMarketplaceItemPurchaseStatus?
+	function FromValue(self, Value: number): EnumMarketplaceItemPurchaseStatus?
 end
 declare class EnumMarketplaceProductType extends EnumItem end
 declare class EnumMarketplaceProductType_INTERNAL extends Enum
 	AvatarAsset: EnumMarketplaceProductType
 	AvatarBundle: EnumMarketplaceProductType
+	function GetEnumItems(self): { EnumMarketplaceProductType }
+	function FromName(self, Name: string): EnumMarketplaceProductType?
+	function FromValue(self, Value: number): EnumMarketplaceProductType?
 end
 declare class EnumMarkupKind extends EnumItem end
 declare class EnumMarkupKind_INTERNAL extends Enum
 	Markdown: EnumMarkupKind
 	PlainText: EnumMarkupKind
+	function GetEnumItems(self): { EnumMarkupKind }
+	function FromName(self, Name: string): EnumMarkupKind?
+	function FromValue(self, Value: number): EnumMarkupKind?
+end
+declare class EnumMatchmakingType extends EnumItem end
+declare class EnumMatchmakingType_INTERNAL extends Enum
+	Default: EnumMatchmakingType
+	PlayStationOnly: EnumMatchmakingType
+	XboxOnly: EnumMatchmakingType
+	function GetEnumItems(self): { EnumMatchmakingType }
+	function FromName(self, Name: string): EnumMatchmakingType?
+	function FromValue(self, Value: number): EnumMatchmakingType?
 end
 declare class EnumMaterial extends EnumItem end
 declare class EnumMaterial_INTERNAL extends Enum
@@ -2286,11 +3580,17 @@ declare class EnumMaterial_INTERNAL extends Enum
 	Water: EnumMaterial
 	Wood: EnumMaterial
 	WoodPlanks: EnumMaterial
+	function GetEnumItems(self): { EnumMaterial }
+	function FromName(self, Name: string): EnumMaterial?
+	function FromValue(self, Value: number): EnumMaterial?
 end
 declare class EnumMaterialPattern extends EnumItem end
 declare class EnumMaterialPattern_INTERNAL extends Enum
 	Organic: EnumMaterialPattern
 	Regular: EnumMaterialPattern
+	function GetEnumItems(self): { EnumMaterialPattern }
+	function FromName(self, Name: string): EnumMaterialPattern?
+	function FromValue(self, Value: number): EnumMaterialPattern?
 end
 declare class EnumMembershipType extends EnumItem end
 declare class EnumMembershipType_INTERNAL extends Enum
@@ -2299,6 +3599,9 @@ declare class EnumMembershipType_INTERNAL extends Enum
 	OutrageousBuildersClub: EnumMembershipType
 	Premium: EnumMembershipType
 	TurboBuildersClub: EnumMembershipType
+	function GetEnumItems(self): { EnumMembershipType }
+	function FromName(self, Name: string): EnumMembershipType?
+	function FromValue(self, Value: number): EnumMembershipType?
 end
 declare class EnumMeshPartDetailLevel extends EnumItem end
 declare class EnumMeshPartDetailLevel_INTERNAL extends Enum
@@ -2308,12 +3611,18 @@ declare class EnumMeshPartDetailLevel_INTERNAL extends Enum
 	Level02: EnumMeshPartDetailLevel
 	Level03: EnumMeshPartDetailLevel
 	Level04: EnumMeshPartDetailLevel
+	function GetEnumItems(self): { EnumMeshPartDetailLevel }
+	function FromName(self, Name: string): EnumMeshPartDetailLevel?
+	function FromValue(self, Value: number): EnumMeshPartDetailLevel?
 end
 declare class EnumMeshPartHeadsAndAccessories extends EnumItem end
 declare class EnumMeshPartHeadsAndAccessories_INTERNAL extends Enum
 	Default: EnumMeshPartHeadsAndAccessories
 	Disabled: EnumMeshPartHeadsAndAccessories
 	Enabled: EnumMeshPartHeadsAndAccessories
+	function GetEnumItems(self): { EnumMeshPartHeadsAndAccessories }
+	function FromName(self, Name: string): EnumMeshPartHeadsAndAccessories?
+	function FromValue(self, Value: number): EnumMeshPartHeadsAndAccessories?
 end
 declare class EnumMeshScaleUnit extends EnumItem end
 declare class EnumMeshScaleUnit_INTERNAL extends Enum
@@ -2323,6 +3632,9 @@ declare class EnumMeshScaleUnit_INTERNAL extends Enum
 	MM: EnumMeshScaleUnit
 	Meter: EnumMeshScaleUnit
 	Stud: EnumMeshScaleUnit
+	function GetEnumItems(self): { EnumMeshScaleUnit }
+	function FromName(self, Name: string): EnumMeshScaleUnit?
+	function FromValue(self, Value: number): EnumMeshScaleUnit?
 end
 declare class EnumMeshType extends EnumItem end
 declare class EnumMeshType_INTERNAL extends Enum
@@ -2338,6 +3650,9 @@ declare class EnumMeshType_INTERNAL extends Enum
 	Sphere: EnumMeshType
 	Torso: EnumMeshType
 	Wedge: EnumMeshType
+	function GetEnumItems(self): { EnumMeshType }
+	function FromName(self, Name: string): EnumMeshType?
+	function FromValue(self, Value: number): EnumMeshType?
 end
 declare class EnumMessageType extends EnumItem end
 declare class EnumMessageType_INTERNAL extends Enum
@@ -2345,18 +3660,28 @@ declare class EnumMessageType_INTERNAL extends Enum
 	MessageInfo: EnumMessageType
 	MessageOutput: EnumMessageType
 	MessageWarning: EnumMessageType
+	function GetEnumItems(self): { EnumMessageType }
+	function FromName(self, Name: string): EnumMessageType?
+	function FromValue(self, Value: number): EnumMessageType?
 end
 declare class EnumModelLevelOfDetail extends EnumItem end
 declare class EnumModelLevelOfDetail_INTERNAL extends Enum
 	Automatic: EnumModelLevelOfDetail
 	Disabled: EnumModelLevelOfDetail
+	SLIM: EnumModelLevelOfDetail
 	StreamingMesh: EnumModelLevelOfDetail
+	function GetEnumItems(self): { EnumModelLevelOfDetail }
+	function FromName(self, Name: string): EnumModelLevelOfDetail?
+	function FromValue(self, Value: number): EnumModelLevelOfDetail?
 end
 declare class EnumModelStreamingBehavior extends EnumItem end
 declare class EnumModelStreamingBehavior_INTERNAL extends Enum
 	Default: EnumModelStreamingBehavior
 	Improved: EnumModelStreamingBehavior
 	Legacy: EnumModelStreamingBehavior
+	function GetEnumItems(self): { EnumModelStreamingBehavior }
+	function FromName(self, Name: string): EnumModelStreamingBehavior?
+	function FromValue(self, Value: number): EnumModelStreamingBehavior?
 end
 declare class EnumModelStreamingMode extends EnumItem end
 declare class EnumModelStreamingMode_INTERNAL extends Enum
@@ -2365,6 +3690,35 @@ declare class EnumModelStreamingMode_INTERNAL extends Enum
 	Nonatomic: EnumModelStreamingMode
 	Persistent: EnumModelStreamingMode
 	PersistentPerPlayer: EnumModelStreamingMode
+	function GetEnumItems(self): { EnumModelStreamingMode }
+	function FromName(self, Name: string): EnumModelStreamingMode?
+	function FromValue(self, Value: number): EnumModelStreamingMode?
+end
+declare class EnumModerationResultCategory extends EnumItem end
+declare class EnumModerationResultCategory_INTERNAL extends Enum
+	Borderline: EnumModerationResultCategory
+	NoViolationDetected: EnumModerationResultCategory
+	ViolationDetected: EnumModerationResultCategory
+	function GetEnumItems(self): { EnumModerationResultCategory }
+	function FromName(self, Name: string): EnumModerationResultCategory?
+	function FromValue(self, Value: number): EnumModerationResultCategory?
+end
+declare class EnumModerationResultLabel extends EnumItem end
+declare class EnumModerationResultLabel_INTERNAL extends Enum
+	ChildExploitation: EnumModerationResultLabel
+	DiscriminationSlursAndHateSpeech: EnumModerationResultLabel
+	IllegalAndRegulatedGoodsAndActivities: EnumModerationResultLabel
+	Other: EnumModerationResultLabel
+	Profanity: EnumModerationResultLabel
+	RealWorldSensitiveEvents: EnumModerationResultLabel
+	RomanticAndSexualContent: EnumModerationResultLabel
+	SuicideSelfInjuryAndHarmfulBehavior: EnumModerationResultLabel
+	TerrorismAndViolentExtremism: EnumModerationResultLabel
+	ThreatsBullyingAndHarassment: EnumModerationResultLabel
+	ViolentContentAndGore: EnumModerationResultLabel
+	function GetEnumItems(self): { EnumModerationResultLabel }
+	function FromName(self, Name: string): EnumModerationResultLabel?
+	function FromValue(self, Value: number): EnumModerationResultLabel?
 end
 declare class EnumModerationStatus extends EnumItem end
 declare class EnumModerationStatus_INTERNAL extends Enum
@@ -2373,6 +3727,9 @@ declare class EnumModerationStatus_INTERNAL extends Enum
 	NotReviewed: EnumModerationStatus
 	ReviewedApproved: EnumModerationStatus
 	ReviewedRejected: EnumModerationStatus
+	function GetEnumItems(self): { EnumModerationStatus }
+	function FromName(self, Name: string): EnumModerationStatus?
+	function FromValue(self, Value: number): EnumModerationStatus?
 end
 declare class EnumModifierKey extends EnumItem end
 declare class EnumModifierKey_INTERNAL extends Enum
@@ -2380,12 +3737,18 @@ declare class EnumModifierKey_INTERNAL extends Enum
 	Ctrl: EnumModifierKey
 	Meta: EnumModifierKey
 	Shift: EnumModifierKey
+	function GetEnumItems(self): { EnumModifierKey }
+	function FromName(self, Name: string): EnumModifierKey?
+	function FromValue(self, Value: number): EnumModifierKey?
 end
 declare class EnumMouseBehavior extends EnumItem end
 declare class EnumMouseBehavior_INTERNAL extends Enum
 	Default: EnumMouseBehavior
 	LockCenter: EnumMouseBehavior
 	LockCurrentPosition: EnumMouseBehavior
+	function GetEnumItems(self): { EnumMouseBehavior }
+	function FromName(self, Name: string): EnumMouseBehavior?
+	function FromValue(self, Value: number): EnumMouseBehavior?
 end
 declare class EnumMoveState extends EnumItem end
 declare class EnumMoveState_INTERNAL extends Enum
@@ -2394,39 +3757,69 @@ declare class EnumMoveState_INTERNAL extends Enum
 	Pushing: EnumMoveState
 	Stopped: EnumMoveState
 	Stopping: EnumMoveState
+	function GetEnumItems(self): { EnumMoveState }
+	function FromName(self, Name: string): EnumMoveState?
+	function FromValue(self, Value: number): EnumMoveState?
 end
 declare class EnumMoverConstraintRootBehaviorMode extends EnumItem end
 declare class EnumMoverConstraintRootBehaviorMode_INTERNAL extends Enum
 	Default: EnumMoverConstraintRootBehaviorMode
 	Disabled: EnumMoverConstraintRootBehaviorMode
 	Enabled: EnumMoverConstraintRootBehaviorMode
+	function GetEnumItems(self): { EnumMoverConstraintRootBehaviorMode }
+	function FromName(self, Name: string): EnumMoverConstraintRootBehaviorMode?
+	function FromValue(self, Value: number): EnumMoverConstraintRootBehaviorMode?
 end
 declare class EnumMuteState extends EnumItem end
 declare class EnumMuteState_INTERNAL extends Enum
 	Muted: EnumMuteState
 	Unmuted: EnumMuteState
+	function GetEnumItems(self): { EnumMuteState }
+	function FromName(self, Name: string): EnumMuteState?
+	function FromValue(self, Value: number): EnumMuteState?
 end
 declare class EnumNameOcclusion extends EnumItem end
 declare class EnumNameOcclusion_INTERNAL extends Enum
 	EnemyOcclusion: EnumNameOcclusion
 	NoOcclusion: EnumNameOcclusion
 	OccludeAll: EnumNameOcclusion
+	function GetEnumItems(self): { EnumNameOcclusion }
+	function FromName(self, Name: string): EnumNameOcclusion?
+	function FromValue(self, Value: number): EnumNameOcclusion?
+end
+declare class EnumNegateOperationHiddenHistory extends EnumItem end
+declare class EnumNegateOperationHiddenHistory_INTERNAL extends Enum
+	NegatedIntersection: EnumNegateOperationHiddenHistory
+	NegatedUnion: EnumNegateOperationHiddenHistory
+	None: EnumNegateOperationHiddenHistory
+	function GetEnumItems(self): { EnumNegateOperationHiddenHistory }
+	function FromName(self, Name: string): EnumNegateOperationHiddenHistory?
+	function FromValue(self, Value: number): EnumNegateOperationHiddenHistory?
 end
 declare class EnumNetworkOwnership extends EnumItem end
 declare class EnumNetworkOwnership_INTERNAL extends Enum
 	Automatic: EnumNetworkOwnership
 	Manual: EnumNetworkOwnership
 	OnContact: EnumNetworkOwnership
+	function GetEnumItems(self): { EnumNetworkOwnership }
+	function FromName(self, Name: string): EnumNetworkOwnership?
+	function FromValue(self, Value: number): EnumNetworkOwnership?
 end
 declare class EnumNetworkStatus extends EnumItem end
 declare class EnumNetworkStatus_INTERNAL extends Enum
 	Connected: EnumNetworkStatus
 	Disconnected: EnumNetworkStatus
 	Unknown: EnumNetworkStatus
+	function GetEnumItems(self): { EnumNetworkStatus }
+	function FromName(self, Name: string): EnumNetworkStatus?
+	function FromValue(self, Value: number): EnumNetworkStatus?
 end
 declare class EnumNoiseType extends EnumItem end
 declare class EnumNoiseType_INTERNAL extends Enum
 	SimplexGabor: EnumNoiseType
+	function GetEnumItems(self): { EnumNoiseType }
+	function FromName(self, Name: string): EnumNoiseType?
+	function FromValue(self, Value: number): EnumNoiseType?
 end
 declare class EnumNormalId extends EnumItem end
 declare class EnumNormalId_INTERNAL extends Enum
@@ -2436,11 +3829,17 @@ declare class EnumNormalId_INTERNAL extends Enum
 	Left: EnumNormalId
 	Right: EnumNormalId
 	Top: EnumNormalId
+	function GetEnumItems(self): { EnumNormalId }
+	function FromName(self, Name: string): EnumNormalId?
+	function FromValue(self, Value: number): EnumNormalId?
 end
 declare class EnumNotificationButtonType extends EnumItem end
 declare class EnumNotificationButtonType_INTERNAL extends Enum
 	Primary: EnumNotificationButtonType
 	Secondary: EnumNotificationButtonType
+	function GetEnumItems(self): { EnumNotificationButtonType }
+	function FromName(self, Name: string): EnumNotificationButtonType?
+	function FromValue(self, Value: number): EnumNotificationButtonType?
 end
 declare class EnumOperationType extends EnumItem end
 declare class EnumOperationType_INTERNAL extends Enum
@@ -2449,34 +3848,53 @@ declare class EnumOperationType_INTERNAL extends Enum
 	Primitive: EnumOperationType
 	Subtraction: EnumOperationType
 	Union: EnumOperationType
+	function GetEnumItems(self): { EnumOperationType }
+	function FromName(self, Name: string): EnumOperationType?
+	function FromValue(self, Value: number): EnumOperationType?
 end
 declare class EnumOrientationAlignmentMode extends EnumItem end
 declare class EnumOrientationAlignmentMode_INTERNAL extends Enum
 	OneAttachment: EnumOrientationAlignmentMode
 	TwoAttachment: EnumOrientationAlignmentMode
+	function GetEnumItems(self): { EnumOrientationAlignmentMode }
+	function FromName(self, Name: string): EnumOrientationAlignmentMode?
+	function FromValue(self, Value: number): EnumOrientationAlignmentMode?
 end
 declare class EnumOutfitSource extends EnumItem end
 declare class EnumOutfitSource_INTERNAL extends Enum
 	All: EnumOutfitSource
 	Created: EnumOutfitSource
 	Purchased: EnumOutfitSource
+	function GetEnumItems(self): { EnumOutfitSource }
+	function FromName(self, Name: string): EnumOutfitSource?
+	function FromValue(self, Value: number): EnumOutfitSource?
 end
 declare class EnumOutfitType extends EnumItem end
 declare class EnumOutfitType_INTERNAL extends Enum
 	All: EnumOutfitType
 	Avatar: EnumOutfitType
 	DynamicHead: EnumOutfitType
+	Shoes: EnumOutfitType
+	function GetEnumItems(self): { EnumOutfitType }
+	function FromName(self, Name: string): EnumOutfitType?
+	function FromValue(self, Value: number): EnumOutfitType?
 end
 declare class EnumOutputLayoutMode extends EnumItem end
 declare class EnumOutputLayoutMode_INTERNAL extends Enum
 	Horizontal: EnumOutputLayoutMode
 	Vertical: EnumOutputLayoutMode
+	function GetEnumItems(self): { EnumOutputLayoutMode }
+	function FromName(self, Name: string): EnumOutputLayoutMode?
+	function FromValue(self, Value: number): EnumOutputLayoutMode?
 end
 declare class EnumOverrideMouseIconBehavior extends EnumItem end
 declare class EnumOverrideMouseIconBehavior_INTERNAL extends Enum
 	ForceHide: EnumOverrideMouseIconBehavior
 	ForceShow: EnumOverrideMouseIconBehavior
 	None: EnumOverrideMouseIconBehavior
+	function GetEnumItems(self): { EnumOverrideMouseIconBehavior }
+	function FromName(self, Name: string): EnumOverrideMouseIconBehavior?
+	function FromValue(self, Value: number): EnumOverrideMouseIconBehavior?
 end
 declare class EnumPackagePermission extends EnumItem end
 declare class EnumPackagePermission_INTERNAL extends Enum
@@ -2486,6 +3904,9 @@ declare class EnumPackagePermission_INTERNAL extends Enum
 	Own: EnumPackagePermission
 	Revoked: EnumPackagePermission
 	UseView: EnumPackagePermission
+	function GetEnumItems(self): { EnumPackagePermission }
+	function FromName(self, Name: string): EnumPackagePermission?
+	function FromValue(self, Value: number): EnumPackagePermission?
 end
 declare class EnumPartType extends EnumItem end
 declare class EnumPartType_INTERNAL extends Enum
@@ -2494,6 +3915,9 @@ declare class EnumPartType_INTERNAL extends Enum
 	CornerWedge: EnumPartType
 	Cylinder: EnumPartType
 	Wedge: EnumPartType
+	function GetEnumItems(self): { EnumPartType }
+	function FromName(self, Name: string): EnumPartType?
+	function FromValue(self, Value: number): EnumPartType?
 end
 declare class EnumParticleEmitterShape extends EnumItem end
 declare class EnumParticleEmitterShape_INTERNAL extends Enum
@@ -2501,24 +3925,37 @@ declare class EnumParticleEmitterShape_INTERNAL extends Enum
 	Cylinder: EnumParticleEmitterShape
 	Disc: EnumParticleEmitterShape
 	Sphere: EnumParticleEmitterShape
+	function GetEnumItems(self): { EnumParticleEmitterShape }
+	function FromName(self, Name: string): EnumParticleEmitterShape?
+	function FromValue(self, Value: number): EnumParticleEmitterShape?
 end
 declare class EnumParticleEmitterShapeInOut extends EnumItem end
 declare class EnumParticleEmitterShapeInOut_INTERNAL extends Enum
 	InAndOut: EnumParticleEmitterShapeInOut
 	Inward: EnumParticleEmitterShapeInOut
 	Outward: EnumParticleEmitterShapeInOut
+	function GetEnumItems(self): { EnumParticleEmitterShapeInOut }
+	function FromName(self, Name: string): EnumParticleEmitterShapeInOut?
+	function FromValue(self, Value: number): EnumParticleEmitterShapeInOut?
 end
 declare class EnumParticleEmitterShapeStyle extends EnumItem end
 declare class EnumParticleEmitterShapeStyle_INTERNAL extends Enum
 	Surface: EnumParticleEmitterShapeStyle
 	Volume: EnumParticleEmitterShapeStyle
+	function GetEnumItems(self): { EnumParticleEmitterShapeStyle }
+	function FromName(self, Name: string): EnumParticleEmitterShapeStyle?
+	function FromValue(self, Value: number): EnumParticleEmitterShapeStyle?
 end
 declare class EnumParticleFlipbookLayout extends EnumItem end
 declare class EnumParticleFlipbookLayout_INTERNAL extends Enum
+	Custom: EnumParticleFlipbookLayout
 	Grid2x2: EnumParticleFlipbookLayout
 	Grid4x4: EnumParticleFlipbookLayout
 	Grid8x8: EnumParticleFlipbookLayout
 	None: EnumParticleFlipbookLayout
+	function GetEnumItems(self): { EnumParticleFlipbookLayout }
+	function FromName(self, Name: string): EnumParticleFlipbookLayout?
+	function FromValue(self, Value: number): EnumParticleFlipbookLayout?
 end
 declare class EnumParticleFlipbookMode extends EnumItem end
 declare class EnumParticleFlipbookMode_INTERNAL extends Enum
@@ -2526,12 +3963,18 @@ declare class EnumParticleFlipbookMode_INTERNAL extends Enum
 	OneShot: EnumParticleFlipbookMode
 	PingPong: EnumParticleFlipbookMode
 	Random: EnumParticleFlipbookMode
+	function GetEnumItems(self): { EnumParticleFlipbookMode }
+	function FromName(self, Name: string): EnumParticleFlipbookMode?
+	function FromValue(self, Value: number): EnumParticleFlipbookMode?
 end
 declare class EnumParticleFlipbookTextureCompatible extends EnumItem end
 declare class EnumParticleFlipbookTextureCompatible_INTERNAL extends Enum
 	Compatible: EnumParticleFlipbookTextureCompatible
 	NotCompatible: EnumParticleFlipbookTextureCompatible
 	Unknown: EnumParticleFlipbookTextureCompatible
+	function GetEnumItems(self): { EnumParticleFlipbookTextureCompatible }
+	function FromName(self, Name: string): EnumParticleFlipbookTextureCompatible?
+	function FromValue(self, Value: number): EnumParticleFlipbookTextureCompatible?
 end
 declare class EnumParticleOrientation extends EnumItem end
 declare class EnumParticleOrientation_INTERNAL extends Enum
@@ -2539,6 +3982,9 @@ declare class EnumParticleOrientation_INTERNAL extends Enum
 	FacingCameraWorldUp: EnumParticleOrientation
 	VelocityParallel: EnumParticleOrientation
 	VelocityPerpendicular: EnumParticleOrientation
+	function GetEnumItems(self): { EnumParticleOrientation }
+	function FromName(self, Name: string): EnumParticleOrientation?
+	function FromValue(self, Value: number): EnumParticleOrientation?
 end
 declare class EnumPathStatus extends EnumItem end
 declare class EnumPathStatus_INTERNAL extends Enum
@@ -2548,18 +3994,45 @@ declare class EnumPathStatus_INTERNAL extends Enum
 	FailStartNotEmpty: EnumPathStatus
 	NoPath: EnumPathStatus
 	Success: EnumPathStatus
+	function GetEnumItems(self): { EnumPathStatus }
+	function FromName(self, Name: string): EnumPathStatus?
+	function FromValue(self, Value: number): EnumPathStatus?
 end
 declare class EnumPathWaypointAction extends EnumItem end
 declare class EnumPathWaypointAction_INTERNAL extends Enum
 	Custom: EnumPathWaypointAction
 	Jump: EnumPathWaypointAction
 	Walk: EnumPathWaypointAction
+	function GetEnumItems(self): { EnumPathWaypointAction }
+	function FromName(self, Name: string): EnumPathWaypointAction?
+	function FromValue(self, Value: number): EnumPathWaypointAction?
 end
 declare class EnumPathfindingUseImprovedSearch extends EnumItem end
 declare class EnumPathfindingUseImprovedSearch_INTERNAL extends Enum
 	Default: EnumPathfindingUseImprovedSearch
 	Disabled: EnumPathfindingUseImprovedSearch
 	Enabled: EnumPathfindingUseImprovedSearch
+	function GetEnumItems(self): { EnumPathfindingUseImprovedSearch }
+	function FromName(self, Name: string): EnumPathfindingUseImprovedSearch?
+	function FromValue(self, Value: number): EnumPathfindingUseImprovedSearch?
+end
+declare class EnumPeoplePageLayout extends EnumItem end
+declare class EnumPeoplePageLayout_INTERNAL extends Enum
+	Card: EnumPeoplePageLayout
+	List: EnumPeoplePageLayout
+	function GetEnumItems(self): { EnumPeoplePageLayout }
+	function FromName(self, Name: string): EnumPeoplePageLayout?
+	function FromValue(self, Value: number): EnumPeoplePageLayout?
+end
+declare class EnumPerformanceOverlayMode extends EnumItem end
+declare class EnumPerformanceOverlayMode_INTERNAL extends Enum
+	Decals: EnumPerformanceOverlayMode
+	Lights: EnumPerformanceOverlayMode
+	Overdraw: EnumPerformanceOverlayMode
+	Transparent: EnumPerformanceOverlayMode
+	function GetEnumItems(self): { EnumPerformanceOverlayMode }
+	function FromName(self, Name: string): EnumPerformanceOverlayMode?
+	function FromValue(self, Value: number): EnumPerformanceOverlayMode?
 end
 declare class EnumPermissionLevelShown extends EnumItem end
 declare class EnumPermissionLevelShown_INTERNAL extends Enum
@@ -2568,18 +4041,46 @@ declare class EnumPermissionLevelShown_INTERNAL extends Enum
 	RobloxGame: EnumPermissionLevelShown
 	RobloxScript: EnumPermissionLevelShown
 	Studio: EnumPermissionLevelShown
+	function GetEnumItems(self): { EnumPermissionLevelShown }
+	function FromName(self, Name: string): EnumPermissionLevelShown?
+	function FromValue(self, Value: number): EnumPermissionLevelShown?
 end
 declare class EnumPhysicsSimulationRate extends EnumItem end
 declare class EnumPhysicsSimulationRate_INTERNAL extends Enum
 	Fixed120Hz: EnumPhysicsSimulationRate
 	Fixed240Hz: EnumPhysicsSimulationRate
 	Fixed60Hz: EnumPhysicsSimulationRate
+	function GetEnumItems(self): { EnumPhysicsSimulationRate }
+	function FromName(self, Name: string): EnumPhysicsSimulationRate?
+	function FromValue(self, Value: number): EnumPhysicsSimulationRate?
 end
 declare class EnumPhysicsSteppingMethod extends EnumItem end
 declare class EnumPhysicsSteppingMethod_INTERNAL extends Enum
 	Adaptive: EnumPhysicsSteppingMethod
 	Default: EnumPhysicsSteppingMethod
 	Fixed: EnumPhysicsSteppingMethod
+	function GetEnumItems(self): { EnumPhysicsSteppingMethod }
+	function FromName(self, Name: string): EnumPhysicsSteppingMethod?
+	function FromValue(self, Value: number): EnumPhysicsSteppingMethod?
+end
+declare class EnumPlaceContentPreference extends EnumItem end
+declare class EnumPlaceContentPreference_INTERNAL extends Enum
+	All: EnumPlaceContentPreference
+	MentionsAndReplies: EnumPlaceContentPreference
+	None: EnumPlaceContentPreference
+	Unknown: EnumPlaceContentPreference
+	function GetEnumItems(self): { EnumPlaceContentPreference }
+	function FromName(self, Name: string): EnumPlaceContentPreference?
+	function FromValue(self, Value: number): EnumPlaceContentPreference?
+end
+declare class EnumPlacePublishType extends EnumItem end
+declare class EnumPlacePublishType_INTERNAL extends Enum
+	None: EnumPlacePublishType
+	Publish: EnumPlacePublishType
+	Save: EnumPlacePublishType
+	function GetEnumItems(self): { EnumPlacePublishType }
+	function FromName(self, Name: string): EnumPlacePublishType?
+	function FromValue(self, Value: number): EnumPlacePublishType?
 end
 declare class EnumPlatform extends EnumItem end
 declare class EnumPlatform_INTERNAL extends Enum
@@ -2605,6 +4106,9 @@ declare class EnumPlatform_INTERNAL extends Enum
 	Windows: EnumPlatform
 	XBox360: EnumPlatform
 	XBoxOne: EnumPlatform
+	function GetEnumItems(self): { EnumPlatform }
+	function FromName(self, Name: string): EnumPlatform?
+	function FromValue(self, Value: number): EnumPlatform?
 end
 declare class EnumPlaybackState extends EnumItem end
 declare class EnumPlaybackState_INTERNAL extends Enum
@@ -2614,6 +4118,9 @@ declare class EnumPlaybackState_INTERNAL extends Enum
 	Delayed: EnumPlaybackState
 	Paused: EnumPlaybackState
 	Playing: EnumPlaybackState
+	function GetEnumItems(self): { EnumPlaybackState }
+	function FromName(self, Name: string): EnumPlaybackState?
+	function FromValue(self, Value: number): EnumPlaybackState?
 end
 declare class EnumPlayerActions extends EnumItem end
 declare class EnumPlayerActions_INTERNAL extends Enum
@@ -2622,24 +4129,64 @@ declare class EnumPlayerActions_INTERNAL extends Enum
 	CharacterJump: EnumPlayerActions
 	CharacterLeft: EnumPlayerActions
 	CharacterRight: EnumPlayerActions
+	function GetEnumItems(self): { EnumPlayerActions }
+	function FromName(self, Name: string): EnumPlayerActions?
+	function FromValue(self, Value: number): EnumPlayerActions?
 end
 declare class EnumPlayerCharacterDestroyBehavior extends EnumItem end
 declare class EnumPlayerCharacterDestroyBehavior_INTERNAL extends Enum
 	Default: EnumPlayerCharacterDestroyBehavior
 	Disabled: EnumPlayerCharacterDestroyBehavior
 	Enabled: EnumPlayerCharacterDestroyBehavior
+	function GetEnumItems(self): { EnumPlayerCharacterDestroyBehavior }
+	function FromName(self, Name: string): EnumPlayerCharacterDestroyBehavior?
+	function FromValue(self, Value: number): EnumPlayerCharacterDestroyBehavior?
 end
 declare class EnumPlayerChatType extends EnumItem end
 declare class EnumPlayerChatType_INTERNAL extends Enum
 	All: EnumPlayerChatType
 	Team: EnumPlayerChatType
 	Whisper: EnumPlayerChatType
+	function GetEnumItems(self): { EnumPlayerChatType }
+	function FromName(self, Name: string): EnumPlayerChatType?
+	function FromValue(self, Value: number): EnumPlayerChatType?
+end
+declare class EnumPlayerDataErrorState extends EnumItem end
+declare class EnumPlayerDataErrorState_INTERNAL extends Enum
+	FlushFailed: EnumPlayerDataErrorState
+	LoadFailed: EnumPlayerDataErrorState
+	None: EnumPlayerDataErrorState
+	ReleaseFailed: EnumPlayerDataErrorState
+	function GetEnumItems(self): { EnumPlayerDataErrorState }
+	function FromName(self, Name: string): EnumPlayerDataErrorState?
+	function FromValue(self, Value: number): EnumPlayerDataErrorState?
+end
+declare class EnumPlayerDataLoadFailureBehavior extends EnumItem end
+declare class EnumPlayerDataLoadFailureBehavior_INTERNAL extends Enum
+	Failure: EnumPlayerDataLoadFailureBehavior
+	FallbackToDefault: EnumPlayerDataLoadFailureBehavior
+	Kick: EnumPlayerDataLoadFailureBehavior
+	function GetEnumItems(self): { EnumPlayerDataLoadFailureBehavior }
+	function FromName(self, Name: string): EnumPlayerDataLoadFailureBehavior?
+	function FromValue(self, Value: number): EnumPlayerDataLoadFailureBehavior?
+end
+declare class EnumPlayerExitReason extends EnumItem end
+declare class EnumPlayerExitReason_INTERNAL extends Enum
+	CreatorKick: EnumPlayerExitReason
+	PlatformKick: EnumPlayerExitReason
+	Unknown: EnumPlayerExitReason
+	function GetEnumItems(self): { EnumPlayerExitReason }
+	function FromName(self, Name: string): EnumPlayerExitReason?
+	function FromValue(self, Value: number): EnumPlayerExitReason?
 end
 declare class EnumPoseEasingDirection extends EnumItem end
 declare class EnumPoseEasingDirection_INTERNAL extends Enum
 	In: EnumPoseEasingDirection
 	InOut: EnumPoseEasingDirection
 	Out: EnumPoseEasingDirection
+	function GetEnumItems(self): { EnumPoseEasingDirection }
+	function FromName(self, Name: string): EnumPoseEasingDirection?
+	function FromValue(self, Value: number): EnumPoseEasingDirection?
 end
 declare class EnumPoseEasingStyle extends EnumItem end
 declare class EnumPoseEasingStyle_INTERNAL extends Enum
@@ -2649,11 +4196,44 @@ declare class EnumPoseEasingStyle_INTERNAL extends Enum
 	CubicV2: EnumPoseEasingStyle
 	Elastic: EnumPoseEasingStyle
 	Linear: EnumPoseEasingStyle
+	function GetEnumItems(self): { EnumPoseEasingStyle }
+	function FromName(self, Name: string): EnumPoseEasingStyle?
+	function FromValue(self, Value: number): EnumPoseEasingStyle?
 end
 declare class EnumPositionAlignmentMode extends EnumItem end
 declare class EnumPositionAlignmentMode_INTERNAL extends Enum
 	OneAttachment: EnumPositionAlignmentMode
 	TwoAttachment: EnumPositionAlignmentMode
+	function GetEnumItems(self): { EnumPositionAlignmentMode }
+	function FromName(self, Name: string): EnumPositionAlignmentMode?
+	function FromValue(self, Value: number): EnumPositionAlignmentMode?
+end
+declare class EnumPredictionMode extends EnumItem end
+declare class EnumPredictionMode_INTERNAL extends Enum
+	Automatic: EnumPredictionMode
+	Off: EnumPredictionMode
+	On: EnumPredictionMode
+	function GetEnumItems(self): { EnumPredictionMode }
+	function FromName(self, Name: string): EnumPredictionMode?
+	function FromValue(self, Value: number): EnumPredictionMode?
+end
+declare class EnumPredictionStatus extends EnumItem end
+declare class EnumPredictionStatus_INTERNAL extends Enum
+	Authoritative: EnumPredictionStatus
+	None: EnumPredictionStatus
+	Predicted: EnumPredictionStatus
+	function GetEnumItems(self): { EnumPredictionStatus }
+	function FromName(self, Name: string): EnumPredictionStatus?
+	function FromValue(self, Value: number): EnumPredictionStatus?
+end
+declare class EnumPreferredInput extends EnumItem end
+declare class EnumPreferredInput_INTERNAL extends Enum
+	Gamepad: EnumPreferredInput
+	KeyboardAndMouse: EnumPreferredInput
+	Touch: EnumPreferredInput
+	function GetEnumItems(self): { EnumPreferredInput }
+	function FromName(self, Name: string): EnumPreferredInput?
+	function FromValue(self, Value: number): EnumPreferredInput?
 end
 declare class EnumPreferredTextSize extends EnumItem end
 declare class EnumPreferredTextSize_INTERNAL extends Enum
@@ -2661,12 +4241,18 @@ declare class EnumPreferredTextSize_INTERNAL extends Enum
 	Larger: EnumPreferredTextSize
 	Largest: EnumPreferredTextSize
 	Medium: EnumPreferredTextSize
+	function GetEnumItems(self): { EnumPreferredTextSize }
+	function FromName(self, Name: string): EnumPreferredTextSize?
+	function FromValue(self, Value: number): EnumPreferredTextSize?
 end
 declare class EnumPrimalPhysicsSolver extends EnumItem end
 declare class EnumPrimalPhysicsSolver_INTERNAL extends Enum
 	Default: EnumPrimalPhysicsSolver
 	Disabled: EnumPrimalPhysicsSolver
 	Experimental: EnumPrimalPhysicsSolver
+	function GetEnumItems(self): { EnumPrimalPhysicsSolver }
+	function FromName(self, Name: string): EnumPrimalPhysicsSolver?
+	function FromValue(self, Value: number): EnumPrimalPhysicsSolver?
 end
 declare class EnumPrimitiveType extends EnumItem end
 declare class EnumPrimitiveType_INTERNAL extends Enum
@@ -2676,6 +4262,9 @@ declare class EnumPrimitiveType_INTERNAL extends Enum
 	Cylinder: EnumPrimitiveType
 	Null: EnumPrimitiveType
 	Wedge: EnumPrimitiveType
+	function GetEnumItems(self): { EnumPrimitiveType }
+	function FromName(self, Name: string): EnumPrimitiveType?
+	function FromValue(self, Value: number): EnumPrimitiveType?
 end
 declare class EnumPrivilegeType extends EnumItem end
 declare class EnumPrivilegeType_INTERNAL extends Enum
@@ -2684,26 +4273,52 @@ declare class EnumPrivilegeType_INTERNAL extends Enum
 	Member: EnumPrivilegeType
 	Owner: EnumPrivilegeType
 	Visitor: EnumPrivilegeType
+	function GetEnumItems(self): { EnumPrivilegeType }
+	function FromName(self, Name: string): EnumPrivilegeType?
+	function FromValue(self, Value: number): EnumPrivilegeType?
 end
 declare class EnumProductLocationRestriction extends EnumItem end
 declare class EnumProductLocationRestriction_INTERNAL extends Enum
 	AllGames: EnumProductLocationRestriction
 	AllowedGames: EnumProductLocationRestriction
 	AvatarShop: EnumProductLocationRestriction
+	function GetEnumItems(self): { EnumProductLocationRestriction }
+	function FromName(self, Name: string): EnumProductLocationRestriction?
+	function FromValue(self, Value: number): EnumProductLocationRestriction?
+end
+declare class EnumProductPurchaseChannel extends EnumItem end
+declare class EnumProductPurchaseChannel_INTERNAL extends Enum
+	AdReward: EnumProductPurchaseChannel
+	CommerceProduct: EnumProductPurchaseChannel
+	ExperienceDetailsPage: EnumProductPurchaseChannel
+	InExperience: EnumProductPurchaseChannel
+	function GetEnumItems(self): { EnumProductPurchaseChannel }
+	function FromName(self, Name: string): EnumProductPurchaseChannel?
+	function FromValue(self, Value: number): EnumProductPurchaseChannel?
 end
 declare class EnumProductPurchaseDecision extends EnumItem end
 declare class EnumProductPurchaseDecision_INTERNAL extends Enum
 	NotProcessedYet: EnumProductPurchaseDecision
 	PurchaseGranted: EnumProductPurchaseDecision
+	function GetEnumItems(self): { EnumProductPurchaseDecision }
+	function FromName(self, Name: string): EnumProductPurchaseDecision?
+	function FromValue(self, Value: number): EnumProductPurchaseDecision?
 end
 declare class EnumPromptCreateAssetResult extends EnumItem end
 declare class EnumPromptCreateAssetResult_INTERNAL extends Enum
+	ModeratedName: EnumPromptCreateAssetResult
 	NoUserInput: EnumPromptCreateAssetResult
 	PermissionDenied: EnumPromptCreateAssetResult
+	PurchaseFailure: EnumPromptCreateAssetResult
 	Success: EnumPromptCreateAssetResult
 	Timeout: EnumPromptCreateAssetResult
+	TokenInvalid: EnumPromptCreateAssetResult
+	UGCValidationFailed: EnumPromptCreateAssetResult
 	UnknownFailure: EnumPromptCreateAssetResult
 	UploadFailed: EnumPromptCreateAssetResult
+	function GetEnumItems(self): { EnumPromptCreateAssetResult }
+	function FromName(self, Name: string): EnumPromptCreateAssetResult?
+	function FromValue(self, Value: number): EnumPromptCreateAssetResult?
 end
 declare class EnumPromptCreateAvatarResult extends EnumItem end
 declare class EnumPromptCreateAvatarResult_INTERNAL extends Enum
@@ -2715,9 +4330,30 @@ declare class EnumPromptCreateAvatarResult_INTERNAL extends Enum
 	PurchaseFailure: EnumPromptCreateAvatarResult
 	Success: EnumPromptCreateAvatarResult
 	Timeout: EnumPromptCreateAvatarResult
+	TokenInvalid: EnumPromptCreateAvatarResult
 	UGCValidationFailed: EnumPromptCreateAvatarResult
 	UnknownFailure: EnumPromptCreateAvatarResult
 	UploadFailed: EnumPromptCreateAvatarResult
+	function GetEnumItems(self): { EnumPromptCreateAvatarResult }
+	function FromName(self, Name: string): EnumPromptCreateAvatarResult?
+	function FromValue(self, Value: number): EnumPromptCreateAvatarResult?
+end
+declare class EnumPromptExperienceDetailsResult extends EnumItem end
+declare class EnumPromptExperienceDetailsResult_INTERNAL extends Enum
+	PromptClosed: EnumPromptExperienceDetailsResult
+	TeleportAttempted: EnumPromptExperienceDetailsResult
+	function GetEnumItems(self): { EnumPromptExperienceDetailsResult }
+	function FromName(self, Name: string): EnumPromptExperienceDetailsResult?
+	function FromValue(self, Value: number): EnumPromptExperienceDetailsResult?
+end
+declare class EnumPromptLinkSharingResult extends EnumItem end
+declare class EnumPromptLinkSharingResult_INTERNAL extends Enum
+	InvalidLaunchData: EnumPromptLinkSharingResult
+	PlayerLeft: EnumPromptLinkSharingResult
+	Success: EnumPromptLinkSharingResult
+	function GetEnumItems(self): { EnumPromptLinkSharingResult }
+	function FromName(self, Name: string): EnumPromptLinkSharingResult?
+	function FromValue(self, Value: number): EnumPromptLinkSharingResult?
 end
 declare class EnumPromptPublishAssetResult extends EnumItem end
 declare class EnumPromptPublishAssetResult_INTERNAL extends Enum
@@ -2727,29 +4363,44 @@ declare class EnumPromptPublishAssetResult_INTERNAL extends Enum
 	Timeout: EnumPromptPublishAssetResult
 	UnknownFailure: EnumPromptPublishAssetResult
 	UploadFailed: EnumPromptPublishAssetResult
+	function GetEnumItems(self): { EnumPromptPublishAssetResult }
+	function FromName(self, Name: string): EnumPromptPublishAssetResult?
+	function FromValue(self, Value: number): EnumPromptPublishAssetResult?
 end
 declare class EnumPropertyStatus extends EnumItem end
 declare class EnumPropertyStatus_INTERNAL extends Enum
 	Error: EnumPropertyStatus
 	Ok: EnumPropertyStatus
 	Warning: EnumPropertyStatus
+	function GetEnumItems(self): { EnumPropertyStatus }
+	function FromName(self, Name: string): EnumPropertyStatus?
+	function FromValue(self, Value: number): EnumPropertyStatus?
 end
 declare class EnumProximityPromptExclusivity extends EnumItem end
 declare class EnumProximityPromptExclusivity_INTERNAL extends Enum
 	AlwaysShow: EnumProximityPromptExclusivity
 	OneGlobally: EnumProximityPromptExclusivity
 	OnePerButton: EnumProximityPromptExclusivity
+	function GetEnumItems(self): { EnumProximityPromptExclusivity }
+	function FromName(self, Name: string): EnumProximityPromptExclusivity?
+	function FromValue(self, Value: number): EnumProximityPromptExclusivity?
 end
 declare class EnumProximityPromptInputType extends EnumItem end
 declare class EnumProximityPromptInputType_INTERNAL extends Enum
 	Gamepad: EnumProximityPromptInputType
 	Keyboard: EnumProximityPromptInputType
 	Touch: EnumProximityPromptInputType
+	function GetEnumItems(self): { EnumProximityPromptInputType }
+	function FromName(self, Name: string): EnumProximityPromptInputType?
+	function FromValue(self, Value: number): EnumProximityPromptInputType?
 end
 declare class EnumProximityPromptStyle extends EnumItem end
 declare class EnumProximityPromptStyle_INTERNAL extends Enum
 	Custom: EnumProximityPromptStyle
 	Default: EnumProximityPromptStyle
+	function GetEnumItems(self): { EnumProximityPromptStyle }
+	function FromName(self, Name: string): EnumProximityPromptStyle?
+	function FromValue(self, Value: number): EnumProximityPromptStyle?
 end
 declare class EnumQualityLevel extends EnumItem end
 declare class EnumQualityLevel_INTERNAL extends Enum
@@ -2775,28 +4426,98 @@ declare class EnumQualityLevel_INTERNAL extends Enum
 	Level19: EnumQualityLevel
 	Level20: EnumQualityLevel
 	Level21: EnumQualityLevel
+	function GetEnumItems(self): { EnumQualityLevel }
+	function FromName(self, Name: string): EnumQualityLevel?
+	function FromValue(self, Value: number): EnumQualityLevel?
 end
 declare class EnumR15CollisionType extends EnumItem end
 declare class EnumR15CollisionType_INTERNAL extends Enum
 	InnerBox: EnumR15CollisionType
 	OuterBox: EnumR15CollisionType
+	function GetEnumItems(self): { EnumR15CollisionType }
+	function FromName(self, Name: string): EnumR15CollisionType?
+	function FromValue(self, Value: number): EnumR15CollisionType?
 end
 declare class EnumRaycastFilterType extends EnumItem end
 declare class EnumRaycastFilterType_INTERNAL extends Enum
 	Exclude: EnumRaycastFilterType
 	Include: EnumRaycastFilterType
+	function GetEnumItems(self): { EnumRaycastFilterType }
+	function FromName(self, Name: string): EnumRaycastFilterType?
+	function FromValue(self, Value: number): EnumRaycastFilterType?
+end
+declare class EnumReadCapturesFromGalleryResult extends EnumItem end
+declare class EnumReadCapturesFromGalleryResult_INTERNAL extends Enum
+	NeedPermission: EnumReadCapturesFromGalleryResult
+	Success: EnumReadCapturesFromGalleryResult
+	function GetEnumItems(self): { EnumReadCapturesFromGalleryResult }
+	function FromName(self, Name: string): EnumReadCapturesFromGalleryResult?
+	function FromValue(self, Value: number): EnumReadCapturesFromGalleryResult?
+end
+declare class EnumRecommendationActionType extends EnumItem end
+declare class EnumRecommendationActionType_INTERNAL extends Enum
+	AddReaction: EnumRecommendationActionType
+	Comment: EnumRecommendationActionType
+	Play: EnumRecommendationActionType
+	Purchase: EnumRecommendationActionType
+	RemoveReaction: EnumRecommendationActionType
+	Report: EnumRecommendationActionType
+	Share: EnumRecommendationActionType
+	function GetEnumItems(self): { EnumRecommendationActionType }
+	function FromName(self, Name: string): EnumRecommendationActionType?
+	function FromValue(self, Value: number): EnumRecommendationActionType?
+end
+declare class EnumRecommendationDepartureIntent extends EnumItem end
+declare class EnumRecommendationDepartureIntent_INTERNAL extends Enum
+	Negative: EnumRecommendationDepartureIntent
+	Neutral: EnumRecommendationDepartureIntent
+	Positive: EnumRecommendationDepartureIntent
+	function GetEnumItems(self): { EnumRecommendationDepartureIntent }
+	function FromName(self, Name: string): EnumRecommendationDepartureIntent?
+	function FromValue(self, Value: number): EnumRecommendationDepartureIntent?
+end
+declare class EnumRecommendationImpressionType extends EnumItem end
+declare class EnumRecommendationImpressionType_INTERNAL extends Enum
+	NotViewable: EnumRecommendationImpressionType
+	View: EnumRecommendationImpressionType
+	function GetEnumItems(self): { EnumRecommendationImpressionType }
+	function FromName(self, Name: string): EnumRecommendationImpressionType?
+	function FromValue(self, Value: number): EnumRecommendationImpressionType?
+end
+declare class EnumRecommendationItemContentType extends EnumItem end
+declare class EnumRecommendationItemContentType_INTERNAL extends Enum
+	Dynamic: EnumRecommendationItemContentType
+	Interactive: EnumRecommendationItemContentType
+	Static: EnumRecommendationItemContentType
+	function GetEnumItems(self): { EnumRecommendationItemContentType }
+	function FromName(self, Name: string): EnumRecommendationItemContentType?
+	function FromValue(self, Value: number): EnumRecommendationItemContentType?
+end
+declare class EnumRecommendationItemVisibility extends EnumItem end
+declare class EnumRecommendationItemVisibility_INTERNAL extends Enum
+	Private: EnumRecommendationItemVisibility
+	Public: EnumRecommendationItemVisibility
+	function GetEnumItems(self): { EnumRecommendationItemVisibility }
+	function FromName(self, Name: string): EnumRecommendationItemVisibility?
+	function FromValue(self, Value: number): EnumRecommendationItemVisibility?
 end
 declare class EnumRejectCharacterDeletions extends EnumItem end
 declare class EnumRejectCharacterDeletions_INTERNAL extends Enum
 	Default: EnumRejectCharacterDeletions
 	Disabled: EnumRejectCharacterDeletions
 	Enabled: EnumRejectCharacterDeletions
+	function GetEnumItems(self): { EnumRejectCharacterDeletions }
+	function FromName(self, Name: string): EnumRejectCharacterDeletions?
+	function FromValue(self, Value: number): EnumRejectCharacterDeletions?
 end
 declare class EnumRenderFidelity extends EnumItem end
 declare class EnumRenderFidelity_INTERNAL extends Enum
 	Automatic: EnumRenderFidelity
 	Performance: EnumRenderFidelity
 	Precise: EnumRenderFidelity
+	function GetEnumItems(self): { EnumRenderFidelity }
+	function FromName(self, Name: string): EnumRenderFidelity?
+	function FromValue(self, Value: number): EnumRenderFidelity?
 end
 declare class EnumRenderPriority extends EnumItem end
 declare class EnumRenderPriority_INTERNAL extends Enum
@@ -2805,28 +4526,43 @@ declare class EnumRenderPriority_INTERNAL extends Enum
 	First: EnumRenderPriority
 	Input: EnumRenderPriority
 	Last: EnumRenderPriority
+	function GetEnumItems(self): { EnumRenderPriority }
+	function FromName(self, Name: string): EnumRenderPriority?
+	function FromValue(self, Value: number): EnumRenderPriority?
 end
 declare class EnumRenderingCacheOptimizationMode extends EnumItem end
 declare class EnumRenderingCacheOptimizationMode_INTERNAL extends Enum
 	Default: EnumRenderingCacheOptimizationMode
 	Disabled: EnumRenderingCacheOptimizationMode
 	Enabled: EnumRenderingCacheOptimizationMode
+	function GetEnumItems(self): { EnumRenderingCacheOptimizationMode }
+	function FromName(self, Name: string): EnumRenderingCacheOptimizationMode?
+	function FromValue(self, Value: number): EnumRenderingCacheOptimizationMode?
 end
 declare class EnumRenderingTestComparisonMethod extends EnumItem end
 declare class EnumRenderingTestComparisonMethod_INTERNAL extends Enum
 	diff: EnumRenderingTestComparisonMethod
 	psnr: EnumRenderingTestComparisonMethod
+	function GetEnumItems(self): { EnumRenderingTestComparisonMethod }
+	function FromName(self, Name: string): EnumRenderingTestComparisonMethod?
+	function FromValue(self, Value: number): EnumRenderingTestComparisonMethod?
 end
 declare class EnumReplicateInstanceDestroySetting extends EnumItem end
 declare class EnumReplicateInstanceDestroySetting_INTERNAL extends Enum
 	Default: EnumReplicateInstanceDestroySetting
 	Disabled: EnumReplicateInstanceDestroySetting
 	Enabled: EnumReplicateInstanceDestroySetting
+	function GetEnumItems(self): { EnumReplicateInstanceDestroySetting }
+	function FromName(self, Name: string): EnumReplicateInstanceDestroySetting?
+	function FromValue(self, Value: number): EnumReplicateInstanceDestroySetting?
 end
 declare class EnumResamplerMode extends EnumItem end
 declare class EnumResamplerMode_INTERNAL extends Enum
 	Default: EnumResamplerMode
 	Pixelated: EnumResamplerMode
+	function GetEnumItems(self): { EnumResamplerMode }
+	function FromName(self, Name: string): EnumResamplerMode?
+	function FromValue(self, Value: number): EnumResamplerMode?
 end
 declare class EnumReservedHighlightId extends EnumItem end
 declare class EnumReservedHighlightId_INTERNAL extends Enum
@@ -2834,12 +4570,18 @@ declare class EnumReservedHighlightId_INTERNAL extends Enum
 	Hover: EnumReservedHighlightId
 	Selection: EnumReservedHighlightId
 	Standard: EnumReservedHighlightId
+	function GetEnumItems(self): { EnumReservedHighlightId }
+	function FromName(self, Name: string): EnumReservedHighlightId?
+	function FromValue(self, Value: number): EnumReservedHighlightId?
 end
 declare class EnumRestPose extends EnumItem end
 declare class EnumRestPose_INTERNAL extends Enum
 	Custom: EnumRestPose
 	Default: EnumRestPose
 	RotationsReset: EnumRestPose
+	function GetEnumItems(self): { EnumRestPose }
+	function FromName(self, Name: string): EnumRestPose?
+	function FromValue(self, Value: number): EnumRestPose?
 end
 declare class EnumReturnKeyType extends EnumItem end
 declare class EnumReturnKeyType_INTERNAL extends Enum
@@ -2849,6 +4591,9 @@ declare class EnumReturnKeyType_INTERNAL extends Enum
 	Next: EnumReturnKeyType
 	Search: EnumReturnKeyType
 	Send: EnumReturnKeyType
+	function GetEnumItems(self): { EnumReturnKeyType }
+	function FromName(self, Name: string): EnumReturnKeyType?
+	function FromValue(self, Value: number): EnumReturnKeyType?
 end
 declare class EnumReverbType extends EnumItem end
 declare class EnumReverbType_INTERNAL extends Enum
@@ -2876,6 +4621,18 @@ declare class EnumReverbType_INTERNAL extends Enum
 	StoneCorridor: EnumReverbType
 	StoneRoom: EnumReverbType
 	UnderWater: EnumReverbType
+	function GetEnumItems(self): { EnumReverbType }
+	function FromName(self, Name: string): EnumReverbType?
+	function FromValue(self, Value: number): EnumReverbType?
+end
+declare class EnumReviewableContentState extends EnumItem end
+declare class EnumReviewableContentState_INTERNAL extends Enum
+	Completed: EnumReviewableContentState
+	Failed: EnumReviewableContentState
+	Pending: EnumReviewableContentState
+	function GetEnumItems(self): { EnumReviewableContentState }
+	function FromName(self, Name: string): EnumReviewableContentState?
+	function FromValue(self, Value: number): EnumReviewableContentState?
 end
 declare class EnumRibbonTool extends EnumItem end
 declare class EnumRibbonTool_INTERNAL extends Enum
@@ -2890,18 +4647,57 @@ declare class EnumRibbonTool_INTERNAL extends Enum
 	Select: EnumRibbonTool
 	Transform: EnumRibbonTool
 	Ungroup: EnumRibbonTool
+	function GetEnumItems(self): { EnumRibbonTool }
+	function FromName(self, Name: string): EnumRibbonTool?
+	function FromValue(self, Value: number): EnumRibbonTool?
+end
+declare class EnumRigLabel extends EnumItem end
+declare class EnumRigLabel_INTERNAL extends Enum
+	Chest: EnumRigLabel
+	HeadBase: EnumRigLabel
+	Invalid: EnumRigLabel
+	LeftAnkle: EnumRigLabel
+	LeftClavicle: EnumRigLabel
+	LeftElbow: EnumRigLabel
+	LeftHip: EnumRigLabel
+	LeftKnee: EnumRigLabel
+	LeftShoulder: EnumRigLabel
+	LeftToes: EnumRigLabel
+	LeftWrist: EnumRigLabel
+	Neck: EnumRigLabel
+	Pelvis: EnumRigLabel
+	RightAnkle: EnumRigLabel
+	RightClavicle: EnumRigLabel
+	RightElbow: EnumRigLabel
+	RightHip: EnumRigLabel
+	RightKnee: EnumRigLabel
+	RightShoulder: EnumRigLabel
+	RightToes: EnumRigLabel
+	RightWrist: EnumRigLabel
+	Root: EnumRigLabel
+	Waist: EnumRigLabel
+	function GetEnumItems(self): { EnumRigLabel }
+	function FromName(self, Name: string): EnumRigLabel?
+	function FromValue(self, Value: number): EnumRigLabel?
 end
 declare class EnumRigScale extends EnumItem end
 declare class EnumRigScale_INTERNAL extends Enum
 	Default: EnumRigScale
 	Rthro: EnumRigScale
 	RthroNarrow: EnumRigScale
+	function GetEnumItems(self): { EnumRigScale }
+	function FromName(self, Name: string): EnumRigScale?
+	function FromValue(self, Value: number): EnumRigScale?
 end
 declare class EnumRigType extends EnumItem end
 declare class EnumRigType_INTERNAL extends Enum
 	Custom: EnumRigType
+	CustomHumanoid: EnumRigType
 	None: EnumRigType
 	R15: EnumRigType
+	function GetEnumItems(self): { EnumRigType }
+	function FromName(self, Name: string): EnumRigType?
+	function FromValue(self, Value: number): EnumRigType?
 end
 declare class EnumRollOffMode extends EnumItem end
 declare class EnumRollOffMode_INTERNAL extends Enum
@@ -2909,12 +4705,18 @@ declare class EnumRollOffMode_INTERNAL extends Enum
 	InverseTapered: EnumRollOffMode
 	Linear: EnumRollOffMode
 	LinearSquare: EnumRollOffMode
+	function GetEnumItems(self): { EnumRollOffMode }
+	function FromName(self, Name: string): EnumRollOffMode?
+	function FromValue(self, Value: number): EnumRollOffMode?
 end
 declare class EnumRolloutState extends EnumItem end
 declare class EnumRolloutState_INTERNAL extends Enum
 	Default: EnumRolloutState
 	Disabled: EnumRolloutState
 	Enabled: EnumRolloutState
+	function GetEnumItems(self): { EnumRolloutState }
+	function FromName(self, Name: string): EnumRolloutState?
+	function FromValue(self, Value: number): EnumRolloutState?
 end
 declare class EnumRotationOrder extends EnumItem end
 declare class EnumRotationOrder_INTERNAL extends Enum
@@ -2924,17 +4726,35 @@ declare class EnumRotationOrder_INTERNAL extends Enum
 	YZX: EnumRotationOrder
 	ZXY: EnumRotationOrder
 	ZYX: EnumRotationOrder
+	function GetEnumItems(self): { EnumRotationOrder }
+	function FromName(self, Name: string): EnumRotationOrder?
+	function FromValue(self, Value: number): EnumRotationOrder?
 end
 declare class EnumRotationType extends EnumItem end
 declare class EnumRotationType_INTERNAL extends Enum
 	CameraRelative: EnumRotationType
 	MovementRelative: EnumRotationType
+	function GetEnumItems(self): { EnumRotationType }
+	function FromName(self, Name: string): EnumRotationType?
+	function FromValue(self, Value: number): EnumRotationType?
+end
+declare class EnumRsvpStatus extends EnumItem end
+declare class EnumRsvpStatus_INTERNAL extends Enum
+	Going: EnumRsvpStatus
+	None: EnumRsvpStatus
+	NotGoing: EnumRsvpStatus
+	function GetEnumItems(self): { EnumRsvpStatus }
+	function FromName(self, Name: string): EnumRsvpStatus?
+	function FromValue(self, Value: number): EnumRsvpStatus?
 end
 declare class EnumRtlTextSupport extends EnumItem end
 declare class EnumRtlTextSupport_INTERNAL extends Enum
 	Default: EnumRtlTextSupport
 	Disabled: EnumRtlTextSupport
 	Enabled: EnumRtlTextSupport
+	function GetEnumItems(self): { EnumRtlTextSupport }
+	function FromName(self, Name: string): EnumRtlTextSupport?
+	function FromValue(self, Value: number): EnumRtlTextSupport?
 end
 declare class EnumRunContext extends EnumItem end
 declare class EnumRunContext_INTERNAL extends Enum
@@ -2942,34 +4762,53 @@ declare class EnumRunContext_INTERNAL extends Enum
 	Legacy: EnumRunContext
 	Plugin: EnumRunContext
 	Server: EnumRunContext
+	function GetEnumItems(self): { EnumRunContext }
+	function FromName(self, Name: string): EnumRunContext?
+	function FromValue(self, Value: number): EnumRunContext?
 end
 declare class EnumRunState extends EnumItem end
 declare class EnumRunState_INTERNAL extends Enum
 	Paused: EnumRunState
 	Running: EnumRunState
 	Stopped: EnumRunState
+	function GetEnumItems(self): { EnumRunState }
+	function FromName(self, Name: string): EnumRunState?
+	function FromValue(self, Value: number): EnumRunState?
 end
 declare class EnumRuntimeUndoBehavior extends EnumItem end
 declare class EnumRuntimeUndoBehavior_INTERNAL extends Enum
 	Aggregate: EnumRuntimeUndoBehavior
 	Hybrid: EnumRuntimeUndoBehavior
 	Snapshot: EnumRuntimeUndoBehavior
+	function GetEnumItems(self): { EnumRuntimeUndoBehavior }
+	function FromName(self, Name: string): EnumRuntimeUndoBehavior?
+	function FromValue(self, Value: number): EnumRuntimeUndoBehavior?
 end
 declare class EnumSafeAreaCompatibility extends EnumItem end
 declare class EnumSafeAreaCompatibility_INTERNAL extends Enum
 	FullscreenExtension: EnumSafeAreaCompatibility
 	None: EnumSafeAreaCompatibility
+	function GetEnumItems(self): { EnumSafeAreaCompatibility }
+	function FromName(self, Name: string): EnumSafeAreaCompatibility?
+	function FromValue(self, Value: number): EnumSafeAreaCompatibility?
 end
 declare class EnumSalesTypeFilter extends EnumItem end
 declare class EnumSalesTypeFilter_INTERNAL extends Enum
 	All: EnumSalesTypeFilter
 	Collectibles: EnumSalesTypeFilter
 	Premium: EnumSalesTypeFilter
+	TimedOptions: EnumSalesTypeFilter
+	function GetEnumItems(self): { EnumSalesTypeFilter }
+	function FromName(self, Name: string): EnumSalesTypeFilter?
+	function FromValue(self, Value: number): EnumSalesTypeFilter?
 end
 declare class EnumSandboxedInstanceMode extends EnumItem end
 declare class EnumSandboxedInstanceMode_INTERNAL extends Enum
 	Default: EnumSandboxedInstanceMode
 	Experimental: EnumSandboxedInstanceMode
+	function GetEnumItems(self): { EnumSandboxedInstanceMode }
+	function FromName(self, Name: string): EnumSandboxedInstanceMode?
+	function FromValue(self, Value: number): EnumSandboxedInstanceMode?
 end
 declare class EnumSaveAvatarThumbnailCustomizationFailure extends EnumItem end
 declare class EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends Enum
@@ -2979,12 +4818,18 @@ declare class EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends Enum
 	BadYRotDeg: EnumSaveAvatarThumbnailCustomizationFailure
 	Other: EnumSaveAvatarThumbnailCustomizationFailure
 	Throttled: EnumSaveAvatarThumbnailCustomizationFailure
+	function GetEnumItems(self): { EnumSaveAvatarThumbnailCustomizationFailure }
+	function FromName(self, Name: string): EnumSaveAvatarThumbnailCustomizationFailure?
+	function FromValue(self, Value: number): EnumSaveAvatarThumbnailCustomizationFailure?
 end
 declare class EnumSaveFilter extends EnumItem end
 declare class EnumSaveFilter_INTERNAL extends Enum
 	SaveAll: EnumSaveFilter
 	SaveGame: EnumSaveFilter
 	SaveWorld: EnumSaveFilter
+	function GetEnumItems(self): { EnumSaveFilter }
+	function FromName(self, Name: string): EnumSaveFilter?
+	function FromValue(self, Value: number): EnumSaveFilter?
 end
 declare class EnumSavedQualitySetting extends EnumItem end
 declare class EnumSavedQualitySetting_INTERNAL extends Enum
@@ -2999,6 +4844,9 @@ declare class EnumSavedQualitySetting_INTERNAL extends Enum
 	QualityLevel7: EnumSavedQualitySetting
 	QualityLevel8: EnumSavedQualitySetting
 	QualityLevel9: EnumSavedQualitySetting
+	function GetEnumItems(self): { EnumSavedQualitySetting }
+	function FromName(self, Name: string): EnumSavedQualitySetting?
+	function FromValue(self, Value: number): EnumSavedQualitySetting?
 end
 declare class EnumScaleType extends EnumItem end
 declare class EnumScaleType_INTERNAL extends Enum
@@ -3007,6 +4855,9 @@ declare class EnumScaleType_INTERNAL extends Enum
 	Slice: EnumScaleType
 	Stretch: EnumScaleType
 	Tile: EnumScaleType
+	function GetEnumItems(self): { EnumScaleType }
+	function FromName(self, Name: string): EnumScaleType?
+	function FromValue(self, Value: number): EnumScaleType?
 end
 declare class EnumScopeCheckResult extends EnumItem end
 declare class EnumScopeCheckResult_INTERNAL extends Enum
@@ -3018,6 +4869,9 @@ declare class EnumScopeCheckResult_INTERNAL extends Enum
 	NoUserInput: EnumScopeCheckResult
 	Timeout: EnumScopeCheckResult
 	UnexpectedError: EnumScopeCheckResult
+	function GetEnumItems(self): { EnumScopeCheckResult }
+	function FromName(self, Name: string): EnumScopeCheckResult?
+	function FromValue(self, Value: number): EnumScopeCheckResult?
 end
 declare class EnumScreenInsets extends EnumItem end
 declare class EnumScreenInsets_INTERNAL extends Enum
@@ -3025,6 +4879,9 @@ declare class EnumScreenInsets_INTERNAL extends Enum
 	DeviceSafeInsets: EnumScreenInsets
 	None: EnumScreenInsets
 	TopbarSafeInsets: EnumScreenInsets
+	function GetEnumItems(self): { EnumScreenInsets }
+	function FromName(self, Name: string): EnumScreenInsets?
+	function FromValue(self, Value: number): EnumScreenInsets?
 end
 declare class EnumScreenOrientation extends EnumItem end
 declare class EnumScreenOrientation_INTERNAL extends Enum
@@ -3033,53 +4890,83 @@ declare class EnumScreenOrientation_INTERNAL extends Enum
 	LandscapeSensor: EnumScreenOrientation
 	Portrait: EnumScreenOrientation
 	Sensor: EnumScreenOrientation
+	function GetEnumItems(self): { EnumScreenOrientation }
+	function FromName(self, Name: string): EnumScreenOrientation?
+	function FromValue(self, Value: number): EnumScreenOrientation?
 end
 declare class EnumScrollBarInset extends EnumItem end
 declare class EnumScrollBarInset_INTERNAL extends Enum
 	Always: EnumScrollBarInset
 	None: EnumScrollBarInset
 	ScrollBar: EnumScrollBarInset
+	function GetEnumItems(self): { EnumScrollBarInset }
+	function FromName(self, Name: string): EnumScrollBarInset?
+	function FromValue(self, Value: number): EnumScrollBarInset?
 end
 declare class EnumScrollingDirection extends EnumItem end
 declare class EnumScrollingDirection_INTERNAL extends Enum
 	X: EnumScrollingDirection
 	XY: EnumScrollingDirection
 	Y: EnumScrollingDirection
+	function GetEnumItems(self): { EnumScrollingDirection }
+	function FromName(self, Name: string): EnumScrollingDirection?
+	function FromValue(self, Value: number): EnumScrollingDirection?
 end
 declare class EnumSecurityCapability extends EnumItem end
 declare class EnumSecurityCapability_INTERNAL extends Enum
 	AccessOutsideWrite: EnumSecurityCapability
 	Animation: EnumSecurityCapability
 	AssetRequire: EnumSecurityCapability
+	Assistant: EnumSecurityCapability
 	Audio: EnumSecurityCapability
 	Avatar: EnumSecurityCapability
 	Basic: EnumSecurityCapability
 	CSG: EnumSecurityCapability
+	CapabilityControl: EnumSecurityCapability
 	Chat: EnumSecurityCapability
 	CreateInstances: EnumSecurityCapability
 	DataStore: EnumSecurityCapability
 	Environment: EnumSecurityCapability
 	Input: EnumSecurityCapability
+	InternalTest: EnumSecurityCapability
 	LegacySound: EnumSecurityCapability
 	LoadString: EnumSecurityCapability
+	LocalUser: EnumSecurityCapability
 	Network: EnumSecurityCapability
 	Physics: EnumSecurityCapability
+	Players: EnumSecurityCapability
+	Plugin: EnumSecurityCapability
+	PluginOrOpenCloud: EnumSecurityCapability
+	RemoteCommand: EnumSecurityCapability
 	RemoteEvent: EnumSecurityCapability
+	RobloxEngine: EnumSecurityCapability
+	RobloxScript: EnumSecurityCapability
 	RunClientScript: EnumSecurityCapability
 	RunServerScript: EnumSecurityCapability
 	ScriptGlobals: EnumSecurityCapability
 	UI: EnumSecurityCapability
+	Unassigned: EnumSecurityCapability
+	WritePlayer: EnumSecurityCapability
+	function GetEnumItems(self): { EnumSecurityCapability }
+	function FromName(self, Name: string): EnumSecurityCapability?
+	function FromValue(self, Value: number): EnumSecurityCapability?
 end
 declare class EnumSelectionBehavior extends EnumItem end
 declare class EnumSelectionBehavior_INTERNAL extends Enum
 	Escape: EnumSelectionBehavior
 	Stop: EnumSelectionBehavior
+	function GetEnumItems(self): { EnumSelectionBehavior }
+	function FromName(self, Name: string): EnumSelectionBehavior?
+	function FromValue(self, Value: number): EnumSelectionBehavior?
 end
 declare class EnumSelectionRenderMode extends EnumItem end
 declare class EnumSelectionRenderMode_INTERNAL extends Enum
 	Both: EnumSelectionRenderMode
 	BoundingBoxes: EnumSelectionRenderMode
 	Outlines: EnumSelectionRenderMode
+	function GetEnumItems(self): { EnumSelectionRenderMode }
+	function FromName(self, Name: string): EnumSelectionRenderMode?
+	function FromValue(self, Value: number): EnumSelectionRenderMode?
 end
 declare class EnumSelfViewPosition extends EnumItem end
 declare class EnumSelfViewPosition_INTERNAL extends Enum
@@ -3088,28 +4975,43 @@ declare class EnumSelfViewPosition_INTERNAL extends Enum
 	LastPosition: EnumSelfViewPosition
 	TopLeft: EnumSelfViewPosition
 	TopRight: EnumSelfViewPosition
+	function GetEnumItems(self): { EnumSelfViewPosition }
+	function FromName(self, Name: string): EnumSelfViewPosition?
+	function FromValue(self, Value: number): EnumSelfViewPosition?
 end
 declare class EnumSensorMode extends EnumItem end
 declare class EnumSensorMode_INTERNAL extends Enum
 	Floor: EnumSensorMode
 	Ladder: EnumSensorMode
+	function GetEnumItems(self): { EnumSensorMode }
+	function FromName(self, Name: string): EnumSensorMode?
+	function FromValue(self, Value: number): EnumSensorMode?
 end
 declare class EnumSensorUpdateType extends EnumItem end
 declare class EnumSensorUpdateType_INTERNAL extends Enum
 	Manual: EnumSensorUpdateType
 	OnRead: EnumSensorUpdateType
+	function GetEnumItems(self): { EnumSensorUpdateType }
+	function FromName(self, Name: string): EnumSensorUpdateType?
+	function FromValue(self, Value: number): EnumSensorUpdateType?
 end
 declare class EnumServerLiveEditingMode extends EnumItem end
 declare class EnumServerLiveEditingMode_INTERNAL extends Enum
 	Disabled: EnumServerLiveEditingMode
 	Enabled: EnumServerLiveEditingMode
 	Uninitialized: EnumServerLiveEditingMode
+	function GetEnumItems(self): { EnumServerLiveEditingMode }
+	function FromName(self, Name: string): EnumServerLiveEditingMode?
+	function FromValue(self, Value: number): EnumServerLiveEditingMode?
 end
 declare class EnumServiceVisibility extends EnumItem end
 declare class EnumServiceVisibility_INTERNAL extends Enum
 	Always: EnumServiceVisibility
 	Off: EnumServiceVisibility
 	WithChildren: EnumServiceVisibility
+	function GetEnumItems(self): { EnumServiceVisibility }
+	function FromName(self, Name: string): EnumServiceVisibility?
+	function FromValue(self, Value: number): EnumServiceVisibility?
 end
 declare class EnumSeverity extends EnumItem end
 declare class EnumSeverity_INTERNAL extends Enum
@@ -3117,6 +5019,21 @@ declare class EnumSeverity_INTERNAL extends Enum
 	Hint: EnumSeverity
 	Information: EnumSeverity
 	Warning: EnumSeverity
+	function GetEnumItems(self): { EnumSeverity }
+	function FromName(self, Name: string): EnumSeverity?
+	function FromValue(self, Value: number): EnumSeverity?
+end
+declare class EnumShowAdResult extends EnumItem end
+declare class EnumShowAdResult_INTERNAL extends Enum
+	AdAlreadyShowing: EnumShowAdResult
+	AdNotReady: EnumShowAdResult
+	InsufficientMemory: EnumShowAdResult
+	InternalError: EnumShowAdResult
+	ShowCompleted: EnumShowAdResult
+	ShowInterrupted: EnumShowAdResult
+	function GetEnumItems(self): { EnumShowAdResult }
+	function FromName(self, Name: string): EnumShowAdResult?
+	function FromValue(self, Value: number): EnumShowAdResult?
 end
 declare class EnumSignalBehavior extends EnumItem end
 declare class EnumSignalBehavior_INTERNAL extends Enum
@@ -3124,34 +5041,52 @@ declare class EnumSignalBehavior_INTERNAL extends Enum
 	Default: EnumSignalBehavior
 	Deferred: EnumSignalBehavior
 	Immediate: EnumSignalBehavior
+	function GetEnumItems(self): { EnumSignalBehavior }
+	function FromName(self, Name: string): EnumSignalBehavior?
+	function FromValue(self, Value: number): EnumSignalBehavior?
 end
 declare class EnumSizeConstraint extends EnumItem end
 declare class EnumSizeConstraint_INTERNAL extends Enum
 	RelativeXX: EnumSizeConstraint
 	RelativeXY: EnumSizeConstraint
 	RelativeYY: EnumSizeConstraint
+	function GetEnumItems(self): { EnumSizeConstraint }
+	function FromName(self, Name: string): EnumSizeConstraint?
+	function FromValue(self, Value: number): EnumSizeConstraint?
 end
 declare class EnumSolverConvergenceMetricType extends EnumItem end
 declare class EnumSolverConvergenceMetricType_INTERNAL extends Enum
 	AlgorithmAgnostic: EnumSolverConvergenceMetricType
 	IterationBased: EnumSolverConvergenceMetricType
+	function GetEnumItems(self): { EnumSolverConvergenceMetricType }
+	function FromName(self, Name: string): EnumSolverConvergenceMetricType?
+	function FromValue(self, Value: number): EnumSolverConvergenceMetricType?
 end
 declare class EnumSolverConvergenceVisualizationMode extends EnumItem end
 declare class EnumSolverConvergenceVisualizationMode_INTERNAL extends Enum
 	Disabled: EnumSolverConvergenceVisualizationMode
 	PerEdge: EnumSolverConvergenceVisualizationMode
 	PerIsland: EnumSolverConvergenceVisualizationMode
+	function GetEnumItems(self): { EnumSolverConvergenceVisualizationMode }
+	function FromName(self, Name: string): EnumSolverConvergenceVisualizationMode?
+	function FromValue(self, Value: number): EnumSolverConvergenceVisualizationMode?
 end
 declare class EnumSortDirection extends EnumItem end
 declare class EnumSortDirection_INTERNAL extends Enum
 	Ascending: EnumSortDirection
 	Descending: EnumSortDirection
+	function GetEnumItems(self): { EnumSortDirection }
+	function FromName(self, Name: string): EnumSortDirection?
+	function FromValue(self, Value: number): EnumSortDirection?
 end
 declare class EnumSortOrder extends EnumItem end
 declare class EnumSortOrder_INTERNAL extends Enum
 	Custom: EnumSortOrder
 	LayoutOrder: EnumSortOrder
 	Name: EnumSortOrder
+	function GetEnumItems(self): { EnumSortOrder }
+	function FromName(self, Name: string): EnumSortOrder?
+	function FromValue(self, Value: number): EnumSortOrder?
 end
 declare class EnumSpecialKey extends EnumItem end
 declare class EnumSpecialKey_INTERNAL extends Enum
@@ -3161,6 +5096,9 @@ declare class EnumSpecialKey_INTERNAL extends Enum
 	Insert: EnumSpecialKey
 	PageDown: EnumSpecialKey
 	PageUp: EnumSpecialKey
+	function GetEnumItems(self): { EnumSpecialKey }
+	function FromName(self, Name: string): EnumSpecialKey?
+	function FromValue(self, Value: number): EnumSpecialKey?
 end
 declare class EnumStartCorner extends EnumItem end
 declare class EnumStartCorner_INTERNAL extends Enum
@@ -3168,17 +5106,53 @@ declare class EnumStartCorner_INTERNAL extends Enum
 	BottomRight: EnumStartCorner
 	TopLeft: EnumStartCorner
 	TopRight: EnumStartCorner
+	function GetEnumItems(self): { EnumStartCorner }
+	function FromName(self, Name: string): EnumStartCorner?
+	function FromValue(self, Value: number): EnumStartCorner?
+end
+declare class EnumStateObjectFieldType extends EnumItem end
+declare class EnumStateObjectFieldType_INTERNAL extends Enum
+	Boolean: EnumStateObjectFieldType
+	CFrame: EnumStateObjectFieldType
+	Color3: EnumStateObjectFieldType
+	Float: EnumStateObjectFieldType
+	INVALID: EnumStateObjectFieldType
+	Instance: EnumStateObjectFieldType
+	Random: EnumStateObjectFieldType
+	Vector2: EnumStateObjectFieldType
+	Vector3: EnumStateObjectFieldType
+	function GetEnumItems(self): { EnumStateObjectFieldType }
+	function FromName(self, Name: string): EnumStateObjectFieldType?
+	function FromValue(self, Value: number): EnumStateObjectFieldType?
 end
 declare class EnumStatus extends EnumItem end
 declare class EnumStatus_INTERNAL extends Enum
 	Confusion: EnumStatus
 	Poison: EnumStatus
+	function GetEnumItems(self): { EnumStatus }
+	function FromName(self, Name: string): EnumStatus?
+	function FromValue(self, Value: number): EnumStatus?
+end
+declare class EnumStepFrequency extends EnumItem end
+declare class EnumStepFrequency_INTERNAL extends Enum
+	Hz1: EnumStepFrequency
+	Hz10: EnumStepFrequency
+	Hz15: EnumStepFrequency
+	Hz30: EnumStepFrequency
+	Hz5: EnumStepFrequency
+	Hz60: EnumStepFrequency
+	function GetEnumItems(self): { EnumStepFrequency }
+	function FromName(self, Name: string): EnumStepFrequency?
+	function FromValue(self, Value: number): EnumStepFrequency?
 end
 declare class EnumStreamOutBehavior extends EnumItem end
 declare class EnumStreamOutBehavior_INTERNAL extends Enum
 	Default: EnumStreamOutBehavior
 	LowMemory: EnumStreamOutBehavior
 	Opportunistic: EnumStreamOutBehavior
+	function GetEnumItems(self): { EnumStreamOutBehavior }
+	function FromName(self, Name: string): EnumStreamOutBehavior?
+	function FromValue(self, Value: number): EnumStreamOutBehavior?
 end
 declare class EnumStreamingIntegrityMode extends EnumItem end
 declare class EnumStreamingIntegrityMode_INTERNAL extends Enum
@@ -3186,12 +5160,26 @@ declare class EnumStreamingIntegrityMode_INTERNAL extends Enum
 	Disabled: EnumStreamingIntegrityMode
 	MinimumRadiusPause: EnumStreamingIntegrityMode
 	PauseOutsideLoadedArea: EnumStreamingIntegrityMode
+	function GetEnumItems(self): { EnumStreamingIntegrityMode }
+	function FromName(self, Name: string): EnumStreamingIntegrityMode?
+	function FromValue(self, Value: number): EnumStreamingIntegrityMode?
 end
 declare class EnumStreamingPauseMode extends EnumItem end
 declare class EnumStreamingPauseMode_INTERNAL extends Enum
 	ClientPhysicsPause: EnumStreamingPauseMode
 	Default: EnumStreamingPauseMode
 	Disabled: EnumStreamingPauseMode
+	function GetEnumItems(self): { EnumStreamingPauseMode }
+	function FromName(self, Name: string): EnumStreamingPauseMode?
+	function FromValue(self, Value: number): EnumStreamingPauseMode?
+end
+declare class EnumStrokeSizingMode extends EnumItem end
+declare class EnumStrokeSizingMode_INTERNAL extends Enum
+	FixedSize: EnumStrokeSizingMode
+	ScaledSize: EnumStrokeSizingMode
+	function GetEnumItems(self): { EnumStrokeSizingMode }
+	function FromName(self, Name: string): EnumStrokeSizingMode?
+	function FromValue(self, Value: number): EnumStrokeSizingMode?
 end
 declare class EnumStudioCloseMode extends EnumItem end
 declare class EnumStudioCloseMode_INTERNAL extends Enum
@@ -3199,6 +5187,9 @@ declare class EnumStudioCloseMode_INTERNAL extends Enum
 	CloseStudio: EnumStudioCloseMode
 	LogOut: EnumStudioCloseMode
 	None: EnumStudioCloseMode
+	function GetEnumItems(self): { EnumStudioCloseMode }
+	function FromName(self, Name: string): EnumStudioCloseMode?
+	function FromValue(self, Value: number): EnumStudioCloseMode?
 end
 declare class EnumStudioDataModelType extends EnumItem end
 declare class EnumStudioDataModelType_INTERNAL extends Enum
@@ -3207,11 +5198,17 @@ declare class EnumStudioDataModelType_INTERNAL extends Enum
 	PlayClient: EnumStudioDataModelType
 	PlayServer: EnumStudioDataModelType
 	Standalone: EnumStudioDataModelType
+	function GetEnumItems(self): { EnumStudioDataModelType }
+	function FromName(self, Name: string): EnumStudioDataModelType?
+	function FromValue(self, Value: number): EnumStudioDataModelType?
 end
 declare class EnumStudioPlaceUpdateFailureReason extends EnumItem end
 declare class EnumStudioPlaceUpdateFailureReason_INTERNAL extends Enum
 	Other: EnumStudioPlaceUpdateFailureReason
 	TeamCreateConflict: EnumStudioPlaceUpdateFailureReason
+	function GetEnumItems(self): { EnumStudioPlaceUpdateFailureReason }
+	function FromName(self, Name: string): EnumStudioPlaceUpdateFailureReason?
+	function FromValue(self, Value: number): EnumStudioPlaceUpdateFailureReason?
 end
 declare class EnumStudioScriptEditorColorCategories extends EnumItem end
 declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
@@ -3259,8 +5256,12 @@ declare class EnumStudioScriptEditorColorCategories_INTERNAL extends Enum
 	Self: EnumStudioScriptEditorColorCategories
 	String: EnumStudioScriptEditorColorCategories
 	TODO: EnumStudioScriptEditorColorCategories
+	Type: EnumStudioScriptEditorColorCategories
 	Warning: EnumStudioScriptEditorColorCategories
 	Whitespace: EnumStudioScriptEditorColorCategories
+	function GetEnumItems(self): { EnumStudioScriptEditorColorCategories }
+	function FromName(self, Name: string): EnumStudioScriptEditorColorCategories?
+	function FromValue(self, Value: number): EnumStudioScriptEditorColorCategories?
 end
 declare class EnumStudioScriptEditorColorPresets extends EnumItem end
 declare class EnumStudioScriptEditorColorPresets_INTERNAL extends Enum
@@ -3268,6 +5269,9 @@ declare class EnumStudioScriptEditorColorPresets_INTERNAL extends Enum
 	Extra1: EnumStudioScriptEditorColorPresets
 	Extra2: EnumStudioScriptEditorColorPresets
 	RobloxDefault: EnumStudioScriptEditorColorPresets
+	function GetEnumItems(self): { EnumStudioScriptEditorColorPresets }
+	function FromName(self, Name: string): EnumStudioScriptEditorColorPresets?
+	function FromValue(self, Value: number): EnumStudioScriptEditorColorPresets?
 end
 declare class EnumStudioStyleGuideColor extends EnumItem end
 declare class EnumStudioStyleGuideColor_INTERNAL extends Enum
@@ -3401,6 +5405,9 @@ declare class EnumStudioStyleGuideColor_INTERNAL extends Enum
 	Tooltip: EnumStudioStyleGuideColor
 	ViewPortBackground: EnumStudioStyleGuideColor
 	WarningText: EnumStudioStyleGuideColor
+	function GetEnumItems(self): { EnumStudioStyleGuideColor }
+	function FromName(self, Name: string): EnumStudioStyleGuideColor?
+	function FromValue(self, Value: number): EnumStudioStyleGuideColor?
 end
 declare class EnumStudioStyleGuideModifier extends EnumItem end
 declare class EnumStudioStyleGuideModifier_INTERNAL extends Enum
@@ -3409,12 +5416,18 @@ declare class EnumStudioStyleGuideModifier_INTERNAL extends Enum
 	Hover: EnumStudioStyleGuideModifier
 	Pressed: EnumStudioStyleGuideModifier
 	Selected: EnumStudioStyleGuideModifier
+	function GetEnumItems(self): { EnumStudioStyleGuideModifier }
+	function FromName(self, Name: string): EnumStudioStyleGuideModifier?
+	function FromValue(self, Value: number): EnumStudioStyleGuideModifier?
 end
 declare class EnumStyle extends EnumItem end
 declare class EnumStyle_INTERNAL extends Enum
 	AlternatingSupports: EnumStyle
 	BridgeStyleSupports: EnumStyle
 	NoSupports: EnumStyle
+	function GetEnumItems(self): { EnumStyle }
+	function FromName(self, Name: string): EnumStyle?
+	function FromValue(self, Value: number): EnumStyle?
 end
 declare class EnumSubscriptionExpirationReason extends EnumItem end
 declare class EnumSubscriptionExpirationReason_INTERNAL extends Enum
@@ -3423,15 +5436,24 @@ declare class EnumSubscriptionExpirationReason_INTERNAL extends Enum
 	ProductInactive: EnumSubscriptionExpirationReason
 	SubscriberCancelled: EnumSubscriptionExpirationReason
 	SubscriberRefunded: EnumSubscriptionExpirationReason
+	function GetEnumItems(self): { EnumSubscriptionExpirationReason }
+	function FromName(self, Name: string): EnumSubscriptionExpirationReason?
+	function FromValue(self, Value: number): EnumSubscriptionExpirationReason?
 end
 declare class EnumSubscriptionPaymentStatus extends EnumItem end
 declare class EnumSubscriptionPaymentStatus_INTERNAL extends Enum
 	Paid: EnumSubscriptionPaymentStatus
 	Refunded: EnumSubscriptionPaymentStatus
+	function GetEnumItems(self): { EnumSubscriptionPaymentStatus }
+	function FromName(self, Name: string): EnumSubscriptionPaymentStatus?
+	function FromValue(self, Value: number): EnumSubscriptionPaymentStatus?
 end
 declare class EnumSubscriptionPeriod extends EnumItem end
 declare class EnumSubscriptionPeriod_INTERNAL extends Enum
 	Month: EnumSubscriptionPeriod
+	function GetEnumItems(self): { EnumSubscriptionPeriod }
+	function FromName(self, Name: string): EnumSubscriptionPeriod?
+	function FromValue(self, Value: number): EnumSubscriptionPeriod?
 end
 declare class EnumSubscriptionState extends EnumItem end
 declare class EnumSubscriptionState_INTERNAL extends Enum
@@ -3440,6 +5462,9 @@ declare class EnumSubscriptionState_INTERNAL extends Enum
 	SubscribedRenewalPaymentPending: EnumSubscriptionState
 	SubscribedWillNotRenew: EnumSubscriptionState
 	SubscribedWillRenew: EnumSubscriptionState
+	function GetEnumItems(self): { EnumSubscriptionState }
+	function FromName(self, Name: string): EnumSubscriptionState?
+	function FromValue(self, Value: number): EnumSubscriptionState?
 end
 declare class EnumSurfaceConstraint extends EnumItem end
 declare class EnumSurfaceConstraint_INTERNAL extends Enum
@@ -3447,16 +5472,25 @@ declare class EnumSurfaceConstraint_INTERNAL extends Enum
 	Motor: EnumSurfaceConstraint
 	None: EnumSurfaceConstraint
 	SteppingMotor: EnumSurfaceConstraint
+	function GetEnumItems(self): { EnumSurfaceConstraint }
+	function FromName(self, Name: string): EnumSurfaceConstraint?
+	function FromValue(self, Value: number): EnumSurfaceConstraint?
 end
 declare class EnumSurfaceGuiShape extends EnumItem end
 declare class EnumSurfaceGuiShape_INTERNAL extends Enum
 	CurvedHorizontally: EnumSurfaceGuiShape
 	Flat: EnumSurfaceGuiShape
+	function GetEnumItems(self): { EnumSurfaceGuiShape }
+	function FromName(self, Name: string): EnumSurfaceGuiShape?
+	function FromValue(self, Value: number): EnumSurfaceGuiShape?
 end
 declare class EnumSurfaceGuiSizingMode extends EnumItem end
 declare class EnumSurfaceGuiSizingMode_INTERNAL extends Enum
 	FixedSize: EnumSurfaceGuiSizingMode
 	PixelsPerStud: EnumSurfaceGuiSizingMode
+	function GetEnumItems(self): { EnumSurfaceGuiSizingMode }
+	function FromName(self, Name: string): EnumSurfaceGuiSizingMode?
+	function FromValue(self, Value: number): EnumSurfaceGuiSizingMode?
 end
 declare class EnumSurfaceType extends EnumItem end
 declare class EnumSurfaceType_INTERNAL extends Enum
@@ -3470,6 +5504,9 @@ declare class EnumSurfaceType_INTERNAL extends Enum
 	Studs: EnumSurfaceType
 	Universal: EnumSurfaceType
 	Weld: EnumSurfaceType
+	function GetEnumItems(self): { EnumSurfaceType }
+	function FromName(self, Name: string): EnumSurfaceType?
+	function FromValue(self, Value: number): EnumSurfaceType?
 end
 declare class EnumSwipeDirection extends EnumItem end
 declare class EnumSwipeDirection_INTERNAL extends Enum
@@ -3478,17 +5515,38 @@ declare class EnumSwipeDirection_INTERNAL extends Enum
 	None: EnumSwipeDirection
 	Right: EnumSwipeDirection
 	Up: EnumSwipeDirection
+	function GetEnumItems(self): { EnumSwipeDirection }
+	function FromName(self, Name: string): EnumSwipeDirection?
+	function FromValue(self, Value: number): EnumSwipeDirection?
+end
+declare class EnumSystemThemeValue extends EnumItem end
+declare class EnumSystemThemeValue_INTERNAL extends Enum
+	dark: EnumSystemThemeValue
+	error: EnumSystemThemeValue
+	light: EnumSystemThemeValue
+	systemDark: EnumSystemThemeValue
+	systemLight: EnumSystemThemeValue
+	function GetEnumItems(self): { EnumSystemThemeValue }
+	function FromName(self, Name: string): EnumSystemThemeValue?
+	function FromValue(self, Value: number): EnumSystemThemeValue?
 end
 declare class EnumTableMajorAxis extends EnumItem end
 declare class EnumTableMajorAxis_INTERNAL extends Enum
 	ColumnMajor: EnumTableMajorAxis
 	RowMajor: EnumTableMajorAxis
+	function GetEnumItems(self): { EnumTableMajorAxis }
+	function FromName(self, Name: string): EnumTableMajorAxis?
+	function FromValue(self, Value: number): EnumTableMajorAxis?
 end
 declare class EnumTeamCreateErrorState extends EnumItem end
 declare class EnumTeamCreateErrorState_INTERNAL extends Enum
 	NoError: EnumTeamCreateErrorState
 	PlaceSizeApproachingLimit: EnumTeamCreateErrorState
 	PlaceSizeTooLarge: EnumTeamCreateErrorState
+	PlaceUploadFailing: EnumTeamCreateErrorState
+	function GetEnumItems(self): { EnumTeamCreateErrorState }
+	function FromName(self, Name: string): EnumTeamCreateErrorState?
+	function FromValue(self, Value: number): EnumTeamCreateErrorState?
 end
 declare class EnumTechnology extends EnumItem end
 declare class EnumTechnology_INTERNAL extends Enum
@@ -3498,6 +5556,40 @@ declare class EnumTechnology_INTERNAL extends Enum
 	ShadowMap: EnumTechnology
 	Unified: EnumTechnology
 	Voxel: EnumTechnology
+	function GetEnumItems(self): { EnumTechnology }
+	function FromName(self, Name: string): EnumTechnology?
+	function FromValue(self, Value: number): EnumTechnology?
+end
+declare class EnumTelemetryBackend extends EnumItem end
+declare class EnumTelemetryBackend_INTERNAL extends Enum
+	Counter: EnumTelemetryBackend
+	EphemeralCounter: EnumTelemetryBackend
+	EphemeralStat: EnumTelemetryBackend
+	EventIngest: EnumTelemetryBackend
+	Points: EnumTelemetryBackend
+	Stat: EnumTelemetryBackend
+	Teletune: EnumTelemetryBackend
+	UNSPECIFIED: EnumTelemetryBackend
+	function GetEnumItems(self): { EnumTelemetryBackend }
+	function FromName(self, Name: string): EnumTelemetryBackend?
+	function FromValue(self, Value: number): EnumTelemetryBackend?
+end
+declare class EnumTelemetryStandardizedField extends EnumItem end
+declare class EnumTelemetryStandardizedField_INTERNAL extends Enum
+	AddArchitectureInfo: EnumTelemetryStandardizedField
+	AddCpuInfo: EnumTelemetryStandardizedField
+	AddCurrentContextName: EnumTelemetryStandardizedField
+	AddDatacenterId: EnumTelemetryStandardizedField
+	AddMemoryInfo: EnumTelemetryStandardizedField
+	AddOsInfo: EnumTelemetryStandardizedField
+	AddPlaceId: EnumTelemetryStandardizedField
+	AddPlaceInstanceId: EnumTelemetryStandardizedField
+	AddPlaySessionId: EnumTelemetryStandardizedField
+	AddSessionInfo: EnumTelemetryStandardizedField
+	AddUniverseId: EnumTelemetryStandardizedField
+	function GetEnumItems(self): { EnumTelemetryStandardizedField }
+	function FromName(self, Name: string): EnumTelemetryStandardizedField?
+	function FromValue(self, Value: number): EnumTelemetryStandardizedField?
 end
 declare class EnumTeleportMethod extends EnumItem end
 declare class EnumTeleportMethod_INTERNAL extends Enum
@@ -3508,6 +5600,9 @@ declare class EnumTeleportMethod_INTERNAL extends Enum
 	TeleportToSpawnByName: EnumTeleportMethod
 	TeleportToVIPServer: EnumTeleportMethod
 	TeleportUnknown: EnumTeleportMethod
+	function GetEnumItems(self): { EnumTeleportMethod }
+	function FromName(self, Name: string): EnumTeleportMethod?
+	function FromValue(self, Value: number): EnumTeleportMethod?
 end
 declare class EnumTeleportResult extends EnumItem end
 declare class EnumTeleportResult_INTERNAL extends Enum
@@ -3519,6 +5614,9 @@ declare class EnumTeleportResult_INTERNAL extends Enum
 	IsTeleporting: EnumTeleportResult
 	Success: EnumTeleportResult
 	Unauthorized: EnumTeleportResult
+	function GetEnumItems(self): { EnumTeleportResult }
+	function FromName(self, Name: string): EnumTeleportResult?
+	function FromValue(self, Value: number): EnumTeleportResult?
 end
 declare class EnumTeleportState extends EnumItem end
 declare class EnumTeleportState_INTERNAL extends Enum
@@ -3527,6 +5625,9 @@ declare class EnumTeleportState_INTERNAL extends Enum
 	RequestedFromServer: EnumTeleportState
 	Started: EnumTeleportState
 	WaitingForServer: EnumTeleportState
+	function GetEnumItems(self): { EnumTeleportState }
+	function FromName(self, Name: string): EnumTeleportState?
+	function FromValue(self, Value: number): EnumTeleportState?
 end
 declare class EnumTeleportType extends EnumItem end
 declare class EnumTeleportType_INTERNAL extends Enum
@@ -3535,6 +5636,9 @@ declare class EnumTeleportType_INTERNAL extends Enum
 	ToPlace: EnumTeleportType
 	ToReservedServer: EnumTeleportType
 	ToVIPServer: EnumTeleportType
+	function GetEnumItems(self): { EnumTeleportType }
+	function FromName(self, Name: string): EnumTeleportType?
+	function FromValue(self, Value: number): EnumTeleportType?
 end
 declare class EnumTerrainAcquisitionMethod extends EnumItem end
 declare class EnumTerrainAcquisitionMethod_INTERNAL extends Enum
@@ -3550,12 +5654,18 @@ declare class EnumTerrainAcquisitionMethod_INTERNAL extends Enum
 	RegionFillTool: EnumTerrainAcquisitionMethod
 	RegionPasteTool: EnumTerrainAcquisitionMethod
 	Template: EnumTerrainAcquisitionMethod
+	function GetEnumItems(self): { EnumTerrainAcquisitionMethod }
+	function FromName(self, Name: string): EnumTerrainAcquisitionMethod?
+	function FromValue(self, Value: number): EnumTerrainAcquisitionMethod?
 end
 declare class EnumTerrainFace extends EnumItem end
 declare class EnumTerrainFace_INTERNAL extends Enum
 	Bottom: EnumTerrainFace
 	Side: EnumTerrainFace
 	Top: EnumTerrainFace
+	function GetEnumItems(self): { EnumTerrainFace }
+	function FromName(self, Name: string): EnumTerrainFace?
+	function FromValue(self, Value: number): EnumTerrainFace?
 end
 declare class EnumTextChatMessageStatus extends EnumItem end
 declare class EnumTextChatMessageStatus_INTERNAL extends Enum
@@ -3568,17 +5678,26 @@ declare class EnumTextChatMessageStatus_INTERNAL extends Enum
 	Success: EnumTextChatMessageStatus
 	TextFilterFailed: EnumTextChatMessageStatus
 	Unknown: EnumTextChatMessageStatus
+	function GetEnumItems(self): { EnumTextChatMessageStatus }
+	function FromName(self, Name: string): EnumTextChatMessageStatus?
+	function FromValue(self, Value: number): EnumTextChatMessageStatus?
 end
 declare class EnumTextDirection extends EnumItem end
 declare class EnumTextDirection_INTERNAL extends Enum
 	Auto: EnumTextDirection
 	LeftToRight: EnumTextDirection
 	RightToLeft: EnumTextDirection
+	function GetEnumItems(self): { EnumTextDirection }
+	function FromName(self, Name: string): EnumTextDirection?
+	function FromValue(self, Value: number): EnumTextDirection?
 end
 declare class EnumTextFilterContext extends EnumItem end
 declare class EnumTextFilterContext_INTERNAL extends Enum
 	PrivateChat: EnumTextFilterContext
 	PublicChat: EnumTextFilterContext
+	function GetEnumItems(self): { EnumTextFilterContext }
+	function FromName(self, Name: string): EnumTextFilterContext?
+	function FromValue(self, Value: number): EnumTextFilterContext?
 end
 declare class EnumTextInputType extends EnumItem end
 declare class EnumTextInputType_INTERNAL extends Enum
@@ -3591,30 +5710,45 @@ declare class EnumTextInputType_INTERNAL extends Enum
 	PasswordShown: EnumTextInputType
 	Phone: EnumTextInputType
 	Username: EnumTextInputType
+	function GetEnumItems(self): { EnumTextInputType }
+	function FromName(self, Name: string): EnumTextInputType?
+	function FromValue(self, Value: number): EnumTextInputType?
 end
 declare class EnumTextTruncate extends EnumItem end
 declare class EnumTextTruncate_INTERNAL extends Enum
 	AtEnd: EnumTextTruncate
 	None: EnumTextTruncate
 	SplitWord: EnumTextTruncate
+	function GetEnumItems(self): { EnumTextTruncate }
+	function FromName(self, Name: string): EnumTextTruncate?
+	function FromValue(self, Value: number): EnumTextTruncate?
 end
 declare class EnumTextXAlignment extends EnumItem end
 declare class EnumTextXAlignment_INTERNAL extends Enum
 	Center: EnumTextXAlignment
 	Left: EnumTextXAlignment
 	Right: EnumTextXAlignment
+	function GetEnumItems(self): { EnumTextXAlignment }
+	function FromName(self, Name: string): EnumTextXAlignment?
+	function FromValue(self, Value: number): EnumTextXAlignment?
 end
 declare class EnumTextYAlignment extends EnumItem end
 declare class EnumTextYAlignment_INTERNAL extends Enum
 	Bottom: EnumTextYAlignment
 	Center: EnumTextYAlignment
 	Top: EnumTextYAlignment
+	function GetEnumItems(self): { EnumTextYAlignment }
+	function FromName(self, Name: string): EnumTextYAlignment?
+	function FromValue(self, Value: number): EnumTextYAlignment?
 end
 declare class EnumTextureMode extends EnumItem end
 declare class EnumTextureMode_INTERNAL extends Enum
 	Static: EnumTextureMode
 	Stretch: EnumTextureMode
 	Wrap: EnumTextureMode
+	function GetEnumItems(self): { EnumTextureMode }
+	function FromName(self, Name: string): EnumTextureMode?
+	function FromValue(self, Value: number): EnumTextureMode?
 end
 declare class EnumTextureQueryType extends EnumItem end
 declare class EnumTextureQueryType_INTERNAL extends Enum
@@ -3622,6 +5756,9 @@ declare class EnumTextureQueryType_INTERNAL extends Enum
 	HumanoidOrphaned: EnumTextureQueryType
 	NonHumanoid: EnumTextureQueryType
 	NonHumanoidOrphaned: EnumTextureQueryType
+	function GetEnumItems(self): { EnumTextureQueryType }
+	function FromName(self, Name: string): EnumTextureQueryType?
+	function FromValue(self, Value: number): EnumTextureQueryType?
 end
 declare class EnumThreadPoolConfig extends EnumItem end
 declare class EnumThreadPoolConfig_INTERNAL extends Enum
@@ -3636,12 +5773,18 @@ declare class EnumThreadPoolConfig_INTERNAL extends Enum
 	Threads3: EnumThreadPoolConfig
 	Threads4: EnumThreadPoolConfig
 	Threads8: EnumThreadPoolConfig
+	function GetEnumItems(self): { EnumThreadPoolConfig }
+	function FromName(self, Name: string): EnumThreadPoolConfig?
+	function FromValue(self, Value: number): EnumThreadPoolConfig?
 end
 declare class EnumThrottlingPriority extends EnumItem end
 declare class EnumThrottlingPriority_INTERNAL extends Enum
 	Default: EnumThrottlingPriority
 	ElevatedOnServer: EnumThrottlingPriority
 	Extreme: EnumThrottlingPriority
+	function GetEnumItems(self): { EnumThrottlingPriority }
+	function FromName(self, Name: string): EnumThrottlingPriority?
+	function FromValue(self, Value: number): EnumThrottlingPriority?
 end
 declare class EnumThumbnailSize extends EnumItem end
 declare class EnumThumbnailSize_INTERNAL extends Enum
@@ -3652,29 +5795,44 @@ declare class EnumThumbnailSize_INTERNAL extends Enum
 	Size420x420: EnumThumbnailSize
 	Size48x48: EnumThumbnailSize
 	Size60x60: EnumThumbnailSize
+	function GetEnumItems(self): { EnumThumbnailSize }
+	function FromName(self, Name: string): EnumThumbnailSize?
+	function FromValue(self, Value: number): EnumThumbnailSize?
 end
 declare class EnumThumbnailType extends EnumItem end
 declare class EnumThumbnailType_INTERNAL extends Enum
 	AvatarBust: EnumThumbnailType
 	AvatarThumbnail: EnumThumbnailType
 	HeadShot: EnumThumbnailType
+	function GetEnumItems(self): { EnumThumbnailType }
+	function FromName(self, Name: string): EnumThumbnailType?
+	function FromValue(self, Value: number): EnumThumbnailType?
 end
 declare class EnumTickCountSampleMethod extends EnumItem end
 declare class EnumTickCountSampleMethod_INTERNAL extends Enum
 	Benchmark: EnumTickCountSampleMethod
 	Fast: EnumTickCountSampleMethod
 	Precise: EnumTickCountSampleMethod
+	function GetEnumItems(self): { EnumTickCountSampleMethod }
+	function FromName(self, Name: string): EnumTickCountSampleMethod?
+	function FromValue(self, Value: number): EnumTickCountSampleMethod?
 end
 declare class EnumTonemapperPreset extends EnumItem end
 declare class EnumTonemapperPreset_INTERNAL extends Enum
 	Default: EnumTonemapperPreset
 	Retro: EnumTonemapperPreset
+	function GetEnumItems(self): { EnumTonemapperPreset }
+	function FromName(self, Name: string): EnumTonemapperPreset?
+	function FromValue(self, Value: number): EnumTonemapperPreset?
 end
 declare class EnumTopBottom extends EnumItem end
 declare class EnumTopBottom_INTERNAL extends Enum
 	Bottom: EnumTopBottom
 	Center: EnumTopBottom
 	Top: EnumTopBottom
+	function GetEnumItems(self): { EnumTopBottom }
+	function FromName(self, Name: string): EnumTopBottom?
+	function FromValue(self, Value: number): EnumTopBottom?
 end
 declare class EnumTouchCameraMovementMode extends EnumItem end
 declare class EnumTouchCameraMovementMode_INTERNAL extends Enum
@@ -3682,6 +5840,9 @@ declare class EnumTouchCameraMovementMode_INTERNAL extends Enum
 	Default: EnumTouchCameraMovementMode
 	Follow: EnumTouchCameraMovementMode
 	Orbital: EnumTouchCameraMovementMode
+	function GetEnumItems(self): { EnumTouchCameraMovementMode }
+	function FromName(self, Name: string): EnumTouchCameraMovementMode?
+	function FromValue(self, Value: number): EnumTouchCameraMovementMode?
 end
 declare class EnumTouchMovementMode extends EnumItem end
 declare class EnumTouchMovementMode_INTERNAL extends Enum
@@ -3691,6 +5852,9 @@ declare class EnumTouchMovementMode_INTERNAL extends Enum
 	DynamicThumbstick: EnumTouchMovementMode
 	Thumbpad: EnumTouchMovementMode
 	Thumbstick: EnumTouchMovementMode
+	function GetEnumItems(self): { EnumTouchMovementMode }
+	function FromName(self, Name: string): EnumTouchMovementMode?
+	function FromValue(self, Value: number): EnumTouchMovementMode?
 end
 declare class EnumTrackerError extends EnumItem end
 declare class EnumTrackerError_INTERNAL extends Enum
@@ -3705,6 +5869,9 @@ declare class EnumTrackerError_INTERNAL extends Enum
 	VideoError: EnumTrackerError
 	VideoNoPermission: EnumTrackerError
 	VideoUnsupported: EnumTrackerError
+	function GetEnumItems(self): { EnumTrackerError }
+	function FromName(self, Name: string): EnumTrackerError?
+	function FromValue(self, Value: number): EnumTrackerError?
 end
 declare class EnumTrackerExtrapolationFlagMode extends EnumItem end
 declare class EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum
@@ -3712,6 +5879,9 @@ declare class EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum
 	ExtrapolateFacsAndPose: EnumTrackerExtrapolationFlagMode
 	ExtrapolateFacsOnly: EnumTrackerExtrapolationFlagMode
 	ForceDisabled: EnumTrackerExtrapolationFlagMode
+	function GetEnumItems(self): { EnumTrackerExtrapolationFlagMode }
+	function FromName(self, Name: string): EnumTrackerExtrapolationFlagMode?
+	function FromValue(self, Value: number): EnumTrackerExtrapolationFlagMode?
 end
 declare class EnumTrackerFaceTrackingStatus extends EnumItem end
 declare class EnumTrackerFaceTrackingStatus_INTERNAL extends Enum
@@ -3722,18 +5892,27 @@ declare class EnumTrackerFaceTrackingStatus_INTERNAL extends Enum
 	FaceTrackingSuccess: EnumTrackerFaceTrackingStatus
 	FaceTrackingUninitialized: EnumTrackerFaceTrackingStatus
 	FaceTrackingUnknown: EnumTrackerFaceTrackingStatus
+	function GetEnumItems(self): { EnumTrackerFaceTrackingStatus }
+	function FromName(self, Name: string): EnumTrackerFaceTrackingStatus?
+	function FromValue(self, Value: number): EnumTrackerFaceTrackingStatus?
 end
 declare class EnumTrackerLodFlagMode extends EnumItem end
 declare class EnumTrackerLodFlagMode_INTERNAL extends Enum
 	Auto: EnumTrackerLodFlagMode
 	ForceFalse: EnumTrackerLodFlagMode
 	ForceTrue: EnumTrackerLodFlagMode
+	function GetEnumItems(self): { EnumTrackerLodFlagMode }
+	function FromName(self, Name: string): EnumTrackerLodFlagMode?
+	function FromValue(self, Value: number): EnumTrackerLodFlagMode?
 end
 declare class EnumTrackerLodValueMode extends EnumItem end
 declare class EnumTrackerLodValueMode_INTERNAL extends Enum
 	Auto: EnumTrackerLodValueMode
 	Force0: EnumTrackerLodValueMode
 	Force1: EnumTrackerLodValueMode
+	function GetEnumItems(self): { EnumTrackerLodValueMode }
+	function FromName(self, Name: string): EnumTrackerLodValueMode?
+	function FromValue(self, Value: number): EnumTrackerLodValueMode?
 end
 declare class EnumTrackerMode extends EnumItem end
 declare class EnumTrackerMode_INTERNAL extends Enum
@@ -3741,44 +5920,76 @@ declare class EnumTrackerMode_INTERNAL extends Enum
 	AudioVideo: EnumTrackerMode
 	None: EnumTrackerMode
 	Video: EnumTrackerMode
+	function GetEnumItems(self): { EnumTrackerMode }
+	function FromName(self, Name: string): EnumTrackerMode?
+	function FromValue(self, Value: number): EnumTrackerMode?
 end
 declare class EnumTrackerPromptEvent extends EnumItem end
 declare class EnumTrackerPromptEvent_INTERNAL extends Enum
 	LODCameraRecommendDisable: EnumTrackerPromptEvent
+	function GetEnumItems(self): { EnumTrackerPromptEvent }
+	function FromName(self, Name: string): EnumTrackerPromptEvent?
+	function FromValue(self, Value: number): EnumTrackerPromptEvent?
 end
 declare class EnumTrackerType extends EnumItem end
 declare class EnumTrackerType_INTERNAL extends Enum
 	Face: EnumTrackerType
 	None: EnumTrackerType
 	UpperBody: EnumTrackerType
+	function GetEnumItems(self): { EnumTrackerType }
+	function FromName(self, Name: string): EnumTrackerType?
+	function FromValue(self, Value: number): EnumTrackerType?
 end
 declare class EnumTriStateBoolean extends EnumItem end
 declare class EnumTriStateBoolean_INTERNAL extends Enum
 	False: EnumTriStateBoolean
 	True: EnumTriStateBoolean
 	Unknown: EnumTriStateBoolean
+	function GetEnumItems(self): { EnumTriStateBoolean }
+	function FromName(self, Name: string): EnumTriStateBoolean?
+	function FromValue(self, Value: number): EnumTriStateBoolean?
 end
 declare class EnumTweenStatus extends EnumItem end
 declare class EnumTweenStatus_INTERNAL extends Enum
 	Canceled: EnumTweenStatus
 	Completed: EnumTweenStatus
+	function GetEnumItems(self): { EnumTweenStatus }
+	function FromName(self, Name: string): EnumTweenStatus?
+	function FromValue(self, Value: number): EnumTweenStatus?
+end
+declare class EnumUICaptureMode extends EnumItem end
+declare class EnumUICaptureMode_INTERNAL extends Enum
+	All: EnumUICaptureMode
+	None: EnumUICaptureMode
+	function GetEnumItems(self): { EnumUICaptureMode }
+	function FromName(self, Name: string): EnumUICaptureMode?
+	function FromValue(self, Value: number): EnumUICaptureMode?
 end
 declare class EnumUIDragDetectorBoundingBehavior extends EnumItem end
 declare class EnumUIDragDetectorBoundingBehavior_INTERNAL extends Enum
 	Automatic: EnumUIDragDetectorBoundingBehavior
 	EntireObject: EnumUIDragDetectorBoundingBehavior
 	HitPoint: EnumUIDragDetectorBoundingBehavior
+	function GetEnumItems(self): { EnumUIDragDetectorBoundingBehavior }
+	function FromName(self, Name: string): EnumUIDragDetectorBoundingBehavior?
+	function FromValue(self, Value: number): EnumUIDragDetectorBoundingBehavior?
 end
 declare class EnumUIDragDetectorDragRelativity extends EnumItem end
 declare class EnumUIDragDetectorDragRelativity_INTERNAL extends Enum
 	Absolute: EnumUIDragDetectorDragRelativity
 	Relative: EnumUIDragDetectorDragRelativity
+	function GetEnumItems(self): { EnumUIDragDetectorDragRelativity }
+	function FromName(self, Name: string): EnumUIDragDetectorDragRelativity?
+	function FromValue(self, Value: number): EnumUIDragDetectorDragRelativity?
 end
 declare class EnumUIDragDetectorDragSpace extends EnumItem end
 declare class EnumUIDragDetectorDragSpace_INTERNAL extends Enum
 	LayerCollector: EnumUIDragDetectorDragSpace
 	Parent: EnumUIDragDetectorDragSpace
 	Reference: EnumUIDragDetectorDragSpace
+	function GetEnumItems(self): { EnumUIDragDetectorDragSpace }
+	function FromName(self, Name: string): EnumUIDragDetectorDragSpace?
+	function FromValue(self, Value: number): EnumUIDragDetectorDragSpace?
 end
 declare class EnumUIDragDetectorDragStyle extends EnumItem end
 declare class EnumUIDragDetectorDragStyle_INTERNAL extends Enum
@@ -3786,6 +5997,9 @@ declare class EnumUIDragDetectorDragStyle_INTERNAL extends Enum
 	Scriptable: EnumUIDragDetectorDragStyle
 	TranslateLine: EnumUIDragDetectorDragStyle
 	TranslatePlane: EnumUIDragDetectorDragStyle
+	function GetEnumItems(self): { EnumUIDragDetectorDragStyle }
+	function FromName(self, Name: string): EnumUIDragDetectorDragStyle?
+	function FromValue(self, Value: number): EnumUIDragDetectorDragStyle?
 end
 declare class EnumUIDragDetectorResponseStyle extends EnumItem end
 declare class EnumUIDragDetectorResponseStyle_INTERNAL extends Enum
@@ -3793,12 +6007,18 @@ declare class EnumUIDragDetectorResponseStyle_INTERNAL extends Enum
 	CustomScale: EnumUIDragDetectorResponseStyle
 	Offset: EnumUIDragDetectorResponseStyle
 	Scale: EnumUIDragDetectorResponseStyle
+	function GetEnumItems(self): { EnumUIDragDetectorResponseStyle }
+	function FromName(self, Name: string): EnumUIDragDetectorResponseStyle?
+	function FromValue(self, Value: number): EnumUIDragDetectorResponseStyle?
 end
 declare class EnumUIDragSpeedAxisMapping extends EnumItem end
 declare class EnumUIDragSpeedAxisMapping_INTERNAL extends Enum
 	XX: EnumUIDragSpeedAxisMapping
 	XY: EnumUIDragSpeedAxisMapping
 	YY: EnumUIDragSpeedAxisMapping
+	function GetEnumItems(self): { EnumUIDragSpeedAxisMapping }
+	function FromName(self, Name: string): EnumUIDragSpeedAxisMapping?
+	function FromValue(self, Value: number): EnumUIDragSpeedAxisMapping?
 end
 declare class EnumUIFlexAlignment extends EnumItem end
 declare class EnumUIFlexAlignment_INTERNAL extends Enum
@@ -3807,6 +6027,9 @@ declare class EnumUIFlexAlignment_INTERNAL extends Enum
 	SpaceAround: EnumUIFlexAlignment
 	SpaceBetween: EnumUIFlexAlignment
 	SpaceEvenly: EnumUIFlexAlignment
+	function GetEnumItems(self): { EnumUIFlexAlignment }
+	function FromName(self, Name: string): EnumUIFlexAlignment?
+	function FromValue(self, Value: number): EnumUIFlexAlignment?
 end
 declare class EnumUIFlexMode extends EnumItem end
 declare class EnumUIFlexMode_INTERNAL extends Enum
@@ -3815,21 +6038,56 @@ declare class EnumUIFlexMode_INTERNAL extends Enum
 	Grow: EnumUIFlexMode
 	None: EnumUIFlexMode
 	Shrink: EnumUIFlexMode
+	function GetEnumItems(self): { EnumUIFlexMode }
+	function FromName(self, Name: string): EnumUIFlexMode?
+	function FromValue(self, Value: number): EnumUIFlexMode?
 end
 declare class EnumUITheme extends EnumItem end
 declare class EnumUITheme_INTERNAL extends Enum
 	Dark: EnumUITheme
 	Light: EnumUITheme
+	function GetEnumItems(self): { EnumUITheme }
+	function FromName(self, Name: string): EnumUITheme?
+	function FromValue(self, Value: number): EnumUITheme?
 end
 declare class EnumUiMessageType extends EnumItem end
 declare class EnumUiMessageType_INTERNAL extends Enum
 	UiMessageError: EnumUiMessageType
 	UiMessageInfo: EnumUiMessageType
+	function GetEnumItems(self): { EnumUiMessageType }
+	function FromName(self, Name: string): EnumUiMessageType?
+	function FromValue(self, Value: number): EnumUiMessageType?
+end
+declare class EnumUpdateState extends EnumItem end
+declare class EnumUpdateState_INTERNAL extends Enum
+	UpdateAvailable: EnumUpdateState
+	UpdateFailed: EnumUpdateState
+	UpdateInProgress: EnumUpdateState
+	UpdateNotAvailable: EnumUpdateState
+	UpdateReady: EnumUpdateState
+	function GetEnumItems(self): { EnumUpdateState }
+	function FromName(self, Name: string): EnumUpdateState?
+	function FromValue(self, Value: number): EnumUpdateState?
+end
+declare class EnumUploadCaptureResult extends EnumItem end
+declare class EnumUploadCaptureResult_INTERNAL extends Enum
+	CaptureModerated: EnumUploadCaptureResult
+	CaptureNotInGallery: EnumUploadCaptureResult
+	IneligibleCapture: EnumUploadCaptureResult
+	NeedPermission: EnumUploadCaptureResult
+	Success: EnumUploadCaptureResult
+	UploadQuotaReached: EnumUploadCaptureResult
+	function GetEnumItems(self): { EnumUploadCaptureResult }
+	function FromName(self, Name: string): EnumUploadCaptureResult?
+	function FromValue(self, Value: number): EnumUploadCaptureResult?
 end
 declare class EnumUsageContext extends EnumItem end
 declare class EnumUsageContext_INTERNAL extends Enum
 	Default: EnumUsageContext
 	Preview: EnumUsageContext
+	function GetEnumItems(self): { EnumUsageContext }
+	function FromName(self, Name: string): EnumUsageContext?
+	function FromValue(self, Value: number): EnumUsageContext?
 end
 declare class EnumUserCFrame extends EnumItem end
 declare class EnumUserCFrame_INTERNAL extends Enum
@@ -3837,6 +6095,9 @@ declare class EnumUserCFrame_INTERNAL extends Enum
 	Head: EnumUserCFrame
 	LeftHand: EnumUserCFrame
 	RightHand: EnumUserCFrame
+	function GetEnumItems(self): { EnumUserCFrame }
+	function FromName(self, Name: string): EnumUserCFrame?
+	function FromValue(self, Value: number): EnumUserCFrame?
 end
 declare class EnumUserInputState extends EnumItem end
 declare class EnumUserInputState_INTERNAL extends Enum
@@ -3845,6 +6106,9 @@ declare class EnumUserInputState_INTERNAL extends Enum
 	Change: EnumUserInputState
 	End: EnumUserInputState
 	None: EnumUserInputState
+	function GetEnumItems(self): { EnumUserInputState }
+	function FromName(self, Name: string): EnumUserInputState?
+	function FromValue(self, Value: number): EnumUserInputState?
 end
 declare class EnumUserInputType extends EnumItem end
 declare class EnumUserInputType_INTERNAL extends Enum
@@ -3869,6 +6133,9 @@ declare class EnumUserInputType_INTERNAL extends Enum
 	None: EnumUserInputType
 	TextInput: EnumUserInputType
 	Touch: EnumUserInputType
+	function GetEnumItems(self): { EnumUserInputType }
+	function FromName(self, Name: string): EnumUserInputType?
+	function FromValue(self, Value: number): EnumUserInputType?
 end
 declare class EnumVRComfortSetting extends EnumItem end
 declare class EnumVRComfortSetting_INTERNAL extends Enum
@@ -3876,11 +6143,17 @@ declare class EnumVRComfortSetting_INTERNAL extends Enum
 	Custom: EnumVRComfortSetting
 	Expert: EnumVRComfortSetting
 	Normal: EnumVRComfortSetting
+	function GetEnumItems(self): { EnumVRComfortSetting }
+	function FromName(self, Name: string): EnumVRComfortSetting?
+	function FromValue(self, Value: number): EnumVRComfortSetting?
 end
 declare class EnumVRControllerModelMode extends EnumItem end
 declare class EnumVRControllerModelMode_INTERNAL extends Enum
 	Disabled: EnumVRControllerModelMode
 	Transparent: EnumVRControllerModelMode
+	function GetEnumItems(self): { EnumVRControllerModelMode }
+	function FromName(self, Name: string): EnumVRControllerModelMode?
+	function FromValue(self, Value: number): EnumVRControllerModelMode?
 end
 declare class EnumVRDeviceType extends EnumItem end
 declare class EnumVRDeviceType_INTERNAL extends Enum
@@ -3889,23 +6162,35 @@ declare class EnumVRDeviceType_INTERNAL extends Enum
 	OculusRift: EnumVRDeviceType
 	Unknown: EnumVRDeviceType
 	ValveIndex: EnumVRDeviceType
+	function GetEnumItems(self): { EnumVRDeviceType }
+	function FromName(self, Name: string): EnumVRDeviceType?
+	function FromValue(self, Value: number): EnumVRDeviceType?
 end
 declare class EnumVRLaserPointerMode extends EnumItem end
 declare class EnumVRLaserPointerMode_INTERNAL extends Enum
 	Disabled: EnumVRLaserPointerMode
 	DualPointer: EnumVRLaserPointerMode
 	Pointer: EnumVRLaserPointerMode
+	function GetEnumItems(self): { EnumVRLaserPointerMode }
+	function FromName(self, Name: string): EnumVRLaserPointerMode?
+	function FromValue(self, Value: number): EnumVRLaserPointerMode?
 end
 declare class EnumVRSafetyBubbleMode extends EnumItem end
 declare class EnumVRSafetyBubbleMode_INTERNAL extends Enum
 	Anyone: EnumVRSafetyBubbleMode
 	NoOne: EnumVRSafetyBubbleMode
 	OnlyFriends: EnumVRSafetyBubbleMode
+	function GetEnumItems(self): { EnumVRSafetyBubbleMode }
+	function FromName(self, Name: string): EnumVRSafetyBubbleMode?
+	function FromValue(self, Value: number): EnumVRSafetyBubbleMode?
 end
 declare class EnumVRScaling extends EnumItem end
 declare class EnumVRScaling_INTERNAL extends Enum
 	Off: EnumVRScaling
 	World: EnumVRScaling
+	function GetEnumItems(self): { EnumVRScaling }
+	function FromName(self, Name: string): EnumVRScaling?
+	function FromValue(self, Value: number): EnumVRScaling?
 end
 declare class EnumVRSessionState extends EnumItem end
 declare class EnumVRSessionState_INTERNAL extends Enum
@@ -3914,34 +6199,52 @@ declare class EnumVRSessionState_INTERNAL extends Enum
 	Stopping: EnumVRSessionState
 	Undefined: EnumVRSessionState
 	Visible: EnumVRSessionState
+	function GetEnumItems(self): { EnumVRSessionState }
+	function FromName(self, Name: string): EnumVRSessionState?
+	function FromValue(self, Value: number): EnumVRSessionState?
 end
 declare class EnumVRTouchpad extends EnumItem end
 declare class EnumVRTouchpad_INTERNAL extends Enum
 	Left: EnumVRTouchpad
 	Right: EnumVRTouchpad
+	function GetEnumItems(self): { EnumVRTouchpad }
+	function FromName(self, Name: string): EnumVRTouchpad?
+	function FromValue(self, Value: number): EnumVRTouchpad?
 end
 declare class EnumVRTouchpadMode extends EnumItem end
 declare class EnumVRTouchpadMode_INTERNAL extends Enum
 	ABXY: EnumVRTouchpadMode
 	Touch: EnumVRTouchpadMode
 	VirtualThumbstick: EnumVRTouchpadMode
+	function GetEnumItems(self): { EnumVRTouchpadMode }
+	function FromName(self, Name: string): EnumVRTouchpadMode?
+	function FromValue(self, Value: number): EnumVRTouchpadMode?
 end
 declare class EnumVelocityConstraintMode extends EnumItem end
 declare class EnumVelocityConstraintMode_INTERNAL extends Enum
 	Line: EnumVelocityConstraintMode
 	Plane: EnumVelocityConstraintMode
 	Vector: EnumVelocityConstraintMode
+	function GetEnumItems(self): { EnumVelocityConstraintMode }
+	function FromName(self, Name: string): EnumVelocityConstraintMode?
+	function FromValue(self, Value: number): EnumVelocityConstraintMode?
 end
 declare class EnumVerticalAlignment extends EnumItem end
 declare class EnumVerticalAlignment_INTERNAL extends Enum
 	Bottom: EnumVerticalAlignment
 	Center: EnumVerticalAlignment
 	Top: EnumVerticalAlignment
+	function GetEnumItems(self): { EnumVerticalAlignment }
+	function FromName(self, Name: string): EnumVerticalAlignment?
+	function FromValue(self, Value: number): EnumVerticalAlignment?
 end
 declare class EnumVerticalScrollBarPosition extends EnumItem end
 declare class EnumVerticalScrollBarPosition_INTERNAL extends Enum
 	Left: EnumVerticalScrollBarPosition
 	Right: EnumVerticalScrollBarPosition
+	function GetEnumItems(self): { EnumVerticalScrollBarPosition }
+	function FromName(self, Name: string): EnumVerticalScrollBarPosition?
+	function FromValue(self, Value: number): EnumVerticalScrollBarPosition?
 end
 declare class EnumVibrationMotor extends EnumItem end
 declare class EnumVibrationMotor_INTERNAL extends Enum
@@ -3951,6 +6254,30 @@ declare class EnumVibrationMotor_INTERNAL extends Enum
 	RightHand: EnumVibrationMotor
 	RightTrigger: EnumVibrationMotor
 	Small: EnumVibrationMotor
+	function GetEnumItems(self): { EnumVibrationMotor }
+	function FromName(self, Name: string): EnumVibrationMotor?
+	function FromValue(self, Value: number): EnumVibrationMotor?
+end
+declare class EnumVideoCaptureResult extends EnumItem end
+declare class EnumVideoCaptureResult_INTERNAL extends Enum
+	OtherError: EnumVideoCaptureResult
+	ScreenSizeChanged: EnumVideoCaptureResult
+	Success: EnumVideoCaptureResult
+	TimeLimitReached: EnumVideoCaptureResult
+	function GetEnumItems(self): { EnumVideoCaptureResult }
+	function FromName(self, Name: string): EnumVideoCaptureResult?
+	function FromValue(self, Value: number): EnumVideoCaptureResult?
+end
+declare class EnumVideoCaptureStartedResult extends EnumItem end
+declare class EnumVideoCaptureStartedResult_INTERNAL extends Enum
+	CapturingAlready: EnumVideoCaptureStartedResult
+	NoDeviceSupport: EnumVideoCaptureStartedResult
+	NoSpaceOnDevice: EnumVideoCaptureStartedResult
+	OtherError: EnumVideoCaptureStartedResult
+	Success: EnumVideoCaptureStartedResult
+	function GetEnumItems(self): { EnumVideoCaptureStartedResult }
+	function FromName(self, Name: string): EnumVideoCaptureStartedResult?
+	function FromValue(self, Value: number): EnumVideoCaptureStartedResult?
 end
 declare class EnumVideoDeviceCaptureQuality extends EnumItem end
 declare class EnumVideoDeviceCaptureQuality_INTERNAL extends Enum
@@ -3958,6 +6285,9 @@ declare class EnumVideoDeviceCaptureQuality_INTERNAL extends Enum
 	High: EnumVideoDeviceCaptureQuality
 	Low: EnumVideoDeviceCaptureQuality
 	Medium: EnumVideoDeviceCaptureQuality
+	function GetEnumItems(self): { EnumVideoDeviceCaptureQuality }
+	function FromName(self, Name: string): EnumVideoDeviceCaptureQuality?
+	function FromValue(self, Value: number): EnumVideoDeviceCaptureQuality?
 end
 declare class EnumVideoError extends EnumItem end
 declare class EnumVideoError_INTERNAL extends Enum
@@ -3980,6 +6310,19 @@ declare class EnumVideoError_INTERNAL extends Enum
 	StreamNotFound: EnumVideoError
 	Unknown: EnumVideoError
 	Unsupported: EnumVideoError
+	function GetEnumItems(self): { EnumVideoError }
+	function FromName(self, Name: string): EnumVideoError?
+	function FromValue(self, Value: number): EnumVideoError?
+end
+declare class EnumVideoSampleSize extends EnumItem end
+declare class EnumVideoSampleSize_INTERNAL extends Enum
+	Full: EnumVideoSampleSize
+	Large: EnumVideoSampleSize
+	Medium: EnumVideoSampleSize
+	Small: EnumVideoSampleSize
+	function GetEnumItems(self): { EnumVideoSampleSize }
+	function FromName(self, Name: string): EnumVideoSampleSize?
+	function FromValue(self, Value: number): EnumVideoSampleSize?
 end
 declare class EnumViewMode extends EnumItem end
 declare class EnumViewMode_INTERNAL extends Enum
@@ -3987,18 +6330,35 @@ declare class EnumViewMode_INTERNAL extends Enum
 	GeometryComplexity: EnumViewMode
 	None: EnumViewMode
 	Transparent: EnumViewMode
+	function GetEnumItems(self): { EnumViewMode }
+	function FromName(self, Name: string): EnumViewMode?
+	function FromValue(self, Value: number): EnumViewMode?
 end
 declare class EnumVirtualCursorMode extends EnumItem end
 declare class EnumVirtualCursorMode_INTERNAL extends Enum
 	Default: EnumVirtualCursorMode
 	Disabled: EnumVirtualCursorMode
 	Enabled: EnumVirtualCursorMode
+	function GetEnumItems(self): { EnumVirtualCursorMode }
+	function FromName(self, Name: string): EnumVirtualCursorMode?
+	function FromValue(self, Value: number): EnumVirtualCursorMode?
 end
 declare class EnumVirtualInputMode extends EnumItem end
 declare class EnumVirtualInputMode_INTERNAL extends Enum
 	None: EnumVirtualInputMode
 	Playing: EnumVirtualInputMode
 	Recording: EnumVirtualInputMode
+	function GetEnumItems(self): { EnumVirtualInputMode }
+	function FromName(self, Name: string): EnumVirtualInputMode?
+	function FromValue(self, Value: number): EnumVirtualInputMode?
+end
+declare class EnumVoiceChatDistanceAttenuationType extends EnumItem end
+declare class EnumVoiceChatDistanceAttenuationType_INTERNAL extends Enum
+	Inverse: EnumVoiceChatDistanceAttenuationType
+	Legacy: EnumVoiceChatDistanceAttenuationType
+	function GetEnumItems(self): { EnumVoiceChatDistanceAttenuationType }
+	function FromName(self, Name: string): EnumVoiceChatDistanceAttenuationType?
+	function FromValue(self, Value: number): EnumVoiceChatDistanceAttenuationType?
 end
 declare class EnumVoiceChatState extends EnumItem end
 declare class EnumVoiceChatState_INTERNAL extends Enum
@@ -4009,18 +6369,42 @@ declare class EnumVoiceChatState_INTERNAL extends Enum
 	Joining: EnumVoiceChatState
 	JoiningRetry: EnumVoiceChatState
 	Leaving: EnumVoiceChatState
+	function GetEnumItems(self): { EnumVoiceChatState }
+	function FromName(self, Name: string): EnumVoiceChatState?
+	function FromValue(self, Value: number): EnumVoiceChatState?
+end
+declare class EnumVoiceClientLeaveReasons extends EnumItem end
+declare class EnumVoiceClientLeaveReasons_INTERNAL extends Enum
+	ClientNetworkDisconnected: EnumVoiceClientLeaveReasons
+	ClientShutdown: EnumVoiceClientLeaveReasons
+	ImguiDebugLeave: EnumVoiceClientLeaveReasons
+	LuaInitiated: EnumVoiceClientLeaveReasons
+	PlayerLeft: EnumVoiceClientLeaveReasons
+	PublishFailed: EnumVoiceClientLeaveReasons
+	RejoinReceived: EnumVoiceClientLeaveReasons
+	Unknown: EnumVoiceClientLeaveReasons
+	VoiceReboot: EnumVoiceClientLeaveReasons
+	function GetEnumItems(self): { EnumVoiceClientLeaveReasons }
+	function FromName(self, Name: string): EnumVoiceClientLeaveReasons?
+	function FromValue(self, Value: number): EnumVoiceClientLeaveReasons?
 end
 declare class EnumVoiceControlPath extends EnumItem end
 declare class EnumVoiceControlPath_INTERNAL extends Enum
 	Join: EnumVoiceControlPath
 	Publish: EnumVoiceControlPath
 	Subscribe: EnumVoiceControlPath
+	function GetEnumItems(self): { EnumVoiceControlPath }
+	function FromName(self, Name: string): EnumVoiceControlPath?
+	function FromValue(self, Value: number): EnumVoiceControlPath?
 end
 declare class EnumVolumetricAudio extends EnumItem end
 declare class EnumVolumetricAudio_INTERNAL extends Enum
 	Automatic: EnumVolumetricAudio
 	Disabled: EnumVolumetricAudio
 	Enabled: EnumVolumetricAudio
+	function GetEnumItems(self): { EnumVolumetricAudio }
+	function FromName(self, Name: string): EnumVolumetricAudio?
+	function FromValue(self, Value: number): EnumVolumetricAudio?
 end
 declare class EnumWaterDirection extends EnumItem end
 declare class EnumWaterDirection_INTERNAL extends Enum
@@ -4030,6 +6414,9 @@ declare class EnumWaterDirection_INTERNAL extends Enum
 	X: EnumWaterDirection
 	Y: EnumWaterDirection
 	Z: EnumWaterDirection
+	function GetEnumItems(self): { EnumWaterDirection }
+	function FromName(self, Name: string): EnumWaterDirection?
+	function FromValue(self, Value: number): EnumWaterDirection?
 end
 declare class EnumWaterForce extends EnumItem end
 declare class EnumWaterForce_INTERNAL extends Enum
@@ -4038,23 +6425,64 @@ declare class EnumWaterForce_INTERNAL extends Enum
 	None: EnumWaterForce
 	Small: EnumWaterForce
 	Strong: EnumWaterForce
+	function GetEnumItems(self): { EnumWaterForce }
+	function FromName(self, Name: string): EnumWaterForce?
+	function FromValue(self, Value: number): EnumWaterForce?
+end
+declare class EnumWebSocketState extends EnumItem end
+declare class EnumWebSocketState_INTERNAL extends Enum
+	Closed: EnumWebSocketState
+	Closing: EnumWebSocketState
+	Connecting: EnumWebSocketState
+	Open: EnumWebSocketState
+	function GetEnumItems(self): { EnumWebSocketState }
+	function FromName(self, Name: string): EnumWebSocketState?
+	function FromValue(self, Value: number): EnumWebSocketState?
+end
+declare class EnumWebStreamClientState extends EnumItem end
+declare class EnumWebStreamClientState_INTERNAL extends Enum
+	Closed: EnumWebStreamClientState
+	Connecting: EnumWebStreamClientState
+	Error: EnumWebStreamClientState
+	Open: EnumWebStreamClientState
+	function GetEnumItems(self): { EnumWebStreamClientState }
+	function FromName(self, Name: string): EnumWebStreamClientState?
+	function FromValue(self, Value: number): EnumWebStreamClientState?
+end
+declare class EnumWebStreamClientType extends EnumItem end
+declare class EnumWebStreamClientType_INTERNAL extends Enum
+	RawStream: EnumWebStreamClientType
+	SSE: EnumWebStreamClientType
+	WebSocket: EnumWebStreamClientType
+	function GetEnumItems(self): { EnumWebStreamClientType }
+	function FromName(self, Name: string): EnumWebStreamClientType?
+	function FromValue(self, Value: number): EnumWebStreamClientType?
 end
 declare class EnumWeldConstraintPreserve extends EnumItem end
 declare class EnumWeldConstraintPreserve_INTERNAL extends Enum
 	All: EnumWeldConstraintPreserve
 	None: EnumWeldConstraintPreserve
 	Touching: EnumWeldConstraintPreserve
+	function GetEnumItems(self): { EnumWeldConstraintPreserve }
+	function FromName(self, Name: string): EnumWeldConstraintPreserve?
+	function FromValue(self, Value: number): EnumWeldConstraintPreserve?
 end
 declare class EnumWhisperChatPrivacyMode extends EnumItem end
 declare class EnumWhisperChatPrivacyMode_INTERNAL extends Enum
 	AllUsers: EnumWhisperChatPrivacyMode
 	NoOne: EnumWhisperChatPrivacyMode
+	function GetEnumItems(self): { EnumWhisperChatPrivacyMode }
+	function FromName(self, Name: string): EnumWhisperChatPrivacyMode?
+	function FromValue(self, Value: number): EnumWhisperChatPrivacyMode?
 end
 declare class EnumWrapLayerAutoSkin extends EnumItem end
 declare class EnumWrapLayerAutoSkin_INTERNAL extends Enum
 	Disabled: EnumWrapLayerAutoSkin
 	EnabledOverride: EnumWrapLayerAutoSkin
 	EnabledPreserve: EnumWrapLayerAutoSkin
+	function GetEnumItems(self): { EnumWrapLayerAutoSkin }
+	function FromName(self, Name: string): EnumWrapLayerAutoSkin?
+	function FromValue(self, Value: number): EnumWrapLayerAutoSkin?
 end
 declare class EnumWrapLayerDebugMode extends EnumItem end
 declare class EnumWrapLayerDebugMode_INTERNAL extends Enum
@@ -4069,14 +6497,19 @@ declare class EnumWrapLayerDebugMode_INTERNAL extends Enum
 	LayerCageFittedToPrev: EnumWrapLayerDebugMode
 	None: EnumWrapLayerDebugMode
 	OuterCage: EnumWrapLayerDebugMode
+	PreWrapDeformerOuterCage: EnumWrapLayerDebugMode
 	Rbf: EnumWrapLayerDebugMode
 	Reference: EnumWrapLayerDebugMode
 	ReferenceMeshAfterMorph: EnumWrapLayerDebugMode
+	function GetEnumItems(self): { EnumWrapLayerDebugMode }
+	function FromName(self, Name: string): EnumWrapLayerDebugMode?
+	function FromValue(self, Value: number): EnumWrapLayerDebugMode?
 end
 declare class EnumWrapTargetDebugMode extends EnumItem end
 declare class EnumWrapTargetDebugMode_INTERNAL extends Enum
 	None: EnumWrapTargetDebugMode
 	OuterCageDetail: EnumWrapTargetDebugMode
+	PreWrapDeformerCage: EnumWrapTargetDebugMode
 	Rbf: EnumWrapTargetDebugMode
 	TargetCageCompressed: EnumWrapTargetDebugMode
 	TargetCageInterface: EnumWrapTargetDebugMode
@@ -4084,28 +6517,38 @@ declare class EnumWrapTargetDebugMode_INTERNAL extends Enum
 	TargetLayerCageCompressed: EnumWrapTargetDebugMode
 	TargetLayerCageOriginal: EnumWrapTargetDebugMode
 	TargetLayerInterface: EnumWrapTargetDebugMode
+	function GetEnumItems(self): { EnumWrapTargetDebugMode }
+	function FromName(self, Name: string): EnumWrapTargetDebugMode?
+	function FromValue(self, Value: number): EnumWrapTargetDebugMode?
 end
 declare class EnumZIndexBehavior extends EnumItem end
 declare class EnumZIndexBehavior_INTERNAL extends Enum
 	Global: EnumZIndexBehavior
 	Sibling: EnumZIndexBehavior
+	function GetEnumItems(self): { EnumZIndexBehavior }
+	function FromName(self, Name: string): EnumZIndexBehavior?
+	function FromValue(self, Value: number): EnumZIndexBehavior?
 end
 
 
 type ENUM_LIST = {
 	AccessModifierType: EnumAccessModifierType_INTERNAL,
 	AccessoryType: EnumAccessoryType_INTERNAL,
+	ActionOnAutoResumeSync: EnumActionOnAutoResumeSync_INTERNAL,
 	ActionOnStopSync: EnumActionOnStopSync_INTERNAL,
 	ActionType: EnumActionType_INTERNAL,
 	ActuatorRelativeTo: EnumActuatorRelativeTo_INTERNAL,
 	ActuatorType: EnumActuatorType_INTERNAL,
+	AdAvailabilityResult: EnumAdAvailabilityResult_INTERNAL,
 	AdEventType: EnumAdEventType_INTERNAL,
+	AdFormat: EnumAdFormat_INTERNAL,
 	AdShape: EnumAdShape_INTERNAL,
 	AdTeleportMethod: EnumAdTeleportMethod_INTERNAL,
 	AdUIEventType: EnumAdUIEventType_INTERNAL,
 	AdUIType: EnumAdUIType_INTERNAL,
 	AdUnitStatus: EnumAdUnitStatus_INTERNAL,
 	AdornCullingMode: EnumAdornCullingMode_INTERNAL,
+	AdornShading: EnumAdornShading_INTERNAL,
 	AlignType: EnumAlignType_INTERNAL,
 	AlphaMode: EnumAlphaMode_INTERNAL,
 	AnalyticsCustomFieldKeys: EnumAnalyticsCustomFieldKeys_INTERNAL,
@@ -4116,10 +6559,18 @@ type ENUM_LIST = {
 	AnalyticsProgressionStatus: EnumAnalyticsProgressionStatus_INTERNAL,
 	AnalyticsProgressionType: EnumAnalyticsProgressionType_INTERNAL,
 	AnimationClipFromVideoStatus: EnumAnimationClipFromVideoStatus_INTERNAL,
+	AnimationNodeBlend2DInputMode: EnumAnimationNodeBlend2DInputMode_INTERNAL,
+	AnimationNodeInterruptible: EnumAnimationNodeInterruptible_INTERNAL,
+	AnimationNodePlayMode: EnumAnimationNodePlayMode_INTERNAL,
+	AnimationNodeTransitionType: EnumAnimationNodeTransitionType_INTERNAL,
+	AnimationNodeType: EnumAnimationNodeType_INTERNAL,
+	AnimationNodeWaitFor: EnumAnimationNodeWaitFor_INTERNAL,
 	AnimationPriority: EnumAnimationPriority_INTERNAL,
 	AnimatorRetargetingMode: EnumAnimatorRetargetingMode_INTERNAL,
+	AnnotationChannelContentPreference: EnumAnnotationChannelContentPreference_INTERNAL,
 	AnnotationEditingMode: EnumAnnotationEditingMode_INTERNAL,
-	AnnotationRequestResult: EnumAnnotationRequestResult_INTERNAL,
+	AnnotationPlaceContentPreference: EnumAnnotationPlaceContentPreference_INTERNAL,
+	AnnotationRequestStatus: EnumAnnotationRequestStatus_INTERNAL,
 	AnnotationRequestType: EnumAnnotationRequestType_INTERNAL,
 	AppLifecycleManagerState: EnumAppLifecycleManagerState_INTERNAL,
 	AppShellActionType: EnumAppShellActionType_INTERNAL,
@@ -4132,10 +6583,13 @@ type ENUM_LIST = {
 	AssetType: EnumAssetType_INTERNAL,
 	AssetTypeVerification: EnumAssetTypeVerification_INTERNAL,
 	AudioApiRollout: EnumAudioApiRollout_INTERNAL,
+	AudioCaptureMode: EnumAudioCaptureMode_INTERNAL,
+	AudioChannelLayout: EnumAudioChannelLayout_INTERNAL,
 	AudioFilterType: EnumAudioFilterType_INTERNAL,
 	AudioSimulationFidelity: EnumAudioSimulationFidelity_INTERNAL,
 	AudioSubType: EnumAudioSubType_INTERNAL,
 	AudioWindowSize: EnumAudioWindowSize_INTERNAL,
+	AuthorityMode: EnumAuthorityMode_INTERNAL,
 	AutoIndentRule: EnumAutoIndentRule_INTERNAL,
 	AutomaticSize: EnumAutomaticSize_INTERNAL,
 	AvatarAssetType: EnumAvatarAssetType_INTERNAL,
@@ -4144,13 +6598,30 @@ type ENUM_LIST = {
 	AvatarGenerationError: EnumAvatarGenerationError_INTERNAL,
 	AvatarItemType: EnumAvatarItemType_INTERNAL,
 	AvatarPromptResult: EnumAvatarPromptResult_INTERNAL,
+	AvatarSettingsAccessoryLimitMethod: EnumAvatarSettingsAccessoryLimitMethod_INTERNAL,
+	AvatarSettingsAccessoryMode: EnumAvatarSettingsAccessoryMode_INTERNAL,
+	AvatarSettingsAnimationClipsMode: EnumAvatarSettingsAnimationClipsMode_INTERNAL,
+	AvatarSettingsAnimationPacksMode: EnumAvatarSettingsAnimationPacksMode_INTERNAL,
+	AvatarSettingsAppearanceMode: EnumAvatarSettingsAppearanceMode_INTERNAL,
+	AvatarSettingsBuildMode: EnumAvatarSettingsBuildMode_INTERNAL,
+	AvatarSettingsClothingMode: EnumAvatarSettingsClothingMode_INTERNAL,
+	AvatarSettingsCollisionMode: EnumAvatarSettingsCollisionMode_INTERNAL,
+	AvatarSettingsCustomAccessoryMode: EnumAvatarSettingsCustomAccessoryMode_INTERNAL,
+	AvatarSettingsCustomBodyType: EnumAvatarSettingsCustomBodyType_INTERNAL,
+	AvatarSettingsCustomClothingMode: EnumAvatarSettingsCustomClothingMode_INTERNAL,
+	AvatarSettingsHitAndTouchDetectionMode: EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL,
+	AvatarSettingsJumpMode: EnumAvatarSettingsJumpMode_INTERNAL,
+	AvatarSettingsLegacyCollisionMode: EnumAvatarSettingsLegacyCollisionMode_INTERNAL,
+	AvatarSettingsScaleMode: EnumAvatarSettingsScaleMode_INTERNAL,
 	AvatarThumbnailCustomizationType: EnumAvatarThumbnailCustomizationType_INTERNAL,
 	AvatarUnificationMode: EnumAvatarUnificationMode_INTERNAL,
 	Axis: EnumAxis_INTERNAL,
+	BenefitType: EnumBenefitType_INTERNAL,
 	BinType: EnumBinType_INTERNAL,
 	BodyPart: EnumBodyPart_INTERNAL,
 	BodyPartR15: EnumBodyPartR15_INTERNAL,
 	BorderMode: EnumBorderMode_INTERNAL,
+	BorderStrokePosition: EnumBorderStrokePosition_INTERNAL,
 	BreakReason: EnumBreakReason_INTERNAL,
 	BreakpointRemoveReason: EnumBreakpointRemoveReason_INTERNAL,
 	BulkMoveMode: EnumBulkMoveMode_INTERNAL,
@@ -4162,9 +6633,12 @@ type ENUM_LIST = {
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
 	CameraSpeedAdjustBinding: EnumCameraSpeedAdjustBinding_INTERNAL,
 	CameraType: EnumCameraType_INTERNAL,
+	CaptureGalleryPermission: EnumCaptureGalleryPermission_INTERNAL,
+	CaptureType: EnumCaptureType_INTERNAL,
 	CatalogCategoryFilter: EnumCatalogCategoryFilter_INTERNAL,
 	CatalogSortAggregation: EnumCatalogSortAggregation_INTERNAL,
 	CatalogSortType: EnumCatalogSortType_INTERNAL,
+	CatalogTimedOptionFilter: EnumCatalogTimedOptionFilter_INTERNAL,
 	CellBlock: EnumCellBlock_INTERNAL,
 	CellMaterial: EnumCellMaterial_INTERNAL,
 	CellOrientation: EnumCellOrientation_INTERNAL,
@@ -4183,11 +6657,15 @@ type ENUM_LIST = {
 	CollisionFidelity: EnumCollisionFidelity_INTERNAL,
 	CommandPermission: EnumCommandPermission_INTERNAL,
 	CompileTarget: EnumCompileTarget_INTERNAL,
+	CompletionAcceptanceBehavior: EnumCompletionAcceptanceBehavior_INTERNAL,
 	CompletionItemKind: EnumCompletionItemKind_INTERNAL,
 	CompletionItemTag: EnumCompletionItemTag_INTERNAL,
 	CompletionTriggerKind: EnumCompletionTriggerKind_INTERNAL,
+	CompositeValueCurveType: EnumCompositeValueCurveType_INTERNAL,
+	CompressionAlgorithm: EnumCompressionAlgorithm_INTERNAL,
 	ComputerCameraMovementMode: EnumComputerCameraMovementMode_INTERNAL,
 	ComputerMovementMode: EnumComputerMovementMode_INTERNAL,
+	ConfigSnapshotErrorState: EnumConfigSnapshotErrorState_INTERNAL,
 	ConnectionError: EnumConnectionError_INTERNAL,
 	ConnectionState: EnumConnectionState_INTERNAL,
 	ContentSourceType: EnumContentSourceType_INTERNAL,
@@ -4207,6 +6685,7 @@ type ENUM_LIST = {
 	DebuggerFrameType: EnumDebuggerFrameType_INTERNAL,
 	DebuggerPauseReason: EnumDebuggerPauseReason_INTERNAL,
 	DebuggerStatus: EnumDebuggerStatus_INTERNAL,
+	DefaultScriptSyncFileType: EnumDefaultScriptSyncFileType_INTERNAL,
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode_INTERNAL,
 	DevComputerCameraMovementMode: EnumDevComputerCameraMovementMode_INTERNAL,
 	DevComputerMovementMode: EnumDevComputerMovementMode_INTERNAL,
@@ -4220,6 +6699,7 @@ type ENUM_LIST = {
 	DialogBehaviorType: EnumDialogBehaviorType_INTERNAL,
 	DialogPurpose: EnumDialogPurpose_INTERNAL,
 	DialogTone: EnumDialogTone_INTERNAL,
+	DisplaySize: EnumDisplaySize_INTERNAL,
 	DominantAxis: EnumDominantAxis_INTERNAL,
 	DraftStatusCode: EnumDraftStatusCode_INTERNAL,
 	DragDetectorDragStyle: EnumDragDetectorDragStyle_INTERNAL,
@@ -4234,13 +6714,22 @@ type ENUM_LIST = {
 	ElasticBehavior: EnumElasticBehavior_INTERNAL,
 	EnviromentalPhysicsThrottle: EnumEnviromentalPhysicsThrottle_INTERNAL,
 	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
+	ExperienceEventStatus: EnumExperienceEventStatus_INTERNAL,
+	ExperienceStateCaptureSelectionMode: EnumExperienceStateCaptureSelectionMode_INTERNAL,
+	ExperienceStateRecordingLoadMode: EnumExperienceStateRecordingLoadMode_INTERNAL,
+	ExperienceStateRecordingLoadSourceType: EnumExperienceStateRecordingLoadSourceType_INTERNAL,
+	ExperienceStateRecordingPlaybackMode: EnumExperienceStateRecordingPlaybackMode_INTERNAL,
 	ExplosionType: EnumExplosionType_INTERNAL,
 	FACSDataLod: EnumFACSDataLod_INTERNAL,
+	FacialAgeEstimationResultType: EnumFacialAgeEstimationResultType_INTERNAL,
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
+	FacsActionUnit: EnumFacsActionUnit_INTERNAL,
+	FeatureRestrictionAbuseVector: EnumFeatureRestrictionAbuseVector_INTERNAL,
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
 	FilterErrorType: EnumFilterErrorType_INTERNAL,
 	FilterResult: EnumFilterResult_INTERNAL,
+	FilterType: EnumFilterType_INTERNAL,
 	FinishRecordingOperation: EnumFinishRecordingOperation_INTERNAL,
 	FluidFidelity: EnumFluidFidelity_INTERNAL,
 	FluidForces: EnumFluidForces_INTERNAL,
@@ -4262,10 +6751,13 @@ type ENUM_LIST = {
 	Genre: EnumGenre_INTERNAL,
 	GraphicsMode: EnumGraphicsMode_INTERNAL,
 	GraphicsOptimizationMode: EnumGraphicsOptimizationMode_INTERNAL,
+	GroupMembershipStatus: EnumGroupMembershipStatus_INTERNAL,
 	GuiState: EnumGuiState_INTERNAL,
 	GuiType: EnumGuiType_INTERNAL,
+	HandRigDescriptionSide: EnumHandRigDescriptionSide_INTERNAL,
 	HandlesStyle: EnumHandlesStyle_INTERNAL,
 	HapticEffectType: EnumHapticEffectType_INTERNAL,
+	HashAlgorithm: EnumHashAlgorithm_INTERNAL,
 	HighlightDepthMode: EnumHighlightDepthMode_INTERNAL,
 	HorizontalAlignment: EnumHorizontalAlignment_INTERNAL,
 	HoverAnimateSpeed: EnumHoverAnimateSpeed_INTERNAL,
@@ -4288,7 +6780,9 @@ type ENUM_LIST = {
 	InOut: EnumInOut_INTERNAL,
 	InfoType: EnumInfoType_INTERNAL,
 	InitialDockState: EnumInitialDockState_INTERNAL,
+	InputActionType: EnumInputActionType_INTERNAL,
 	InputType: EnumInputType_INTERNAL,
+	IntermediateMeshGenerationResult: EnumIntermediateMeshGenerationResult_INTERNAL,
 	InterpolationThrottlingMode: EnumInterpolationThrottlingMode_INTERNAL,
 	InviteState: EnumInviteState_INTERNAL,
 	ItemLineAlignment: EnumItemLineAlignment_INTERNAL,
@@ -4311,10 +6805,13 @@ type ENUM_LIST = {
 	LoadCharacterLayeredClothing: EnumLoadCharacterLayeredClothing_INTERNAL,
 	LoadDynamicHeads: EnumLoadDynamicHeads_INTERNAL,
 	LocationType: EnumLocationType_INTERNAL,
+	LuauTypeCheckMode: EnumLuauTypeCheckMode_INTERNAL,
+	MakeupType: EnumMakeupType_INTERNAL,
 	MarketplaceBulkPurchasePromptStatus: EnumMarketplaceBulkPurchasePromptStatus_INTERNAL,
 	MarketplaceItemPurchaseStatus: EnumMarketplaceItemPurchaseStatus_INTERNAL,
 	MarketplaceProductType: EnumMarketplaceProductType_INTERNAL,
 	MarkupKind: EnumMarkupKind_INTERNAL,
+	MatchmakingType: EnumMatchmakingType_INTERNAL,
 	Material: EnumMaterial_INTERNAL,
 	MaterialPattern: EnumMaterialPattern_INTERNAL,
 	MembershipType: EnumMembershipType_INTERNAL,
@@ -4326,6 +6823,8 @@ type ENUM_LIST = {
 	ModelLevelOfDetail: EnumModelLevelOfDetail_INTERNAL,
 	ModelStreamingBehavior: EnumModelStreamingBehavior_INTERNAL,
 	ModelStreamingMode: EnumModelStreamingMode_INTERNAL,
+	ModerationResultCategory: EnumModerationResultCategory_INTERNAL,
+	ModerationResultLabel: EnumModerationResultLabel_INTERNAL,
 	ModerationStatus: EnumModerationStatus_INTERNAL,
 	ModifierKey: EnumModifierKey_INTERNAL,
 	MouseBehavior: EnumMouseBehavior_INTERNAL,
@@ -4333,6 +6832,7 @@ type ENUM_LIST = {
 	MoverConstraintRootBehaviorMode: EnumMoverConstraintRootBehaviorMode_INTERNAL,
 	MuteState: EnumMuteState_INTERNAL,
 	NameOcclusion: EnumNameOcclusion_INTERNAL,
+	NegateOperationHiddenHistory: EnumNegateOperationHiddenHistory_INTERNAL,
 	NetworkOwnership: EnumNetworkOwnership_INTERNAL,
 	NetworkStatus: EnumNetworkStatus_INTERNAL,
 	NoiseType: EnumNoiseType_INTERNAL,
@@ -4356,25 +6856,38 @@ type ENUM_LIST = {
 	PathStatus: EnumPathStatus_INTERNAL,
 	PathWaypointAction: EnumPathWaypointAction_INTERNAL,
 	PathfindingUseImprovedSearch: EnumPathfindingUseImprovedSearch_INTERNAL,
+	PeoplePageLayout: EnumPeoplePageLayout_INTERNAL,
+	PerformanceOverlayMode: EnumPerformanceOverlayMode_INTERNAL,
 	PermissionLevelShown: EnumPermissionLevelShown_INTERNAL,
 	PhysicsSimulationRate: EnumPhysicsSimulationRate_INTERNAL,
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod_INTERNAL,
+	PlaceContentPreference: EnumPlaceContentPreference_INTERNAL,
+	PlacePublishType: EnumPlacePublishType_INTERNAL,
 	Platform: EnumPlatform_INTERNAL,
 	PlaybackState: EnumPlaybackState_INTERNAL,
 	PlayerActions: EnumPlayerActions_INTERNAL,
 	PlayerCharacterDestroyBehavior: EnumPlayerCharacterDestroyBehavior_INTERNAL,
 	PlayerChatType: EnumPlayerChatType_INTERNAL,
+	PlayerDataErrorState: EnumPlayerDataErrorState_INTERNAL,
+	PlayerDataLoadFailureBehavior: EnumPlayerDataLoadFailureBehavior_INTERNAL,
+	PlayerExitReason: EnumPlayerExitReason_INTERNAL,
 	PoseEasingDirection: EnumPoseEasingDirection_INTERNAL,
 	PoseEasingStyle: EnumPoseEasingStyle_INTERNAL,
 	PositionAlignmentMode: EnumPositionAlignmentMode_INTERNAL,
+	PredictionMode: EnumPredictionMode_INTERNAL,
+	PredictionStatus: EnumPredictionStatus_INTERNAL,
+	PreferredInput: EnumPreferredInput_INTERNAL,
 	PreferredTextSize: EnumPreferredTextSize_INTERNAL,
 	PrimalPhysicsSolver: EnumPrimalPhysicsSolver_INTERNAL,
 	PrimitiveType: EnumPrimitiveType_INTERNAL,
 	PrivilegeType: EnumPrivilegeType_INTERNAL,
 	ProductLocationRestriction: EnumProductLocationRestriction_INTERNAL,
+	ProductPurchaseChannel: EnumProductPurchaseChannel_INTERNAL,
 	ProductPurchaseDecision: EnumProductPurchaseDecision_INTERNAL,
 	PromptCreateAssetResult: EnumPromptCreateAssetResult_INTERNAL,
 	PromptCreateAvatarResult: EnumPromptCreateAvatarResult_INTERNAL,
+	PromptExperienceDetailsResult: EnumPromptExperienceDetailsResult_INTERNAL,
+	PromptLinkSharingResult: EnumPromptLinkSharingResult_INTERNAL,
 	PromptPublishAssetResult: EnumPromptPublishAssetResult_INTERNAL,
 	PropertyStatus: EnumPropertyStatus_INTERNAL,
 	ProximityPromptExclusivity: EnumProximityPromptExclusivity_INTERNAL,
@@ -4383,6 +6896,12 @@ type ENUM_LIST = {
 	QualityLevel: EnumQualityLevel_INTERNAL,
 	R15CollisionType: EnumR15CollisionType_INTERNAL,
 	RaycastFilterType: EnumRaycastFilterType_INTERNAL,
+	ReadCapturesFromGalleryResult: EnumReadCapturesFromGalleryResult_INTERNAL,
+	RecommendationActionType: EnumRecommendationActionType_INTERNAL,
+	RecommendationDepartureIntent: EnumRecommendationDepartureIntent_INTERNAL,
+	RecommendationImpressionType: EnumRecommendationImpressionType_INTERNAL,
+	RecommendationItemContentType: EnumRecommendationItemContentType_INTERNAL,
+	RecommendationItemVisibility: EnumRecommendationItemVisibility_INTERNAL,
 	RejectCharacterDeletions: EnumRejectCharacterDeletions_INTERNAL,
 	RenderFidelity: EnumRenderFidelity_INTERNAL,
 	RenderPriority: EnumRenderPriority_INTERNAL,
@@ -4394,13 +6913,16 @@ type ENUM_LIST = {
 	RestPose: EnumRestPose_INTERNAL,
 	ReturnKeyType: EnumReturnKeyType_INTERNAL,
 	ReverbType: EnumReverbType_INTERNAL,
+	ReviewableContentState: EnumReviewableContentState_INTERNAL,
 	RibbonTool: EnumRibbonTool_INTERNAL,
+	RigLabel: EnumRigLabel_INTERNAL,
 	RigScale: EnumRigScale_INTERNAL,
 	RigType: EnumRigType_INTERNAL,
 	RollOffMode: EnumRollOffMode_INTERNAL,
 	RolloutState: EnumRolloutState_INTERNAL,
 	RotationOrder: EnumRotationOrder_INTERNAL,
 	RotationType: EnumRotationType_INTERNAL,
+	RsvpStatus: EnumRsvpStatus_INTERNAL,
 	RtlTextSupport: EnumRtlTextSupport_INTERNAL,
 	RunContext: EnumRunContext_INTERNAL,
 	RunState: EnumRunState_INTERNAL,
@@ -4426,6 +6948,7 @@ type ENUM_LIST = {
 	ServerLiveEditingMode: EnumServerLiveEditingMode_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
 	Severity: EnumSeverity_INTERNAL,
+	ShowAdResult: EnumShowAdResult_INTERNAL,
 	SignalBehavior: EnumSignalBehavior_INTERNAL,
 	SizeConstraint: EnumSizeConstraint_INTERNAL,
 	SolverConvergenceMetricType: EnumSolverConvergenceMetricType_INTERNAL,
@@ -4434,10 +6957,13 @@ type ENUM_LIST = {
 	SortOrder: EnumSortOrder_INTERNAL,
 	SpecialKey: EnumSpecialKey_INTERNAL,
 	StartCorner: EnumStartCorner_INTERNAL,
+	StateObjectFieldType: EnumStateObjectFieldType_INTERNAL,
 	Status: EnumStatus_INTERNAL,
+	StepFrequency: EnumStepFrequency_INTERNAL,
 	StreamOutBehavior: EnumStreamOutBehavior_INTERNAL,
 	StreamingIntegrityMode: EnumStreamingIntegrityMode_INTERNAL,
 	StreamingPauseMode: EnumStreamingPauseMode_INTERNAL,
+	StrokeSizingMode: EnumStrokeSizingMode_INTERNAL,
 	StudioCloseMode: EnumStudioCloseMode_INTERNAL,
 	StudioDataModelType: EnumStudioDataModelType_INTERNAL,
 	StudioPlaceUpdateFailureReason: EnumStudioPlaceUpdateFailureReason_INTERNAL,
@@ -4455,9 +6981,12 @@ type ENUM_LIST = {
 	SurfaceGuiSizingMode: EnumSurfaceGuiSizingMode_INTERNAL,
 	SurfaceType: EnumSurfaceType_INTERNAL,
 	SwipeDirection: EnumSwipeDirection_INTERNAL,
+	SystemThemeValue: EnumSystemThemeValue_INTERNAL,
 	TableMajorAxis: EnumTableMajorAxis_INTERNAL,
 	TeamCreateErrorState: EnumTeamCreateErrorState_INTERNAL,
 	Technology: EnumTechnology_INTERNAL,
+	TelemetryBackend: EnumTelemetryBackend_INTERNAL,
+	TelemetryStandardizedField: EnumTelemetryStandardizedField_INTERNAL,
 	TeleportMethod: EnumTeleportMethod_INTERNAL,
 	TeleportResult: EnumTeleportResult_INTERNAL,
 	TeleportState: EnumTeleportState_INTERNAL,
@@ -4492,6 +7021,7 @@ type ENUM_LIST = {
 	TrackerType: EnumTrackerType_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
+	UICaptureMode: EnumUICaptureMode_INTERNAL,
 	UIDragDetectorBoundingBehavior: EnumUIDragDetectorBoundingBehavior_INTERNAL,
 	UIDragDetectorDragRelativity: EnumUIDragDetectorDragRelativity_INTERNAL,
 	UIDragDetectorDragSpace: EnumUIDragDetectorDragSpace_INTERNAL,
@@ -4502,6 +7032,8 @@ type ENUM_LIST = {
 	UIFlexMode: EnumUIFlexMode_INTERNAL,
 	UITheme: EnumUITheme_INTERNAL,
 	UiMessageType: EnumUiMessageType_INTERNAL,
+	UpdateState: EnumUpdateState_INTERNAL,
+	UploadCaptureResult: EnumUploadCaptureResult_INTERNAL,
 	UsageContext: EnumUsageContext_INTERNAL,
 	UserCFrame: EnumUserCFrame_INTERNAL,
 	UserInputState: EnumUserInputState_INTERNAL,
@@ -4519,16 +7051,24 @@ type ENUM_LIST = {
 	VerticalAlignment: EnumVerticalAlignment_INTERNAL,
 	VerticalScrollBarPosition: EnumVerticalScrollBarPosition_INTERNAL,
 	VibrationMotor: EnumVibrationMotor_INTERNAL,
+	VideoCaptureResult: EnumVideoCaptureResult_INTERNAL,
+	VideoCaptureStartedResult: EnumVideoCaptureStartedResult_INTERNAL,
 	VideoDeviceCaptureQuality: EnumVideoDeviceCaptureQuality_INTERNAL,
 	VideoError: EnumVideoError_INTERNAL,
+	VideoSampleSize: EnumVideoSampleSize_INTERNAL,
 	ViewMode: EnumViewMode_INTERNAL,
 	VirtualCursorMode: EnumVirtualCursorMode_INTERNAL,
 	VirtualInputMode: EnumVirtualInputMode_INTERNAL,
+	VoiceChatDistanceAttenuationType: EnumVoiceChatDistanceAttenuationType_INTERNAL,
 	VoiceChatState: EnumVoiceChatState_INTERNAL,
+	VoiceClientLeaveReasons: EnumVoiceClientLeaveReasons_INTERNAL,
 	VoiceControlPath: EnumVoiceControlPath_INTERNAL,
 	VolumetricAudio: EnumVolumetricAudio_INTERNAL,
 	WaterDirection: EnumWaterDirection_INTERNAL,
 	WaterForce: EnumWaterForce_INTERNAL,
+	WebSocketState: EnumWebSocketState_INTERNAL,
+	WebStreamClientState: EnumWebStreamClientState_INTERNAL,
+	WebStreamClientType: EnumWebStreamClientType_INTERNAL,
 	WeldConstraintPreserve: EnumWeldConstraintPreserve_INTERNAL,
 	WhisperChatPrivacyMode: EnumWhisperChatPrivacyMode_INTERNAL,
 	WrapLayerAutoSkin: EnumWrapLayerAutoSkin_INTERNAL,
@@ -4571,7 +7111,7 @@ declare class CFrame
 	YVector: Vector3
 	Z: number
 	ZVector: Vector3
-	function FuzzyEq(self, other: CFrame, epsilon: number): boolean
+	function FuzzyEq(self, other: CFrame, epsilon: number?): boolean
 	function GetComponents(self): (number, number, number, number, number, number, number, number, number, number, number, number)
 	function Inverse(self): CFrame
 	function Lerp(self, goal: CFrame, alpha: number): CFrame
@@ -4594,7 +7134,7 @@ declare class CFrame
 end
 
 declare class CatalogSearchParams
-	AssetTypes: { EnumAssetType }
+	AssetTypes: { EnumAvatarAssetType }
 	BundleTypes: { EnumBundleType }
 	CategoryFilter: EnumCatalogCategoryFilter
 	MaxPrice: number
@@ -4757,13 +7297,7 @@ declare class RaycastParams
 	function AddToFilter(self, instances: Instance | { Instance }): nil
 end
 
-declare class RaycastResult
-	Distance: number
-	Instance: Instance
-	Material: EnumMaterial
-	Normal: Vector3
-	Position: Vector3
-end
+
 
 declare class Rect
 	Height: number
@@ -4794,6 +7328,12 @@ end
 declare class Secret
 	function AddPrefix(self, prefix: string): Secret
 	function AddSuffix(self, suffix: string): Secret
+end
+
+declare class SecurityCapabilities
+	function Add(self, ...: (EnumSecurityCapability)): SecurityCapabilities
+	function Contains(self, ...: (EnumSecurityCapability)): SecurityCapabilities
+	function Remove(self, ...: (EnumSecurityCapability)): SecurityCapabilities
 end
 
 
@@ -4832,11 +7372,12 @@ declare class Vector2
 	X: number
 	Y: number
 	function Abs(self): Vector2
-	function Angle(self, other: Vector2, isSigned: boolean): Vector2
+	function Angle(self, other: Vector2, isSigned: boolean): number
 	function Ceil(self): Vector2
 	function Cross(self, other: Vector2): number
 	function Dot(self, v: Vector2): number
 	function Floor(self): Vector2
+	function FuzzyEq(self, other: Vector2, epsilon: number?): boolean
 	function Lerp(self, v: Vector2, alpha: number): Vector2
 	function Max(self, ...: (Vector2)): Vector2
 	function Min(self, ...: (Vector2)): Vector2
@@ -4871,7 +7412,7 @@ declare class Vector3
 	function Cross(self, other: Vector3): Vector3
 	function Dot(self, other: Vector3): number
 	function Floor(self): Vector3
-	function FuzzyEq(self, other: Vector3, epsilon: number): boolean
+	function FuzzyEq(self, other: Vector3, epsilon: number?): boolean
 	function Lerp(self, goal: Vector3, alpha: number): Vector3
 	function Max(self, ...: (Vector3)): Vector3
 	function Min(self, ...: (Vector3)): Vector3
@@ -4935,13 +7476,25 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
+declare class ValueCurveKey
+    Interpolation: EnumKeyInterpolationMode
+    Time: number
+    Value: any
+    RightTangent: number
+    LeftTangent: number
+end
+
+declare ValueCurveKey: {
+    new: (time: number, value: any, interpolation: EnumKeyInterpolationMode) -> ValueCurveKey
+}
+
 export type Hat = any
+export type AuroraScriptObject = any
 export type RocketPropulsion = any
 export type Skin = any
 export type Plane = any
 export type CustomEvent = any
 export type CustomEventReceiver = any
-export type BevelMesh = any
 export type CylinderMesh = any
 export type Hole = any
 export type MotorFeature = any
@@ -4962,6 +7515,8 @@ export type Snap = any
 export type JointsService = any
 export type Message = any
 export type Hint = any
+export type OpenCloudApiV1 = any
+export type OpenCloudService = any
 export type FlagStand = any
 export type SkateboardPlatform = any
 export type HopperBin = any
@@ -4975,6 +7530,33 @@ declare class Object
 	ClassName: string
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
 	function IsA(self, className: string): boolean
+end
+
+declare class AnimationNode extends Object
+end
+
+declare class Capture extends Object
+	CaptureTime: DateTime
+	CaptureType: EnumCaptureType
+	LocalId: string
+	SourcePlaceId: number
+	SourceUniverseId: number
+end
+
+declare class ScreenshotCapture extends Capture
+end
+
+declare class VideoCapture extends Capture
+	TimeLength: number
+end
+
+declare class ConfigSnapshot extends Object
+	Error: EnumConfigSnapshotErrorState
+	Outdated: boolean
+	UpdateAvailable: RBXScriptSignal<>
+	function GetValue(self, key: string): any
+	function GetValueChangedSignal(self, key: string): RBXScriptSignal
+	function Refresh(self): nil
 end
 
 declare class EditableImage extends Object
@@ -4992,8 +7574,9 @@ end
 
 declare class EditableMesh extends Object
 	FixedSize: boolean
-	SkinningEnabled: boolean
+	function AddBone(self, boneProperties: { [any]: any }): number
 	function AddColor(self, color: Color3, alpha: number): number
+	function AddFace(self, vertexIds: { any }): number
 	function AddNormal(self, normal: Vector3?): number
 	function AddTriangle(self, vertexId0: number, vertexId1: number, vertexId2: number): number
 	function AddUV(self, uv: Vector2): number
@@ -5004,6 +7587,12 @@ declare class EditableMesh extends Object
 	function FindVerticesWithinSphere(self, center: Vector3, radius: number): { any }
 	function GetAdjacentFaces(self, faceId: number): { any }
 	function GetAdjacentVertices(self, vertexId: number): { any }
+	function GetBoneByName(self, boneName: string): number
+	function GetBoneCFrame(self, boneId: number): CFrame
+	function GetBoneIsVirtual(self, boneId: number): boolean
+	function GetBoneName(self, boneId: number): string
+	function GetBoneParent(self, boneId: number): number
+	function GetBones(self): { any }
 	function GetCenter(self): Vector3
 	function GetColor(self, colorId: number): Color3?
 	function GetColorAlpha(self, colorId: number): number?
@@ -5013,37 +7602,75 @@ declare class EditableMesh extends Object
 	function GetFaceUVs(self, faceId: number): { any }
 	function GetFaceVertices(self, faceId: number): { any }
 	function GetFaces(self): { any }
-	function GetFacesWithAttribute(self, id: number): { any }
+	function GetFacesWithColor(self, colorId: number): { any }
+	function GetFacesWithNormal(self, normalId: number): { any }
+	function GetFacesWithUV(self, uvId: number): { any }
+	function GetFacsCorrectivePose(self, actions: { any }): any
+	function GetFacsCorrectivePoses(self): { any }
+	function GetFacsPose(self, action: EnumFacsActionUnit): any
+	function GetFacsPoses(self): { any }
 	function GetNormal(self, normalId: number): Vector3?
 	function GetNormals(self): { any }
 	function GetPosition(self, vertexId: number): Vector3
 	function GetSize(self): Vector3
 	function GetUV(self, uvId: number): Vector2?
 	function GetUVs(self): { any }
+	function GetVertexBoneWeights(self, vertexId: number): { any }
+	function GetVertexBones(self, vertexId: number): { any }
+	function GetVertexColors(self, vertexId: number): { any }
+	function GetVertexFaceColor(self, vertexId: number, faceId: number): number
+	function GetVertexFaceNormal(self, vertexId: number, faceId: number): number
+	function GetVertexFaceUV(self, vertexId: number, faceId: number): number
+	function GetVertexFaces(self, vertexId: number): { any }
+	function GetVertexNormals(self, vertexId: number): { any }
+	function GetVertexUVs(self, vertexId: number): { any }
 	function GetVertices(self): { any }
-	function GetVerticesWithAttribute(self, id: number): { any }
+	function GetVerticesWithColor(self, colorId: number): { any }
+	function GetVerticesWithNormal(self, normalId: number): { any }
+	function GetVerticesWithUV(self, uvId: number): { any }
 	function IdDebugString(self, id: number): string
 	function MergeVertices(self, mergeTolerance: number): { [any]: any }
 	function RaycastLocal(self, origin: Vector3, direction: Vector3): any
+	function RemoveBone(self, boneId: number): nil
 	function RemoveFace(self, faceId: number): nil
 	function RemoveUnused(self): { any }
 	function ResetNormal(self, normalId: number): nil
+	function SetBoneCFrame(self, boneId: number, cframe: CFrame): nil
+	function SetBoneIsVirtual(self, boneId: number, virtual: boolean): nil
+	function SetBoneName(self, boneId: number, name: string): nil
+	function SetBoneParent(self, boneId: number, parentBoneId: number): nil
 	function SetColor(self, colorId: number, color: Color3): nil
 	function SetColorAlpha(self, colorId: number, alpha: number): nil
 	function SetFaceColors(self, faceId: number, ids: { any }): nil
 	function SetFaceNormals(self, faceId: number, ids: { any }): nil
 	function SetFaceUVs(self, faceId: number, ids: { any }): nil
 	function SetFaceVertices(self, faceId: number, ids: { any }): nil
+	function SetFacsBonePose(self, action: EnumFacsActionUnit, boneId: number, cframe: CFrame): nil
+	function SetFacsCorrectivePose(self, actions: { any }, boneIds: { any }, cframes: { any }): nil
+	function SetFacsPose(self, action: EnumFacsActionUnit, boneIds: { any }, cframes: { any }): nil
 	function SetNormal(self, normalId: number, normal: Vector3): nil
 	function SetPosition(self, vertexId: number, p: Vector3): nil
 	function SetUV(self, uvId: number, uv: Vector2): nil
+	function SetVertexBoneWeights(self, vertexId: number, boneWeights: { any }): nil
+	function SetVertexBones(self, vertexId: number, boneIDs: { any }): nil
+	function SetVertexFaceColor(self, vertexId: number, faceId: number, colorId: number): nil
+	function SetVertexFaceNormal(self, vertexId: number, faceId: number, normalId: number): nil
+	function SetVertexFaceUV(self, vertexId: number, faceId: number, uvId: number): nil
 	function Triangulate(self): nil
+end
+
+declare class ExecutedRemoteCommand extends Object
+	ReceivedUpdate: RBXScriptSignal<any>
+	function RunMoreCode(self, code: string, args: any): nil
+	function SendUpdate(self, args: any): nil
+	function Stop(self): nil
 end
 
 declare class Instance extends Object
 	AncestryChanged: RBXScriptSignal<Instance, Instance?>
 	Archivable: boolean
 	AttributeChanged: RBXScriptSignal<string>
+	Capabilities: SecurityCapabilities
 	ChildAdded: RBXScriptSignal<Instance>
 	ChildRemoved: RBXScriptSignal<Instance>
 	DescendantAdded: RBXScriptSignal<Instance>
@@ -5051,6 +7678,8 @@ declare class Instance extends Object
 	Destroying: RBXScriptSignal<>
 	Name: string
 	Parent: Instance?
+	Sandboxed: boolean
+	StyledPropertiesChanged: RBXScriptSignal<>
 	function AddTag(self, tag: string): nil
 	function ClearAllChildren(self): nil
 	function Clone(self): Instance
@@ -5071,13 +7700,15 @@ declare class Instance extends Object
 	function GetFullName(self): string
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
 	function GetStyled(self, name: string): any
+	function GetStyledPropertyChangedSignal(self, property: string): RBXScriptSignal
 	function GetTags(self): { any }
 	function HasTag(self, tag: string): boolean
 	function IsAncestorOf(self, descendant: Instance): boolean
 	function IsDescendantOf(self, ancestor: Instance): boolean
-	function IsPropertyModified(self, name: string): boolean
+	function IsPropertyModified(self, property: string): boolean
+	function QueryDescendants(self, selector: string): { Instance }
 	function RemoveTag(self, tag: string): nil
-	function ResetPropertyToDefault(self, name: string): nil
+	function ResetPropertyToDefault(self, property: string): nil
 	function SetAttribute(self, attribute: string, value: any): nil
 	function WaitForChild(self, name: string): Instance
 	function WaitForChild(self, name: string, timeout: number): Instance?
@@ -5125,6 +7756,11 @@ declare class AdPortal extends Instance
 end
 
 declare class AdService extends Instance
+	function CreateAdRewardFromDevProductId(self, devProductId: number): AdReward
+	function GetAdAvailabilityNowAsync(self, adFormat: EnumAdFormat): any
+	function RegisterAdOpportunityAsync(self, instance: Instance, placementId: number?): nil
+	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward, placementId: number?): EnumShowAdResult
+	function UnregisterAdOpportunity(self, instance: Instance): nil
 end
 
 declare class AdvancedDragger extends Instance
@@ -5148,6 +7784,9 @@ end
 declare class AnimationClip extends Instance
 	Loop: boolean
 	Priority: EnumAnimationPriority
+end
+
+declare class AnimationGraphDefinition extends AnimationClip
 end
 
 declare class CurveAnimation extends AnimationClip
@@ -5174,6 +7813,13 @@ declare class AnimationFromVideoCreatorService extends Instance
 end
 
 declare class AnimationFromVideoCreatorStudioService extends Instance
+end
+
+declare class AnimationNodeDefinition extends Instance
+	NodeType: EnumAnimationNodeType
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AnimationRigData extends Instance
@@ -5205,8 +7851,14 @@ declare class AnimationTrack extends Instance
 	function AdjustSpeed(self, speed: number?): nil
 	function AdjustWeight(self, weight: number?, fadeTime: number?): nil
 	function GetMarkerReachedSignal(self, name: string): RBXScriptSignal
+	function GetParameter(self, key: string): any
+	function GetParameterDefaults(self): { [any]: any }
+	function GetTargetInstance(self, name: string): Instance
+	function GetTargetNames(self): { any }
 	function GetTimeOfKeyframe(self, keyframeName: string): number
 	function Play(self, fadeTime: number?, weight: number?, speed: number?): nil
+	function SetParameter(self, key: string, value: any): nil
+	function SetTargetInstance(self, name: string, target: Instance): nil
 	function Stop(self, fadeTime: number?): nil
 end
 
@@ -5234,6 +7886,9 @@ end
 declare class AppLifecycleObserverService extends Instance
 end
 
+declare class AppRatingPromptService extends Instance
+end
+
 declare class AppUpdateService extends Instance
 end
 
@@ -5249,11 +7904,6 @@ end
 declare class AssetImportService extends Instance
 end
 
-declare class AssetImportSession extends Instance
-	UploadComplete: RBXScriptSignal<{ [any]: any }>
-	UploadProgress: RBXScriptSignal<number>
-end
-
 declare class AssetManagerService extends Instance
 end
 
@@ -5263,7 +7913,11 @@ declare class AssetPatchSettings extends Instance
 	PatchId: string
 end
 
+declare class AssetQualityService extends Instance
+end
+
 declare class AssetService extends Instance
+	function ComposeDecalAsync(self, layers: { any }): Decal
 	function CreateAssetAsync(self, object: Object, assetType: EnumAssetType, requestParameters: { [any]: any }?): any
 	function CreateAssetVersionAsync(self, object: Object, assetType: EnumAssetType, assetId: number, requestParameters: { [any]: any }?): any
 	function CreateEditableImage(self, editableImageOptions: { [any]: any }?): EditableImage
@@ -5273,13 +7927,15 @@ declare class AssetService extends Instance
 	function CreateMeshPartAsync(self, meshContent: Content, options: { [any]: any }?): MeshPart
 	function CreatePlaceAsync(self, placeName: string, templatePlaceID: number, description: string?): number
 	function CreatePlaceInPlayerInventoryAsync(self, player: Player, placeName: string, templatePlaceID: number, description: string?): number
+	function CreateSurfaceAppearanceAsync(self, content: { [any]: any }): SurfaceAppearance
 	function GetAssetIdsForPackage(self, packageAssetId: number): { any }
 	function GetAudioMetadataAsync(self, idList: { any }): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [any]: any }
 	function GetGamePlacesAsync(self): Instance
+	function LoadAssetAsync(self, assetId: number): Instance
 	function PromptCreateAssetAsync(self, player: Player, instance: Instance, assetType: EnumAssetType): any
 	function PromptImportAnimationClipFromVideoAsync(self, player: Player, progressCallback: ((...any) -> ...any)): any
-	function SavePlaceAsync(self): nil
+	function SavePlaceAsync(self, requestParameters: { [any]: any }?): nil
 	function SearchAudio(self, searchParameters: AudioSearchParams): AudioPages
 end
 
@@ -5317,9 +7973,28 @@ declare class AudioAnalyzer extends Instance
 	PeakLevel: number
 	RmsLevel: number
 	SpectrumEnabled: boolean
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 	function GetSpectrum(self): { any }
+end
+
+declare class AudioChannelMixer extends Instance
+	Layout: EnumAudioChannelLayout
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+end
+
+declare class AudioChannelSplitter extends Instance
+	Layout: EnumAudioChannelLayout
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioChorus extends Instance
@@ -5329,6 +8004,8 @@ declare class AudioChorus extends Instance
 	Rate: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioCompressor extends Instance
@@ -5340,6 +8017,8 @@ declare class AudioCompressor extends Instance
 	Threshold: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioDeviceInput extends Instance
@@ -5350,6 +8029,8 @@ declare class AudioDeviceInput extends Instance
 	Volume: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 	function GetUserIdAccessList(self): { any }
 	function SetUserIdAccessList(self, userIds: { any }): nil
 end
@@ -5358,6 +8039,8 @@ declare class AudioDeviceOutput extends Instance
 	Player: Player
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioDistortion extends Instance
@@ -5365,6 +8048,8 @@ declare class AudioDistortion extends Instance
 	Level: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioEcho extends Instance
@@ -5376,16 +8061,21 @@ declare class AudioEcho extends Instance
 	WetLevel: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioEmitter extends Instance
+	AcousticSimulationEnabled: boolean
 	AudioInteractionGroup: string
-	SimulationFidelity: EnumAudioSimulationFidelity
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetAngleAttenuation(self): { [any]: any }
+	function GetAudibilityFor(self, listener: AudioListener): number
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetDistanceAttenuation(self): { [any]: any }
+	function GetInputPins(self): { any }
 	function GetInteractingListeners(self): { Instance }
+	function GetOutputPins(self): { any }
 	function SetAngleAttenuation(self, curve: { [any]: any }): nil
 	function SetDistanceAttenuation(self, curve: { [any]: any }): nil
 end
@@ -5398,6 +8088,8 @@ declare class AudioEqualizer extends Instance
 	MidRange: NumberRange
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioFader extends Instance
@@ -5405,6 +8097,8 @@ declare class AudioFader extends Instance
 	Volume: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioFilter extends Instance
@@ -5416,6 +8110,8 @@ declare class AudioFilter extends Instance
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetGainAt(self, frequency: number): number
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioFlanger extends Instance
@@ -5425,9 +8121,22 @@ declare class AudioFlanger extends Instance
 	Rate: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioFocusService extends Instance
+end
+
+declare class AudioGate extends Instance
+	Attack: number
+	Bypass: boolean
+	Release: number
+	Threshold: NumberRange
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioLimiter extends Instance
@@ -5436,16 +8145,21 @@ declare class AudioLimiter extends Instance
 	Release: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioListener extends Instance
+	AcousticSimulationEnabled: boolean
 	AudioInteractionGroup: string
-	SimulationFidelity: EnumAudioSimulationFidelity
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetAngleAttenuation(self): { [any]: any }
+	function GetAudibilityFor(self, emitter: AudioEmitter): number
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetDistanceAttenuation(self): { [any]: any }
+	function GetInputPins(self): { any }
 	function GetInteractingEmitters(self): { Instance }
+	function GetOutputPins(self): { any }
 	function SetAngleAttenuation(self, curve: { [any]: any }): nil
 	function SetDistanceAttenuation(self, curve: { [any]: any }): nil
 end
@@ -5453,13 +8167,18 @@ end
 declare class AudioPitchShifter extends Instance
 	Bypass: boolean
 	Pitch: number
+	WindowSize: EnumAudioWindowSize
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioPlayer extends Instance
-	AssetId: string
+	Asset: ContentId
+	AudioContent: Content
 	AutoLoad: boolean
+	AutoPlay: boolean
 	Ended: RBXScriptSignal<>
 	IsPlaying: boolean
 	IsReady: boolean
@@ -5473,8 +8192,25 @@ declare class AudioPlayer extends Instance
 	Volume: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 	function GetWaveformAsync(self, timeRange: NumberRange, samples: number): { any }
 	function Play(self): nil
+	function Stop(self): nil
+end
+
+declare class AudioRecorder extends Instance
+	IsRecording: boolean
+	TimeLength: number
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function CanRecordAsync(self): boolean
+	function Clear(self): nil
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+	function GetTemporaryContent(self): Content
+	function GetUnrecordableInstancesAsync(self): { Instance }
+	function RecordAsync(self): nil
 	function Stop(self): nil
 end
 
@@ -5494,6 +8230,8 @@ declare class AudioReverb extends Instance
 	WetLevel: number
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
 end
 
 declare class AudioSearchParams extends Instance
@@ -5507,24 +8245,87 @@ declare class AudioSearchParams extends Instance
 	Title: string
 end
 
+declare class AudioSpeechToText extends Instance
+	Enabled: boolean
+	Text: string
+	VoiceDetected: boolean
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+end
+
+declare class AudioTextToSpeech extends Instance
+	Ended: RBXScriptSignal<>
+	IsLoaded: boolean
+	IsPlaying: boolean
+	Looped: RBXScriptSignal<>
+	Looping: boolean
+	Pitch: number
+	PlaybackSpeed: number
+	Speed: number
+	Text: string
+	TimeLength: number
+	TimePosition: number
+	VoiceId: string
+	Volume: number
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetWaveformAsync(self, timeRange: NumberRange, samples: number): { any }
+	function LoadAsync(self): EnumAssetFetchStatus
+	function Pause(self): nil
+	function Play(self): nil
+	function Unload(self): nil
+end
+
+declare class AudioTremolo extends Instance
+	Bypass: boolean
+	Depth: number
+	Duty: number
+	Frequency: number
+	Shape: number
+	Skew: number
+	Square: number
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+end
+
+
+
+declare class AvatarAccessoryRules extends Instance
+end
+
+declare class AvatarAnimationRules extends Instance
+end
+
+declare class AvatarBodyRules extends Instance
+end
+
 declare class AvatarChatService extends Instance
 end
 
+declare class AvatarClothingRules extends Instance
+end
+
+declare class AvatarCollisionRules extends Instance
+end
+
 declare class AvatarCreationService extends Instance
-	function GenerateAvatarAsync(self, sessionId: string, previewId: string): string
-	function GenerateAvatarModelAsync(self, player: Player, previewJobId: string, options: { [any]: any }, progressCallback: ((...any) -> ...any)): string
-	function GenerateAvatarPreviewAsync(self, player: Player, textPrompt: string, options: { [any]: any }, progressCallback: ((...any) -> ...any)): string
-	function GenerateAvatarPreviewAsync2(self, sessionId: string, fileId: string, textPrompt: string, options: { [any]: any }): string
-	function GetAvatarGenerationConfig(self): { [any]: any }
+	AvatarAssetModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
+	AvatarModerationCompleted: RBXScriptSignal<number, EnumModerationStatus>
+	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: ((...any) -> ...any)?): string
+	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: { [any]: any }, progressCallback: ((...any) -> ...any)?): string
+	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [any]: any }): string
+	function GenerateAvatarAsync(self, avatarGenerationParams: { [any]: any }): string
 	function GetBatchTokenDetailsAsync(self, tokenIds: { any }): { any }
 	function GetValidationRules(self): { [any]: any }
-	function LoadAvatarHumanoidDescriptionAsync(self, id: string): HumanoidDescription
-	function LoadAvatarModelAsync(self, id: string): Instance
-	function LoadAvatarPreviewImageAsync(self, avatarPreview: string): EditableImage
+	function LoadAvatar2DPreviewAsync(self, previewId: string): EditableImage
+	function LoadGeneratedAvatarAsync(self, generationId: string): HumanoidDescription
+	function PrepareAvatarForPreviewAsync(self, humanoidModel: Model): nil
+	function PromptCreateAvatarAssetAsync(self, tokenId: string, player: Player, assetInstance: Instance, assetType: EnumAvatarAssetType): any
 	function PromptCreateAvatarAsync(self, tokenId: string, player: Player, humanoidDescription: HumanoidDescription): any
 	function PromptSelectAvatarGenerationImageAsync(self, player: Player): string
 	function RequestAvatarGenerationSessionAsync(self, player: Player, callback: ((...any) -> ...any)): any
-	function SendAnalyticsEvent(self, eventName: string, params: { [any]: any }): nil
 	function ValidateUGCAccessoryAsync(self, player: Player, accessory: Instance, accessoryType: EnumAccessoryType): any
 	function ValidateUGCBodyPartAsync(self, player: Player, instance: Instance, bodyPart: EnumBodyPart): any
 	function ValidateUGCFullBodyAsync(self, player: Player, humanoidDescription: HumanoidDescription): any
@@ -5563,7 +8364,10 @@ end
 declare class AvatarImportService extends Instance
 end
 
-declare class AvatarPreloader extends Instance
+declare class AvatarRules extends Instance
+end
+
+declare class AvatarSettings extends Instance
 end
 
 declare class Backpack extends Instance
@@ -5601,6 +8405,7 @@ end
 
 declare class MaterialImportData extends BaseImportData
 	DiffuseFilePath: string
+	EmissiveFilePath: string
 	IsPbr: boolean
 	MetalnessFilePath: string
 	NormalFilePath: string
@@ -5650,7 +8455,6 @@ declare class RootImportData extends BaseImportData
 	RigType: EnumRigType
 	RigVisualization: boolean
 	ScaleUnit: EnumMeshScaleUnit
-	UseSceneOriginAsCFrame: boolean
 	UseSceneOriginAsPivot: boolean
 	UsesCages: boolean
 	ValidateUgcBody: boolean
@@ -5715,7 +8519,7 @@ end
 declare class WrapDeformer extends BaseWrap
 	function CreateEditableMeshAsync(self): EditableMesh
 	function GetDeformedCFrameAsync(self, originalCFrame: CFrame): CFrame
-	function SetCageMeshContent(self, content: Content): nil
+	function SetCageMeshContent(self, content: Content, cageOrigin: CFrame?): nil
 end
 
 declare class WrapLayer extends BaseWrap
@@ -5821,6 +8625,7 @@ declare class BodyPartDescription extends Instance
 	AssetId: number
 	BodyPart: EnumBodyPart
 	Color: Color3
+	HeadShape: string
 	Instance: Instance
 end
 
@@ -5828,6 +8633,9 @@ declare class Breakpoint extends Instance
 end
 
 declare class BrowserService extends Instance
+end
+
+declare class BugReporterService extends Instance
 end
 
 declare class BulkImportService extends Instance
@@ -5842,49 +8650,37 @@ end
 declare class MeshContentProvider extends CacheableContentProvider
 end
 
+declare class SlimContentProvider extends CacheableContentProvider
+end
+
 declare class SolidModelContentProvider extends CacheableContentProvider
 end
 
 declare class CalloutService extends Instance
 end
 
-declare class Camera extends Instance
-	CFrame: CFrame
-	CameraSubject: Humanoid | BasePart | nil
-	CameraType: EnumCameraType
-	DiagonalFieldOfView: number
-	FieldOfView: number
-	FieldOfViewMode: EnumFieldOfViewMode
-	FirstPersonTransition: RBXScriptSignal<boolean>
-	Focus: CFrame
-	HeadLocked: boolean
-	HeadScale: number
-	InterpolationFinished: RBXScriptSignal<>
-	MaxAxisFieldOfView: number
-	NearPlaneZ: number
-	VRTiltAndRollEnabled: boolean
-	ViewportSize: Vector2
-	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
-	function GetRenderCFrame(self): CFrame
-	function GetRoll(self): number
-	function ScreenPointToRay(self, x: number, y: number, depth: number?): Ray
-	function SetRoll(self, rollAngle: number): nil
-	function ViewportPointToRay(self, x: number, y: number, depth: number?): Ray
-	function WorldToScreenPoint(self, worldPoint: Vector3): (Vector3, boolean)
-	function WorldToViewportPoint(self, worldPoint: Vector3): (Vector3, boolean)
-	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
-end
-
 declare class CaptureService extends Instance
-	CaptureBegan: RBXScriptSignal<>
-	CaptureEnded: RBXScriptSignal<>
+	CaptureBegan: RBXScriptSignal<EnumCaptureType>
+	CaptureEnded: RBXScriptSignal<EnumCaptureType>
 	UserCaptureSaved: RBXScriptSignal<ContentId>
 	function CaptureScreenshot(self, onCaptureReady: ((...any) -> ...any)): nil
-	function PromptSaveCapturesToGallery(self, contentIds: { any }, resultCallback: ((...any) -> ...any)): nil
-	function PromptShareCapture(self, contentId: ContentId, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
+	function GetDeviceInfo(self): { [any]: any }
+	function InternalCheckPlayabilityAsync(self, universeId: number): boolean
+	function InternalGetStartPlaceIdAsync(self, universeId: number): number
+	function PromptCaptureGalleryPermissionAsync(self, captureGalleryPermission: EnumCaptureGalleryPermission): boolean
+	function PromptSaveCapturesToGallery(self, captures: { any }, resultCallback: ((...any) -> ...any)): nil
+	function PromptShareCapture(self, captureContent: Content, launchData: string, onAcceptedCallback: ((...any) -> ...any), onDeniedCallback: ((...any) -> ...any)): nil
+	function ReadCapturesFromGalleryAsync(self, captureTypeFilters: { any }?): any
+	function StartVideoCaptureAsync(self, onCaptureReady: ((...any) -> ...any), captureParams: { [any]: any }?): EnumVideoCaptureStartedResult
+	function StopVideoCapture(self): nil
+	function TakeCapture(self, onCaptureReady: ((...any) -> ...any), captureParams: { [any]: any }?): nil
+	function UploadCaptureAsync(self, capture: Capture): any
 end
 
 declare class ChangeHistoryService extends Instance
+end
+
+declare class ChangeHistoryStreamingService extends Instance
 end
 
 declare class CharacterAppearance extends Instance
@@ -5950,6 +8746,7 @@ end
 
 declare class ClickDetector extends Instance
 	CursorIcon: ContentId
+	CursorIconContent: Content
 	MaxActivationDistance: number
 	MouseClick: RBXScriptSignal<Player>
 	MouseHoverEnter: RBXScriptSignal<Player>
@@ -5959,6 +8756,7 @@ end
 
 declare class DragDetector extends ClickDetector
 	ActivatedCursorIcon: ContentId
+	ActivatedCursorIconContent: Content
 	ApplyAtCenterOfMass: boolean
 	Axis: Vector3
 	DragContinue: RBXScriptSignal<Player, Ray, CFrame, CFrame?, boolean>
@@ -6034,21 +8832,25 @@ declare class CollectionService extends Instance
 	function RemoveTag(self, instance: Instance, tag: string): nil
 end
 
-declare class CommandInstance extends Instance
-	AllowGUIAccessPoints: boolean
-	DisplayName: string
-	Name: string
-end
-
-declare class CommandService extends Instance
-end
-
 declare class CommerceService extends Instance
 	PromptCommerceProductPurchaseFinished: RBXScriptSignal<Player, string>
 	function GetCommerceProductInfoAsync(self, commerceProductId: string): { [any]: any }
 	function PromptCommerceProductPurchase(self, user: Player, commerceProductId: string): nil
 	function PromptRealWorldCommerceBrowser(self, player: Player, url: string): nil
 	function UserEligibleForRealWorldCommerceAsync(self): boolean
+end
+
+declare class CompositeValueCurve extends Instance
+	CurveType: EnumCompositeValueCurveType
+	function GetComponentCurves(self): { Instance }
+	function GetValueAtTime(self, time: number): any
+end
+
+declare class ConfigService extends Instance
+	function ClearTestingValue(self, key: string): nil
+	function GetConfigAsync(self): ConfigSnapshot
+	function GetConfigForPlayerAsync(self, player: Player): ConfigSnapshot
+	function SetTestingValue(self, key: string, value: any): nil
 end
 
 declare class Configuration extends Instance
@@ -6158,6 +8960,7 @@ declare class LinearVelocity extends Constraint
 	MaxPlanarAxesForce: Vector2
 	PlaneVelocity: Vector2
 	PrimaryTangentAxis: Vector3
+	ReactionForceEnabled: boolean
 	RelativeTo: EnumActuatorRelativeTo
 	SecondaryTangentAxis: Vector3
 	VectorVelocity: Vector3
@@ -6378,14 +9181,14 @@ declare class SwimController extends ControllerBase
 end
 
 declare class ControllerManager extends Instance
-	ActiveController: ControllerBase
+	ActiveController: ControllerBase?
 	BaseMoveSpeed: number
 	BaseTurnSpeed: number
-	ClimbSensor: ControllerSensor
+	ClimbSensor: ControllerSensor?
 	FacingDirection: Vector3
-	GroundSensor: ControllerSensor
+	GroundSensor: ControllerSensor?
 	MovingDirection: Vector3
-	RootPart: BasePart
+	RootPart: BasePart?
 	UpDirection: Vector3
 end
 
@@ -6420,13 +9223,24 @@ end
 
 
 
+declare class CustomLog extends Instance
+	function Close(self): nil
+	function GetLogPath(self): string
+	function Open(self): nil
+	function WriteAppend(self, append: string): nil
+end
+
 declare class DataModelMesh extends Instance
 	Offset: Vector3
 	Scale: Vector3
 	VertexColor: Vector3
 end
 
+declare class BevelMesh extends DataModelMesh
+end
 
+declare class BlockMesh extends BevelMesh
+end
 
 
 
@@ -6613,6 +9427,16 @@ end
 declare class EditableService extends Instance
 end
 
+declare class EncodingService extends Instance
+	function Base64Decode(self, input: buffer): buffer
+	function Base64Encode(self, input: buffer): buffer
+	function CompressBuffer(self, input: buffer, algorithm: EnumCompressionAlgorithm, compressionLevel: number?): buffer
+	function ComputeBufferHash(self, input: buffer, algorithm: EnumHashAlgorithm): buffer
+	function ComputeStringHash(self, input: string, algorithm: EnumHashAlgorithm): string
+	function DecompressBuffer(self, input: buffer, algorithm: EnumCompressionAlgorithm): buffer
+	function GetDecompressedBufferSize(self, input: buffer, algorithm: EnumCompressionAlgorithm): number?
+end
+
 declare class EulerRotationCurve extends Instance
 	RotationOrder: EnumRotationOrder
 	function GetAnglesAtTime(self, time: number): { any }
@@ -6625,7 +9449,7 @@ end
 declare class EventIngestService extends Instance
 end
 
-declare class ExampleService extends Instance
+declare class ExampleV2Service extends Instance
 end
 
 declare class ExperienceAuthService extends Instance
@@ -6648,6 +9472,9 @@ declare class ExperienceService extends Instance
 end
 
 declare class ExperienceStateCaptureService extends Instance
+end
+
+declare class ExperienceStateRecordingService extends Instance
 end
 
 declare class ExplorerFilter extends Instance
@@ -6684,9 +9511,17 @@ end
 
 declare class Decal extends FaceInstance
 	Color3: Color3
+	ColorMap: ContentId
+	ColorMapContent: Content
 	LocalTransparencyModifier: number
+	MetalnessMapContent: Content
+	NormalMapContent: Content
+	RoughnessMapContent: Content
 	Texture: ContentId
+	TextureContent: Content
 	Transparency: number
+	UVOffset: Vector2
+	UVScale: Vector2
 	ZIndex: number
 end
 
@@ -6695,6 +9530,9 @@ declare class Texture extends Decal
 	OffsetStudsV: number
 	StudsPerTileU: number
 	StudsPerTileV: number
+end
+
+declare class FacialAgeEstimationService extends Instance
 end
 
 declare class FacialAnimationRecordingService extends Instance
@@ -6775,13 +9613,18 @@ declare class GamePassService extends Instance
 end
 
 declare class GameSettings extends Instance
-	VideoCaptureEnabled: boolean
 end
 
 declare class GamepadService extends Instance
 	GamepadCursorEnabled: boolean
 	function DisableGamepadCursor(self): nil
 	function EnableGamepadCursor(self, guiObject: Instance): nil
+end
+
+declare class GenerationService extends Instance
+	function GenerateMeshAsync(self, inputs: { [any]: any }, player: Player, options: { [any]: any }, intermediateResultCallback: ((...any) -> ...any)?): any
+	function GenerateModelAsync(self, inputs: { [any]: any }, schema: { [any]: any }, options: { [any]: any }?): any
+	function LoadGeneratedMeshAsync(self, generationId: string): MeshPart
 end
 
 declare class GenericChallengeService extends Instance
@@ -6792,8 +9635,10 @@ end
 
 declare class GeometryService extends Instance
 	function CalculateConstraintsToPreserve(self, source: Instance, destination: { any }, options: { [any]: any }?): { any }
+	function FragmentAsync(self, part: BasePart, fragmentSites: { any }, options: { [any]: any }?, mainPartSites: { any }?): { any }
 	function IntersectAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 	function SubtractAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
+	function SweepPartAsync(self, part: BasePart, cframes: { any }, options: { [any]: any }?): MeshPart
 	function UnionAsync(self, part: Instance, parts: { any }, options: { [any]: any }?): { any }
 end
 
@@ -6829,14 +9674,12 @@ declare class OrderedDataStore extends GlobalDataStore
 	function UpdateAsync(self, key: string, transformFunction: ((number?, DataStoreKeyInfo) -> (number, { number }?, {}?))): (number?, DataStoreKeyInfo)
 end
 
-declare class GoogleAnalyticsConfiguration extends Instance
-end
-
 declare class GroupService extends Instance
 	function GetAlliesAsync(self, groupId: number): StandardPages
 	function GetEnemiesAsync(self, groupId: number): StandardPages
 	function GetGroupInfoAsync(self, groupId: number): any
 	function GetGroupsAsync(self, userId: number): { any }
+	function PromptJoinAsync(self, groupId: number): EnumGroupMembershipStatus
 end
 
 declare class GuiBase extends Instance
@@ -6916,6 +9759,7 @@ end
 declare class GuiButton extends GuiObject
 	Activated: RBXScriptSignal<InputObject, number>
 	AutoButtonColor: boolean
+	HoverHapticEffect: HapticEffect
 	Modal: boolean
 	MouseButton1Click: RBXScriptSignal<>
 	MouseButton1Down: RBXScriptSignal<number, number>
@@ -6923,12 +9767,15 @@ declare class GuiButton extends GuiObject
 	MouseButton2Click: RBXScriptSignal<>
 	MouseButton2Down: RBXScriptSignal<number, number>
 	MouseButton2Up: RBXScriptSignal<number, number>
+	PressHapticEffect: HapticEffect
+	SecondaryActivated: RBXScriptSignal<InputObject>
 	Selected: boolean
 	Style: EnumButtonStyle
 end
 
 declare class ImageButton extends GuiButton
 	HoverImage: ContentId
+	HoverImageContent: Content
 	Image: ContentId
 	ImageColor3: Color3
 	ImageContent: Content
@@ -6937,6 +9784,7 @@ declare class ImageButton extends GuiButton
 	ImageTransparency: number
 	IsLoaded: boolean
 	PressedImage: ContentId
+	PressedImageContent: Content
 	ResampleMode: EnumResamplerMode
 	ScaleType: EnumScaleType
 	SliceCenter: Rect
@@ -7022,17 +9870,20 @@ declare class ScrollingFrame extends GuiObject
 	AbsoluteWindowSize: Vector2
 	AutomaticCanvasSize: EnumAutomaticSize
 	BottomImage: ContentId
+	BottomImageContent: Content
 	CanvasPosition: Vector2
 	CanvasSize: UDim2
 	ElasticBehavior: EnumElasticBehavior
 	HorizontalScrollBarInset: EnumScrollBarInset
 	MidImage: ContentId
+	MidImageContent: Content
 	ScrollBarImageColor3: Color3
 	ScrollBarImageTransparency: number
 	ScrollBarThickness: number
 	ScrollingDirection: EnumScrollingDirection
 	ScrollingEnabled: boolean
 	TopImage: ContentId
+	TopImageContent: Content
 	VerticalScrollBarInset: EnumScrollBarInset
 	VerticalScrollBarPosition: EnumVerticalScrollBarPosition
 end
@@ -7076,6 +9927,20 @@ declare class TextBox extends GuiObject
 	function ReleaseFocus(self, submitted: boolean?): nil
 end
 
+declare class VideoDisplay extends GuiObject
+	ResampleMode: EnumResamplerMode
+	ScaleType: EnumScaleType
+	TileSize: UDim2
+	VideoColor3: Color3
+	VideoRectOffset: Vector2
+	VideoRectSize: Vector2
+	VideoTransparency: number
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+end
+
 declare class VideoFrame extends GuiObject
 	DidLoop: RBXScriptSignal<string>
 	Ended: RBXScriptSignal<string>
@@ -7089,6 +9954,7 @@ declare class VideoFrame extends GuiObject
 	TimeLength: number
 	TimePosition: number
 	Video: ContentId
+	VideoContent: Content
 	Volume: number
 	function Pause(self): nil
 	function Play(self): nil
@@ -7116,9 +9982,7 @@ declare class BillboardGui extends LayerCollector
 	Brightness: number
 	ClipsDescendants: boolean
 	CurrentDistance: number
-	DistanceLowerLimit: number
 	DistanceStep: number
-	DistanceUpperLimit: number
 	ExtentsOffset: Vector3
 	ExtentsOffsetWorldSpace: Vector3
 	LightInfluence: number
@@ -7214,12 +10078,15 @@ declare class HandleAdornment extends PVAdornment
 end
 
 declare class BoxHandleAdornment extends HandleAdornment
+	Shading: EnumAdornShading
 	Size: Vector3
 end
 
 declare class ConeHandleAdornment extends HandleAdornment
 	Height: number
+	Hollow: boolean
 	Radius: number
+	Shading: EnumAdornShading
 end
 
 declare class CylinderHandleAdornment extends HandleAdornment
@@ -7227,6 +10094,7 @@ declare class CylinderHandleAdornment extends HandleAdornment
 	Height: number
 	InnerRadius: number
 	Radius: number
+	Shading: EnumAdornShading
 end
 
 declare class ImageHandleAdornment extends HandleAdornment
@@ -7239,12 +10107,21 @@ declare class LineHandleAdornment extends HandleAdornment
 	Thickness: number
 end
 
+declare class PyramidHandleAdornment extends HandleAdornment
+	Height: number
+	Shading: EnumAdornShading
+	Sides: number
+	Size: number
+end
+
 declare class SphereHandleAdornment extends HandleAdornment
 	Radius: number
+	Shading: EnumAdornShading
 end
 
 declare class WireframeHandleAdornment extends HandleAdornment
 	Scale: Vector3
+	Thickness: number
 	function AddLine(self, from: Vector3, to: Vector3): nil
 	function AddLines(self, points: { any }): nil
 	function AddPath(self, points: { any }, loop: boolean): nil
@@ -7333,6 +10210,7 @@ declare class GuiService extends Instance
 	SelectedObject: GuiObject?
 	TopbarInset: Rect
 	TouchControlsEnabled: boolean
+	ViewportDisplaySize: EnumDisplaySize
 	function CloseInspectMenu(self): nil
 	function DismissNotification(self, notificationId: string): boolean
 	function GetEmotesMenuOpen(self): boolean
@@ -7353,10 +10231,62 @@ end
 declare class GuidRegistryService extends Instance
 end
 
+declare class HandRigDescription extends Instance
+	Index1: Instance
+	Index1TposeAdjustment: CFrame
+	Index2: Instance
+	Index2TposeAdjustment: CFrame
+	Index3: Instance
+	Index3TposeAdjustment: CFrame
+	IndexRange: Vector3
+	IndexSize: number
+	Middle1: Instance
+	Middle1TposeAdjustment: CFrame
+	Middle2: Instance
+	Middle2TposeAdjustment: CFrame
+	Middle3: Instance
+	Middle3TposeAdjustment: CFrame
+	MiddleRange: Vector3
+	MiddleSize: number
+	Pinky1: Instance
+	Pinky1TposeAdjustment: CFrame
+	Pinky2: Instance
+	Pinky2TposeAdjustment: CFrame
+	Pinky3: Instance
+	Pinky3TposeAdjustment: CFrame
+	PinkyRange: Vector3
+	PinkySize: number
+	Ring1: Instance
+	Ring1TposeAdjustment: CFrame
+	Ring2: Instance
+	Ring2TposeAdjustment: CFrame
+	Ring3: Instance
+	Ring3TposeAdjustment: CFrame
+	RingRange: Vector3
+	RingSize: number
+	Side: EnumHandRigDescriptionSide
+	Thumb1: Instance
+	Thumb1TposeAdjustment: CFrame
+	Thumb2: Instance
+	Thumb2TposeAdjustment: CFrame
+	Thumb3: Instance
+	Thumb3TposeAdjustment: CFrame
+	ThumbRange: Vector3
+	ThumbSize: number
+	function GetFingerControl(self, fingerIndex: number): Vector3
+	function GetFingerTip(self, fingerIndex: number): Vector3
+	function SetFingerControl(self, fingerIndex: number, control: Vector3): nil
+	function SetFingerTip(self, fingerIndex: number, point: Vector3): nil
+end
+
 declare class HapticEffect extends Instance
+	Ended: RBXScriptSignal<>
 	Looped: boolean
+	Position: Vector3
+	Radius: number
 	Type: EnumHapticEffectType
 	function Play(self): nil
+	function SetWaveformKeys(self, keys: { any }): nil
 	function Stop(self): nil
 end
 
@@ -7365,6 +10295,12 @@ declare class HapticService extends Instance
 	function IsMotorSupported(self, inputType: EnumUserInputType, vibrationMotor: EnumVibrationMotor): boolean
 	function IsVibrationSupported(self, inputType: EnumUserInputType): boolean
 	function SetMotor(self, inputType: EnumUserInputType, vibrationMotor: EnumVibrationMotor, vibrationValues: any): nil
+end
+
+declare class HarmonyService extends Instance
+end
+
+declare class HeapProfilerService extends Instance
 end
 
 declare class HeatmapService extends Instance
@@ -7397,6 +10333,7 @@ end
 
 declare class HttpService extends Instance
 	HttpEnabled: boolean
+	function CreateWebStreamClient(self, streamClientType: EnumWebStreamClientType, requestOptions: { [any]: any }): WebStreamClient
 	function GenerateGUID(self, wrapInCurlyBraces: boolean?): string
 	function GetAsync(self, url: any, nocache: boolean?, headers: any): string
 	function GetSecret(self, key: string): Secret
@@ -7520,6 +10457,7 @@ declare class HumanoidDescription extends Instance
 	SwimAnimation: number
 	Torso: number
 	TorsoColor: Color3
+	UseAvatarSettings: boolean
 	WaistAccessory: string
 	WalkAnimation: number
 	WidthScale: number
@@ -7531,6 +10469,123 @@ declare class HumanoidDescription extends Instance
 	function SetAccessories(self, accessories: { HumanoidDescriptionAccessory }, includeRigidAccessories: boolean): ()
 	function SetEmotes(self, emotes: { [string]: { number } }): ()
 	function SetEquippedEmotes(self, equippedEmotes: { string } | { Slot: number, Name: string }): ()
+end
+
+declare class HumanoidRigDescription extends Instance
+	Chest: Instance
+	ChestRangeMax: Vector3
+	ChestRangeMin: Vector3
+	ChestSize: number
+	ChestTposeAdjustment: CFrame
+	HeadBase: Instance
+	HeadBaseRangeMax: Vector3
+	HeadBaseRangeMin: Vector3
+	HeadBaseSize: number
+	HeadBaseTposeAdjustment: CFrame
+	LeftAnkle: Instance
+	LeftAnkleRangeMax: Vector3
+	LeftAnkleRangeMin: Vector3
+	LeftAnkleSize: number
+	LeftAnkleTposeAdjustment: CFrame
+	LeftClavicle: Instance
+	LeftClavicleRangeMax: Vector3
+	LeftClavicleRangeMin: Vector3
+	LeftClavicleSize: number
+	LeftClavicleTposeAdjustment: CFrame
+	LeftElbow: Instance
+	LeftElbowRangeMax: Vector3
+	LeftElbowRangeMin: Vector3
+	LeftElbowSize: number
+	LeftElbowTposeAdjustment: CFrame
+	LeftHip: Instance
+	LeftHipRangeMax: Vector3
+	LeftHipRangeMin: Vector3
+	LeftHipSize: number
+	LeftHipTposeAdjustment: CFrame
+	LeftKnee: Instance
+	LeftKneeRangeMax: Vector3
+	LeftKneeRangeMin: Vector3
+	LeftKneeSize: number
+	LeftKneeTposeAdjustment: CFrame
+	LeftShoulder: Instance
+	LeftShoulderRangeMax: Vector3
+	LeftShoulderRangeMin: Vector3
+	LeftShoulderSize: number
+	LeftShoulderTposeAdjustment: CFrame
+	LeftToes: Instance
+	LeftToesRangeMax: Vector3
+	LeftToesRangeMin: Vector3
+	LeftToesSize: number
+	LeftToesTposeAdjustment: CFrame
+	LeftWrist: Instance
+	LeftWristRangeMax: Vector3
+	LeftWristRangeMin: Vector3
+	LeftWristSize: number
+	LeftWristTposeAdjustment: CFrame
+	Neck: Instance
+	NeckRangeMax: Vector3
+	NeckRangeMin: Vector3
+	NeckSize: number
+	NeckTposeAdjustment: CFrame
+	Pelvis: Instance
+	PelvisRangeMax: Vector3
+	PelvisRangeMin: Vector3
+	PelvisSize: number
+	PelvisTposeAdjustment: CFrame
+	RightAnkle: Instance
+	RightAnkleRangeMax: Vector3
+	RightAnkleRangeMin: Vector3
+	RightAnkleSize: number
+	RightAnkleTposeAdjustment: CFrame
+	RightClavicle: Instance
+	RightClavicleRangeMax: Vector3
+	RightClavicleRangeMin: Vector3
+	RightClavicleSize: number
+	RightClavicleTposeAdjustment: CFrame
+	RightElbow: Instance
+	RightElbowRangeMax: Vector3
+	RightElbowRangeMin: Vector3
+	RightElbowSize: number
+	RightElbowTposeAdjustment: CFrame
+	RightHip: Instance
+	RightHipRangeMax: Vector3
+	RightHipRangeMin: Vector3
+	RightHipSize: number
+	RightHipTposeAdjustment: CFrame
+	RightKnee: Instance
+	RightKneeRangeMax: Vector3
+	RightKneeRangeMin: Vector3
+	RightKneeSize: number
+	RightKneeTposeAdjustment: CFrame
+	RightShoulder: Instance
+	RightShoulderRangeMax: Vector3
+	RightShoulderRangeMin: Vector3
+	RightShoulderSize: number
+	RightShoulderTposeAdjustment: CFrame
+	RightToes: Instance
+	RightToesRangeMax: Vector3
+	RightToesRangeMin: Vector3
+	RightToesSize: number
+	RightToesTposeAdjustment: CFrame
+	RightWrist: Instance
+	RightWristRangeMax: Vector3
+	RightWristRangeMin: Vector3
+	RightWristSize: number
+	RightWristTposeAdjustment: CFrame
+	Root: Instance
+	RootRangeMax: Vector3
+	RootRangeMin: Vector3
+	RootSize: number
+	RootTposeAdjustment: CFrame
+	Waist: Instance
+	WaistRangeMax: Vector3
+	WaistRangeMin: Vector3
+	WaistSize: number
+	WaistTposeAdjustment: CFrame
+	function GetJointFromName(self, name: string): Instance
+	function GetJointNames(self): { any }
+	function GetR15JointNames(self): { any }
+	function GetR6JointNames(self): { any }
 end
 
 declare class IKControl extends Instance
@@ -7561,19 +10616,37 @@ end
 
 declare class IXPService extends Instance
 	OnBrowserTrackerLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
+	OnCreatorLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
 	OnUserLayerLoadingStatusChanged: RBXScriptSignal<EnumIXPLoadingStatus>
+	function ClearCreatorLayers(self): nil
 	function ClearUserLayers(self): nil
 	function GetBrowserTrackerLayerLoadingStatus(self): EnumIXPLoadingStatus
 	function GetBrowserTrackerLayerVariables(self, layerName: string): { [any]: any }
 	function GetBrowserTrackerStatusForLayer(self, layerName: string): EnumIXPLoadingStatus?
+	function GetCreatorLayerLoadingStatus(self): EnumIXPLoadingStatus
+	function GetCreatorLayerVariables(self, layerName: string): { [any]: any }
+	function GetCreatorStatusForLayer(self, layerName: string): EnumIXPLoadingStatus?
+	function GetRegisteredCreatorLayersToStatus(self): { [any]: any }
 	function GetRegisteredUserLayersToStatus(self): { [any]: any }
 	function GetUserLayerLoadingStatus(self): EnumIXPLoadingStatus
 	function GetUserLayerVariables(self, layerName: string): { [any]: any }
 	function GetUserStatusForLayer(self, layerName: string): EnumIXPLoadingStatus?
+	function InitializeCreatorLayers(self, creatorId: number): nil
 	function InitializeUserLayers(self, userId: number): nil
 	function LogBrowserTrackerLayerExposure(self, layerName: string): nil
+	function LogCreatorLayerExposure(self, layerName: string): nil
+	function LogFlagLinkedUserLayerExposure(self, layerName: string): nil
 	function LogUserLayerExposure(self, layerName: string): nil
+	function RegisterCreatorLayers(self, creatorLayers: any): nil
 	function RegisterUserLayers(self, userLayers: any): nil
+end
+
+declare class ImportSession extends Instance
+	UploadComplete: RBXScriptSignal<{ [any]: any }>
+	UploadProgress: RBXScriptSignal<number>
+end
+
+declare class AssetImportSession extends ImportSession
 end
 
 declare class IncrementalPatchBuilder extends Instance
@@ -7581,7 +10654,41 @@ declare class IncrementalPatchBuilder extends Instance
 	BuildDebouncePeriod: number
 	HighCompression: boolean
 	SerializePatch: boolean
+	UseFileLevelCompressionInsteadOfChunk: boolean
 	ZstdCompression: boolean
+end
+
+declare class InputAction extends Instance
+	Enabled: boolean
+	Pressed: RBXScriptSignal<>
+	Released: RBXScriptSignal<>
+	StateChanged: RBXScriptSignal<any>
+	Type: EnumInputActionType
+	function Fire(self, state: any): nil
+	function GetState(self): any
+end
+
+declare class InputBinding extends Instance
+	Backward: EnumKeyCode
+	Down: EnumKeyCode
+	Forward: EnumKeyCode
+	KeyCode: EnumKeyCode
+	Left: EnumKeyCode
+	PressedThreshold: number
+	ReleasedThreshold: number
+	ResponseCurve: number
+	Right: EnumKeyCode
+	Scale: number
+	UIButton: GuiButton
+	Up: EnumKeyCode
+	Vector2Scale: Vector2
+	Vector3Scale: Vector3
+end
+
+declare class InputContext extends Instance
+	Enabled: boolean
+	Priority: number
+	Sink: boolean
 end
 
 declare class InputObject extends Instance
@@ -7601,6 +10708,9 @@ declare class InsertService extends Instance
 	function GetLatestAssetVersionAsync(self, assetId: number): number
 	function LoadAsset(self, assetId: number): Instance
 	function LoadAssetVersion(self, assetVersionId: number): Instance
+end
+
+declare class InstanceExtensionsService extends Instance
 end
 
 declare class JointInstance extends Instance
@@ -7685,6 +10795,7 @@ declare class LSPFileSyncService extends Instance
 end
 
 declare class LanguageService extends Instance
+	function GetCapabilitiesUsedInPackageAsync(self, instances: { Instance }): { [any]: any }
 end
 
 declare class Light extends Instance
@@ -7719,6 +10830,7 @@ declare class Lighting extends Instance
 	EnvironmentDiffuseScale: number
 	EnvironmentSpecularScale: number
 	ExposureCompensation: number
+	ExtendLightRangeTo120: EnumRolloutState
 	FogColor: Color3
 	FogEnd: number
 	FogStart: number
@@ -7741,6 +10853,12 @@ declare class LinkingService extends Instance
 end
 
 declare class LiveScriptingService extends Instance
+end
+
+declare class LiveSyncService extends Instance
+	HasSyncedInstances: boolean
+	SyncStatusChanged: RBXScriptSignal<Instance>
+	function GetSyncState(self, instance: Instance): any
 end
 
 declare class LocalStorageService extends Instance
@@ -7838,6 +10956,18 @@ end
 declare class MLModelDeliveryService extends Instance
 end
 
+declare class MLService extends Instance
+	function CreateSessionAsync(self, assetId: string): MLSession
+end
+
+declare class MakeupDescription extends Instance
+	AssetId: number
+	Instance: Instance
+	MakeupType: EnumMakeupType
+	Order: number
+	function GetAppliedInstance(self): Instance
+end
+
 declare class MarkerCurve extends Instance
 	Length: number
 	function GetMarkerAtIndex(self, index: number): { [any]: any }
@@ -7862,6 +10992,7 @@ declare class MarketplaceService extends Instance
 	function GetUserSubscriptionDetailsAsync(self, user: Player, subscriptionId: string): { [any]: any }
 	function GetUserSubscriptionPaymentHistoryAsync(self, user: Player, subscriptionId: string): { any }
 	function GetUserSubscriptionStatusAsync(self, user: Player, subscriptionId: string): { [any]: any }
+	function GetUsersPriceLevelsAsync(self, userIds: { any }): { any }
 	function PlayerOwnsAsset(self, player: Player, assetId: number): boolean
 	function PlayerOwnsBundle(self, player: Player, bundleId: number): boolean
 	function PromptBulkPurchase(self, player: Player, lineItems: { any }, options: { [any]: any }): nil
@@ -7873,13 +11004,18 @@ declare class MarketplaceService extends Instance
 	function PromptPurchase(self, player: Player, assetId: number, equipIfPurchased: boolean?, currencyType: EnumCurrencyType?): nil
 	function PromptSubscriptionPurchase(self, user: Player, subscriptionId: string): nil
 	function PromptThirdPartyPurchase(self, player: Instance, productId: string): nil
+	function RankProductsAsync(self, productIdentifiers: { any }): { any }
+	function RecommendTopProductsAsync(self, infoTypes: { any }): { any }
 	function UserOwnsGamePassAsync(self, userId: number, gamePassId: number): boolean
 end
 
-declare class MaterialGenerationService extends Instance
+declare class MatchmakingService extends Instance
+	function GetServerAttribute(self, name: string): any
+	function InitializeServerAttributesForStudio(self, serverAttributes: { [any]: any }): any
+	function SetServerAttribute(self, name: string, value: any): any
 end
 
-declare class MaterialGenerationSession extends Instance
+declare class MaterialGenerationService extends Instance
 end
 
 declare class MaterialService extends Instance
@@ -7891,6 +11027,8 @@ end
 declare class MaterialVariant extends Instance
 	BaseMaterial: EnumMaterial
 	CustomPhysicalProperties: PhysicalProperties
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	MaterialPattern: EnumMaterialPattern
 	StudsPerTile: number
 end
@@ -7911,6 +11049,7 @@ end
 
 declare class MemoryStoreQueue extends Instance
 	function AddAsync(self, value: any, expiration: number, priority: number?): nil
+	function GetSizeAsync(self, excludeInvisible: boolean?): number
 	function ReadAsync(self, count: number, allOrNothing: boolean?, waitTimeout: number?): any
 	function RemoveAsync(self, id: string): nil
 end
@@ -7924,6 +11063,7 @@ end
 declare class MemoryStoreSortedMap extends Instance
 	function GetAsync(self, key: string): any
 	function GetRangeAsync(self, direction: EnumSortDirection, count: number, exclusiveLowerBound: any, exclusiveUpperBound: any): { any }
+	function GetSizeAsync(self): number
 	function RemoveAsync(self, key: string): nil
 	function SetAsync(self, key: string, value: any, expiration: number, sortKey: any): boolean
 	function UpdateAsync(self, key: string, transformFunction: ((...any) -> ...any), expiration: number): any
@@ -7953,6 +11093,18 @@ end
 declare class MetaBreakpointManager extends Instance
 end
 
+declare class MicroProfilerService extends Instance
+end
+
+declare class ModerationService extends Instance
+	InternalProcessReviewableContentEvent: (event: { [any]: any }) -> boolean
+	function BindReviewableContentEventProcessor(self, priority: number, callback: ((...any) -> ...any)): RBXScriptConnection
+	function CreateReviewableContentAsync(self, config: { [any]: any }): string
+	function CreateReviewableContentKey(self, content: Content): string
+	function InternalCreateReviewableContentAsync(self, config: { [any]: any }): string
+	function InternalRequestReviewableContentReviewAsync(self, config: { [any]: any }): nil
+end
+
 declare class Mouse extends Instance
 	Button1Down: RBXScriptSignal<>
 	Button1Up: RBXScriptSignal<>
@@ -7960,6 +11112,7 @@ declare class Mouse extends Instance
 	Button2Up: RBXScriptSignal<>
 	Hit: CFrame
 	Icon: ContentId
+	IconContent: Content
 	Idle: RBXScriptSignal<>
 	Move: RBXScriptSignal<>
 	Origin: CFrame
@@ -8046,15 +11199,9 @@ end
 declare class OmniRecommendationsService extends Instance
 end
 
-declare class OpenCloudApiV1 extends Instance
-	function CreateModel(self, name: string): OpenCloudModel
-	function CreateUserNotificationAsync(self, user: string, userNotification: OpenCloudModel): OpenCloudModel
-end
 
-declare class OpenCloudService extends Instance
-	function GetApiV1(self): OpenCloudApiV1
-	function InvokeAsync(self, version: string, methodName: string, arguments: { [any]: any }, headers: { [any]: any }?): { [any]: any }
-end
+
+
 
 declare class OperationGraph extends Instance
 end
@@ -8126,7 +11273,6 @@ declare class BasePart extends PVInstance
 	function GetNetworkOwner(self): Player?
 	function GetNetworkOwnershipAuto(self): boolean
 	function GetNoCollisionConstraints(self): { Instance }
-	function GetRootPart(self): BasePart
 	function GetTouchingParts(self): { BasePart }
 	function GetVelocityAtPosition(self, position: Vector3): Vector3
 	function IntersectAsync(self, parts: { Instance }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): Instance
@@ -8186,6 +11332,7 @@ declare class Terrain extends BasePart
 	function CellCenterToWorld(self, x: number, y: number, z: number): Vector3
 	function CellCornerToWorld(self, x: number, y: number, z: number): Vector3
 	function Clear(self): nil
+	function ClearVoxelsAsync_beta(self, region: Region3, channelIds: { any }): nil
 	function CopyRegion(self, region: Region3int16): TerrainRegion
 	function CountCells(self): number
 	function FillBall(self, center: Vector3, radius: number, material: EnumMaterial): nil
@@ -8194,9 +11341,12 @@ declare class Terrain extends BasePart
 	function FillRegion(self, region: Region3, resolution: number, material: EnumMaterial): nil
 	function FillWedge(self, cframe: CFrame, size: Vector3, material: EnumMaterial): nil
 	function GetMaterialColor(self, material: EnumMaterial): Color3
+	function IterateVoxelsAsync_beta(self, region: Region3, resolution: number, channelIds: { any }): TerrainIterateOperation
+	function ModifyVoxelsAsync_beta(self, region: Region3, resolution: number, channelIds: { any }): TerrainModifyOperation
 	function PasteRegion(self, region: TerrainRegion, corner: Vector3int16, pasteEmptyCells: boolean): nil
 	function ReadVoxelChannels(self, region: Region3, resolution: number, channelIds: { any }): { [any]: any }
 	function ReadVoxels(self, region: Region3, resolution: number): any
+	function ReadVoxelsAsync_beta(self, region: Region3, resolution: number, channelIds: { any }): TerrainReadOperation
 	function ReplaceMaterial(self, region: Region3, resolution: number, sourceMaterial: EnumMaterial, targetMaterial: EnumMaterial): nil
 	function SetMaterialColor(self, material: EnumMaterial, value: Color3): nil
 	function WorldToCell(self, position: Vector3): Vector3
@@ -8204,6 +11354,7 @@ declare class Terrain extends BasePart
 	function WorldToCellPreferSolid(self, position: Vector3): Vector3
 	function WriteVoxelChannels(self, region: Region3, resolution: number, channels: { [any]: any }): nil
 	function WriteVoxels(self, region: Region3, resolution: number, materials: { any }, occupancy: { any }): nil
+	function WriteVoxelsAsync_beta(self, region: Region3, resolution: number, channelIds: { any }): TerrainWriteOperation
 end
 
 declare class TriangleMeshPart extends BasePart
@@ -8214,9 +11365,7 @@ end
 
 declare class MeshPart extends TriangleMeshPart
 	DoubleSided: boolean
-	HasJointOffset: boolean
 	HasSkinnedMesh: boolean
-	JointOffset: Vector3
 	MeshContent: Content
 	MeshId: ContentId
 	RenderFidelity: EnumRenderFidelity
@@ -8261,6 +11410,33 @@ declare class VehicleSeat extends BasePart
 	function Sit(self, humanoid: Humanoid): nil
 end
 
+declare class Camera extends PVInstance
+	CFrame: CFrame
+	CameraSubject: Humanoid | BasePart | nil
+	CameraType: EnumCameraType
+	DiagonalFieldOfView: number
+	FieldOfView: number
+	FieldOfViewMode: EnumFieldOfViewMode
+	FirstPersonTransition: RBXScriptSignal<boolean>
+	Focus: CFrame
+	HeadLocked: boolean
+	HeadScale: number
+	InterpolationFinished: RBXScriptSignal<>
+	MaxAxisFieldOfView: number
+	NearPlaneZ: number
+	VRTiltAndRollEnabled: boolean
+	ViewportSize: Vector2
+	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
+	function GetRenderCFrame(self): CFrame
+	function GetRoll(self): number
+	function ScreenPointToRay(self, x: number, y: number, depth: number?): Ray
+	function SetRoll(self, rollAngle: number): nil
+	function ViewportPointToRay(self, x: number, y: number, depth: number?): Ray
+	function WorldToScreenPoint(self, worldPoint: Vector3): (Vector3, boolean)
+	function WorldToViewportPoint(self, worldPoint: Vector3): (Vector3, boolean)
+	function ZoomToExtents(self, boundingBoxCFrame: CFrame, boundingBoxSize: Vector3): nil
+end
+
 declare class Model extends PVInstance
 	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
@@ -8284,6 +11460,7 @@ declare class Actor extends Model
 end
 
 declare class BackpackItem extends Model
+	TextureContent: Content
 	TextureId: ContentId
 end
 
@@ -8315,25 +11492,25 @@ end
 declare class WorldRoot extends Model
 	function ArePartsTouchingOthers(self, partList: { BasePart }, overlapIgnored: number?): boolean
 	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Blockcast(self, cframe: CFrame, size: Vector3, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function BulkMoveTo(self, partList: { BasePart }, cframeList: { CFrame }, eventMode: EnumBulkMoveMode?): nil
 	function GetPartBoundsInBox(self, cframe: CFrame, size: Vector3, overlapParams: OverlapParams?): { BasePart }
 	function GetPartBoundsInRadius(self, position: Vector3, radius: number, overlapParams: OverlapParams?): { BasePart }
 	function GetPartsInPart(self, part: BasePart, overlapParams: OverlapParams?): { BasePart }
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
-	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 end
 
 declare class Workspace extends WorldRoot
 	AirDensity: number
+	AirTurbulenceIntensity: number
 	AllowThirdPartySales: boolean
+	AuthorityMode: EnumAuthorityMode
 	AvatarUnificationMode: EnumAvatarUnificationMode
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
+	FallHeightEnabled: boolean
 	FallenPartsDestroyHeight: number
 	FluidForces: EnumFluidForces
 	GlobalWind: Vector3
@@ -8343,10 +11520,13 @@ declare class Workspace extends WorldRoot
 	MeshPartHeadsAndAccessories: EnumMeshPartHeadsAndAccessories
 	ModelStreamingBehavior: EnumModelStreamingBehavior
 	MoverConstraintRootBehavior: EnumMoverConstraintRootBehaviorMode
+	NextGenerationReplication: EnumRolloutState
 	PathfindingUseImprovedSearch: EnumPathfindingUseImprovedSearch
 	PersistentLoaded: RBXScriptSignal<Player>
+	PhysicsImprovedSleep: EnumRolloutState
 	PhysicsSteppingMethod: EnumPhysicsSteppingMethod
 	PlayerCharacterDestroyBehavior: EnumPlayerCharacterDestroyBehavior
+	PlayerScriptsUseInputActionSystem: EnumRolloutState
 	PrimalPhysicsSolver: EnumPrimalPhysicsSolver
 	RejectCharacterDeletions: EnumRejectCharacterDeletions
 	RenderingCacheOptimizations: EnumRenderingCacheOptimizationMode
@@ -8362,6 +11542,8 @@ declare class Workspace extends WorldRoot
 	Terrain: Terrain
 	TouchEventsUseCollisionGroups: EnumRolloutState
 	TouchesUseCollisionGroups: boolean
+	UseFixedSimulation: EnumRolloutState
+	UseNewLuauTypeSolver: EnumRolloutState
 	function ExperimentalSolverIsEnabled(self): boolean
 	function GetNumAwakeParts(self): number
 	function GetPhysicsThrottling(self): number
@@ -8404,6 +11586,9 @@ end
 declare class BanHistoryPages extends Pages
 end
 
+declare class CapturesPages extends Pages
+end
+
 declare class CatalogPages extends Pages
 end
 
@@ -8436,6 +11621,9 @@ end
 declare class OutfitPages extends Pages
 end
 
+declare class RecommendationPages extends Pages
+end
+
 declare class StandardPages extends Pages
 end
 
@@ -8453,6 +11641,8 @@ declare class ParticleEmitter extends Instance
 	FlipbookIncompatible: string
 	FlipbookLayout: EnumParticleFlipbookLayout
 	FlipbookMode: EnumParticleFlipbookMode
+	FlipbookSizeX: number
+	FlipbookSizeY: number
 	FlipbookStartRandom: boolean
 	Lifetime: NumberRange
 	LightEmission: number
@@ -8479,6 +11669,9 @@ declare class ParticleEmitter extends Instance
 	ZOffset: number
 	function Clear(self): nil
 	function Emit(self, particleCount: number?): nil
+end
+
+declare class PartyEmulatorService extends Instance
 end
 
 declare class PatchBundlerFileWatch extends Instance
@@ -8573,6 +11766,9 @@ declare class PhysicsSettings extends Instance
 	UseCSGv2: boolean
 end
 
+declare class PlaceAssetIdsService extends Instance
+end
+
 declare class PlaceStatsService extends Instance
 end
 
@@ -8616,15 +11812,18 @@ declare class Player extends Instance
 	NameDisplayDistance: number
 	Neutral: boolean
 	OnTeleport: RBXScriptSignal<EnumTeleportState, number, string>
-	ReplicationFocus: Instance
+	PartyId: string
+	ReplicationFocus: Instance?
 	RespawnLocation: SpawnLocation
 	SimulationRadius: number
 	SimulationRadiusChanged: RBXScriptSignal<number>
 	Team: Team
 	TeamColor: BrickColor
 	UserId: number
+	function AddReplicationFocus(self, part: BasePart): nil
 	function ClearCharacterAppearance(self): nil
 	function DistanceFromCharacter(self, point: Vector3): number
+	function GetData(self): PlayerData
 	function GetFriendsOnline(self, maxFriends: number?): { any }
 	function GetJoinData(self): { LaunchData: string?, Members: {number}?, SourceGameId: number?, SourcePlaceId: number?, TeleportData: TeleportData? }
 	function GetMouse(self): Mouse
@@ -8641,7 +11840,48 @@ declare class Player extends Instance
 	function LoadCharacterWithHumanoidDescription(self, humanoidDescription: HumanoidDescription): nil
 	function Move(self, walkDirection: Vector3, relativeToCamera: boolean?): nil
 	function RemoveCharacter(self): nil
+	function RemoveReplicationFocus(self, part: BasePart): nil
 	function RequestStreamAroundAsync(self, position: Vector3, timeOut: number?): nil
+end
+
+declare class PlayerData extends Instance
+	function GetPlayer(self): Player
+	function GetRecordAsync(self, recordName: string?): PlayerDataRecord
+end
+
+declare class PlayerDataRecord extends Instance
+	Changed: RBXScriptSignal<string, any>
+	CreatedTime: number
+	DefaultRecordName: boolean
+	Dirty: boolean
+	Error: EnumPlayerDataErrorState
+	Flushed: RBXScriptSignal<boolean, string?>
+	FlushedTime: number
+	Loaded: RBXScriptSignal<boolean, string?>
+	LoadedTime: number
+	ModifiedTime: number
+	NewRecord: boolean
+	Readable: boolean
+	RecordName: string
+	Writable: boolean
+	function GetPlayer(self): Player
+	function GetValue(self, key: string): any
+	function GetValueChangedSignal(self, key: string): RBXScriptSignal
+	function ReleaseAsync(self): nil
+	function RemoveValue(self, key: string): nil
+	function RequestFlushAsync(self): nil
+	function SetValue(self, key: string, value: any): nil
+end
+
+declare class PlayerDataRecordConfig extends Instance
+	RecordName: string
+	function GetDefaultValue(self, key: string): any
+	function SetDefaultValue(self, key: string, value: any): nil
+end
+
+declare class PlayerDataService extends Instance
+	LoadFailureBehavior: EnumPlayerDataLoadFailureBehavior
+	function GetRecordConfig(self, recordName: string?): PlayerDataRecordConfig
 end
 
 declare class PlayerEmulatorService extends Instance
@@ -8679,7 +11919,7 @@ declare class Players extends Instance
 	PlayerDisconnecting: RBXScriptSignal<Player>
 	PlayerMembershipChanged: RBXScriptSignal<Player>
 	PlayerRejoining: RBXScriptSignal<Player>
-	PlayerRemoving: RBXScriptSignal<Player>
+	PlayerRemoving: RBXScriptSignal<Player, EnumPlayerExitReason>
 	PreferredPlayers: number
 	PreferredPlayersInternal: number
 	RespawnTime: number
@@ -8834,8 +12074,11 @@ declare class ProximityPrompt extends Instance
 	Exclusivity: EnumProximityPromptExclusivity
 	GamepadKeyCode: EnumKeyCode
 	HoldDuration: number
+	IndicatorHidden: RBXScriptSignal<>
+	IndicatorShown: RBXScriptSignal<>
 	KeyboardKeyCode: EnumKeyCode
 	MaxActivationDistance: number
+	MaxIndicatorDistance: number
 	ObjectText: string
 	PromptButtonHoldBegan: RBXScriptSignal<Player>
 	PromptButtonHoldEnded: RBXScriptSignal<Player>
@@ -8853,6 +12096,9 @@ end
 
 declare class ProximityPromptService extends Instance
 	Enabled: boolean
+	IndicatorHidden: RBXScriptSignal<ProximityPrompt>
+	IndicatorShown: RBXScriptSignal<ProximityPrompt>
+	MaxIndicatorsVisible: number
 	MaxPromptsVisible: number
 	PromptButtonHoldBegan: RBXScriptSignal<ProximityPrompt, Player>
 	PromptButtonHoldEnded: RBXScriptSignal<ProximityPrompt, Player>
@@ -8876,6 +12122,16 @@ declare class RTAnimationTracker extends Instance
 end
 
 declare class RbxAnalyticsService extends Instance
+end
+
+declare class RecommendationService extends Instance
+	function GenerateItemListAsync(self, generateRecommendationItemListRequest: { [any]: any }): RecommendationPages
+	function GetRecommendationItemAsync(self, itemId: string): { [any]: any }
+	function LogActionEvent(self, actionType: EnumRecommendationActionType, itemId: string, tracingId: string, actionEventDetails: { [any]: any }?): nil
+	function LogImpressionEvent(self, impressionType: EnumRecommendationImpressionType, itemId: string, tracingId: string, impressionEventDetails: { [any]: any }?): nil
+	function RegisterItemAsync(self, player: Player, registerRecommendationItemsRequest: { [any]: any }): { [any]: any }
+	function RemoveItemAsync(self, itemId: string): nil
+	function UpdateItemAsync(self, updateRecommendationItemRequest: { [any]: any }): nil
 end
 
 declare class ReflectionMetadata extends Instance
@@ -8938,6 +12194,16 @@ declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
 declare class ReflectionService extends Instance
+	function GetClass(self, className: string, filter: { [any]: any }?): { [any]: any }?
+	function GetClasses(self, filter: { [any]: any }?): { any }
+	function GetPropertiesOfClass(self, className: string, filter: { [any]: any }?): { any }
+end
+
+declare class RemoteCommandService extends Instance
+	function GetExecutingPlayer(self): Player
+	function GetReceivedUpdateSignal(self): RBXScriptSignal
+	function GetStoppingSignal(self): RBXScriptSignal
+	function SendUpdate(self, args: any): nil
 end
 
 declare class RemoteCursorService extends Instance
@@ -9035,7 +12301,9 @@ declare class RtMessagingService extends Instance
 end
 
 declare class RunService extends Instance
+	FrameNumber: number
 	Heartbeat: RBXScriptSignal<number>
+	Misprediction: RBXScriptSignal<number, { any }>
 	PostSimulation: RBXScriptSignal<number>
 	PreAnimation: RBXScriptSignal<number>
 	PreRender: RBXScriptSignal<number>
@@ -9043,12 +12311,22 @@ declare class RunService extends Instance
 	RenderStepped: RBXScriptSignal<number>
 	Stepped: RBXScriptSignal<number, number>
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
+	function BindToSimulation(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?): RBXScriptConnection
+	function GetPredictionStatus(self, context: Instance): EnumPredictionStatus
 	function IsClient(self): boolean
 	function IsRunMode(self): boolean
 	function IsRunning(self): boolean
 	function IsServer(self): boolean
 	function IsStudio(self): boolean
+	function SetPredictionMode(self, context: Instance, mode: EnumPredictionMode): nil
 	function UnbindFromRenderStep(self, name: string): nil
+end
+
+declare class RuntimeContentService extends Instance
+	RuntimeContentFail: RBXScriptSignal<string>
+	RuntimeContentLRCleanup: RBXScriptSignal<string, string>
+	RuntimeContentQuery: RBXScriptSignal<string, string, string>
+	RuntimeContentShare: RBXScriptSignal<string, string>
 end
 
 declare class RuntimeScriptService extends Instance
@@ -9178,6 +12456,11 @@ declare class FluidForceSensor extends SensorBase
 	function EvaluateAsync(self, linearVelocity: Vector3, angularVelocity: Vector3, cframe: CFrame): any
 end
 
+declare class SerializationService extends Instance
+	function DeserializeInstancesAsync(self, buffer: buffer): { Instance }
+	function SerializeInstancesAsync(self, inputInstances: { Instance }): buffer
+end
+
 declare class ServerScriptService extends Instance
 	LoadStringEnabled: boolean
 end
@@ -9202,6 +12485,7 @@ declare class DataModel extends ServiceProvider
 	GraphicsQualityChangeRequest: RBXScriptSignal<boolean>
 	JobId: string
 	Loaded: RBXScriptSignal<>
+	MatchmakingType: EnumMatchmakingType
 	PlaceId: number
 	PlaceVersion: number
 	PrivateServerId: string
@@ -9220,9 +12504,6 @@ end
 declare class GenericSettings extends ServiceProvider
 end
 
-declare class AnalysticsSettings extends GenericSettings
-end
-
 declare class UserSettings extends GenericSettings
 	GameSettings: UserGameSettings
 	function GetService(self, service: "UserGameSettings"): UserGameSettings
@@ -9233,6 +12514,9 @@ end
 declare class ServiceVisibilityService extends Instance
 end
 
+declare class SessionCheckService extends Instance
+end
+
 declare class SessionService extends Instance
 end
 
@@ -9241,22 +12525,31 @@ declare class SharedTableRegistry extends Instance
 	function SetSharedTable(self, name: string, st: SharedTable?): nil
 end
 
-declare class ShorelineUpgraderService extends Instance
-end
-
 declare class Sky extends Instance
 	CelestialBodiesShown: boolean
 	MoonAngularSize: number
+	MoonTextureContent: Content
 	MoonTextureId: ContentId
+	SkyboxBackContent: Content
 	SkyboxBk: ContentId
 	SkyboxDn: ContentId
+	SkyboxDownContent: Content
+	SkyboxFrontContent: Content
 	SkyboxFt: ContentId
+	SkyboxLeftContent: Content
 	SkyboxLf: ContentId
+	SkyboxOrientation: Vector3
+	SkyboxRightContent: Content
 	SkyboxRt: ContentId
 	SkyboxUp: ContentId
+	SkyboxUpContent: Content
 	StarCount: number
 	SunAngularSize: number
+	SunTextureContent: Content
 	SunTextureId: ContentId
+end
+
+declare class SlimService extends Instance
 end
 
 declare class Smoke extends Instance
@@ -9280,15 +12573,25 @@ declare class SocialService extends Instance
 	GameInvitePromptClosed: RBXScriptSignal<Instance, { any }>
 	OnCallInviteInvoked: (tag: string, callParticipantIds: { any }) -> Instance
 	PhoneBookPromptClosed: RBXScriptSignal<Instance>
+	ShareSheetClosed: RBXScriptSignal<Player>
 	function CanSendCallInviteAsync(self, player: Instance): boolean
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
+	function GetEventRsvpStatusAsync(self, eventId: string): EnumRsvpStatus
+	function GetExperienceEventAsync(self, eventId: string): { [any]: any }?
+	function GetPartyAsync(self, partyId: string): { any }
+	function GetPlayersByPartyId(self, partyId: string): { Instance }
+	function GetUpcomingExperienceEventsAsync(self): { any }
 	function HideSelfView(self): nil
+	function PromptFeedbackSubmissionAsync(self): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
+	function PromptLinkSharing(self, player: Player, options: { [any]: any }?): any
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
+	function PromptRsvpToEventAsync(self, eventId: string): EnumRsvpStatus
 	function ShowSelfView(self, selfViewPosition: EnumSelfViewPosition?): nil
 end
 
 declare class Sound extends Instance
+	AudioContent: Content
 	DidLoop: RBXScriptSignal<string, number>
 	Ended: RBXScriptSignal<string>
 	IsLoaded: boolean
@@ -9309,7 +12612,7 @@ declare class Sound extends Instance
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
-	SoundGroup: SoundGroup
+	SoundGroup: SoundGroup?
 	SoundId: ContentId
 	Stopped: RBXScriptSignal<string>
 	TimeLength: number
@@ -9397,7 +12700,9 @@ declare class SoundGroup extends Instance
 end
 
 declare class SoundService extends Instance
+	AcousticSimulationEnabled: boolean
 	AmbientReverb: EnumReverbType
+	CharacterSoundsUseNewApi: EnumRolloutState
 	DistanceFactor: number
 	DopplerScale: number
 	RespectFilteringEnabled: boolean
@@ -9406,6 +12711,9 @@ declare class SoundService extends Instance
 	function GetListener(self): (EnumListenerType, any)
 	function PlayLocalSound(self, sound: Sound): nil
 	function SetListener(self, listenerType: EnumListenerType, listener: any): nil
+end
+
+declare class SoundShimService extends Instance
 end
 
 declare class Sparkles extends Instance
@@ -9441,11 +12749,14 @@ declare class StarterPlayer extends Instance
 	CameraMaxZoomDistance: number
 	CameraMinZoomDistance: number
 	CameraMode: EnumCameraMode
+	CharacterBreakJointsOnDeath: boolean
 	CharacterJumpHeight: number
 	CharacterJumpPower: number
 	CharacterMaxSlopeAngle: number
 	CharacterUseJumpPower: boolean
 	CharacterWalkSpeed: number
+	ClassicDeath: boolean
+	CreateDefaultPlayerModule: boolean
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMovementMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
@@ -9477,6 +12788,7 @@ declare class Stats extends Instance
 	FrameTime: number
 	HeartbeatTime: number
 	InstanceCount: number
+	MemoryTrackingEnabled: boolean
 	MovingPrimitivesCount: number
 	PhysicsReceiveKbps: number
 	PhysicsSendKbps: number
@@ -9492,8 +12804,13 @@ declare class Stats extends Instance
 	UI2DTriangleCount: number
 	UI3DDrawcallCount: number
 	UI3DTriangleCount: number
+	function GetHarmonyQualityLevel(self): number
+	function GetMemoryCategoryNames(self): { any }
+	function GetMemoryUsageMbAllCategories(self): { any }
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
 	function GetTotalMemoryUsageMb(self): number
+	function ResetHarmonyMemoryTarget(self): nil
+	function SetHarmonyMemoryTarget(self, targetMB: number): nil
 end
 
 declare class StatsItem extends Instance
@@ -9521,7 +12838,6 @@ end
 declare class Studio extends Instance
 	ActionOnStopSync: EnumActionOnStopSync
 	CommandBarLocalState: boolean
-	DefaultScriptFileDir: QDir
 	DeprecatedObjectsShown: boolean
 	Font: QFont
 	HintColor: Color3
@@ -9644,6 +12960,12 @@ end
 declare class StudioCallout extends Instance
 end
 
+declare class StudioCameraService extends Instance
+	LockCameraSpeed: boolean
+	LoggingEnabled: boolean
+	ShowCameraSpeed: RBXScriptSignal<number>
+end
+
 declare class StudioData extends Instance
 end
 
@@ -9673,6 +12995,12 @@ declare class StudioService extends Instance
 	ShowConstraintDetails: boolean
 	StudioLocaleId: string
 	UseLocalSpace: boolean
+	function GizmoRaycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult<Attachment | Constraint | NoCollisionConstraint | WeldConstraint>?
+end
+
+declare class StudioTestService extends Instance
+	function EndTest(self, value: any): nil
+	function GetTestArgs(self): any
 end
 
 declare class StudioTheme extends Instance
@@ -9687,7 +13015,7 @@ end
 declare class StyleBase extends Instance
 	StyleRulesChanged: RBXScriptSignal<>
 	function GetStyleRules(self): { Instance }
-	function InsertStyleRule(self, rule: StyleRule, index: number?): nil
+	function InsertStyleRule(self, rule: StyleRule, priority: number?): nil
 	function SetStyleRules(self, rules: { Instance }): nil
 end
 
@@ -9697,7 +13025,7 @@ declare class StyleRule extends StyleBase
 	SelectorError: string
 	function GetProperties(self): { [any]: any }
 	function GetProperty(self, name: string): any
-	function SetProperties(self, table: { [any]: any }): nil
+	function SetProperties(self, styleProperties: { [any]: any }): nil
 	function SetProperty(self, name: string, value: any): nil
 end
 
@@ -9707,6 +13035,7 @@ declare class StyleSheet extends StyleBase
 end
 
 declare class StyleDerive extends Instance
+	Priority: number
 	StyleSheet: StyleSheet
 end
 
@@ -9714,11 +13043,33 @@ declare class StyleLink extends Instance
 	StyleSheet: StyleSheet
 end
 
+declare class StyleQuery extends Instance
+	AspectRatioRange: NumberRange
+	IsActive: boolean
+	MaxSize: Vector2
+	MinSize: Vector2
+	function GetCondition(self, name: string): any
+	function GetConditions(self): { [any]: any }
+	function SetCondition(self, name: string, value: any): nil
+	function SetConditions(self, conditions: { [any]: any }): nil
+end
+
 declare class StylingService extends Instance
 end
 
 declare class SurfaceAppearance extends Instance
+	AlphaMode: EnumAlphaMode
 	Color: Color3
+	ColorMapContent: Content
+	EmissiveMaskContent: Content
+	EmissiveStrength: number
+	EmissiveTint: Color3
+	MetalnessMapContent: Content
+	NormalMapContent: Content
+	RoughnessMapContent: Content
+end
+
+declare class SystemThemeService extends Instance
 end
 
 declare class TaskScheduler extends Instance
@@ -9772,6 +13123,7 @@ declare class TeleportService extends Instance
 	function GetLocalPlayerTeleportData(self): TeleportData?
 	function GetPlayerPlaceInstanceAsync(self, userId: number): (boolean, string, number, string)
 	function GetTeleportSetting(self, setting: string): any
+	function PromptExperienceDetailsAsync(self, player: Player, universeId: number): EnumPromptExperienceDetailsResult
 	function ReserveServer(self, placeId: number): (string, string)
 	function SetTeleportGui(self, gui: GuiObject): nil
 	function SetTeleportSetting(self, setting: string, value: any): nil
@@ -9790,6 +13142,8 @@ declare class TemporaryScriptService extends Instance
 end
 
 declare class TerrainDetail extends Instance
+	EmissiveStrength: number
+	EmissiveTint: Color3
 	Face: EnumTerrainFace
 	MaterialPattern: EnumMaterialPattern
 	StudsPerTile: number
@@ -9804,7 +13158,6 @@ declare class TestService extends Instance
 	Description: string
 	ErrorCount: number
 	ExecuteWithStudioRun: boolean
-	Is30FpsThrottleEnabled: boolean
 	IsPhysicsEnvironmentalThrottled: boolean
 	IsSleepAllowed: boolean
 	NumberOfPlayers: number
@@ -9812,6 +13165,7 @@ declare class TestService extends Instance
 	ServerCollectResult: RBXScriptSignal<string, Instance, number>
 	SimulateSecondsLag: number
 	TestCount: number
+	ThrottlePhysicsToRealtime: boolean
 	Timeout: number
 	WarnCount: number
 	function Check(self, condition: boolean, description: string, source: Instance?, line: number?): nil
@@ -9822,6 +13176,7 @@ declare class TestService extends Instance
 	function Message(self, text: string, source: Instance?, line: number?): nil
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function ScopeTime(self): { [any]: any }
+	function TakeSnapshot(self, snapshotname: string): nil
 	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function isFeatureEnabled(self, name: string): boolean
 end
@@ -9961,9 +13316,13 @@ declare class ChatWindowMessageProperties extends TextChatMessageProperties
 end
 
 declare class TextChatService extends Instance
+	BubbleChatConfiguration: BubbleChatConfiguration
 	BubbleDisplayed: RBXScriptSignal<Instance, TextChatMessage>
+	ChannelTabsConfiguration: ChannelTabsConfiguration
+	ChatInputBarConfiguration: ChatInputBarConfiguration
 	ChatTranslationEnabled: boolean
 	ChatVersion: EnumChatVersion
+	ChatWindowConfiguration: ChatWindowConfiguration
 	CreateDefaultCommands: boolean
 	CreateDefaultTextChannels: boolean
 	MessageReceived: RBXScriptSignal<TextChatMessage>
@@ -9978,7 +13337,6 @@ declare class TextChatService extends Instance
 end
 
 declare class TextFilterResult extends Instance
-	function GetChatForUserAsync(self, toUserId: number): string
 	function GetNonChatStringForBroadcastAsync(self): string
 	function GetNonChatStringForUserAsync(self, toUserId: number): string
 end
@@ -9988,6 +13346,14 @@ declare class TextFilterTranslatedResult extends Instance
 	SourceText: TextFilterResult
 	function GetTranslationForLocale(self, locale: string): TextFilterResult
 	function GetTranslations(self): { [any]: any }
+end
+
+declare class TextGenerator extends Instance
+	Seed: number
+	SystemPrompt: string
+	Temperature: number
+	TopP: number
+	function GenerateTextAsync(self, request: { [any]: any }): { [any]: any }
 end
 
 declare class TextService extends Instance
@@ -10130,9 +13496,11 @@ end
 
 declare class UIDragDetector extends UIComponent
 	ActivatedCursorIcon: ContentId
+	ActivatedCursorIconContent: Content
 	BoundingBehavior: EnumUIDragDetectorBoundingBehavior
 	BoundingUI: GuiBase2d
 	CursorIcon: ContentId
+	CursorIconContent: Content
 	DragAxis: Vector2
 	DragContinue: RBXScriptSignal<Vector2>
 	DragEnd: RBXScriptSignal<Vector2>
@@ -10241,14 +13609,22 @@ end
 
 declare class UIStroke extends UIComponent
 	ApplyStrokeMode: EnumApplyStrokeMode
+	BorderOffset: UDim
+	BorderStrokePosition: EnumBorderStrokePosition
 	Color: Color3
 	Enabled: boolean
 	LineJoinMode: EnumLineJoinMode
+	StrokeSizingMode: EnumStrokeSizingMode
 	Thickness: number
 	Transparency: number
+	ZIndex: number
 end
 
 declare class UIDragDetectorService extends Instance
+end
+
+declare class UniqueIdLookupService extends Instance
+	function GetOrCreateUniqueIdRemoteCommand(self, instance: Instance): string
 end
 
 declare class UnvalidatedAssetService extends Instance
@@ -10298,11 +13674,13 @@ declare class UserInputService extends Instance
 	MouseDeltaSensitivity: number
 	MouseEnabled: boolean
 	MouseIcon: ContentId
+	MouseIconContent: Content
 	MouseIconEnabled: boolean
 	OnScreenKeyboardPosition: Vector2
 	OnScreenKeyboardSize: Vector2
 	OnScreenKeyboardVisible: boolean
 	PointerAction: RBXScriptSignal<number, Vector2, number, boolean>
+	PreferredInput: EnumPreferredInput
 	TextBoxFocusReleased: RBXScriptSignal<TextBox>
 	TextBoxFocused: RBXScriptSignal<TextBox>
 	TouchDrag: RBXScriptSignal<EnumSwipeDirection, number, boolean>
@@ -10434,6 +13812,19 @@ declare class Vector3Value extends ValueBase
 	Value: Vector3
 end
 
+declare class ValueCurve extends Instance
+	Length: number
+	ValueType: string
+	function GetKeyAtIndex(self, index: number): ValueCurveKey
+	function GetKeyIndicesAtTime(self, time: number): { any }
+	function GetKeys(self): { any }
+	function GetValueAtTime(self, time: number): any?
+	function InsertKey(self, key: ValueCurveKey): { any }
+	function InsertKeyValue(self, time: number, value: any, keyInterpolationMode: EnumKeyInterpolationMode?): { any }
+	function RemoveKeyAtIndex(self, startingIndex: number, count: number?): number
+	function SetKeys(self, keys: { any }): number
+end
+
 declare class Vector3Curve extends Instance
 	function GetValueAtTime(self, time: number): { any }
 	function X(self): FloatCurve
@@ -10455,25 +13846,35 @@ declare class VideoDeviceInput extends Instance
 end
 
 declare class VideoPlayer extends Instance
-	Asset: ContentId
-	AutoLoad: boolean
-	Ended: RBXScriptSignal<>
+	AutoLoadInStudio: boolean
+	AutoPlayInStudio: boolean
+	DidEnd: RBXScriptSignal<>
+	DidLoop: RBXScriptSignal<>
+	IsLoaded: boolean
 	IsPlaying: boolean
-	IsReady: boolean
-	Looped: RBXScriptSignal<>
 	Looping: boolean
+	PlayFailed: RBXScriptSignal<EnumAssetFetchStatus>
 	PlaybackSpeed: number
 	Resolution: Vector2
-	Thumbnail: ContentId
 	TimeLength: number
 	TimePosition: number
+	VideoContent: Content
 	Volume: number
+	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
 	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+	function LoadAsync(self): EnumAssetFetchStatus
+	function Pause(self): nil
 	function Play(self): nil
-	function Stop(self): nil
+	function Unload(self): nil
+end
+
+declare class VideoScreenCaptureService extends Instance
 end
 
 declare class VideoService extends Instance
+	function CreateVideoSamplerAsync(self, content: Content, options: { [any]: any }?): VideoSampler
 end
 
 declare class VirtualInputManager extends Instance
@@ -10518,6 +13919,19 @@ declare class VoiceChatService extends Instance
 	function IsVoiceEnabledForUserIdAsync(self, userId: number): boolean
 end
 
+declare class WebSocketClient extends Instance
+	Closed: RBXScriptSignal<>
+	ConnectionState: EnumWebSocketState
+	MessageReceived: RBXScriptSignal<string>
+	Opened: RBXScriptSignal<>
+	function Close(self): nil
+	function Send(self, data: string): nil
+end
+
+declare class WebSocketService extends Instance
+	function CreateClient(self, uri: string): WebSocketClient
+end
+
 declare class WebViewService extends Instance
 end
 
@@ -10534,6 +13948,51 @@ declare class Wire extends Instance
 	SourceName: string
 	TargetInstance: Instance
 	TargetName: string
+end
+
+declare class WrapTextureTransfer extends Instance
+	ReferenceCageMeshContent: Content
+	UVMaxBound: Vector2
+	UVMinBound: Vector2
+end
+
+declare class MLSession extends Object
+	function ForwardAsync(self, data: { [any]: any }): { [any]: any }
+end
+
+declare class TerrainIterateOperation extends Object
+	Ready: RBXScriptSignal<{ [any]: any }>
+	function CommitBlock(self, block: { [any]: any }): RBXScriptSignal
+end
+
+declare class TerrainModifyOperation extends Object
+	Ready: RBXScriptSignal<{ [any]: any }>
+	function CommitBlock(self, block: { [any]: any }): RBXScriptSignal
+end
+
+declare class TerrainReadOperation extends Object
+	Ready: RBXScriptSignal<{ [any]: any }>
+end
+
+declare class TerrainWriteOperation extends Object
+	function CommitBlock(self, block: { [any]: any }): RBXScriptSignal
+	function GetBlock(self): { [any]: any }
+end
+
+declare class VideoSampler extends Object
+	TimeLength: number
+	VideoContent: Content
+	function GetSamplesAtTimesAsync(self, times: { any }): { any }
+end
+
+declare class WebStreamClient extends Object
+	Closed: RBXScriptSignal<>
+	ConnectionState: EnumWebStreamClientState
+	Error: RBXScriptSignal<number, string>
+	MessageReceived: RBXScriptSignal<string>
+	Opened: RBXScriptSignal<number, string>
+	function Close(self): nil
+	function Send(self, data: string): nil
 end
 
 declare Instance: {
@@ -10561,6 +14020,7 @@ declare BrickColor: {
 	DarkGray: (() -> BrickColor),
 	White: (() -> BrickColor),
 	random: (() -> BrickColor),
+	Random: (() -> BrickColor),
 	Green: (() -> BrickColor),
 	Black: (() -> BrickColor),
 	palette: ((paletteValue: number) -> BrickColor),
@@ -10598,7 +14058,7 @@ declare PhysicalProperties: {
 }
 
 declare Axes: {
-	new: ((axes: any) -> Axes),
+	new: ((...EnumAxis | EnumNormalId) -> Axes),
 }
 
 declare Region3: {
@@ -10618,7 +14078,7 @@ declare UDim2: {
 declare CFrame: {
 	identity: CFrame,
 	fromEulerAnglesYXZ: ((rx: number, ry: number, rz: number) -> CFrame),
-	fromEulerAngles: ((rx: number, ry: number, rz: number, order: EnumRotationOrder) -> CFrame),
+	fromEulerAngles: ((rx: number, ry: number, rz: number, order: EnumRotationOrder?) -> CFrame),
 	Angles: ((rx: number, ry: number, rz: number) -> CFrame),
 	fromMatrix: ((pos: Vector3, vX: Vector3, vY: Vector3, vZ: Vector3?) -> CFrame),
 	fromAxisAngle: ((v: Vector3, r: number) -> CFrame),
@@ -10631,7 +14091,7 @@ declare CFrame: {
 }
 
 declare Faces: {
-	new: ((normalIds: any) -> Faces),
+	new: ((...EnumNormalId) -> Faces),
 }
 
 declare Rect: {
@@ -10735,6 +14195,19 @@ declare Path2DControlPoint: {
 	new: (() -> Path2DControlPoint) & ((position: UDim2) -> Path2DControlPoint) & ((position: UDim2, leftTangent: UDim2, rightTangent: UDim2) -> Path2DControlPoint),
 }
 
+declare SecurityCapabilities: {
+	new: ((...EnumSecurityCapability) -> SecurityCapabilities),
+	fromCurrent: (() -> SecurityCapabilities),
+}
+
+
+export type RaycastResult<T = BasePart> = {
+    Instance: T,
+    Position: Vector3,
+    Normal: Vector3,
+    Material: EnumMaterial,
+    Distance: number,
+}
 
 declare class GlobalSettings extends GenericSettings
     Lua: LuaSettings

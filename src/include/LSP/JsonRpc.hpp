@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "Protocol/Base.hpp"
 #include "LSP/Utils.hpp"
+#include "LSP/Transport/Transport.hpp"
 
 using json = nlohmann::json;
 
@@ -40,6 +41,15 @@ public:
     }
 };
 
+class RequestCancelledException : public JsonRpcException
+{
+public:
+    explicit RequestCancelledException()
+        : JsonRpcException(lsp::ErrorCode::RequestCancelled, "Request cancelled by client")
+    {
+    }
+};
+
 class JsonRpcMessage
 {
 public:
@@ -68,9 +78,9 @@ public:
 JsonRpcMessage parse(const std::string& jsonString);
 
 /// Reads a JSON-RPC message from input
-bool readRawMessage(std::istream& input, std::string& output);
+bool readRawMessage(Transport* transport, std::string& output);
 
 /// Sends a raw JSON-RPC message to output stream
-void sendRawMessage(std::ostream& output, const json& message);
+void sendRawMessage(Transport* transport, const json& message);
 
 } // namespace json_rpc

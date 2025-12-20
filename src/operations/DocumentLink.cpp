@@ -49,11 +49,10 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
         if (auto moduleInfo = frontend.moduleResolver.resolveModuleInfo(moduleName, *require.require))
         {
             // Resolve the module info to a URI
-            auto realName = platform->resolveToRealPath(moduleInfo->name);
-            if (realName)
+            if (auto uri = platform->resolveToRealPath(moduleInfo->name))
             {
                 lsp::DocumentLink link;
-                link.target = Uri::file(*realName);
+                link.target = *uri;
                 link.range = lsp::Range{
                     {require.location.begin.line, require.location.begin.column}, {require.location.end.line, require.location.end.column - 1}};
                 result.push_back(link);

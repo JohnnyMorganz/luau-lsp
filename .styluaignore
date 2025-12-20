@@ -1,3 +1,4 @@
 luau/
+tests/testdata/non-ascii/
 *.d.lua
 *.d.luau

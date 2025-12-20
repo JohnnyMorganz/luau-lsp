@@ -483,4 +483,27 @@ TEST_CASE_FIXTURE(Fixture, "ignored_tags")
                             "\n- `x` number -- Testing");
 }
 
+TEST_CASE_FIXTURE(Fixture, "singleline_comments_preserve_newlines")
+{
+    auto result = check(R"(
+        --- @class MyClass
+        ---
+        --- A sample class.
+        local MyClass = {}
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("MyClass");
+    auto ttv = Luau::get<Luau::TableType>(ty);
+    REQUIRE(ttv);
+
+    auto comments = getComments(ttv->definitionLocation);
+    REQUIRE_EQ(3, comments.size());
+
+    CHECK_EQ("@class MyClass", comments[0]);
+    CHECK_EQ("\n", comments[1]);
+    CHECK_EQ("A sample class.", comments[2]);
+}
+
 TEST_SUITE_END();
