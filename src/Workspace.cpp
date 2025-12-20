@@ -12,7 +12,6 @@
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
-#include "nlohmann/json.hpp"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -350,46 +349,6 @@ std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const st
     return platform->getOvertureLibraryPath(libraryName);
 }
 
-static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* folder, Client* client, std::unordered_map<std::string, std::string>& libraries)
-{
-    Uri jsonPath = rootUri.resolvePath("oLibrariesMap.json");
-    if (!jsonPath.exists())
-    {
-		if (client) {
-            client->sendTrace("workspace: oLibrariesMap.json not found. Run the 'Index Overture Libraries' task to generate it");
-        }
-        return;
-    }
-
-    try
-    {
-        std::ifstream file(jsonPath.fsPath());
-        if (!file.is_open())
-            return;
-
-        nlohmann::json data = nlohmann::json::parse(file);
-        if (!data.is_object())
-            return;
-
-        for (const auto& [key, value] : data.items())
-        {
-            if (!value.is_string())
-                continue;
-
-            libraries[key] = value.get<std::string>();
-        }
-
-		if (client) {
-            client->sendTrace("workspace: loaded " + std::to_string(libraries.size()) + " oLibraries from json");
-        }
-    }
-    catch (const std::exception& e)
-    {
-		if (client) {
-            client->sendTrace("workspace: exception occurred when loading oLibrariesMap.json: " + std::string(e.what()));
-        }
-    }
-}
 
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
