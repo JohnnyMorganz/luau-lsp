@@ -1316,7 +1316,7 @@ def printLuauTypes():
         found = False
 
         for line in writtenLines:
-            if line.find(declaration) != -1:
+            if line.find(declaredType) != -1:
                 found = True
                 break
 
