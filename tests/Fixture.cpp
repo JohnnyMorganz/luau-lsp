@@ -12,8 +12,10 @@
 
 #include "doctest.h"
 #include <string_view>
+#include <atomic>
 
 static const char* mainModuleName = "MainModule";
+static std::atomic<int> fixtureCounter{0};
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -45,9 +47,15 @@ void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::strin
 }
 } // namespace Luau::LanguageServer
 
+static std::string generateFixtureName()
+{
+    return "luau_lsp_test_" + std::to_string(fixtureCounter.fetch_add(1));
+}
+
 Fixture::Fixture()
     : client(std::make_unique<TestClient>(TestClient{}))
-    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt)
+    , tempDir(generateFixtureName())
+    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt)
 {
     client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;

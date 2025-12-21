@@ -9,6 +9,7 @@
 #include "LSP/Transport/Transport.hpp"
 
 using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
 
 namespace json_rpc
 {

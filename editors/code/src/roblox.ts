@@ -398,6 +398,18 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     res.sendStatus(200);
   });
 
+  app.get("/get-file-paths", async (_req, res) => {
+    try {
+      const uris = await vscode.workspace.findFiles("**/*.{lua,luau}");
+      res.json({
+        files: uris.map((uri: vscode.Uri) => uri.fsPath),
+      });
+    } catch (error) {
+      console.error("Error getting file paths:", error);
+      res.status(500).json({ error: "Failed to get file paths" });
+    }
+  });
+
   const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     if (res.headersSent) {
       return next(err);

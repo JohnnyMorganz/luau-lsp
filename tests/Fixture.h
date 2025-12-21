@@ -14,6 +14,7 @@
 #include "Luau/Type.h"
 
 #include "LSP/Workspace.hpp"
+#include "TempDir.h"
 
 #include <iostream>
 #include <string>
@@ -34,6 +35,7 @@ struct Fixture
 {
     std::unique_ptr<Luau::SourceModule> sourceModule;
     std::unique_ptr<TestClient> client;
+    TempDir tempDir; // Must be declared before workspace since workspace uses tempDir.path()
     WorkspaceFolder workspace;
 
     explicit Fixture();

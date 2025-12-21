@@ -114,7 +114,7 @@ std::optional<std::string> getHomeDirectory()
 // Resolves a filesystem path, including any tilde expansion
 std::string resolvePath(const std::string& path)
 {
-    if (Luau::startsWith(path, "~/"))
+    if (Luau::startsWith(path, "~/") || Luau::startsWith(path, "~\\"))
     {
         if (auto home = getHomeDirectory())
             return Luau::FileUtils::joinPaths(*home, path.substr(2));

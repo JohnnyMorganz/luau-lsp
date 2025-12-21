@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "TempDir.h"
 #include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("Diagnostics");

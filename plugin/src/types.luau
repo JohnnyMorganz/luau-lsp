@@ -18,6 +18,7 @@ export type Result<T, E> = Ok<T> | Err<E>
 export type EncodedInstance = {
 	Name: string,
 	ClassName: string,
+	FilePaths: { string },
 	Children: { EncodedInstance },
 }
 
