@@ -30,19 +30,6 @@ SECURITY_LEVELS = [
 
 DEFAULT_SECURITY_LEVEL = "RobloxScriptSecurity"
 
-# Classes which should still be kept even though they are marked deprecated: (mainly the bodymovers)
-OVERRIDE_DEPRECATED_REMOVAL = [
-    "BodyMover",
-    "BodyAngularVelocity",
-    "BodyForce",
-    "BodyGyro",
-    "BodyPosition",
-    "BodyThrust",
-    "BodyVelocity",
-    # "RocketPropulsion",
-    "BevelMesh",  # superclass of BlockMesh
-]
-
 # Labeled sections of the LuauTypes.d.luau to remove entirely
 DELETED_LUAU_SECTIONS = [
     "TestEZ", # Implied to be injected into modules suffixed with .test
@@ -52,14 +39,14 @@ DELETED_LUAU_SECTIONS = [
 # Manual corrections to the RobloxGlobals in LuauTypes.d.luau
 # Also used as a fallback failsafe for some of the functions.
 LUAU_SNIPPET_PATCHES = {
-    "declare function collectgarbage(mode: string): number":
-        "@[deprecated{ use = \"gcinfo\" }]\ndeclare function collectgarbage(mode: \"count\"): number",
-    
     "declare function delay(delay: number?, callback: () -> ())":
         "@[deprecated{ use = \"task.delay\" }]\ndeclare function delay(delay: number?, callback: (dt: number, gt: number) -> ())",
     
+    "declare function collectgarbage(mode: string): number":
+        "@[deprecated{ use = \"gcinfo\" }]\ndeclare function collectgarbage(mode: \"count\"): number",
+    
     "declare function stats()":
-        "@[deprecated{ use = [[game:GetService(\"Stats\")]] }]\ndeclare function stats(): Stats",
+        "@[deprecated{ use = 'game:GetService(\"Stats\")' }]\ndeclare function stats(): Stats",
     
     "declare function wait(delay: number?): (number, number)": 
         "@[deprecated{ use = \"task.wait\" }]\ndeclare function wait(delay: number?): (number, number)",
@@ -74,11 +61,21 @@ LUAU_SNIPPET_PATCHES = {
     "declare workspace: any": "declare workspace: Workspace",
     "declare script: any": "declare script: LuaSourceContainer",
 
-    "declare ElapsedTime: typeof(elapsedTime)": "",
-    "declare Delay: typeof(delay)": "",
-    "declare Stats: typeof(stats)": "",
-    "declare Version: typeof(version)": "",
-    "declare Wait: typeof(wait)": "",
+    "declare Delay: typeof(delay)": 
+        "@[deprecated{ use = \"task.delay\" }]\ndeclare function Delay(delay: number?, callback: (dt: number, gt: number) -> ())",
+    
+    "declare Wait: typeof(wait)": 
+        "@[deprecated{ use = \"task.wait\" }]\ndeclare function Wait(delay: number?): (number, number)",
+    
+    "declare ElapsedTime: typeof(elapsedTime)": 
+        "@[deprecated{ use = \"elapsedTime\" }]\ndeclare function ElapsedTime(): number",
+    
+    "declare Stats: typeof(stats)":
+        "@[deprecated{ use = 'game:GetService(\"Stats\")' }]\ndeclare function Stats(): Stats",
+    
+    "declare Version: typeof(version)": 
+        "@[deprecated{ use = \"version\" }]\ndeclare function Version(): string",
+    
     "declare Workspace: any": "",
     "declare Game: any": "",
 }
@@ -97,7 +94,7 @@ TYPE_INDEX = {
     "null": "nil",
     "Objects": "{ Instance }",
     "Instances": "{ Instance }",
-    "Dictionary": "{ [any]: any }",
+    "Dictionary": "{ [string]: any }",
     "Map": "{ [any]: any }",
     "Array": "{ any }",
     "table": "{ any }",
@@ -267,10 +264,6 @@ EXTRA_MEMBERS = {
         "LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>",
         "TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>",
     ],
-    "Players": [
-        "function BanAsync(self, config: BanConfigType)",
-        "function UnbanAsync(self, config: UnbanConfigType)"
-    ],
     "TeleportOptions": [
         "function GetTeleportData(self): TeleportData?",
         "function SetTeleportData(self, teleportData: TeleportData)",
@@ -413,17 +406,19 @@ EXTRA_MEMBERS = {
         "GroundSensor: ControllerSensor?",
         "RootPart: BasePart?",
     ],
-    "EditableImage": [
-        "function DrawImageProjected(self, mesh: EditableMesh, projection: ProjectionParams, brushConfig: BrushConfig)"
-    ],
     "CaptureService": [
-        "function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams) -> EnumVideoCaptureStartResult",
-        "function TakeCapture(self, onCaptureReady: (capture: Capture) -> (), params: CaptureParams) -> ()",
+        "function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams): EnumVideoCaptureStartResult",
+        "function TakeCapture(self, onCaptureReady: (capture: Capture) -> (), params: CaptureParams): ()",
     ],
-    "ReflectionService": [
-        "function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClass?",
-        "function GetClasses(self, filter: ReflectionClassFilter?): { ReflectedClass }",
-        "function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedProperty }"
+    "ModerationService": [
+        "function BindReviewableContentEventProcessor(self, priority: number, callback: (event: ReviewableContentEvent) -> ()): RBXScriptConnection"
+    ],
+    "VideoSampler": [
+        "function GetSamplesAtTimesAsync(self, times: { number }): { VideoSample }"
+    ],
+    "AvatarCreationService": [
+        "function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string"
+        "function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string"
     ]
 }
 
@@ -445,16 +440,40 @@ type TeleportData = boolean | buffer | number | string | {[number]: TeleportData
 type AdReward = any
 
 -- Forward declare types from LuauTypes.d.luau used in
--- EXTRA_MEMBERS, in case any of them fail to arrive.
+-- EXTRA_MEMBERS/Corrections.json, in case any of them fail to arrive.
+-- TODO: Automate this against EXTRA_MEMBERS and Corrections.json?
 type BanConfigType = any
 type UnbanConfigType = any
+
 type CaptureParams = any
-type ProjectionParams = any
+
 type BrushConfig = any
+type ProjectionParams = any
+
 type ReflectedClass = any
 type ReflectedProperty = any
 type ReflectionClassFilter = any
 type ReflectionMemberFilter = any
+
+type RecommendationItem = any
+type UpdateRecommendationItemRequest = any
+type RecommendationActionEventDetails = any
+type RegisterRecommendationItemsRequest = any
+type RegisterRecommendationItemsResponse = any
+type RecommendationImpressionEventDetails = any
+type GenerateRecommendationItemListRequest = any
+
+type LinkSharingOptions = any
+
+type ReviewableContentEvent = any
+type CreateReviewableContentParams = any
+type RequestReviewableContentReviewParams = any
+
+type InfoTypeArray = any
+type RankedItemArray = any
+type ProductIdentifierArray = any
+
+type AutoSetupParams = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -588,8 +607,11 @@ declare SharedTable: {
 declare function settings(): GlobalSettings
 declare function UserSettings(): UserSettings
 
-@deprecated declare function PluginManager(): PluginManager
-@deprecated declare function DebuggerManager(): DebuggerManager
+@[deprecated {use = "plugin"}]
+declare function PluginManager(): PluginManager
+
+@[deprecated {use = 'game:GetService("DebuggerManager")'}]
+declare function DebuggerManager(): DebuggerManager
 """
 
 CLASSES = {}  # All loaded classes from the API Dump, including corrections
@@ -1198,12 +1220,6 @@ def loadClassesIntoStructures(dump: ApiDump):
 
         isCreatable = True
         if "Tags" in klass and klass["Tags"] is not None:
-            if (
-                "Deprecated" in klass
-                and not INCLUDE_DEPRECATED_MEMBERS
-                and not klass["Name"] in OVERRIDE_DEPRECATED_REMOVAL
-            ):
-                continue
             if "Service" in klass["Tags"]:
                 SERVICES.append(klass["Name"])
             if "NotCreatable" in klass["Tags"]:

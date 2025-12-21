@@ -185,6 +185,28 @@
                     "ReturnType": {
                         "Generic": "Player"
                     }
+                },
+                {
+                    "Name": "BanAsync",
+                    "Parameters": [
+                        {
+                            "Name": "config",
+                            "Type": {
+                                "Name": "BanConfigType"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "UnbanAsync",
+                    "Parameters": [
+                        {
+                            "Name": "config",
+                            "Type": {
+                                "Name": "UnbanConfigType"
+                            }
+                        }
+                    ]
                 }
             ],
             "Name": "Players"
@@ -1526,6 +1548,35 @@
                             }
                         }
                     ]
+                },
+                {
+                    "Name": "RankProductsAsync",
+                    "Parameters": [
+                        {
+                            "Name": "productIdentifiers",
+
+                            "Type": {
+                                "Name": "ProductIdentifierArray"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RankedItemArray"
+                    }
+                },
+                {
+                    "Name": "RecommendTopProductsAsync",
+                    "Parameters": [
+                        {
+                            "Name": "infoTypes",
+                            "Type": {
+                                "Name": "InfoTypeArray"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RankedItemArray"
+                    }
                 }
             ],
             "Name": "MarketplaceService"
@@ -2309,6 +2360,262 @@
                 }
             ],
             "Name": "DataStoreService"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "GetClass",
+                    "Parameters": [
+                        {
+                            "Name": "filter",
+                            "Type": {
+                                "Name": "ReflectionClassFilter?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ReflectedClassOrNil"
+                    }
+                },
+                {
+                    "Name": "GetClasses",
+                    "Parameters": [
+                        {
+                            "Name": "filter",
+                            "Type": {
+                                "Name": "ReflectionClassFilter?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ReflectedClasses"
+                    }
+                },
+                {
+                    "Name": "GetPropertiesOfClass",
+                    "Parameters": [
+                        {
+                            "Name": "filter",
+                            "Type": {
+                                "Name": "ReflectionPropertyFilter?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "ReflectedProperties"
+                    }
+                },
+                {
+                    "Name": "GetPropertyNames",
+                    "Parameters": [
+                        {
+                            "Name": "className",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Generic": "string"
+                    }
+                }
+            ],
+
+            "Name": "ReflectionService"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "DrawImageProjected",
+                    "Parameters": [
+                        {
+                            "Name": "projection",
+                            "Type": {
+                                "Name": "ProjectionParams"
+                            }
+                        },
+                        {
+                            "Name": "brushConfig",
+                            "Type": {
+                                "Name": "BrushConfig"
+                            }
+                        }
+                    ]
+                }
+            ],
+
+            "Name": "EditableImage"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "GenerateItemListAsync",
+                    "Parameters": [
+                        {
+                            "Name": "generateRecommendationItemListRequest",
+                            "Type": {
+                                "Name": "GenerateRecommendationItemListRequest"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "GetRecommendationItemAsync",
+                    "ReturnType": {
+                        "Name": "RecommendationItem"
+                    }
+                },
+                {
+                    "Name": "LogActionEvent",
+                    "Parameters": [
+                        {
+                            "Name": "actionEventDetails",
+                            "Type": {
+                                "Name": "RecommendationActionEventDetails?"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "LogImpressionEvent",
+                    "Parameters": [
+                        {
+                            "Name": "impressionEventDetails",
+                            "Type": {
+                                "Name": "RecommendationImpressionEventDetails?"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "RegisterItemAsync",
+                    "Parameters": [
+                        {
+                            "Name": "registerRecommendationItemsRequest",
+                            "Type": {
+                                "Name": "RegisterRecommendationItemsRequest"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "RegisterRecommendationItemsResponse"
+                    }
+                },
+                {
+                    "Name": "UpdateItemAsync",
+                    "Parameters": [
+                        {
+                            "Name": "updateRecommendationItemRequest",
+                            "Type": {
+                                "Name": "UpdateRecommendationItemRequest"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "Name": "RecommendationService"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "PromptLinkSharingAsync",
+
+                    "Parameters": [
+                        {
+                            "Name": "options",
+                            "Type": {
+                                "Name": "LinkSharingOptions"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "PromptLinkSharing",
+
+                    "Parameters": [
+                        {
+                            "Name": "options",
+                            "Type": {
+                                "Name": "LinkSharingOptions"
+                            }
+                        }
+                    ]
+                }
+            ],
+
+            "Name": "SocialService"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "CreateReviewableContentAsync",
+                    "Parameters": [
+                        {
+                            "Name": "config",
+                            "Type": {
+                                "Name": "CreateReviewableContentParams"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "InternalCreateReviewableContentAsync",
+                    "Parameters": [
+                        {
+                            "Name": "config",
+                            "Type": {
+                                "Name": "CreateReviewableContentParams"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "InternalRequestReviewableContentReviewAsync",
+                    "Parameters": [
+                        {
+                            "Name": "config",
+                            "Type": {
+                                "Name": "RequestReviewableContentReviewParams"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "InternalProcessReviewableContentEvent",
+
+                    "Parameters": [
+                        {
+                            "Name": "event",
+                            "Type": {
+                                "Name": "ReviewableContentEvent"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "Name": "ModerationService"
+        },
+        {
+            "Members": [
+                {
+                    "Name": "GetSamplesAtTimes",
+
+                    "Parameters": [
+                        {
+                            "Name": "times",
+
+                            "Type": {
+                                "Generic": "number"
+                            }
+                        }
+                    ],
+
+                    "ReturnType": {
+                        "Name": "VideoSampleArray"
+                    }
+                }
+            ],
+            "Name": "VideoSampler"
         }
     ]
 }
