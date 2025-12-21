@@ -12,6 +12,7 @@
 #endif
 #include <direct.h>
 #include <windows.h>
+#include <shellapi.h>
 #else
 #include <dirent.h>
 #include <fcntl.h>
@@ -45,6 +46,25 @@ std::string toUtf8(const std::wstring& path)
     WideCharToMultiByte(CP_UTF8, 0, path.data(), int(path.size()), &buf[0], int(buf.size()), nullptr, nullptr);
 
     return buf;
+}
+
+std::vector<std::string> getUtf8CommandLineArgs()
+{
+    int argc;
+    LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (!argvW)
+        return {};
+
+    std::vector<std::string> args;
+    args.reserve(argc);
+
+    for (int i = 0; i < argc; ++i)
+    {
+        args.push_back(toUtf8(argvW[i]));
+    }
+
+    LocalFree(argvW);
+    return args;
 }
 #endif
 

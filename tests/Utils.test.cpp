@@ -176,6 +176,15 @@ TEST_CASE("fromUtf8 and toUtf8 are inverses for Unicode paths")
     std::string roundTrip = Luau::FileUtils::toUtf8(wide);
     CHECK_EQ(original, roundTrip);
 }
+
+TEST_CASE("getUtf8CommandLineArgs returns UTF-8 encoded arguments")
+{
+    // This test verifies the function exists and returns non-empty results
+    // when running from command line with arguments
+    auto args = Luau::FileUtils::getUtf8CommandLineArgs();
+    // Should have at least the program name
+    CHECK_FALSE(args.empty());
+}
 #endif
 
 TEST_SUITE_END();
