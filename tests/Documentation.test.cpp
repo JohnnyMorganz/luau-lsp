@@ -506,4 +506,145 @@ TEST_CASE_FIXTURE(Fixture, "singleline_comments_preserve_newlines")
     CHECK_EQ("A sample class.", comments[2]);
 }
 
+TEST_CASE_FIXTURE(Fixture, "section_header_not_attached_to_function")
+{
+    auto result = check(R"(
+--[[
+==========================Math Functions==========================
+]]
+
+--[[
+    Helps do math for physics
+]]
+local function Add(a: number, b: number): number
+    return a + b
+end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("Add");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    // Should only get the "Helps do math" comment, not the section header
+    REQUIRE_EQ(1, comments.size());
+    CHECK(comments[0] == "Helps do math for physics");
+}
+
+TEST_CASE_FIXTURE(Fixture, "multiple_adjacent_singleline_comments_attached")
+{
+    auto result = check(R"(
+--- First comment
+--- Second comment
+function foo() end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    // Both should be attached since they're contiguous
+    REQUIRE_EQ(2, comments.size());
+    CHECK(comments[0] == "First comment");
+    CHECK(comments[1] == "Second comment");
+}
+
+TEST_CASE_FIXTURE(Fixture, "multiple_adjacent_multiline_block_comments_attached")
+{
+    auto result = check(R"(
+--[[
+    First multiline comment
+    with multiple lines
+]]
+--[[
+    Second multiline comment
+    also with multiple lines
+]]
+function foo() end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    // Both multiline block comments should be attached since they're contiguous
+    REQUIRE_EQ(4, comments.size());
+    CHECK(comments[0] == "First multiline comment");
+    CHECK(comments[1] == "with multiple lines");
+    CHECK(comments[2] == "    Second multiline comment");
+    CHECK(comments[3] == "    also with multiple lines");
+}
+
+TEST_CASE_FIXTURE(Fixture, "blank_line_breaks_comment_chain")
+{
+    auto result = check(R"(
+--- First comment
+
+--- Second comment
+function foo() end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("foo");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    // Only second comment should be attached
+    REQUIRE_EQ(1, comments.size());
+    CHECK(comments[0] == "Second comment");
+}
+
+TEST_CASE_FIXTURE(Fixture, "second_function_only_gets_adjacent_comment")
+{
+    auto result = check(R"(
+--[[
+==========================Math Functions==========================
+]]
+
+--[[
+    Helps do math for physics
+]]
+local function Add(a: number, b: number): number
+    return a + b
+end
+
+--[[
+==========================Physics Functions==========================
+]]
+
+--[[
+    Does physics simulation
+]]
+local function _Simulate(a: number, b: number): number
+    return Add(a, b) * Add(a, b)
+end
+    )");
+
+    REQUIRE_EQ(0, result.errors.size());
+
+    auto ty = requireType("_Simulate");
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    REQUIRE(ftv);
+    REQUIRE(ftv->definition);
+
+    auto comments = getComments(ftv->definition->definitionLocation);
+    // Should only get "Does physics simulation", not the section header
+    REQUIRE_EQ(1, comments.size());
+    CHECK(comments[0] == "Does physics simulation");
+}
+
 TEST_SUITE_END();
