@@ -2374,7 +2374,7 @@
                         }
                     ],
                     "ReturnType": {
-                        "Name": "ReflectedClassOrNil"
+                        "Declared": "ReflectedClassOrNil"
                     }
                 },
                 {
@@ -2462,7 +2462,7 @@
                 {
                     "Name": "GetRecommendationItemAsync",
                     "ReturnType": {
-                        "Name": "RecommendationItem"
+                        "Declared": "RecommendationItem"
                     }
                 },
                 {
