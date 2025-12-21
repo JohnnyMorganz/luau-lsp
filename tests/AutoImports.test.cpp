@@ -1504,4 +1504,52 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_completion_property")
     CHECK_FALSE(getItem(result, "ReplicatedStorage"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "auto_imports_are_inserted_before_function_definitions_not_inside")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    newDocument("React.luau", "");
+
+    // Completion inside a function should still insert the require at the top level
+    auto [source, marker] = sourceWithMarker(R"(
+        local function SduiText()
+            local text = "from a confused luau developer"
+            |
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "React");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    // The require should be inserted at line 0 (top of file), not inside the function
+    CHECK_EQ(imports[0].additionalTextEdits[0].range.start.line, 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "requires_inside_functions_are_not_tracked")
+{
+    // This test ensures that requires defined inside functions don't affect
+    // where new requires are inserted
+    auto astRoot = parse(R"(
+        local function foo()
+            local React = require("@Packages/React")
+        end
+    )");
+
+    FindImportsVisitor importsVisitor;
+    importsVisitor.visit(astRoot);
+
+    // The require inside the function should not be tracked
+    CHECK_FALSE(importsVisitor.containsRequire("React"));
+    CHECK_FALSE(importsVisitor.firstRequireLine.has_value());
+}
+
 TEST_SUITE_END();

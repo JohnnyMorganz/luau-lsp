@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Platform/LSPPlatform.hpp"
+#include "Platform/RotrieverResolver.hpp"
 #include "Luau/TypeCheckLimits.h"
 #include "Luau/Frontend.h"
 #include "Luau/Autocomplete.h"
@@ -54,6 +55,10 @@ private:
     /// Mapping between a definitions package name to the TextDocument / SourceModule that contains this definitions.
     /// Used for documentation comment lookup within definition files.
     std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
+
+    /// Discovered Rotriever packages in this workspace.
+    /// Key is the directory containing the rotriever.toml file.
+    std::unordered_map<Uri, Luau::LanguageServer::RotrieverPackage, UriHash> rotrieverPackages{};
 
 public:
     WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
@@ -110,6 +115,7 @@ public:
 
 private:
     void registerTypes(const std::vector<std::string>& disabledGlobals);
+    void discoverRotrieverPackages();
     void endAutocompletion(const lsp::CompletionParams& params);
     void suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
         const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix = true);
@@ -169,6 +175,16 @@ public:
     {
         return name == "$NULL_WORKSPACE";
     };
+
+    /// Get discovered Rotriever packages
+    const std::unordered_map<Uri, Luau::LanguageServer::RotrieverPackage, UriHash>& getRotrieverPackages() const
+    {
+        return rotrieverPackages;
+    }
+
+    /// Find the Rotriever package that contains a given file
+    /// Returns nullptr if no package contains the file
+    const Luau::LanguageServer::RotrieverPackage* findRotrieverPackageForFile(const Uri& fileUri) const;
 };
 
 void throwIfCancelled(const LSPCancellationToken& cancellationToken);

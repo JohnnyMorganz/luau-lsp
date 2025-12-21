@@ -395,6 +395,75 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendTrace("workspace: indexing all files COMPLETED");
 }
 
+void WorkspaceFolder::discoverRotrieverPackages()
+{
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::discoverRotrieverPackages", "LSP");
+
+    if (isNullWorkspace())
+        return;
+
+    client->sendTrace("workspace: discovering rotriever packages");
+
+    rotrieverPackages.clear();
+    Luau::LanguageServer::RotrieverResolver resolver;
+
+    Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
+        [&](auto& path)
+        {
+            auto uri = Uri::file(path);
+            if (uri.filename() == "rotriever.toml")
+            {
+                client->sendTrace("workspace: found rotriever.toml at " + path);
+                auto result = resolver.parseManifest(uri);
+                if (result)
+                {
+                    // Try to parse exports from the package's init.lua
+                    auto initLuaPath = result->packageRoot.resolvePath(result->contentRoot + "/init.lua");
+                    auto exports = Luau::LanguageServer::RotrieverResolver::parseExports(initLuaPath);
+                    result->exports = std::move(exports.values);
+                    result->typeExports = std::move(exports.types);
+
+                    // Discover internal modules for intra-package imports
+                    auto contentRootUri = result->packageRoot.resolvePath(result->contentRoot);
+                    result->internalModules = Luau::LanguageServer::RotrieverResolver::discoverInternalModules(contentRootUri);
+
+                    client->sendLogMessage(lsp::MessageType::Info, "Discovered Rotriever package: " + result->name + " (" +
+                                                                       std::to_string(result->exports.size()) + " exports, " +
+                                                                       std::to_string(result->typeExports.size()) + " types, " +
+                                                                       std::to_string(result->internalModules.size()) + " internal modules)");
+                    rotrieverPackages.emplace(result->packageRoot, std::move(*result));
+                }
+                else
+                {
+                    client->sendLogMessage(lsp::MessageType::Warning, "Failed to parse rotriever.toml at " + path);
+                }
+            }
+        });
+
+    client->sendLogMessage(lsp::MessageType::Info, "Discovered " + std::to_string(rotrieverPackages.size()) + " Rotriever packages");
+    client->sendTrace("workspace: discovering rotriever packages COMPLETED");
+}
+
+const Luau::LanguageServer::RotrieverPackage* WorkspaceFolder::findRotrieverPackageForFile(const Uri& fileUri) const
+{
+    const std::string filePath = fileUri.fsPath();
+
+    for (const auto& [packageRoot, package] : rotrieverPackages)
+    {
+        // Compute the content root path: packageRoot + contentRoot
+        Uri contentRootUri = packageRoot.resolvePath(package.contentRoot);
+        const std::string contentRootPath = contentRootUri.fsPath();
+
+        // Check if the file is under this package's content root
+        if (Luau::startsWith(filePath, contentRootPath))
+        {
+            return &package;
+        }
+    }
+
+    return nullptr;
+}
+
 static void clearDisabledGlobals(const Client* client, const Luau::GlobalTypes& globalTypes, const std::vector<std::string>& disabledGlobals)
 {
     const auto targetScope = globalTypes.globalScope;
@@ -599,6 +668,9 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     client->sendTrace("workspace: apply platform-specific configuration");
 
     platform->setupWithConfiguration(configuration);
+
+    // Discover Rotriever packages in the workspace
+    discoverRotrieverPackages();
 
     if (configuration.index.enabled)
         indexFiles(configuration);

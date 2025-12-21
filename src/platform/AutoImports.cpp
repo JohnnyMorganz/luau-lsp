@@ -10,6 +10,16 @@ bool FindImportsVisitor::containsRequire(const std::string& module) const
     return false;
 }
 
+std::optional<size_t> FindImportsVisitor::getRequireDefinitionLine(const std::string& module) const
+{
+    for (const auto& map : requiresMap)
+    {
+        if (auto it = map.find(module); it != map.end())
+            return it->second->location.end.line;
+    }
+    return std::nullopt;
+}
+
 bool FindImportsVisitor::visit(Luau::AstStatLocal* local)
 {
     if (local->vars.size != 1 || local->values.size != 1)
@@ -44,6 +54,14 @@ bool FindImportsVisitor::visit(Luau::AstStatLocal* local)
 
 bool FindImportsVisitor::visit(Luau::AstStatBlock* block)
 {
+    // Only process the root block - don't descend into nested blocks
+    // (function bodies, if statements, loops, etc.)
+    // This ensures imports are only tracked at the top level
+    if (visitedRootBlock)
+        return false;
+
+    visitedRootBlock = true;
+
     for (Luau::AstStat* stat : block->body)
     {
         stat->visit(this);
@@ -156,4 +174,14 @@ size_t computeBestLineForRequire(
 
     return lineNumber;
 }
+
+size_t computeLineForTypeImport(const FindImportsVisitor& importsVisitor, size_t minimumLineNumber)
+{
+    // Type imports should be placed after all requires
+    // Use the last require line if available, otherwise use the minimum line
+    if (auto lastRequireLine = importsVisitor.getLastRequireLine())
+        return *lastRequireLine + 1;
+
+    return minimumLineNumber;
 }
+} // namespace Luau::LanguageServer::AutoImports

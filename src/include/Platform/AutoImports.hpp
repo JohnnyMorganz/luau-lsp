@@ -15,6 +15,7 @@ struct FindImportsVisitor : public Luau::AstVisitor
 {
 private:
     std::optional<size_t> previousRequireLine = std::nullopt;
+    bool visitedRootBlock = false;
 
 public:
     std::optional<size_t> firstRequireLine = std::nullopt;
@@ -36,6 +37,15 @@ public:
     }
 
     bool containsRequire(const std::string& module) const;
+    /// Get the line number where a specific require/local is defined
+    /// Returns std::nullopt if the module is not found
+    std::optional<size_t> getRequireDefinitionLine(const std::string& module) const;
+    /// Get the last require line (end of all requires block)
+    /// Returns std::nullopt if no requires exist
+    [[nodiscard]] std::optional<size_t> getLastRequireLine() const
+    {
+        return previousRequireLine;
+    }
     bool visit(Luau::AstStatLocal* local) override;
     bool visit(Luau::AstStatBlock* block) override;
 };
@@ -47,4 +57,6 @@ lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vec
 size_t computeMinimumLineNumberForRequire(const FindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
 size_t computeBestLineForRequire(
     const FindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
-}
+/// Compute the line number for type imports (after all requires)
+size_t computeLineForTypeImport(const FindImportsVisitor& importsVisitor, size_t minimumLineNumber);
+} // namespace Luau::LanguageServer::AutoImports

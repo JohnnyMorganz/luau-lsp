@@ -58,6 +58,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/CliConfigurationParser.cpp
         src/platform/AutoImports.cpp
         src/platform/LSPPlatform.cpp
+        src/platform/RotrieverResolver.cpp
         src/platform/StringRequireAutoImporter.cpp
         src/platform/StringRequireSuggester.cpp
         src/platform/roblox/RobloxCodeAction.cpp
@@ -129,6 +130,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
         tests/RequireGraph.test.cpp
+        tests/RotrieverResolver.test.cpp
         tests/AnalyzeCli.test.cpp
         src/AnalyzeCli.cpp # For testing
 )

@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.58.0",
+  "version": "1.59.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -679,7 +679,7 @@
         },
         "luau-lsp.index.maxFiles": {
           "type": "number",
-          "default": 10000,
+          "default": 50000,
           "scope": "window",
           "markdownDescription": "The maximum amount of files that can be indexed. If more files are indexed, more memory is needed"
         },

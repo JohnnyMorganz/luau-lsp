@@ -12,6 +12,7 @@ static constexpr SortTextT CorrectFunctionResult = "3";
 static constexpr SortTextT Default = "4";
 static constexpr SortTextT WrongIndexType = "5";
 static constexpr SortTextT MetatableIndex = "6";
+static constexpr SortTextT AutoImportsRotriever = "65"; // Prioritized over regular auto-imports
 static constexpr SortTextT AutoImports = "7";
 static constexpr SortTextT AutoImportsAbsolute = "71";
 static constexpr SortTextT Keywords = "8";

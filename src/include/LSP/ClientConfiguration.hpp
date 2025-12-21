@@ -157,9 +157,11 @@ struct ClientCompletionImportsConfiguration
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{};
+    /// Whether to suggest imports based on Rotriever package dependencies
+    bool suggestRotrieverImports = true;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
-    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
+    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs, suggestRotrieverImports);
 
 struct ClientCompletionConfiguration
 {
@@ -213,7 +215,7 @@ struct ClientIndexConfiguration
     // available for features such as "Find All References" and "Rename"
     bool enabled = true;
     /// The maximum amount of files that can be indexed
-    size_t maxFiles = 10000;
+    size_t maxFiles = 50000;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientIndexConfiguration, enabled, maxFiles);
