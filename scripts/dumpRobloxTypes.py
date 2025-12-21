@@ -417,7 +417,7 @@ EXTRA_MEMBERS = {
         "function GetSamplesAtTimesAsync(self, times: { number }): { VideoSample }"
     ],
     "AvatarCreationService": [
-        "function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string"
+        "function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string",
         "function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string"
     ]
 }
