@@ -255,13 +255,43 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 
     std::vector<Luau::Comment> attachComments()
     {
-        std::vector<Luau::Comment> result{};
+        std::vector<Luau::Comment> candidates{};
+
+        // Gather candidate comments (between previous node and target)
         for (auto& comment : moduleComments)
             // The comment needs to be present before the node for it to be attached
             if (comment.location.begin <= pos)
                 // They should be after the closest previous node
                 if (comment.location.begin >= closestPreviousNode)
-                    result.emplace_back(comment);
+                    candidates.emplace_back(comment);
+
+        if (candidates.empty())
+            return {};
+
+        // Sort by end position descending (closest to target first)
+        std::sort(candidates.begin(), candidates.end(),
+            [](const Luau::Comment& a, const Luau::Comment& b) {
+                return a.location.end > b.location.end;
+            });
+
+        // Filter to only adjacent comments
+        // A comment is adjacent if there's no blank line between it and the target
+        std::vector<Luau::Comment> result{};
+        unsigned int adjacentLine = pos.line;
+
+        for (const auto& comment : candidates)
+        {
+            if (comment.location.end.line + 1 >= adjacentLine)
+            {
+                result.emplace_back(comment);
+                adjacentLine = comment.location.begin.line;
+            }
+            else
+                break;
+        }
+
+        // Reverse to restore chronological order
+        std::reverse(result.begin(), result.end());
         return result;
     }
 
