@@ -407,7 +407,7 @@ EXTRA_MEMBERS = {
         "RootPart: BasePart?",
     ],
     "CaptureService": [
-        "function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams): EnumVideoCaptureStartResult",
+        "function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams): EnumVideoCaptureStartedResult",
         "function TakeCapture(self, onCaptureReady: (capture: Capture) -> (), params: CaptureParams): ()",
     ],
     "ModerationService": [

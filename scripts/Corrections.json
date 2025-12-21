@@ -2493,12 +2493,12 @@
                         {
                             "Name": "registerRecommendationItemsRequest",
                             "Type": {
-                                "Name": "RegisterRecommendationItemsRequest"
+                                "Name": "RegisterRecommendationItemRequest"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "RegisterRecommendationItemsResponse"
+                        "Name": "RegisterRecommendationItemResponse"
                     }
                 },
                 {
