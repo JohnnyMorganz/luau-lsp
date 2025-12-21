@@ -788,6 +788,21 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         {
             suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
         }
+        else if (result.context == Luau::AutocompleteContext::Property)
+        {
+            bool isTableLiteral = false;
+            for (auto node : result.ancestry)
+            {
+                if (node->is<Luau::AstExprTable>())
+                {
+                    isTableLiteral = true;
+                    break;
+                }
+            }
+
+            if (isTableLiteral)
+                suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
+        }
         else if (result.context == Luau::AutocompleteContext::Type)
         {
             // Make sure we are in the context of completing a prefix in an AstTypeReference
