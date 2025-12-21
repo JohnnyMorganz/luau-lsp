@@ -593,6 +593,7 @@ CorrectionsValueType = TypedDict(
         "Category": None,
         "Default": Optional[str],
         "Generic": Optional[str],
+        "Declared": Optional[str],
         "Tuple": Optional["CorrectionsValueType"],
         "Union": Optional[List["CorrectionsValueType"]],
     },
@@ -694,7 +695,7 @@ ApiFunction = TypedDict(
         "MemberType": Literal["Function"],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": Union[ApiValueType, List[ApiValueType]],
+        "ReturnType": Optional[Union[ApiValueType, List[ApiValueType]]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Security": ApiSecurityLevel,
         "Tags": ApiTags,
@@ -720,7 +721,7 @@ ApiCallback = TypedDict(
         "MemberType": Literal["Callback"],
         "Description": Optional[str],
         "Parameters": List[ApiParameter],
-        "ReturnType": Union[ApiValueType, List[ApiValueType]],
+        "ReturnType": Optional[Union[ApiValueType, List[ApiValueType]]],
         "TupleReturns": Optional[List[CorrectionsValueType]],
         "Tags": ApiTags,
         "Security": ApiSecurityLevel,
@@ -787,6 +788,9 @@ assert (
 # Cache for looking up members by name when resolving deprecations
 classesWithMemberName: dict[str, List[ApiClass]] = {}
 
+# Keep track of declared Luau types as a failsafe if we need to declare them
+declaredLuauTypes: Set[str] = set()
+
 def isIdentifier(name: str):
     return re.match(r"^[a-zA-Z_]+[a-zA-Z_0-9]*$", name)  # TODO: 'function'
 
@@ -818,6 +822,9 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if "Variadic" in type and type["Variadic"] is not None:
         subtype = resolveType(type["Variadic"])
         return f"...{subtype}"
+
+    if "Declared" in type and type["Declared"] is not None:
+        type["Name"] = type["Declared"]
 
     name, category = (
         type["Name"],
@@ -857,10 +864,12 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
     elif isinstance(member["ReturnType"], list):
         types = [resolveType(ret) for ret in member["ReturnType"]]
         return "(" + ", ".join(types) + ")"
-    else:
+    elif member["ReturnType"] is not None:
         return resolveType(member["ReturnType"])
+    
+    return "nil"
 
-def resolveDeprecation(member: ApiMember, klass: ApiClass) -> str:
+def resolveDeprecation(member: ApiMember, klass: ApiClass | DataType) -> str:
     tags: Optional[List[Union[str, ApiDeprecatedInfo]]] = None
     
     if "Tags" in member:
@@ -883,7 +892,7 @@ def resolveDeprecation(member: ApiMember, klass: ApiClass) -> str:
                         matchingClasses = [klass]
 
                 if matchingClasses is not None:
-                    bestClass: Optional[ApiClass] = None
+                    bestClass: Optional[ApiClass | DataType] = None
 
                     if klass in matchingClasses:
                         bestClass = klass
@@ -1118,7 +1127,8 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                     for otherMember in otherClass["Members"]:
                         if otherMember["Name"] == member["Name"]:
                             if "TupleReturns" in member:
-                                del otherMember["ReturnType"]
+                                if "ReturnType" in otherMember:
+                                    otherMember["ReturnType"] = None
                                 otherMember["TupleReturns"] = member["TupleReturns"]
                             elif "ReturnType" in member:
                                 otherMember["ReturnType"]["Name"] = (
@@ -1195,6 +1205,42 @@ def loadClassesIntoStructures(dump: ApiDump):
         CLASSES[klass["Name"]] = klass
         loadMembersIntoStructures(klass)
 
+def registerDeclaredInType(type: CorrectionsValueType | None):
+    if type is not None:
+        if "Declared" in type and type["Declared"] is not None:
+            if type["Declared"] not in declaredLuauTypes:
+                declaredType = type["Declared"]
+
+                if declaredType.endswith("?"):
+                    declaredType = declaredType[:-1]
+
+                if re.match("^[A-z0-9_]+$", declaredType):
+                    declaredLuauTypes.add(declaredType)
+
+def registerDeclared(dump: CorrectionsDump):
+    for klass in dump["Classes"]:
+        for member in klass["Members"]:
+            if "TupleReturns" in member and member["TupleReturns"] is not None:
+                for ret in member["TupleReturns"]:
+                    registerDeclaredInType(ret)
+            
+            if "ReturnType" in member:
+                if isinstance(member["ReturnType"], list):
+                    for ret in member["ReturnType"]:
+                        registerDeclaredInType(ret)
+                else:
+                    ret = member["ReturnType"]
+                    registerDeclaredInType(ret)
+
+            if "ValueType" in member:
+                value = member["ValueType"]
+                registerDeclaredInType(value)
+            
+            if "Parameters" in member and member["Parameters"] is not None:
+                for param in member["Parameters"]:
+                    if "Type" in param:
+                        paramType = param["Type"]
+                        registerDeclaredInType(paramType)
 
 def processBrickColors(colors):
     for color in colors["BrickColors"]:
@@ -1255,6 +1301,19 @@ def printLuauTypes():
     for patch in LUAU_SNIPPET_PATCHES.values():
         if patch not in writtenLines:
             luauTypes += patch + "\n"
+
+    # Fail-safe: Declare any missing types that were marked as declared
+    for declaredType in declaredLuauTypes:
+        declaration = f"type {declaredType} = any"
+        found = False
+
+        for line in writtenLines:
+            if line.find(declaration) != -1:
+                found = True
+                break
+
+        if not found:
+            luauTypes += declaration + "\n"
     
     print(luauTypes)
 
@@ -1272,6 +1331,7 @@ loadClassesIntoStructures(dump)
 # Apply any corrections on the dump
 corrections: CorrectionsDump = json.load(CORRECTIONS)
 applyCorrections(dump, corrections)
+registerDeclared(corrections)
 
 printJsonPrologue()
 print(START_BASE)

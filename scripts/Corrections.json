@@ -192,7 +192,7 @@
                         {
                             "Name": "config",
                             "Type": {
-                                "Name": "BanConfigType"
+                                "Declared": "BanConfigType"
                             }
                         }
                     ]
@@ -203,7 +203,7 @@
                         {
                             "Name": "config",
                             "Type": {
-                                "Name": "UnbanConfigType"
+                                "Declared": "UnbanConfigType"
                             }
                         }
                     ]
@@ -1556,12 +1556,12 @@
                             "Name": "productIdentifiers",
 
                             "Type": {
-                                "Name": "ProductIdentifierArray"
+                                "Declared": "ProductIdentifierArray"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "RankedItemArray"
+                        "Declared": "RankedItemArray"
                     }
                 },
                 {
@@ -1570,12 +1570,12 @@
                         {
                             "Name": "infoTypes",
                             "Type": {
-                                "Name": "InfoTypeArray"
+                                "Declared": "InfoTypeArray"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "RankedItemArray"
+                        "Declared": "RankedItemArray"
                     }
                 }
             ],
@@ -2369,7 +2369,7 @@
                         {
                             "Name": "filter",
                             "Type": {
-                                "Name": "ReflectionClassFilter?"
+                                "Declared": "ReflectionClassFilter?"
                             }
                         }
                     ],
@@ -2383,12 +2383,12 @@
                         {
                             "Name": "filter",
                             "Type": {
-                                "Name": "ReflectionClassFilter?"
+                                "Declared": "ReflectionClassFilter?"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "ReflectedClasses"
+                        "Declared": "ReflectedClasses"
                     }
                 },
                 {
@@ -2397,12 +2397,12 @@
                         {
                             "Name": "filter",
                             "Type": {
-                                "Name": "ReflectionMemberFilter?"
+                                "Declared": "ReflectionMemberFilter?"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "ReflectedProperties"
+                        "Declared": "ReflectedProperties"
                     }
                 },
                 {
@@ -2431,13 +2431,13 @@
                         {
                             "Name": "projection",
                             "Type": {
-                                "Name": "ProjectionParams"
+                                "Declared": "ProjectionParams"
                             }
                         },
                         {
                             "Name": "brushConfig",
                             "Type": {
-                                "Name": "BrushConfig"
+                                "Declared": "BrushConfig"
                             }
                         }
                     ]
@@ -2454,7 +2454,7 @@
                         {
                             "Name": "generateRecommendationItemListRequest",
                             "Type": {
-                                "Name": "GenerateRecommendationItemListRequest"
+                                "Declared": "GenerateRecommendationItemListRequest"
                             }
                         }
                     ]
@@ -2471,7 +2471,7 @@
                         {
                             "Name": "actionEventDetails",
                             "Type": {
-                                "Name": "RecommendationActionEventDetails?"
+                                "Declared": "RecommendationActionEventDetails?"
                             }
                         }
                     ]
@@ -2482,7 +2482,7 @@
                         {
                             "Name": "impressionEventDetails",
                             "Type": {
-                                "Name": "RecommendationImpressionEventDetails?"
+                                "Declared": "RecommendationImpressionEventDetails?"
                             }
                         }
                     ]
@@ -2493,12 +2493,12 @@
                         {
                             "Name": "registerRecommendationItemsRequest",
                             "Type": {
-                                "Name": "RegisterRecommendationItemRequest"
+                                "Declared": "RegisterRecommendationItemRequest"
                             }
                         }
                     ],
                     "ReturnType": {
-                        "Name": "RegisterRecommendationItemResponse"
+                        "Declared": "RegisterRecommendationItemResponse"
                     }
                 },
                 {
@@ -2507,7 +2507,7 @@
                         {
                             "Name": "updateRecommendationItemRequest",
                             "Type": {
-                                "Name": "UpdateRecommendationItemRequest"
+                                "Declared": "UpdateRecommendationItemRequest"
                             }
                         }
                     ]
@@ -2524,7 +2524,7 @@
                         {
                             "Name": "options",
                             "Type": {
-                                "Name": "LinkSharingOptions"
+                                "Declared": "LinkSharingOptions"
                             }
                         }
                     ]
@@ -2536,7 +2536,7 @@
                         {
                             "Name": "options",
                             "Type": {
-                                "Name": "LinkSharingOptions"
+                                "Declared": "LinkSharingOptions"
                             }
                         }
                     ]
@@ -2553,7 +2553,7 @@
                         {
                             "Name": "config",
                             "Type": {
-                                "Name": "CreateReviewableContentParams"
+                                "Declared": "CreateReviewableContentParams"
                             }
                         }
                     ]
@@ -2564,7 +2564,7 @@
                         {
                             "Name": "config",
                             "Type": {
-                                "Name": "CreateReviewableContentParams"
+                                "Declared": "CreateReviewableContentParams"
                             }
                         }
                     ]
@@ -2575,7 +2575,7 @@
                         {
                             "Name": "config",
                             "Type": {
-                                "Name": "RequestReviewableContentReviewParams"
+                                "Declared": "RequestReviewableContentReviewParams"
                             }
                         }
                     ]
@@ -2587,7 +2587,7 @@
                         {
                             "Name": "event",
                             "Type": {
-                                "Name": "ReviewableContentEvent"
+                                "Declared": "ReviewableContentEvent"
                             }
                         }
                     ]
@@ -2611,7 +2611,7 @@
                     ],
 
                     "ReturnType": {
-                        "Name": "VideoSampleArray"
+                        "Declared": "VideoSampleArray"
                     }
                 }
             ],
