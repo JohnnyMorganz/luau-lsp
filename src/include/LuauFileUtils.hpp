@@ -11,6 +11,7 @@ namespace Luau::FileUtils
 {
 #ifdef _WIN32
 std::wstring fromUtf8(const std::string& path);
+std::string toUtf8(const std::wstring& path);
 #endif
 
 bool isAbsolutePath(std::string_view path);

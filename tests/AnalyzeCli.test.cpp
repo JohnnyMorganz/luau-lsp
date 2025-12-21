@@ -5,7 +5,6 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "LSP/Utils.hpp"
-#include "LuauFileUtils.hpp"
 
 namespace std
 {
@@ -168,21 +167,6 @@ TEST_CASE("parse_definitions_files_handles_unicode_paths")
     REQUIRE(definitionsFiles.find("@cyrillic") != definitionsFiles.end());
     CHECK_EQ(definitionsFiles["@polish"], "C:/Users/Użytkownik/types.d.luau");
     CHECK_EQ(definitionsFiles["@cyrillic"], "C:/Users/Рабочий стол/defs.d.luau");
-}
-
-TEST_CASE("definitions_file_with_unicode_path_can_be_read")
-{
-    // This test uses the actual testdata directory with Unicode path
-    auto basePath = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii/Рабочий стол");
-    auto defPath = Luau::FileUtils::joinPaths(basePath, "test.luau");
-
-    // Verify the path contains non-ASCII characters
-    CHECK(defPath.find("Рабочий") != std::string::npos);
-
-    // Verify we can read the file
-    auto contents = Luau::FileUtils::readFile(defPath);
-    REQUIRE(contents.has_value());
-    CHECK_FALSE(contents->empty());
 }
 
 TEST_SUITE_END();

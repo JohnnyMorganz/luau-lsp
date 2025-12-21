@@ -36,7 +36,7 @@ std::wstring fromUtf8(const std::string& path)
     return buf;
 }
 
-static std::string toUtf8(const std::wstring& path)
+std::string toUtf8(const std::wstring& path)
 {
     size_t result = WideCharToMultiByte(CP_UTF8, 0, path.data(), int(path.size()), nullptr, 0, nullptr, nullptr);
     LUAU_ASSERT(result);
