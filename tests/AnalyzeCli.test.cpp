@@ -5,6 +5,7 @@
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 #include "LSP/Utils.hpp"
+#include "LuauFileUtils.hpp"
 
 namespace std
 {
@@ -139,6 +140,49 @@ TEST_CASE("parse_definitions_files_handles_legacy_syntax")
                                    {"@roblox", "example_path.d.luau"},
                                    {"@roblox1", "lune.d.luau"},
                                });
+}
+
+// Issue #1191: Test definitions file paths with non-ASCII characters
+TEST_CASE("parse_definitions_files_handles_unicode_paths")
+{
+    argparse::ArgumentParser program("test");
+    program.set_assign_chars(":=");
+    program.add_argument("--definitions", "--defs")
+        .help("A path to a Luau definitions file to load into the global namespace")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
+
+    // Test with Polish characters (ż) and Cyrillic (Рабочий стол)
+    std::vector<std::string> arguments{
+        "",
+        "--definitions:@polish=C:/Users/Użytkownik/types.d.luau",
+        "--definitions:@cyrillic=C:/Users/Рабочий стол/defs.d.luau"
+    };
+    program.parse_args(arguments);
+
+    auto definitionsFiles = processDefinitionsFilePaths(program);
+
+    // Verify the paths are preserved correctly with Unicode characters
+    REQUIRE(definitionsFiles.find("@polish") != definitionsFiles.end());
+    REQUIRE(definitionsFiles.find("@cyrillic") != definitionsFiles.end());
+    CHECK_EQ(definitionsFiles["@polish"], "C:/Users/Użytkownik/types.d.luau");
+    CHECK_EQ(definitionsFiles["@cyrillic"], "C:/Users/Рабочий стол/defs.d.luau");
+}
+
+TEST_CASE("definitions_file_with_unicode_path_can_be_read")
+{
+    // This test uses the actual testdata directory with Unicode path
+    auto basePath = Luau::FileUtils::joinPaths(*Luau::FileUtils::getCurrentWorkingDirectory(), "tests/testdata/non-ascii/Рабочий стол");
+    auto defPath = Luau::FileUtils::joinPaths(basePath, "test.luau");
+
+    // Verify the path contains non-ASCII characters
+    CHECK(defPath.find("Рабочий") != std::string::npos);
+
+    // Verify we can read the file
+    auto contents = Luau::FileUtils::readFile(defPath);
+    REQUIRE(contents.has_value());
+    CHECK_FALSE(contents->empty());
 }
 
 TEST_SUITE_END();
