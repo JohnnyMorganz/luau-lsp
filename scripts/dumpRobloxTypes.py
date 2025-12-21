@@ -437,43 +437,8 @@ type Path2DControlPoint = any
 type UniqueId = any
 type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
+type SystemAddress = any
 type AdReward = any
-
--- Forward declare types from LuauTypes.d.luau used in
--- EXTRA_MEMBERS/Corrections.json, in case any of them fail to arrive.
--- TODO: Automate this against EXTRA_MEMBERS and Corrections.json?
-type BanConfigType = any
-type UnbanConfigType = any
-
-type CaptureParams = any
-
-type BrushConfig = any
-type ProjectionParams = any
-
-type ReflectedClass = any
-type ReflectedProperty = any
-type ReflectionClassFilter = any
-type ReflectionMemberFilter = any
-
-type RecommendationItem = any
-type UpdateRecommendationItemRequest = any
-type RecommendationActionEventDetails = any
-type RegisterRecommendationItemsRequest = any
-type RegisterRecommendationItemsResponse = any
-type RecommendationImpressionEventDetails = any
-type GenerateRecommendationItemListRequest = any
-
-type LinkSharingOptions = any
-
-type ReviewableContentEvent = any
-type CreateReviewableContentParams = any
-type RequestReviewableContentReviewParams = any
-
-type InfoTypeArray = any
-type RankedItemArray = any
-type ProductIdentifierArray = any
-
-type AutoSetupParams = any
 
 declare class Enum
     function GetEnumItems(self): { any }

@@ -2397,7 +2397,7 @@
                         {
                             "Name": "filter",
                             "Type": {
-                                "Name": "ReflectionPropertyFilter?"
+                                "Name": "ReflectionMemberFilter?"
                             }
                         }
                     ],
