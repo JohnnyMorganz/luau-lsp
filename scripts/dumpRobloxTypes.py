@@ -788,8 +788,16 @@ assert (
 # Cache for looking up members by name when resolving deprecations
 classesWithMemberName: dict[str, List[ApiClass]] = {}
 
-# Keep track of declared Luau types as a failsafe if we need to declare them
-declaredLuauTypes: Set[str] = set()
+# Keep track of declared Luau types as a failsafe if we need to declare them.
+# This needs to be kept in-sync with any Luau type declarations
+# added in EXTRA_MEMBERS
+
+declaredLuauTypes: Set[str] = {
+    "ReviewableContentEvent",
+    "AutoSetupParams",
+    "CaptureParams",
+    "VideoSample",
+}
 
 def isIdentifier(name: str):
     return re.match(r"^[a-zA-Z_]+[a-zA-Z_0-9]*$", name)  # TODO: 'function'
