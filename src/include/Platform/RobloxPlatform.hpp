@@ -131,12 +131,6 @@ public:
     {
         pluginInfo = info;
     }
-
-    void addOvertureLibrary(const std::string& libraryName, const std::string& virtualPath)
-    {
-        overtureLibraryVirtualPaths[libraryName] = virtualPath;
-    }
-
     bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
     void writePathsToMap(SourceNode* node, const std::string& base);
@@ -153,10 +147,6 @@ public:
     {
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
-
-    std::optional<Luau::ModuleName> getOvertureLibraryPath(const std::string& libraryName) const override;
-
-    std::vector<std::string> getOvertureLibraries() const override;
 
     std::optional<Luau::ModuleName> resolveToVirtualPath(const Uri& name) const override;
 

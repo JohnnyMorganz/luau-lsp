@@ -2,16 +2,10 @@
 #include "Platform/RobloxPlatform.hpp"
 
 #include "LSP/Workspace.hpp"
-#include "LSP/Utils.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
-
-#include <algorithm>
-#include <filesystem>
-#include <functional>
-#include <fstream>
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -59,7 +53,6 @@ static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globa
 }
 
 static Luau::TypeId getSourcemapType(const Luau::GlobalTypes& globals, Luau::TypeArena& arena, const SourceNode* node);
-static std::string toRequirePath(const std::string& virtualPath);
 
 struct MagicChildLookup final : Luau::MagicFunction
 {
@@ -483,331 +476,6 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
-std::optional<Luau::ModuleName> RobloxPlatform::getOvertureLibraryPath(const std::string& libraryName) const
-{
-	auto it = overtureLibraryVirtualPaths.find(libraryName);
-	if (it != overtureLibraryVirtualPaths.end())
-		return it->second;
-	return std::nullopt;
-}
-
-std::vector<std::string> RobloxPlatform::getOvertureLibraries() const
-{
-	std::vector<std::string> libraries;
-	for (const auto& [name, _] : overtureLibraryVirtualPaths)
-	{
-		libraries.push_back(name);
-	}
-	return libraries;
-}
-
-static bool isOvertureLibrary(const json& meta)
-{
-	if (!meta.is_object())
-		return false;
-
-	const json* tagsLocation = nullptr;
-	if (meta.contains("properties") && meta["properties"].is_object() && meta["properties"].contains("Tags"))
-	{
-		tagsLocation = &meta["properties"]["Tags"];
-	}
-	else if (meta.contains("Tags"))
-	{
-		tagsLocation = &meta["Tags"];
-	}
-
-	if (tagsLocation && tagsLocation->is_array())
-	{
-		for (const auto& tag : *tagsLocation)
-		{
-			if (tag.is_string())
-			{
-				std::string tagStr = tag.get<std::string>();
-				if (tagStr == "oLibrary")
-					return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-static std::optional<std::string> findOvertureLibraryModule(const Uri& metaDir, const std::string& baseName)
-{
-	std::vector<std::string> candidates = {baseName + ".luau", baseName + ".lua", "init.luau", "init.lua"};
-
-	for (const auto& candidate : candidates)
-	{
-		Uri candidatePath = metaDir.resolvePath(candidate);
-		if (candidatePath.exists())
-		{
-			return candidate;
-		}
-	}
-
-	return std::nullopt;
-}
-
-static void findOvertureLibraries(const Uri& workspaceRoot, RobloxPlatform* platform,
-	const std::unordered_map<std::string, std::string>& fsToVirtualPaths)
-{
-	LUAU_TIMETRACE_SCOPE("RobloxPlatform::findOvertureLibraries", "LSP");
-
-	std::vector<Uri> metaFiles;
-
-	std::vector<std::string> stack;
-	stack.push_back(workspaceRoot.fsPath());
-
-	while (!stack.empty())
-	{
-		std::string dirPath = stack.back();
-		stack.pop_back();
-
-		std::filesystem::directory_iterator dirIter;
-		try
-		{
-			dirIter = std::filesystem::directory_iterator(dirPath);
-		}
-		catch (const std::exception&)
-		{
-			continue;
-		}
-
-		for (const auto& entry : dirIter)
-		{
-			std::string filename = entry.path().filename().string();
-
-			if (entry.is_directory())
-			{
-				stack.push_back(entry.path().string());
-			}
-			else if (entry.is_regular_file() && endsWith(filename, ".meta.json"))
-			{
-				metaFiles.push_back(Uri::file(entry.path().string()));
-			}
-		}
-	}
-
-    std::cerr << "[overture-index] found " << metaFiles.size() << " .meta.json files\n";
-
-    for (const auto& metaFilePath : metaFiles)
-	{
-		if (auto metaContents = Luau::FileUtils::readFile(metaFilePath.fsPath()))
-		{
-			try
-			{
-				json meta = json::parse(metaContents.value());
-				if (!isOvertureLibrary(meta))
-				{
-					std::cerr << "[overture-index] " << metaFilePath.fsPath() << " is not an Overture library\n";
-					continue;
-				}
-
-				std::cerr << "[overture-index] found Overture library at " << metaFilePath.fsPath() << "\n";
-
-				std::string metaFileName = metaFilePath.filename();
-				size_t dotPos = metaFileName.rfind(".meta.json");
-				if (dotPos == std::string::npos)
-				{
-					std::cerr << "[overture-index] failed to extract base name from " << metaFileName << "\n";
-					continue;
-				}
-
-				std::string baseName = metaFileName.substr(0, dotPos);
-				auto metaDirOpt = metaFilePath.parent();
-				if (!metaDirOpt)
-				{
-					std::cerr << "[overture-index] failed to get parent directory of " << metaFilePath.fsPath() << "\n";
-					continue;
-				}
-				Uri metaDir = *metaDirOpt;
-
-				auto moduleFileOpt = findOvertureLibraryModule(metaDir, baseName);
-				if (!moduleFileOpt)
-				{
-					std::cerr << "[overture-index] no module file found for " << baseName << " in " << metaDir.fsPath() << "\n";
-					continue;
-				}
-
-				std::string moduleFile = *moduleFileOpt;
-                Uri moduleFilePath = metaDir.resolvePath(moduleFile);
-                std::string relativeModulePath = moduleFilePath.lexicallyRelative(workspaceRoot);
-                for (char& ch : relativeModulePath)
-                    if (ch == '\\')
-                        ch = '/';
-
-                auto virtualPath = fsToVirtualPaths.find(relativeModulePath);
-				std::string virtualPathStr = virtualPath != fsToVirtualPaths.end() ? virtualPath->second : relativeModulePath;
-                std::string requirePath = toRequirePath(virtualPathStr);
-
-                std::cerr << "[overture-index] adding library " << baseName << " with require path: " << requirePath << "\n";
-                platform->addOvertureLibrary(baseName, requirePath);
-			}
-			catch (const std::exception& e)
-			{
-				std::cerr << "[overture-index] exception while processing " << metaFilePath.fsPath() << ": " << e.what() << "\n";
-				continue;
-			}
-		}
-		else
-		{
-			std::cerr << "[overture-index] failed to read " << metaFilePath.fsPath() << "\n";
-		}
-	}
-}
-
-static std::unordered_map<std::string, std::string> buildFsToVirtualMap(const json& sourcemap)
-{
-	std::unordered_map<std::string, std::string> map;
-
-	std::function<void(const json&, const std::string&)> traverse = [&](const json& node, const std::string& base)
-	{
-		if (!node.is_object())
-			return;
-
-		if (node.contains("filePaths") && node["filePaths"].is_array())
-		{
-			for (const auto& filePath : node["filePaths"])
-			{
-				if (filePath.is_string())
-				{
-                    std::string pathStr = filePath.get<std::string>();
-                    for (char& ch : pathStr)
-                        if (ch == '\\')
-                            ch = '/';
-					if (!endsWith(pathStr, ".meta.json"))
-					{
-						map[pathStr] = base;
-					}
-				}
-			}
-		}
-
-		if (node.contains("children") && node["children"].is_array())
-		{
-			for (const auto& child : node["children"])
-			{
-				if (!child.is_object())
-					continue;
-
-				std::string childName = child.contains("name") && child["name"].is_string() ? child["name"].get<std::string>() : "";
-
-				if (childName.empty())
-					continue;
-
-				std::string childPath = base + "/" + childName;
-				traverse(child, childPath);
-			}
-		}
-	};
-
-	traverse(sourcemap, "game");
-	return map;
-}
-
-static bool isValidIdentifierSegment(const std::string& s)
-{
-    if (s.empty())
-        return false;
-    char c0 = s[0];
-    if (!((c0 >= 'A' && c0 <= 'Z') || (c0 >= 'a' && c0 <= 'z') || c0 == '_'))
-        return false;
-    for (size_t i = 1; i < s.size(); ++i)
-    {
-        char c = s[i];
-        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_'))
-            return false;
-    }
-    return true;
-}
-
-static std::string toRequirePath(const std::string& virtualPath)
-{
-    if (virtualPath.empty())
-        return virtualPath;
-
-    std::string normalized = virtualPath;
-    for (char& ch : normalized)
-        if (ch == '\\')
-            ch = '/';
-
-    while (!normalized.empty() && normalized.back() == '/')
-        normalized.pop_back();
-
-    auto endsWithCaseInsensitive = [](const std::string& s, const std::string& suffix) {
-        if (s.size() < suffix.size())
-            return false;
-        for (size_t i = 0; i < suffix.size(); ++i)
-        {
-            char a = s[s.size() - suffix.size() + i];
-            char b = suffix[i];
-            if (a >= 'A' && a <= 'Z') a = char(a - 'A' + 'a');
-            if (b >= 'A' && b <= 'Z') b = char(b - 'A' + 'a');
-            if (a != b)
-                return false;
-        }
-        return true;
-    };
-
-    if (endsWithCaseInsensitive(normalized, ".luau"))
-        normalized.resize(normalized.size() - 5);
-    else if (endsWithCaseInsensitive(normalized, ".lua"))
-        normalized.resize(normalized.size() - 4);
-
-    if (endsWithCaseInsensitive(normalized, "/init"))
-        normalized.resize(normalized.size() - 5);
-
-    std::vector<std::string> segments;
-    {
-        size_t start = 0;
-        while (start <= normalized.size())
-        {
-            size_t pos = normalized.find('/', start);
-            std::string seg = normalized.substr(start, pos == std::string::npos ? std::string::npos : pos - start);
-            if (!seg.empty())
-                segments.push_back(seg);
-            if (pos == std::string::npos)
-                break;
-            start = pos + 1;
-        }
-    }
-
-    if (segments.empty())
-        return std::string();
-
-    auto escapeSegment = [](const std::string& s) {
-        std::string out;
-        out.reserve(s.size());
-        for (char ch : s)
-        {
-            if (ch == '\\')
-                out += "\\\\";
-            else if (ch == '\'')
-                out += "\\'";
-            else
-                out += ch;
-        }
-        return out;
-    };
-
-    std::string requirePath;
-    if (isValidIdentifierSegment(segments[0]))
-        requirePath = segments[0];
-    else
-        requirePath = "[\'" + escapeSegment(segments[0]) + "\']";
-
-    for (size_t i = 1; i < segments.size(); ++i)
-    {
-        const std::string& seg = segments[i];
-        if (isValidIdentifierSegment(seg))
-            requirePath += "." + seg;
-        else
-            requirePath += "[\'" + escapeSegment(seg) + "\']";
-    }
-
-    return requirePath;
-}
-
 void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
@@ -817,6 +485,7 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
     if (auto realPath = getRealPathFromSourceNode(node))
     {
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
+        overtureLibraryVirtualPaths.insert_or_assign();
     }
 
     for (auto& child : node->children)
@@ -839,44 +508,6 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
-
-        auto fsToVirtualPaths = buildFsToVirtualMap(j);
-        {
-            bool hasSourcemap = !fsToVirtualPaths.empty();
-            workspaceFolder->client->sendTrace(std::string("[overture-index:sourcemap] sourcemap loaded: ") + (hasSourcemap ? "true" : "false"));
-            if (hasSourcemap)
-            {
-                int count = 0;
-                std::string dump;
-                for (const auto& kv : fsToVirtualPaths)
-                {
-                    dump += "  " + kv.first + " -> " + kv.second + "\n";
-                    if (++count >= 5)
-                        break;
-                }
-                workspaceFolder->client->sendTrace("[overture-index:sourcemap] sample mappings:\n" + dump);
-            }
-            else
-            {
-                workspaceFolder->client->sendTrace("[overture-index:sourcemap] no sourcemap data found; outputs will be relative paths");
-            }
-        }
-
-        findOvertureLibraries(workspaceFolder->rootUri, this, fsToVirtualPaths);
-
-        if (!overtureLibraryVirtualPaths.empty())
-        {
-            std::string libraryDump = "Found " + std::to_string(overtureLibraryVirtualPaths.size()) + " Overture libraries:\n";
-            for (const auto& [name, path] : overtureLibraryVirtualPaths)
-            {
-                libraryDump += "  " + name + " -> " + path + "\n";
-            }
-            workspaceFolder->client->sendTrace(libraryDump);
-        }
-        else
-        {
-            workspaceFolder->client->sendTrace("No Overture libraries found");
-        }
     }
     catch (const std::exception& e)
     {
@@ -887,6 +518,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         return;
     }
 
+    // Write paths
     std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
     writePathsToMap(rootSourceNode, base);
 

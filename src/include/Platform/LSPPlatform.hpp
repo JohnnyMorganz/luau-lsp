@@ -109,16 +109,6 @@ public:
         return false;
     }
 
-    [[nodiscard]] virtual std::optional<Luau::ModuleName> getOvertureLibraryPath(const std::string& libraryName) const
-    {
-        return std::nullopt;
-    }
-
-    [[nodiscard]] virtual std::vector<std::string> getOvertureLibraries() const
-    {
-        return {};
-    }
-
     static std::unique_ptr<LSPPlatform> getPlatform(
         const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder = nullptr);
 
