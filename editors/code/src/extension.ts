@@ -17,6 +17,7 @@ import {
 
 import {
   registerComputeBytecode,
+  registerComputeCodeGen,
   registerComputeCompilerRemarks,
 } from "./bytecode";
 
@@ -535,6 +536,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   clientDisposables.push(...registerComputeBytecode(context, client));
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
+  clientDisposables.push(...registerComputeCodeGen(context, client));
   clientDisposables.push(...registerRequireGraph(context, client));
   clientDisposables.push(
     vscode.commands.registerCommand("luau-lsp.openWalkthrough", () => {

@@ -104,6 +104,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/TestClient.cpp
         tests/Autocomplete.test.cpp
         tests/AutoImports.test.cpp
+        tests/Bytecode.test.cpp
         tests/MagicFunctions.test.cpp
         tests/Documentation.test.cpp
         tests/TextDocument.test.cpp
@@ -185,7 +186,7 @@ target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
 target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_VERSION="${LSP_VERSION}")
 target_compile_definitions(Luau.LanguageServer PUBLIC -DLSP_NAME="${LSP_NAME}")
 target_include_directories(Luau.LanguageServer PUBLIC src/include ${EXTERN_INCLUDES})
-target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler Luau.VM)
+target_link_libraries(Luau.LanguageServer PRIVATE Luau.Ast Luau.Analysis Luau.Compiler Luau.VM Luau.CodeGen)
 
 set_target_properties(Luau.LanguageServer.CLI PROPERTIES OUTPUT_NAME luau-lsp)
 target_compile_features(Luau.LanguageServer.CLI PUBLIC cxx_std_17)
