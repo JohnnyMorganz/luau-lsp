@@ -129,6 +129,11 @@
         "enablement": "resourceLangId == luau"
       },
       {
+        "command": "luau-lsp.computeCodeGen",
+        "title": "Luau: Compute CodeGen instructions for file",
+        "enablement": "resourceLangId == luau"
+      },
+      {
         "command": "luau-lsp.flushTimeTrace",
         "title": "Luau: Flush Time Trace Events to tracing.json"
       },

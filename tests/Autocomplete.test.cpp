@@ -333,6 +333,27 @@ TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_t
     CHECK(item.deprecated);
 }
 
+TEST_CASE_FIXTURE(Fixture, "deprecated_attribute_applies_to_autocomplete_entry")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        @deprecated
+        local function foo()
+        end
+
+        local x = |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "foo");
+    CHECK(item.deprecated);
+}
+
 TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index_with_colon")
 {
     auto [source, marker] = sourceWithMarker(R"(
