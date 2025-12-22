@@ -476,6 +476,14 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
+std::optional<Luau::ModuleName> RobloxPlatform::getOvertureLibraryPath(const std::string& libraryName) const
+{
+    auto it = overtureLibraryVirtualPaths.find(libraryName);
+    if (it != overtureLibraryVirtualPaths.end())
+        return it->second;
+    return std::nullopt;
+}
+
 void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
@@ -485,7 +493,65 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
     if (auto realPath = getRealPathFromSourceNode(node))
     {
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
-        overtureLibraryVirtualPaths.insert_or_assign();
+
+        if (node->className == "ModuleScript")
+        {
+            std::string metaJsonPath;
+            std::string fsPath = realPath->fsPath();
+
+            if (endsWith(fsPath, "/init.luau") || endsWith(fsPath, "/init.lua"))
+            {
+                size_t lastSlash = fsPath.find_last_of("/\\");
+                if (lastSlash != std::string::npos)
+                {
+                    metaJsonPath = fsPath.substr(0, lastSlash + 1) + "init.meta.json";
+                }
+            }
+            else
+            {
+                if (endsWith(fsPath, ".luau"))
+                {
+                    metaJsonPath = fsPath.substr(0, fsPath.length() - 5) + ".meta.json";
+                }
+                else if (endsWith(fsPath, ".lua"))
+                {
+                    metaJsonPath = fsPath.substr(0, fsPath.length() - 4) + ".meta.json";
+                }
+            }
+
+            if (!metaJsonPath.empty() && Luau::FileUtils::exists(metaJsonPath))
+            {
+                if (auto metaContents = Luau::FileUtils::readFile(metaJsonPath))
+                {
+                    try
+                    {
+                        auto metaJson = json::parse(*metaContents);
+
+                        if (metaJson.contains("properties") &&
+                            metaJson["properties"].contains("Tags"))
+                        {
+                            auto& tags = metaJson["properties"]["Tags"];
+                            for (const auto& tag : tags)
+                            {
+                                if (tag.is_string() && tag.get<std::string>() == "oLibrary")
+                                {
+									if (isVirtualPath(node->virtualPath)) {
+										overtureLibraryVirtualPaths[node->name] = node->virtualPath;
+										break;
+									} else {
+										std::cerr << "No virtual path found for " << node->name << "!";
+									}
+                                }
+                            }
+                        }
+                    }
+                    catch (const std::exception& e)
+                    {
+                        std::cerr << "Failed to parse meta.json for " << node->name << ": " << e.what() << '\n';
+                    }
+                }
+            }
+        }
     }
 
     for (auto& child : node->children)
@@ -522,6 +588,8 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
     writePathsToMap(rootSourceNode, base);
 
+    dumpOvertureLibraryMap(); // for debugging
+
     if (pluginInfo)
     {
         if (rootSourceNode->className == "DataModel")
@@ -533,6 +601,29 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
             std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
         }
     }
+}
+
+void RobloxPlatform::dumpOvertureLibraryMap() const
+{
+    std::string msg = "Overture library map: " + std::to_string(overtureLibraryVirtualPaths.size()) + " entries\n";
+    for (const auto& pair : overtureLibraryVirtualPaths)
+    {
+        msg += "  " + pair.first + " => " + pair.second + "\n";
+    }
+
+    if (workspaceFolder && workspaceFolder->client)
+        workspaceFolder->client->sendTrace(msg);
+    else
+        std::cerr << msg;
+}
+
+std::vector<std::string> RobloxPlatform::getOvertureLibraries() const
+{
+    std::vector<std::string> names;
+    names.reserve(overtureLibraryVirtualPaths.size());
+    for (const auto& kv : overtureLibraryVirtualPaths)
+        names.push_back(kv.first);
+    return names;
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)

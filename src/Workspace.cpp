@@ -345,55 +345,6 @@ Luau::CheckResult WorkspaceFolder::checkStrict(
 
 static const char* kIndexProgressToken = "luau/indexFiles";
 
-std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const std::string& libraryName) const
-{
-    auto it = overtureLibraryVirtualPaths.find(libraryName);
-    if (it != overtureLibraryVirtualPaths.end())
-        return it->second;
-    return std::nullopt;
-}
-
-static void loadOvertureLibrariesFromJson(const Uri& rootUri, WorkspaceFolder* folder, Client* client, std::unordered_map<std::string, std::string>& libraries)
-{
-    Uri jsonPath = rootUri.resolvePath("oLibrariesMap.json");
-    if (!jsonPath.exists())
-    {
-		if (client) {
-            client->sendTrace("workspace: oLibrariesMap.json not found. Run the 'Index Overture Libraries' task to generate it");
-        }
-        return;
-    }
-
-    try
-    {
-        std::ifstream file(jsonPath.fsPath());
-        if (!file.is_open())
-            return;
-
-        nlohmann::json data = nlohmann::json::parse(file);
-        if (!data.is_object())
-            return;
-
-        for (const auto& [key, value] : data.items())
-        {
-            if (!value.is_string())
-                continue;
-
-            libraries[key] = value.get<std::string>();
-        }
-
-		if (client) {
-            client->sendTrace("workspace: loaded " + std::to_string(libraries.size()) + " oLibraries from json");
-        }
-    }
-    catch (const std::exception& e)
-    {
-		if (client) {
-            client->sendTrace("workspace: exception occurred when loading oLibrariesMap.json: " + std::string(e.what()));
-        }
-    }
-}
-
 void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::indexFiles", "LSP");
@@ -408,10 +359,6 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing");
 
     std::vector<Luau::ModuleName> moduleNames;
-    overtureLibraryVirtualPaths.clear();
-
-    // Load Overture libraries from pre-generated JSON (values are already module names)
-    loadOvertureLibrariesFromJson(rootUri, this, client, overtureLibraryVirtualPaths);
 
     bool sentMessage = false;
     Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
@@ -661,4 +608,16 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         indexFiles(configuration);
 
     client->sendTrace("workspace: setting up with configuration COMPLETED");
+}
+
+std::optional<Luau::ModuleName> WorkspaceFolder::getOvertureLibraryPath(const std::string& libraryName) const
+{
+    // Delegate to RobloxPlatform when available; otherwise indicate absence
+    if (!platform)
+        return std::nullopt;
+
+    if (auto* roblox = dynamic_cast<RobloxPlatform*>(platform.get()))
+        return roblox->getOvertureLibraryPath(libraryName);
+
+    return std::nullopt;
 }

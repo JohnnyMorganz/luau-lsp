@@ -152,6 +152,12 @@ public:
 
     std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const override;
 
+    std::optional<Luau::ModuleName> getOvertureLibraryPath(const std::string& libraryName) const;
+
+    void dumpOvertureLibraryMap() const;
+
+    [[nodiscard]] std::vector<std::string> getOvertureLibraries() const override;
+
     Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const override;
 
     std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;

@@ -112,6 +112,45 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
         return names;
     };
 
+    auto fixRequirePath = [](const std::string& virtualPath) -> std::string
+    {
+        std::stringstream ss(virtualPath);
+        std::string part;
+        std::vector<std::string> parts;
+        while (std::getline(ss, part, '/'))
+            parts.push_back(part);
+
+        auto isValidIdent = [](const std::string& s) -> bool
+        {
+            if (s.empty()) return false;
+            if (!(std::isalpha(static_cast<unsigned char>(s[0])) || s[0] == '_')) return false;
+            for (size_t i = 1; i < s.size(); ++i)
+            {
+                unsigned char c = static_cast<unsigned char>(s[i]);
+                if (!(std::isalnum(c) || c == '_')) return false;
+            }
+            return true;
+        };
+
+        std::string expr;
+        for (size_t i = 0; i < parts.size(); ++i)
+        {
+            const std::string& p = parts[i];
+            if (i == 0)
+            {
+                expr = p;
+            }
+            else
+            {
+                if (isValidIdent(p))
+                    expr += "." + p;
+                else
+                    expr += "[\"" + p + "\"]";
+            }
+        }
+        return expr;
+    };
+
     {
         std::string::const_iterator searchStart(source.cbegin());
         std::smatch match;
@@ -134,7 +173,7 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
 
                     if (varNames.size() == fnNames.size() && !varNames.empty())
                     {
-                        const std::string requireExpr = *libraryPath;
+                        const std::string requireExpr = fixRequirePath(*libraryPath);
                         std::string typeAnnotations;
 
                         for (size_t i = 0; i < varNames.size(); ++i)
@@ -195,7 +234,7 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
             {
                 if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
                 {
-                    const std::string requireExpr = *libraryPath;
+                    const std::string requireExpr = fixRequirePath(*libraryPath);
                     const std::string typeExpr = "typeof(require(" + requireExpr + "))";
                     replacement = "local " + varName + ": " + typeExpr + " = Overture:LoadLibrary(\"" + libName + "\")";
 
@@ -213,6 +252,8 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
             searchStart = match.suffix().first;
         }
     }
+
+	// Overture:Get support
 
     {
         std::regex getPattern(R"(local\s+(\w+)\s*=\s*Overture\s*:\s*Get\s*\(\s*\"([^\"]+)\"\s*,\s*\"([^\"]+)\"(?:\s*,\s*[^)]+)?\s*\))");

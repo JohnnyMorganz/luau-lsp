@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <unordered_set>
+#include <vector>
 
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
@@ -107,6 +108,11 @@ public:
     virtual bool handleNotification(const std::string& method, std::optional<json> params)
     {
         return false;
+    }
+
+    [[nodiscard]] virtual std::vector<std::string> getOvertureLibraries() const
+    {
+        return {};
     }
 
     static std::unique_ptr<LSPPlatform> getPlatform(
