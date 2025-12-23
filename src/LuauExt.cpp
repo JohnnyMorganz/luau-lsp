@@ -777,18 +777,6 @@ bool isGetService(const Luau::AstExpr* expr)
     return false;
 }
 
-bool isOvertureCall(const Luau::AstExpr* expr)
-{
-    if (auto call = expr->as<Luau::AstExprCall>())
-        if (auto index = call->func->as<Luau::AstExprIndexName>())
-            if (index->index == "LoadLibrary")
-                if (auto local = index->expr->as<Luau::AstExprLocal>())
-                    if (local->local->name == "Overture")
-                        return true;
-
-    return false;
-}
-
 bool isRequire(const Luau::AstExpr* expr)
 {
     if (auto call = expr->as<Luau::AstExprCall>())
