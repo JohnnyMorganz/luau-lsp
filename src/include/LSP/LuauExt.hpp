@@ -65,7 +65,6 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDo
 lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const TextDocument* textDocument = nullptr);
 
 bool isGetService(const Luau::AstExpr* expr);
-bool isOvertureCall(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
