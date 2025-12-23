@@ -535,6 +535,76 @@ std::optional<std::vector<lsp::CompletionItem>> WorkspaceFolder::tryCompleteOver
 
     std::string textUpToCursor = lineContent.substr(0, position.character);
 
+    std::regex namedImportsPattern(R"(Overture:LoadLibrary\s*\(\s*[\"']([^\"']+)[\"']\s*,\s*\{[^}]*)");
+    std::smatch namedImportsMatch;
+    if (std::regex_search(textUpToCursor, namedImportsMatch, namedImportsPattern))
+    {
+        std::string libraryName = namedImportsMatch[1].str();
+
+        auto libraryPath = getOvertureLibraryPath(libraryName);
+        if (!libraryPath)
+        {
+            return std::nullopt;
+        }
+
+        auto module = getModule(*libraryPath, /* forAutocomplete: */ true);
+        if (!module || !module->returnType)
+        {
+            return std::nullopt;
+        }
+
+        std::optional<Luau::TypeId> returnTypeOpt = Luau::first(module->returnType);
+        if (!returnTypeOpt)
+        {
+            return std::nullopt;
+        }
+
+        Luau::TypeId returnType = Luau::follow(*returnTypeOpt);
+
+        std::vector<lsp::CompletionItem> items;
+
+        if (auto tableType = Luau::get<Luau::TableType>(returnType))
+        {
+            for (const auto& [propName, prop] : tableType->props)
+            {
+                if (prop.readTy)
+                {
+                    Luau::TypeId propType = Luau::follow(*prop.readTy);
+                    if (Luau::get<Luau::FunctionType>(propType) || Luau::isOverloadedFunction(propType))
+                    {
+                        lsp::CompletionItem item;
+                        item.label = propName;
+                        item.kind = lsp::CompletionItemKind::Function;
+                        item.sortText = SortText::Default;
+                        items.push_back(item);
+                    }
+                }
+            }
+        }
+		
+        else if (auto externType = Luau::get<Luau::ExternType>(returnType))
+        {
+            for (const auto& [propName, prop] : externType->props)
+            {
+                if (prop.readTy)
+                {
+                    Luau::TypeId propType = Luau::follow(*prop.readTy);
+                    if (Luau::get<Luau::FunctionType>(propType) || Luau::isOverloadedFunction(propType))
+                    {
+                        lsp::CompletionItem item;
+                        item.label = propName;
+                        item.kind = lsp::CompletionItemKind::Function;
+                        item.sortText = SortText::Default;
+                        items.push_back(item);
+                    }
+                }
+            }
+        }
+
+        if (!items.empty())
+            return items;
+    }
+
     std::regex libraryNamePattern(R"(Overture:LoadLibrary\s*\(\s*[\"']([^\"]*)$)");
     std::smatch libraryMatch;
     if (std::regex_search(textUpToCursor, libraryMatch, libraryNamePattern))
