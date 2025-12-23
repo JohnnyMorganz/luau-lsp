@@ -101,12 +101,20 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     // Lints only apply to the current file
     for (auto& error : cr.lintResult.errors)
     {
+        if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
+            continue;
+
         auto diagnostic = createLintDiagnostic(error, *textDocument);
         diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
         report.items.emplace_back(diagnostic);
     }
     for (auto& error : cr.lintResult.warnings)
+    {
+        if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
+            continue;
+
         report.items.emplace_back(createLintDiagnostic(error, *textDocument));
+    }
 
     return report;
 }
@@ -194,12 +202,22 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Report Lint Warnings
         for (auto& error : cr.lintResult.errors)
         {
+            // Skip ImportUnused warnings for Overture since it's used via method calls
+            if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
+                continue;
+
             auto diagnostic = createLintDiagnostic(error, document);
             diagnostic.severity = lsp::DiagnosticSeverity::Error; // Report this as an error instead
             documentReport.items.emplace_back(diagnostic);
         }
         for (auto& error : cr.lintResult.warnings)
+        {
+            // Skip ImportUnused warnings for Overture since it's used via method calls
+            if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
+                continue;
+
             documentReport.items.emplace_back(createLintDiagnostic(error, document));
+        }
 
         workspaceReport.items.emplace_back(documentReport);
     }
