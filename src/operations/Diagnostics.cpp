@@ -202,7 +202,6 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         // Report Lint Warnings
         for (auto& error : cr.lintResult.errors)
         {
-            // Skip ImportUnused warnings for Overture since it's used via method calls
             if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
                 continue;
 
@@ -212,7 +211,6 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
         }
         for (auto& error : cr.lintResult.warnings)
         {
-            // Skip ImportUnused warnings for Overture since it's used via method calls
             if (error.code == Luau::LintWarning::Code::Code_ImportUnused && error.text.find("'Overture'") != std::string::npos)
                 continue;
 

@@ -9,6 +9,8 @@ Changes from upstream Luau LSP:
 * Added `Overture:Get` support for resolving specified instance types
 * Added autocomplete in `Overture:Get` calls
 * Added support for `NamedImports` in `Overture:LoadLibrary` calls
+* Added autocomplete for `NamedImports` in `Overture:LoadLibrary` calls
+* Disabled `ImportUnused` lint warnings for the `Overture` variable
 
 # Luau Language Server
 
