@@ -294,6 +294,44 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
         }
     }
 
+    {
+        std::regex overtureRequirePattern(R"(local\s+Overture\s*=\s*require\s*\()");
+
+        std::string::const_iterator searchStart(source.cbegin());
+        std::smatch match;
+        while (std::regex_search(searchStart, source.cend(), match, overtureRequirePattern))
+        {
+            size_t matchPos = std::distance(source.cbegin(), match[0].first);
+            size_t matchLen = match[0].length();
+            bool alreadyReplaced = false;
+			
+            for (const auto& r : replacements)
+            {
+                if (matchPos >= r.first && matchPos < r.first + r.second.first)
+                {
+                    alreadyReplaced = true;
+                    break;
+                }
+            }
+
+            if (!alreadyReplaced)
+            {
+                std::string replacement = match.str();
+                size_t pos = replacement.find("Overture");
+                if (pos != std::string::npos)
+                {
+                    replacement.replace(pos, 8, "_Overture");
+                }
+
+                std::cerr << "[Overture] Renamed Overture require to _Overture in: " << moduleName << "\n";
+
+                replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
+            }
+
+            searchStart = match.suffix().first;
+        }
+    }
+
     // Apply replacements in reverse order
     std::sort(replacements.begin(), replacements.end());
     for (auto it = replacements.rbegin(); it != replacements.rend(); ++it)
