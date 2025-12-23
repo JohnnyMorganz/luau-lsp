@@ -256,7 +256,8 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
 	// Overture:Get support
 
     {
-        std::regex getPattern(R"(local\s+(\w+)\s*=\s*Overture\s*:\s*Get\s*\(\s*\"([^\"]+)\"\s*,\s*\"([^\"]+)\"(?:\s*,\s*[^)]+)?\s*\))");
+        std::regex getPattern(R"(local\s+(\w+)\s*=\s*Overture\s*:\s*Get\s*\(\s*\"([^\"]+)\"\s*,\s*\"([^\"]+)\"(\s*,\s*[^)]+)?\s*\))");
+
         std::string::const_iterator getSearchStart(source.cbegin());
         std::smatch getMatch;
         while (std::regex_search(getSearchStart, source.cend(), getMatch, getPattern))
@@ -264,6 +265,7 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
             std::string varName = getMatch[1].str();
             std::string className = getMatch[2].str();
             std::string instanceName = getMatch[3].str();
+            std::string thirdArgPart = getMatch[4].str();
 
             size_t matchPos = std::distance(source.cbegin(), getMatch[0].first);
             size_t matchLen = getMatch[0].length();
@@ -281,23 +283,10 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
 
             if (!alreadyReplaced)
             {
-                std::string originalCall = getMatch.str();
-                std::string thirdArgPart;
-
-                size_t secondQuoteEnd = originalCall.rfind('"');
-                size_t commaAfterSecond = originalCall.find(',', secondQuoteEnd);
-
-                if (commaAfterSecond != std::string::npos)
-                {
-                    thirdArgPart = originalCall.substr(commaAfterSecond);
-                }
-
-                // Type the variable based on the ClassName
-                std::string replacement = "local " + varName + ": " + className + " = Overture:Get(\"" + className + "\", \"" + instanceName + "\"" + thirdArgPart + ")";
+                std::string replacement = "local " + varName + ": " + className + " = Overture:Get(\"" + className + "\", \"" + instanceName + "\"" + (thirdArgPart.empty() ? "" : thirdArgPart) + ")";
 
                 std::cerr << "[Transform] In file: " << moduleName << "\n";
-                std::cerr << "  Original: " << originalCall << "\n";
-                std::cerr << "  Replaced: " << replacement << "\n";
+                std::cerr << "  Replaced with type: " << className << "\n";
 
                 replacements.emplace_back(matchPos, std::make_pair(matchLen, replacement));
             }
