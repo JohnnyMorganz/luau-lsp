@@ -235,8 +235,7 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
                 if (auto libraryPath = workspace->getOvertureLibraryPath(libName))
                 {
                     const std::string requireExpr = fixRequirePath(*libraryPath);
-                    const std::string typeExpr = "typeof(require(" + requireExpr + "))";
-                    replacement = "local " + varName + ": " + typeExpr + " = Overture:LoadLibrary(\"" + libName + "\")";
+                    replacement = "local " + varName + " = require(" + requireExpr + ")";
 
                     std::cerr << "[Transform] In file: " << moduleName << "\n";
                     std::cerr << "  Original: " << match.str() << "\n";
