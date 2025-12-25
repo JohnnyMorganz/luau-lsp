@@ -9,6 +9,52 @@ using namespace toml::literals::toml_literals;
 
 TEST_SUITE_BEGIN("JsonTomlSyntaxParser");
 
+TEST_CASE_FIXTURE(Fixture, "jsonValueToLuau returns proper Luau string")
+{
+    nlohmann::json json = {
+        {"int", 123},
+        {"float", 123.456},
+        {"string", "hello"},
+        {"bool", true},
+        {"array", {1, 2, 3}},
+        {"object", {{"key", "value"}}},
+    };
+
+    auto block = parse("return " + jsonValueToLuau(json));
+    REQUIRE(block->body.size == 1);
+
+    auto returnStmt = (*block->body.begin())->as<Luau::AstStatReturn>();
+    REQUIRE(returnStmt);
+    REQUIRE(returnStmt->list.size == 1);
+
+    auto table = (*returnStmt->list.begin())->as<Luau::AstExprTable>();
+    REQUIRE(table);
+    CHECK(table->items.size == 6);
+}
+
+TEST_CASE_FIXTURE(Fixture, "jsonValueToLuau escapes strings")
+{
+    nlohmann::json json = {
+        {"newLineKey", "a\nb"},
+        {"a\nb", "newLineValue"},
+        {"quoteKey", "a\"b"},
+        {"a\"b", "quoteValue"},
+    };
+
+    auto block = parse("return " + jsonValueToLuau(json));
+    REQUIRE(block->body.size == 1);
+
+    auto returnStmt = (*block->body.begin())->as<Luau::AstStatReturn>();
+    REQUIRE(returnStmt);
+    REQUIRE(returnStmt->list.size == 1);
+
+    auto table = (*returnStmt->list.begin())->as<Luau::AstExprTable>();
+    REQUIRE(table);
+
+    // Verify all 4 items parsed correctly (keys and values escaped)
+    CHECK(table->items.size == 4);
+}
+
 static Luau::AstExprTable* parseLuauTable(const Luau::AstStatBlock* block)
 {
     REQUIRE(block->body.size == 1);
