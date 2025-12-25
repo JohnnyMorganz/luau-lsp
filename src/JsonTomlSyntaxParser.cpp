@@ -4,7 +4,11 @@
 
 std::string jsonValueToLuau(const nlohmann::json& val)
 {
-    if (val.is_string() || val.is_number() || val.is_boolean())
+    if (val.is_string())
+    {
+        return '"' + Luau::escape(val.get<std::string>()) + '"';
+    }
+    else if (val.is_number() || val.is_boolean())
     {
         return val.dump();
     }
@@ -30,7 +34,7 @@ std::string jsonValueToLuau(const nlohmann::json& val)
 
         for (auto& [key, value] : val.items())
         {
-            out += "[\"" + key + "\"] = ";
+            out += "[\"" + Luau::escape(key) + "\"] = ";
             out += jsonValueToLuau(value);
             out += ";";
         }
