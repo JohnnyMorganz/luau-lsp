@@ -1015,6 +1015,7 @@ TEST_CASE_FIXTURE(Fixture, "inlay_hint_union_with_custom_types_has_separate_part
 TEST_CASE_FIXTURE(Fixture, "inlay_hint_generics_and_extern_type")
 {
     client->globalConfig.inlayHints.variableTypes = true;
+    client->documentation["@roblox/globaltype/Instance"] = Luau::BasicDocumentation{"Example Class Documentation"};
     auto source = R"(
         type Box<T> = { inner: T }
         local x: Box<Instance>
@@ -1031,8 +1032,8 @@ TEST_CASE_FIXTURE(Fixture, "inlay_hint_generics_and_extern_type")
     CHECK_EQ(result[0].label[1].location->range, lsp::Range{{2, 17}, {2, 30}});
     CHECK_EQ(result[0].label[2].value, "<");
     CHECK_EQ(result[0].label[3].value, "Instance");
-    REQUIRE(result[0].label[3].location);
-    CHECK_EQ(result[0].label[3].location->range, lsp::Range{{1, 13}, {1, 16}});
+    REQUIRE(result[0].label[3].tooltip);
+    CHECK_EQ(result[0].label[3].tooltip->value, "Example Class Documentation");
     CHECK_EQ(result[0].label[4].value, ">");
 }
 

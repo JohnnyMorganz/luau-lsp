@@ -9,7 +9,8 @@
 #include "Luau/PrettyPrinter.h"
 #include "LSP/LuauExt.hpp"
 
-static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(const Luau::ToStringResult& result, WorkspaceFileResolver* fileResolver)
+static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(
+    const Luau::ToStringResult& result, const Client* client, WorkspaceFileResolver* fileResolver)
 {
     std::vector<lsp::InlayHintLabelPart> parts;
 
@@ -35,6 +36,11 @@ static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(const Luau::To
         lsp::InlayHintLabelPart part;
         part.value = result.name.substr(start, end - start);
         part.location = types::getTypeLocation(typeId, fileResolver);
+        if (typeId->documentationSymbol)
+        {
+            if (auto documentation = printDocumentation(client->documentation, *typeId->documentationSymbol))
+                part.tooltip = lsp::MarkupContent{lsp::MarkupKind::Markdown, *documentation};
+        }
         parts.push_back(part);
 
         lastEnd = end;
@@ -88,15 +94,17 @@ struct InlayHintVisitor : public Luau::AstVisitor
 {
     const Luau::ModulePtr& module;
     const ClientConfiguration& config;
+    const Client* client;
     const TextDocument* textDocument;
     WorkspaceFileResolver* fileResolver;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(
-        const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument, WorkspaceFileResolver* fileResolver)
+    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const Client* client,
+        const TextDocument* textDocument, WorkspaceFileResolver* fileResolver)
         : module(module)
         , config(config)
+        , client(client)
         , textDocument(textDocument)
         , fileResolver(fileResolver)
 
@@ -109,7 +117,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     {
         auto result = Luau::toStringDetailed(ty, stringOptions);
         hint.label.push_back(lsp::InlayHintLabelPart{prefix});
-        auto parts = toInlayHintLabelParts(result, fileResolver);
+        auto parts = toInlayHintLabelParts(result, client, fileResolver);
         hint.label.insert(hint.label.end(), parts.begin(), parts.end());
     }
 
@@ -119,7 +127,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
         if (removeEllipsis)
             result.name = removePrefix(result.name, "...");
         hint.label.push_back(lsp::InlayHintLabelPart{prefix});
-        auto parts = toInlayHintLabelParts(result, fileResolver);
+        auto parts = toInlayHintLabelParts(result, client, fileResolver);
         hint.label.insert(hint.label.end(), parts.begin(), parts.end());
     }
 
@@ -395,7 +403,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config, textDocument, &fileResolver};
+    InlayHintVisitor visitor{module, config, client, textDocument, &fileResolver};
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
