@@ -85,6 +85,20 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
             return std::nullopt;
         }
     }
+    else if (path.extension() == ".yaml" || path.extension() == ".yml")
+    {
+        try
+        {
+            ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(*source));
+            source = "--!strict\nreturn " + yamlValueToLuau(tree.rootref());
+        }
+        catch (const std::exception& e)
+        {
+            // TODO: display diagnostic?
+            std::cerr << "Failed to load YAML module: " << path.toString() << " - " << e.what() << '\n';
+            return std::nullopt;
+        }
+    }
 
     return source;
 }

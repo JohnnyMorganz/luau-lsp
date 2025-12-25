@@ -437,6 +437,48 @@ TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
     CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolve_yaml_modules")
+{
+    TempDir t("resolve_yaml_modules");
+    auto path = t.write_child("settings.yaml", "value: 1");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_yml_modules")
+{
+    TempDir t("resolve_yml_modules");
+    auto path = t.write_child("settings.yml", "value: 1");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
 TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 {
     TempDir t("file_resolver_supports_config_luau");
