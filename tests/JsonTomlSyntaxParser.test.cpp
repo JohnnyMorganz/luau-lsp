@@ -84,4 +84,74 @@ TEST_CASE_FIXTURE(Fixture, "tomlValueToLuau escapes strings")
     expectItem(table, "a\"b", "'quoteValue'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau returns proper Luau string")
+{
+    const char yaml_str[] = R"(
+string: this is a string
+boolean: true
+integer: 1337
+float: 123456789.5
+value-with-hypen: it sure is
+sequence:
+  - wow
+  - 8675309
+map:
+  key: value
+  key2: "value 2"
+  key3: 'value 3'
+nested-map:
+  - key: value
+  - key2: "value 2"
+  - key3: "value 3"
+whatever_this_is: [i imagine, it's, a, sequence?]
+null1: ~
+null2: null
+)";
+
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+    auto block = parse("return " + yamlValueToLuau(tree.rootref()));
+    auto table = parseLuauTable(block);
+
+    expectItem(table, "string", "'this is a string'");
+    expectItem(table, "boolean", "true");
+    expectItem(table, "integer", "1337");
+    expectItem(table, "value-with-hypen", "'it sure is'");
+    expectItem(table, "null1", "nil");
+    expectItem(table, "null2", "nil");
+}
+
+TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau handles null values")
+{
+    const char yaml_str[] = R"(
+null1: ~
+null2: null
+null3: Null
+null4: NULL
+)";
+
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+    auto block = parse("return " + yamlValueToLuau(tree.rootref()));
+    auto table = parseLuauTable(block);
+
+    expectItem(table, "null1", "nil");
+    expectItem(table, "null2", "nil");
+    expectItem(table, "null3", "nil");
+    expectItem(table, "null4", "nil");
+}
+
+TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau escapes strings")
+{
+    const char yaml_str[] = R"(
+newLineKey: "a\nb"
+quoteKey: 'a"b'
+)";
+
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+    auto block = parse("return " + yamlValueToLuau(tree.rootref()));
+    auto table = parseLuauTable(block);
+
+    expectItem(table, "newLineKey", "'a\\nb'");
+    expectItem(table, "quoteKey", "'a\\\"b'");
+}
+
 TEST_SUITE_END();
