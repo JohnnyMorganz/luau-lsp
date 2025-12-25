@@ -1012,7 +1012,7 @@ def declareClass(klass: Union[ApiClass, DataType]) -> str:
             f"\t{member}\n" for member in EXTRA_MEMBERS[klass["Name"]]
         ]
 
-    out += "".join(memberDefinitions)
+    out += "".join(sorted(memberDefinitions))
     out += "end"
 
     return out
