@@ -181,7 +181,7 @@ NLOHMANN_DEFINE_OPTIONAL(InlayHintLabelPart, value, tooltip, location, command)
 struct InlayHint
 {
     Position position;
-    std::string label;
+    std::vector<InlayHintLabelPart> label;
     std::optional<InlayHintKind> kind = std::nullopt;
     std::vector<TextEdit> textEdits{};
     std::optional<std::string> tooltip = std::nullopt;

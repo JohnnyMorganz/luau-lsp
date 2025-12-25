@@ -1,10 +1,50 @@
+#include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+
+#include <algorithm>
 
 #include "Luau/Ast.h"
 #include "Luau/AstQuery.h"
 #include "Luau/ToString.h"
 #include "Luau/PrettyPrinter.h"
 #include "LSP/LuauExt.hpp"
+
+static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(const Luau::ToStringResult& result, WorkspaceFileResolver* fileResolver)
+{
+    std::vector<lsp::InlayHintLabelPart> parts;
+
+    if (result.typeSpans.empty())
+    {
+        parts.push_back(lsp::InlayHintLabelPart{result.name});
+        return parts;
+    }
+
+    auto spans = result.typeSpans;
+    std::sort(spans.begin(), spans.end(),
+        [](const auto& a, const auto& b)
+        {
+            return std::get<0>(a) < std::get<0>(b);
+        });
+
+    size_t lastEnd = 0;
+    for (const auto& [start, end, typeId] : spans)
+    {
+        if (start > lastEnd)
+            parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd, start - lastEnd)});
+
+        lsp::InlayHintLabelPart part;
+        part.value = result.name.substr(start, end - start);
+        part.location = types::getTypeLocation(typeId, fileResolver);
+        parts.push_back(part);
+
+        lastEnd = end;
+    }
+
+    if (lastEnd < result.name.length())
+        parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd)});
+
+    return parts;
+}
 
 bool isLiteral(const Luau::AstExpr* expr)
 {
@@ -49,17 +89,38 @@ struct InlayHintVisitor : public Luau::AstVisitor
     const Luau::ModulePtr& module;
     const ClientConfiguration& config;
     const TextDocument* textDocument;
+    WorkspaceFileResolver* fileResolver;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument)
+    explicit InlayHintVisitor(
+        const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument, WorkspaceFileResolver* fileResolver)
         : module(module)
         , config(config)
         , textDocument(textDocument)
+        , fileResolver(fileResolver)
 
     {
         stringOptions.maxTableLength = 30;
         stringOptions.maxTypeLength = config.inlayHints.typeHintMaxLength;
+    }
+
+    void setLabelFromType(lsp::InlayHint& hint, Luau::TypeId ty, const std::string& prefix = ": ")
+    {
+        auto result = Luau::toStringDetailed(ty, stringOptions);
+        hint.label.push_back(lsp::InlayHintLabelPart{prefix});
+        auto parts = toInlayHintLabelParts(result, fileResolver);
+        hint.label.insert(hint.label.end(), parts.begin(), parts.end());
+    }
+
+    void setLabelFromTypePack(lsp::InlayHint& hint, Luau::TypePackId ty, const std::string& prefix = ": ", bool removeEllipsis = false)
+    {
+        auto result = types::toStringReturnTypeDetailed(ty, stringOptions);
+        if (removeEllipsis)
+            result.name = removePrefix(result.name, "...");
+        hint.label.push_back(lsp::InlayHintLabelPart{prefix});
+        auto parts = toInlayHintLabelParts(result, fileResolver);
+        hint.label.insert(hint.label.end(), parts.begin(), parts.end());
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -105,8 +166,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
+                    setLabelFromType(hint, followedTy);
                     makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
@@ -151,8 +212,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
+                    setLabelFromType(hint, followedTy);
                     makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
@@ -178,8 +239,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
                     hint.position = textDocument->convertPosition(func->argLocation->end);
+                    setLabelFromTypePack(hint, ftv->retTypes);
                     makeInsertable(config, hint, ftv->retTypes);
                     hints.emplace_back(hint);
                 }
@@ -205,8 +266,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         {
                             lsp::InlayHint hint;
                             hint.kind = lsp::InlayHintKind::Type;
-                            hint.label = ": " + Luau::toString(argType, stringOptions);
                             hint.position = textDocument->convertPosition(param->location.end);
+                            setLabelFromType(hint, argType);
                             makeInsertable(config, hint, argType);
                             hints.emplace_back(hint);
                         }
@@ -222,8 +283,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     {
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
                         hint.position = textDocument->convertPosition(func->varargLocation.end);
+                        setLabelFromTypePack(hint, varargType, ": ", /* removeEllipsis: */ true);
                         makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
                         hints.emplace_back(hint);
                     }
@@ -291,7 +352,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Parameter;
-                    hint.label = paramName + ":";
+                    hint.label.push_back(lsp::InlayHintLabelPart{paramName + ":"});
                     hint.position = textDocument->convertPosition(param->location.begin);
                     hint.paddingRight = true;
                     hints.emplace_back(hint);
@@ -334,7 +395,7 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config, textDocument};
+    InlayHintVisitor visitor{module, config, textDocument, &fileResolver};
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
