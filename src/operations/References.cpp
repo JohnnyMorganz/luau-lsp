@@ -136,6 +136,20 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
                     if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
                         references.push_back(Reference{moduleName, indexName->indexLocation});
                 }
+                else if (auto indexExpr = expr->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    if (auto constantString = indexExpr->index->as<Luau::AstExprConstantString>())
+                    {
+                        std::string propName(constantString->value.data, constantString->value.size);
+                        if (propName == property.value())
+                        {
+                            auto possibleParentTy = module->astTypes.find(indexExpr->expr);
+                            if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
+                                references.push_back(Reference{moduleName, constantString->location});
+                        }
+                    }
+                }
                 else if (auto table = expr->as<Luau::AstExprTable>(); table && isSameTable(ty, Luau::follow(referencedTy)))
                 {
                     for (const auto& item : table->items)
@@ -551,7 +565,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         }
         else if (auto constantString = expr->as<Luau::AstExprConstantString>())
         {
-            // Potentially a property defined inside of a table
+            // Potentially a property defined inside of a table or accessed via bracket notation
             auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes= */ false);
             if (ancestry.size() > 1)
             {
@@ -563,6 +577,18 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
                     {
                         auto references = findAllTableReferences(
                             Luau::follow(*possibleTableTy), cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
+                        return processReferences(fileResolver, references);
+                    }
+                }
+                else if (auto indexExpr = parent->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    auto possibleParentTy = module->astTypes.find(indexExpr->expr);
+                    if (possibleParentTy)
+                    {
+                        auto parentTy = Luau::follow(*possibleParentTy);
+                        auto references = findAllTableReferences(
+                            parentTy, cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
                         return processReferences(fileResolver, references);
                     }
                 }
