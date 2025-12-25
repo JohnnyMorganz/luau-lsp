@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed `sourcemapFile` configuration not supporting relative paths from the workspace root (e.g., `subdir/sourcemap.json`) ([#1288](https://github.com/JohnnyMorganz/luau-lsp/issues/1288))
 - Fixed auto-imports not showing up when autocompleting in array-like tables (i.e., before the `=` sign has been written for a property) ([#1062](https://github.com/JohnnyMorganz/luau-lsp/issues/1062))
 - Fixed improper and missing escaping when converting JSON files to Luau data modules. Object keys and string values containing special characters (quotes, newlines, etc.) are now properly escaped ([#426](https://github.com/JohnnyMorganz/luau-lsp/issues/426))
+- Fixed Find All References not including properties accessed via bracket notation (e.g., `obj["property"]`) ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
+- Fixed Rename not supporting properties accessed via bracket notation. Renaming now correctly updates both dot notation (`obj.property`) and bracket notation (`obj["property"]`) references ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
 
 ## [1.58.0] - 2025-12-14
 

@@ -1,5 +1,6 @@
 #include "LSP/Workspace.hpp"
 
+#include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
 static std::optional<Luau::Binding> getBinding(
@@ -75,6 +76,45 @@ std::vector<lsp::Location> getReferencesForRenaming(
     }
 }
 
+/// Checks if the given location refers to a quoted string literal that needs range adjustment during rename.
+/// If so, returns an adjusted range that excludes the quotes (so the edit replaces only the content inside).
+/// For table keys, only adjusts if it's bracket notation (General kind), not shorthand syntax.
+static std::optional<lsp::Range> getAdjustedRangeIfQuotedString(WorkspaceFolder* workspaceFolder, const lsp::Location& location)
+{
+    auto moduleName = workspaceFolder->fileResolver.getModuleName(location.uri);
+    auto sourceModule = workspaceFolder->frontend.getSourceModule(moduleName);
+    auto textDocument = workspaceFolder->fileResolver.getOrCreateTextDocumentFromModuleName(moduleName);
+    if (!sourceModule || !textDocument)
+        return std::nullopt;
+
+    auto position = textDocument->convertPosition(location.range.start);
+
+    auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes= */ false);
+    if (ancestry.size() < 2)
+        return std::nullopt;
+
+    auto node = ancestry.back();
+    auto constantString = node->as<Luau::AstExprConstantString>();
+    if (!constantString)
+        return std::nullopt;
+
+    // Check if this string is a table key - if so, we need to verify it's bracket notation (General kind)
+    auto parent = ancestry.at(ancestry.size() - 2);
+    if (auto table = parent->as<Luau::AstExprTable>())
+    {
+        for (const auto& item : table->items)
+        {
+            if (item.key == node)
+            {
+                if (item.kind != Luau::AstExprTable::Item::Kind::General)
+                    return std::nullopt;
+                break;
+            }
+        }
+    }
+
+    return lsp::Range{{location.range.start.line, location.range.start.character + 1}, {location.range.end.line, location.range.end.character - 1}};
+}
 
 lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params, const LSPCancellationToken& cancellationToken)
 {
@@ -99,9 +139,13 @@ lsp::RenameResult WorkspaceFolder::rename(const lsp::RenameParams& params, const
         if (result.changes.find(reference.uri) == result.changes.end())
             result.changes.insert_or_assign(reference.uri, std::vector<lsp::TextEdit>{});
 
-        result.changes.at(reference.uri).emplace_back(lsp::TextEdit{reference.range, params.newName});
+        // For quoted strings (bracket notation), adjust range to exclude quotes
+        lsp::Range editRange = reference.range;
+        if (auto adjustedRange = getAdjustedRangeIfQuotedString(this, reference))
+            editRange = *adjustedRange;
+
+        result.changes.at(reference.uri).emplace_back(lsp::TextEdit{editRange, params.newName});
     }
 
     return result;
 }
-
