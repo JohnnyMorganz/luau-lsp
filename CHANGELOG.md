@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed improper and missing escaping when converting JSON files to Luau data modules. Object keys and string values containing special characters (quotes, newlines, etc.) are now properly escaped ([#426](https://github.com/JohnnyMorganz/luau-lsp/issues/426))
 - Fixed Find All References not including properties accessed via bracket notation (e.g., `obj["property"]`) ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
 - Fixed Rename not supporting properties accessed via bracket notation. Renaming now correctly updates both dot notation (`obj.property`) and bracket notation (`obj["property"]`) references ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
+- Fixed definitions or documentation files not loading when the path to the file contains non-ASCII characters ([#1191](https://github.com/JohnnyMorganz/luau-lsp/issues/1191))
 
 ## [1.58.0] - 2025-12-14
 
