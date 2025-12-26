@@ -179,7 +179,7 @@ if (LSP_BUILD_ASAN)
     endif ()
 endif ()
 
-set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include)
+set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include extern/ryml/include)
 
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
