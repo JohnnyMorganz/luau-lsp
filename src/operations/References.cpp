@@ -11,7 +11,6 @@ static bool isSameTableDirect(const Luau::TypeId a, const Luau::TypeId b)
     if (followedA == followedB)
         return true;
 
-    // Extract TableType from MetatableType if needed
     if (auto mt = Luau::get<Luau::MetatableType>(followedA))
         followedA = Luau::follow(mt->table);
     if (auto mt = Luau::get<Luau::MetatableType>(followedB))
