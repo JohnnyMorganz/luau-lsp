@@ -1,5 +1,4 @@
 #include "Platform/AutoImports.hpp"
-#include "Platform/StringRequireAutoImporter.hpp"
 #include "LSP/Workspace.hpp"
 
 namespace Luau::LanguageServer::AutoImports

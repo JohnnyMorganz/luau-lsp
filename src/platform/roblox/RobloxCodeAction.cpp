@@ -6,7 +6,7 @@
 #include "Luau/PrettyPrinter.h"
 #include "Platform/InstanceRequireAutoImporter.hpp"
 
-#include <set>
+#include <unordered_set>
 
 lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
 {
@@ -85,7 +85,6 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
 
     ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
-    // Find existing imports
     Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
@@ -172,11 +171,10 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
 {
     std::vector<lsp::TextEdit> serviceEdits;
     std::vector<lsp::TextEdit> requireEdits;
-    std::set<std::string> addedServices;
+    std::unordered_set<std::string> addedServices;
 
     auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
-    // Find existing imports
     Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
@@ -223,7 +221,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     }
     else
     {
-        std::set<std::string> addedRequires;
+        std::unordered_set<std::string> addedRequires;
 
         Luau::LanguageServer::AutoImports::InstanceRequireAutoImporterContext importCtx{
             ctx.sourceModule->name,

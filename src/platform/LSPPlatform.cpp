@@ -9,7 +9,7 @@
 
 #include "Luau/TimeTrace.h"
 #include <memory>
-#include <set>
+#include <unordered_set>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
     : fileResolver(fileResolver)
@@ -245,7 +245,6 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
         return;
 
-    // Find existing imports to determine best insertion line
     LUAU_ASSERT(ctx.sourceModule->root);
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
@@ -291,7 +290,6 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
 {
     std::vector<lsp::TextEdit> edits;
 
-    // Find existing imports
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
@@ -299,7 +297,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
     std::vector<std::string> unknownSymbols;
-    std::set<std::string> addedRequires;
+    std::unordered_set<std::string> addedRequires;
 
     for (const auto& error : errors)
     {
@@ -327,7 +325,6 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     const auto results = computeAllStringRequires(importCtx);
     for (const auto& stringRequire : results)
     {
-        // Skip if we've already added a require for this name
         if (addedRequires.find(stringRequire.variableName) != addedRequires.end())
             continue;
 
