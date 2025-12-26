@@ -35,8 +35,7 @@ static bool isSameTableDirect(const Luau::TypeId a, const Luau::TypeId b)
 
 static bool tableIsRelatedViaMetatable(const Luau::TypeId metatableType, const Luau::TypeId targetTable, Luau::DenseHashSet<Luau::TypeId>& visited)
 {
-    auto current = Luau::follow(metatableType);
-    auto mt = Luau::get<Luau::MetatableType>(current);
+    auto mt = Luau::get<Luau::MetatableType>(Luau::follow(metatableType));
     if (!mt)
         return false;
 
