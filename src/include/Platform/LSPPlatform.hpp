@@ -105,6 +105,10 @@ public:
     virtual void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
         const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result);
 
+    /// Compute edits to add all missing imports for all unknown symbols in the given errors
+    virtual std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors);
+
     virtual lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
     {
         return {};

@@ -535,4 +535,114 @@ local x = MyModule
     CHECK(changes[0].newText.find("local MyModule = require(ReplicatedStorage.Folder.MyModule)") != std::string::npos);
 }
 
+TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_source_action")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto moduleA = newDocument("ModuleA.luau", R"(
+return {}
+)");
+    auto moduleB = newDocument("ModuleB.luau", R"(
+return {}
+)");
+    workspace.frontend.check(workspace.fileResolver.getModuleName(moduleA));
+    workspace.frontend.check(workspace.fileResolver.getModuleName(moduleB));
+
+    auto uri = newDocument("test.luau", R"(
+local x = ModuleA
+local y = ModuleB
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 0}, {3, 0}};
+    params.context.only = {lsp::CodeActionKind::Source};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Add all missing requires");
+    REQUIRE(action.has_value());
+    CHECK(action->kind == lsp::CodeActionKind::Source);
+    REQUIRE(action->edit.has_value());
+    auto& changes = action->edit->changes.at(uri);
+    REQUIRE_EQ(changes.size(), 2);
+    CHECK(changes[0].newText.find("local ModuleA = require") != std::string::npos);
+    CHECK(changes[1].newText.find("local ModuleB = require") != std::string::npos);
+}
+
+TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_no_action_when_no_missing")
+{
+    auto uri = newDocument("test.luau", R"(
+local x = 1
+local y = 2
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 0}, {3, 0}};
+    params.context.only = {lsp::CodeActionKind::Source};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Add all missing requires");
+    CHECK_FALSE(action.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_with_services")
+{
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    { "name": "ModuleA", "className": "ModuleScript" },
+                    { "name": "ModuleB", "className": "ModuleScript" }
+                ]
+            },
+            {
+                "name": "ServerScriptService",
+                "className": "ServerScriptService",
+                "children": [
+                    { "name": "Script", "className": "Script", "filePaths": ["Script.server.luau"] }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto uri = newDocument("Script.server.luau", R"(
+local a = ModuleA
+local b = ModuleB
+local rs = ReplicatedStorage
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 0}, {4, 0}};
+    params.context.only = {lsp::CodeActionKind::Source};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Add all missing requires");
+    REQUIRE(action.has_value());
+    REQUIRE(action->edit.has_value());
+    auto& changes = action->edit->changes.at(uri);
+
+    // Should have service import + 2 requires (service is deduplicated)
+    REQUIRE_GE(changes.size(), 2);
+
+    // Check that ReplicatedStorage service is added
+    bool hasServiceImport = false;
+    for (const auto& change : changes)
+    {
+        if (change.newText.find("game:GetService(\"ReplicatedStorage\")") != std::string::npos)
+            hasServiceImport = true;
+    }
+    CHECK(hasServiceImport);
+}
+
 TEST_SUITE_END();

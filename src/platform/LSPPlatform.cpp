@@ -9,6 +9,7 @@
 
 #include "Luau/TimeTrace.h"
 #include <memory>
+#include <set>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
     : fileResolver(fileResolver)
@@ -325,4 +326,64 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
         result.push_back(action);
         isFirst = false;
     }
+}
+
+std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
+    const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors)
+{
+    std::vector<lsp::TextEdit> edits;
+    std::set<std::string> addedRequires; // Track which requires we've already added
+
+    // Find existing imports
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(ctx.sourceModule->root);
+
+    auto fromUri = workspaceFolder->fileResolver.getUri(ctx.sourceModule->name);
+    auto availableAliases = workspaceFolder->fileResolver.getConfig(ctx.sourceModule->name, workspaceFolder->limits).aliases;
+
+    ClientConfiguration config;
+    if (workspaceFolder->fileResolver.client)
+        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+
+    size_t minimumLineNumber =
+        Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+
+    for (const auto& error : errors)
+    {
+        const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data);
+        if (!unknownSymbol || unknownSymbol->context != Luau::UnknownSymbol::Binding)
+            continue;
+
+        // Skip if we've already added a require for this name
+        if (addedRequires.count(unknownSymbol->name))
+            continue;
+
+        // Skip if already imported
+        if (importsVisitor.containsRequire(unknownSymbol->name))
+            continue;
+
+        // Find matching modules
+        auto moduleMatches = findModulesForName(unknownSymbol->name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+        if (moduleMatches.empty())
+            continue;
+
+        // Use the first matching module
+        const auto& [moduleName, requireName] = moduleMatches[0];
+        auto toUri = workspaceFolder->fileResolver.getUri(moduleName);
+
+        auto [requirePath, sortText] =
+            Luau::LanguageServer::AutoImports::computeRequirePath(fromUri, toUri, availableAliases, config.completion.imports.requireStyle);
+
+        size_t lineNumber =
+            Luau::LanguageServer::AutoImports::computeBestLineForRequire(importsVisitor, *ctx.textDocument, requirePath, minimumLineNumber);
+
+        bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+        auto requireEdit =
+            Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
+
+        edits.push_back(requireEdit);
+        addedRequires.insert(requireName);
+    }
+
+    return edits;
 }

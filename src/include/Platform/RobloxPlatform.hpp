@@ -176,6 +176,8 @@ public:
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;
     void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
         const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result) override;
+    std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors) override;
 
     lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module) override;
 

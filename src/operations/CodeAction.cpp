@@ -554,6 +554,42 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
 
                 result.emplace_back(removeUnusedAction);
             }
+
+            // Add "Add all missing requires" source action
+            if (!cr.errors.empty())
+            {
+                // Compute hot comments line number for import placement
+                size_t hotCommentsLineNumber = 0;
+                for (const auto& hotComment : sourceModule->hotcomments)
+                {
+                    if (!hotComment.header)
+                        continue;
+                    if (hotComment.location.begin.line >= hotCommentsLineNumber)
+                        hotCommentsLineNumber = hotComment.location.begin.line + 1U;
+                }
+
+                UnknownSymbolFixContext ctx{
+                    params.textDocument.uri,
+                    Luau::NotNull(&*textDocument),
+                    Luau::NotNull(sourceModule),
+                    Luau::NotNull(&frontend),
+                    hotCommentsLineNumber,
+                };
+
+                auto importEdits = platform->computeAddAllMissingImportsEdits(ctx, cr.errors);
+                if (!importEdits.empty())
+                {
+                    lsp::CodeAction addMissingRequiresAction;
+                    addMissingRequiresAction.title = "Add all missing requires";
+                    addMissingRequiresAction.kind = lsp::CodeActionKind::Source;
+
+                    lsp::WorkspaceEdit workspaceEdit;
+                    workspaceEdit.changes.emplace(params.textDocument.uri, importEdits);
+                    addMissingRequiresAction.edit = workspaceEdit;
+
+                    result.emplace_back(addMissingRequiresAction);
+                }
+            }
         }
     }
 

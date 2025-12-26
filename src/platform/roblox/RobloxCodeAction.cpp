@@ -6,6 +6,8 @@
 #include "Platform/StringRequireAutoImporter.hpp"
 #include "Luau/PrettyPrinter.h"
 
+#include <set>
+
 lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
 {
     auto moduleName = fileResolver->getModuleName(uri);
@@ -239,4 +241,144 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
             hasAction = true;
         }
     }
+}
+
+std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
+    const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors)
+{
+    std::vector<lsp::TextEdit> serviceEdits;
+    std::vector<lsp::TextEdit> requireEdits;
+    std::set<std::string> addedServices;
+    std::set<std::string> addedRequires;
+
+    ClientConfiguration config;
+    if (workspaceFolder->fileResolver.client)
+        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+
+    // Find existing imports
+    RobloxFindImportsVisitor importsVisitor;
+    importsVisitor.visit(ctx.sourceModule->root);
+
+    std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
+    auto services = metadata.has_value() ? metadata->SERVICES : std::vector<std::string>{};
+
+    size_t minimumLineNumber =
+        Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+
+    for (const auto& error : errors)
+    {
+        const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data);
+        if (!unknownSymbol || unknownSymbol->context != Luau::UnknownSymbol::Binding)
+            continue;
+
+        const std::string& symbolName = unknownSymbol->name;
+
+        // 1. Check if it's a service
+        if (std::find(services.begin(), services.end(), symbolName) != services.end())
+        {
+            if (!contains(importsVisitor.serviceLineMap, symbolName) && !addedServices.count(symbolName))
+            {
+                size_t lineNumber = importsVisitor.findBestLineForService(symbolName, ctx.hotCommentsLineNumber);
+
+                bool appendNewline = false;
+                if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
+                    importsVisitor.firstRequireLine.value() - lineNumber == 0)
+                    appendNewline = true;
+
+                serviceEdits.push_back(createServiceTextEdit(symbolName, lineNumber, appendNewline));
+                addedServices.insert(symbolName);
+            }
+            continue;
+        }
+
+        // Skip if we've already added a require for this name
+        if (addedRequires.count(symbolName))
+            continue;
+
+        // Skip if already imported
+        if (importsVisitor.containsRequire(symbolName))
+            continue;
+
+        // 2. Check for modules - use string requires if enabled
+        if (config.completion.imports.stringRequires.enabled)
+        {
+            // Delegate to base implementation
+            auto baseEdits = LSPPlatform::computeAddAllMissingImportsEdits(ctx, {error});
+            for (auto& edit : baseEdits)
+                requireEdits.push_back(std::move(edit));
+            if (!baseEdits.empty())
+                addedRequires.insert(symbolName);
+        }
+        else
+        {
+            // Generate script-path requires
+            for (auto& [path, node] : virtualPathsToSourceNodes)
+            {
+                auto name = Luau::LanguageServer::AutoImports::makeValidVariableName(node->name);
+
+                if (name != symbolName)
+                    continue;
+
+                if (path == ctx.sourceModule->name || node->className != "ModuleScript" || importsVisitor.containsRequire(name))
+                    continue;
+
+                if (auto scriptFilePath = getRealPathFromSourceNode(node);
+                    scriptFilePath && workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath, config))
+                    continue;
+
+                std::string requirePath;
+
+                // Compute the style of require
+                bool isRelative = false;
+                auto parent1 = getParentPath(ctx.sourceModule->name), parent2 = getParentPath(path);
+                if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
+                    Luau::startsWith(path, "ProjectRoot/") ||
+                    (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
+                        (Luau::startsWith(ctx.sourceModule->name, path) || Luau::startsWith(path, ctx.sourceModule->name) || parent1 == parent2)))
+                {
+                    requirePath = "./" + Uri::file(path).lexicallyRelative(Uri::file(ctx.sourceModule->name));
+                    isRelative = true;
+                }
+                else
+                    requirePath = optimiseAbsoluteRequire(path);
+
+                auto require = convertToScriptPath(requirePath);
+
+                size_t lineNumber =
+                    Luau::LanguageServer::AutoImports::computeBestLineForRequire(importsVisitor, *ctx.textDocument, require, minimumLineNumber);
+
+                if (!isRelative)
+                {
+                    // Service will be the first part of the path
+                    // If we haven't imported the service already, then we auto-import it
+                    auto service = requirePath.substr(0, requirePath.find('/'));
+                    if (!contains(importsVisitor.serviceLineMap, service) && !addedServices.count(service))
+                    {
+                        auto serviceLineNumber = importsVisitor.findBestLineForService(service, ctx.hotCommentsLineNumber);
+                        bool appendNewline = false;
+                        if (config.completion.imports.separateGroupsWithLine &&
+                            importsVisitor.firstRequireLine.value_or(serviceLineNumber) - serviceLineNumber == 0)
+                            appendNewline = true;
+                        serviceEdits.push_back(createServiceTextEdit(service, serviceLineNumber, appendNewline));
+                        addedServices.insert(service);
+                    }
+                }
+
+                bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+                requireEdits.push_back(Luau::LanguageServer::AutoImports::createRequireTextEdit(name, require, lineNumber, prependNewline));
+                addedRequires.insert(name);
+                break; // Use first match
+            }
+        }
+    }
+
+    // Combine edits: services first, then requires
+    std::vector<lsp::TextEdit> allEdits;
+    allEdits.reserve(serviceEdits.size() + requireEdits.size());
+    for (auto& edit : serviceEdits)
+        allEdits.push_back(std::move(edit));
+    for (auto& edit : requireEdits)
+        allEdits.push_back(std::move(edit));
+
+    return allEdits;
 }
