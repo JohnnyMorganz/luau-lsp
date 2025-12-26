@@ -522,4 +522,134 @@ TEST_CASE_FIXTURE(Fixture, "rename_property_from_bracket_notation_definition_in_
     )");
 }
 
+TEST_CASE_FIXTURE(Fixture, "rename_method_through_metatable_inheritance")
+{
+    auto source = R"(
+local Foo = {}
+Foo.__index = Foo
+export type Foo = typeof(setmetatable({}, Foo))
+
+function Foo.Test(self: Foo, a)
+    print(a)
+end
+
+local Bar = setmetatable({}, Foo)
+Bar.__index = Bar
+export type Bar = typeof(setmetatable({}, Foo))
+
+function Bar.new()
+    local self = setmetatable({}, Bar)
+    return self
+end
+
+function Bar.DoSomething(self: Bar)
+    self:Test("Hello, World!")
+end
+
+return Bar
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{5, 13}; // cursor on 'Test' in function Foo.Test
+    params.newName = "Run";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+local Foo = {}
+Foo.__index = Foo
+export type Foo = typeof(setmetatable({}, Foo))
+
+function Foo.Run(self: Foo, a)
+    print(a)
+end
+
+local Bar = setmetatable({}, Foo)
+Bar.__index = Bar
+export type Bar = typeof(setmetatable({}, Foo))
+
+function Bar.new()
+    local self = setmetatable({}, Bar)
+    return self
+end
+
+function Bar.DoSomething(self: Bar)
+    self:Run("Hello, World!")
+end
+
+return Bar
+    )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "rename_method_from_metatable_call_site")
+{
+    auto source = R"(
+local Foo = {}
+Foo.__index = Foo
+export type Foo = typeof(setmetatable({}, Foo))
+
+function Foo.Test(self: Foo, a)
+    print(a)
+end
+
+local Bar = setmetatable({}, Foo)
+Bar.__index = Bar
+export type Bar = typeof(setmetatable({}, Foo))
+
+function Bar.new()
+    local self = setmetatable({}, Bar)
+    return self
+end
+
+function Bar.DoSomething(self: Bar)
+    self:Test("Hello, World!")
+end
+
+return Bar
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{19, 9}; // cursor on 'Test' in self:Test()
+    params.newName = "Run";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+local Foo = {}
+Foo.__index = Foo
+export type Foo = typeof(setmetatable({}, Foo))
+
+function Foo.Run(self: Foo, a)
+    print(a)
+end
+
+local Bar = setmetatable({}, Foo)
+Bar.__index = Bar
+export type Bar = typeof(setmetatable({}, Foo))
+
+function Bar.new()
+    local self = setmetatable({}, Bar)
+    return self
+end
+
+function Bar.DoSomething(self: Bar)
+    self:Run("Hello, World!")
+end
+
+return Bar
+    )");
+}
+
 TEST_SUITE_END();

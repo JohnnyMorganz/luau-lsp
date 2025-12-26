@@ -126,7 +126,7 @@ public:
     std::optional<std::string> getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
         const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule, const Luau::Position& position);
     std::vector<Reference> findAllTableReferences(
-        const Luau::TypeId ty, const LSPCancellationToken& cancellationToken, std::optional<Luau::Name> property = std::nullopt);
+        const Luau::TypeId ty, const LSPCancellationToken& cancellationToken, const std::optional<Luau::Name>& property = std::nullopt);
     std::vector<Reference> findAllFunctionReferences(const Luau::TypeId ty, const LSPCancellationToken& cancellationToken);
     std::vector<Reference> findAllTypeReferences(
         const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken);
