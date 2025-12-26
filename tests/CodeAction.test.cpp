@@ -264,4 +264,49 @@ end
     CHECK_EQ(changes[0].range.end.line, 4);
 }
 
+TEST_CASE_FIXTURE(Fixture, "remove_all_unused_code_source_action")
+{
+    auto uri = newDocument("test.luau", R"(
+local unused1 = 1
+local unused2 = 2
+local function unusedFunc()
+    return 3
+end
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 0}, {7, 0}};
+    params.context.only = {lsp::CodeActionKind::Source};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Remove all unused code");
+    REQUIRE(action.has_value());
+    CHECK(action->kind == lsp::CodeActionKind::Source);
+    REQUIRE(action->edit.has_value());
+    auto& changes = action->edit->changes.at(uri);
+    // Should have 3 edits: unused1, unused2, and unusedFunc
+    CHECK_EQ(changes.size(), 3);
+}
+
+TEST_CASE_FIXTURE(Fixture, "remove_all_unused_code_not_shown_when_no_unused")
+{
+    auto uri = newDocument("test.luau", R"(
+local used = 1
+print(used)
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 0}, {3, 0}};
+    params.context.only = {lsp::CodeActionKind::Source};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Remove all unused code");
+    CHECK_FALSE(action.has_value());
+}
+
 TEST_SUITE_END();

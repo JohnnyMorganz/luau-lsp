@@ -7,6 +7,8 @@
 #include "Platform/AutoImports.hpp"
 #include "Luau/Ast.h"
 
+#include <set>
+
 LUAU_FASTFLAG(LuauSolverV2)
 
 namespace
@@ -424,6 +426,75 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         //     contains(client->capabilities.textDocument->codeAction->resolveSupport->properties, "edit"))
         organiseImportsAction.edit = computeOrganiseRequiresEdit(params.textDocument.uri);
         result.emplace_back(organiseImportsAction);
+
+        // Add "Remove all unused code" source action
+        Luau::CheckResult cr =
+            FFlag::LuauSolverV2 ? checkStrict(moduleName, cancellationToken, /* forAutocomplete= */ false) : checkSimple(moduleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
+
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (sourceModule)
+        {
+            std::vector<lsp::TextEdit> edits;
+            std::set<size_t> deletedLines; // Track which lines we've already deleted to avoid duplicates
+
+            for (const auto& lint : cr.lintResult.warnings)
+            {
+                if (lint.code == Luau::LintWarning::Code_LocalUnused ||
+                    lint.code == Luau::LintWarning::Code_FunctionUnused ||
+                    lint.code == Luau::LintWarning::Code_ImportUnused)
+                {
+                    auto statement = findStatementContainingLocal(sourceModule->root, lint.location);
+                    if (statement)
+                    {
+                        size_t startLine = statement->location.begin.line;
+                        // Only add if we haven't already deleted this line
+                        if (deletedLines.find(startLine) == deletedLines.end())
+                        {
+                            lsp::Range deleteRange{
+                                {statement->location.begin.line, 0},
+                                {statement->location.end.line + 1, 0}
+                            };
+                            edits.push_back({deleteRange, ""});
+
+                            // Mark all lines in this range as deleted
+                            for (size_t line = statement->location.begin.line; line <= statement->location.end.line; ++line)
+                                deletedLines.insert(line);
+                        }
+                    }
+                }
+                else if (lint.code == Luau::LintWarning::Code_UnreachableCode)
+                {
+                    size_t startLine = lint.location.begin.line;
+                    // Only add if we haven't already deleted this line
+                    if (deletedLines.find(startLine) == deletedLines.end())
+                    {
+                        lsp::Range deleteRange{
+                            {lint.location.begin.line, 0},
+                            {lint.location.end.line + 1, 0}
+                        };
+                        edits.push_back({deleteRange, ""});
+
+                        // Mark all lines in this range as deleted
+                        for (size_t line = lint.location.begin.line; line <= lint.location.end.line; ++line)
+                            deletedLines.insert(line);
+                    }
+                }
+            }
+
+            if (!edits.empty())
+            {
+                lsp::CodeAction removeUnusedAction;
+                removeUnusedAction.title = "Remove all unused code";
+                removeUnusedAction.kind = lsp::CodeActionKind::Source;
+
+                lsp::WorkspaceEdit workspaceEdit;
+                workspaceEdit.changes.emplace(params.textDocument.uri, edits);
+                removeUnusedAction.edit = workspaceEdit;
+
+                result.emplace_back(removeUnusedAction);
+            }
+        }
     }
 
     platform->handleCodeAction(params, result);
