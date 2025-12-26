@@ -17,6 +17,16 @@ static lsp::DocumentOnTypeFormattingResult processOnTypeFormatting(Fixture* fixt
     return fixture->workspace.onTypeFormatting(params);
 }
 
+TEST_CASE_FIXTURE(Fixture, "on_type_formatting_disabled_by_default")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        print("aaa {|")
+    )");
+
+    auto edits = processOnTypeFormatting(this, source, marker);
+    REQUIRE(!edits.has_value());
+}
+
 TEST_CASE_FIXTURE(Fixture, "on_type_formatting_converts_quotes")
 {
     client->globalConfig.format.convertQuotes = true;
