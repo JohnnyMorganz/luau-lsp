@@ -406,6 +406,30 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             case Luau::LintWarning::Code_UnreachableCode:
                 generateUnreachableCodeFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
                 break;
+            case Luau::LintWarning::Code_RedundantNativeAttribute:
+            {
+                lsp::CodeAction action;
+                action.title = "Remove redundant @native attribute";
+                action.kind = lsp::CodeActionKind::QuickFix;
+                action.isPreferred = false;
+
+                if (diagnostic)
+                    action.diagnostics.push_back(*diagnostic);
+
+                // Delete the entire line containing the @native attribute
+                lsp::Range deleteRange{
+                    {lint.location.begin.line, 0},
+                    {lint.location.end.line + 1, 0}
+                };
+                lsp::TextEdit edit{deleteRange, ""};
+
+                lsp::WorkspaceEdit workspaceEdit;
+                workspaceEdit.changes.emplace(params.textDocument.uri, std::vector{edit});
+                action.edit = workspaceEdit;
+
+                result.push_back(action);
+                break;
+            }
             default:
                 break;
             }
