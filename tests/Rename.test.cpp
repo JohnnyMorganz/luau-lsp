@@ -457,4 +457,108 @@ TEST_CASE_FIXTURE(Fixture, "rename_respects_cancellation")
     CHECK_THROWS_AS(workspace.rename(lsp::RenameParams{{{document}, lsp::Position{}}, "y"}, cancellationToken), RequestCancelledException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "rename_property_from_bracket_notation")
+{
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' inside brackets
+    params.newName = "title";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        type Tbl = {
+            title: string
+        }
+
+        local x: Tbl
+        local v = x["title"]
+    )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "rename_property_affects_both_dot_and_bracket_notation")
+{
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v1 = x.name
+        local v2 = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Rename from dot notation should also update bracket notation
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' in x.name
+    params.newName = "title";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        type Tbl = {
+            title: string
+        }
+
+        local x: Tbl
+        local v1 = x.title
+        local v2 = x["title"]
+    )");
+}
+
+TEST_CASE_FIXTURE(Fixture, "rename_property_from_bracket_notation_definition_in_table_literal")
+{
+    // When table is defined using bracket notation keys: {["key"] = value}
+    auto source = R"(
+        local T = {
+            ["name"] = "string"
+        }
+
+        local v1 = T.name
+        local v2 = T["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Rename from the bracket notation definition in the table literal
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 15}; // cursor on 'name' inside ["name"] definition
+    params.newName = "title";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        local T = {
+            ["title"] = "string"
+        }
+
+        local v1 = T.title
+        local v2 = T["title"]
+    )");
+}
+
 TEST_SUITE_END();

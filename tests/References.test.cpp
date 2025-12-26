@@ -485,4 +485,93 @@ TEST_CASE_FIXTURE(Fixture, "references_respect_cancellation")
     CHECK_THROWS_AS(workspace.references(lsp::ReferenceParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_via_bracket_notation")
+{
+    // Finding reference of "name" accessed via bracket notation x["name"]
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' inside brackets
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // type definition
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 26}}, result->at(1).range);  // bracket notation usage (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_includes_both_dot_and_bracket_notation")
+{
+    // Finding references should include both x.name and x["name"]
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v1 = x.name
+        local v2 = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Find from dot notation
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' in x.name
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(3, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // type definition
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 25}}, result->at(1).range);  // dot notation
+    CHECK_EQ(lsp::Range{{7, 21}, {7, 27}}, result->at(2).range);  // bracket notation (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_from_bracket_to_dot_notation")
+{
+    // Starting from bracket notation should find dot notation usages
+    auto source = R"(
+        local T = {
+            name = "string"
+        }
+
+        local v1 = T.name
+        local v2 = T["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Find from bracket notation
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 23}; // cursor on 'name' inside T["name"]
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(3, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // inline table definition
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(1).range);  // dot notation
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 27}}, result->at(2).range);  // bracket notation (including quotes)
+}
+
 TEST_SUITE_END();
