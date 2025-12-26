@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Function entries correctly show as deprecated in autocomplete if they are marked with `@deprecated` attribute ([#1302](https://github.com/JohnnyMorganz/luau-lsp/issues/1302))
 - Fixed `sourcemapFile` configuration not supporting relative paths from the workspace root (e.g., `subdir/sourcemap.json`) ([#1288](https://github.com/JohnnyMorganz/luau-lsp/issues/1288))
 - Fixed auto-imports not showing up when autocompleting in array-like tables (i.e., before the `=` sign has been written for a property) ([#1062](https://github.com/JohnnyMorganz/luau-lsp/issues/1062))
+- Fixed definitions or documentation files not loading when the path to the file contains non-ASCII characters ([#1191](https://github.com/JohnnyMorganz/luau-lsp/issues/1191))
 
 ## [1.58.0] - 2025-12-14
 
