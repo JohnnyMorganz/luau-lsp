@@ -130,6 +130,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Workspace.test.cpp
         tests/RequireGraph.test.cpp
         tests/AnalyzeCli.test.cpp
+        tests/CodeAction.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 
