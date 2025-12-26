@@ -117,6 +117,9 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
         if (moduleName == ctx.from || ctx.importsVisitor->containsRequire(name))
             continue;
 
+        if (ctx.moduleFilter && !(*ctx.moduleFilter)(moduleName, name))
+            continue;
+
         auto uri = ctx.workspaceFolder->fileResolver.getUri(moduleName);
         if (ctx.workspaceFolder->isIgnoredFileForAutoImports(uri))
             continue;
