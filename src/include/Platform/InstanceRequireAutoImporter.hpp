@@ -79,7 +79,7 @@ struct InstanceRequireAutoImporterContext
     std::optional<std::function<bool(const std::string&)>> moduleFilter;
 };
 
-/// Result of computing a string require import
+/// Result of computing an instance require import
 struct InstanceRequireResult
 {
     std::string variableName; // e.g., "MyModule"

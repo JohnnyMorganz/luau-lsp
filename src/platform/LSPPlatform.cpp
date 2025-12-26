@@ -261,7 +261,7 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
-        [&unknownSymbol](const Luau::ModuleName&, const std::string& requireName)
+        [&unknownSymbol](const std::string& requireName)
         {
             return requireName == unknownSymbol.name;
         },
@@ -318,7 +318,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
-        [&unknownSymbols](const Luau::ModuleName&, const std::string& requireName)
+        [&unknownSymbols](const std::string& requireName)
         {
             return contains(unknownSymbols, requireName);
         },

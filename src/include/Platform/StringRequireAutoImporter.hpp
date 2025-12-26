@@ -19,7 +19,7 @@ struct StringRequireAutoImporterContext
     size_t hotCommentsLineNumber = 0;
     Luau::NotNull<const FindImportsVisitor> importsVisitor;
 
-    std::optional<std::function<bool(const Luau::ModuleName&, const std::string&)>> moduleFilter;
+    std::optional<std::function<bool(const std::string&)>> moduleFilter;
 };
 
 /// Result of computing a string require import
