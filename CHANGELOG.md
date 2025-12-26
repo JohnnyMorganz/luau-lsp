@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added command `Luau: Compute CodeGen instructions for file` to emit annotated codegen instructions, similar to the bytecode command. External editors can implement this by using the `luau-lsp/codeGen` request. ([#617](https://github.com/JohnnyMorganz/luau-lsp/issues/617))
 - Added support for requiring YAML files (`.yaml` and `.yml`) as Luau data modules, similar to existing JSON and TOML support ([#1267](https://github.com/JohnnyMorganz/luau-lsp/issues/1267))
+- Implemented quick fix code actions for common diagnostics ([#439](https://github.com/JohnnyMorganz/luau-lsp/issues/439)):
+  - `GlobalUsedAsLocal`: Add `local` keyword to fix accidental global variable
+  - `LocalUnused`, `FunctionUnused`, `ImportUnused`: Prefix with `_` to silence, or remove the unused declaration
+  - `UnreachableCode`: Remove unreachable code after early return/error
+  - `RedundantNativeAttribute`: Remove redundant `@native` attribute
+  - Unknown symbol errors now have a quick fix to auto-import missing modules (both string requires and Roblox instance-based requires) and services
+  - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
+  - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
 
 ### Fixed
 

@@ -4,10 +4,12 @@
 #include "LSP/TextDocument.hpp"
 #include "Luau/Ast.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/Error.h"
 #include "Luau/FileResolver.h"
 #include "Luau/Frontend.h"
 #include "Luau/GlobalTypes.h"
 #include "Luau/Module.h"
+#include "Luau/NotNull.h"
 #include "Luau/TypeFwd.h"
 #include "Protocol/CodeAction.hpp"
 #include "Protocol/Completion.hpp"
@@ -21,6 +23,15 @@
 
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
+
+/// Context for generating unknown symbol quick fixes
+struct UnknownSymbolFixContext
+{
+    lsp::DocumentUri uri;
+    Luau::NotNull<const TextDocument> textDocument;
+    Luau::NotNull<const Luau::SourceModule> sourceModule;
+    Luau::NotNull<const WorkspaceFolder> workspaceFolder;
+};
 
 class LSPPlatform
 {
@@ -57,7 +68,8 @@ public:
 
     [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const;
 
-    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
+    std::optional<Luau::ModuleInfo> resolveStringRequire(
+        const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
     virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits);
 
     virtual void handleCompletion(
@@ -88,6 +100,14 @@ public:
     }
 
     virtual void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) {}
+
+    /// Generate code actions for an unknown symbol (missing require/service import)
+    virtual void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result);
+
+    /// Compute edits to add all missing imports for all unknown symbols in the given errors
+    virtual std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors);
 
     virtual lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
     {

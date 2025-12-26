@@ -119,7 +119,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Code Action Provider
-    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
+    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
     // Folding Range Provider
@@ -240,7 +240,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/codeAction")
     {
-        response = codeAction(JSON_REQUIRED_PARAMS(baseParams, "textDocument/codeAction"));
+        ASSERT_PARAMS(baseParams, "textDocument/codeAction")
+        auto params = baseParams->get<lsp::CodeActionParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->codeAction(params, cancellationToken);
     }
     // else if (method == "codeAction/resolve")
     // {

@@ -1,7 +1,22 @@
 #include "Platform/AutoImports.hpp"
+#include "LSP/Workspace.hpp"
 
 namespace Luau::LanguageServer::AutoImports
 {
+
+size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule)
+{
+    size_t hotCommentsLineNumber = 0;
+    for (const auto& hotComment : sourceModule.hotcomments)
+    {
+        if (!hotComment.header)
+            continue;
+        if (hotComment.location.begin.line >= hotCommentsLineNumber)
+            hotCommentsLineNumber = hotComment.location.begin.line + 1U;
+    }
+    return hotCommentsLineNumber;
+}
+
 bool FindImportsVisitor::containsRequire(const std::string& module) const
 {
     for (const auto& map : requiresMap)
@@ -156,4 +171,4 @@ size_t computeBestLineForRequire(
 
     return lineNumber;
 }
-}
+} // namespace Luau::LanguageServer::AutoImports
