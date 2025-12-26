@@ -40,6 +40,8 @@ Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau:
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);
 
+std::optional<lsp::Location> getTypeLocation(Luau::TypeId ty, WorkspaceFileResolver* fileResolver);
+
 } // namespace types
 
 // TODO: should upstream this
