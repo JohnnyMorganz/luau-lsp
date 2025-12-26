@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
   - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
 
+### Changed
+
+- Aliases defined in a root-level `.luaurc` / `.config.luau` will now be indexed at startup. As such, external alias files will now show up as part of string-require auto-imports if the file has not previously been required ([#1043](https://github.com/JohnnyMorganz/luau-lsp/issues/1043))
+
 ### Fixed
 
 - Fixed non-adjacent comments (such as section headers separated by blank lines) being incorrectly included in hover documentation ([#310](https://github.com/JohnnyMorganz/luau-lsp/issues/310))
