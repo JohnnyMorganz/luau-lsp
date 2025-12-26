@@ -361,10 +361,13 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     for (const auto& [aliasName, aliasInfo] : luauConfig.aliases)
     {
         auto uri = resolveAliasLocation(aliasInfo);
-        if (uri.isDirectory())
-            directories.emplace_back(uri.fsPath());
-        else
-            moduleNames.emplace_back(fileResolver.getModuleName(uri));
+        if (!rootUri.isAncestorOf(uri))
+        {
+            if (uri.isDirectory())
+                directories.emplace_back(uri.fsPath());
+            else
+                moduleNames.emplace_back(fileResolver.getModuleName(uri));
+        }
     }
 
     bool sentMessage = false;
