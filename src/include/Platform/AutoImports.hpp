@@ -5,12 +5,23 @@
 #include <map>
 
 #include "Luau/Ast.h"
+#include "Luau/Frontend.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Utils.hpp"
 
+class WorkspaceFolder;
+
 namespace Luau::LanguageServer::AutoImports
 {
+
+/// Compute the line number after which hot comments end (for import placement)
+size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule);
+
+/// Find all modules that can be required with a variable name matching the given name
+std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
+    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder);
+
 struct FindImportsVisitor : public Luau::AstVisitor
 {
 private:

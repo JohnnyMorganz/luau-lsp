@@ -66,6 +66,12 @@ public:
     }
 };
 
+/// Create a text edit for inserting a Roblox service import (e.g., `local Players = game:GetService("Players")`)
+lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false);
+
+/// Optimise an absolute require path by removing the "game/" prefix (e.g., "game/ReplicatedStorage/Foo" -> "ReplicatedStorage/Foo")
+std::string optimiseAbsoluteRequire(const std::string& path);
+
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually

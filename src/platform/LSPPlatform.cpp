@@ -238,33 +238,6 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
     return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }
 
-namespace
-{
-// Find all modules that can be required with a variable name matching the given name
-std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
-    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder)
-{
-    std::vector<std::pair<Luau::ModuleName, std::string>> matches;
-
-    for (const auto& [moduleName, sourceNode] : frontend.sourceNodes)
-    {
-        if (moduleName == fromModule)
-            continue;
-
-        auto requireName = Luau::LanguageServer::AutoImports::requireNameFromModuleName(moduleName);
-        if (requireName == name)
-        {
-            auto uri = workspaceFolder.fileResolver.getUri(moduleName);
-            if (workspaceFolder.isIgnoredFileForAutoImports(uri))
-                continue;
-
-            matches.emplace_back(moduleName, requireName);
-        }
-    }
-    return matches;
-}
-} // namespace
-
 void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
     const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
 {
@@ -273,7 +246,7 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
         return;
 
     // Find all modules that match this name
-    auto moduleMatches = findModulesForName(unknownSymbol.name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+    auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(unknownSymbol.name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
     if (moduleMatches.empty())
         return;
 
@@ -363,7 +336,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
             continue;
 
         // Find matching modules
-        auto moduleMatches = findModulesForName(unknownSymbol->name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+        auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(unknownSymbol->name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
         if (moduleMatches.empty())
             continue;
 

@@ -1,7 +1,46 @@
 #include "Platform/AutoImports.hpp"
+#include "Platform/StringRequireAutoImporter.hpp"
+#include "LSP/Workspace.hpp"
 
 namespace Luau::LanguageServer::AutoImports
 {
+
+size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule)
+{
+    size_t hotCommentsLineNumber = 0;
+    for (const auto& hotComment : sourceModule.hotcomments)
+    {
+        if (!hotComment.header)
+            continue;
+        if (hotComment.location.begin.line >= hotCommentsLineNumber)
+            hotCommentsLineNumber = hotComment.location.begin.line + 1U;
+    }
+    return hotCommentsLineNumber;
+}
+
+std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
+    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder)
+{
+    std::vector<std::pair<Luau::ModuleName, std::string>> matches;
+
+    for (const auto& [moduleName, sourceNode] : frontend.sourceNodes)
+    {
+        if (moduleName == fromModule)
+            continue;
+
+        auto requireName = requireNameFromModuleName(moduleName);
+        if (requireName == name)
+        {
+            auto uri = workspaceFolder.fileResolver.getUri(moduleName);
+            if (workspaceFolder.isIgnoredFileForAutoImports(uri))
+                continue;
+
+            matches.emplace_back(moduleName, requireName);
+        }
+    }
+    return matches;
+}
+
 bool FindImportsVisitor::containsRequire(const std::string& module) const
 {
     for (const auto& map : requiresMap)

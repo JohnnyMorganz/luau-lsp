@@ -48,15 +48,6 @@ static constexpr const char* COMMON_SERVICE_PROVIDER_PROPERTIES[] = {
     "GetService",
 };
 
-static lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false)
-{
-    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
-    if (appendNewline)
-        importText += "\n";
-    return {range, importText};
-}
-
 static lsp::CompletionItem createSuggestService(const std::string& service, size_t lineNumber, bool appendNewline = false)
 {
     auto textEdit = createServiceTextEdit(service, lineNumber, appendNewline);
@@ -72,21 +63,6 @@ static lsp::CompletionItem createSuggestService(const std::string& service, size
     item.additionalTextEdits.emplace_back(textEdit);
 
     return item;
-}
-
-static std::string optimiseAbsoluteRequire(const std::string& path)
-{
-    if (!Luau::startsWith(path, "game/"))
-        return path;
-
-    auto parts = Luau::split(path, '/');
-    if (parts.size() > 2)
-    {
-        auto service = std::string(parts[1]);
-        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
-    }
-
-    return path;
 }
 
 std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(

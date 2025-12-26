@@ -8,6 +8,30 @@
 
 #include <set>
 
+lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline)
+{
+    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
+    auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
+    if (appendNewline)
+        importText += "\n";
+    return {range, importText};
+}
+
+std::string optimiseAbsoluteRequire(const std::string& path)
+{
+    if (!Luau::startsWith(path, "game/"))
+        return path;
+
+    auto parts = Luau::split(path, '/');
+    if (parts.size() > 2)
+    {
+        auto service = std::string(parts[1]);
+        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
+    }
+
+    return path;
+}
+
 lsp::WorkspaceEdit RobloxPlatform::computeOrganiseServicesEdit(const lsp::DocumentUri& uri)
 {
     auto moduleName = fileResolver->getModuleName(uri);
@@ -76,33 +100,6 @@ void RobloxPlatform::handleCodeAction(const lsp::CodeActionParams& params, std::
         items.emplace_back(sortServicesAction);
     }
 }
-
-namespace
-{
-lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false)
-{
-    auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
-    if (appendNewline)
-        importText += "\n";
-    return {range, importText};
-}
-
-std::string optimiseAbsoluteRequire(const std::string& path)
-{
-    if (!Luau::startsWith(path, "game/"))
-        return path;
-
-    auto parts = Luau::split(path, '/');
-    if (parts.size() > 2)
-    {
-        auto service = std::string(parts[1]);
-        return service + "/" + Luau::join(std::vector(parts.begin() + 2, parts.end()), "/");
-    }
-
-    return path;
-}
-} // namespace
 
 void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
     const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
@@ -251,9 +248,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     std::set<std::string> addedServices;
     std::set<std::string> addedRequires;
 
-    ClientConfiguration config;
-    if (workspaceFolder->fileResolver.client)
-        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
     // Find existing imports
     RobloxFindImportsVisitor importsVisitor;

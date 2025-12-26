@@ -9,7 +9,7 @@
 #include "Luau/Ast.h"
 #include "Luau/Error.h"
 
-#include <set>
+#include <unordered_set>
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -89,17 +89,37 @@ void generateGlobalUsedAsLocalFix(const lsp::DocumentUri& uri, const Luau::LintW
     result.push_back(action);
 }
 
-void generateUnusedVariableFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
-    Luau::AstStatBlock* root, const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+enum class UnusedCodeKind
 {
-    // Get the variable name from the lint location
+    Variable,
+    Function,
+    Import
+};
+
+void generateUnusedCodeFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument, Luau::AstStatBlock* root,
+    const std::optional<lsp::Diagnostic>& diagnostic, UnusedCodeKind kind, std::vector<lsp::CodeAction>& result)
+{
     lsp::Range lintRange = textDocument.convertLocation(lint.location);
-    std::string varName = textDocument.getText(lintRange);
+    std::string name = textDocument.getText(lintRange);
+
+    const char* kindLabel = nullptr;
+    switch (kind)
+    {
+    case UnusedCodeKind::Variable:
+        kindLabel = "variable";
+        break;
+    case UnusedCodeKind::Function:
+        kindLabel = "function";
+        break;
+    case UnusedCodeKind::Import:
+        kindLabel = "import";
+        break;
+    }
 
     // Fix 1: Prefix with '_' to silence the lint
     {
         lsp::CodeAction action;
-        action.title = "Prefix '" + varName + "' with '_' to silence";
+        action.title = "Prefix '" + name + "' with '_' to silence";
         action.kind = lsp::CodeActionKind::QuickFix;
         action.isPreferred = false;
 
@@ -116,129 +136,20 @@ void generateUnusedVariableFixes(const lsp::DocumentUri& uri, const Luau::LintWa
         result.push_back(action);
     }
 
-    // Fix 2: Delete the variable declaration
+    // Fix 2: Delete the declaration/statement
     {
         auto statement = findStatementContainingLocal(root, lint.location);
 
         if (statement)
         {
             lsp::CodeAction action;
-            action.title = "Remove unused variable: '" + varName + "'";
+            action.title = std::string("Remove unused ") + kindLabel + ": '" + name + "'";
             action.kind = lsp::CodeActionKind::QuickFix;
             action.isPreferred = false;
 
             if (diagnostic)
                 action.diagnostics.push_back(*diagnostic);
 
-            // Delete the entire line containing the statement
-            lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
-            lsp::TextEdit edit{deleteRange, ""};
-
-            lsp::WorkspaceEdit workspaceEdit;
-            workspaceEdit.changes.emplace(uri, std::vector{edit});
-            action.edit = workspaceEdit;
-
-            result.push_back(action);
-        }
-    }
-}
-
-void generateUnusedFunctionFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
-    Luau::AstStatBlock* root, const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
-{
-    // Get the function name from the lint location
-    lsp::Range lintRange = textDocument.convertLocation(lint.location);
-    std::string funcName = textDocument.getText(lintRange);
-
-    // Fix 1: Prefix with '_' to silence the lint
-    {
-        lsp::CodeAction action;
-        action.title = "Prefix '" + funcName + "' with '_' to silence";
-        action.kind = lsp::CodeActionKind::QuickFix;
-        action.isPreferred = false;
-
-        if (diagnostic)
-            action.diagnostics.push_back(*diagnostic);
-
-        lsp::Position insertPos = textDocument.convertPosition(lint.location.begin);
-        lsp::TextEdit edit{{insertPos, insertPos}, "_"};
-
-        lsp::WorkspaceEdit workspaceEdit;
-        workspaceEdit.changes.emplace(uri, std::vector{edit});
-        action.edit = workspaceEdit;
-
-        result.push_back(action);
-    }
-
-    // Fix 2: Delete the function declaration
-    {
-        auto statement = findStatementContainingLocal(root, lint.location);
-
-        if (statement)
-        {
-            lsp::CodeAction action;
-            action.title = "Remove unused function: '" + funcName + "'";
-            action.kind = lsp::CodeActionKind::QuickFix;
-            action.isPreferred = false;
-
-            if (diagnostic)
-                action.diagnostics.push_back(*diagnostic);
-
-            // Delete the entire function
-            lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
-            lsp::TextEdit edit{deleteRange, ""};
-
-            lsp::WorkspaceEdit workspaceEdit;
-            workspaceEdit.changes.emplace(uri, std::vector{edit});
-            action.edit = workspaceEdit;
-
-            result.push_back(action);
-        }
-    }
-}
-
-void generateUnusedImportFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument, Luau::AstStatBlock* root,
-    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
-{
-    // Get the import name from the lint location
-    lsp::Range lintRange = textDocument.convertLocation(lint.location);
-    std::string importName = textDocument.getText(lintRange);
-
-    // Fix 1: Prefix with '_' to silence the lint
-    {
-        lsp::CodeAction action;
-        action.title = "Prefix '" + importName + "' with '_' to silence";
-        action.kind = lsp::CodeActionKind::QuickFix;
-        action.isPreferred = false;
-
-        if (diagnostic)
-            action.diagnostics.push_back(*diagnostic);
-
-        lsp::Position insertPos = textDocument.convertPosition(lint.location.begin);
-        lsp::TextEdit edit{{insertPos, insertPos}, "_"};
-
-        lsp::WorkspaceEdit workspaceEdit;
-        workspaceEdit.changes.emplace(uri, std::vector{edit});
-        action.edit = workspaceEdit;
-
-        result.push_back(action);
-    }
-
-    // Fix 2: Delete the import statement
-    {
-        auto statement = findStatementContainingLocal(root, lint.location);
-
-        if (statement)
-        {
-            lsp::CodeAction action;
-            action.title = "Remove unused import: '" + importName + "'";
-            action.kind = lsp::CodeActionKind::QuickFix;
-            action.isPreferred = false;
-
-            if (diagnostic)
-                action.diagnostics.push_back(*diagnostic);
-
-            // Delete the entire line containing the import
             lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
             lsp::TextEdit edit{deleteRange, ""};
 
@@ -263,6 +174,27 @@ void generateUnreachableCodeFix(const lsp::DocumentUri& uri, const Luau::LintWar
         action.diagnostics.push_back(*diagnostic);
 
     // Delete the entire unreachable statement (the lint location is the unreachable statement)
+    lsp::Range deleteRange{{lint.location.begin.line, 0}, {lint.location.end.line + 1, 0}};
+    lsp::TextEdit edit{deleteRange, ""};
+
+    lsp::WorkspaceEdit workspaceEdit;
+    workspaceEdit.changes.emplace(uri, std::vector{edit});
+    action.edit = workspaceEdit;
+
+    result.push_back(action);
+}
+
+void generateRedundantNativeAttributeFix(const lsp::DocumentUri& uri, const Luau::LintWarning& lint,
+    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    lsp::CodeAction action;
+    action.title = "Remove redundant @native attribute";
+    action.kind = lsp::CodeActionKind::QuickFix;
+    action.isPreferred = false;
+
+    if (diagnostic)
+        action.diagnostics.push_back(*diagnostic);
+
     lsp::Range deleteRange{{lint.location.begin.line, 0}, {lint.location.end.line + 1, 0}};
     lsp::TextEdit edit{deleteRange, ""};
 
@@ -381,52 +313,27 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
                 generateGlobalUsedAsLocalFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
                 break;
             case Luau::LintWarning::Code_LocalUnused:
-                generateUnusedVariableFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Variable, result);
                 break;
             case Luau::LintWarning::Code_FunctionUnused:
-                generateUnusedFunctionFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Function, result);
                 break;
             case Luau::LintWarning::Code_ImportUnused:
-                generateUnusedImportFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Import, result);
                 break;
             case Luau::LintWarning::Code_UnreachableCode:
                 generateUnreachableCodeFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
                 break;
             case Luau::LintWarning::Code_RedundantNativeAttribute:
-            {
-                lsp::CodeAction action;
-                action.title = "Remove redundant @native attribute";
-                action.kind = lsp::CodeActionKind::QuickFix;
-                action.isPreferred = false;
-
-                if (diagnostic)
-                    action.diagnostics.push_back(*diagnostic);
-
-                lsp::Range deleteRange{{lint.location.begin.line, 0}, {lint.location.end.line + 1, 0}};
-                lsp::TextEdit edit{deleteRange, ""};
-
-                lsp::WorkspaceEdit workspaceEdit;
-                workspaceEdit.changes.emplace(params.textDocument.uri, std::vector{edit});
-                action.edit = workspaceEdit;
-
-                result.push_back(action);
+                generateRedundantNativeAttributeFix(params.textDocument.uri, lint, diagnostic, result);
                 break;
-            }
             default:
                 break;
             }
         }
 
         // Process type errors (UnknownSymbol for missing requires)
-        // Compute hot comments line number for import placement
-        size_t hotCommentsLineNumber = 0;
-        for (const auto& hotComment : sourceModule->hotcomments)
-        {
-            if (!hotComment.header)
-                continue;
-            if (hotComment.location.begin.line >= hotCommentsLineNumber)
-                hotCommentsLineNumber = hotComment.location.begin.line + 1U;
-        }
+        size_t hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*sourceModule);
 
         UnknownSymbolFixContext unknownSymbolCtx{
             params.textDocument.uri,
@@ -468,7 +375,7 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
 
         // Add "Remove all unused code" source action
         std::vector<lsp::TextEdit> edits;
-        std::set<size_t> deletedLines; // Track which lines we've already deleted to avoid duplicates
+        std::unordered_set<size_t> deletedLines; // Track which lines we've already deleted to avoid duplicates
 
         for (const auto& lint : cr.lintResult.warnings)
         {
@@ -523,22 +430,14 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         // Add "Add all missing requires" source action
         if (!cr.errors.empty())
         {
-            // Compute hot comments line number for import placement
-            size_t hotCommentsLineNumber = 0;
-            for (const auto& hotComment : sourceModule->hotcomments)
-            {
-                if (!hotComment.header)
-                    continue;
-                if (hotComment.location.begin.line >= hotCommentsLineNumber)
-                    hotCommentsLineNumber = hotComment.location.begin.line + 1U;
-            }
+            size_t sourceActionHotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*sourceModule);
 
             UnknownSymbolFixContext ctx{
                 params.textDocument.uri,
                 Luau::NotNull(&*textDocument),
                 Luau::NotNull(sourceModule),
                 Luau::NotNull(&frontend),
-                hotCommentsLineNumber,
+                sourceActionHotCommentsLineNumber,
             };
 
             auto importEdits = platform->computeAddAllMissingImportsEdits(ctx, cr.errors);
