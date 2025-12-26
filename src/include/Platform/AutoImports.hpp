@@ -20,7 +20,7 @@ size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule);
 
 /// Find all modules that can be required with a variable name matching the given name
 std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
-    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder);
+    const WorkspaceFolder& workspaceFolder, const std::string& name, const Luau::ModuleName& fromModule);
 
 struct FindImportsVisitor : public Luau::AstVisitor
 {
@@ -58,4 +58,4 @@ lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vec
 size_t computeMinimumLineNumberForRequire(const FindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
 size_t computeBestLineForRequire(
     const FindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
-}
+} // namespace Luau::LanguageServer::AutoImports

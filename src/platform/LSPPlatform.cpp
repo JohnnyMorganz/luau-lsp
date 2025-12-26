@@ -132,7 +132,8 @@ std::optional<Uri> resolveDirectoryAlias(
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
+std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
+    const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
 {
     if (!context)
         return std::nullopt;
@@ -241,12 +242,10 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
 void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
     const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
 {
-    // Only handle binding context (not type references)
     if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
         return;
 
-    // Find all modules that match this name
-    auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(unknownSymbol.name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+    auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(*workspaceFolder, unknownSymbol.name, ctx.sourceModule->name);
     if (moduleMatches.empty())
         return;
 
@@ -257,16 +256,12 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     // Compute the require path
     auto fromUri = workspaceFolder->fileResolver.getUri(ctx.sourceModule->name);
     auto availableAliases = workspaceFolder->fileResolver.getConfig(ctx.sourceModule->name, workspaceFolder->limits).aliases;
+    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
-    ClientConfiguration config;
-    if (workspaceFolder->fileResolver.client)
-        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
-    // Generate a code action for each matching module
-    bool isFirst = true;
     for (const auto& [moduleName, requireName] : moduleMatches)
     {
-        // Check if this module is already imported
         if (importsVisitor.containsRequire(requireName))
             continue;
 
@@ -275,19 +270,17 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
         auto [requirePath, sortText] =
             Luau::LanguageServer::AutoImports::computeRequirePath(fromUri, toUri, availableAliases, config.completion.imports.requireStyle);
 
-        size_t minimumLineNumber =
-            Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+        size_t minimumLineNumber = Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
         size_t lineNumber =
             Luau::LanguageServer::AutoImports::computeBestLineForRequire(importsVisitor, *ctx.textDocument, requirePath, minimumLineNumber);
 
         bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
-        auto requireEdit =
-            Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
+        auto requireEdit = Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
 
         lsp::CodeAction action;
         action.title = "Add require for '" + requireName + "' from \"" + requirePath + "\"";
         action.kind = lsp::CodeActionKind::QuickFix;
-        action.isPreferred = isFirst; // Only the first match is preferred
+        action.isPreferred = moduleMatches.size() == 1;
 
         if (diagnostic)
             action.diagnostics.push_back(*diagnostic);
@@ -297,7 +290,6 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
         action.edit = workspaceEdit;
 
         result.push_back(action);
-        isFirst = false;
     }
 }
 
@@ -305,7 +297,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors)
 {
     std::vector<lsp::TextEdit> edits;
-    std::set<std::string> addedRequires; // Track which requires we've already added
+    std::set<std::string> addedRequires;
 
     // Find existing imports
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
@@ -314,12 +306,10 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     auto fromUri = workspaceFolder->fileResolver.getUri(ctx.sourceModule->name);
     auto availableAliases = workspaceFolder->fileResolver.getConfig(ctx.sourceModule->name, workspaceFolder->limits).aliases;
 
-    ClientConfiguration config;
-    if (workspaceFolder->fileResolver.client)
-        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
-    size_t minimumLineNumber =
-        Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
+    size_t minimumLineNumber = Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
     for (const auto& error : errors)
     {
@@ -336,7 +326,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
             continue;
 
         // Find matching modules
-        auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(unknownSymbol->name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+        auto moduleMatches = Luau::LanguageServer::AutoImports::findModulesForName(*workspaceFolder, unknownSymbol->name, ctx.sourceModule->name);
         if (moduleMatches.empty())
             continue;
 
@@ -351,8 +341,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
             Luau::LanguageServer::AutoImports::computeBestLineForRequire(importsVisitor, *ctx.textDocument, requirePath, minimumLineNumber);
 
         bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
-        auto requireEdit =
-            Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
+        auto requireEdit = Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
 
         edits.push_back(requireEdit);
         addedRequires.insert(requireName);

@@ -19,11 +19,11 @@ size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule)
 }
 
 std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
-    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder)
+    const WorkspaceFolder& workspaceFolder, const std::string& name, const Luau::ModuleName& fromModule)
 {
     std::vector<std::pair<Luau::ModuleName, std::string>> matches;
 
-    for (const auto& [moduleName, sourceNode] : frontend.sourceNodes)
+    for (const auto& [moduleName, sourceNode] : workspaceFolder.frontend.sourceNodes)
     {
         if (moduleName == fromModule)
             continue;
@@ -195,4 +195,4 @@ size_t computeBestLineForRequire(
 
     return lineNumber;
 }
-}
+} // namespace Luau::LanguageServer::AutoImports

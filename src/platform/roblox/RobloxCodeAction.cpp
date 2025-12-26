@@ -3,7 +3,6 @@
 #include "LSP/Workspace.hpp"
 #include "LSP/Utils.hpp"
 #include "Platform/AutoImports.hpp"
-#include "Platform/StringRequireAutoImporter.hpp"
 #include "Luau/PrettyPrinter.h"
 
 #include <set>
@@ -104,53 +103,44 @@ void RobloxPlatform::handleCodeAction(const lsp::CodeActionParams& params, std::
 void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
     const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
 {
-    // Only handle binding context (not type references)
     if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
         return;
 
-    ClientConfiguration config;
-    if (workspaceFolder->fileResolver.client)
-        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
     // Find existing imports
     RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
-    bool hasAction = false;
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
     // 1. Check if the unknown symbol matches a Roblox service name
     std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
     auto services = metadata.has_value() ? metadata->SERVICES : std::vector<std::string>{};
-
-    if (std::find(services.begin(), services.end(), unknownSymbol.name) != services.end())
+    if (contains(services, unknownSymbol.name) && !contains(importsVisitor.serviceLineMap, unknownSymbol.name))
     {
-        // Check if already imported
-        if (!contains(importsVisitor.serviceLineMap, unknownSymbol.name))
-        {
-            size_t lineNumber = importsVisitor.findBestLineForService(unknownSymbol.name, ctx.hotCommentsLineNumber);
+        size_t lineNumber = importsVisitor.findBestLineForService(unknownSymbol.name, hotCommentsLineNumber);
 
-            bool appendNewline = false;
-            if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
-                importsVisitor.firstRequireLine.value() - lineNumber == 0)
-                appendNewline = true;
+        bool appendNewline = false;
+        if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
+            importsVisitor.firstRequireLine.value() - lineNumber == 0)
+            appendNewline = true;
 
-            auto serviceEdit = createServiceTextEdit(unknownSymbol.name, lineNumber, appendNewline);
+        auto serviceEdit = createServiceTextEdit(unknownSymbol.name, lineNumber, appendNewline);
 
-            lsp::CodeAction action;
-            action.title = "Import service '" + unknownSymbol.name + "'";
-            action.kind = lsp::CodeActionKind::QuickFix;
-            action.isPreferred = !hasAction; // First action is preferred
+        lsp::CodeAction action;
+        action.title = "Import service '" + unknownSymbol.name + "'";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = true;
 
-            if (diagnostic)
-                action.diagnostics.push_back(*diagnostic);
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
 
-            lsp::WorkspaceEdit workspaceEdit;
-            workspaceEdit.changes.emplace(ctx.uri, std::vector{serviceEdit});
-            action.edit = workspaceEdit;
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(ctx.uri, std::vector{serviceEdit});
+        action.edit = workspaceEdit;
 
-            result.push_back(action);
-            hasAction = true;
-        }
+        result.push_back(action);
     }
 
     // 2. Check for modules that can be required
@@ -161,9 +151,7 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
     }
     else
     {
-        // Generate script-path requires
-        size_t minimumLineNumber =
-            Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+        size_t minimumLineNumber = Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
         for (auto& [path, node] : virtualPathsToSourceNodes)
         {
@@ -209,7 +197,7 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
                 auto service = requirePath.substr(0, requirePath.find('/'));
                 if (!contains(importsVisitor.serviceLineMap, service))
                 {
-                    auto serviceLineNumber = importsVisitor.findBestLineForService(service, ctx.hotCommentsLineNumber);
+                    auto serviceLineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
                     bool appendNewline = false;
                     if (config.completion.imports.separateGroupsWithLine &&
                         importsVisitor.firstRequireLine.value_or(serviceLineNumber) - serviceLineNumber == 0)
@@ -225,7 +213,7 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
             lsp::CodeAction action;
             action.title = "Add require for '" + name + "' from \"" + require + "\"";
             action.kind = lsp::CodeActionKind::QuickFix;
-            action.isPreferred = !hasAction; // First action is preferred
+            action.isPreferred = false; // TODO: Mark preferred if only module available
 
             if (diagnostic)
                 action.diagnostics.push_back(*diagnostic);
@@ -235,7 +223,6 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
             action.edit = workspaceEdit;
 
             result.push_back(action);
-            hasAction = true;
         }
     }
 }
@@ -257,8 +244,8 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     std::optional<RobloxDefinitionsFileMetadata> metadata = workspaceFolder->definitionsFileMetadata;
     auto services = metadata.has_value() ? metadata->SERVICES : std::vector<std::string>{};
 
-    size_t minimumLineNumber =
-        Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
+    size_t minimumLineNumber = Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
     for (const auto& error : errors)
     {
@@ -273,7 +260,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
         {
             if (!contains(importsVisitor.serviceLineMap, symbolName) && !addedServices.count(symbolName))
             {
-                size_t lineNumber = importsVisitor.findBestLineForService(symbolName, ctx.hotCommentsLineNumber);
+                size_t lineNumber = importsVisitor.findBestLineForService(symbolName, hotCommentsLineNumber);
 
                 bool appendNewline = false;
                 if (config.completion.imports.separateGroupsWithLine && importsVisitor.firstRequireLine &&
@@ -326,8 +313,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
                 // Compute the style of require
                 bool isRelative = false;
                 auto parent1 = getParentPath(ctx.sourceModule->name), parent2 = getParentPath(path);
-                if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative ||
-                    Luau::startsWith(path, "ProjectRoot/") ||
+                if (config.completion.imports.requireStyle == ImportRequireStyle::AlwaysRelative || Luau::startsWith(path, "ProjectRoot/") ||
                     (config.completion.imports.requireStyle != ImportRequireStyle::AlwaysAbsolute &&
                         (Luau::startsWith(ctx.sourceModule->name, path) || Luau::startsWith(path, ctx.sourceModule->name) || parent1 == parent2)))
                 {
@@ -349,7 +335,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
                     auto service = requirePath.substr(0, requirePath.find('/'));
                     if (!contains(importsVisitor.serviceLineMap, service) && !addedServices.count(service))
                     {
-                        auto serviceLineNumber = importsVisitor.findBestLineForService(service, ctx.hotCommentsLineNumber);
+                        auto serviceLineNumber = importsVisitor.findBestLineForService(service, hotCommentsLineNumber);
                         bool appendNewline = false;
                         if (config.completion.imports.separateGroupsWithLine &&
                             importsVisitor.firstRequireLine.value_or(serviceLineNumber) - serviceLineNumber == 0)

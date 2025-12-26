@@ -16,7 +16,7 @@ LUAU_FASTFLAG(LuauSolverV2)
 namespace
 {
 // Visitor to find the statement containing a local variable at a specific location
-struct FindStatementContainingLocal : public Luau::AstVisitor
+struct FindStatementContainingLocal : Luau::AstVisitor
 {
     Luau::Location targetLocation;
     Luau::AstStat* result = nullptr;
@@ -137,28 +137,24 @@ void generateUnusedCodeFixes(const lsp::DocumentUri& uri, const Luau::LintWarnin
     }
 
     // Fix 2: Delete the declaration/statement
+    if (auto statement = findStatementContainingLocal(root, lint.location))
     {
-        auto statement = findStatementContainingLocal(root, lint.location);
+        lsp::CodeAction action;
+        action.title = std::string("Remove unused ") + kindLabel + ": '" + name + "'";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = false;
 
-        if (statement)
-        {
-            lsp::CodeAction action;
-            action.title = std::string("Remove unused ") + kindLabel + ": '" + name + "'";
-            action.kind = lsp::CodeActionKind::QuickFix;
-            action.isPreferred = false;
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
 
-            if (diagnostic)
-                action.diagnostics.push_back(*diagnostic);
+        lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
+        lsp::TextEdit edit{deleteRange, ""};
 
-            lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
-            lsp::TextEdit edit{deleteRange, ""};
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(uri, std::vector{edit});
+        action.edit = workspaceEdit;
 
-            lsp::WorkspaceEdit workspaceEdit;
-            workspaceEdit.changes.emplace(uri, std::vector{edit});
-            action.edit = workspaceEdit;
-
-            result.push_back(action);
-        }
+        result.push_back(action);
     }
 }
 
@@ -184,8 +180,8 @@ void generateUnreachableCodeFix(const lsp::DocumentUri& uri, const Luau::LintWar
     result.push_back(action);
 }
 
-void generateRedundantNativeAttributeFix(const lsp::DocumentUri& uri, const Luau::LintWarning& lint,
-    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+void generateRedundantNativeAttributeFix(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const std::optional<lsp::Diagnostic>& diagnostic,
+    std::vector<lsp::CodeAction>& result)
 {
     lsp::CodeAction action;
     action.title = "Remove redundant @native attribute";
@@ -313,10 +309,12 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
                 generateGlobalUsedAsLocalFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
                 break;
             case Luau::LintWarning::Code_LocalUnused:
-                generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Variable, result);
+                generateUnusedCodeFixes(
+                    params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Variable, result);
                 break;
             case Luau::LintWarning::Code_FunctionUnused:
-                generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Function, result);
+                generateUnusedCodeFixes(
+                    params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Function, result);
                 break;
             case Luau::LintWarning::Code_ImportUnused:
                 generateUnusedCodeFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, UnusedCodeKind::Import, result);
@@ -332,15 +330,10 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             }
         }
 
-        // Process type errors (UnknownSymbol for missing requires)
-        size_t hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*sourceModule);
-
         UnknownSymbolFixContext unknownSymbolCtx{
             params.textDocument.uri,
-            Luau::NotNull(&*textDocument),
+            Luau::NotNull(textDocument),
             Luau::NotNull(sourceModule),
-            Luau::NotNull(&frontend),
-            hotCommentsLineNumber,
         };
 
         for (const auto& error : cr.errors)
@@ -348,11 +341,11 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             if (!requestRange.overlaps(error.location))
                 continue;
 
-            lsp::Range errorRange = textDocument->convertLocation(error.location);
-            auto diagnostic = findMatchingDiagnostic(params.context.diagnostics, errorRange);
-
             if (const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data))
             {
+                lsp::Range errorRange = textDocument->convertLocation(error.location);
+                auto diagnostic = findMatchingDiagnostic(params.context.diagnostics, errorRange);
+
                 platform->handleUnknownSymbolFix(unknownSymbolCtx, *unknownSymbol, diagnostic, result);
             }
         }
@@ -375,24 +368,21 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
 
         // Add "Remove all unused code" source action
         std::vector<lsp::TextEdit> edits;
-        std::unordered_set<size_t> deletedLines; // Track which lines we've already deleted to avoid duplicates
+        std::unordered_set<size_t> deletedLines;
 
         for (const auto& lint : cr.lintResult.warnings)
         {
             if (lint.code == Luau::LintWarning::Code_LocalUnused || lint.code == Luau::LintWarning::Code_FunctionUnused ||
                 lint.code == Luau::LintWarning::Code_ImportUnused)
             {
-                auto statement = findStatementContainingLocal(sourceModule->root, lint.location);
-                if (statement)
+                if (auto statement = findStatementContainingLocal(sourceModule->root, lint.location))
                 {
                     size_t startLine = statement->location.begin.line;
-                    // Only add if we haven't already deleted this line
                     if (deletedLines.find(startLine) == deletedLines.end())
                     {
                         lsp::Range deleteRange{{statement->location.begin.line, 0}, {statement->location.end.line + 1, 0}};
                         edits.push_back({deleteRange, ""});
 
-                        // Mark all lines in this range as deleted
                         for (size_t line = statement->location.begin.line; line <= statement->location.end.line; ++line)
                             deletedLines.insert(line);
                     }
@@ -401,13 +391,11 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             else if (lint.code == Luau::LintWarning::Code_UnreachableCode)
             {
                 size_t startLine = lint.location.begin.line;
-                // Only add if we haven't already deleted this line
                 if (deletedLines.find(startLine) == deletedLines.end())
                 {
                     lsp::Range deleteRange{{lint.location.begin.line, 0}, {lint.location.end.line + 1, 0}};
                     edits.push_back({deleteRange, ""});
 
-                    // Mark all lines in this range as deleted
                     for (size_t line = lint.location.begin.line; line <= lint.location.end.line; ++line)
                         deletedLines.insert(line);
                 }
@@ -430,14 +418,10 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         // Add "Add all missing requires" source action
         if (!cr.errors.empty())
         {
-            size_t sourceActionHotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*sourceModule);
-
             UnknownSymbolFixContext ctx{
                 params.textDocument.uri,
-                Luau::NotNull(&*textDocument),
+                Luau::NotNull(textDocument),
                 Luau::NotNull(sourceModule),
-                Luau::NotNull(&frontend),
-                sourceActionHotCommentsLineNumber,
             };
 
             auto importEdits = platform->computeAddAllMissingImportsEdits(ctx, cr.errors);
