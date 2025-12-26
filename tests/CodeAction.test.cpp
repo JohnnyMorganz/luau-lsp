@@ -236,4 +236,32 @@ print("hello")
     CHECK_EQ(deleteChanges[0].range.end.line, 2);
 }
 
+TEST_CASE_FIXTURE(Fixture, "unreachable_code_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local function test()
+    error("always errors")
+    print("unreachable")
+end
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{3, 0}, {4, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Remove unreachable code");
+    REQUIRE(action.has_value());
+    CHECK(action->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(action->isPreferred == false);
+    REQUIRE(action->edit.has_value());
+    auto& changes = action->edit->changes.at(uri);
+    REQUIRE_EQ(changes.size(), 1);
+    CHECK_EQ(changes[0].newText, "");
+    CHECK_EQ(changes[0].range.start.line, 3);
+    CHECK_EQ(changes[0].range.end.line, 4);
+}
+
 TEST_SUITE_END();

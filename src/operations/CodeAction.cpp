@@ -259,6 +259,31 @@ void generateUnusedImportFixes(const lsp::DocumentUri& uri, const Luau::LintWarn
         }
     }
 }
+
+void generateUnreachableCodeFix(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
+    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    lsp::CodeAction action;
+    action.title = "Remove unreachable code";
+    action.kind = lsp::CodeActionKind::QuickFix;
+    action.isPreferred = false;
+
+    if (diagnostic)
+        action.diagnostics.push_back(*diagnostic);
+
+    // Delete the entire unreachable statement (the lint location is the unreachable statement)
+    lsp::Range deleteRange{
+        {lint.location.begin.line, 0},
+        {lint.location.end.line + 1, 0}
+    };
+    lsp::TextEdit edit{deleteRange, ""};
+
+    lsp::WorkspaceEdit workspaceEdit;
+    workspaceEdit.changes.emplace(uri, std::vector{edit});
+    action.edit = workspaceEdit;
+
+    result.push_back(action);
+}
 } // namespace
 
 lsp::WorkspaceEdit WorkspaceFolder::computeOrganiseRequiresEdit(const lsp::DocumentUri& uri)
@@ -375,6 +400,9 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
                 break;
             case Luau::LintWarning::Code_ImportUnused:
                 generateUnusedImportFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                break;
+            case Luau::LintWarning::Code_UnreachableCode:
+                generateUnreachableCodeFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
                 break;
             default:
                 break;
