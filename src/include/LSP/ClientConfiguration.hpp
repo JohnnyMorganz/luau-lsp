@@ -243,6 +243,17 @@ struct ClientBytecodeConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, typeInfoLevel, vectorLib, vectorCtor, vectorType)
 
+struct ClientPluginConfiguration
+{
+    /// Whether plugins are enabled
+    bool enabled = false;
+    /// Paths to plugin Luau scripts
+    std::vector<std::string> paths{};
+    /// Timeout for plugin execution in milliseconds
+    size_t timeoutMs = 5000;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginConfiguration, enabled, paths, timeoutMs)
+
 enum struct LSPPlatformConfig
 {
     Standard,
@@ -280,6 +291,7 @@ struct ClientConfiguration
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
+    ClientPluginConfiguration plugins{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, plugins);
