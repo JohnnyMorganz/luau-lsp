@@ -233,7 +233,6 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     std::vector<lsp::TextEdit> serviceEdits;
     std::vector<lsp::TextEdit> requireEdits;
     std::set<std::string> addedServices;
-    std::set<std::string> addedRequires;
 
     auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
 
@@ -247,15 +246,19 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
     size_t minimumLineNumber = Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, hotCommentsLineNumber);
 
+    std::vector<std::string> unknownSymbols;
     for (const auto& error : errors)
     {
         const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data);
         if (!unknownSymbol || unknownSymbol->context != Luau::UnknownSymbol::Binding)
             continue;
 
-        const std::string& symbolName = unknownSymbol->name;
+        unknownSymbols.emplace_back(unknownSymbol->name);
+    }
 
-        // 1. Check if it's a service
+    // Handle symbols as services
+    for (const auto& symbolName : unknownSymbols)
+    {
         if (std::find(services.begin(), services.end(), symbolName) != services.end())
         {
             if (!contains(importsVisitor.serviceLineMap, symbolName) && !addedServices.count(symbolName))
@@ -270,29 +273,30 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
                 serviceEdits.push_back(createServiceTextEdit(symbolName, lineNumber, appendNewline));
                 addedServices.insert(symbolName);
             }
-            continue;
         }
+    }
 
-        // Skip if we've already added a require for this name
-        if (addedRequires.count(symbolName))
-            continue;
+    // Handle symbol as modules
+    if (config.completion.imports.stringRequires.enabled)
+    {
+        auto baseEdits = LSPPlatform::computeAddAllMissingImportsEdits(ctx, errors);
+        for (auto& edit : baseEdits)
+            requireEdits.push_back(std::move(edit));
+    }
+    else
+    {
+        std::set<std::string> addedRequires;
 
-        // Skip if already imported
-        if (importsVisitor.containsRequire(symbolName))
-            continue;
-
-        // 2. Check for modules - use string requires if enabled
-        if (config.completion.imports.stringRequires.enabled)
+        for (const auto& symbolName : unknownSymbols)
         {
-            // Delegate to base implementation
-            auto baseEdits = LSPPlatform::computeAddAllMissingImportsEdits(ctx, {error});
-            for (auto& edit : baseEdits)
-                requireEdits.push_back(std::move(edit));
-            if (!baseEdits.empty())
-                addedRequires.insert(symbolName);
-        }
-        else
-        {
+            // Skip if we've already added a require for this name
+            if (addedRequires.count(symbolName))
+                continue;
+
+            // Skip if already imported
+            if (importsVisitor.containsRequire(symbolName))
+                continue;
+
             // Generate script-path requires
             for (auto& [path, node] : virtualPathsToSourceNodes)
             {

@@ -334,6 +334,7 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             params.textDocument.uri,
             Luau::NotNull(textDocument),
             Luau::NotNull(sourceModule),
+            Luau::NotNull(this),
         };
 
         for (const auto& error : cr.errors)
@@ -422,6 +423,7 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
                 params.textDocument.uri,
                 Luau::NotNull(textDocument),
                 Luau::NotNull(sourceModule),
+                Luau::NotNull(this),
             };
 
             auto importEdits = platform->computeAddAllMissingImportsEdits(ctx, cr.errors);

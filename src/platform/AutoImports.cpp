@@ -18,29 +18,6 @@ size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule)
     return hotCommentsLineNumber;
 }
 
-std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
-    const WorkspaceFolder& workspaceFolder, const std::string& name, const Luau::ModuleName& fromModule)
-{
-    std::vector<std::pair<Luau::ModuleName, std::string>> matches;
-
-    for (const auto& [moduleName, sourceNode] : workspaceFolder.frontend.sourceNodes)
-    {
-        if (moduleName == fromModule)
-            continue;
-
-        auto requireName = requireNameFromModuleName(moduleName);
-        if (requireName == name)
-        {
-            auto uri = workspaceFolder.fileResolver.getUri(moduleName);
-            if (workspaceFolder.isIgnoredFileForAutoImports(uri))
-                continue;
-
-            matches.emplace_back(moduleName, requireName);
-        }
-    }
-    return matches;
-}
-
 bool FindImportsVisitor::containsRequire(const std::string& module) const
 {
     for (const auto& map : requiresMap)

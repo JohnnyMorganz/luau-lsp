@@ -18,10 +18,6 @@ namespace Luau::LanguageServer::AutoImports
 /// Compute the line number after which hot comments end (for import placement)
 size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule);
 
-/// Find all modules that can be required with a variable name matching the given name
-std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
-    const WorkspaceFolder& workspaceFolder, const std::string& name, const Luau::ModuleName& fromModule);
-
 struct FindImportsVisitor : public Luau::AstVisitor
 {
 private:

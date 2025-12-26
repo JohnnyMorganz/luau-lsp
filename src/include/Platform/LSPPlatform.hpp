@@ -30,6 +30,7 @@ struct UnknownSymbolFixContext
     lsp::DocumentUri uri;
     Luau::NotNull<const TextDocument> textDocument;
     Luau::NotNull<const Luau::SourceModule> sourceModule;
+    Luau::NotNull<const WorkspaceFolder> workspaceFolder;
 };
 
 class LSPPlatform

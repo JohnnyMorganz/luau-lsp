@@ -102,8 +102,9 @@ std::pair<std::string, SortText::SortTextT> computeRequirePath(
     return {relativePath, SortText::AutoImports};
 }
 
-void suggestStringRequires(const StringRequireAutoImporterContext& ctx, std::vector<lsp::CompletionItem>& items)
+std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAutoImporterContext& ctx)
 {
+    std::vector<StringRequireResult> result;
     size_t minimumLineNumber = computeMinimumLineNumberForRequire(*ctx.importsVisitor, ctx.hotCommentsLineNumber);
 
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
@@ -126,9 +127,22 @@ void suggestStringRequires(const StringRequireAutoImporterContext& ctx, std::vec
 
         bool prependNewline = ctx.config->separateGroupsWithLine && ctx.importsVisitor->shouldPrependNewline(lineNumber);
 
-        std::vector<lsp::TextEdit> textEdits;
-        textEdits.emplace_back(createRequireTextEdit(name, '"' + require + '"', lineNumber, prependNewline));
-        items.emplace_back(createSuggestRequire(name, textEdits, sortText, moduleName, require));
+        result.emplace_back(StringRequireResult{
+            name,
+            moduleName,
+            require,
+            createRequireTextEdit(name, '"' + require + '"', lineNumber, prependNewline),
+            sortText,
+        });
     }
+
+    return result;
+}
+
+void suggestStringRequires(const StringRequireAutoImporterContext& ctx, std::vector<lsp::CompletionItem>& items)
+{
+    auto availableStringRequires = computeAllStringRequires(ctx);
+    for (const auto& [variableName, moduleName, requirePath, edit, sortText] : availableStringRequires)
+        items.emplace_back(createSuggestRequire(variableName, {edit}, sortText, moduleName, requirePath));
 }
 } // namespace Luau::LanguageServer::AutoImports
