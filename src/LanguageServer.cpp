@@ -141,6 +141,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
         /* range: */ false,
         /* full: */ true,
     };
+    // Document On Type Formatting Provider
+    capabilities.documentOnTypeFormattingProvider = lsp::DocumentOnTypeFormattingOptions{"{", std::nullopt};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
@@ -305,6 +307,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto params = baseParams->get<lsp::DocumentDiagnosticParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->documentDiagnostics(params, cancellationToken);
+    }
+    else if (method == "textDocument/onTypeFormatting")
+    {
+        ASSERT_PARAMS(baseParams, "textDocument/onTypeFormatting")
+        auto params = baseParams->get<lsp::DocumentOnTypeFormattingParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->onTypeFormatting(params);
     }
     else if (method == "workspace/diagnostic")
     {

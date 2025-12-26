@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Unknown symbol errors now have a quick fix to auto-import missing modules (both string requires and Roblox instance-based requires) and services
   - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
   - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
+- Added support for automatic quote conversion to backticks when typing `{` inside strings. This can be enabled with the `luau-lsp.format.convertQuotes` configuration option. You may need to enable on-type formatting in your editor (e.g., `format.onType` in VSCode) ([#1298](https://github.com/JohnnyMorganz/luau-lsp/pull/1298))
 
 ### Changed
 
