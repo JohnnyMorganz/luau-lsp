@@ -124,7 +124,6 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
     // 2. Check for modules that can be required
     if (config.completion.imports.stringRequires.enabled)
     {
-        // Delegate to base implementation for string requires
         LSPPlatform::handleUnknownSymbolFix(ctx, unknownSymbol, diagnostic, result);
     }
     else

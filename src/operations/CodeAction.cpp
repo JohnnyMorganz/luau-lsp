@@ -62,7 +62,7 @@ std::optional<lsp::Diagnostic> findMatchingDiagnostic(const std::vector<lsp::Dia
 {
     for (const auto& diag : diagnostics)
     {
-        if (diag.range.start.line == range.start.line && diag.range.start.character == range.start.character)
+        if (diag.range == range)
             return diag;
     }
     return std::nullopt;
