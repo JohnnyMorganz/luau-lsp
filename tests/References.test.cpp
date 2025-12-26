@@ -509,8 +509,8 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_via_bracket_notation")
 
     sortResults(result);
 
-    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // type definition
-    CHECK_EQ(lsp::Range{{6, 20}, {6, 26}}, result->at(1).range);  // bracket notation usage (including quotes)
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // type definition
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 26}}, result->at(1).range); // bracket notation usage (including quotes)
 }
 
 TEST_CASE_FIXTURE(Fixture, "find_references_includes_both_dot_and_bracket_notation")
@@ -539,9 +539,9 @@ TEST_CASE_FIXTURE(Fixture, "find_references_includes_both_dot_and_bracket_notati
 
     sortResults(result);
 
-    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // type definition
-    CHECK_EQ(lsp::Range{{6, 21}, {6, 25}}, result->at(1).range);  // dot notation
-    CHECK_EQ(lsp::Range{{7, 21}, {7, 27}}, result->at(2).range);  // bracket notation (including quotes)
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // type definition
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 25}}, result->at(1).range); // dot notation
+    CHECK_EQ(lsp::Range{{7, 21}, {7, 27}}, result->at(2).range); // bracket notation (including quotes)
 }
 
 TEST_CASE_FIXTURE(Fixture, "find_references_from_bracket_to_dot_notation")
@@ -569,9 +569,134 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_bracket_to_dot_notation")
 
     sortResults(result);
 
-    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);  // inline table definition
-    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(1).range);  // dot notation
-    CHECK_EQ(lsp::Range{{6, 21}, {6, 27}}, result->at(2).range);  // bracket notation (including quotes)
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // inline table definition
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(1).range); // dot notation
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 27}}, result->at(2).range); // bracket notation (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_method_through_metatable_index")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+
+        function Foo.Test(self: Foo)
+        end
+
+        local Bar = setmetatable({}, Foo)
+        type Bar = typeof(setmetatable({}, Foo))
+        function Bar.DoSomething(self: Bar)
+            self:Test()
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{5, 21}; // "Test" in function Foo.Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + self:Test() via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(0).range);   // function Foo.Test()
+    CHECK_EQ(lsp::Range{{11, 17}, {11, 21}}, result->at(1).range); // self:Test()
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_method_from_metatable_call_site")
+{
+    // Finding references from self:Test() should find the Foo.Test definition
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+
+        function Foo.Test(self: Foo)
+        end
+
+        local Bar = setmetatable({}, Foo)
+        type Bar = typeof(setmetatable({}, Foo))
+        function Bar.DoSomething(self: Bar)
+            self:Test()
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{11, 17}; // "Test" in self:Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + self:Test() via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(0).range);   // function Foo.Test()
+    CHECK_EQ(lsp::Range{{11, 17}, {11, 21}}, result->at(1).range); // self:Test()
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_property_through_metatable_index")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        Foo.name = "test"
+
+        local Bar = setmetatable({}, Foo)
+        local x = Bar.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 12}; // "name" in Foo.name
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + Bar.name via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{3, 12}, {3, 16}}, result->at(0).range); // Foo.name
+    CHECK_EQ(lsp::Range{{6, 22}, {6, 26}}, result->at(1).range); // Bar.name
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_through_nested_metatable_chain")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+        function Foo.Test(self: Foo) end
+
+        local Bar = setmetatable({}, Foo)
+        Bar.__index = Bar
+
+        local Baz = setmetatable({}, Bar)
+        Baz:Test()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 21}; // "Test" in function Foo.Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + Baz:Test() via chain
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{4, 21}, {4, 25}}, result->at(0).range); // function Foo.Test()
+    CHECK_EQ(lsp::Range{{10, 12}, {10, 16}}, result->at(1).range); // Baz:Test()
 }
 
 TEST_SUITE_END();

@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Aliases defined in a root-level `.luaurc` / `.config.luau` will now be indexed at startup. As such, external alias files will now show up as part of string-require auto-imports if the file has not previously been required ([#1043](https://github.com/JohnnyMorganz/luau-lsp/issues/1043))
+- Find All References and Rename now correctly track property references through metatable `__index` chains, enabling proper support for Luau class patterns using `setmetatable` inheritance ([#961](https://github.com/JohnnyMorganz/luau-lsp/issues/961))
 
 ### Fixed
 
