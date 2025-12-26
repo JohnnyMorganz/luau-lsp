@@ -33,6 +33,10 @@ std::optional<std::string> SourceNode::getScriptFilePath() const
         {
             return path;
         }
+        else if ((uri.extension() == ".yaml" || uri.extension() == ".yml") && isScript())
+        {
+            return path;
+        }
     }
     return std::nullopt;
 }

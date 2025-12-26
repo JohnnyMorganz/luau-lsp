@@ -355,32 +355,47 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
     client->sendWorkDoneProgressBegin(kIndexProgressToken, "Luau: Indexing");
 
     std::vector<Luau::ModuleName> moduleNames;
+    std::vector<std::string> directories{rootUri.fsPath()};
+
+    auto luauConfig = fileResolver.readConfigRec(rootUri, limits);
+    for (const auto& [aliasName, aliasInfo] : luauConfig.aliases)
+    {
+        auto uri = resolveAliasLocation(aliasInfo);
+        if (uri.isDirectory())
+            directories.emplace_back(uri.fsPath());
+        else
+            moduleNames.emplace_back(fileResolver.getModuleName(uri));
+    }
 
     bool sentMessage = false;
-    Luau::FileUtils::traverseDirectoryRecursive(rootUri.fsPath(),
-        [&](auto& path)
-        {
-            if (moduleNames.size() >= config.index.maxFiles)
+    for (const auto& directory : directories)
+    {
+        client->sendTrace("workspace: indexing files from '" + directory + "'");
+        Luau::FileUtils::traverseDirectoryRecursive(directory,
+            [&](auto& path)
             {
-                if (!sentMessage)
+                if (moduleNames.size() >= config.index.maxFiles)
                 {
-                    client->sendWindowMessage(
-                        lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
-                                                       ") has been hit. This may cause some language features to only work partially "
-                                                       "(Find All References, Rename). If necessary, consider increasing the limit");
-                    sentMessage = true;
+                    if (!sentMessage)
+                    {
+                        client->sendWindowMessage(
+                            lsp::MessageType::Warning, "The maximum workspace index limit (" + std::to_string(config.index.maxFiles) +
+                                                           ") has been hit. This may cause some language features to only work partially "
+                                                           "(Find All References, Rename). If necessary, consider increasing the limit");
+                        sentMessage = true;
+                    }
+                    return;
                 }
-                return;
-            }
 
-            auto uri = Uri::file(path);
-            auto ext = uri.extension();
-            if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
-            {
-                auto moduleName = fileResolver.getModuleName(uri);
-                moduleNames.emplace_back(moduleName);
-            }
-        });
+                auto uri = Uri::file(path);
+                auto ext = uri.extension();
+                if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+                {
+                    auto moduleName = fileResolver.getModuleName(uri);
+                    moduleNames.emplace_back(moduleName);
+                }
+            });
+    }
 
     client->sendWorkDoneProgressReport(kIndexProgressToken, std::to_string(moduleNames.size()) + " files");
 

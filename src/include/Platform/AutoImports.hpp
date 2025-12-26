@@ -5,12 +5,19 @@
 #include <map>
 
 #include "Luau/Ast.h"
+#include "Luau/Frontend.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/TextDocument.hpp"
 #include "LSP/Utils.hpp"
 
+class WorkspaceFolder;
+
 namespace Luau::LanguageServer::AutoImports
 {
+
+/// Compute the line number after which hot comments end (for import placement)
+size_t computeHotCommentsLineNumber(const Luau::SourceModule& sourceModule);
+
 struct FindImportsVisitor : public Luau::AstVisitor
 {
 private:
@@ -47,4 +54,4 @@ lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vec
 size_t computeMinimumLineNumberForRequire(const FindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);
 size_t computeBestLineForRequire(
     const FindImportsVisitor& importsVisitor, const TextDocument& textDocument, const std::string& require, size_t minimumLineNumber);
-}
+} // namespace Luau::LanguageServer::AutoImports

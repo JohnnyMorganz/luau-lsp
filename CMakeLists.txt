@@ -60,6 +60,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/platform/LSPPlatform.cpp
         src/platform/StringRequireAutoImporter.cpp
         src/platform/StringRequireSuggester.cpp
+        src/platform/roblox/InstanceRequireAutoImporter.cpp
         src/platform/roblox/RobloxCodeAction.cpp
         src/platform/roblox/RobloxColorProvider.cpp
         src/platform/roblox/RobloxCompletion.cpp
@@ -133,6 +134,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/RequireGraph.test.cpp
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
+        tests/CodeAction.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 
@@ -182,7 +184,7 @@ if (LSP_BUILD_ASAN)
     endif ()
 endif ()
 
-set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include)
+set(EXTERN_INCLUDES extern/json/include extern/glob/include extern/argparse/include extern/toml/include extern/ryml/include)
 
 target_compile_features(Luau.LanguageServer PUBLIC cxx_std_17)
 target_compile_options(Luau.LanguageServer PRIVATE ${LUAU_LSP_OPTIONS})
