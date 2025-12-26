@@ -177,27 +177,6 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
     return call.args.data[0];
 }
 
-std::optional<Luau::AstExpr*> matchLoadLibrary(const Luau::AstExprCall& call)
-{
-	const char* loadLibrary = "LoadLibrary";
-
-    if (call.args.size != 1)
-        return std::nullopt;
-
-	const Luau::AstExprLocal* funcAsLocal = call.func->as<Luau::AstExprLocal>();
-
-    if (!funcAsLocal || funcAsLocal->local->name != loadLibrary)
-        return std::nullopt;
-
-    if (call.args.size != 1)
-        return std::nullopt;
-
-	if (call.args.size > 1)
-		return std::nullopt; // TODO: We don't have support for NamedImports yet
-
-    return call.args.data[0];
-}
-
 } // namespace types
 
 struct FindNodeType : public Luau::AstVisitor
