@@ -174,16 +174,21 @@ std::string WorkspaceFileResolver::transformOvertureLoadLibrary(const std::strin
                     if (varNames.size() == fnNames.size() && !varNames.empty())
                     {
                         const std::string requireExpr = fixRequirePath(*libraryPath);
-                        std::string typeAnnotations;
-
+                        std::string varsJoined;
+                        std::string rhsJoined;
+						
                         for (size_t i = 0; i < varNames.size(); ++i)
                         {
                             if (i > 0)
-                                typeAnnotations += ", ";
-                            typeAnnotations += varNames[i] + ": typeof(require(" + requireExpr + ")." + fnNames[i] + ")";
+                            {
+                                varsJoined += ", ";
+                                rhsJoined += ", ";
+                            }
+                            varsJoined += varNames[i];
+                            rhsJoined += "require(" + requireExpr + ")." + fnNames[i];
                         }
 
-                        replacement = "local " + typeAnnotations + " = Overture:LoadLibrary(\"" + libName + "\", {" + arrayStr + "})";
+                        replacement = "local " + varsJoined + " = " + rhsJoined;
 
                         std::cerr << "[Transform] In file: " << moduleName << "\n";
                         std::cerr << "  Original: " << match.str() << "\n";
