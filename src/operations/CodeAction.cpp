@@ -5,11 +5,54 @@
 #include "Luau/PrettyPrinter.h"
 #include "Luau/LinterConfig.h"
 #include "Platform/AutoImports.hpp"
+#include "Luau/Ast.h"
 
 LUAU_FASTFLAG(LuauSolverV2)
 
 namespace
 {
+// Visitor to find the statement containing a local variable at a specific location
+struct FindStatementContainingLocal : public Luau::AstVisitor
+{
+    Luau::Location targetLocation;
+    Luau::AstStat* result = nullptr;
+
+    explicit FindStatementContainingLocal(const Luau::Location& location)
+        : targetLocation(location)
+    {
+    }
+
+    bool visit(Luau::AstStatLocal* node) override
+    {
+        for (size_t i = 0; i < node->vars.size; ++i)
+        {
+            if (node->vars.data[i]->location == targetLocation)
+            {
+                result = node;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool visit(Luau::AstStatLocalFunction* node) override
+    {
+        if (node->name->location == targetLocation)
+        {
+            result = node;
+            return false;
+        }
+        return true;
+    }
+};
+
+Luau::AstStat* findStatementContainingLocal(Luau::AstStatBlock* root, const Luau::Location& location)
+{
+    FindStatementContainingLocal finder(location);
+    root->visit(&finder);
+    return finder.result;
+}
+
 // Find a matching diagnostic from the client-provided diagnostics by location
 std::optional<lsp::Diagnostic> findMatchingDiagnostic(
     const std::vector<lsp::Diagnostic>& diagnostics, const lsp::Range& range, const std::string& messageSubstring = "")
@@ -44,6 +87,177 @@ void generateGlobalUsedAsLocalFix(const lsp::DocumentUri& uri, const Luau::LintW
     action.edit = workspaceEdit;
 
     result.push_back(action);
+}
+
+void generateUnusedVariableFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
+    Luau::AstStatBlock* root, const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    // Get the variable name from the lint location
+    lsp::Range lintRange = textDocument.convertLocation(lint.location);
+    std::string varName = textDocument.getText(lintRange);
+
+    // Fix 1: Prefix with '_' to silence the lint
+    {
+        lsp::CodeAction action;
+        action.title = "Prefix '" + varName + "' with '_' to silence";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = false;
+
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
+
+        lsp::Position insertPos = textDocument.convertPosition(lint.location.begin);
+        lsp::TextEdit edit{{insertPos, insertPos}, "_"};
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(uri, std::vector{edit});
+        action.edit = workspaceEdit;
+
+        result.push_back(action);
+    }
+
+    // Fix 2: Delete the variable declaration
+    {
+        auto statement = findStatementContainingLocal(root, lint.location);
+
+        if (statement)
+        {
+            lsp::CodeAction action;
+            action.title = "Remove unused variable: '" + varName + "'";
+            action.kind = lsp::CodeActionKind::QuickFix;
+            action.isPreferred = false;
+
+            if (diagnostic)
+                action.diagnostics.push_back(*diagnostic);
+
+            // Delete the entire line containing the statement
+            lsp::Range deleteRange{
+                {statement->location.begin.line, 0},
+                {statement->location.end.line + 1, 0}
+            };
+            lsp::TextEdit edit{deleteRange, ""};
+
+            lsp::WorkspaceEdit workspaceEdit;
+            workspaceEdit.changes.emplace(uri, std::vector{edit});
+            action.edit = workspaceEdit;
+
+            result.push_back(action);
+        }
+    }
+}
+
+void generateUnusedFunctionFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
+    Luau::AstStatBlock* root, const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    // Get the function name from the lint location
+    lsp::Range lintRange = textDocument.convertLocation(lint.location);
+    std::string funcName = textDocument.getText(lintRange);
+
+    // Fix 1: Prefix with '_' to silence the lint
+    {
+        lsp::CodeAction action;
+        action.title = "Prefix '" + funcName + "' with '_' to silence";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = false;
+
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
+
+        lsp::Position insertPos = textDocument.convertPosition(lint.location.begin);
+        lsp::TextEdit edit{{insertPos, insertPos}, "_"};
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(uri, std::vector{edit});
+        action.edit = workspaceEdit;
+
+        result.push_back(action);
+    }
+
+    // Fix 2: Delete the function declaration
+    {
+        auto statement = findStatementContainingLocal(root, lint.location);
+
+        if (statement)
+        {
+            lsp::CodeAction action;
+            action.title = "Remove unused function: '" + funcName + "'";
+            action.kind = lsp::CodeActionKind::QuickFix;
+            action.isPreferred = false;
+
+            if (diagnostic)
+                action.diagnostics.push_back(*diagnostic);
+
+            // Delete the entire function
+            lsp::Range deleteRange{
+                {statement->location.begin.line, 0},
+                {statement->location.end.line + 1, 0}
+            };
+            lsp::TextEdit edit{deleteRange, ""};
+
+            lsp::WorkspaceEdit workspaceEdit;
+            workspaceEdit.changes.emplace(uri, std::vector{edit});
+            action.edit = workspaceEdit;
+
+            result.push_back(action);
+        }
+    }
+}
+
+void generateUnusedImportFixes(const lsp::DocumentUri& uri, const Luau::LintWarning& lint, const TextDocument& textDocument,
+    Luau::AstStatBlock* root, const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    // Get the import name from the lint location
+    lsp::Range lintRange = textDocument.convertLocation(lint.location);
+    std::string importName = textDocument.getText(lintRange);
+
+    // Fix 1: Prefix with '_' to silence the lint
+    {
+        lsp::CodeAction action;
+        action.title = "Prefix '" + importName + "' with '_' to silence";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = false;
+
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
+
+        lsp::Position insertPos = textDocument.convertPosition(lint.location.begin);
+        lsp::TextEdit edit{{insertPos, insertPos}, "_"};
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(uri, std::vector{edit});
+        action.edit = workspaceEdit;
+
+        result.push_back(action);
+    }
+
+    // Fix 2: Delete the import statement
+    {
+        auto statement = findStatementContainingLocal(root, lint.location);
+
+        if (statement)
+        {
+            lsp::CodeAction action;
+            action.title = "Remove unused import: '" + importName + "'";
+            action.kind = lsp::CodeActionKind::QuickFix;
+            action.isPreferred = false;
+
+            if (diagnostic)
+                action.diagnostics.push_back(*diagnostic);
+
+            // Delete the entire line containing the import
+            lsp::Range deleteRange{
+                {statement->location.begin.line, 0},
+                {statement->location.end.line + 1, 0}
+            };
+            lsp::TextEdit edit{deleteRange, ""};
+
+            lsp::WorkspaceEdit workspaceEdit;
+            workspaceEdit.changes.emplace(uri, std::vector{edit});
+            action.edit = workspaceEdit;
+
+            result.push_back(action);
+        }
+    }
 }
 } // namespace
 
@@ -131,6 +345,10 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             FFlag::LuauSolverV2 ? checkStrict(moduleName, cancellationToken, /* forAutocomplete= */ false) : checkSimple(moduleName, cancellationToken);
         throwIfCancelled(cancellationToken);
 
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return result;
+
         // Convert the requested LSP range to Luau location for filtering
         Luau::Location requestRange = textDocument->convertRange(params.range);
 
@@ -148,6 +366,15 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             {
             case Luau::LintWarning::Code_GlobalUsedAsLocal:
                 generateGlobalUsedAsLocalFix(params.textDocument.uri, lint, *textDocument, diagnostic, result);
+                break;
+            case Luau::LintWarning::Code_LocalUnused:
+                generateUnusedVariableFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                break;
+            case Luau::LintWarning::Code_FunctionUnused:
+                generateUnusedFunctionFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
+                break;
+            case Luau::LintWarning::Code_ImportUnused:
+                generateUnusedImportFixes(params.textDocument.uri, lint, *textDocument, sourceModule->root, diagnostic, result);
                 break;
             default:
                 break;

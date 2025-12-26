@@ -82,4 +82,158 @@ end
     CHECK_FALSE(action.has_value());
 }
 
+TEST_CASE_FIXTURE(Fixture, "local_unused_prefix_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local unused = 1
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {2, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
+    REQUIRE(prefixAction.has_value());
+    CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(prefixAction->isPreferred == false);
+    REQUIRE(prefixAction->edit.has_value());
+    auto& prefixChanges = prefixAction->edit->changes.at(uri);
+    REQUIRE_EQ(prefixChanges.size(), 1);
+    CHECK_EQ(prefixChanges[0].newText, "_");
+}
+
+TEST_CASE_FIXTURE(Fixture, "local_unused_delete_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local unused = 1
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {2, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto deleteAction = findAction(result, "Remove unused variable: 'unused'");
+    REQUIRE(deleteAction.has_value());
+    CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(deleteAction->isPreferred == false);
+    REQUIRE(deleteAction->edit.has_value());
+    auto& deleteChanges = deleteAction->edit->changes.at(uri);
+    REQUIRE_EQ(deleteChanges.size(), 1);
+    CHECK_EQ(deleteChanges[0].newText, "");
+    CHECK_EQ(deleteChanges[0].range.start.line, 1);
+    CHECK_EQ(deleteChanges[0].range.end.line, 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "function_unused_prefix_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local function unused()
+    return 1
+end
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {4, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
+    REQUIRE(prefixAction.has_value());
+    CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(prefixAction->isPreferred == false);
+    REQUIRE(prefixAction->edit.has_value());
+    auto& prefixChanges = prefixAction->edit->changes.at(uri);
+    REQUIRE_EQ(prefixChanges.size(), 1);
+    CHECK_EQ(prefixChanges[0].newText, "_");
+}
+
+TEST_CASE_FIXTURE(Fixture, "function_unused_delete_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local function unused()
+    return 1
+end
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {4, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto deleteAction = findAction(result, "Remove unused function: 'unused'");
+    REQUIRE(deleteAction.has_value());
+    CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(deleteAction->isPreferred == false);
+    REQUIRE(deleteAction->edit.has_value());
+    auto& deleteChanges = deleteAction->edit->changes.at(uri);
+    REQUIRE_EQ(deleteChanges.size(), 1);
+    CHECK_EQ(deleteChanges[0].newText, "");
+    CHECK_EQ(deleteChanges[0].range.start.line, 1);
+    CHECK_EQ(deleteChanges[0].range.end.line, 4);
+}
+
+TEST_CASE_FIXTURE(Fixture, "import_unused_prefix_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local unused = require("./foo.luau")
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {2, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
+    REQUIRE(prefixAction.has_value());
+    CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(prefixAction->isPreferred == false);
+    REQUIRE(prefixAction->edit.has_value());
+    auto& prefixChanges = prefixAction->edit->changes.at(uri);
+    REQUIRE_EQ(prefixChanges.size(), 1);
+    CHECK_EQ(prefixChanges[0].newText, "_");
+}
+
+TEST_CASE_FIXTURE(Fixture, "import_unused_delete_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local unused = require("./foo.luau")
+print("hello")
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {2, 0}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto deleteAction = findAction(result, "Remove unused import: 'unused'");
+    REQUIRE(deleteAction.has_value());
+    CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(deleteAction->isPreferred == false);
+    REQUIRE(deleteAction->edit.has_value());
+    auto& deleteChanges = deleteAction->edit->changes.at(uri);
+    REQUIRE_EQ(deleteChanges.size(), 1);
+    CHECK_EQ(deleteChanges[0].newText, "");
+    CHECK_EQ(deleteChanges[0].range.start.line, 1);
+    CHECK_EQ(deleteChanges[0].range.end.line, 2);
+}
+
 TEST_SUITE_END();
