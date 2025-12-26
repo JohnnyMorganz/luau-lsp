@@ -15,63 +15,6 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
-struct RobloxFindImportsVisitor : public Luau::LanguageServer::AutoImports::FindImportsVisitor
-{
-public:
-    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
-    std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
-
-    size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber)
-    {
-        if (firstServiceDefinitionLine)
-            minimumLineNumber = *firstServiceDefinitionLine > minimumLineNumber ? *firstServiceDefinitionLine : minimumLineNumber;
-
-        size_t lineNumber = minimumLineNumber;
-        for (auto& [definedService, stat] : serviceLineMap)
-        {
-            auto location = stat->location.end.line;
-            if (definedService < serviceName && location >= lineNumber)
-                lineNumber = location + 1;
-        }
-        return lineNumber;
-    }
-
-    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
-    {
-        if (!isGetService(expr))
-            return false;
-
-        firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
-                                         ? startLine
-                                         : firstServiceDefinitionLine.value();
-        lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
-        serviceLineMap.emplace(std::string(localName->name.value), local);
-
-        return true;
-    }
-
-    [[nodiscard]] size_t getMinimumRequireLine() const override
-    {
-        if (lastServiceDefinitionLine)
-            return *lastServiceDefinitionLine + 1;
-
-        return 0;
-    }
-
-    [[nodiscard]] bool shouldPrependNewline(size_t lineNumber) const override
-    {
-        return lastServiceDefinitionLine && lineNumber - *lastServiceDefinitionLine == 1;
-    }
-};
-
-/// Create a text edit for inserting a Roblox service import (e.g., `local Players = game:GetService("Players")`)
-lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false);
-
-/// Optimise an absolute require path by removing the "game/" prefix (e.g., "game/ReplicatedStorage/Foo" -> "ReplicatedStorage/Foo")
-std::string optimiseAbsoluteRequire(const std::string& path);
-
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
@@ -114,7 +57,6 @@ private:
     PluginNode* pluginInfo = nullptr;
 
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
-    mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
 
     std::optional<const SourceNode*> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
     std::optional<const SourceNode*> getSourceNodeFromRealPath(const Uri& name) const;
@@ -128,6 +70,8 @@ public:
     SourceNode* rootSourceNode = nullptr;
     Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
     Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
+
+    mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
 
     Luau::TypeArena instanceTypes;
 

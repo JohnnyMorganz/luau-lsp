@@ -5,6 +5,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
+#include "Platform/InstanceRequireAutoImporter.hpp"
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -957,7 +958,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_wh
     auto textDocument = workspace.fileResolver.getTextDocument(uri);
     REQUIRE(textDocument);
 
-    RobloxFindImportsVisitor importsVisitor;
+    Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(astRoot);
 
     auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
@@ -977,7 +978,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_wh
     auto textDocument = workspace.fileResolver.getTextDocument(uri);
     REQUIRE(textDocument);
 
-    RobloxFindImportsVisitor importsVisitor;
+    Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(astRoot);
 
     auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);

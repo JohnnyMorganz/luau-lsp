@@ -31,7 +31,7 @@ TEST_CASE_FIXTURE(Fixture, "organise_imports_action_is_returned")
 
     auto result = workspace.codeAction(params, nullptr);
     auto action = findAction(result, "Sort requires");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::SourceOrganizeImports);
 }
 
@@ -53,10 +53,10 @@ end
 
     auto result = workspace.codeAction(params, nullptr);
     auto action = findAction(result, "Add 'local' to global variable");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
     CHECK(action->isPreferred == true);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
     CHECK_EQ(changes[0].newText, "local ");
@@ -79,7 +79,7 @@ end
 
     auto result = workspace.codeAction(params, nullptr);
     auto action = findAction(result, "Add 'local' to global variable");
-    CHECK_FALSE(action.has_value());
+    CHECK_FALSE(action);
 }
 
 TEST_CASE_FIXTURE(Fixture, "local_unused_prefix_fix")
@@ -97,10 +97,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
-    REQUIRE(prefixAction.has_value());
+    REQUIRE(prefixAction);
     CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(prefixAction->isPreferred == false);
-    REQUIRE(prefixAction->edit.has_value());
+    REQUIRE(prefixAction->edit);
     auto& prefixChanges = prefixAction->edit->changes.at(uri);
     REQUIRE_EQ(prefixChanges.size(), 1);
     CHECK_EQ(prefixChanges[0].newText, "_");
@@ -121,10 +121,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto deleteAction = findAction(result, "Remove unused variable: 'unused'");
-    REQUIRE(deleteAction.has_value());
+    REQUIRE(deleteAction);
     CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(deleteAction->isPreferred == false);
-    REQUIRE(deleteAction->edit.has_value());
+    REQUIRE(deleteAction->edit);
     auto& deleteChanges = deleteAction->edit->changes.at(uri);
     REQUIRE_EQ(deleteChanges.size(), 1);
     CHECK_EQ(deleteChanges[0].newText, "");
@@ -149,10 +149,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
-    REQUIRE(prefixAction.has_value());
+    REQUIRE(prefixAction);
     CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(prefixAction->isPreferred == false);
-    REQUIRE(prefixAction->edit.has_value());
+    REQUIRE(prefixAction->edit);
     auto& prefixChanges = prefixAction->edit->changes.at(uri);
     REQUIRE_EQ(prefixChanges.size(), 1);
     CHECK_EQ(prefixChanges[0].newText, "_");
@@ -175,10 +175,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto deleteAction = findAction(result, "Remove unused function: 'unused'");
-    REQUIRE(deleteAction.has_value());
+    REQUIRE(deleteAction);
     CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(deleteAction->isPreferred == false);
-    REQUIRE(deleteAction->edit.has_value());
+    REQUIRE(deleteAction->edit);
     auto& deleteChanges = deleteAction->edit->changes.at(uri);
     REQUIRE_EQ(deleteChanges.size(), 1);
     CHECK_EQ(deleteChanges[0].newText, "");
@@ -201,10 +201,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto prefixAction = findAction(result, "Prefix 'unused' with '_' to silence");
-    REQUIRE(prefixAction.has_value());
+    REQUIRE(prefixAction);
     CHECK(prefixAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(prefixAction->isPreferred == false);
-    REQUIRE(prefixAction->edit.has_value());
+    REQUIRE(prefixAction->edit);
     auto& prefixChanges = prefixAction->edit->changes.at(uri);
     REQUIRE_EQ(prefixChanges.size(), 1);
     CHECK_EQ(prefixChanges[0].newText, "_");
@@ -225,10 +225,10 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto deleteAction = findAction(result, "Remove unused import: 'unused'");
-    REQUIRE(deleteAction.has_value());
+    REQUIRE(deleteAction);
     CHECK(deleteAction->kind == lsp::CodeActionKind::QuickFix);
     CHECK(deleteAction->isPreferred == false);
-    REQUIRE(deleteAction->edit.has_value());
+    REQUIRE(deleteAction->edit);
     auto& deleteChanges = deleteAction->edit->changes.at(uri);
     REQUIRE_EQ(deleteChanges.size(), 1);
     CHECK_EQ(deleteChanges[0].newText, "");
@@ -253,10 +253,10 @@ end
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Remove unreachable code");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
     CHECK(action->isPreferred == false);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
     CHECK_EQ(changes[0].newText, "");
@@ -283,9 +283,9 @@ print("hello")
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Remove all unused code");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::Source);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     // Should have 3 edits: unused1, unused2, and unusedFunc
     CHECK_EQ(changes.size(), 3);
@@ -306,7 +306,7 @@ print(used)
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Remove all unused code");
-    CHECK_FALSE(action.has_value());
+    CHECK_FALSE(action);
 }
 
 TEST_CASE_FIXTURE(Fixture, "redundant_native_attribute_fix")
@@ -327,10 +327,10 @@ print(foo())
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Remove redundant @native attribute");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
     CHECK(action->isPreferred == false);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
     CHECK_EQ(changes[0].newText, "");
@@ -360,10 +360,10 @@ return {}
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add require for 'MyModule' from \"./MyModule\"");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
     CHECK(action->isPreferred == true);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
 
@@ -412,8 +412,8 @@ local x = OtherModule
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add require for 'OtherModule' from \"./OtherModule\"");
-    REQUIRE(action.has_value());
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action);
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
     CHECK(changes[0].newText.find("local OtherModule = require") != std::string::npos);
@@ -434,10 +434,10 @@ TEST_CASE_FIXTURE(Fixture, "unknown_global_offers_service_import_fix")
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Import service 'ReplicatedStorage'");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
     CHECK(action->isPreferred == true);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
 
@@ -490,9 +490,9 @@ TEST_CASE_FIXTURE(Fixture, "unknown_global_offers_instance_based_require_fix")
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add require for 'MyModule' from \"ReplicatedStorage.Folder.MyModule\"");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::QuickFix);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 2);
 
@@ -547,8 +547,8 @@ TEST_CASE_FIXTURE(Fixture, "unknown_global_instance_require_reuses_existing_serv
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add require for 'MyModule' from \"ReplicatedStorage.Folder.MyModule\"");
-    REQUIRE(action.has_value());
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action);
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
 
@@ -587,9 +587,9 @@ return {}
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add all missing requires");
-    REQUIRE(action.has_value());
+    REQUIRE(action);
     CHECK(action->kind == lsp::CodeActionKind::Source);
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 2);
 
@@ -617,7 +617,7 @@ local y = 2
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add all missing requires");
-    CHECK_FALSE(action.has_value());
+    CHECK_FALSE(action);
 }
 
 TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_with_services")
@@ -661,8 +661,8 @@ TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_with_services")
     auto result = workspace.codeAction(params, nullptr);
 
     auto action = findAction(result, "Add all missing requires");
-    REQUIRE(action.has_value());
-    REQUIRE(action->edit.has_value());
+    REQUIRE(action);
+    REQUIRE(action->edit);
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 3);
 
