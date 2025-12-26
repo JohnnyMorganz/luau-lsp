@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `UnreachableCode`: Remove unreachable code after early return/error
   - `RedundantNativeAttribute`: Remove redundant `@native` attribute
   - Unknown symbol errors now have a quick fix to auto-import missing modules (both string requires and Roblox instance-based requires) and services
+  - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
   - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
 
 ### Fixed

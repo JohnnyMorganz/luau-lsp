@@ -342,12 +342,35 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             if (!requestRange.overlaps(error.location))
                 continue;
 
+            lsp::Range errorRange = textDocument->convertLocation(error.location);
+            auto diagnostic = findMatchingDiagnostic(params.context.diagnostics, errorRange);
+
             if (const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data))
             {
-                lsp::Range errorRange = textDocument->convertLocation(error.location);
-                auto diagnostic = findMatchingDiagnostic(params.context.diagnostics, errorRange);
-
                 platform->handleUnknownSymbolFix(unknownSymbolCtx, *unknownSymbol, diagnostic, result);
+            }
+            else if (const auto* misspelledProp = Luau::get_if<Luau::UnknownPropButFoundLikeProp>(&error.data))
+            {
+                bool singleCandidate = misspelledProp->candidates.size() == 1;
+
+                for (const auto& candidate : misspelledProp->candidates)
+                {
+                    lsp::CodeAction action;
+                    action.title = "Change '" + misspelledProp->key + "' to '" + candidate + "'";
+                    action.kind = lsp::CodeActionKind::QuickFix;
+                    action.isPreferred = singleCandidate;
+
+                    if (diagnostic)
+                        action.diagnostics.push_back(*diagnostic);
+
+                    lsp::TextEdit edit{errorRange, candidate};
+
+                    lsp::WorkspaceEdit workspaceEdit;
+                    workspaceEdit.changes.emplace(params.textDocument.uri, std::vector{edit});
+                    action.edit = workspaceEdit;
+
+                    result.push_back(action);
+                }
             }
         }
     }

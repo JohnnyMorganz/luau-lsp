@@ -677,4 +677,79 @@ TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_with_services")
     )"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "misspelled_property_single_candidate_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local t = {}
+function t.Foo() end
+
+t.fOo()
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{4, 2}, {4, 5}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Change 'fOo' to 'Foo'");
+    REQUIRE(action);
+    CHECK(action->kind == lsp::CodeActionKind::QuickFix);
+    CHECK(action->isPreferred == true);
+    REQUIRE(action->edit);
+    auto& changes = action->edit->changes.at(uri);
+    REQUIRE_EQ(changes.size(), 1);
+    CHECK_EQ(changes[0].newText, "Foo");
+}
+
+TEST_CASE_FIXTURE(Fixture, "misspelled_property_multiple_candidates_fix")
+{
+    auto uri = newDocument("test.luau", R"(
+local t = {}
+function t.Foo() end
+function t.FOO() end
+
+t.foo()
+)");
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{5, 2}, {5, 5}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    // Both candidates should be offered
+    auto action1 = findAction(result, "Change 'foo' to 'Foo'");
+    auto action2 = findAction(result, "Change 'foo' to 'FOO'");
+    REQUIRE(action1);
+    REQUIRE(action2);
+
+    // Neither should be preferred when there are multiple candidates
+    CHECK(action1->isPreferred == false);
+    CHECK(action2->isPreferred == false);
+}
+
+TEST_CASE_FIXTURE(Fixture, "misspelled_property_no_fix_when_range_outside")
+{
+    auto uri = newDocument("test.luau", R"(
+local t = {}
+function t.Foo() end
+
+t.fOo()
+)");
+
+    // Request code action for line 1 (not where the error is)
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{1, 0}, {1, 10}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+
+    auto action = findAction(result, "Change 'fOo' to 'Foo'");
+    CHECK_FALSE(action);
+}
+
 TEST_SUITE_END();
