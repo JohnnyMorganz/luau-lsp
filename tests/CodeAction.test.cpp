@@ -347,13 +347,14 @@ return {}
 )");
     workspace.frontend.check(workspace.fileResolver.getModuleName(moduleUri));
 
-    auto uri = newDocument("test.luau", R"(
-local x = MyModule
-)");
+    std::string source = dedent(R"(
+        local x = MyModule
+    )");
+    auto uri = newDocument("test.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{1, 10}, {1, 18}};
+    params.range = {{0, 10}, {0, 18}};
     params.context.only = {lsp::CodeActionKind::QuickFix};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -365,7 +366,12 @@ local x = MyModule
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
-    CHECK(changes[0].newText.find("local MyModule = require") != std::string::npos);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local MyModule = require("./MyModule")
+        local x = MyModule
+    )"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "unknown_global_no_fix_when_no_matching_module")
@@ -415,13 +421,14 @@ local x = OtherModule
 
 TEST_CASE_FIXTURE(Fixture, "unknown_global_offers_service_import_fix")
 {
-    auto uri = newDocument("test.luau", R"(
-local storage = ReplicatedStorage
-)");
+    std::string source = dedent(R"(
+        local storage = ReplicatedStorage
+    )");
+    auto uri = newDocument("test.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{1, 16}, {1, 33}};
+    params.range = {{0, 16}, {0, 33}};
     params.context.only = {lsp::CodeActionKind::QuickFix};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -433,7 +440,12 @@ local storage = ReplicatedStorage
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
-    CHECK(changes[0].newText.find("local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")") != std::string::npos);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local storage = ReplicatedStorage
+    )"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "unknown_global_offers_instance_based_require_fix")
@@ -465,13 +477,14 @@ TEST_CASE_FIXTURE(Fixture, "unknown_global_offers_instance_based_require_fix")
     }
     )");
 
-    auto uri = newDocument("Script.server.luau", R"(
-local x = MyModule
-)");
+    std::string source = dedent(R"(
+        local x = MyModule
+    )");
+    auto uri = newDocument("Script.server.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{1, 10}, {1, 18}};
+    params.range = {{0, 10}, {0, 18}};
     params.context.only = {lsp::CodeActionKind::QuickFix};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -482,8 +495,13 @@ local x = MyModule
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 2);
-    CHECK(changes[0].newText.find("local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")") != std::string::npos);
-    CHECK(changes[1].newText.find("local MyModule = require(ReplicatedStorage.Folder.MyModule)") != std::string::npos);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local MyModule = require(ReplicatedStorage.Folder.MyModule)
+        local x = MyModule
+    )"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "unknown_global_instance_require_reuses_existing_service")
@@ -515,14 +533,15 @@ TEST_CASE_FIXTURE(Fixture, "unknown_global_instance_require_reuses_existing_serv
     }
     )");
 
-    auto uri = newDocument("Script.server.luau", R"(
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local x = MyModule
-)");
+    std::string source = dedent(R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local x = MyModule
+    )");
+    auto uri = newDocument("Script.server.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{2, 10}, {2, 18}};
+    params.range = {{1, 10}, {1, 18}};
     params.context.only = {lsp::CodeActionKind::QuickFix};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -532,7 +551,13 @@ local x = MyModule
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 1);
-    CHECK(changes[0].newText.find("local MyModule = require(ReplicatedStorage.Folder.MyModule)") != std::string::npos);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local MyModule = require(ReplicatedStorage.Folder.MyModule)
+        local x = MyModule
+    )"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_source_action")
@@ -548,14 +573,15 @@ return {}
     workspace.frontend.check(workspace.fileResolver.getModuleName(moduleA));
     workspace.frontend.check(workspace.fileResolver.getModuleName(moduleB));
 
-    auto uri = newDocument("test.luau", R"(
-local x = ModuleA
-local y = ModuleB
-)");
+    std::string source = dedent(R"(
+        local x = ModuleA
+        local y = ModuleB
+    )");
+    auto uri = newDocument("test.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{0, 0}, {3, 0}};
+    params.range = {{0, 0}, {2, 0}};
     params.context.only = {lsp::CodeActionKind::Source};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -566,8 +592,14 @@ local y = ModuleB
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
     REQUIRE_EQ(changes.size(), 2);
-    CHECK(changes[0].newText.find("local ModuleA = require") != std::string::npos);
-    CHECK(changes[1].newText.find("local ModuleB = require") != std::string::npos);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ModuleA = require("./ModuleA")
+        local ModuleB = require("./ModuleB")
+        local x = ModuleA
+        local y = ModuleB
+    )"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_no_action_when_no_missing")
@@ -614,15 +646,16 @@ TEST_CASE_FIXTURE(Fixture, "add_all_missing_requires_with_services")
     }
     )");
 
-    auto uri = newDocument("Script.server.luau", R"(
-local a = ModuleA
-local b = ModuleB
-local rs = ReplicatedStorage
-)");
+    std::string source = dedent(R"(
+        local a = ModuleA
+        local b = ModuleB
+        local rs = ReplicatedStorage
+    )");
+    auto uri = newDocument("Script.server.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;
-    params.range = {{0, 0}, {4, 0}};
+    params.range = {{0, 0}, {3, 0}};
     params.context.only = {lsp::CodeActionKind::Source};
 
     auto result = workspace.codeAction(params, nullptr);
@@ -631,18 +664,17 @@ local rs = ReplicatedStorage
     REQUIRE(action.has_value());
     REQUIRE(action->edit.has_value());
     auto& changes = action->edit->changes.at(uri);
+    REQUIRE_EQ(changes.size(), 3);
 
-    // Should have service import + 2 requires (service is deduplicated)
-    REQUIRE_GE(changes.size(), 2);
-
-    // Check that ReplicatedStorage service is added
-    bool hasServiceImport = false;
-    for (const auto& change : changes)
-    {
-        if (change.newText.find("game:GetService(\"ReplicatedStorage\")") != std::string::npos)
-            hasServiceImport = true;
-    }
-    CHECK(hasServiceImport);
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local ModuleA = require(ReplicatedStorage.ModuleA)
+        local ModuleB = require(ReplicatedStorage.ModuleB)
+        local a = ModuleA
+        local b = ModuleB
+        local rs = ReplicatedStorage
+    )"));
 }
 
 TEST_SUITE_END();
