@@ -4,10 +4,12 @@
 #include "LSP/TextDocument.hpp"
 #include "Luau/Ast.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/Error.h"
 #include "Luau/FileResolver.h"
 #include "Luau/Frontend.h"
 #include "Luau/GlobalTypes.h"
 #include "Luau/Module.h"
+#include "Luau/NotNull.h"
 #include "Luau/TypeFwd.h"
 #include "Protocol/CodeAction.hpp"
 #include "Protocol/Completion.hpp"
@@ -21,6 +23,16 @@
 
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
+
+/// Context for generating unknown symbol quick fixes
+struct UnknownSymbolFixContext
+{
+    lsp::DocumentUri uri;
+    Luau::NotNull<const TextDocument> textDocument;
+    Luau::NotNull<const Luau::SourceModule> sourceModule;
+    Luau::NotNull<const Luau::Frontend> frontend;
+    size_t hotCommentsLineNumber;
+};
 
 class LSPPlatform
 {
@@ -88,6 +100,10 @@ public:
     }
 
     virtual void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) {}
+
+    /// Generate code actions for an unknown symbol (missing require/service import)
+    virtual void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result);
 
     virtual lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
     {

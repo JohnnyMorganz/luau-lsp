@@ -5,7 +5,9 @@
 #include "Luau/PrettyPrinter.h"
 #include "Luau/LinterConfig.h"
 #include "Platform/AutoImports.hpp"
+#include "Platform/LSPPlatform.hpp"
 #include "Luau/Ast.h"
+#include "Luau/Error.h"
 
 #include <set>
 
@@ -432,6 +434,40 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
             }
             default:
                 break;
+            }
+        }
+
+        // Process type errors (UnknownSymbol for missing requires)
+        // Compute hot comments line number for import placement
+        size_t hotCommentsLineNumber = 0;
+        for (const auto& hotComment : sourceModule->hotcomments)
+        {
+            if (!hotComment.header)
+                continue;
+            if (hotComment.location.begin.line >= hotCommentsLineNumber)
+                hotCommentsLineNumber = hotComment.location.begin.line + 1U;
+        }
+
+        UnknownSymbolFixContext unknownSymbolCtx{
+            params.textDocument.uri,
+            Luau::NotNull(&*textDocument),
+            Luau::NotNull(sourceModule),
+            Luau::NotNull(&frontend),
+            hotCommentsLineNumber,
+        };
+
+        for (const auto& error : cr.errors)
+        {
+            // Only include errors that overlap with the requested range
+            if (!requestRange.overlaps(error.location))
+                continue;
+
+            lsp::Range errorRange = textDocument->convertLocation(error.location);
+            auto diagnostic = findMatchingDiagnostic(params.context.diagnostics, errorRange);
+
+            if (const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data))
+            {
+                platform->handleUnknownSymbolFix(unknownSymbolCtx, *unknownSymbol, diagnostic, result);
             }
         }
     }

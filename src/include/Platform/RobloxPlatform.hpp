@@ -174,6 +174,8 @@ public:
 
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;
+    void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result) override;
 
     lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module) override;
 

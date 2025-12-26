@@ -236,3 +236,93 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
 
     return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }
+
+namespace
+{
+// Find all modules that can be required with a variable name matching the given name
+std::vector<std::pair<Luau::ModuleName, std::string>> findModulesForName(
+    const std::string& name, const Luau::ModuleName& fromModule, const Luau::Frontend& frontend, const WorkspaceFolder& workspaceFolder)
+{
+    std::vector<std::pair<Luau::ModuleName, std::string>> matches;
+
+    for (const auto& [moduleName, sourceNode] : frontend.sourceNodes)
+    {
+        if (moduleName == fromModule)
+            continue;
+
+        auto requireName = Luau::LanguageServer::AutoImports::requireNameFromModuleName(moduleName);
+        if (requireName == name)
+        {
+            auto uri = workspaceFolder.fileResolver.getUri(moduleName);
+            if (workspaceFolder.isIgnoredFileForAutoImports(uri))
+                continue;
+
+            matches.emplace_back(moduleName, requireName);
+        }
+    }
+    return matches;
+}
+} // namespace
+
+void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    // Only handle binding context (not type references)
+    if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
+        return;
+
+    // Find all modules that match this name
+    auto moduleMatches = findModulesForName(unknownSymbol.name, ctx.sourceModule->name, *ctx.frontend, *workspaceFolder);
+    if (moduleMatches.empty())
+        return;
+
+    // Find existing imports to determine best insertion line
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(ctx.sourceModule->root);
+
+    // Compute the require path
+    auto fromUri = workspaceFolder->fileResolver.getUri(ctx.sourceModule->name);
+    auto availableAliases = workspaceFolder->fileResolver.getConfig(ctx.sourceModule->name, workspaceFolder->limits).aliases;
+
+    ClientConfiguration config;
+    if (workspaceFolder->fileResolver.client)
+        config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+
+    // Generate a code action for each matching module
+    bool isFirst = true;
+    for (const auto& [moduleName, requireName] : moduleMatches)
+    {
+        // Check if this module is already imported
+        if (importsVisitor.containsRequire(requireName))
+            continue;
+
+        auto toUri = workspaceFolder->fileResolver.getUri(moduleName);
+
+        auto [requirePath, sortText] =
+            Luau::LanguageServer::AutoImports::computeRequirePath(fromUri, toUri, availableAliases, config.completion.imports.requireStyle);
+
+        size_t minimumLineNumber =
+            Luau::LanguageServer::AutoImports::computeMinimumLineNumberForRequire(importsVisitor, ctx.hotCommentsLineNumber);
+        size_t lineNumber =
+            Luau::LanguageServer::AutoImports::computeBestLineForRequire(importsVisitor, *ctx.textDocument, requirePath, minimumLineNumber);
+
+        bool prependNewline = config.completion.imports.separateGroupsWithLine && importsVisitor.shouldPrependNewline(lineNumber);
+        auto requireEdit =
+            Luau::LanguageServer::AutoImports::createRequireTextEdit(requireName, '"' + requirePath + '"', lineNumber, prependNewline);
+
+        lsp::CodeAction action;
+        action.title = "Add require for '" + requireName + "' from \"" + requirePath + "\"";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = isFirst; // Only the first match is preferred
+
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(ctx.uri, std::vector{requireEdit});
+        action.edit = workspaceEdit;
+
+        result.push_back(action);
+        isFirst = false;
+    }
+}
