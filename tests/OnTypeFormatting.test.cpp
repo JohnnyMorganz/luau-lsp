@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "TestUtils.h"
 #include "LSP/LanguageServer.hpp"
 
 TEST_SUITE_BEGIN("OnTypeFormatting");

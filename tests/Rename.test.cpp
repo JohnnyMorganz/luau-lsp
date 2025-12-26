@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "TestUtils.h"
 
 TEST_SUITE_BEGIN("Rename");
 

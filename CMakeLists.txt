@@ -104,7 +104,6 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Fixture.cpp
         tests/TempDir.cpp
         tests/TestClient.cpp
-        tests/TestUtils.cpp
         tests/Autocomplete.test.cpp
         tests/AutoImports.test.cpp
         tests/Bytecode.test.cpp
