@@ -150,10 +150,6 @@ TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
     CHECK_EQ(paths.size(), 1);
 }
 
-// Issue #1191: Test UTF-8 command-line argument handling
-// On Windows, command-line arguments are encoded in the system code page, not UTF-8.
-// These tests verify the fix for handling non-ASCII characters in file paths.
-
 #ifdef _WIN32
 TEST_CASE("toUtf8 converts wide string to UTF-8 string")
 {
@@ -177,10 +173,8 @@ TEST_CASE("fromUtf8 and toUtf8 are inverses for Unicode paths")
     CHECK_EQ(original, roundTrip);
 }
 
-TEST_CASE("getUtf8CommandLineArgs returns UTF-8 encoded arguments")
+TEST_CASE("getUtf8CommandLineArgs returns command line arguments")
 {
-    // This test verifies the function exists and returns non-empty results
-    // when running from command line with arguments
     auto args = Luau::FileUtils::getUtf8CommandLineArgs();
     // Should have at least the program name
     CHECK_FALSE(args.empty());

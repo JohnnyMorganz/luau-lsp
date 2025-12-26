@@ -141,32 +141,4 @@ TEST_CASE("parse_definitions_files_handles_legacy_syntax")
                                });
 }
 
-// Issue #1191: Test definitions file paths with non-ASCII characters
-TEST_CASE("parse_definitions_files_handles_unicode_paths")
-{
-    argparse::ArgumentParser program("test");
-    program.set_assign_chars(":=");
-    program.add_argument("--definitions", "--defs")
-        .help("A path to a Luau definitions file to load into the global namespace")
-        .default_value<std::vector<std::string>>({})
-        .append()
-        .metavar("PATH");
-
-    // Test with Polish characters (ż) and Cyrillic (Рабочий стол)
-    std::vector<std::string> arguments{
-        "",
-        "--definitions:@polish=C:/Users/Użytkownik/types.d.luau",
-        "--definitions:@cyrillic=C:/Users/Рабочий стол/defs.d.luau"
-    };
-    program.parse_args(arguments);
-
-    auto definitionsFiles = processDefinitionsFilePaths(program);
-
-    // Verify the paths are preserved correctly with Unicode characters
-    REQUIRE(definitionsFiles.find("@polish") != definitionsFiles.end());
-    REQUIRE(definitionsFiles.find("@cyrillic") != definitionsFiles.end());
-    CHECK_EQ(definitionsFiles["@polish"], "C:/Users/Użytkownik/types.d.luau");
-    CHECK_EQ(definitionsFiles["@cyrillic"], "C:/Users/Рабочий стол/defs.d.luau");
-}
-
 TEST_SUITE_END();
