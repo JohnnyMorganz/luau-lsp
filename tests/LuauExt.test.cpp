@@ -98,7 +98,6 @@ TEST_CASE_FIXTURE(Fixture, "lookupProp on a self-referential intersection type d
 
 TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union types")
 {
-    // Use check() which uses the internal Luau parser
     check(R"(
         type A = { prop: number }
         type B = { prop: string }
@@ -116,7 +115,6 @@ TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union types"
 
 TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union of same generic instantiation")
 {
-    // Use check() which uses the internal Luau parser
     check(R"(
         type Base<T> = { prop: T }
         type Union = Base<number> | Base<string>
@@ -128,8 +126,6 @@ TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union of sam
 
     auto ty = requireType("x");
     auto results = lookupProp(Luau::follow(ty), "prop");
-    // Both union options have the property, so we get 2 results
-    // (even though they're from the same generic definition)
     CHECK_EQ(results.size(), 2);
 }
 
