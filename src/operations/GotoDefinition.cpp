@@ -23,43 +23,55 @@ static std::optional<LocationInformation> findLocationForSymbol(
     return LocationInformation{Luau::getDefinitionModuleName(*ty), getLocation(*ty), *ty};
 }
 
-static std::optional<LocationInformation> findLocationForIndex(const Luau::ModulePtr& module, const Luau::AstExpr* base, const Luau::Name& name)
+static std::vector<LocationInformation> findLocationsForIndex(const Luau::ModulePtr& module, const Luau::AstExpr* base, const Luau::Name& name)
 {
     auto baseTy = module->astTypes.find(base);
     if (!baseTy)
-        return std::nullopt;
+        return {};
     auto baseTyFollowed = Luau::follow(*baseTy);
-    auto propInformation = lookupProp(baseTyFollowed, name);
-    if (propInformation.size() != 1)
-        return std::nullopt;
 
-    auto [realBaseTy, prop] = propInformation[0];
-    auto location = prop.location ? prop.location : prop.typeLocation;
+    std::vector<LocationInformation> results;
+    for (const auto& [realBaseTy, prop] : lookupProp(baseTyFollowed, name))
+    {
+        auto location = prop.location ? prop.location : prop.typeLocation;
+        if (!prop.readTy)
+            continue;
 
-    if (!prop.readTy)
-        return std::nullopt;
+        // Deduplicate by location to avoid returning multiple identical results
+        // (e.g., when a union has multiple instantiations of the same generic type)
+        bool isDuplicate = std::any_of(results.begin(), results.end(),
+            [&](const LocationInformation& existing)
+            {
+                return existing.location == location;
+            });
+        if (!isDuplicate)
+            results.push_back(LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, *prop.readTy});
+    }
 
-    return LocationInformation{Luau::getDefinitionModuleName(realBaseTy), location, *prop.readTy};
+    return results;
 }
 
-static std::optional<LocationInformation> findLocationForExpr(
-    const Luau::ModulePtr& module, const Luau::AstExpr* expr, const Luau::Position& position)
+static std::vector<LocationInformation> findLocationsForExpr(const Luau::ModulePtr& module, const Luau::AstExpr* expr, const Luau::Position& position)
 {
-    auto scope = Luau::findScopeAtPosition(*module, position);
-
     if (auto local = expr->as<Luau::AstExprLocal>())
-        return findLocationForSymbol(module, position, local->local);
+    {
+        if (auto loc = findLocationForSymbol(module, position, local->local))
+            return {*loc};
+    }
     else if (auto global = expr->as<Luau::AstExprGlobal>())
-        return findLocationForSymbol(module, position, global->name);
+    {
+        if (auto loc = findLocationForSymbol(module, position, global->name))
+            return {*loc};
+    }
     else if (auto indexname = expr->as<Luau::AstExprIndexName>())
-        return findLocationForIndex(module, indexname->expr, indexname->index.value);
+        return findLocationsForIndex(module, indexname->expr, indexname->index.value);
     else if (auto indexexpr = expr->as<Luau::AstExprIndexExpr>())
     {
         if (auto string = indexexpr->index->as<Luau::AstExprConstantString>())
-            return findLocationForIndex(module, indexexpr->expr, std::string(string->value.data, string->value.size));
+            return findLocationsForIndex(module, indexexpr->expr, std::string(string->value.data, string->value.size));
     }
 
-    return std::nullopt;
+    return {};
 }
 
 lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParams& params, const LSPCancellationToken& cancellationToken)
@@ -114,10 +126,8 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
 
     if (auto expr = node->asExpr())
     {
-        auto locationInformation = findLocationForExpr(module, expr, position);
-        if (locationInformation)
+        for (const auto& [definitionModuleName, location, _] : findLocationsForExpr(module, expr, position))
         {
-            auto [definitionModuleName, location, _] = *locationInformation;
             if (location)
             {
                 if (definitionModuleName)
