@@ -1917,7 +1917,7 @@ TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
         CHECK_FALSE(getItem(result, property));
 }
 
-TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
+TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_property_on_union_type")
 {
     auto source = R"(
         type BaseNode<HOS> = {
