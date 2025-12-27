@@ -617,7 +617,7 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_all_parts_of_union_point
 
     auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
-    CHECK_EQ(result->contents.value, codeBlock("luau", "false | true") + kDocumentationBreaker +
+    CHECK_EQ(result->contents.value, codeBlock("luau", FFlag::LuauSolverV2 ? "boolean" : "false | true") + kDocumentationBreaker +
                                          "Indicates if the node has only a single supporter, this is purely internal\n"
                                          "and only used by `object_tree.closest_empty_node`,\n"
                                          "as an optimization for trees that have a taper type of \"Flat\" or \"Slope\".\n");
