@@ -45,4 +45,23 @@ struct DidCloseTextDocumentParams
     TextDocumentIdentifier textDocument;
 };
 NLOHMANN_DEFINE_OPTIONAL(DidCloseTextDocumentParams, textDocument)
+
+struct FormattingOptions
+{
+    int tabSize = 0;
+    bool insertSpaces = false;
+    std::optional<bool> trimTrailingWhitespace = std::nullopt;
+    std::optional<bool> insertFinalNewline = std::nullopt;
+    std::optional<bool> trimFinalNewlines = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(FormattingOptions, tabSize, insertSpaces, trimTrailingWhitespace, insertFinalNewline, trimFinalNewlines)
+
+struct DocumentOnTypeFormattingParams
+{
+    TextDocumentIdentifier textDocument;
+    Position position;
+    std::string ch;
+    FormattingOptions options;
+};
+NLOHMANN_DEFINE_OPTIONAL(DocumentOnTypeFormattingParams, textDocument, position, ch, options)
 } // namespace lsp

@@ -10,6 +10,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added command `Luau: Compute CodeGen instructions for file` to emit annotated codegen instructions, similar to the bytecode command. External editors can implement this by using the `luau-lsp/codeGen` request. ([#617](https://github.com/JohnnyMorganz/luau-lsp/issues/617))
 - Added support for requiring YAML files (`.yaml` and `.yml`) as Luau data modules, similar to existing JSON and TOML support ([#1267](https://github.com/JohnnyMorganz/luau-lsp/issues/1267))
+- Implemented quick fix code actions for common diagnostics ([#439](https://github.com/JohnnyMorganz/luau-lsp/issues/439)):
+  - `GlobalUsedAsLocal`: Add `local` keyword to fix accidental global variable
+  - `LocalUnused`, `FunctionUnused`, `ImportUnused`: Prefix with `_` to silence, or remove the unused declaration
+  - `UnreachableCode`: Remove unreachable code after early return/error
+  - `RedundantNativeAttribute`: Remove redundant `@native` attribute
+  - Unknown symbol errors now have a quick fix to auto-import missing modules (both string requires and Roblox instance-based requires) and services
+  - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
+  - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
+- Added support for automatic quote conversion to backticks when typing `{` inside strings. This can be enabled with the `luau-lsp.format.convertQuotes` configuration option. You may need to enable on-type formatting in your editor (e.g., `format.onType` in VSCode) ([#1298](https://github.com/JohnnyMorganz/luau-lsp/pull/1298))
+
+### Changed
+
+- Aliases defined in a root-level `.luaurc` / `.config.luau` will now be indexed at startup. As such, external alias files will now show up as part of string-require auto-imports if the file has not previously been required ([#1043](https://github.com/JohnnyMorganz/luau-lsp/issues/1043))
+- Find All References and Rename now correctly track property references through metatable `__index` chains, enabling proper support for Luau class patterns using `setmetatable` inheritance ([#961](https://github.com/JohnnyMorganz/luau-lsp/issues/961))
 
 ### Fixed
 
@@ -20,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed improper and missing escaping when converting JSON files to Luau data modules. Object keys and string values containing special characters (quotes, newlines, etc.) are now properly escaped ([#426](https://github.com/JohnnyMorganz/luau-lsp/issues/426))
 - Fixed Find All References not including properties accessed via bracket notation (e.g., `obj["property"]`) ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
 - Fixed Rename not supporting properties accessed via bracket notation. Renaming now correctly updates both dot notation (`obj.property`) and bracket notation (`obj["property"]`) references ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
+- Fixed definitions or documentation files not loading when the path to the file contains non-ASCII characters ([#1191](https://github.com/JohnnyMorganz/luau-lsp/issues/1191))
 
 ## [1.58.0] - 2025-12-14
 

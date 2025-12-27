@@ -60,6 +60,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/platform/LSPPlatform.cpp
         src/platform/StringRequireAutoImporter.cpp
         src/platform/StringRequireSuggester.cpp
+        src/platform/roblox/InstanceRequireAutoImporter.cpp
         src/platform/roblox/RobloxCodeAction.cpp
         src/platform/roblox/RobloxColorProvider.cpp
         src/platform/roblox/RobloxCompletion.cpp
@@ -87,6 +88,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
         src/operations/RequireGraph.cpp
+        src/operations/OnTypeFormatting.cpp
         src/transport/PipeTransport.cpp
         src/transport/StdioTransport.cpp
         extern/glob/match.cpp
@@ -129,7 +131,9 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
         tests/RequireGraph.test.cpp
+        tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
+        tests/CodeAction.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 

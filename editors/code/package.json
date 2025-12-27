@@ -278,6 +278,12 @@
           "default": false,
           "scope": "resource"
         },
+        "luau-lsp.format.convertQuotes": {
+          "markdownDescription": "Whether to automatically convert single/double quotes to backticks when typing `{` inside strings",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
         "luau-lsp.fflags.enableByDefault": {
           "markdownDescription": "Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`",
           "type": "boolean",

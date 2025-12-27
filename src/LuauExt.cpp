@@ -736,6 +736,10 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
     {
         return ttv->definitionLocation;
     }
+    else if (auto mtv = Luau::get<Luau::MetatableType>(type))
+    {
+        return getLocation(mtv->table);
+    }
     else if (auto ctv = Luau::get<Luau::ExternType>(type))
     {
         return ctv->definitionLocation;

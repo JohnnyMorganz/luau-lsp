@@ -9,6 +9,7 @@
 
 #include "Luau/TimeTrace.h"
 #include <memory>
+#include <unordered_set>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
     : fileResolver(fileResolver)
@@ -131,7 +132,8 @@ std::optional<Uri> resolveDirectoryAlias(
     return std::nullopt;
 }
 
-std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
+std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
+    const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
 {
     if (!context)
         return std::nullopt;
@@ -235,4 +237,106 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
     };
 
     return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
+}
+
+void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+    const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result)
+{
+    if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
+        return;
+
+    LUAU_ASSERT(ctx.sourceModule->root);
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(ctx.sourceModule->root);
+
+    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
+
+    Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
+        ctx.sourceModule->name,
+        Luau::NotNull(ctx.textDocument),
+        Luau::NotNull(&ctx.workspaceFolder->frontend),
+        ctx.workspaceFolder,
+        Luau::NotNull(&config.completion.imports),
+        hotCommentsLineNumber,
+        Luau::NotNull(&importsVisitor),
+        [&unknownSymbol](const std::string& requireName)
+        {
+            return requireName == unknownSymbol.name;
+        },
+    };
+
+    const auto results = Luau::LanguageServer::AutoImports::computeAllStringRequires(importCtx);
+    for (const auto& stringRequire : results)
+    {
+        lsp::CodeAction action;
+        action.title = "Add require for '" + stringRequire.variableName + "' from \"" + stringRequire.requirePath + "\"";
+        action.kind = lsp::CodeActionKind::QuickFix;
+        action.isPreferred = results.size() == 1;
+
+        if (diagnostic)
+            action.diagnostics.push_back(*diagnostic);
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.changes.emplace(ctx.uri, std::vector{stringRequire.edit});
+        action.edit = workspaceEdit;
+
+        result.push_back(action);
+    }
+}
+
+std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
+    const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors)
+{
+    std::vector<lsp::TextEdit> edits;
+
+    Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
+    importsVisitor.visit(ctx.sourceModule->root);
+
+    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
+
+    std::vector<std::string> unknownSymbols;
+    std::unordered_set<std::string> addedRequires;
+
+    for (const auto& error : errors)
+    {
+        const auto* unknownSymbol = Luau::get_if<Luau::UnknownSymbol>(&error.data);
+        if (!unknownSymbol || unknownSymbol->context != Luau::UnknownSymbol::Binding)
+            continue;
+
+        unknownSymbols.emplace_back(unknownSymbol->name);
+    }
+
+    Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
+        ctx.sourceModule->name,
+        Luau::NotNull(ctx.textDocument),
+        Luau::NotNull(&ctx.workspaceFolder->frontend),
+        ctx.workspaceFolder,
+        Luau::NotNull(&config.completion.imports),
+        hotCommentsLineNumber,
+        Luau::NotNull(&importsVisitor),
+        [&unknownSymbols](const std::string& requireName)
+        {
+            return contains(unknownSymbols, requireName);
+        },
+    };
+
+    const auto results = computeAllStringRequires(importCtx);
+    for (const auto& stringRequire : results)
+    {
+        if (addedRequires.find(stringRequire.variableName) != addedRequires.end())
+            continue;
+
+        edits.push_back(stringRequire.edit);
+        addedRequires.insert(stringRequire.variableName);
+    }
+
+    std::sort(edits.begin(), edits.end(),
+        [](const lsp::TextEdit& a, const lsp::TextEdit& b)
+        {
+            return a.range.start.line == b.range.start.line ? a.newText < b.newText : a.range.start.line < b.range.start.line;
+        });
+
+    return edits;
 }
