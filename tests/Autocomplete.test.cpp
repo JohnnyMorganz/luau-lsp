@@ -1917,4 +1917,36 @@ TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
         CHECK_FALSE(getItem(result, property));
 }
 
+TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_property_on_union_type")
+{
+    auto source = R"(
+        type BaseNode<HOS> = {
+	        --[[
+		        This is a documentation comment
+	        ]]
+	        has_one_supporter: HOS,
+        }
+
+        export type Node = BaseNode<true> | BaseNode<false>
+
+        local x: Node = {} :: any
+
+        x.
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{14, 10};
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = getItem(result, "has_one_supporter");
+    REQUIRE(item);
+    REQUIRE(item->documentation);
+    CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item->documentation->value);
+    CHECK_EQ(item->documentation->value, "This is a documentation comment");
+}
+
 TEST_SUITE_END();

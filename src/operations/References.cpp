@@ -180,9 +180,9 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
     // table where the property is defined (may be via __index chain)
     if (property)
     {
-        if (auto propResult = lookupProp(ty, *property))
+        if (auto propResult = lookupProp(ty, *property); propResult.size() == 1)
         {
-            auto [baseTy, prop] = *propResult;
+            auto [baseTy, prop] = propResult[0];
             ty = Luau::follow(baseTy);
         }
     }
@@ -287,9 +287,8 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
     // If its a property, include its original declaration location if not yet found
     if (property)
     {
-        if (auto propInformation = lookupProp(ty, *property))
+        for (const auto& [baseTy, prop] : lookupProp(ty, *property))
         {
-            auto [baseTy, prop] = propInformation.value();
             if (prop.location)
             {
                 auto reference = Reference{Luau::getDefinitionModuleName(baseTy).value_or(ttv->definitionModuleName), prop.location.value()};

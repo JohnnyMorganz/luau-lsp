@@ -93,7 +93,40 @@ TEST_CASE_FIXTURE(Fixture, "lookupProp on a self-referential intersection type d
     REQUIRE(itv);
     itv->parts.emplace_back(intersectionTypeId);
 
-    CHECK_FALSE(lookupProp(intersectionTypeId, "RandomProp"));
+    CHECK(lookupProp(intersectionTypeId, "RandomProp").empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union types")
+{
+    check(R"(
+        type A = { prop: number }
+        type B = { prop: string }
+        type Union = A | B
+        local x: Union = {} :: any
+    )");
+
+    auto module = getMainModule();
+    REQUIRE(module);
+
+    auto ty = requireType("x");
+    auto results = lookupProp(Luau::follow(ty), "prop");
+    CHECK_EQ(results.size(), 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "lookupProp returns multiple results for union of same generic instantiation")
+{
+    check(R"(
+        type Base<T> = { prop: T }
+        type Union = Base<number> | Base<string>
+        local x: Union = {} :: any
+    )");
+
+    auto module = getMainModule();
+    REQUIRE(module);
+
+    auto ty = requireType("x");
+    auto results = lookupProp(Luau::follow(ty), "prop");
+    CHECK_EQ(results.size(), 2);
 }
 
 TEST_SUITE_END();
