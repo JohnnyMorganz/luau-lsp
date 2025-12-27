@@ -93,7 +93,7 @@ TEST_CASE_FIXTURE(Fixture, "lookupProp on a self-referential intersection type d
     REQUIRE(itv);
     itv->parts.emplace_back(intersectionTypeId);
 
-    CHECK_FALSE(lookupProp(intersectionTypeId, "RandomProp"));
+    CHECK(lookupProp(intersectionTypeId, "RandomProp").empty());
 }
 
 TEST_SUITE_END();

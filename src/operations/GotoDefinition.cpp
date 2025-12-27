@@ -30,10 +30,10 @@ static std::optional<LocationInformation> findLocationForIndex(const Luau::Modul
         return std::nullopt;
     auto baseTyFollowed = Luau::follow(*baseTy);
     auto propInformation = lookupProp(baseTyFollowed, name);
-    if (!propInformation)
+    if (propInformation.size() != 1)
         return std::nullopt;
 
-    auto [realBaseTy, prop] = *propInformation;
+    auto [realBaseTy, prop] = propInformation[0];
     auto location = prop.location ? prop.location : prop.typeLocation;
 
     if (!prop.readTy)

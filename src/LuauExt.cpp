@@ -300,23 +300,22 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
-    const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
+static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
     if (seenSet.contains(parentType))
-        return std::nullopt;
+        return {};
     seenSet.insert(parentType);
 
     if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
         if (auto prop = Luau::lookupExternTypeProp(ctv, name))
-            return std::make_pair(parentType, *prop);
+            return {PropLookup{parentType, *prop}};
     }
     else if (auto tbl = Luau::get<Luau::TableType>(parentType))
     {
         if (tbl->props.find(name) != tbl->props.end())
         {
-            return std::make_pair(parentType, tbl->props.at(name));
+            return {PropLookup{parentType, tbl->props.at(name)}};
         }
     }
     else if (auto mt = Luau::get<Luau::MetatableType>(parentType))
@@ -334,7 +333,7 @@ static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
                 else if (Luau::get<Luau::FunctionType>(followed))
                 {
                     // TODO: can we handle an index function...?
-                    return std::nullopt;
+                    return {};
                 }
             }
         }
@@ -344,7 +343,7 @@ static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
         {
             if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
             {
-                return std::make_pair(baseTableTy, mtBaseTable->props.at(name));
+                return {PropLookup{baseTableTy, mtBaseTable->props.at(name)}};
             }
         }
     }
@@ -352,18 +351,25 @@ static std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(
     {
         for (Luau::TypeId ty : i->parts)
         {
-            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet))
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet); !prop.empty())
                 return prop;
         }
     }
-    // else if (auto u = get<Luau::UnionType>(parentType))
-    // {
-    //     // Find the corresponding ty
-    // }
-    return std::nullopt;
+    else if (auto u = Luau::get<Luau::UnionType>(parentType))
+    {
+        std::vector<PropLookup> options;
+        for (Luau::TypeId ty : u->options)
+        {
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet); !prop.empty())
+                options.insert(options.end(), prop.begin(), prop.end());
+        }
+
+        return options;
+    }
+    return {};
 }
 
-std::optional<std::pair<Luau::TypeId, Luau::Property>> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
     Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
     return lookupProp(parentType, name, seenSet);
@@ -825,9 +831,9 @@ std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
         return std::nullopt;
 
     auto unwrapped = Luau::follow(*metatable);
-    if (auto prop = lookupProp(unwrapped, "__call"); prop && prop->second.readTy)
+    if (auto prop = lookupProp(unwrapped, "__call"); prop.size() == 1 && prop[0].property.readTy)
     {
-        return prop->second.readTy;
+        return prop[0].property.readTy;
     }
 
     return std::nullopt;
