@@ -487,11 +487,52 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
     }
 
+#ifndef NEVERMORE_STRING_REQUIRE
     for (auto& child : node->children)
     {
         child->parent = node;
         writePathsToMap(child, base + "/" + child->name);
     }
+#else
+    bool hasChildren = false;
+    bool hasLoader = false;
+
+    for (auto& child : node->children)
+    {
+        child->parent = node;
+        writePathsToMap(child, base + "/" + child->name);
+
+        if (child->isScript())
+        {
+            hasChildren = true;
+
+            if (child->name == "loader")
+            {
+                hasLoader = true;
+            }
+
+            if (child->className == "ModuleScript")
+            {
+                this->moduleNameToSourceNode.insert({child->name, child});
+            }
+        }
+    }
+
+    if (hasChildren && !hasLoader)
+    {
+        // Create a virtual source_node for nevermore loader
+        std::vector<std::string> filePaths = {};
+        std::vector<SourceNode*> children = {};
+
+        SourceNode* source_node = sourceNodeAllocator.allocate(SourceNode("loader", "ModuleScript", filePaths, children));
+        source_node->parent = node;
+        source_node->isVirtualNevermoreLoader = true;
+        node->children.push_back(source_node);
+
+        writePathsToMap(source_node, base + "/" + source_node->name);
+    }
+#endif
+
 }
 
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
@@ -501,6 +542,10 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     sourceNodeAllocator.clear();
     realPathsToSourceNodes.clear();
     virtualPathsToSourceNodes.clear();
+
+#ifdef NEVERMORE_STRING_REQUIRE
+    moduleNameToSourceNode.clear();
+#endif
 
     try
     {
@@ -618,6 +663,11 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             scope->bindings[Luau::AstName("workspace")] = Luau::Binding{globals.builtinTypes->anyType};
             scope->bindings[Luau::AstName("game")] = Luau::Binding{globals.builtinTypes->anyType};
         }
+
+#ifdef NEVERMORE_STRING_REQUIRE
+        if (auto node = isVirtualPath(name) ? getSourceNodeFromVirtualPath(name) : getSourceNodeFromRealPath(fileResolver->getUri(name)))
+            scope->bindings[Luau::AstName{"StringRequire"}] = Luau::Binding{getStringRequireType(globals, instanceTypes, node.value())};
+#endif
 
         if (expressiveTypes || forAutocomplete)
             if (auto node = isVirtualPath(name) ? getSourceNodeFromVirtualPath(name) : getSourceNodeFromRealPath(fileResolver->getUri(name)))
