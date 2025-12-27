@@ -220,25 +220,19 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                     lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
                 continue;
             }
-            else if (isIgnoredFile(change.uri, config))
-            {
-                continue;
-            }
 
-            // Index the workspace on changes
-            if (config.index.enabled && appliedFirstTimeConfiguration)
-            {
-                auto moduleName = fileResolver.getModuleName(change.uri);
-                frontend.markDirty(moduleName, &dirtyFiles);
-            }
+            // Note: we should always mark as dirty, even if the file is ignored
+            auto moduleName = fileResolver.getModuleName(change.uri);
+            frontend.markDirty(moduleName, &dirtyFiles);
 
             if (change.type == lsp::FileChangeType::Deleted)
                 deletedFiles.push_back(change.uri);
         }
     }
 
-    // Parse require graph for files if indexing enabled
-    frontend.parseModules(dirtyFiles);
+    // Parse require graph for files if indexing enable
+    if (config.index.enabled && appliedFirstTimeConfiguration)
+        frontend.parseModules(dirtyFiles);
 
     // Clear the diagnostics for files in case it was not managed
     clearDiagnosticsForFiles(deletedFiles);

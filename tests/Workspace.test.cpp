@@ -144,4 +144,26 @@ TEST_CASE_FIXTURE(Fixture, "files_in_alias_directories_are_indexed")
     CHECK(workspace.frontend.getSourceModule(moduleName));
 }
 
+TEST_CASE_FIXTURE(Fixture, "ignored_files_are_marked_as_dirty_when_changed_externally")
+{
+    client->globalConfig.ignoreGlobs = {"**/ignored/**"};
+
+    auto ignoredFile = newDocument("sample/ignored/main.luau", R"(
+         --!strict
+         return {}
+     )");
+
+    REQUIRE(workspace.isIgnoredFile(ignoredFile));
+
+    auto moduleName = workspace.fileResolver.getModuleName(ignoredFile);
+    workspace.frontend.check(moduleName);
+    REQUIRE_FALSE(workspace.frontend.isDirty(moduleName));
+
+    // Simulate external file change
+    lsp::FileEvent event{ignoredFile, lsp::FileChangeType::Changed};
+    workspace.onDidChangeWatchedFiles({event});
+
+    CHECK(workspace.frontend.isDirty(moduleName));
+}
+
 TEST_SUITE_END();
