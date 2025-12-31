@@ -492,13 +492,6 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     {
         auto j = json::parse(sourceMapContents);
         rootSourceNode = SourceNode::fromJson(j, sourceNodeAllocator);
-
-        // Mutate with plugin info
-        hydrateSourcemapWithPluginInfo();
-
-        // Write paths
-        std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
-        writePathsToMap(rootSourceNode, base);
     }
     catch (const std::exception& e)
     {
@@ -506,7 +499,15 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         std::cerr << "Sourcemap parsing failed, sourcemap is not loaded: " << e.what() << '\n';
         rootSourceNode = nullptr;
         sourceNodeAllocator.clear();
+        return;
     }
+
+    // Mutate with plugin info
+    hydrateSourcemapWithPluginInfo();
+
+    // Write paths
+    std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
+    writePathsToMap(rootSourceNode, base);
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)

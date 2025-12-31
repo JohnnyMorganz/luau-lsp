@@ -126,34 +126,31 @@ bool RobloxPlatform::hydrateSourcemapWithPluginInfo()
         return false;
     }
 
-    try
+    bool didUpdateSourcemap = mutateSourceNodeWithPluginInfo(rootSourceNode, pluginInfo, sourceNodeAllocator);
+
+    if (didUpdateSourcemap)
     {
-        bool didUpdateSourcemap = mutateSourceNodeWithPluginInfo(rootSourceNode, pluginInfo, sourceNodeAllocator);
-
-        if (didUpdateSourcemap)
+        // Update the sourcemap file if needed
+        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+        if (config.sourcemap.autogenerate)
         {
-            // Update the sourcemap file if needed
-            auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-            if (config.sourcemap.autogenerate)
+            auto sourcemapPath = workspaceFolder->rootUri.resolvePath(config.sourcemap.sourcemapFile);
+
+            workspaceFolder->client->sendLogMessage(
+                lsp::MessageType::Info, "Updating " + config.sourcemap.sourcemapFile + " with information from plugin");
+
+            try
             {
-                auto sourcemapPath = workspaceFolder->rootUri.resolvePath(config.sourcemap.sourcemapFile);
-
-                workspaceFolder->client->sendLogMessage(
-                    lsp::MessageType::Info, "Updating " + config.sourcemap.sourcemapFile + " with information from plugin");
-
                 Luau::FileUtils::writeFileIfModified(sourcemapPath.fsPath(), rootSourceNode->toJson().dump(2));
             }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Failed to write sourcemap file: " << e.what() << '\n';
+            }
         }
-
-        return didUpdateSourcemap;
-    }
-    catch (const std::exception& e)
-    {
-        // TODO: log message? NOTE: this function can be called from CLI
-        std::cerr << "Updating sourcemap from plugin info failed:" << e.what() << '\n';
     }
 
-    return false;
+    return didUpdateSourcemap;
 }
 
 void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
