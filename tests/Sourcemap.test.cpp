@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
+#include "Protocol/Workspace.hpp"
 #include "ScopedFlags.h"
 #include "LuauFileUtils.hpp"
 
@@ -1518,6 +1519,62 @@ TEST_CASE_FIXTURE(Fixture, "plugin_file_paths_propagate_to_source_node_during_hy
     auto moduleNode = platform->rootSourceNode->findChild("Module");
     REQUIRE(moduleNode);
     CHECK_EQ((*moduleNode)->filePaths.size(), 1);
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_simple_filename")
+{
+    client->globalConfig.sourcemap.sourcemapFile = "sourcemap.json";
+    client->notificationQueue.clear();
+
+    lsp::FileEvent event;
+    event.uri = workspace.rootUri.resolvePath("sourcemap.json");
+    event.type = lsp::FileChangeType::Changed;
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onDidChangeWatchedFiles(event);
+
+    bool foundLogMessage = false;
+    for (const auto& [method, params] : client->notificationQueue)
+    {
+        if (method == "window/logMessage" && params)
+        {
+            auto message = params->value("message", "");
+            if (message.find("Registering sourcemap changed") != std::string::npos)
+            {
+                foundLogMessage = true;
+                break;
+            }
+        }
+    }
+    CHECK(foundLogMessage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_relative_paths")
+{
+    client->globalConfig.sourcemap.sourcemapFile = "subdir/sourcemap.json";
+    client->notificationQueue.clear();
+
+    lsp::FileEvent event;
+    event.uri = workspace.rootUri.resolvePath("subdir/sourcemap.json");
+    event.type = lsp::FileChangeType::Changed;
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onDidChangeWatchedFiles(event);
+
+    bool foundLogMessage = false;
+    for (const auto& [method, params] : client->notificationQueue)
+    {
+        if (method == "window/logMessage" && params)
+        {
+            auto message = params->value("message", "");
+            if (message.find("Registering sourcemap changed") != std::string::npos)
+            {
+                foundLogMessage = true;
+                break;
+            }
+        }
+    }
+    CHECK(foundLogMessage);
 }
 
 TEST_SUITE_END();

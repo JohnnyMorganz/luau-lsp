@@ -93,3 +93,9 @@ struct Fixture
 #define LUAU_LSP_REQUIRE_NO_ERRORS(result) LUAU_LSP_REQUIRE_ERROR_COUNT(0, result)
 
 std::pair<std::string, lsp::Position> sourceWithMarker(std::string source);
+
+/// Apply a set of text edits to a source string and return the result
+std::string applyEdit(const std::string& source, const std::vector<lsp::TextEdit>& edits);
+
+/// Remove common leading whitespace from each line (like Python's textwrap.dedent)
+std::string dedent(std::string source);

@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.58.0",
+  "version": "1.59.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -126,6 +126,11 @@
       {
         "command": "luau-lsp.computeCompilerRemarks",
         "title": "Luau: Compute Compiler Remarks for file",
+        "enablement": "resourceLangId == luau"
+      },
+      {
+        "command": "luau-lsp.computeCodeGen",
+        "title": "Luau: Compute CodeGen instructions for file",
         "enablement": "resourceLangId == luau"
       },
       {
@@ -269,6 +274,12 @@
         },
         "luau-lsp.sourcemap.useVSCodeWatcher": {
           "markdownDescription": "Whether the VSCode filesystem watchers are used to regenerate the sourcemap. If disabled, delegates to the generator process. If using `rojo`, this command stops using `--watch`",
+          "type": "boolean",
+          "default": false,
+          "scope": "resource"
+        },
+        "luau-lsp.format.convertQuotes": {
+          "markdownDescription": "Whether to automatically convert single/double quotes to backticks when typing `{` inside strings",
           "type": "boolean",
           "default": false,
           "scope": "resource"

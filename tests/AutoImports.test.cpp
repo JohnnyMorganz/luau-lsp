@@ -1158,6 +1158,52 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(\"@Modules/Module\")\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_directory")
+{
+    TempDir main("string_require_includes_aliased_files_from_external_directory");
+    TempDir library("include_aliases_external_lib");
+    auto module = library.write_child("module.luau", R"(
+        return {}
+    )");
+
+    auto luaurc = std::string(R"(
+    {
+        "aliases": {
+            "library": "{filepath}"
+        }
+    }
+    )");
+    replace(luaurc, "{filepath}", library.path());
+    loadLuaurc(luaurc);
+    auto moduleName = workspace.fileResolver.getModuleName(Uri::file(module));
+
+    workspace.rootUri = Uri::file(main.path()); // Index an empty directory
+    client->globalConfig.index.enabled = true;
+
+    client->globalConfig.completion.imports.enabled = true;
+    // HACK: Fixture is loaded for RobloxPlatform
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.appliedFirstTimeConfiguration = false;
+    workspace.setupWithConfiguration(client->globalConfig);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("src/client/file.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result);
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local module = require(\"@library/module\")\n");
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_correctly_for_init_luau_file")
 {
     AliasMap aliases{""};
@@ -1446,6 +1492,44 @@ TEST_CASE_FIXTURE(Fixture, "auto_import_empty_require_statement")
     REQUIRE(item);
     REQUIRE_EQ(item->additionalTextEdits.size(), 1);
     CHECK_EQ(item->additionalTextEdits[0].range.start.line, 1);
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_shows_up_in_tables_before_equals_sign")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    auto [source, marker] = sourceWithMarker(R"(
+        create({
+            |
+        })
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK(getItem(result, "ReplicatedStorage"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "auto_imports_shows_up_in_tables_after_equals_sign")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    auto [source, marker] = sourceWithMarker(R"(
+        create({
+            Key = |
+        })
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK(getItem(result, "ReplicatedStorage"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_completion_property")

@@ -3,18 +3,90 @@
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
-static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
+static bool isSameTableDirect(const Luau::TypeId a, const Luau::TypeId b)
 {
-    if (a == b)
+    Luau::TypeId followedA = Luau::follow(a);
+    Luau::TypeId followedB = Luau::follow(b);
+
+    if (followedA == followedB)
         return true;
+
+    if (auto mt = Luau::get<Luau::MetatableType>(followedA))
+        followedA = Luau::follow(mt->table);
+    if (auto mt = Luau::get<Luau::MetatableType>(followedB))
+        followedB = Luau::follow(mt->table);
+
+    if (followedA == followedB)
+        return true;
+
+    auto ttv1 = Luau::get<Luau::TableType>(followedA);
+    auto ttv2 = Luau::get<Luau::TableType>(followedB);
 
     // TODO: in some cases, the table in the first module doesnt point to the same ty as the table in the second
     // for example, in the first module (the one being required), the table may be unsealed
     // we check for location equality in these cases
-    if (auto ttv1 = Luau::get<Luau::TableType>(a))
-        if (auto ttv2 = Luau::get<Luau::TableType>(b))
-            return !ttv1->definitionModuleName.empty() && ttv1->definitionModuleName == ttv2->definitionModuleName &&
-                   ttv1->definitionLocation == ttv2->definitionLocation;
+    if (ttv1 && ttv2)
+        return !ttv1->definitionModuleName.empty() && ttv1->definitionModuleName == ttv2->definitionModuleName &&
+               ttv1->definitionLocation == ttv2->definitionLocation;
+
+    return false;
+}
+
+static bool tableIsRelatedViaMetatable(const Luau::TypeId metatableType, const Luau::TypeId targetTable, Luau::DenseHashSet<Luau::TypeId>& visited)
+{
+    auto mt = Luau::get<Luau::MetatableType>(Luau::follow(metatableType));
+    if (!mt)
+        return false;
+
+    auto metatable = Luau::follow(mt->metatable);
+
+    if (visited.contains(metatable))
+        return false;
+    visited.insert(metatable);
+
+    if (auto mtable = Luau::get<Luau::TableType>(metatable))
+    {
+        if (auto indexIt = mtable->props.find("__index"); indexIt != mtable->props.end() && indexIt->second.readTy)
+        {
+            auto indexTarget = Luau::follow(*indexIt->second.readTy);
+
+            if (isSameTableDirect(indexTarget, targetTable))
+                return true;
+
+            if (Luau::get<Luau::MetatableType>(indexTarget))
+                return tableIsRelatedViaMetatable(indexTarget, targetTable, visited);
+        }
+    }
+    else if (Luau::is<Luau::MetatableType>(metatable))
+    {
+        if (isSameTableDirect(metatable, targetTable))
+            return true;
+
+        return tableIsRelatedViaMetatable(metatable, targetTable, visited);
+    }
+
+    return false;
+}
+
+static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
+{
+    if (isSameTableDirect(a, b))
+        return true;
+
+    Luau::DenseHashSet<Luau::TypeId> visited{nullptr};
+
+    if (Luau::get<Luau::MetatableType>(Luau::follow(a)))
+    {
+        if (tableIsRelatedViaMetatable(a, b, visited))
+            return true;
+    }
+
+    visited.clear();
+    if (Luau::get<Luau::MetatableType>(Luau::follow(b)))
+    {
+        if (tableIsRelatedViaMetatable(b, a, visited))
+            return true;
+    }
 
     return false;
 }
@@ -100,9 +172,23 @@ std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId t
 
 // Find all references across all files for the usage of TableType, or a property on a TableType
 std::vector<Reference> WorkspaceFolder::findAllTableReferences(
-    Luau::TypeId ty, const LSPCancellationToken& cancellationToken, std::optional<Luau::Name> property)
+    Luau::TypeId ty, const LSPCancellationToken& cancellationToken, const std::optional<Luau::Name>& property)
 {
     ty = Luau::follow(ty);
+
+    // If looking for a property on a MetatableType, use lookupProp to find the actual
+    // table where the property is defined (may be via __index chain)
+    if (property)
+    {
+        if (auto propResult = lookupProp(ty, *property); propResult.size() == 1)
+        {
+            auto [baseTy, prop] = propResult[0];
+            ty = Luau::follow(baseTy);
+        }
+    }
+
+    LUAU_ASSERT(!Luau::get<Luau::MetatableType>(ty));
+
     auto ttv = Luau::get<Luau::TableType>(ty);
 
     if (!ttv)
@@ -135,6 +221,20 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
                     auto possibleParentTy = module->astTypes.find(indexName->expr);
                     if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
                         references.push_back(Reference{moduleName, indexName->indexLocation});
+                }
+                else if (auto indexExpr = expr->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    if (auto constantString = indexExpr->index->as<Luau::AstExprConstantString>())
+                    {
+                        std::string propName(constantString->value.data, constantString->value.size);
+                        if (propName == property.value())
+                        {
+                            auto possibleParentTy = module->astTypes.find(indexExpr->expr);
+                            if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
+                                references.push_back(Reference{moduleName, constantString->location});
+                        }
+                    }
                 }
                 else if (auto table = expr->as<Luau::AstExprTable>(); table && isSameTable(ty, Luau::follow(referencedTy)))
                 {
@@ -187,9 +287,8 @@ std::vector<Reference> WorkspaceFolder::findAllTableReferences(
     // If its a property, include its original declaration location if not yet found
     if (property)
     {
-        if (auto propInformation = lookupProp(ty, *property))
+        for (const auto& [baseTy, prop] : lookupProp(ty, *property))
         {
-            auto [baseTy, prop] = propInformation.value();
             if (prop.location)
             {
                 auto reference = Reference{Luau::getDefinitionModuleName(baseTy).value_or(ttv->definitionModuleName), prop.location.value()};
@@ -541,8 +640,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     {
         if (auto indexName = expr->as<Luau::AstExprIndexName>())
         {
-            auto possibleParentTy = module->astTypes.find(indexName->expr);
-            if (possibleParentTy)
+            if (auto possibleParentTy = module->astTypes.find(indexName->expr))
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
                 auto references = findAllTableReferences(parentTy, cancellationToken, indexName->index.value);
@@ -551,18 +649,28 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         }
         else if (auto constantString = expr->as<Luau::AstExprConstantString>())
         {
-            // Potentially a property defined inside of a table
+            // Potentially a property defined inside of a table or accessed via bracket notation
             auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes= */ false);
             if (ancestry.size() > 1)
             {
                 auto parent = ancestry.at(ancestry.size() - 2);
                 if (auto tbl = parent->as<Luau::AstExprTable>())
                 {
-                    auto possibleTableTy = module->astTypes.find(tbl);
-                    if (possibleTableTy)
+                    if (auto possibleTableTy = module->astTypes.find(tbl))
                     {
                         auto references = findAllTableReferences(
                             Luau::follow(*possibleTableTy), cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
+                        return processReferences(fileResolver, references);
+                    }
+                }
+                else if (auto indexExpr = parent->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    if (auto possibleParentTy = module->astTypes.find(indexExpr->expr))
+                    {
+                        auto parentTy = Luau::follow(*possibleParentTy);
+                        auto references =
+                            findAllTableReferences(parentTy, cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
                         return processReferences(fileResolver, references);
                     }
                 }
