@@ -217,6 +217,15 @@ function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
 
 	local result = ServerEndpoints.getFilePaths(self._address)
 	if not result.ok then
+		-- A 404 indicates the endpoint doesn't exist, likely because we're
+		-- connecting to an older language server that predates Script Sync support
+		if string.find(result.error, "404") then
+			Log.warn(
+				"Running against an older version of the language server that does not support Script Sync. Please update luau-lsp for full functionality."
+			)
+			return {}
+		end
+
 		self:_logHttpError("Getting file paths", result.error)
 		return nil
 	end
@@ -266,7 +275,7 @@ function LSPManager.sendFullDMInfo(self: LSPManager): boolean
 
 	local filePaths = self:getFilePaths()
 	if filePaths == nil then
-		-- Server failed to respond, don't bother encoding the tree
+		-- Server isn't up, don't bother encoding the tree
 		-- since it will fail to send anyway
 		Log.debug("Server failed to respond, cancelling DataModel send")
 		self:disconnect()
