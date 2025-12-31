@@ -2,11 +2,13 @@
 #include "Platform/RobloxPlatform.hpp"
 #include <queue>
 
-SourceNode::SourceNode(std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children)
+SourceNode::SourceNode(
+    std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children, bool pluginManaged)
     : name(std::move(name))
     , className(std::move(className))
     , filePaths(std::move(filePaths))
     , children(std::move(children))
+    , pluginManaged(pluginManaged)
 {
 }
 
@@ -127,13 +129,9 @@ SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>
             children.emplace_back(SourceNode::fromJson(child, allocator));
     }
 
-    bool pluginManaged = false;
-    if (j.contains("pluginManaged"))
-        pluginManaged = j.at("pluginManaged").get<bool>();
+    bool pluginManaged = j.contains("pluginManaged") && j.at("pluginManaged").get<bool>();
 
-    auto node = allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children)));
-    node->pluginManaged = pluginManaged;
-    return node;
+    return allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children), pluginManaged));
 }
 
 // Only includes nodes with filepaths to avoid writing every Instance in the DataModel to `sourcemap.json`

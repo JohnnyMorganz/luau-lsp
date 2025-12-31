@@ -29,7 +29,8 @@ struct SourceNode
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
     mutable std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
-    SourceNode(std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children);
+    SourceNode(
+        std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children, bool pluginManaged = false);
 
     bool isScript() const;
     std::optional<std::string> getScriptFilePath() const;
