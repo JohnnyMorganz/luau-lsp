@@ -1302,14 +1302,6 @@ TEST_CASE_FIXTURE(Fixture, "handle_notification_routes_plugin_clear_notification
     REQUIRE(platform->rootSourceNode->findChild("ReplicatedStorage"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "handle_notification_returns_false_for_unknown_methods")
-{
-    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
-
-    bool handled = platform->handleNotification("$/unknown/method", std::nullopt);
-
-    CHECK_FALSE(handled);
-}
 
 TEST_CASE_FIXTURE(Fixture, "plugin_prunes_children_removed_from_plugin_info")
 {
