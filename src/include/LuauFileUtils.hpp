@@ -18,7 +18,7 @@ std::vector<std::string> getUtf8CommandLineArgs();
 bool isAbsolutePath(std::string_view path);
 
 std::optional<std::string> readFile(const std::string& name);
-bool writeFile(const std::string& name, const std::string& content);
+bool writeFileIfModified(const std::string& name, const std::string& content);
 
 std::optional<std::string> getCurrentWorkingDirectory();
 

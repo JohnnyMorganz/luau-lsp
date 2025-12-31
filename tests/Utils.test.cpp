@@ -150,12 +150,12 @@ TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
     CHECK_EQ(paths.size(), 1);
 }
 
-TEST_CASE("writeFile writes content to a new file")
+TEST_CASE("writeFileIfModified writes content to a new file")
 {
     TempDir t("write_file_new");
     auto path = t.path() + "/test.txt";
 
-    bool success = Luau::FileUtils::writeFile(path, "hello world");
+    bool success = Luau::FileUtils::writeFileIfModified(path, "hello world");
     CHECK(success);
 
     auto content = Luau::FileUtils::readFile(path);
@@ -163,12 +163,12 @@ TEST_CASE("writeFile writes content to a new file")
     CHECK_EQ(*content, "hello world");
 }
 
-TEST_CASE("writeFile overwrites an existing file")
+TEST_CASE("writeFileIfModified overwrites an existing file")
 {
     TempDir t("write_file_overwrite");
     auto path = t.write_child("existing.txt", "original content");
 
-    bool success = Luau::FileUtils::writeFile(path, "new content");
+    bool success = Luau::FileUtils::writeFileIfModified(path, "new content");
     CHECK(success);
 
     auto content = Luau::FileUtils::readFile(path);
@@ -176,12 +176,12 @@ TEST_CASE("writeFile overwrites an existing file")
     CHECK_EQ(*content, "new content");
 }
 
-TEST_CASE("writeFile writes empty content")
+TEST_CASE("writeFileIfModified writes empty content")
 {
     TempDir t("write_file_empty");
     auto path = t.path() + "/empty.txt";
 
-    bool success = Luau::FileUtils::writeFile(path, "");
+    bool success = Luau::FileUtils::writeFileIfModified(path, "");
     CHECK(success);
 
     auto content = Luau::FileUtils::readFile(path);
@@ -189,14 +189,14 @@ TEST_CASE("writeFile writes empty content")
     CHECK_EQ(*content, "");
 }
 
-TEST_CASE("writeFile returns false for invalid path")
+TEST_CASE("writeFileIfModified returns false for invalid path")
 {
     // Attempt to write to a non-existent directory
-    bool success = Luau::FileUtils::writeFile("/nonexistent/directory/path/file.txt", "content");
+    bool success = Luau::FileUtils::writeFileIfModified("/nonexistent/directory/path/file.txt", "content");
     CHECK_FALSE(success);
 }
 
-TEST_CASE("writeFile only writes when content differs from existing file")
+TEST_CASE("writeFileIfModified only writes when content differs from existing file")
 {
     TempDir t("write_file_skip");
     auto path = t.write_child("same_content.txt", "unchanged content");
@@ -207,7 +207,7 @@ TEST_CASE("writeFile only writes when content differs from existing file")
     auto timeBefore = std::filesystem::last_write_time(path);
 
     // Write the same content - should succeed but not actually write
-    bool success = Luau::FileUtils::writeFile(path, "unchanged content");
+    bool success = Luau::FileUtils::writeFileIfModified(path, "unchanged content");
     CHECK(success);
 
     // File modification time should be unchanged
@@ -220,7 +220,7 @@ TEST_CASE("writeFile only writes when content differs from existing file")
     CHECK_EQ(*contentUnchanged, "unchanged content");
 
     // Write different content - should actually write
-    success = Luau::FileUtils::writeFile(path, "modified content");
+    success = Luau::FileUtils::writeFileIfModified(path, "modified content");
     CHECK(success);
 
     // File modification time should be updated

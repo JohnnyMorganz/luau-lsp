@@ -141,7 +141,7 @@ bool RobloxPlatform::hydrateSourcemapWithPluginInfo()
                 workspaceFolder->client->sendLogMessage(
                     lsp::MessageType::Info, "Updating " + config.sourcemap.sourcemapFile + " with information from plugin");
 
-                Luau::FileUtils::writeFile(sourcemapPath.fsPath(), rootSourceNode->toJson().dump(2));
+                Luau::FileUtils::writeFileIfModified(sourcemapPath.fsPath(), rootSourceNode->toJson().dump(2));
             }
         }
 

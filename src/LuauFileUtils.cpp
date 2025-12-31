@@ -114,7 +114,7 @@ std::optional<std::string> readFile(const std::string& name)
     return result;
 }
 
-bool writeFile(const std::string& name, const std::string& content)
+bool writeFileIfModified(const std::string& name, const std::string& content)
 {
     // Skip write if file already has the same content
     if (auto existingContent = readFile(name))
@@ -131,10 +131,10 @@ bool writeFile(const std::string& name, const std::string& content)
     if (!file)
         return false;
 
-    fwrite(content.data(), 1, content.size(), file);
+    size_t written = fwrite(content.data(), 1, content.size(), file);
     fclose(file);
 
-    return true;
+    return written == content.size();
 }
 
 std::optional<std::string> getCurrentWorkingDirectory()
