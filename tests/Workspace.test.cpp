@@ -1,9 +1,8 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "TempDir.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Platform/RobloxPlatform.hpp"
-#include "Luau/Ast.h"
-#include "Luau/FileResolver.h"
 
 TEST_SUITE_BEGIN("WorkspaceTest");
 
@@ -117,6 +116,54 @@ TEST_CASE_FIXTURE(Fixture, "isDefinitionsFile")
 
     CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("source.luau")), false);
     CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("globalTypes.d.luau")), true);
+}
+
+TEST_CASE_FIXTURE(Fixture, "files_in_alias_directories_are_indexed")
+{
+    TempDir library("index_files_resolve_aliases_library");
+    auto module = library.write_child("module.luau", R"(
+        return {}
+    )");
+
+    auto luaurc = std::string(R"(
+    {
+        "aliases": {
+            "library": "{filepath}"
+        }
+    }
+    )");
+    replace(luaurc, "{filepath}", library.path());
+    loadLuaurc(luaurc);
+    auto moduleName = workspace.fileResolver.getModuleName(Uri::file(module));
+
+    CHECK_FALSE(workspace.frontend.getSourceModule(moduleName));
+
+    client->globalConfig.index.enabled = true;
+    workspace.indexFiles(client->globalConfig);
+
+    CHECK(workspace.frontend.getSourceModule(moduleName));
+}
+
+TEST_CASE_FIXTURE(Fixture, "ignored_files_are_marked_as_dirty_when_changed_externally")
+{
+    client->globalConfig.ignoreGlobs = {"**/ignored/**"};
+
+    auto ignoredFile = newDocument("sample/ignored/main.luau", R"(
+         --!strict
+         return {}
+     )");
+
+    REQUIRE(workspace.isIgnoredFile(ignoredFile));
+
+    auto moduleName = workspace.fileResolver.getModuleName(ignoredFile);
+    workspace.frontend.check(moduleName);
+    REQUIRE_FALSE(workspace.frontend.isDirty(moduleName));
+
+    // Simulate external file change
+    lsp::FileEvent event{ignoredFile, lsp::FileChangeType::Changed};
+    workspace.onDidChangeWatchedFiles({event});
+
+    CHECK(workspace.frontend.isDirty(moduleName));
 }
 
 TEST_SUITE_END();

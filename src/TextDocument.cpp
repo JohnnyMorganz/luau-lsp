@@ -294,6 +294,16 @@ lsp::Position TextDocument::convertPosition(const Luau::Position& position) cons
     return lsp::Position{line, lspLength(currentContent)};
 }
 
+Luau::Location TextDocument::convertRange(const lsp::Range& range) const
+{
+    return Luau::Location{convertPosition(range.start), convertPosition(range.end)};
+}
+
+lsp::Range TextDocument::convertLocation(const Luau::Location& location) const
+{
+    return lsp::Range{convertPosition(location.begin), convertPosition(location.end)};
+}
+
 void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version)
 {
     _version = version;

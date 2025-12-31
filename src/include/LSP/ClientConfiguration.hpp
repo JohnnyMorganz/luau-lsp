@@ -156,7 +156,7 @@ struct ClientCompletionImportsConfiguration
     /// Whether services and requires should be separated by an empty line
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
-    std::vector<std::string> ignoreGlobs{};
+    std::vector<std::string> ignoreGlobs{"**/_Index/**"};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
     suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
@@ -243,6 +243,13 @@ struct ClientBytecodeConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, typeInfoLevel, vectorLib, vectorCtor, vectorType)
 
+struct ClientFormatConfiguration
+{
+    /// Whether to convert single/double quotes to backticks when typing `{` inside strings
+    bool convertQuotes = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFormatConfiguration, convertQuotes);
+
 enum struct LSPPlatformConfig
 {
     Standard,
@@ -267,7 +274,7 @@ struct ClientConfiguration
     /// Whether to automatically autocomplete end
     /// DEPRECATED: Use completion.autocompleteEnd instead
     bool autocompleteEnd = false;
-    std::vector<std::string> ignoreGlobs{};
+    std::vector<std::string> ignoreGlobs{"**/_Index/**"};
     ClientPlatformConfiguration platform{};
     ClientRobloxSourcemapConfiguration sourcemap{};
     ClientDiagnosticsConfiguration diagnostics{};
@@ -280,6 +287,7 @@ struct ClientConfiguration
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
+    ClientFormatConfiguration format{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);

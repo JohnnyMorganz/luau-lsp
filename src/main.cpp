@@ -303,7 +303,16 @@ int main(int argc, char** argv)
 
     try
     {
+#ifdef _WIN32
+        // On Windows, command-line arguments are encoded in the system code page, not UTF-8.
+        // This causes non-ASCII characters in file paths to be corrupted.
+        // Use GetCommandLineW() and CommandLineToArgvW() to get proper UTF-8 encoded arguments.
+        // See: https://github.com/JohnnyMorganz/luau-lsp/issues/1191
+        auto utf8Args = Luau::FileUtils::getUtf8CommandLineArgs();
+        program.parse_args(utf8Args);
+#else
         program.parse_args(argc, argv);
+#endif
     }
     catch (const std::exception& err)
     {

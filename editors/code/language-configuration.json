@@ -42,5 +42,22 @@
   "indentationRules": {
     "increaseIndentPattern": "^((?!(\\-\\-)).)*((\\b(function|do|repeat)\\b((?!\\b(end|until)\\b).)*)|(\\{\\s*)|(\\b(then|else)\\b[;\\s]*))(\\-\\-.*)*$",
     "decreaseIndentPattern": "^\\s*((\\b(end|until)\\b)|(\\})|(\\))|(\\b(else)\\b[;\\s]*))"
-  }
+  },
+
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*(?:local\\s+)?function\\s*[\\w.:]*\\s*\\([^)]*\\)\\s*$",
+      "afterText": "^\\s*end\\b",
+      "action": {
+        "indent": "indentOutdent"
+      }
+    },
+    {
+      "beforeText": "\\b(?:then|do|else)\\s*$",
+      "afterText": "^\\s*(?:end|else|elseif)\\b",
+      "action": {
+        "indent": "indentOutdent"
+      }
+    }
+  ]
 }
