@@ -301,9 +301,9 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
         }
 
         auto ty = Luau::follow(*parentTy);
-        if (auto propInformation = lookupProp(ty, std::string(index->index.value)); propInformation && propInformation->second.readTy)
+        if (auto propInformation = lookupProp(ty, std::string(index->index.value)); propInformation.size() == 1 && propInformation[0].property.readTy)
         {
-            auto prop = propInformation->second;
+            auto prop = propInformation[0].property;
 
             auto defaultType = lsp::SemanticTokenTypes::Property;
             if (parentIsEnum)
