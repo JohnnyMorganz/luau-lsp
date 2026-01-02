@@ -10,6 +10,8 @@
 #include "LSP/JsonRpc.hpp"
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Transport/Transport.hpp"
+#include "LSP/ServerIO.hpp"
+#include "LSP/DocumentationParser.hpp"
 
 using namespace json_rpc;
 using ResponseHandler = std::function<void(const JsonRpcMessage&)>;
@@ -32,9 +34,7 @@ public:
     lsp::ClientCapabilities capabilities;
     lsp::TraceValue traceMode = lsp::TraceValue::Off;
     /// A registered definitions file passed by the client
-    std::unordered_map<std::string, std::string> definitionsFiles{};
-    /// A registered documentation file passed by the client
-    std::vector<std::string> documentationFiles{};
+    std::shared_ptr<std::vector<std::filesystem::path>> definitionsFiles;
     /// Parsed documentation database
     Luau::DocumentationDatabase documentation{""};
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
@@ -48,12 +48,12 @@ public:
     // If this is present, we can stream results
     std::optional<id_type> workspaceDiagnosticsRequestId = std::nullopt;
     std::optional<lsp::ProgressToken> workspaceDiagnosticsToken = std::nullopt;
-
 private:
     std::unique_ptr<Transport> transport;
     /// The request id for the next request
     int nextRequestId = 0;
     std::unordered_map<id_type, ResponseHandler> responseHandler{};
+    std::shared_ptr<ServerIO> io;
 
 public:
     Client();
@@ -65,7 +65,22 @@ public:
     virtual void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
     virtual void sendNotification(const std::string& method, const std::optional<json>& params) const;
 
-    void sendProgress(const lsp::ProgressParams& params)
+    Client(std::shared_ptr<ServerIO> io_,
+        std::shared_ptr<std::vector<std::filesystem::path>> definitionsFiles_,
+        const std::vector<std::filesystem::path> & documentationFiles) 
+    :   definitionsFiles(std::move(definitionsFiles_)),
+        io(io_)
+    {
+        parseDocumentation(documentationFiles, this->documentation, *io_);
+    }
+
+     const void sendRequest(const id_type& id, const std::string& method, const std::optional<json>& params,
+        const std::optional<ResponseHandler>& handler = std::nullopt);
+     const void sendResponse(const id_type& id, const json& result);
+     const void sendError(const std::optional<id_type>& id, const JsonRpcException& e);
+     const void sendNotification(const std::string& method, const std::optional<json>& params);
+
+     const void sendProgress(const lsp::ProgressParams& params)
     {
         sendNotification("$/progress", params);
     }
@@ -76,9 +91,9 @@ public:
         const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt, std::optional<uint8_t> percentage = std::nullopt);
     void sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message = std::nullopt);
 
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const override;
-    void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt) const;
-    void sendWindowMessage(const lsp::MessageType& type, const std::string& message) const;
+     const void sendLogMessage(const lsp::MessageType& type, const std::string& message);
+     const void sendTrace(const std::string& message, const std::optional<std::string>& verbose = std::nullopt);
+     const void sendWindowMessage(const lsp::MessageType& type, const std::string& message);
 
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);
@@ -95,10 +110,6 @@ public:
 
     void setTrace(const lsp::SetTraceParams& params);
 
-    bool readRawMessage(std::string& output) const;
-
     void handleResponse(const JsonRpcMessage& message);
-
-private:
-    void sendRawMessage(const json& message) const;
 };
+ 

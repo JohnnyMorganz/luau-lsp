@@ -581,61 +581,21 @@ std::optional<json_rpc::JsonRpcMessage> LanguageServer::popMessage()
     return message;
 }
 
-void LanguageServer::processInputLoop()
+void LanguageServer::processInput(const std::string &jsonString)
 {
-    std::string jsonString;
-    while (std::cin)
+    // sendTrace(jsonString, std::nullopt);
+    std::optional<id_type> id = std::nullopt;
+    try
     {
-        if (client->readRawMessage(jsonString))
-        {
-            std::optional<id_type> id = std::nullopt;
-            try
-            {
-                // Parse the input
-                auto msg = json_rpc::parse(jsonString);
-                id = msg.id;
+        // Parse the input
+        auto msg = json_rpc::parse(jsonString);
+        id = msg.id;
 
-                if (msg.is_request() && msg.method == "shutdown")
-                {
-                    shutdown();
-                    client->sendResponse(*id, {});
-                }
-                else if (msg.is_notification() && msg.method == "exit")
-                {
-                    // Exit the process loop
-                    std::exit(shutdownRequested ? 0 : 1);
-                }
-                else if (shutdownRequested)
-                {
-                    client->sendError(msg.id, JsonRpcException(lsp::ErrorCode::InvalidRequest, "server is shutting down"));
-                }
-                else
-                {
-                    {
-                        std::unique_lock guard(messagesMutex);
-                        if (msg.is_request())
-                            cancellationTokens[*msg.id] = std::make_shared<Luau::FrontendCancellationToken>();
-                        else if (msg.is_notification() && msg.method == "$/cancelRequest")
-                        {
-                            ASSERT_PARAMS(msg.params, "$/cancelRequest")
-                            auto params = msg.params->get<lsp::CancelParams>();
-                            if (const auto& it = cancellationTokens.find(params.id); it != cancellationTokens.end())
-                                it->second->cancel();
-
-                            client->sendTrace("Processed cancellation for " + msg.params->dump());
-                            continue;
-                        }
-                        messages.push(std::move(msg));
-                    }
-
-                    messagesCv.notify_one();
-                }
-            }
-            catch (const json::exception& e)
-            {
-                client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
-            }
-        }
+        handleMessage(msg);
+    }
+    catch (const json::exception& e)
+    {
+        client->sendError(id, JsonRpcException(lsp::ErrorCode::ParseError, e.what()));
     }
 }
 
@@ -689,12 +649,12 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     {
         for (auto& folder : params.workspaceFolders.value())
         {
-            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
+            workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, packageName));
         }
     }
     else if (params.rootUri.has_value())
     {
-        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig));
+        workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig, packageName));
     }
 
     isInitialized = true;
@@ -735,6 +695,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
 
         // Update the workspace setup with the new configuration
         workspace->setupWithConfiguration(config);
+        checkAndDispatchSuspendedRequests();
 
         // Refresh diagnostics
         workspace->recomputeDiagnostics(config);
@@ -794,6 +755,20 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         for (auto& folder : workspaceFolders)
             folder->hasConfiguration = true;
     }
+
+    checkAndDispatchSuspendedRequests();
+}
+
+void LanguageServer::checkAndDispatchSuspendedRequests() {
+    if (configPostponedMessages.size() > 0 && allWorkspacesConfigured())
+    {
+        client->sendTrace("workspaces configured, handling postponed messages");
+        for (const auto& msg : configPostponedMessages)
+            handleMessage(msg);
+
+        configPostponedMessages.clear();
+        client->sendTrace("workspaces configured, handling postponed COMPLETED");
+    }
 }
 
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)
@@ -820,6 +795,59 @@ void LanguageServer::onDidSaveTextDocument(const lsp::DidSaveTextDocumentParams&
 {
     auto workspace = findWorkspace(params.textDocument.uri);
     workspace->onDidSaveTextDocument(params.textDocument.uri, params);
+    // Trigger diagnostics
+    // By default, we rely on the pull based diagnostics model (based on documentDiagnostic)
+    // however if a client doesn't yet support it, we push the diagnostics instead
+    if (!client->capabilities.textDocument || !client->capabilities.textDocument->diagnostic)
+    {
+        // Convert the diagnostics report into a series of diagnostics published for each relevant file
+        auto diagnostics = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{params.textDocument.uri}});
+        client->publishDiagnostics(lsp::PublishDiagnosticsParams{params.textDocument.uri, params.textDocument.version, diagnostics.items});
+
+        // Compute diagnostics for reverse dependencies
+        // TODO: should we put this inside documentDiagnostics so it works in the pull based model as well? (its a reverse BFS which is expensive)
+        // TODO: maybe this should only be done onSave
+        auto config = client->getConfiguration(workspace->rootUri);
+        if (config.diagnostics.includeDependents || config.diagnostics.workspace)
+        {
+            std::unordered_map<std::string, lsp::SingleDocumentDiagnosticReport> reverseDependencyDiagnostics{};
+            for (auto& module : markedDirty)
+            {
+                auto filePath = workspace->platform->resolveToRealPath(module);
+                if (filePath)
+                {
+                    auto uri = Uri::parse(*filePath);
+                    if (uri != params.textDocument.uri && !contains(diagnostics.relatedDocuments, uri.toString()) &&
+                        !workspace->isIgnoredFile(*filePath, config))
+                    {
+                        auto dependencyDiags = workspace->documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}});
+                        diagnostics.relatedDocuments.emplace(uri.toString(),
+                            lsp::SingleDocumentDiagnosticReport{dependencyDiags.kind, dependencyDiags.resultId, dependencyDiags.items});
+                        diagnostics.relatedDocuments.merge(dependencyDiags.relatedDocuments);
+                    }
+                    else
+                    {
+                        client->sendTrace("LanguageServer ignoring " + uri.toString() + " with params.textDocument.uri=" + params.textDocument.uri.toString() + " and isRelated=" + std::to_string(contains(diagnostics.relatedDocuments, uri.toString())) + " and isIgnoredFile=" + std::to_string(workspace->isIgnoredFile(*filePath, config)));
+                    }
+                }
+                else
+                {
+                    client->sendTrace("LanguageServer ignoring " + module + " because it does not resolve to a real path");
+                }
+            }
+        }
+
+        if (!diagnostics.relatedDocuments.empty())
+        {
+            for (const auto& [uri, relatedDiagnostics] : diagnostics.relatedDocuments)
+            {
+                if (relatedDiagnostics.kind == lsp::DocumentDiagnosticReportKind::Full)
+                {
+                    client->publishDiagnostics(lsp::PublishDiagnosticsParams{Uri::parse(uri), std::nullopt, relatedDiagnostics.items});
+                }
+            }
+        }
+    }
 }
 
 void LanguageServer::onDidCloseTextDocument(const lsp::DidCloseTextDocumentParams& params)
@@ -882,7 +910,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
     std::vector<lsp::DocumentUri> configItems{};
     for (auto& folder : params.event.added)
     {
-        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig));
+        workspaceFolders.emplace_back(std::make_shared<WorkspaceFolder>(client, folder.name, folder.uri, defaultConfig, packageName));
         configItems.emplace_back(folder.uri);
     }
     client->requestConfiguration(configItems);

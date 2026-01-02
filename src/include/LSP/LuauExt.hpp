@@ -19,7 +19,7 @@ bool isMetamethod(const Luau::Name& name);
 std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions);
 
 Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName, const std::string& definitions);
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, const std::string& packageName, bool typeCheckForAutocomplete = false);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 

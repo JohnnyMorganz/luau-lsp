@@ -36,18 +36,27 @@ class LanguageServer
 {
 private:
     // Client is guaranteed to live for the duration of the whole program
-    Client* client;
-    std::optional<Luau::Config> defaultConfig;
+    // Client* client;
+    // std::optional<Luau::Config> defaultConfig;
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
     // This is common if the client has not yet opened a folder
+    std::shared_ptr<Client> client;
+    std::optional<Luau::Config> defaultConfig;
     WorkspaceFolderPtr nullWorkspace;
     std::vector<WorkspaceFolderPtr> workspaceFolders;
-
     std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
-
+    const std::string & packageName;
 public:
-    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig);
+    // TODO: figure out a better strategy for package name specification for definition files.
+    // we should probably have a definitions provider class that provides both package name and content on demand.
+    explicit LanguageServer(std::shared_ptr<Client> aClient, std::optional<Luau::Config> aDefaultConfig, const std::string & packageName)
+        : client(aClient)
+        , defaultConfig(std::move(aDefaultConfig))
+        , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig, packageName))
+        , packageName(packageName)
+    {
+    }
 
     static lsp::ServerCapabilities getServerCapabilities();
 
@@ -57,7 +66,7 @@ public:
 
     void onRequest(const id_type& id, const std::string& method, std::optional<json> params);
     void onNotification(const std::string& method, std::optional<json> params);
-    void processInputLoop();
+    void processInput(const std::string& jsonInput);
     bool requestedShutdown();
 
     // Visible for testing only
@@ -89,6 +98,8 @@ private:
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);
+
+    void checkAndDispatchSuspendedRequests();
 
 private:
     bool isInitialized = false;

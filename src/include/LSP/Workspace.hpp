@@ -36,6 +36,7 @@ public:
     Luau::Frontend frontend;
     Luau::TypeCheckLimits limits;
     std::optional<nlohmann::json> definitionsFileMetadata;
+    const std::string& packageName;
 
     /// Whether this workspace folder has received configuration data.
     /// We postpone all initial messages until configuration data is received from the client.
@@ -56,7 +57,7 @@ private:
     std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
 
 public:
-    WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
+    WorkspaceFolder(const std::shared_ptr<Client>& client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig, const std::string& packageName)
         : client(client)
         , name(std::move(name))
         , rootUri(uri)
@@ -65,8 +66,8 @@ public:
         // but it seems that the option specified here is the one used
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
-              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
-        , limits(Luau::TypeCheckLimits{})
+              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ false}))
+        , packageName(packageName)
     {
         fileResolver.client = client;
         fileResolver.rootUri = uri;

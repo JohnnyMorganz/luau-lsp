@@ -12,6 +12,10 @@
 
 #include "doctest.h"
 #include <string_view>
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <memory>
 
 static const char* mainModuleName = "MainModule";
 
@@ -44,6 +48,17 @@ void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::strin
     workspace.updateTextDocument(uri, params);
 }
 } // namespace Luau::LanguageServer
+
+std::shared_ptr<Client> Fixture::makeClient() {
+    const char* standardDefinitionsFile = "./tests/testdata/standard_definitions.d.luau";
+    const auto defFilePath = std::filesystem::path(standardDefinitionsFile);
+    const auto pathsPtr = std::make_shared<std::vector<std::filesystem::path>>(std::vector<std::filesystem::path>{defFilePath});
+    const auto docsVec = std::vector<std::filesystem::path>();
+    return std::make_shared<Client>(
+        std::make_shared<ServerIOStd>(),
+        pathsPtr,
+        docsVec);
+}
 
 Fixture::Fixture()
     : client(std::make_unique<TestClient>(TestClient{}))
@@ -171,7 +186,8 @@ Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packag
     auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
 
     Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, packageName, source);
+    // TODO - parameterize package name for additional definitions.
+    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, "@roblox", forAutocomplete);
     platform.mutateRegisteredDefinitions(globals, std::nullopt);
     Luau::freeze(globals.globalTypes);
 

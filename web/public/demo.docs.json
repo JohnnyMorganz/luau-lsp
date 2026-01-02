@@ -1,0 +1,3400 @@
+{
+  "@demo/globaltype/DemoTypeFoo": {
+    "documentation": "A strongly-typed alias of string."
+  },
+  "@demo/globaltype/DemoTypeBar": {
+    "documentation": "A strongly-typed alias of number"
+  },
+  "@demo/globaltype/DemoTypeComposite": {
+    "documentation": "A record type composed of foo and bar",
+    "keys": {
+      "foo": "@demo/globaltype/DataTypeComposite.foo",
+      "bar": "@demo/globaltype/DataTypeComposite.bar"
+    },
+    "learn_more_link": "about:blank"
+  },
+  "@demo/global/demo": {
+    "documentation": "An example fake module.",
+    "keys": {
+      "fake_function": "@demo/global/demo.fake_function"
+    },
+    "learn_more_link": "about:blank"
+  },
+  "@demo/global/demo.fake_function": {
+    "documentation": "This fake function doesn't do anything.",
+    "params": [
+      {
+        "name": "value",
+        "documentation": "@demo/global/demo.fake_function/param/0"
+      }
+    ],
+    "returns": ["@demo/global/demo.fake_function/return/0"],
+    "learn_more_link": "about:blank",
+    "code_sample": "local another_val = demo.fake_function(val)"
+  },
+  "@demo/global/demo.fake_function/param/0": {
+    "documentation": "A DemoTypeComposite to pass into the function"
+  },
+  "@demo/global/demo.fake_function/return/0": {
+    "documentation": "A DemoTypeComposite returned by the function"
+  },
+  "@luau/global/math": {
+    "documentation": "A library of math functions.",
+    "keys": {
+      "abs": "@luau/global/math.abs",
+      "acos": "@luau/global/math.acos",
+      "asin": "@luau/global/math.asin",
+      "atan": "@luau/global/math.atan",
+      "atan2": "@luau/global/math.atan2",
+      "ceil": "@luau/global/math.ceil",
+      "clamp": "@luau/global/math.clamp",
+      "cos": "@luau/global/math.cos",
+      "cosh": "@luau/global/math.cosh",
+      "deg": "@luau/global/math.deg",
+      "exp": "@luau/global/math.exp",
+      "floor": "@luau/global/math.floor",
+      "fmod": "@luau/global/math.fmod",
+      "frexp": "@luau/global/math.frexp",
+      "ldexp": "@luau/global/math.ldexp",
+      "log": "@luau/global/math.log",
+      "log10": "@luau/global/math.log10",
+      "max": "@luau/global/math.max",
+      "min": "@luau/global/math.min",
+      "modf": "@luau/global/math.modf",
+      "noise": "@luau/global/math.noise",
+      "pow": "@luau/global/math.pow",
+      "rad": "@luau/global/math.rad",
+      "random": "@luau/global/math.random",
+      "randomseed": "@luau/global/math.randomseed",
+      "round": "@luau/global/math.round",
+      "sign": "@luau/global/math.sign",
+      "sin": "@luau/global/math.sin",
+      "sinh": "@luau/global/math.sinh",
+      "sqrt": "@luau/global/math.sqrt",
+      "tan": "@luau/global/math.tan",
+      "tanh": "@luau/global/math.tanh"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/math.abs/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.abs/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.abs": {
+    "documentation": "Returns the absolute value of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.abs/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.abs/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.acos/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.acos/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.acos": {
+    "documentation": "Returns the arc cosine of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.acos/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.acos/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.asin/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.asin/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.asin": {
+    "documentation": "Returns the arc sine of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.asin/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.asin/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.atan/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.atan/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.atan": {
+    "documentation": "Returns the arc tangent of <code>x</code> in radians.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.atan/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.atan/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.atan2/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.atan2/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.atan2/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.atan2": {
+    "documentation": "Returns the arc tangent of <code>y</code>/<code>x</code> (in radians) while using the signs of both parameters to find the quadrant of the result.",
+    "params": [
+      {
+        "name": "y",
+        "documentation": "@luau/global/math.atan2/param/0"
+      },
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.atan2/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.atan2/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.ceil/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.ceil/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.ceil": {
+    "documentation": "Returns the smallest integer larger than or equal to <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.ceil/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.ceil/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.clamp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.clamp/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.clamp/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/math.clamp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.clamp": {
+    "documentation": "Returns a number between <code>min</code> and <code>max</code>, inclusive.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.clamp/param/0"
+      },
+      {
+        "name": "min",
+        "documentation": "@luau/global/math.clamp/param/1"
+      },
+      {
+        "name": "max",
+        "documentation": "@luau/global/math.clamp/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.clamp/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.cos/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.cos/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.cos": {
+    "documentation": "Returns the cosine of <code>x</code>, assumed to be in radians.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.cos/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.cos/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.cosh/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.cosh/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.cosh": {
+    "documentation": "Returns the hyperbolic cosine of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.cosh/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.cosh/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.deg/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.deg/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.deg": {
+    "documentation": "Returns the angle <code>x</code> (given in radians) in degrees.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.deg/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.deg/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.exp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.exp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.exp": {
+    "documentation": "Returns the value <code>e</code>^<code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.exp/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.exp/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.floor/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.floor/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.floor": {
+    "documentation": "Returns the largest integer smaller than or equal to <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.floor/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.floor/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.fmod/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.fmod/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.fmod/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.fmod": {
+    "documentation": "Returns the remainder of the division of <code>x</code> by <code>y</code> that rounds the quotient towards zero.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.fmod/param/0"
+      },
+      {
+        "name": "y",
+        "documentation": "@luau/global/math.fmod/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.fmod/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.frexp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.frexp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.frexp/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.frexp": {
+    "documentation": "Returns <code>m</code> and <code>e</code> such that <code>x</code> = <code>m</code>*<code>2</code>^<code>e</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.frexp/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.frexp/return/0",
+      "@luau/global/math.frexp/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.ldexp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.ldexp/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.ldexp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.ldexp": {
+    "documentation": "Returns <code>x</code>*<code>2</code>^<code>e</code> (<code>e</code> should be an integer).",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.ldexp/param/0"
+      },
+      {
+        "name": "e",
+        "documentation": "@luau/global/math.ldexp/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.ldexp/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.log/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.log/param/1": {
+    "documentation": "The base of the logarithm, the constant <code>e</code> by default."
+  },
+  "@luau/global/math.log/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.log": {
+    "documentation": "Returns the logarithm of <code>x</code> using the given base.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.log/param/0"
+      },
+      {
+        "name": "base",
+        "documentation": "@luau/global/math.log/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.log/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.log10/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.log10/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.log10": {
+    "documentation": "Returns the base-10 logarithm of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.log10/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.log10/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.max/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.max/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.max/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.max": {
+    "documentation": "Returns the maximum value among the numbers passed to the function.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.max/param/0"
+      },
+      {
+        "name": "...",
+        "documentation": "@luau/global/math.max/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.max/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.min/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.min/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.min/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.min": {
+    "documentation": "Returns the minimum value among the numbers passed to the function.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.min/param/0"
+      },
+      {
+        "name": "...",
+        "documentation": "@luau/global/math.min/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.min/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.modf/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.modf/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.modf/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.modf": {
+    "documentation": "Returns two numbers: the integral part of <code>x</code> and the fractional part of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.modf/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.modf/return/0",
+      "@luau/global/math.modf/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.noise/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.noise/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.noise/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/math.noise/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.noise": {
+    "documentation": "Returns a perlin noise value.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.noise/param/0"
+      },
+      {
+        "name": "y",
+        "documentation": "@luau/global/math.noise/param/1"
+      },
+      {
+        "name": "z",
+        "documentation": "@luau/global/math.noise/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.noise/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.pow/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.pow/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.pow/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.pow": {
+    "documentation": "Returns <code>x</code>^<code>y</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.pow/param/0"
+      },
+      {
+        "name": "y",
+        "documentation": "@luau/global/math.pow/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.pow/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.rad/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.rad/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.rad": {
+    "documentation": "Returns the angle <code>x</code> (given in degrees) in radians.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.rad/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.rad/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.random/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.random/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/math.random/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.random": {
+    "documentation": "Returns a random number within the range provided.",
+    "params": [
+      {
+        "name": "m",
+        "documentation": "@luau/global/math.random/param/0"
+      },
+      {
+        "name": "n",
+        "documentation": "@luau/global/math.random/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.random/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.randomseed/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.randomseed": {
+    "documentation": "Sets <code>x</code> as the seed for the pseudo-random generator.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.randomseed/param/0"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/math.round/param/0": {
+    "documentation": "The value to be rounded."
+  },
+  "@luau/global/math.round/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.round": {
+    "documentation": "Returns the integer with the smallest difference between it and the given number.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.round/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.round/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.sign/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sign/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sign": {
+    "documentation": "Returns -1 if <code>x</code> is less than 0, 0 if <code>x</code> equals 0, or 1 if <code>x</code> is greater than 0.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.sign/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.sign/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.sin/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sin/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sin": {
+    "documentation": "Returns the sine of <code>x</code>, assumed to be in radians.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.sin/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.sin/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.sinh/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sinh/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sinh": {
+    "documentation": "Returns the hyperbolic sine of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.sinh/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.sinh/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.sqrt/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sqrt/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.sqrt": {
+    "documentation": "Returns the square root of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.sqrt/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.sqrt/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.tan/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.tan/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.tan": {
+    "documentation": "Returns the tangent of <code>x</code>, assumed to be in radians.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.tan/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.tan/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/math.tanh/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.tanh/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/math.tanh": {
+    "documentation": "Returns the hyperbolic tangent of <code>x</code>.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/math.tanh/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/math.tanh/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32": {
+    "documentation": "A library of functions to perform bitwise operations.",
+    "keys": {
+      "arshift": "@luau/global/bit32.arshift",
+      "band": "@luau/global/bit32.band",
+      "bnot": "@luau/global/bit32.bnot",
+      "bor": "@luau/global/bit32.bor",
+      "btest": "@luau/global/bit32.btest",
+      "bxor": "@luau/global/bit32.bxor",
+      "countlz": "@luau/global/bit32.countlz",
+      "countrz": "@luau/global/bit32.countrz",
+      "extract": "@luau/global/bit32.extract",
+      "replace": "@luau/global/bit32.replace",
+      "lrotate": "@luau/global/bit32.lrotate",
+      "lshift": "@luau/global/bit32.lshift",
+      "rrotate": "@luau/global/bit32.rrotate",
+      "rshift": "@luau/global/bit32.rshift"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/bit32.arshift/param/0": {
+    "documentation": "The number whose bits shall be shifted."
+  },
+  "@luau/global/bit32.arshift/param/1": {
+    "documentation": "The integer number of bits to shift by."
+  },
+  "@luau/global/bit32.arshift/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.arshift": {
+    "documentation": "Returns a number after its bits have been arithmetically shifted to the right by a given displacement.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.arshift/param/0"
+      },
+      {
+        "name": "disp",
+        "documentation": "@luau/global/bit32.arshift/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.arshift/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.band/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.band/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.band": {
+    "documentation": "Returns the bitwise AND of all provided numbers.",
+    "params": [
+      {
+        "name": "numbers",
+        "documentation": "@luau/global/bit32.band/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.band/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.bnot/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bnot/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bnot": {
+    "documentation": "Returns the bitwise negation of a given number.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.bnot/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.bnot/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.bor/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bor/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bor": {
+    "documentation": "Returns the bitwise OR of all provided numbers.",
+    "params": [
+      {
+        "name": "numbers",
+        "documentation": "@luau/global/bit32.bor/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.bor/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.btest/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.btest/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.btest": {
+    "documentation": "Returns a boolean describing whether the bitwise and of its operands is different from zero.",
+    "params": [
+      {
+        "name": "numbers",
+        "documentation": "@luau/global/bit32.btest/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.btest/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.bxor/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bxor/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.bxor": {
+    "documentation": "Returns the bitwise XOR of all provided numbers.",
+    "params": [
+      {
+        "name": "numbers",
+        "documentation": "@luau/global/bit32.bxor/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.bxor/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.countlz/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.countlz/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.countlz": {
+    "documentation": "Returns the number of consecutive zero bits in the 32-bit representation of the provided number starting from the left-most (most significant) bit.",
+    "params": [
+      {
+        "name": "n",
+        "documentation": "@luau/global/bit32.countlz/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.countlz/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.countrz/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.countrz/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.countrz": {
+    "documentation": "Returns the number of consecutive zero bits in the 32-bit representation of the provided number starting from the right-most (least significant) bit.",
+    "params": [
+      {
+        "name": "n",
+        "documentation": "@luau/global/bit32.countrz/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.countrz/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.extract/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.extract/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.extract/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.extract/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.extract": {
+    "documentation": "Extract a range of bits from a number and return them as an unsigned number.",
+    "params": [
+      {
+        "name": "n",
+        "documentation": "@luau/global/bit32.extract/param/0"
+      },
+      {
+        "name": "field",
+        "documentation": "@luau/global/bit32.extract/param/1"
+      },
+      {
+        "name": "width",
+        "documentation": "@luau/global/bit32.extract/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.extract/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.replace/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.replace/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.replace/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.replace/param/3": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.replace/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.replace": {
+    "documentation": "Return a copy of a number with a range of bits replaced by a given value.",
+    "params": [
+      {
+        "name": "n",
+        "documentation": "@luau/global/bit32.replace/param/0"
+      },
+      {
+        "name": "v",
+        "documentation": "@luau/global/bit32.replace/param/1"
+      },
+      {
+        "name": "field",
+        "documentation": "@luau/global/bit32.replace/param/2"
+      },
+      {
+        "name": "width",
+        "documentation": "@luau/global/bit32.replace/param/3"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.replace/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.lrotate/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lrotate/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lrotate/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lrotate": {
+    "documentation": "Returns a number after its bits have been rotated to the left by a given number of times.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.lrotate/param/0"
+      },
+      {
+        "name": "disp",
+        "documentation": "@luau/global/bit32.lrotate/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.lrotate/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.lshift/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lshift/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lshift/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.lshift": {
+    "documentation": "Returns a number whose bits have been logically shifted to the left by a given displacement.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.lshift/param/0"
+      },
+      {
+        "name": "disp",
+        "documentation": "@luau/global/bit32.lshift/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.lshift/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.rrotate/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rrotate/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rrotate/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rrotate": {
+    "documentation": "Returns a number after its bits have been rotated to the right by a given number of times.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.rrotate/param/0"
+      },
+      {
+        "name": "disp",
+        "documentation": "@luau/global/bit32.rrotate/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.rrotate/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/bit32.rshift/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rshift/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rshift/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/bit32.rshift": {
+    "documentation": "Returns a number whose bits have been logically shifted to the right by a given displacement.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/bit32.rshift/param/0"
+      },
+      {
+        "name": "disp",
+        "documentation": "@luau/global/bit32.rshift/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/bit32.rshift/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/os": {
+    "documentation": "This library provides functions related to time and date.",
+    "keys": {
+      "time": "@luau/global/os.time",
+      "difftime": "@luau/global/os.difftime",
+      "date": "@luau/global/os.date",
+      "clock": "@luau/global/os.clock"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/os.time/param/0": {
+    "documentation": "A dictionary table describing a specific time, similar to that returned by <code>os.date()</code>. If not provided, uses the current UTC time."
+  },
+  "@luau/global/os.time/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/os.time": {
+    "documentation": "Returns how many seconds have passed since the Unix epoch (1 January 1970, 00:00:00) under current UTC time.",
+    "params": [
+      {
+        "name": "time",
+        "documentation": "@luau/global/os.time/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/os.time/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/os.difftime/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/os.difftime/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/os.difftime/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/os.difftime": {
+    "documentation": "Returns the number of seconds from t1 to t2, assuming the arguments are correctly casted to the time_t format.",
+    "params": [
+      {
+        "name": "t2",
+        "documentation": "@luau/global/os.difftime/param/0"
+      },
+      {
+        "name": "t1",
+        "documentation": "@luau/global/os.difftime/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/os.difftime/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/os.date/param/0": {
+    "documentation": "Must be either <code>\"*t\"</code> or <code>\"!*t\"</code>."
+  },
+  "@luau/global/os.date/param/1": {
+    "documentation": "The time value to format."
+  },
+  "@luau/global/os.date/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/os.date": {
+    "documentation": "Formats the given string with date/time information based on the given time (or if not provided, the value returned by os.time).",
+    "params": [
+      {
+        "name": "formatString",
+        "documentation": "@luau/global/os.date/param/0"
+      },
+      {
+        "name": "time",
+        "documentation": "@luau/global/os.date/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/os.date/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/os.clock/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/os.clock": {
+    "documentation": "Returns a high-precision amount of CPU time used by Lua in seconds, intended for use in benchmarking.",
+    "params": [],
+    "returns": [
+      "@luau/global/os.clock/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug": {
+    "documentation": "This library provides functions useful for debugging and profiling code.",
+    "keys": {
+      "traceback": "@luau/global/debug.traceback",
+      "info": "@luau/global/debug.info",
+      "profilebegin": "@luau/global/debug.profilebegin",
+      "profileend": "@luau/global/debug.profileend",
+      "getmemorycategory": "@luau/global/debug.getmemorycategory",
+      "setmemorycategory": "@luau/global/debug.setmemorycategory",
+      "resetmemorycategory": "@luau/global/debug.resetmemorycategory",
+      "dumpcodesize": "@luau/global/debug.dumpcodesize"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/debug.traceback": {
+    "overloads": {
+      "(string?, number?) -> string": "@luau/global/debug.traceback/overload/(string?, number?) -> string",
+      "(thread, string?, number?) -> string": "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string"
+    }
+  },
+  "@luau/global/debug.traceback/overload/(string?, number?) -> string/param/0": {
+    "documentation": "The first line of the returned string."
+  },
+  "@luau/global/debug.traceback/overload/(string?, number?) -> string/param/1": {
+    "documentation": "The number of calls \"up\" the call stack to return."
+  },
+  "@luau/global/debug.traceback/overload/(string?, number?) -> string/return/0": {
+    "documentation": "Traceback of the current function call stack."
+  },
+  "@luau/global/debug.traceback/overload/(string?, number?) -> string": {
+    "documentation": "Returns a string of undefined format that describes the current function call stack.",
+    "params": [
+      {
+        "name": "message",
+        "documentation": "@luau/global/debug.traceback/overload/(string?, number?) -> string/param/0"
+      },
+      {
+        "name": "level",
+        "documentation": "@luau/global/debug.traceback/overload/(string?, number?) -> string/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.traceback/overload/(string?, number?) -> string/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/0": {
+    "documentation": "A thread as returned by <code>coroutine.create()</code>."
+  },
+  "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/1": {
+    "documentation": "The first line of the returned string."
+  },
+  "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/2": {
+    "documentation": "The number of calls \"up\" the call stack to return."
+  },
+  "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/return/0": {
+    "documentation": "Traceback of the current function call stack."
+  },
+  "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string": {
+    "documentation": "Returns a string of undefined format that describes the current function call stack.",
+    "params": [
+      {
+        "name": "thread",
+        "documentation": "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/0"
+      },
+      {
+        "name": "message",
+        "documentation": "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/1"
+      },
+      {
+        "name": "level",
+        "documentation": "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.traceback/overload/(thread, string?, number?) -> string/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.info": {
+    "overloads": {
+      "(number, string) -> Tuple": "@luau/global/debug.info/overload/(number, string) -> Tuple",
+      "(function, string) -> Tuple": "@luau/global/debug.info/overload/(function, string) -> Tuple",
+      "(thread, number, string) -> Tuple": "@luau/global/debug.info/overload/(thread, number, string) -> Tuple"
+    }
+  },
+  "@luau/global/debug.info/overload/(number, string) -> Tuple/param/0": {
+    "documentation": "Determines at what level of the call stack the information returned should describe. A value of <code>1</code> represents the function which is calling <code>debug.info()</code>, a value of <code>2</code> represents the function that called that function, and so on."
+  },
+  "@luau/global/debug.info/overload/(number, string) -> Tuple/param/1": {
+    "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) — The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) — The line number of the function   call represented by <code>level</code>.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) — The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) —   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) — The function which was   inspected.</li> </ul>"
+  },
+  "@luau/global/debug.info/overload/(number, string) -> Tuple/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/debug.info/overload/(number, string) -> Tuple": {
+    "documentation": "Traverses the entire stack of current thread and returns a string containing the call stack of target level details.",
+    "params": [
+      {
+        "name": "level",
+        "documentation": "@luau/global/debug.info/overload/(number, string) -> Tuple/param/0"
+      },
+      {
+        "name": "options",
+        "documentation": "@luau/global/debug.info/overload/(number, string) -> Tuple/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.info/overload/(number, string) -> Tuple/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.info/overload/(function, string) -> Tuple/param/0": {
+    "documentation": "The function of the call stack which the information returned should describe."
+  },
+  "@luau/global/debug.info/overload/(function, string) -> Tuple/param/1": {
+    "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) — The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) — The line that <code>function</code> is   defined on.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) — The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) —   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) — The function which was   inspected.</li> </ul>"
+  },
+  "@luau/global/debug.info/overload/(function, string) -> Tuple/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/debug.info/overload/(function, string) -> Tuple": {
+    "documentation": "Traverses the entire stack of current thread and returns a string containing the call stack of target function details.",
+    "params": [
+      {
+        "name": "function",
+        "documentation": "@luau/global/debug.info/overload/(function, string) -> Tuple/param/0"
+      },
+      {
+        "name": "options",
+        "documentation": "@luau/global/debug.info/overload/(function, string) -> Tuple/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.info/overload/(function, string) -> Tuple/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/0": {
+    "documentation": "A thread as returned by <code>coroutine.create()</code>."
+  },
+  "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/1": {
+    "documentation": "Determines at what level of the call stack the information returned should describe. A value of <code>1</code> represents the function which is calling <code>debug.info()</code>, a value of <code>2</code> represents the function that called that function, and so on."
+  },
+  "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/2": {
+    "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) — The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) — The line number of the function   call represented by <code>level</code>.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) — The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) —   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) — The function which was   inspected.</li> </ul>"
+  },
+  "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/debug.info/overload/(thread, number, string) -> Tuple": {
+    "documentation": "Traverses the entire stack of target thread and returns a string containing the call stack of target level details.",
+    "params": [
+      {
+        "name": "thread",
+        "documentation": "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/0"
+      },
+      {
+        "name": "level",
+        "documentation": "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/1"
+      },
+      {
+        "name": "options",
+        "documentation": "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.profilebegin/param/0": {
+    "documentation": "The text that this <a href=\"../../../studio/microprofiler/index.md\">MicroProfiler</a> label displays."
+  },
+  "@luau/global/debug.profilebegin": {
+    "documentation": "Starts profiling for a label.",
+    "params": [
+      {
+        "name": "label",
+        "documentation": "@luau/global/debug.profilebegin/param/0"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/debug.profileend": {
+    "documentation": "Stops profiling for the most recent label that <code>debug.profilebegin()</code> opened.",
+    "params": [],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/debug.getmemorycategory/return/0": {
+    "documentation": "The current thread's active memory category."
+  },
+  "@luau/global/debug.getmemorycategory": {
+    "documentation": "Returns the name of the current thread's active memory category.",
+    "params": [],
+    "returns": [
+      "@luau/global/debug.getmemorycategory/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.setmemorycategory/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/debug.setmemorycategory/return/0": {
+    "documentation": "The current thread's previous memory category."
+  },
+  "@luau/global/debug.setmemorycategory": {
+    "documentation": "Assigns a custom tag to the current thread's memory category.",
+    "params": [
+      {
+        "name": "tag",
+        "documentation": "@luau/global/debug.setmemorycategory/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/debug.setmemorycategory/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/debug.resetmemorycategory": {
+    "documentation": "Resets the tag assigned by <code>debug.setmemorycategory()</code> to the automatically assigned value (typically, the script name).",
+    "params": [],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/debug.dumpcodesize": {
+    "documentation": "Displays a table of native code size of individual functions and scripts.",
+    "params": [],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table": {
+    "documentation": "A library of table functions.",
+    "keys": {
+      "clear": "@luau/global/table.clear",
+      "clone": "@luau/global/table.clone",
+      "concat": "@luau/global/table.concat",
+      "create": "@luau/global/table.create",
+      "find": "@luau/global/table.find",
+      "foreach": "@luau/global/table.foreach",
+      "foreachi": "@luau/global/table.foreachi",
+      "freeze": "@luau/global/table.freeze",
+      "getn": "@luau/global/table.getn",
+      "insert": "@luau/global/table.insert",
+      "isfrozen": "@luau/global/table.isfrozen",
+      "maxn": "@luau/global/table.maxn",
+      "move": "@luau/global/table.move",
+      "pack": "@luau/global/table.pack",
+      "remove": "@luau/global/table.remove",
+      "sort": "@luau/global/table.sort",
+      "unpack": "@luau/global/table.unpack"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/table.clear/param/0": {
+    "documentation": "The table whose keys will be cleared."
+  },
+  "@luau/global/table.clear": {
+    "documentation": "Sets all keys in the given table to nil.",
+    "params": [
+      {
+        "name": "table",
+        "documentation": "@luau/global/table.clear/param/0"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.clone/param/0": {
+    "documentation": "The table to be cloned."
+  },
+  "@luau/global/table.clone/return/0": {
+    "documentation": "The clone of the provided table."
+  },
+  "@luau/global/table.clone": {
+    "documentation": "Returns a shallow copy of the provided table.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.clone/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.clone/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.concat/param/0": {
+    "documentation": "The table that will be converted into a string."
+  },
+  "@luau/global/table.concat/param/1": {
+    "documentation": "The string that will be concatenated between each entry in the table."
+  },
+  "@luau/global/table.concat/param/2": {
+    "documentation": "The starting index of the table concatenation."
+  },
+  "@luau/global/table.concat/param/3": {
+    "documentation": "The ending index of the table concatenation."
+  },
+  "@luau/global/table.concat/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.concat": {
+    "documentation": "Returns the given range of table elements as a string where each element is separated by the given separator.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.concat/param/0"
+      },
+      {
+        "name": "sep",
+        "documentation": "@luau/global/table.concat/param/1"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/table.concat/param/2"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/table.concat/param/3"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.concat/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.create/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.create/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/table.create/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.create": {
+    "documentation": "Returns a new table populated with many instances of the specified value.",
+    "params": [
+      {
+        "name": "count",
+        "documentation": "@luau/global/table.create/param/0"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/table.create/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.create/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.find/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.find/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/table.find/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/table.find/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.find": {
+    "documentation": "Returns the index of the first occurrence of <code>needle</code> within <code>haystack</code> starting from <code>init</code>.",
+    "params": [
+      {
+        "name": "haystack",
+        "documentation": "@luau/global/table.find/param/0"
+      },
+      {
+        "name": "needle",
+        "documentation": "@luau/global/table.find/param/1"
+      },
+      {
+        "name": "init",
+        "documentation": "@luau/global/table.find/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.find/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.foreach/param/0": {
+    "documentation": "The table to be iterated over."
+  },
+  "@luau/global/table.foreach/param/1": {
+    "documentation": "The function that will be used for the iteration. This function will receive 2 arguments for each iteration, where the 1st argument is the key, and the 2nd argument is the value."
+  },
+  "@luau/global/table.foreach": {
+    "documentation": "Iterates over the provided table, passing the key and value of each iteration over to the provided function.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.foreach/param/0"
+      },
+      {
+        "name": "f",
+        "documentation": "@luau/global/table.foreach/param/1"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.foreachi/param/0": {
+    "documentation": "The table to be iterated over."
+  },
+  "@luau/global/table.foreachi/param/1": {
+    "documentation": "The function that will be used for the iteration. This function will receive 2 arguments for each iteration, where the 1st argument is the index, and the 2nd argument is the value."
+  },
+  "@luau/global/table.foreachi": {
+    "documentation": "Similar to table.foreach() except index-value pairs are passed instead of key-value pairs.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.foreachi/param/0"
+      },
+      {
+        "name": "f",
+        "documentation": "@luau/global/table.foreachi/param/1"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.freeze/param/0": {
+    "documentation": "The table to be frozen."
+  },
+  "@luau/global/table.freeze/return/0": {
+    "documentation": "The frozen table."
+  },
+  "@luau/global/table.freeze": {
+    "documentation": "Makes the given table read-only.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.freeze/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.freeze/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.getn/param/0": {
+    "documentation": "The table whose size is being measured."
+  },
+  "@luau/global/table.getn/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.getn": {
+    "documentation": "Returns the number of elements in the table passed.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.getn/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.getn/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.insert": {
+    "overloads": {
+      "(table, number, Variant) -> ()": "@luau/global/table.insert/overload/(table, number, Variant) -> ()",
+      "(table, Variant) -> ()": "@luau/global/table.insert/overload/(table, Variant) -> ()"
+    }
+  },
+  "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/0": {
+    "documentation": "The table that is being appended to."
+  },
+  "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/1": {
+    "documentation": "The position at which the value will be inserted."
+  },
+  "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/2": {
+    "documentation": "The value that will be appended to the table."
+  },
+  "@luau/global/table.insert/overload/(table, number, Variant) -> ()": {
+    "documentation": "Inserts the provided value to the target position of the array.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/0"
+      },
+      {
+        "name": "pos",
+        "documentation": "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/1"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/table.insert/overload/(table, number, Variant) -> ()/param/2"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.insert/overload/(table, Variant) -> ()/param/0": {
+    "documentation": "The table that is being appended to."
+  },
+  "@luau/global/table.insert/overload/(table, Variant) -> ()/param/1": {
+    "documentation": "The value that will be appended to the table."
+  },
+  "@luau/global/table.insert/overload/(table, Variant) -> ()": {
+    "documentation": "Appends the provided value to the end of the array.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.insert/overload/(table, Variant) -> ()/param/0"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/table.insert/overload/(table, Variant) -> ()/param/1"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.isfrozen/param/0": {
+    "documentation": "The table to check."
+  },
+  "@luau/global/table.isfrozen/return/0": {
+    "documentation": "Whether the table is frozen from <code>table.freeze()</code>."
+  },
+  "@luau/global/table.isfrozen": {
+    "documentation": "Returns <code>true</code> if the given table is frozen and <code>false</code> if it isn't frozen.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.isfrozen/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.isfrozen/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.maxn/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.maxn/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.maxn": {
+    "documentation": "Returns the maximum numeric key of the provided table, or zero if the table has no numeric keys.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.maxn/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.maxn/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.move/param/0": {
+    "documentation": "Source table."
+  },
+  "@luau/global/table.move/param/1": {
+    "documentation": "Start copying at <code>src[a]</code>."
+  },
+  "@luau/global/table.move/param/2": {
+    "documentation": "Copy up to and including <code>src[b]</code>."
+  },
+  "@luau/global/table.move/param/3": {
+    "documentation": "Copy into <code>dst[t], ...</code>."
+  },
+  "@luau/global/table.move/param/4": {
+    "documentation": "Destination table."
+  },
+  "@luau/global/table.move/return/0": {
+    "documentation": "<code>dst</code>, for convenience."
+  },
+  "@luau/global/table.move": {
+    "documentation": "Copies the specified range of elements from one table to another.",
+    "params": [
+      {
+        "name": "src",
+        "documentation": "@luau/global/table.move/param/0"
+      },
+      {
+        "name": "a",
+        "documentation": "@luau/global/table.move/param/1"
+      },
+      {
+        "name": "b",
+        "documentation": "@luau/global/table.move/param/2"
+      },
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.move/param/3"
+      },
+      {
+        "name": "dst",
+        "documentation": "@luau/global/table.move/param/4"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.move/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.pack/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.pack/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.pack": {
+    "documentation": "Returns a new table containing the provided values.",
+    "params": [
+      {
+        "name": "values...",
+        "documentation": "@luau/global/table.pack/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.pack/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.remove/param/0": {
+    "documentation": "The table that is having an element removed."
+  },
+  "@luau/global/table.remove/param/1": {
+    "documentation": "The index of the element being removed."
+  },
+  "@luau/global/table.remove/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.remove": {
+    "documentation": "Removes the specified element from the array, shifting later elements down to fill in the empty space if possible.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.remove/param/0"
+      },
+      {
+        "name": "pos",
+        "documentation": "@luau/global/table.remove/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.remove/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/table.sort/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.sort/param/1": {
+    "documentation": "An optional comparison function to be used when comparing elements in the table. This function receives two elements, and should return true if the first element should be sorted before the second in the final order."
+  },
+  "@luau/global/table.sort": {
+    "documentation": "Sorts table elements using the provided comparison function or the <code>&lt;</code> operator.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/table.sort/param/0"
+      },
+      {
+        "name": "comp",
+        "documentation": "@luau/global/table.sort/param/1"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/table.unpack/param/0": {
+    "documentation": "The list of elements to be unpacked."
+  },
+  "@luau/global/table.unpack/param/1": {
+    "documentation": "The index of the first element to unpack."
+  },
+  "@luau/global/table.unpack/param/2": {
+    "documentation": "The index of the last element to unpack."
+  },
+  "@luau/global/table.unpack/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/table.unpack": {
+    "documentation": "Returns all elements from the given list as a tuple.",
+    "params": [
+      {
+        "name": "list",
+        "documentation": "@luau/global/table.unpack/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/table.unpack/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/table.unpack/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/table.unpack/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string": {
+    "documentation": "Provides generic functions to manipulate strings.",
+    "keys": {
+      "byte": "@luau/global/string.byte",
+      "char": "@luau/global/string.char",
+      "find": "@luau/global/string.find",
+      "format": "@luau/global/string.format",
+      "gmatch": "@luau/global/string.gmatch",
+      "gsub": "@luau/global/string.gsub",
+      "len": "@luau/global/string.len",
+      "lower": "@luau/global/string.lower",
+      "match": "@luau/global/string.match",
+      "pack": "@luau/global/string.pack",
+      "packsize": "@luau/global/string.packsize",
+      "rep": "@luau/global/string.rep",
+      "reverse": "@luau/global/string.reverse",
+      "split": "@luau/global/string.split",
+      "sub": "@luau/global/string.sub",
+      "unpack": "@luau/global/string.unpack",
+      "upper": "@luau/global/string.upper"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/string.byte/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.byte/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.byte/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/string.byte/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.byte": {
+    "documentation": "Returns the internal numerical codes of the characters <code>s[i], s[i+1], ..., s[j]</code>. The default value for <code>i</code> is 1; the default value for <code>j</code> is <code>i</code>. These indices are corrected following the same rules of function string.sub.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.byte/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/string.byte/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/string.byte/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.byte/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.char/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.char/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.char": {
+    "documentation": "Receives zero or more integers and returns a string with length equal to the number of arguments that has each character has the internal numerical code equal to its corresponding argument.",
+    "params": [
+      {
+        "name": "...",
+        "documentation": "@luau/global/string.char/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.char/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.find/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.find/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.find/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/string.find/param/3": {
+    "documentation": ""
+  },
+  "@luau/global/string.find/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.find/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.find": {
+    "documentation": "Looks for the first match of pattern in the string <code>s</code> and returns the indices of <code>s</code> where the occurrence starts and ends.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.find/param/0"
+      },
+      {
+        "name": "pattern",
+        "documentation": "@luau/global/string.find/param/1"
+      },
+      {
+        "name": "init",
+        "documentation": "@luau/global/string.find/param/2"
+      },
+      {
+        "name": "plain",
+        "documentation": "@luau/global/string.find/param/3"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.find/return/0",
+      "@luau/global/string.find/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.format/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.format/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.format/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.format": {
+    "documentation": "Returns a formatted version of its variable number of arguments following the description given in its first argument, which must be a string.",
+    "params": [
+      {
+        "name": "formatstring",
+        "documentation": "@luau/global/string.format/param/0"
+      },
+      {
+        "name": "...",
+        "documentation": "@luau/global/string.format/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.format/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.gmatch/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.gmatch/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.gmatch/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.gmatch": {
+    "documentation": "Returns an iterator function that returns the next captures from pattern over the string <code>s</code> each time it's called.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.gmatch/param/0"
+      },
+      {
+        "name": "pattern",
+        "documentation": "@luau/global/string.gmatch/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.gmatch/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.gsub/param/0": {
+    "documentation": "The string whose occurrences of the given pattern shall be replaced."
+  },
+  "@luau/global/string.gsub/param/1": {
+    "documentation": "The pattern to be matched and replaced."
+  },
+  "@luau/global/string.gsub/param/2": {
+    "documentation": "Determines what should replace the occurrence(s) of the given pattern."
+  },
+  "@luau/global/string.gsub/param/3": {
+    "documentation": "The maximum number of substitutions to make."
+  },
+  "@luau/global/string.gsub/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.gsub/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.gsub": {
+    "documentation": "Returns a copy of <code>s</code> in which all or the first <code>n</code> occurrences of the pattern are replaced with the given replacement. The second value returned is the total number of substitutions made.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.gsub/param/0"
+      },
+      {
+        "name": "pattern",
+        "documentation": "@luau/global/string.gsub/param/1"
+      },
+      {
+        "name": "replacement",
+        "documentation": "@luau/global/string.gsub/param/2"
+      },
+      {
+        "name": "replacements",
+        "documentation": "@luau/global/string.gsub/param/3"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.gsub/return/0",
+      "@luau/global/string.gsub/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.len/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.len/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.len": {
+    "documentation": "Returns the length of a string.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.len/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.len/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.lower/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.lower/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.lower": {
+    "documentation": "Returns a copy of a string with all uppercase letters changed to lowercase.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.lower/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.lower/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.match/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.match/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.match/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/string.match/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.match": {
+    "documentation": "Looks for the first match of pattern in the string <code>s</code>. If a match is found, it is returned; otherwise, it returns nil. A third, optional numerical argument, init, specifies where to start the search.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.match/param/0"
+      },
+      {
+        "name": "pattern",
+        "documentation": "@luau/global/string.match/param/1"
+      },
+      {
+        "name": "init",
+        "documentation": "@luau/global/string.match/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.match/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.pack/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.pack/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.pack/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.pack": {
+    "documentation": "Returns a binary string containing the provided arguments.",
+    "params": [
+      {
+        "name": "format",
+        "documentation": "@luau/global/string.pack/param/0"
+      },
+      {
+        "name": "...",
+        "documentation": "@luau/global/string.pack/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.pack/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.packsize/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.packsize/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.packsize": {
+    "documentation": "Returns the size in bytes of any string packed with a given description.",
+    "params": [
+      {
+        "name": "format",
+        "documentation": "@luau/global/string.packsize/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.packsize/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.rep/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.rep/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.rep/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.rep": {
+    "documentation": "Returns a string that is the concatenation of <code>n</code> copies of the string <code>s</code>.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.rep/param/0"
+      },
+      {
+        "name": "n",
+        "documentation": "@luau/global/string.rep/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.rep/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.reverse/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.reverse/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.reverse": {
+    "documentation": "Returns a string that is the string <code>s</code> reversed.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.reverse/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.reverse/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.split/param/0": {
+    "documentation": "The string to split."
+  },
+  "@luau/global/string.split/param/1": {
+    "documentation": "The separator character(s) to be used for splitting the string."
+  },
+  "@luau/global/string.split/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.split": {
+    "documentation": "Splits a string into parts based on the defined separator character(s), returning a table of ordered results.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.split/param/0"
+      },
+      {
+        "name": "separator",
+        "documentation": "@luau/global/string.split/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.split/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.sub/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.sub/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.sub/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/string.sub/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.sub": {
+    "documentation": "Returns the substring of <code>s</code> that starts at <code>i</code> and continues until j. <code>i</code> and <code>j</code> can be negative. <code>i</code> defaults to 1 and <code>j</code> defaults to <code>-1</code>.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.sub/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/string.sub/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/string.sub/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.sub/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.unpack/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.unpack/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/string.unpack/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/string.unpack/return/0": {
+    "documentation": "The values packed into the provided binary string, plus the index of the first unread byte."
+  },
+  "@luau/global/string.unpack": {
+    "documentation": "Extracts the values packed in the provided binary string.",
+    "params": [
+      {
+        "name": "format",
+        "documentation": "@luau/global/string.unpack/param/0"
+      },
+      {
+        "name": "data",
+        "documentation": "@luau/global/string.unpack/param/1"
+      },
+      {
+        "name": "readStart",
+        "documentation": "@luau/global/string.unpack/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.unpack/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/string.upper/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.upper/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/string.upper": {
+    "documentation": "Returns a copy of a string with all lowercase letters changed to uppercase.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/string.upper/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/string.upper/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8": {
+    "documentation": "This library provides basic support for <code>UTF-8</code> encoding.",
+    "keys": {
+      "char": "@luau/global/utf8.char",
+      "codes": "@luau/global/utf8.codes",
+      "codepoint": "@luau/global/utf8.codepoint",
+      "len": "@luau/global/utf8.len",
+      "offset": "@luau/global/utf8.offset",
+      "graphemes": "@luau/global/utf8.graphemes",
+      "nfcnormalize": "@luau/global/utf8.nfcnormalize",
+      "nfdnormalize": "@luau/global/utf8.nfdnormalize"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/utf8.char/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.char/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.char": {
+    "documentation": "Converts zero or more codepoints to UTF-8 byte sequences.",
+    "params": [
+      {
+        "name": "codepoints",
+        "documentation": "@luau/global/utf8.char/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.char/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.codes/param/0": {
+    "documentation": "The string to iterate over."
+  },
+  "@luau/global/utf8.codes/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.codes/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.codes/return/2": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.codes": {
+    "documentation": "Returns an iterator function that iterates over all codepoints in a given string.",
+    "params": [
+      {
+        "name": "str",
+        "documentation": "@luau/global/utf8.codes/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.codes/return/0",
+      "@luau/global/utf8.codes/return/1",
+      "@luau/global/utf8.codes/return/2"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.codepoint/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.codepoint/param/1": {
+    "documentation": "The index of the codepoint that should be fetched from this string."
+  },
+  "@luau/global/utf8.codepoint/param/2": {
+    "documentation": "The index of the last codepoint between <code>i</code> and <code>j</code> that will be returned. If excluded, this will default to the value of <code>i</code>."
+  },
+  "@luau/global/utf8.codepoint/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.codepoint": {
+    "documentation": "Returns the codepoints (as integers) from all codepoints in a given string.",
+    "params": [
+      {
+        "name": "str",
+        "documentation": "@luau/global/utf8.codepoint/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/utf8.codepoint/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/utf8.codepoint/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.codepoint/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.len/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.len/param/1": {
+    "documentation": "The starting position."
+  },
+  "@luau/global/utf8.len/param/2": {
+    "documentation": "The ending position."
+  },
+  "@luau/global/utf8.len/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.len": {
+    "documentation": "Returns the number of UTF-8 codepoints in a given string.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/utf8.len/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/utf8.len/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/utf8.len/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.len/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.offset/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.offset/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.offset/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.offset/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.offset": {
+    "documentation": "Returns the position (in bytes) where the encoding of the <code>n</code>‑th codepoint of <code>s</code> (counting from byte position <code>i</code>) starts.",
+    "params": [
+      {
+        "name": "s",
+        "documentation": "@luau/global/utf8.offset/param/0"
+      },
+      {
+        "name": "n",
+        "documentation": "@luau/global/utf8.offset/param/1"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/utf8.offset/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.offset/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.graphemes/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.graphemes/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.graphemes/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.graphemes/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.graphemes": {
+    "documentation": "Returns an iterator function that iterates over the grapheme clusters of a given string.",
+    "params": [
+      {
+        "name": "str",
+        "documentation": "@luau/global/utf8.graphemes/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/utf8.graphemes/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/utf8.graphemes/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.graphemes/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.nfcnormalize/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.nfcnormalize/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.nfcnormalize": {
+    "documentation": "Converts the input string to Normal Form C.",
+    "params": [
+      {
+        "name": "str",
+        "documentation": "@luau/global/utf8.nfcnormalize/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.nfcnormalize/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/utf8.nfdnormalize/param/0": {
+    "documentation": "The string to convert."
+  },
+  "@luau/global/utf8.nfdnormalize/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/utf8.nfdnormalize": {
+    "documentation": "Converts the input string to Normal Form D.",
+    "params": [
+      {
+        "name": "str",
+        "documentation": "@luau/global/utf8.nfdnormalize/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/utf8.nfdnormalize/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine": {
+    "documentation": "A function that executes alongside the main thread.",
+    "keys": {
+      "close": "@luau/global/coroutine.close",
+      "create": "@luau/global/coroutine.create",
+      "isyieldable": "@luau/global/coroutine.isyieldable",
+      "resume": "@luau/global/coroutine.resume",
+      "running": "@luau/global/coroutine.running",
+      "status": "@luau/global/coroutine.status",
+      "wrap": "@luau/global/coroutine.wrap",
+      "yield": "@luau/global/coroutine.yield"
+    },
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.close/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.close/return/0": {
+    "documentation": "<code>true</code> unless the coroutine being closed is in an error state."
+  },
+  "@luau/global/coroutine.close/return/1": {
+    "documentation": "The error message, if any."
+  },
+  "@luau/global/coroutine.close": {
+    "documentation": "Closes and puts the provided coroutine in a dead state.",
+    "params": [
+      {
+        "name": "co",
+        "documentation": "@luau/global/coroutine.close/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.close/return/0",
+      "@luau/global/coroutine.close/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.create/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.create/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.create": {
+    "documentation": "Creates a new coroutine, with body f. f must be a Lua function.",
+    "params": [
+      {
+        "name": "f",
+        "documentation": "@luau/global/coroutine.create/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.create/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.isyieldable/return/0": {
+    "documentation": "Whether or not the coroutine can safely yield at this point."
+  },
+  "@luau/global/coroutine.isyieldable": {
+    "documentation": "Returns <code>true</code> if the coroutine this function is called within can safely yield.",
+    "params": [],
+    "returns": [
+      "@luau/global/coroutine.isyieldable/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.resume/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.resume/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.resume/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.resume/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.resume": {
+    "documentation": "Starts or continues the execution of coroutine <code>co</code>.",
+    "params": [
+      {
+        "name": "co",
+        "documentation": "@luau/global/coroutine.resume/param/0"
+      },
+      {
+        "name": "...",
+        "documentation": "@luau/global/coroutine.resume/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.resume/return/0",
+      "@luau/global/coroutine.resume/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.running/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.running": {
+    "documentation": "Returns the running coroutine.",
+    "params": [],
+    "returns": [
+      "@luau/global/coroutine.running/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.status/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.status/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.status": {
+    "documentation": "Returns the status of coroutine co as a string.",
+    "params": [
+      {
+        "name": "co",
+        "documentation": "@luau/global/coroutine.status/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.status/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.wrap/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.wrap/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.wrap": {
+    "documentation": "Creates a new coroutine and returns a function that, when called, resumes the coroutine.",
+    "params": [
+      {
+        "name": "f",
+        "documentation": "@luau/global/coroutine.wrap/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.wrap/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.yield/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.yield/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/coroutine.yield": {
+    "documentation": "Suspends execution of the coroutine.",
+    "params": [
+      {
+        "name": "...",
+        "documentation": "@luau/global/coroutine.yield/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/coroutine.yield/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/assert/param/0": {
+    "documentation": "The value that will be asserted against."
+  },
+  "@luau/global/assert/param/1": {
+    "documentation": "The text that will be shown in the error if the assertion fails."
+  },
+  "@luau/global/assert/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/assert": {
+    "documentation": "Throws an error if the provided <code>value</code> resolves to <code>false</code> or <code>nil</code>.",
+    "params": [
+      {
+        "name": "value",
+        "documentation": "@luau/global/assert/param/0"
+      },
+      {
+        "name": "errorMessage",
+        "documentation": "@luau/global/assert/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/assert/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/collectgarbage/param/0": {
+    "documentation": "The name of the operation that should be performed by the garbage collector."
+  },
+  "@luau/global/collectgarbage/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/collectgarbage": {
+    "documentation": "Performs the specified operation of the garbage collector.",
+    "params": [
+      {
+        "name": "operation",
+        "documentation": "@luau/global/collectgarbage/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/collectgarbage/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/error/param/0": {
+    "documentation": "The error message to display."
+  },
+  "@luau/global/error/param/1": {
+    "documentation": "The level of information that should be printed. Defaults to 1."
+  },
+  "@luau/global/error": {
+    "documentation": "Halts thread execution and throws an error.",
+    "params": [
+      {
+        "name": "message",
+        "documentation": "@luau/global/error/param/0"
+      },
+      {
+        "name": "level",
+        "documentation": "@luau/global/error/param/1"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/getfenv/param/0": {
+    "documentation": "The stack level (int) of the environment to be returned; or the function whose environment will be returned."
+  },
+  "@luau/global/getfenv/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/getfenv": {
+    "documentation": "Returns the current environment in use by the caller, as a dictionary.",
+    "params": [
+      {
+        "name": "stack",
+        "documentation": "@luau/global/getfenv/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/getfenv/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/getmetatable/param/0": {
+    "documentation": "The object to fetch the metatable of."
+  },
+  "@luau/global/getmetatable/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/getmetatable": {
+    "documentation": "Returns the metatable of the given table.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/getmetatable/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/getmetatable/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/ipairs/param/0": {
+    "documentation": "A table whose elements are to be iterated over."
+  },
+  "@luau/global/ipairs/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/ipairs/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/ipairs/return/2": {
+    "documentation": ""
+  },
+  "@luau/global/ipairs": {
+    "documentation": "Returns an iterator function and the table for use in a for loop.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/ipairs/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/ipairs/return/0",
+      "@luau/global/ipairs/return/1",
+      "@luau/global/ipairs/return/2"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/loadstring/param/0": {
+    "documentation": "The specified string to be loaded as Lua code."
+  },
+  "@luau/global/loadstring/param/1": {
+    "documentation": "An optional chunk name for error messages and debug information. If unspecified, Lua uses the <code>contents</code> string."
+  },
+  "@luau/global/loadstring/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/loadstring": {
+    "documentation": "Returns the provided code as a function that can be executed.",
+    "params": [
+      {
+        "name": "contents",
+        "documentation": "@luau/global/loadstring/param/0"
+      },
+      {
+        "name": "chunkname",
+        "documentation": "@luau/global/loadstring/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/loadstring/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/newproxy/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/newproxy/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/newproxy": {
+    "documentation": "Creates a blank <code>userdata</code>, with the option for it to have a metatable.",
+    "params": [
+      {
+        "name": "addMetatable",
+        "documentation": "@luau/global/newproxy/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/newproxy/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/next/param/0": {
+    "documentation": "The array to be traversed."
+  },
+  "@luau/global/next/param/1": {
+    "documentation": "The last key that was previously retrieved from a call to next."
+  },
+  "@luau/global/next/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/next/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/next": {
+    "documentation": "An iterator function for use in for loops.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/next/param/0"
+      },
+      {
+        "name": "lastKey",
+        "documentation": "@luau/global/next/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/next/return/0",
+      "@luau/global/next/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/pairs/param/0": {
+    "documentation": "An array or dictionary table to iterate over."
+  },
+  "@luau/global/pairs/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/pairs/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/pairs": {
+    "documentation": "Returns an iterator function and the provided table for use in a <code>for</code> loop.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/pairs/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/pairs/return/0",
+      "@luau/global/pairs/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/pcall/param/0": {
+    "documentation": "The function to be called in protected mode."
+  },
+  "@luau/global/pcall/param/1": {
+    "documentation": "The arguments to send to <code>func</code> when executing."
+  },
+  "@luau/global/pcall/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/pcall/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/pcall": {
+    "documentation": "Runs the provided function and catches any error it throws, returning the function's success and its results.",
+    "params": [
+      {
+        "name": "func",
+        "documentation": "@luau/global/pcall/param/0"
+      },
+      {
+        "name": "args",
+        "documentation": "@luau/global/pcall/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/pcall/return/0",
+      "@luau/global/pcall/return/1"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/print/param/0": {
+    "documentation": "Any number of arguments to be outputted."
+  },
+  "@luau/global/print": {
+    "documentation": "Prints all provided values to the output.",
+    "params": [
+      {
+        "name": "params",
+        "documentation": "@luau/global/print/param/0"
+      }
+    ],
+    "returns": [],
+    "code_sample": ""
+  },
+  "@luau/global/rawequal/param/0": {
+    "documentation": "The first variable to compare."
+  },
+  "@luau/global/rawequal/param/1": {
+    "documentation": "The second variable to compare."
+  },
+  "@luau/global/rawequal/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/rawequal": {
+    "documentation": "Returns whether <code>v1</code> is equal to <code>v2</code>, bypassing their metamethods.",
+    "params": [
+      {
+        "name": "v1",
+        "documentation": "@luau/global/rawequal/param/0"
+      },
+      {
+        "name": "v2",
+        "documentation": "@luau/global/rawequal/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/rawequal/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/rawget/param/0": {
+    "documentation": "The table to be referenced."
+  },
+  "@luau/global/rawget/param/1": {
+    "documentation": "The index to get from <code>t</code>."
+  },
+  "@luau/global/rawget/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/rawget": {
+    "documentation": "Gets the real value of <code>table[index]</code>, bypassing any metamethods.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/rawget/param/0"
+      },
+      {
+        "name": "index",
+        "documentation": "@luau/global/rawget/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/rawget/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/rawlen/param/0": {
+    "documentation": "The table to be referenced."
+  },
+  "@luau/global/rawlen/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/rawlen": {
+    "documentation": "Returns the length of the string or table, bypassing any metamethods.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/rawlen/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/rawlen/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/rawset/param/0": {
+    "documentation": "The table to be referenced."
+  },
+  "@luau/global/rawset/param/1": {
+    "documentation": "The index to set in <code>t</code> to a specified <code>value</code>. Must be different from nil."
+  },
+  "@luau/global/rawset/param/2": {
+    "documentation": "The value to be set to a specified <code>index</code> in table <code>t</code>."
+  },
+  "@luau/global/rawset/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/rawset": {
+    "documentation": "Sets the real value of <code>table[index]</code>, bypassing any metamethods.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/rawset/param/0"
+      },
+      {
+        "name": "index",
+        "documentation": "@luau/global/rawset/param/1"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/rawset/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/rawset/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/select/param/0": {
+    "documentation": "The index of the argument to return all arguments after in <code>args</code>. or must be \"#\"."
+  },
+  "@luau/global/select/param/1": {
+    "documentation": "A tuple of arguments."
+  },
+  "@luau/global/select/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/select": {
+    "documentation": "Returns all arguments after the given index.",
+    "params": [
+      {
+        "name": "index",
+        "documentation": "@luau/global/select/param/0"
+      },
+      {
+        "name": "args",
+        "documentation": "@luau/global/select/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/select/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/setfenv/param/0": {
+    "documentation": "Either a function or a number that specifies the function at that stack level."
+  },
+  "@luau/global/setfenv/param/1": {
+    "documentation": "The function environment table to set for the specified function."
+  },
+  "@luau/global/setfenv/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/setfenv": {
+    "documentation": "Sets the given function's environment.",
+    "params": [
+      {
+        "name": "f",
+        "documentation": "@luau/global/setfenv/param/0"
+      },
+      {
+        "name": "fenv",
+        "documentation": "@luau/global/setfenv/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/setfenv/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/setmetatable/param/0": {
+    "documentation": "The table to set the metatable of."
+  },
+  "@luau/global/setmetatable/param/1": {
+    "documentation": "If nil, the metatable of the given table <code>t</code> is removed. Otherwise, the metatable to set for the given table <code>t</code>."
+  },
+  "@luau/global/setmetatable/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/setmetatable": {
+    "documentation": "Sets the given table's metatable.",
+    "params": [
+      {
+        "name": "t",
+        "documentation": "@luau/global/setmetatable/param/0"
+      },
+      {
+        "name": "newMeta",
+        "documentation": "@luau/global/setmetatable/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/setmetatable/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/tonumber/param/0": {
+    "documentation": "The object to be converted into a number."
+  },
+  "@luau/global/tonumber/param/1": {
+    "documentation": "The numerical base to convert <code>arg</code> into."
+  },
+  "@luau/global/tonumber/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/tonumber": {
+    "documentation": "Returns the provided value converted to a number, or nil if impossible.",
+    "params": [
+      {
+        "name": "arg",
+        "documentation": "@luau/global/tonumber/param/0"
+      },
+      {
+        "name": "base",
+        "documentation": "@luau/global/tonumber/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/tonumber/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/tostring/param/0": {
+    "documentation": "The object to be converted into a string."
+  },
+  "@luau/global/tostring/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/tostring": {
+    "documentation": "Returns the provided value converted to a string, or nil if impossible.",
+    "params": [
+      {
+        "name": "e",
+        "documentation": "@luau/global/tostring/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/tostring/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/type/param/0": {
+    "documentation": "The object to return the type of."
+  },
+  "@luau/global/type/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/type": {
+    "documentation": "Returns the basic type of the provided object.",
+    "params": [
+      {
+        "name": "v",
+        "documentation": "@luau/global/type/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/type/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/unpack/param/0": {
+    "documentation": "The list of elements to be unpacked."
+  },
+  "@luau/global/unpack/param/1": {
+    "documentation": "The index of the first element to unpack."
+  },
+  "@luau/global/unpack/param/2": {
+    "documentation": "The index of the last element to unpack."
+  },
+  "@luau/global/unpack/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/unpack": {
+    "documentation": "Returns all elements from the given list as a tuple.",
+    "params": [
+      {
+        "name": "list",
+        "documentation": "@luau/global/unpack/param/0"
+      },
+      {
+        "name": "i",
+        "documentation": "@luau/global/unpack/param/1"
+      },
+      {
+        "name": "j",
+        "documentation": "@luau/global/unpack/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/unpack/return/0"
+    ],
+    "code_sample": ""
+  },
+  "@luau/global/xpcall/param/0": {
+    "documentation": "The function to be called in protected mode."
+  },
+  "@luau/global/xpcall/param/1": {
+    "documentation": "The function to be used as an error handle if xpcall catches an error."
+  },
+  "@luau/global/xpcall/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/xpcall/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/xpcall/return/1": {
+    "documentation": ""
+  },
+  "@luau/global/xpcall": {
+    "documentation": "Similar to <code>pcall()</code> except it uses a custom error handler.",
+    "params": [
+      {
+        "name": "f",
+        "documentation": "@luau/global/xpcall/param/0"
+      },
+      {
+        "name": "err",
+        "documentation": "@luau/global/xpcall/param/1"
+      },
+      {
+        "name": "args",
+        "documentation": "@luau/global/xpcall/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/xpcall/return/0",
+      "@luau/global/xpcall/return/1"
+    ],
+    "code_sample": ""
+  }
+}

@@ -53,8 +53,11 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
 const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const Luau::ModuleName& name) const
 {
     // managedFiles is keyed by URI. If module name is a URI that maps to a managed file, return that directly
-    if (auto document = getTextDocument(Uri::parse(name)))
-        return document;
+    // if (auto document = getTextDocument(Uri::parse(name)))
+    //     return document;
+    // Handle untitled: files
+    if (Luau::startsWith(name, "untitled:") || Luau::startsWith(name, "inmemory:"))
+        return getTextDocument(Uri::parse(name));
 
     return getTextDocument(getUri(name));
 }

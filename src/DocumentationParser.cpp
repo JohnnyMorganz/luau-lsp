@@ -16,21 +16,44 @@ Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j)
     return Luau::FunctionParameterDocumentation{name, documentation};
 }
 
-void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const Client* client)
+/// Converts an HTML string provided as an input to markdown
+/// TODO: currently, this just strips tags, rather than do anything special
+std::string convertHtmlToMarkdown(const std::string& input)
+{
+    // TODO - Tags to support:
+    // <code></code> - as well as <code class="language-lua">
+    // <pre></pre>
+    // <em></em> / <i></i>
+    // <ul><li></li></ul>
+    // <ol><li></li></ol>
+    // <a href=""></a>
+    // <strong></strong> / <b></b>
+    // <img alt="" src="" />
+    // Also need to unescape HTML characters
+
+
+    // Yes, regex is bad, but I really cannot be bothered right now
+    std::regex strip("<[^>]*>");
+    return std::regex_replace(input, strip, "");
+}
+
+
+const void parseDocumentation(
+    const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const ServerIO & io)
 {
     if (documentationFiles.empty())
     {
-        client->sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
+        io.sendLogMessage(lsp::MessageType::Warning, "No documentation file given. Documentation will not be provided");
         return;
     }
-
     for (auto& documentationFile : documentationFiles)
     {
-        auto resolvedFilePath = resolvePath(documentationFile);
-        if (auto contents = Luau::FileUtils::readFile(resolvedFilePath))
+        try
         {
-            try
+            auto resolvedFilePath = resolvePath(documentationFile);
+            if (auto contents = readFile(resolvedFilePath))
             {
+                int count = 0;
                 auto docs = json::parse(*contents);
                 for (auto& [symbol, info] : docs.items())
                 {
@@ -51,6 +74,7 @@ void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau
                             keys[k] = v;
                         }
                         database[symbol] = Luau::TableDocumentation{documentation, keys, learnMoreLink, codeSample};
+                        count++;
                     }
                     else if (info.contains("overloads"))
                     {
@@ -60,6 +84,7 @@ void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau
                             overloads[sig] = sym;
                         }
                         database[symbol] = Luau::OverloadedFunctionDocumentation{overloads};
+                        count++;
                     }
                     else if (info.contains("params") || info.contains("returns"))
                     {
@@ -72,25 +97,28 @@ void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau
                         if (info.contains("returns"))
                             info.at("returns").get_to(returns);
                         database[symbol] = Luau::FunctionDocumentation{documentation, parameters, returns, learnMoreLink, codeSample};
+                        count++;
                     }
                     else
                     {
                         database[symbol] = Luau::BasicDocumentation{documentation, learnMoreLink, codeSample};
+                        count++;
                     }
                 }
+                io.sendLogMessage(lsp::MessageType::Info, std::string("Loaded ") + std::to_string(count) + std::string(" symbols for documentation file ") + std::string(documentationFile));
             }
-            catch (const std::exception& e)
+            else
             {
-                client->sendLogMessage(
-                    lsp::MessageType::Error, "Failed to load documentation database for " + resolvedFilePath + ": " + std::string(e.what()));
-                client->sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
+                io.sendLogMessage(lsp::MessageType::Error,
+                    "Failed to read documentation file for " + documentationFile.generic_string() + ". Documentation will not be provided");
+                io.sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
             }
         }
-        else
+        catch (const std::exception& e)
         {
-            client->sendLogMessage(
-                lsp::MessageType::Error, "Failed to read documentation file for " + resolvedFilePath + ". Documentation will not be provided");
-            client->sendWindowMessage(lsp::MessageType::Error, "Failed to read documentation file. Documentation will not be provided");
+            io.sendLogMessage(lsp::MessageType::Error,
+                "Failed to load documentation database for " + documentationFile.generic_string() + ": " + std::string(e.what()));
+            io.sendWindowMessage(lsp::MessageType::Error, "Failed to load documentation database: " + std::string(e.what()));
         }
     }
 }

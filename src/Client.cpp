@@ -15,7 +15,7 @@ Client::Client(std::unique_ptr<Transport> transport)
 {
 }
 
-void Client::sendRequest(
+ const void Client::sendRequest(
     const id_type& id, const std::string& method, const std::optional<json>& params, const std::optional<ResponseHandler>& handler)
 {
     json msg{
@@ -29,40 +29,22 @@ void Client::sendRequest(
     if (handler)
         responseHandler.emplace(id, *handler);
 
-    sendRawMessage(msg);
+    io->sendRawMessage(msg);
 }
 
-void Client::sendResponse(const id_type& id, const json& result)
+ const void Client::sendResponse(const id_type& id, const json& result)
 {
-    json msg{
-        {"jsonrpc", "2.0"},
-        {"result", result},
-        {"id", id},
-    };
-
-    sendRawMessage(msg);
+    io->sendResponse(id, result);
 }
 
-void Client::sendError(const std::optional<id_type>& id, const JsonRpcException& e)
+ const void Client::sendError(const std::optional<id_type>& id, const JsonRpcException& e)
 {
-    json msg{
-        {"jsonrpc", "2.0"},
-        {"id", id},
-        {"error", {{"code", e.code}, {"message", e.message}, {"data", e.data}}},
-    };
-
-    sendRawMessage(msg);
+    io->sendError(id, e);
 }
 
-void Client::sendNotification(const std::string& method, const std::optional<json>& params) const
+ const void Client::sendNotification(const std::string& method, const std::optional<json>& params)
 {
-    json msg{
-        {"jsonrpc", "2.0"},
-        {"method", method},
-        {"params", params},
-    };
-
-    sendRawMessage(msg);
+    io->sendNotification(method, params);
 }
 
 static bool supportsWorkDoneProgress(const lsp::ClientCapabilities& capabilities)
@@ -118,16 +100,12 @@ void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optio
     sendProgress(lsp::ProgressParams{token, workDone});
 }
 
-void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message) const
+ const void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message)
 {
-    json params{
-        {"type", type},
-        {"message", message},
-    };
-    sendNotification("window/logMessage", params);
+    io->sendLogMessage(type, message);
 }
 
-void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose) const
+ const void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose)
 {
     if (traceMode == lsp::TraceValue::Off)
         return;
@@ -137,10 +115,9 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     sendNotification("$/logTrace", params);
 }
 
-void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message) const
+ const void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message)
 {
-    lsp::ShowMessageParams params{type, message};
-    sendNotification("window/showMessage", params);
+    io->sendWindowMessage(type, message);
 }
 
 void Client::registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions)
@@ -252,11 +229,6 @@ void Client::setTrace(const lsp::SetTraceParams& params)
     traceMode = params.value;
 }
 
-bool Client::readRawMessage(std::string& output) const
-{
-    return json_rpc::readRawMessage(transport.get(), output);
-}
-
 void Client::handleResponse(const JsonRpcMessage& message)
 {
     // We run our own exception catcher here because we don't want an exception escaping
@@ -282,9 +254,4 @@ void Client::handleResponse(const JsonRpcMessage& message)
     {
         sendLogMessage(lsp::MessageType::Error, "failed to process response " + json(message.id).dump() + " - " + e.what());
     }
-}
-
-void Client::sendRawMessage(const json& message) const
-{
-    json_rpc::sendRawMessage(transport.get(), message);
 }

@@ -2,6 +2,7 @@
 #include "LSP/LanguageServer.hpp"
 #include "Protocol/Lifecycle.hpp"
 #include "TestClient.h"
+#include "Fixture.h"
 
 TEST_SUITE_BEGIN("LanguageServer");
 
@@ -9,8 +10,8 @@ LUAU_FASTFLAG(DebugLuauTimeTracing)
 
 TEST_CASE("language_server_handles_fflags_in_initialization_options")
 {
-    Client client;
-    LanguageServer server(&client, std::nullopt);
+    auto client = Fixture::makeClient();
+    LanguageServer server(client, std::nullopt);
 
     InitializationOptions initializationOptions{};
     initializationOptions.fflags.insert_or_assign("DebugLuauTimeTracing", "True");

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.28)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 
 option(LUAU_ENABLE_TIME_TRACE "Build with Luau TimeTrace" OFF)
@@ -135,6 +135,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/AnalyzeCli.test.cpp
         tests/CodeAction.test.cpp
         src/AnalyzeCli.cpp # For testing
+        tests/MonacoWasm.test.cpp
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
@@ -215,3 +216,24 @@ if (LSP_BUILD_WITH_SENTRY)
             COMMENT "Copying crashpad_handler to output directory"
     )
 endif ()
+add_executable(Luau.LanguageServer.Web)
+target_sources(Luau.LanguageServer.Web PRIVATE
+        src/wasm.cpp
+)
+set_target_properties(
+    Luau.LanguageServer.Web
+    PROPERTIES
+        SUFFIX ".js"
+)
+target_include_directories(Luau.LanguageServer.Web PRIVATE src/include emsdk/upstream/emscripten/cache/sysroot/include)
+target_compile_options(Luau.LanguageServer.Web PRIVATE ${LUAU_LSP_OPTIONS})
+target_link_libraries(Luau.LanguageServer.Web PRIVATE Luau.Ast Luau.Analysis Luau.Compiler Luau.LanguageServer)
+target_link_options(Luau.LanguageServer.Web PRIVATE -sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$dynCall)
+target_link_options(Luau.LanguageServer.Web PRIVATE -sENVIRONMENT=web)
+target_link_options(Luau.LanguageServer.Web PRIVATE -sMODULARIZE=1 -sEXPORT_NAME=LuauLanguageServerWeb -sEXPORT_ES6=1)
+target_link_options(Luau.LanguageServer.Web PRIVATE --bind --no-entry -sIGNORE_MISSING_MAIN=1 -sALLOW_MEMORY_GROWTH=1)
+target_link_options(Luau.LanguageServer.Web PRIVATE -sMINIMAL_RUNTIME=2 -sEXPORTED_RUNTIME_METHODS=FS)
+# if necessary, we can enable these flags to get separate dwarf debugging files for stack traces in browser tools. it's expensive and unweildy.
+# target_link_options(Luau.LanguageServer.Web PRIVATE "$<$<CONFIG:Debug>:-gseparate_dwarf -v -sEXCEPTION_STACK_TRACES -sEMULATE_FUNCTION_POINTER_CASTS -sASSERTIONS=2>")
+# we need exception support because we use JsonRpcException for control flow in normal operation
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")

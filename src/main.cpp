@@ -12,6 +12,7 @@
 #ifndef _WIN32
 #include "LSP/Transport/PipeTransport.hpp"
 #endif
+#include "LSP/Client.hpp"
 
 #ifdef _WIN32
 #include <io.h>
@@ -111,30 +112,9 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     }
 
     // Setup client
-    std::unique_ptr<Transport> transport;
-    if (transportPipeFile)
-    {
-        if (program.is_used("--stdio"))
-        {
-            std::cerr << "both --stdio and --pipe cannot be specified at the same time\n";
-            return 1;
-        }
-#ifdef _WIN32
-        std::cerr << "--pipe is not supported on windows\n";
-        return 1;
-#else
-        transport = std::make_unique<PipeTransport>(*transportPipeFile);
-#endif
-    }
-    else
-    {
-        transport = std::make_unique<StdioTransport>();
-    }
-
-    Client client{std::move(transport)};
-    client.definitionsFiles = definitionsFiles;
-    client.documentationFiles = documentationFiles;
-    parseDocumentation(documentationFiles, client.documentation, &client);
+    auto io = std::make_shared<ServerIOStd>();
+    auto defsPtr = std::make_shared<std::vector<std::filesystem::path>>(std::move(definitionsFiles));
+    auto client = std::make_shared<Client>(io, defsPtr, documentationFiles);
 
     // Parse LSP Settings
     if (auto settingsPath = program.present<std::string>("--settings"))
@@ -147,17 +127,18 @@ int startLanguageServer(const argparse::ArgumentParser& program)
             return 1;
         }
     }
-
-    LanguageServer server(&client, defaultConfig);
+    // TODO - figure out a better strategy for the parameterization of definition file package names.
+    LanguageServer server(client, defaultConfig, "@roblox");
+    std::string jsonString;
 
     // Begin input loop
-    server.processInputLoop();
-
-#ifdef LSP_BUILD_WITH_SENTRY
-    if (isCrashReportingEnabled)
-        sentry_close();
-#endif
-
+    while (std::cin)
+    {
+        if (io->readRawMessage(jsonString))
+        {
+            server.processInput(jsonString);
+        }
+    }
     // If we received a shutdown request before exiting, exit normally. Otherwise, it is an abnormal exit
     return server.requestedShutdown() ? 0 : 1;
 }

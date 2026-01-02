@@ -8,14 +8,15 @@
 #include "Luau/Documentation.h"
 #include "Luau/Module.h"
 #include "Luau/Location.h"
-#include "LSP/Client.hpp"
+#include "LSP/ServerIO.hpp"
 
 using json = nlohmann::json;
 
 const std::string kDocumentationBreaker = "\n----------\n";
 
 Luau::FunctionParameterDocumentation parseDocumentationParameter(const json& j);
-void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau::DocumentationDatabase& database, const Client* client);
+const void parseDocumentation(
+    const std::vector<std::filesystem::path>& documentationFiles, Luau::DocumentationDatabase& database, const ServerIO & io);
 
 /// Returns a markdown string of the provided documentation
 /// If we can't find any documentation for the given symbol, then we return nullopt

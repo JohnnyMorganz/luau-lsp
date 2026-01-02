@@ -483,7 +483,7 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     auto& tagRegisterGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
     Luau::attachTag(Luau::getGlobalBinding(tagRegisterGlobals, "require"), "Require");
 
-    if (client->definitionsFiles.empty())
+    if (client->definitionsFiles->empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
     // For backwards compatibility, we need to keep an ordering where a definitions file for '@roblox' is always processed first
@@ -497,7 +497,7 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
             definitionsFilesToProcess.emplace_back(pair);
     }
 
-    for (const auto& [packageName, definitionsFile] : definitionsFilesToProcess)
+    for (const auto& definitionsFile : *client->definitionsFiles)
     {
         auto resolvedFilePath = resolvePath(definitionsFile);
         client->sendLogMessage(lsp::MessageType::Info, "Loading definitions file: " + packageName + " - " + resolvedFilePath);
@@ -518,9 +518,11 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
+        // auto result = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
+        auto result = types::registerDefinitions(frontend, frontend.globals, *definitionsContents, packageName, /* typeCheckForAutocomplete = */ false);
         if (!FFlag::LuauSolverV2)
-            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents);
+            // types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents);
+            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, *definitionsContents, packageName, /* typeCheckForAutocomplete = */ true);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
 
         client->sendTrace("workspace: applying platform mutations on definitions");
@@ -594,6 +596,10 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::setupWithConfiguration", "LSP");
     client->sendTrace("workspace: setting up with configuration");
+    platform = LSPPlatform::getPlatform(configuration, &fileResolver, this);
+    client->sendLogMessage(lsp::MessageType::Info, "workspace: using platform " + platform->getName());
+
+    fileResolver.platform = platform.get();
 
     // Apply first-time configuration
     if (!appliedFirstTimeConfiguration)

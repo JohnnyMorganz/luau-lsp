@@ -38,6 +38,13 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     TextDocumentPtr textDocument = allowUnmanagedFiles ? fileResolver.getOrCreateTextDocumentFromModuleName(moduleName)
                                                        : TextDocumentPtr(fileResolver.getTextDocument(params.textDocument.uri));
+
+    if(!textDocument) {
+        client->sendLogMessage(lsp::MessageType::Error, "Failing diagnostics on " + moduleName + " with missing textDocument");
+    } else if(!frontend.getSourceModule(moduleName)) {
+        client->sendLogMessage(lsp::MessageType::Error, "Failing diagnostics on " + moduleName + " with missing sourceModule");
+    }
+
     if (!textDocument)
         return report; // Bail early with empty report - file was likely closed
 
@@ -74,15 +81,24 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
         }
         else if (supportsRelatedDocuments(client->capabilities))
         {
-            auto uri = platform->resolveToRealPath(error.moduleName);
-            if (!uri)
-                continue;
             auto relatedTextDocument = fileResolver.getTextDocumentFromModuleName(error.moduleName);
             if (isIgnoredFile(*uri, config))
                 continue;
             auto diagnostic = createTypeErrorDiagnostic(error, &fileResolver, relatedTextDocument);
-            auto& currentDiagnostics = relatedDiagnostics[*uri];
-            currentDiagnostics.emplace_back(diagnostic);
+            auto fileName = platform->resolveToRealPath(error.moduleName);
+
+            // textDocument takes priority over fileName, unless fileName resolves and is known to be ignored
+            if (fileName && isIgnoredFile(*fileName, config)) {
+                continue;
+            }
+
+            if(textDocument) {
+                relatedDiagnostics[textDocument->uri().toString()].emplace_back(diagnostic);
+            } else if(fileName) {
+                relatedDiagnostics[Uri::parse(*fileName).toString()].emplace_back(diagnostic);
+            } else {
+                continue;
+            }
         }
     }
 
@@ -267,24 +283,42 @@ void WorkspaceFolder::recomputeDiagnostics(const ClientConfiguration& config)
 
 lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> LanguageServer::workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params)
 {
-    lsp::WorkspaceDiagnosticReport fullReport;
+    std::string output("");
+    try
+    {
 
-    for (auto& workspace : workspaceFolders)
-    {
-        auto report = workspace->workspaceDiagnostics(params);
-        fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
-    }
+        lsp::WorkspaceDiagnosticReport fullReport;
 
-    client->workspaceDiagnosticsToken = params.partialResultToken;
-    if (params.partialResultToken)
-    {
-        // Send the initial report as a partial result, and allow streaming of further results
-        client->sendProgress({params.partialResultToken.value(), fullReport});
-        return std::nullopt;
+        for (auto& workspace : workspaceFolders)
+        {
+            output = output + "workspace:" + workspace->name + ":" + workspace->packageName + ",";
+        }
+        output = output + "!!!! starting work !!!!";
+
+        for (auto& workspace : workspaceFolders)
+        {
+            output = output + "working:" + workspace->name + ",";
+            auto report = workspace->workspaceDiagnostics(params);
+            fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
+        }
+        output = output + "!!!! endWorkspaceFolders";
+
+        client->workspaceDiagnosticsToken = params.partialResultToken;
+        if (params.partialResultToken)
+        {
+            // Send the initial report as a partial result, and allow streaming of further results
+            client->sendProgress({params.partialResultToken.value(), fullReport});
+            return std::nullopt;
+        }
+        else
+        {
+            return fullReport;
+        }
     }
-    else
+    catch (const std::exception& e)
     {
-        return fullReport;
+        client->sendLogMessage(lsp::MessageType::Info, "Encountered error " + std::string(e.what()) + " with output " + output);
+        throw;
     }
 }
 
