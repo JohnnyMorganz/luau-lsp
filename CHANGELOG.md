@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `luau-lsp analyze` will now respect `luau-lsp.fflags.enableNewSolver` if enabled in the provided `--settings` file ([#1321](https://github.com/JohnnyMorganz/luau-lsp/issues/1321))
 - Added `luau-lsp.completion.showAnonymousAutofilledFunction` setting (enabled by default) to control whether the "function (anonymous autofilled)" completion item is shown when autocompleting callback arguments
 - Added `luau-lsp.completion.showDeprecatedItems` setting (enabled by default) to control whether deprecated items are shown in autocomplete suggestions
+- Added language server support for the upcoming Studio Script Sync release, via the Studio Plugin. ([#1295](https://github.com/JohnnyMorganz/luau-lsp/pull/1295))
+  - When the Studio Plugin is enabled alongside Studio Script Sync, it will also populate file path information for synced instances, enabling require functionality.
+  - The synced tree with file path information will be written to the `sourcemap.json` file, giving access for external tools.
+  - External editors will need to implement the `GET /get-file-paths` endpoint for the local HTTP server to support Studio Script Sync
 
 ### Changed
 
