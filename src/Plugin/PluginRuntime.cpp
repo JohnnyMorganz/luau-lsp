@@ -1,4 +1,5 @@
 #include "Plugin/PluginRuntime.hpp"
+#include "Plugin/PluginLuaApi.hpp"
 #include "LuauFileUtils.hpp"
 #include "Luau/Compiler.h"
 #include "Luau/TimeTrace.h"
@@ -28,10 +29,11 @@ void PluginRuntime::interruptCallback(lua_State* L, int gc)
     }
 }
 
-PluginRuntime::PluginRuntime(const std::string& pluginPath, size_t timeoutMs)
+PluginRuntime::PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const std::string& pluginPath, size_t timeoutMs)
     : state(nullptr, lua_close)
     , pluginPath(pluginPath)
     , timeoutMs(timeoutMs)
+    , workspace(workspace)
 {
 }
 
@@ -59,6 +61,12 @@ std::optional<PluginError> PluginRuntime::load()
 
     // Open safe libraries
     luaL_openlibs(L);
+
+    // Register Uri userdata metatable (must be before sandbox)
+    registerUriUserdata(L);
+
+    // Register lsp API (must be before sandbox)
+    registerLspApi(L, workspace);
 
     // Sandbox the environment (removes dangerous functions)
     luaL_sandbox(L);
@@ -172,8 +180,8 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
     lua_pushstring(L, context.languageId.c_str());
     lua_setfield(L, -2, "languageId");
 
-    // Call the function
-    int status = lua_resume(L, nullptr, 2);
+    // Call the function (use pcall, not resume - resume is for coroutines)
+    int status = lua_pcall(L, 2, 1, 0);
     if (status != LUA_OK)
     {
         if (timedOut)
