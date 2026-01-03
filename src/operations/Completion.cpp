@@ -644,6 +644,10 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
+
+        if (!config.completion.showDeprecatedItems && item.deprecated)
+            continue;
+
         item.kind = entryKind(item.label, entry, platform.get());
         item.sortText = sortText(frontend, item.label, item, entry, tags, *platform);
 

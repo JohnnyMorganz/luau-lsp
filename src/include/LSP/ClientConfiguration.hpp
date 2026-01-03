@@ -183,12 +183,14 @@ struct ClientCompletionConfiguration
     bool showKeywords = true;
     /// Whether to show the "function (anonymous autofilled)" generated function entry
     bool showAnonymousAutofilledFunction = true;
+    /// Whether to show deprecated items in autocomplete suggestions
+    bool showDeprecatedItems = true;
     /// Enables the experimental fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {

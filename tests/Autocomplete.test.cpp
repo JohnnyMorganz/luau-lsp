@@ -356,6 +356,27 @@ TEST_CASE_FIXTURE(Fixture, "deprecated_attribute_applies_to_autocomplete_entry")
     CHECK_EQ(item.sortText, SortText::Deprioritized);
 }
 
+TEST_CASE_FIXTURE(Fixture, "deprecated_items_are_hidden_from_autocomplete_if_disabled")
+{
+    client->globalConfig.completion.showDeprecatedItems = false;
+    auto [source, marker] = sourceWithMarker(R"(
+        @deprecated
+        local function foo()
+        end
+
+        local x = |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "foo"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index_with_colon")
 {
     auto [source, marker] = sourceWithMarker(R"(

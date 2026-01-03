@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `luau-lsp analyze` will now respect `luau-lsp.fflags.enableNewSolver` if enabled in the provided `--settings` file ([#1321](https://github.com/JohnnyMorganz/luau-lsp/issues/1321))
 - Added `luau-lsp.completion.showAnonymousAutofilledFunction` setting (enabled by default) to control whether the "function (anonymous autofilled)" completion item is shown when autocompleting callback arguments
+- Added `luau-lsp.completion.showDeprecatedItems` setting (enabled by default) to control whether deprecated items are shown in autocomplete suggestions
 
 ### Changed
 

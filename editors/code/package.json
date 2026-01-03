@@ -538,6 +538,12 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.showDeprecatedItems": {
+          "markdownDescription": "Whether to show deprecated items in autocomplete suggestions",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.suggestImports": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",
