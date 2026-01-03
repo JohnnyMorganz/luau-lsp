@@ -1354,3 +1354,187 @@ return {
 }
 
 TEST_SUITE_END();
+
+TEST_SUITE_BEGIN("PluginJsonAPI");
+
+TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses simple values")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_json_simple.luau", R"(
+return {
+    transformSource = function(source, context)
+        -- Test null
+        local null_val = lsp.json.deserialize("null")
+        assert(null_val == nil)
+
+        -- Test booleans
+        assert(lsp.json.deserialize("true") == true)
+        assert(lsp.json.deserialize("false") == false)
+
+        -- Test numbers
+        assert(lsp.json.deserialize("42") == 42)
+        assert(lsp.json.deserialize("3.14") == 3.14)
+        assert(lsp.json.deserialize("-123") == -123)
+
+        -- Test string
+        assert(lsp.json.deserialize('"hello"') == "hello")
+        assert(lsp.json.deserialize('"with spaces"') == "with spaces")
+
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses arrays")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_json_arrays.luau", R"(
+return {
+    transformSource = function(source, context)
+        -- Test simple array
+        local arr = lsp.json.deserialize("[1, 2, 3]")
+        assert(type(arr) == "table")
+        assert(#arr == 3)
+        assert(arr[1] == 1)
+        assert(arr[2] == 2)
+        assert(arr[3] == 3)
+
+        -- Test mixed array (note: #mixed is 3 because Lua length doesn't count trailing nil)
+        local mixed = lsp.json.deserialize('[1, "hello", true, null]')
+        assert(mixed[1] == 1)
+        assert(mixed[2] == "hello")
+        assert(mixed[3] == true)
+        assert(mixed[4] == nil)
+
+        -- Test empty array
+        local empty = lsp.json.deserialize("[]")
+        assert(type(empty) == "table")
+        assert(#empty == 0)
+
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses objects")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_json_objects.luau", R"(
+return {
+    transformSource = function(source, context)
+        -- Test simple object
+        local obj = lsp.json.deserialize('{"name": "test", "count": 42}')
+        assert(type(obj) == "table")
+        assert(obj.name == "test")
+        assert(obj.count == 42)
+
+        -- Test object with various types
+        local complex = lsp.json.deserialize('{"str": "hello", "num": 3.14, "bool": true, "null": null}')
+        assert(complex.str == "hello")
+        assert(complex.num == 3.14)
+        assert(complex.bool == true)
+        assert(complex.null == nil)
+
+        -- Test empty object
+        local empty = lsp.json.deserialize("{}")
+        assert(type(empty) == "table")
+
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses nested structures")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_json_nested.luau", R"(
+return {
+    transformSource = function(source, context)
+        -- Test nested object
+        local nested = lsp.json.deserialize('{"user": {"name": "John", "age": 30}}')
+        assert(nested.user.name == "John")
+        assert(nested.user.age == 30)
+
+        -- Test array of objects
+        local items = lsp.json.deserialize('[{"id": 1}, {"id": 2}]')
+        assert(#items == 2)
+        assert(items[1].id == 1)
+        assert(items[2].id == 2)
+
+        -- Test object with array
+        local data = lsp.json.deserialize('{"items": [1, 2, 3]}')
+        assert(#data.items == 3)
+        assert(data.items[1] == 1)
+
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize throws on invalid JSON")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_json_error.luau", R"(
+return {
+    transformSource = function(source, context)
+        -- Test that invalid JSON throws
+        local ok, err = pcall(lsp.json.deserialize, "invalid json")
+        assert(ok == false)
+        assert(type(err) == "string")
+        assert(string.find(err, "JSON parse error") ~= nil)
+
+        -- Test incomplete JSON
+        local ok2, err2 = pcall(lsp.json.deserialize, '{"incomplete":')
+        assert(ok2 == false)
+
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_SUITE_END();
