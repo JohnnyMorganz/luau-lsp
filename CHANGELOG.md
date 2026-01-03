@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - VSCode: the extension will now automatically activate when your opened folder contains any `.luau` files, not just when you explicitly open a Luau file. This allows the Studio Plugin to start up and connect quicker ([#1278](https://github.com/JohnnyMorganz/luau-lsp/pull/1278))
+- Entries marked as deprecated will now be sorted to the bottom of the autocomplete items list ([#1318](https://github.com/JohnnyMorganz/luau-lsp/issues/1318))
 
 ## [1.59.0] - 2025-12-28
 

@@ -353,6 +353,7 @@ TEST_CASE_FIXTURE(Fixture, "deprecated_attribute_applies_to_autocomplete_entry")
     auto result = workspace.completion(params, nullptr);
     auto item = requireItem(result, "foo");
     CHECK(item.deprecated);
+    CHECK_EQ(item.sortText, SortText::Deprioritized);
 }
 
 TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index_with_colon")

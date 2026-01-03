@@ -320,11 +320,14 @@ static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label
     return std::nullopt;
 }
 
-static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
-    const std::unordered_set<std::string>& tags, LSPPlatform& platform)
+static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const lsp::CompletionItem& item,
+    const Luau::AutocompleteEntry& entry, const std::unordered_set<std::string>& tags, LSPPlatform& platform)
 {
     if (auto text = platform.handleSortText(frontend, name, entry, tags))
         return text;
+
+    if (item.deprecated)
+        return SortText::Deprioritized;
 
     // If it's a file or directory alias, de-prioritise it compared to normal paths
     if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
@@ -639,7 +642,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         item.deprecated = deprecated(entry, item.documentation);
         item.kind = entryKind(item.label, entry, platform.get());
-        item.sortText = sortText(frontend, item.label, entry, tags, *platform);
+        item.sortText = sortText(frontend, item.label, item, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
