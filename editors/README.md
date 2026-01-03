@@ -36,13 +36,23 @@ $ luau-lsp lsp --definition:@roblox=/path/to/globalTypes.d.luau
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
 
 For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.luau
-(using something like `curl` or `wget` should be sufficient).
+(using something like `curl` or `wget` should be sufficient). Multiple definition files are available depending on the
+API security level.
 
 Optionally, you can define documentation files as well, by passing `--docs=PATH`.
 This provides documentation for any built-in definitions, but is not a requirement.
 
 See https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json for an example of a
 documentation file.
+
+GitHub implements very strong rate limiting for unauthenticated requests. This project provides a Cloudflare-based proxy
+to serve static files on a CDN instead. We recommend using the following URLs when downloading:
+
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+- `https://luau-lsp.pages.dev/api-docs/en-us.json`
 
 ## Configuring FFlags
 
@@ -159,12 +169,16 @@ Further Reference:
 
 ## Optional: Bytecode generation
 
-The Language server implements support for computing file-level textual bytecode and source code remarks, for lower level debugging features.
+The Language server implements support for computing file-level textual bytecode, source code remarks, and codegen instructions for lower level debugging features.
 
 A custom LSP request message is implemented:
 
 - `luau-lsp/bytecode`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - textual bytecode output
 - `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
+- `luau-lsp/codeGen`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number, codeGenTarget: string }`,
+  returns `string` - annotated codegen instructions
+
+`codeGenTarget` can be one of: `"host" | "a64" | "a64_nofeatures" | "x64_windows" | "x64_systemv"`
 
 You can implement this request via a custom command to surface this information in your editor
 

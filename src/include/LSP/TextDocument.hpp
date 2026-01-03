@@ -52,6 +52,9 @@ public:
     virtual Luau::Position convertPosition(const lsp::Position& position) const;
     virtual lsp::Position convertPosition(const Luau::Position& position) const;
 
+    Luau::Location convertRange(const lsp::Range& range) const;
+    lsp::Range convertLocation(const Luau::Location& location) const;
+
     void update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version);
 
     virtual const std::vector<size_t>& getLineOffsets() const;

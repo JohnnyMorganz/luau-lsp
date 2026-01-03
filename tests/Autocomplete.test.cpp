@@ -5,6 +5,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
+#include "Platform/InstanceRequireAutoImporter.hpp"
 
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -331,6 +332,49 @@ TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_t
     auto result = workspace.completion(params, nullptr);
     auto item = requireItem(result, "foo");
     CHECK(item.deprecated);
+}
+
+TEST_CASE_FIXTURE(Fixture, "deprecated_attribute_applies_to_autocomplete_entry")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        @deprecated
+        local function foo()
+        end
+
+        local x = |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "foo");
+    CHECK(item.deprecated);
+    CHECK_EQ(item.sortText, SortText::Deprioritized);
+}
+
+TEST_CASE_FIXTURE(Fixture, "deprecated_items_are_hidden_from_autocomplete_if_disabled")
+{
+    client->globalConfig.completion.showDeprecatedItems = false;
+    auto [source, marker] = sourceWithMarker(R"(
+        @deprecated
+        local function foo()
+        end
+
+        local x = |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "foo"));
 }
 
 TEST_CASE_FIXTURE(Fixture, "configure_properties_shown_when_autocompleting_index_with_colon")
@@ -936,7 +980,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_wh
     auto textDocument = workspace.fileResolver.getTextDocument(uri);
     REQUIRE(textDocument);
 
-    RobloxFindImportsVisitor importsVisitor;
+    Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(astRoot);
 
     auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
@@ -956,7 +1000,7 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_multi_line_existing_requires_wh
     auto textDocument = workspace.fileResolver.getTextDocument(uri);
     REQUIRE(textDocument);
 
-    RobloxFindImportsVisitor importsVisitor;
+    Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(astRoot);
 
     auto minimumLineNumber = computeMinimumLineNumberForRequire(importsVisitor, 0);
@@ -1893,6 +1937,76 @@ TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
 
     for (const auto property : {"do", "export", "for", "function", "if", "local", "repeat", "return", "while"})
         CHECK_FALSE(getItem(result, property));
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_anonymous_autofilled_function_by_default")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK(getItem(result, "function (anonymous autofilled)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "do_not_show_anonymous_autofilled_function_if_disabled")
+{
+    client->globalConfig.completion.showAnonymousAutofilledFunction = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "function (anonymous autofilled)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_property_on_union_type")
+{
+    auto source = R"(
+        type BaseNode<HOS> = {
+	        --[[
+		        This is a documentation comment
+	        ]]
+	        has_one_supporter: HOS,
+        }
+
+        export type Node = BaseNode<true> | BaseNode<false>
+
+        local x: Node = {} :: any
+
+        x.
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{14, 10};
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = getItem(result, "has_one_supporter");
+    REQUIRE(item);
+    REQUIRE(item->documentation);
+    CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item->documentation->value);
+    CHECK_EQ(item->documentation->value, "This is a documentation comment");
 }
 
 TEST_SUITE_END();

@@ -673,4 +673,56 @@ TEST_CASE_FIXTURE(Fixture, "go_to_type_definition_respects_cancellation")
     CHECK_THROWS_AS(workspace.gotoTypeDefinition(lsp::TypeDefinitionParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_for_property_on_union_type_with_same_definition")
+{
+    auto document = newDocument("main.luau", R"(
+        type BaseNode<HOS> = {
+            has_one_supporter: HOS,
+        }
+
+        type Node = BaseNode<true> | BaseNode<false>
+
+        local x: Node = {} :: any
+        local y = x.has_one_supporter
+    )");
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = lsp::Position{8, 20}; // x.has_one_supporter
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range, lsp::Range{{2, 12}, {2, 29}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_for_property_on_union_type_with_different_definitions")
+{
+    auto document = newDocument("main.luau", R"(
+        type A = {
+            prop: number,
+        }
+
+        type B = {
+            prop: string,
+        }
+
+        type Union = A | B
+
+        local x: Union = {} :: any
+        local y = x.prop
+    )");
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = lsp::Position{12, 20}; // x.prop
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 2);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[1].uri, document);
+    CHECK_EQ(result[0].range, lsp::Range{{2, 12}, {2, 16}});
+    CHECK_EQ(result[1].range, lsp::Range{{6, 12}, {6, 16}});
+}
+
 TEST_SUITE_END();

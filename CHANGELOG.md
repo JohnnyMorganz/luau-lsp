@@ -6,6 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `luau-lsp analyze` will now respect `luau-lsp.fflags.enableNewSolver` if enabled in the provided `--settings` file ([#1321](https://github.com/JohnnyMorganz/luau-lsp/issues/1321))
+- Added `luau-lsp.completion.showAnonymousAutofilledFunction` setting (enabled by default) to control whether the "function (anonymous autofilled)" completion item is shown when autocompleting callback arguments
+- Added `luau-lsp.completion.showDeprecatedItems` setting (enabled by default) to control whether deprecated items are shown in autocomplete suggestions
+
+### Changed
+
+- VSCode: the extension will now automatically activate when your opened folder contains any `.luau` files, not just when you explicitly open a Luau file. This allows the Studio Plugin to start up and connect quicker ([#1278](https://github.com/JohnnyMorganz/luau-lsp/pull/1278))
+- Entries marked as deprecated will now be sorted to the bottom of the autocomplete items list ([#1318](https://github.com/JohnnyMorganz/luau-lsp/issues/1318))
+
+### Fixed
+
+- VSCode: fixed cursor being positioned outside of the string after performing automatic quote conversion to backticks ([#1317](https://github.com/JohnnyMorganz/luau-lsp/issues/1317))
+- VSCode: fixed builtin documentation files (api-docs.json) not being downloaded, leading to an error that documentation files do not exist
+
+## [1.59.0] - 2025-12-28
+
+### Added
+
+- Added command `Luau: Compute CodeGen instructions for file` to emit annotated codegen instructions, similar to the bytecode command. External editors can implement this by using the `luau-lsp/codeGen` request. ([#617](https://github.com/JohnnyMorganz/luau-lsp/issues/617))
+- Added support for requiring YAML files (`.yaml` and `.yml`) as Luau data modules, similar to existing JSON and TOML support ([#1267](https://github.com/JohnnyMorganz/luau-lsp/issues/1267))
+- Implemented quick fix code actions for common diagnostics ([#439](https://github.com/JohnnyMorganz/luau-lsp/issues/439)):
+  - `GlobalUsedAsLocal`: Add `local` keyword to fix accidental global variable
+  - `LocalUnused`, `FunctionUnused`, `ImportUnused`: Prefix with `_` to silence, or remove the unused declaration
+  - `UnreachableCode`: Remove unreachable code after early return/error
+  - `RedundantNativeAttribute`: Remove redundant `@native` attribute
+  - Unknown symbol errors now have a quick fix to auto-import missing modules (both string requires and Roblox instance-based requires) and services
+  - Misspelled property names (case mismatches) now have a quick fix to rename to the correct property
+  - Added source file actions "Remove all unused code" and "Add all missing requires" to perform bulk quick fixes at once
+- Added support for automatic quote conversion to backticks when typing `{` inside strings. This can be enabled with the `luau-lsp.format.convertQuotes` configuration option. You may need to enable on-type formatting in your editor (e.g., `format.onType` in VSCode) ([#1298](https://github.com/JohnnyMorganz/luau-lsp/pull/1298))
+
+### Changed
+
+- Aliases defined in a root-level `.luaurc` / `.config.luau` will now be indexed at startup. As such, external alias files will now show up as part of string-require auto-imports if the file has not previously been required ([#1043](https://github.com/JohnnyMorganz/luau-lsp/issues/1043))
+- Find All References and Rename now correctly track property references through metatable `__index` chains, enabling proper support for Luau class patterns using `setmetatable` inheritance ([#961](https://github.com/JohnnyMorganz/luau-lsp/issues/961))
+- VSCode: expanding a single line block (e.g., `function foo() end`, adding a newline to start writing the block) will now move the cursor to the correct indentation ([#220](https://github.com/JohnnyMorganz/luau-lsp/issues/220))
+
+### Fixed
+
+- Fixed non-adjacent comments (such as section headers separated by blank lines) being incorrectly included in hover documentation ([#310](https://github.com/JohnnyMorganz/luau-lsp/issues/310))
+- Function entries correctly show as deprecated in autocomplete if they are marked with `@deprecated` attribute ([#1302](https://github.com/JohnnyMorganz/luau-lsp/issues/1302))
+- Fixed `sourcemapFile` configuration not supporting relative paths from the workspace root (e.g., `subdir/sourcemap.json`) ([#1288](https://github.com/JohnnyMorganz/luau-lsp/issues/1288))
+- Fixed auto-imports not showing up when autocompleting in array-like tables (i.e., before the `=` sign has been written for a property) ([#1062](https://github.com/JohnnyMorganz/luau-lsp/issues/1062))
+- Fixed improper and missing escaping when converting JSON files to Luau data modules. Object keys and string values containing special characters (quotes, newlines, etc.) are now properly escaped ([#426](https://github.com/JohnnyMorganz/luau-lsp/issues/426))
+- Fixed Find All References not including properties accessed via bracket notation (e.g., `obj["property"]`) ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
+- Fixed Rename not supporting properties accessed via bracket notation. Renaming now correctly updates both dot notation (`obj.property`) and bracket notation (`obj["property"]`) references ([#1084](https://github.com/JohnnyMorganz/luau-lsp/issues/1084))
+- Fixed definitions or documentation files not loading when the path to the file contains non-ASCII characters ([#1191](https://github.com/JohnnyMorganz/luau-lsp/issues/1191))
+- Ignored files that are changed externally are correctly marked as dirty internally to ensure the next typecheck will use updated source contents ([#1144](https://github.com/JohnnyMorganz/luau-lsp/issues/1144))
+- Fixed documentation not being shown when hovering over shared properties of unioned table types. Go to Definition now also returns multiple locations when the property is defined in different union members ([#1018](https://github.com/JohnnyMorganz/luau-lsp/issues/1018))
+
 ## [1.58.0] - 2025-12-14
 
 ### Added
@@ -1771,6 +1822,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

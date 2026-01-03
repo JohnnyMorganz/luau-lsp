@@ -119,7 +119,7 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Code Action Provider
-    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
+    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
     // Folding Range Provider
@@ -141,6 +141,8 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
         /* range: */ false,
         /* full: */ true,
     };
+    // Document On Type Formatting Provider
+    capabilities.documentOnTypeFormattingProvider = lsp::DocumentOnTypeFormattingOptions{"{", std::nullopt};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
@@ -240,7 +242,10 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else if (method == "textDocument/codeAction")
     {
-        response = codeAction(JSON_REQUIRED_PARAMS(baseParams, "textDocument/codeAction"));
+        ASSERT_PARAMS(baseParams, "textDocument/codeAction")
+        auto params = baseParams->get<lsp::CodeActionParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->codeAction(params, cancellationToken);
     }
     // else if (method == "codeAction/resolve")
     // {
@@ -303,6 +308,13 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->documentDiagnostics(params, cancellationToken);
     }
+    else if (method == "textDocument/onTypeFormatting")
+    {
+        ASSERT_PARAMS(baseParams, "textDocument/onTypeFormatting")
+        auto params = baseParams->get<lsp::DocumentOnTypeFormattingParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->onTypeFormatting(params);
+    }
     else if (method == "workspace/diagnostic")
     {
         // This request has partial request support.
@@ -338,13 +350,19 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->bytecode(params);
     }
-
     else if (method == "luau-lsp/compilerRemarks")
     {
         ASSERT_PARAMS(baseParams, "luau-lsp/compilerRemarks")
         auto params = baseParams->get<lsp::CompilerRemarksParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->compilerRemarks(params);
+    }
+    else if (method == "luau-lsp/codeGen")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/codeGen")
+        auto params = baseParams->get<lsp::CodegenParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        response = workspace->codeGen(params);
     }
     else if (method == "luau-lsp/requireGraph")
     {

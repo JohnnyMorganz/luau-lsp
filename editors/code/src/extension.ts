@@ -17,8 +17,11 @@ import {
 
 import {
   registerComputeBytecode,
+  registerComputeCodeGen,
   registerComputeCompilerRemarks,
 } from "./bytecode";
+
+import { onTypeFormattingMiddleware } from "./onTypeFormattingMiddleware";
 
 import { registerRequireGraph } from "./requireGraph";
 
@@ -213,7 +216,7 @@ const handleExternalFiles = async (
   }
 
   if (builtinDocumentationFiles) {
-    externalFiles.concat(builtinDocumentationFiles);
+    externalFiles.push(...builtinDocumentationFiles);
     documentationFiles = documentationFiles.concat(
       builtinDocumentationFiles.map((info) => info.outputUri.fsPath),
     );
@@ -517,6 +520,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       supportHtml: true,
     },
     errorHandler: new ClientErrorHandler(context, 4),
+    middleware: {
+      provideOnTypeFormattingEdits: onTypeFormattingMiddleware,
+    },
   };
 
   client = new LanguageClient(
@@ -535,6 +541,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 
   clientDisposables.push(...registerComputeBytecode(context, client));
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
+  clientDisposables.push(...registerComputeCodeGen(context, client));
   clientDisposables.push(...registerRequireGraph(context, client));
   clientDisposables.push(
     vscode.commands.registerCommand("luau-lsp.openWalkthrough", () => {

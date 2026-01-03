@@ -241,6 +241,26 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     if (entry.deprecated)
         return true;
 
+    // TODO: unnecessary once https://github.com/luau-lang/luau/issues/2158 is fixed
+    if (entry.type)
+    {
+        const auto ty = Luau::follow(*entry.type);
+        if (const auto ftv = Luau::get<Luau::FunctionType>(ty); ftv && ftv->isDeprecatedFunction)
+            return true;
+        else if (const auto itv = Luau::get<Luau::IntersectionType>(ty))
+        {
+            const auto allDeprecated = std::all_of(itv->parts.begin(), itv->parts.end(),
+                [](const auto& part)
+                {
+                    const auto partTy = Luau::follow(part);
+                    const auto ftv = Luau::get<Luau::FunctionType>(partTy);
+                    return ftv && ftv->isDeprecatedFunction;
+                });
+            if (allDeprecated)
+                return true;
+        }
+    }
+
     if (documentation)
         if (documentation->value.find("@deprecated") != std::string::npos)
             return true;
@@ -300,11 +320,14 @@ static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label
     return std::nullopt;
 }
 
-static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
-    const std::unordered_set<std::string>& tags, LSPPlatform& platform)
+static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const lsp::CompletionItem& item,
+    const Luau::AutocompleteEntry& entry, const std::unordered_set<std::string>& tags, LSPPlatform& platform)
 {
     if (auto text = platform.handleSortText(frontend, name, entry, tags))
         return text;
+
+    if (item.deprecated)
+        return SortText::Deprioritized;
 
     // If it's a file or directory alias, de-prioritise it compared to normal paths
     if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
@@ -479,8 +502,8 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
                 {
                     // parentTy might be an intersected type, find the actual base ttv
                     auto followedTy = Luau::follow(*parentTy);
-                    if (auto propInformation = lookupProp(followedTy, name))
-                        definitionModuleName = Luau::getDefinitionModuleName(propInformation->first);
+                    if (auto propInformation = lookupProp(followedTy, name); !propInformation.empty())
+                        definitionModuleName = Luau::getDefinitionModuleName(propInformation[0].baseTableTy);
                     else
                         definitionModuleName = Luau::getDefinitionModuleName(followedTy);
                 }
@@ -601,6 +624,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (!config.completion.showKeywords && entry.kind == Luau::AutocompleteEntryKind::Keyword)
             continue;
 
+        if (!config.completion.showAnonymousAutofilledFunction && entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
+            continue;
+
         lsp::CompletionItem item;
         item.label = name;
 
@@ -618,8 +644,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
+
+        if (!config.completion.showDeprecatedItems && item.deprecated)
+            continue;
+
         item.kind = entryKind(item.label, entry, platform.get());
-        item.sortText = sortText(frontend, item.label, entry, tags, *platform);
+        item.sortText = sortText(frontend, item.label, item, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
@@ -767,6 +797,21 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (result.context == Luau::AutocompleteContext::Expression || result.context == Luau::AutocompleteContext::Statement)
         {
             suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
+        }
+        else if (result.context == Luau::AutocompleteContext::Property)
+        {
+            bool isTableLiteral = false;
+            for (auto node : result.ancestry)
+            {
+                if (node->is<Luau::AstExprTable>())
+                {
+                    isTableLiteral = true;
+                    break;
+                }
+            }
+
+            if (isTableLiteral)
+                suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
         }
         else if (result.context == Luau::AutocompleteContext::Type)
         {

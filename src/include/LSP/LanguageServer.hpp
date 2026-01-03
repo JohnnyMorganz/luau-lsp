@@ -86,7 +86,6 @@ private:
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
-    lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params);
 
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> workspaceDiagnostic(const lsp::WorkspaceDiagnosticParams& params);

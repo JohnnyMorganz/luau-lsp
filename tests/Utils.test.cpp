@@ -150,4 +150,35 @@ TEST_CASE("traverseDirectory can handle non-ASCII characters in path")
     CHECK_EQ(paths.size(), 1);
 }
 
+#ifdef _WIN32
+TEST_CASE("toUtf8 converts wide string to UTF-8 string")
+{
+    // Test Polish character 'ż' (U+017C)
+    // L"Użytkownik" = { 'U', 0x017C, 'y', 't', 'k', 'o', 'w', 'n', 'i', 'k' }
+    std::wstring polish = L"U\u017Cytkownik";
+    std::string utf8 = Luau::FileUtils::toUtf8(polish);
+    CHECK_EQ(utf8, "Użytkownik");
+
+    // Test Cyrillic: "Рабочий стол" (Russian for "Desktop")
+    std::wstring cyrillic = L"\u0420\u0430\u0431\u043E\u0447\u0438\u0439 \u0441\u0442\u043E\u043B";
+    std::string utf8Cyr = Luau::FileUtils::toUtf8(cyrillic);
+    CHECK_EQ(utf8Cyr, "Рабочий стол");
+}
+
+TEST_CASE("fromUtf8 and toUtf8 are inverses for Unicode paths")
+{
+    std::string original = "C:/Users/Użytkownik/Desktop/Рабочий стол/test.luau";
+    std::wstring wide = Luau::FileUtils::fromUtf8(original);
+    std::string roundTrip = Luau::FileUtils::toUtf8(wide);
+    CHECK_EQ(original, roundTrip);
+}
+
+TEST_CASE("getUtf8CommandLineArgs returns command line arguments")
+{
+    auto args = Luau::FileUtils::getUtf8CommandLineArgs();
+    // Should have at least the program name
+    CHECK_FALSE(args.empty());
+}
+#endif
+
 TEST_SUITE_END();
