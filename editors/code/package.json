@@ -28,7 +28,8 @@
     "roblox"
   ],
   "activationEvents": [
-    "onLanguage:luau"
+    "onLanguage:luau",
+    "workspaceContains:**/*.luau"
   ],
   "main": "./dist/extension.js",
   "contributes": {
