@@ -225,13 +225,15 @@ struct ClientFFlagsConfiguration
 
     /// Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`
     bool enableByDefault = true;
+    /// Enables the flags required for Luau's new type solver. These flags can be overriden by `#luau-lsp.fflags.override#`
+    bool enableNewSolver = false;
     // Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'
     bool sync = false;
     // Override FFlags passed to Luau
     std::unordered_map<std::string, std::string> override;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, enableNewSolver, sync, override);
 
 struct ClientBytecodeConfiguration
 {

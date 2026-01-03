@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `luau-lsp analyze` will now respect `luau-lsp.fflags.enableNewSolver` if enabled in the provided `--settings` file ([#1321](https://github.com/JohnnyMorganz/luau-lsp/issues/1321))
+
 ### Changed
 
 - VSCode: the extension will now automatically activate when your opened folder contains any `.luau` files, not just when you explicitly open a Luau file. This allows the Studio Plugin to start up and connect quicker ([#1278](https://github.com/JohnnyMorganz/luau-lsp/pull/1278))
