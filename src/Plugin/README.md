@@ -313,3 +313,39 @@ lsp.client.sendLogMessage("error", "Failed to parse configuration")
 ```
 
 The global `print` function will send a log message at `info` level.
+
+## JSON API
+
+Plugins can parse JSON strings into Lua tables.
+
+### `lsp.json.deserialize(jsonString: string): any`
+
+Parses a JSON string and returns the corresponding Lua value.
+
+**Example:**
+
+```luau
+-- Parse an object
+local data = lsp.json.deserialize('{"name": "test", "count": 42}')
+print(data.name)   -- "test"
+print(data.count)  -- 42
+
+-- Parse an array (1-indexed in Lua)
+local arr = lsp.json.deserialize('[1, 2, 3]')
+print(arr[1])  -- 1
+
+-- Parse nested structures
+local nested = lsp.json.deserialize('{"items": [{"id": 1}, {"id": 2}]}')
+print(nested.items[1].id)  -- 1
+```
+
+**Error Handling:**
+
+Parse errors throw a Luau error. Use `pcall` to handle them:
+
+```luau
+local ok, result = pcall(lsp.json.deserialize, "invalid json")
+if not ok then
+    -- result contains error message starting with "JSON parse error:"
+end
+```
