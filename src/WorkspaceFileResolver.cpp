@@ -354,3 +354,22 @@ void WorkspaceFileResolver::clearConfigCache()
 {
     configCache.clear();
 }
+
+bool WorkspaceFileResolver::isPluginFile(const Luau::ModuleName& name) const
+{
+    if (!pluginManager || !pluginManager->hasPlugins())
+        return false;
+
+    auto uri = getUri(name);
+    if (uri.scheme != "file")
+        return false;
+
+    return pluginManager->isPluginFile(uri);
+}
+
+std::optional<std::string> WorkspaceFileResolver::getEnvironmentForModule(const Luau::ModuleName& name) const
+{
+    if (isPluginFile(name))
+        return "LSPPlugin";
+    return std::nullopt;
+}

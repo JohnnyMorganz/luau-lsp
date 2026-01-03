@@ -418,7 +418,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(!error.has_value());
@@ -427,7 +427,7 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails on non-existent file")
 {
-    PluginRuntime runtime(getWorkspaceNotNull(*this), "/non/existent/path/plugin.luau");
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file("/non/existent/path/plugin.luau"));
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -444,7 +444,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -458,7 +458,7 @@ TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin does not return tabl
 return "not a table"
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -473,7 +473,7 @@ TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin returns nil")
 return nil
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -490,7 +490,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(!error.has_value());
@@ -514,7 +514,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -533,7 +533,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -555,7 +555,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -585,7 +585,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -616,7 +616,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test/file.luau", "TestModule", "luau"};
@@ -637,7 +637,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -661,7 +661,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -686,7 +686,7 @@ return {
 )");
 
     // Use a very short timeout (10ms)
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 10);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath), 10);
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -709,7 +709,7 @@ return {
 )");
 
     // Use a very short timeout (10ms)
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 10);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath), 10);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -737,7 +737,7 @@ return {
 )");
 
     // Use a longer timeout (5 seconds)
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 5000);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath), 5000);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -992,7 +992,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1016,7 +1016,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1039,7 +1039,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1067,7 +1067,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1091,7 +1091,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1122,7 +1122,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1151,7 +1151,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1177,7 +1177,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1202,7 +1202,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1240,7 +1240,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1276,7 +1276,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1297,7 +1297,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1331,7 +1331,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1385,7 +1385,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1425,7 +1425,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1462,7 +1462,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1498,7 +1498,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -1528,13 +1528,74 @@ return {
 }
 )");
 
-    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_SUITE_END();
+
+TEST_SUITE_BEGIN("PluginEnvironment");
+
+TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns LSPPlugin for plugin files")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("my_plugin.luau", "return {}");
+
+    // Configure plugin manager with the plugin
+    workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
+        client.get(), getWorkspaceNotNull(*this));
+    workspace.fileResolver.pluginManager->configure({pluginPath});
+
+    // Plugin files should return "LSPPlugin" environment
+    auto env = workspace.fileResolver.getEnvironmentForModule(pluginPath);
+    REQUIRE(env.has_value());
+    CHECK(*env == "LSPPlugin");
+}
+
+TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns nullopt for non-plugin files")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("my_plugin.luau", "return {}");
+
+    // Configure plugin manager with the plugin
+    workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
+        client.get(), getWorkspaceNotNull(*this));
+    workspace.fileResolver.pluginManager->configure({pluginPath});
+
+    // Non-plugin files should return nullopt
+    auto env = workspace.fileResolver.getEnvironmentForModule("/some/other/file.luau");
+    CHECK(!env.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns nullopt when no plugins configured")
+{
+    // No plugin manager configured
+    workspace.fileResolver.pluginManager.reset();
+
+    auto env = workspace.fileResolver.getEnvironmentForModule("/any/file.luau");
+    CHECK(!env.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "isPluginFile matches loaded plugin paths")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("plugin.luau", "return {}");
+
+    // Configure plugin manager
+    workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
+        client.get(), getWorkspaceNotNull(*this));
+    workspace.fileResolver.pluginManager->configure({pluginPath});
+
+    // Exact match
+    CHECK(workspace.fileResolver.isPluginFile(pluginPath));
+
+    // Different path
+    CHECK_FALSE(workspace.fileResolver.isPluginFile("/path/to/other.luau"));
 }
 
 TEST_SUITE_END();
