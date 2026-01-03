@@ -757,6 +757,12 @@
           "minimum": 100,
           "scope": "resource",
           "markdownDescription": "Timeout in milliseconds for plugin execution. If a plugin takes longer than this, it will be terminated."
+        },
+        "luau-lsp.plugins.fileSystem.enabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Allow plugins to read files within the workspace. Only files within the workspace can be accessed for security."
         }
       }
     },

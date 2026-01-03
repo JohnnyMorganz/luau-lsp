@@ -95,6 +95,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Plugin/PluginTextDocument.cpp
         src/Plugin/PluginRuntime.cpp
         src/Plugin/PluginManager.cpp
+        src/Plugin/PluginLuaApi.cpp
         extern/glob/match.cpp
 )
 

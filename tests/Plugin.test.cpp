@@ -2,51 +2,38 @@
 #include "Fixture.h"
 #include "TempDir.h"
 #include "LSP/Uri.hpp"
-#include "LSP/Client.hpp"
+#include "LSP/Workspace.hpp"
+#include "Protocol/Window.hpp"
 #include "Plugin/SourceMapping.hpp"
 #include "Plugin/PluginTextDocument.hpp"
 #include "Plugin/PluginRuntime.hpp"
 #include "Plugin/PluginManager.hpp"
 #include "Plugin/TextEdit.hpp"
+#include "Luau/NotNull.h"
 
 using namespace Luau::LanguageServer::Plugin;
 
-// Mock client for testing that captures log messages
-class MockPluginClient : public BaseClient
+// Helper to get NotNull workspace from Fixture
+inline Luau::NotNull<WorkspaceFolder> getWorkspaceNotNull(Fixture& fixture)
 {
-public:
-    struct LogMessage
-    {
-        lsp::MessageType type;
-        std::string message;
-    };
-    mutable std::vector<LogMessage> logMessages;
+    return Luau::NotNull<WorkspaceFolder>{&fixture.workspace};
+}
 
-    ClientConfiguration getConfiguration(const lsp::DocumentUri&) override
+// Helper to extract error messages from TestClient notification queue
+inline std::vector<std::string> getLogMessages(const TestClient& client, lsp::MessageType type)
+{
+    std::vector<std::string> messages;
+    for (const auto& [method, params] : client.notificationQueue)
     {
-        return {};
-    }
-
-    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const override
-    {
-        logMessages.push_back({type, message});
-    }
-
-    void publishDiagnostics(const lsp::PublishDiagnosticsParams&) override
-    {
-    }
-
-    std::vector<std::string> getErrorMessages() const
-    {
-        std::vector<std::string> errors;
-        for (const auto& msg : logMessages)
+        if (method == "window/logMessage" && params.has_value())
         {
-            if (msg.type == lsp::MessageType::Error)
-                errors.push_back(msg.message);
+            auto logParams = params->get<lsp::LogMessageParams>();
+            if (logParams.type == type)
+                messages.push_back(logParams.message);
         }
-        return errors;
     }
-};
+    return messages;
+}
 
 TEST_SUITE_BEGIN("SourceMapping");
 
@@ -420,7 +407,7 @@ TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("PluginRuntime");
 
-TEST_CASE("PluginRuntime loads valid plugin")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime loads valid plugin")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("valid_plugin.luau", R"(
@@ -431,16 +418,16 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(!error.has_value());
     CHECK(runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime fails on non-existent file")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails on non-existent file")
 {
-    PluginRuntime runtime("/non/existent/path/plugin.luau");
+    PluginRuntime runtime(getWorkspaceNotNull(*this), "/non/existent/path/plugin.luau");
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -448,7 +435,7 @@ TEST_CASE("PluginRuntime fails on non-existent file")
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime fails on syntax error")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails on syntax error")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("syntax_error.luau", R"(
@@ -457,21 +444,21 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(error.has_value());
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime fails when plugin does not return table")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin does not return table")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("no_table.luau", R"(
 return "not a table"
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -479,14 +466,14 @@ return "not a table"
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime fails when plugin returns nil")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin returns nil")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("returns_nil.luau", R"(
 return nil
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -494,7 +481,7 @@ return nil
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime loads plugin without transformSource (optional)")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime loads plugin without transformSource (optional)")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("no_transform.luau", R"(
@@ -503,7 +490,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(!error.has_value());
@@ -518,7 +505,7 @@ return {
     CHECK(edits.empty());
 }
 
-TEST_CASE("PluginRuntime fails when transformSource is not a function")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when transformSource is not a function")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("not_function.luau", R"(
@@ -527,7 +514,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -535,7 +522,7 @@ return {
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime transformSource returns nil for no changes")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns nil for no changes")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("no_changes.luau", R"(
@@ -546,7 +533,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -557,7 +544,7 @@ return {
     CHECK(edits.empty());
 }
 
-TEST_CASE("PluginRuntime transformSource returns empty table for no changes")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns empty table for no changes")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("empty_table.luau", R"(
@@ -568,7 +555,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -579,7 +566,7 @@ return {
     CHECK(edits.empty());
 }
 
-TEST_CASE("PluginRuntime transformSource returns edits")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns edits")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("with_edits.luau", R"(
@@ -598,7 +585,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -614,7 +601,7 @@ return {
     CHECK(edits[0].newText == "y");
 }
 
-TEST_CASE("PluginRuntime transformSource receives context")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource receives context")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("check_context.luau", R"(
@@ -629,7 +616,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test/file.luau", "TestModule", "luau"};
@@ -639,7 +626,7 @@ return {
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
 }
 
-TEST_CASE("PluginRuntime transformSource handles runtime error")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource handles runtime error")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("runtime_error.luau", R"(
@@ -650,7 +637,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -661,7 +648,7 @@ return {
     CHECK(error.message.find("Something went wrong") != std::string::npos);
 }
 
-TEST_CASE("PluginRuntime transformSource handles invalid edit structure")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource handles invalid edit structure")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("invalid_edit.luau", R"(
@@ -674,7 +661,7 @@ return {
 }
 )");
 
-    PluginRuntime runtime(pluginPath);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -683,7 +670,7 @@ return {
     CHECK(std::holds_alternative<PluginError>(result));
 }
 
-TEST_CASE("PluginRuntime load times out on infinite loop")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime load times out on infinite loop")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("infinite_loop.luau", R"(
@@ -699,7 +686,7 @@ return {
 )");
 
     // Use a very short timeout (10ms)
-    PluginRuntime runtime(pluginPath, 10);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 10);
     auto error = runtime.load();
 
     CHECK(error.has_value());
@@ -707,7 +694,7 @@ return {
     CHECK(!runtime.isLoaded());
 }
 
-TEST_CASE("PluginRuntime transformSource times out on infinite loop")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource times out on infinite loop")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("infinite_transform.luau", R"(
@@ -722,7 +709,7 @@ return {
 )");
 
     // Use a very short timeout (10ms)
-    PluginRuntime runtime(pluginPath, 10);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 10);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -733,7 +720,7 @@ return {
     CHECK(error.message.find("timed out") != std::string::npos);
 }
 
-TEST_CASE("PluginRuntime with long timeout completes successfully")
+TEST_CASE_FIXTURE(Fixture, "PluginRuntime with long timeout completes successfully")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("valid_plugin.luau", R"(
@@ -750,7 +737,7 @@ return {
 )");
 
     // Use a longer timeout (5 seconds)
-    PluginRuntime runtime(pluginPath, 5000);
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath, 5000);
     REQUIRE(!runtime.load().has_value());
 
     PluginContext ctx{"test.luau", "test", "luau"};
@@ -763,7 +750,7 @@ TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("PluginManager");
 
-TEST_CASE("PluginManager configure loads plugins")
+TEST_CASE_FIXTURE(Fixture, "PluginManager configure loads plugins")
 {
     TempDir dir("plugin_test");
     std::string plugin1 = dir.write_child("plugin1.luau", R"(
@@ -781,7 +768,7 @@ return {
 }
 )");
 
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     size_t loaded = manager.configure({plugin1, plugin2});
 
     CHECK(loaded == 2);
@@ -789,7 +776,7 @@ return {
     CHECK(manager.hasPlugins());
 }
 
-TEST_CASE("PluginManager configure handles invalid plugins gracefully")
+TEST_CASE_FIXTURE(Fixture, "PluginManager configure handles invalid plugins gracefully")
 {
     TempDir dir("plugin_test");
     std::string validPlugin = dir.write_child("valid.luau", R"(
@@ -803,27 +790,28 @@ return {
 return "not a table"
 )");
 
-    MockPluginClient client;
-    PluginManager manager(&client);
-
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     size_t loaded = manager.configure({validPlugin, invalidPlugin});
 
     CHECK(loaded == 1);
     CHECK(manager.pluginCount() == 1);
 
-    auto errors = client.getErrorMessages();
-    CHECK(errors.size() == 1);
+    // Verify error was logged for invalid plugin
+    auto errors = getLogMessages(*client, lsp::MessageType::Error);
+    REQUIRE(errors.size() == 1);
+    CHECK(errors[0].find("invalid.luau") != std::string::npos);
+    CHECK(errors[0].find("must return a table") != std::string::npos);
 }
 
-TEST_CASE("PluginManager transform with no plugins returns empty")
+TEST_CASE_FIXTURE(Fixture, "PluginManager transform with no plugins returns empty")
 {
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
 
     CHECK(edits.empty());
 }
 
-TEST_CASE("PluginManager transform applies plugin edits")
+TEST_CASE_FIXTURE(Fixture, "PluginManager transform applies plugin edits")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("transform.luau", R"(
@@ -842,7 +830,7 @@ return {
 }
 )");
 
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     manager.configure({pluginPath});
 
     auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
@@ -851,7 +839,7 @@ return {
     CHECK(edits[0].newText == "y");
 }
 
-TEST_CASE("PluginManager clear removes all plugins")
+TEST_CASE_FIXTURE(Fixture, "PluginManager clear removes all plugins")
 {
     TempDir dir("plugin_test");
     std::string pluginPath = dir.write_child("plugin.luau", R"(
@@ -862,7 +850,7 @@ return {
 }
 )");
 
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     manager.configure({pluginPath});
     CHECK(manager.hasPlugins());
 
@@ -871,9 +859,9 @@ return {
     CHECK(manager.pluginCount() == 0);
 }
 
-TEST_CASE("PluginManager createMapping builds correct mapping")
+TEST_CASE_FIXTURE(Fixture, "PluginManager createMapping builds correct mapping")
 {
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
 
     std::string source = "local x = 1";
     std::vector<TextEdit> edits = {
@@ -886,7 +874,7 @@ TEST_CASE("PluginManager createMapping builds correct mapping")
     CHECK(mapping.hasEdits());
 }
 
-TEST_CASE("PluginManager combines edits from multiple plugins")
+TEST_CASE_FIXTURE(Fixture, "PluginManager combines edits from multiple plugins")
 {
     TempDir dir("plugin_test");
 
@@ -924,7 +912,7 @@ return {
 }
 )");
 
-    PluginManager manager;
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     manager.configure({plugin1Path, plugin2Path});
 
     auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
@@ -933,7 +921,7 @@ return {
     REQUIRE(edits.size() == 2);
 }
 
-TEST_CASE("PluginManager rejects overlapping edits from multiple plugins")
+TEST_CASE_FIXTURE(Fixture, "PluginManager rejects overlapping edits from multiple plugins")
 {
     TempDir dir("plugin_test");
 
@@ -971,18 +959,231 @@ return {
 }
 )");
 
-    MockPluginClient client;
-    PluginManager manager(&client);
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
     manager.configure({plugin1Path, plugin2Path});
 
     auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
 
-    // Overlapping edits should result in empty return and error
+    // Overlapping edits should result in empty return
     CHECK(edits.empty());
 
-    auto errors = client.getErrorMessages();
-    REQUIRE(errors.size() >= 1);
-    CHECK(errors.back().find("overlap") != std::string::npos);
+    // Verify error was logged about overlapping edits
+    auto errors = getLogMessages(*client, lsp::MessageType::Error);
+    REQUIRE(errors.size() == 1);
+    CHECK(errors[0].find("overlap") != std::string::npos);
+}
+
+TEST_SUITE_END();
+
+TEST_SUITE_BEGIN("PluginFilesystemAPI");
+
+TEST_CASE_FIXTURE(Fixture, "lsp.workspace.getRootUri returns Uri userdata")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_rooturi.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        assert(rootUri ~= nil, "getRootUri returned nil")
+        assert(rootUri.scheme == "file", "scheme mismatch: " .. tostring(rootUri.scheme))
+        assert(rootUri.fsPath ~= nil, "fsPath is nil")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.Uri.parse creates Uri userdata")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_uri_parse.luau", R"(
+return {
+    transformSource = function(source, context)
+        local uri = lsp.Uri.parse("file:///test/path/file.luau")
+        assert(uri ~= nil, "Uri.parse returned nil")
+        assert(uri.scheme == "file", "scheme mismatch: " .. tostring(uri.scheme))
+        assert(uri.path == "/test/path/file.luau", "path mismatch: " .. tostring(uri.path))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.Uri.file creates file Uri")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_uri_file.luau", R"(
+return {
+    transformSource = function(source, context)
+        local uri = lsp.Uri.file("/test/path/file.luau")
+        assert(uri ~= nil, "Uri.file returned nil")
+        assert(uri.scheme == "file", "scheme mismatch: " .. tostring(uri.scheme))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "Uri:joinPath works correctly")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_joinpath.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        local newUri = rootUri:joinPath("subdir", "file.luau")
+        assert(newUri ~= nil, "joinPath returned nil")
+        assert(newUri.scheme == "file", "scheme mismatch")
+        -- Path should contain the joined segments
+        local pathStr = newUri:toString()
+        assert(string.find(pathStr, "subdir") ~= nil, "subdir not in path")
+        assert(string.find(pathStr, "file.luau") ~= nil, "file.luau not in path")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "Uri:toString returns string")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_tostring.luau", R"(
+return {
+    transformSource = function(source, context)
+        local uri = lsp.Uri.parse("file:///test/path/file.luau")
+        local str = uri:toString()
+        assert(type(str) == "string", "toString did not return string")
+        assert(string.find(str, "file://") ~= nil, "toString result missing scheme")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.fs.readFile throws when disabled")
+{
+    TempDir dir("plugin_test");
+    // Filesystem access is disabled by default
+
+    std::string testFilePath = dir.write_child("testdata.txt", "Hello, World!");
+
+    std::string pluginPath = dir.write_child("test_readfile_disabled.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        local fileUri = rootUri:joinPath("testdata.txt")
+        local ok, err = pcall(function()
+            return lsp.fs.readFile(fileUri)
+        end)
+        assert(not ok, "readFile should have thrown")
+        assert(string.find(err, "filesystem access not available") ~= nil, "wrong error: " .. tostring(err))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.fs.readFile throws for non-file URIs")
+{
+    TempDir dir("plugin_test");
+    // Enable filesystem access for this test
+    client->globalConfig.plugins.fileSystem.enabled = true;
+
+    std::string pluginPath = dir.write_child("test_readfile_https.luau", R"(
+return {
+    transformSource = function(source, context)
+        local httpsUri = lsp.Uri.parse("https://example.com/file.txt")
+        local ok, err = pcall(function()
+            return lsp.fs.readFile(httpsUri)
+        end)
+        assert(not ok, "readFile should have thrown")
+        assert(string.find(err, "only file://") ~= nil, "wrong error: " .. tostring(err))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "Uri equality works")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_uri_equality.luau", R"(
+return {
+    transformSource = function(source, context)
+        local uri1 = lsp.Uri.parse("file:///test/path/file.luau")
+        local uri2 = lsp.Uri.parse("file:///test/path/file.luau")
+        local uri3 = lsp.Uri.parse("file:///other/path/file.luau")
+
+        assert(uri1 == uri2, "equal URIs should be equal")
+        assert(uri1 ~= uri3, "different URIs should not be equal")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
 }
 
 TEST_SUITE_END();

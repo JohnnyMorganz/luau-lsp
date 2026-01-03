@@ -3,11 +3,13 @@
 #include "Plugin/SourceMapping.hpp"
 #include "Plugin/PluginRuntime.hpp"
 #include "LSP/Uri.hpp"
+#include "Luau/NotNull.h"
 #include <memory>
 #include <string>
 #include <vector>
 
 struct BaseClient;
+class WorkspaceFolder;
 
 namespace lsp
 {
@@ -22,12 +24,12 @@ class PluginManager
 {
     std::vector<std::unique_ptr<PluginRuntime>> plugins;
     BaseClient* client = nullptr;
+    Luau::NotNull<WorkspaceFolder> workspace;
 
 public:
-    PluginManager() = default;
-
-    explicit PluginManager(BaseClient* client)
+    explicit PluginManager(BaseClient* client, Luau::NotNull<WorkspaceFolder> workspace)
         : client(client)
+        , workspace(workspace)
     {
     }
 

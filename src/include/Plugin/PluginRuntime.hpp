@@ -1,5 +1,6 @@
 #pragma once
 #include "Plugin/TextEdit.hpp"
+#include "Luau/NotNull.h"
 #include <memory>
 #include <optional>
 #include <string>
@@ -7,6 +8,7 @@
 #include <vector>
 
 struct lua_State;
+class WorkspaceFolder;
 
 namespace Luau::LanguageServer::Plugin
 {
@@ -23,6 +25,7 @@ private:
     size_t timeoutMs;
     bool loaded = false;
     int transformSourceRef = LUA_NOREF;
+    Luau::NotNull<WorkspaceFolder> workspace;
 
     // Timeout tracking using wall-clock time
     mutable double deadline = 0;
@@ -32,7 +35,7 @@ private:
 
 public:
 
-    explicit PluginRuntime(const std::string& pluginPath, size_t timeoutMs = 5000);
+    explicit PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const std::string& pluginPath, size_t timeoutMs = 5000);
     ~PluginRuntime();
 
     // Non-copyable

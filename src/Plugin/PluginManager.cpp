@@ -14,7 +14,7 @@ size_t PluginManager::configure(const std::vector<std::string>& pluginPaths, siz
     {
         sendLogMessage(lsp::MessageType::Info, "Loading plugin: " + path);
 
-        auto plugin = std::make_unique<PluginRuntime>(path, timeoutMs);
+        auto plugin = std::make_unique<PluginRuntime>(workspace, path, timeoutMs);
 
         if (auto error = plugin->load())
         {

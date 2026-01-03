@@ -8,6 +8,7 @@
 #include "Plugin/PluginManager.hpp"
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/NotNull.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
 
@@ -622,7 +623,7 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
         client->sendTrace("workspace: configuring plugins");
 
         // Always recreate the plugin manager to ensure clean state
-        fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(client);
+        fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(client, Luau::NotNull<WorkspaceFolder>{this});
 
         size_t loadedCount = fileResolver.pluginManager->configure(configuration.plugins.paths, configuration.plugins.timeoutMs);
         client->sendLogMessage(lsp::MessageType::Info, "Loaded " + std::to_string(loadedCount) + " of " +

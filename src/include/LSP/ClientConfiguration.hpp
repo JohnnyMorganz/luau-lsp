@@ -256,6 +256,13 @@ struct ClientFormatConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFormatConfiguration, convertQuotes);
 
+struct ClientPluginFileSystemConfiguration
+{
+    /// Whether filesystem access is enabled for plugins
+    bool enabled = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginFileSystemConfiguration, enabled)
+
 struct ClientPluginConfiguration
 {
     /// Whether plugins are enabled
@@ -264,8 +271,10 @@ struct ClientPluginConfiguration
     std::vector<std::string> paths{};
     /// Timeout for plugin execution in milliseconds
     size_t timeoutMs = 5000;
+    /// Configuration for plugin filesystem access
+    ClientPluginFileSystemConfiguration fileSystem{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginConfiguration, enabled, paths, timeoutMs)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginConfiguration, enabled, paths, timeoutMs, fileSystem)
 
 enum struct LSPPlatformConfig
 {
