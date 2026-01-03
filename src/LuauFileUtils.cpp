@@ -11,6 +11,7 @@
 #define NOMINMAX
 #endif
 #include <direct.h>
+#include <share.h>
 #include <windows.h>
 #include <shellapi.h>
 #else
@@ -111,6 +112,29 @@ std::optional<std::string> readFile(const std::string& name)
     // LUAU-LSP DEVIATION: We don't remove shebang here, that is handled in TextDocument
 
     return result;
+}
+
+bool writeFileIfModified(const std::string& name, const std::string& content)
+{
+    // Skip write if file already has the same content
+    if (auto existingContent = readFile(name))
+    {
+        if (*existingContent == content)
+            return true;
+    }
+#ifdef _WIN32
+    FILE* file = _wfsopen(fromUtf8(name).c_str(), L"wb", _SH_DENYWR);
+#else
+    FILE* file = fopen(name.c_str(), "wb");
+#endif
+
+    if (!file)
+        return false;
+
+    size_t written = fwrite(content.data(), 1, content.size(), file);
+    fclose(file);
+
+    return written == content.size();
 }
 
 std::optional<std::string> getCurrentWorkingDirectory()

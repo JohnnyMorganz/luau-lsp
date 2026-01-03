@@ -107,11 +107,8 @@ TEST_CASE("enable_new_solver_fflag_from_settings_file_applied")
 
 TEST_CASE_FIXTURE(Fixture, "analysis_relative_file_paths")
 {
-    TempDir t("analyze_cli_relative_file_paths");
-    workspace.fileResolver.rootUri = Uri::file(t.path());
-
-    CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("test.luau")).relativePath, "test.luau");
-    CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("folder/file.luau")).relativePath, "folder/file.luau");
+    CHECK_EQ(getFilePath(&workspace.fileResolver, tempDir.touch_child("test.luau")).relativePath, "test.luau");
+    CHECK_EQ(getFilePath(&workspace.fileResolver, tempDir.touch_child("folder/file.luau")).relativePath, "folder/file.luau");
 }
 
 TEST_CASE("parse_definitions_files_handles_new_syntax")

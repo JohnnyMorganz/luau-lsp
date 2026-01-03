@@ -130,10 +130,11 @@ The Language Server will operate without a sourcemap available, but will not res
 ## Optional: Roblox Studio plugin
 
 A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
-for users who would like intellisense for non-filesystem based DataModel instances.
+for users who would like intellisense for non-Rojo and non-filesystem based DataModel instances.
 
-The companion plugin sends HTTP post requests to the following endpoints on localhost at the user-defined port:
+The companion plugin sends HTTP requests to the following endpoints on localhost at the user-defined port:
 
+- `GET /get-file-paths`
 - `POST /full`
 - `POST /clear`
 
