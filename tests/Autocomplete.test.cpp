@@ -1918,6 +1918,44 @@ TEST_CASE_FIXTURE(Fixture, "do_not_show_keywords_if_disabled")
         CHECK_FALSE(getItem(result, property));
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_anonymous_autofilled_function_by_default")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK(getItem(result, "function (anonymous autofilled)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "do_not_show_anonymous_autofilled_function_if_disabled")
+{
+    client->globalConfig.completion.showAnonymousAutofilledFunction = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "function (anonymous autofilled)"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_property_on_union_type")
 {
     auto source = R"(

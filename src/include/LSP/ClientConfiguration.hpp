@@ -181,12 +181,14 @@ struct ClientCompletionConfiguration
     bool showPropertiesOnMethodCall = false;
     /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
     bool showKeywords = true;
+    /// Whether to show the "function (anonymous autofilled)" generated function entry
+    bool showAnonymousAutofilledFunction = true;
     /// Enables the experimental fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {

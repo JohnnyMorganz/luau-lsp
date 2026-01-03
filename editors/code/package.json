@@ -532,6 +532,12 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.showAnonymousAutofilledFunction": {
+          "markdownDescription": "Whether to show the auto-generated anonymous function completion item when autocompleting callback arguments",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.suggestImports": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",
