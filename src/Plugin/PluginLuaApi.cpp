@@ -304,7 +304,7 @@ static void pushJsonValue(lua_State* L, const nlohmann::json& value)
     }
     else if (value.is_number_integer())
     {
-        lua_pushinteger(L, value.get<int64_t>());
+        lua_pushinteger(L, value.get<lua_Integer>());
     }
     else if (value.is_number())
     {
