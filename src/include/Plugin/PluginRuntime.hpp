@@ -1,5 +1,6 @@
 #pragma once
 #include "Plugin/TextEdit.hpp"
+#include "LSP/Uri.hpp"
 #include "Luau/NotNull.h"
 #include <memory>
 #include <optional>
@@ -21,7 +22,7 @@ public:
 
 private:
     std::unique_ptr<lua_State, void (*)(lua_State*)> state;
-    std::string pluginPath;
+    Uri pluginUri;
     size_t timeoutMs;
     bool loaded = false;
     int transformSourceRef = LUA_NOREF;
@@ -35,7 +36,7 @@ private:
 
 public:
 
-    explicit PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const std::string& pluginPath, size_t timeoutMs = 5000);
+    explicit PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const Uri& pluginUri, size_t timeoutMs = 5000);
     ~PluginRuntime();
 
     // Non-copyable
@@ -59,9 +60,9 @@ public:
         return transformSourceRef != LUA_NOREF;
     }
 
-    const std::string& getPath() const
+    const Uri& getUri() const
     {
-        return pluginPath;
+        return pluginUri;
     }
 };
 

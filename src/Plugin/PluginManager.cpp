@@ -1,5 +1,7 @@
 #include "Plugin/PluginManager.hpp"
 #include "LSP/Client.hpp"
+#include "LSP/Utils.hpp"
+#include "LSP/Workspace.hpp"
 #include "Protocol/Window.hpp"
 
 namespace Luau::LanguageServer::Plugin
@@ -12,17 +14,19 @@ size_t PluginManager::configure(const std::vector<std::string>& pluginPaths, siz
 
     for (const auto& path : pluginPaths)
     {
-        sendLogMessage(lsp::MessageType::Info, "Loading plugin: " + path);
+        auto resolvedUri = workspace->rootUri.resolvePath(resolvePath(path));
 
-        auto plugin = std::make_unique<PluginRuntime>(workspace, path, timeoutMs);
+        sendLogMessage(lsp::MessageType::Info, "Loading plugin: " + resolvedUri.fsPath());
+
+        auto plugin = std::make_unique<PluginRuntime>(workspace, resolvedUri, timeoutMs);
 
         if (auto error = plugin->load())
         {
-            sendLogMessage(lsp::MessageType::Error, "Failed to load plugin '" + path + "': " + error->message);
+            sendLogMessage(lsp::MessageType::Error, "Failed to load plugin '" + resolvedUri.fsPath() + "': " + error->message);
             continue;
         }
 
-        sendLogMessage(lsp::MessageType::Info, "Successfully loaded plugin: " + path);
+        sendLogMessage(lsp::MessageType::Info, "Successfully loaded plugin: " + resolvedUri.fsPath());
         plugins.push_back(std::move(plugin));
         loaded++;
     }
@@ -45,7 +49,7 @@ std::vector<TextEdit> PluginManager::transform(const std::string& source, const 
 
         if (auto* error = std::get_if<PluginError>(&result))
         {
-            sendLogMessage(lsp::MessageType::Error, "Plugin '" + plugin->getPath() + "' error: " + error->message);
+            sendLogMessage(lsp::MessageType::Error, "Plugin '" + plugin->getUri().fsPath() + "' error: " + error->message);
             continue;
         }
 
