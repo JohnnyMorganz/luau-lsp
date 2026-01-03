@@ -135,6 +135,11 @@
         "enablement": "resourceLangId == luau"
       },
       {
+        "command": "luau-lsp.debug.viewInternalSource",
+        "title": "Luau Debug: View Internal Source Representation of File",
+        "enablement": "resourceLangId == luau"
+      },
+      {
         "command": "luau-lsp.flushTimeTrace",
         "title": "Luau: Flush Time Trace Events to tracing.json"
       },
@@ -158,6 +163,10 @@
         {
           "when": "resourceLangId == luau",
           "command": "luau-lsp.computeCompilerRemarks"
+        },
+        {
+          "when": "resourceLangId == luau",
+          "command": "luau-lsp.debug.viewInternalSource"
         }
       ]
     },
