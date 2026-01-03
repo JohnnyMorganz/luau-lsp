@@ -21,6 +21,8 @@ import {
   registerComputeCompilerRemarks,
 } from "./bytecode";
 
+import { onTypeFormattingMiddleware } from "./onTypeFormattingMiddleware";
+
 import { registerRequireGraph } from "./requireGraph";
 
 import * as roblox from "./roblox";
@@ -518,6 +520,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
       supportHtml: true,
     },
     errorHandler: new ClientErrorHandler(context, 4),
+    middleware: {
+      provideOnTypeFormattingEdits: onTypeFormattingMiddleware,
+    },
   };
 
   client = new LanguageClient(
