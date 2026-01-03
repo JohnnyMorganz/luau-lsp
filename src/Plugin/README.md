@@ -167,3 +167,111 @@ When multiple plugins are configured:
 5. The combined edits produce the final transformed source
 
 This parallel approach is simpler than chaining and ensures plugins don't need to be aware of each other.
+
+## Filesystem API
+
+Plugins can optionally access files within the workspace through a sandboxed filesystem API.
+
+### Enabling Filesystem Access
+
+Filesystem access is disabled by default. To enable it:
+
+```json
+{
+    "luau-lsp.plugins.fileSystem.enabled": true
+}
+```
+
+### API Reference
+
+#### `lsp.workspace.getRootUri(): Uri`
+Returns the workspace root as a Uri object.
+
+#### `lsp.fs.readFile(uri: Uri): string`
+Reads a file within the workspace. Throws an error on failure.
+
+**Security**: Only files within the workspace can be read. Attempting to read files outside the workspace will throw an "access denied" error.
+
+```luau
+local ok, content = pcall(function()
+    local rootUri = lsp.workspace.getRootUri()
+    local fileUri = rootUri:joinPath("src", "config.luau")
+    return lsp.fs.readFile(fileUri)
+end)
+if ok then
+    -- Use content
+else
+    warn("Failed:", content)
+end
+```
+
+#### `lsp.Uri.parse(uriString: string): Uri`
+Parses a URI string into a Uri object.
+
+```luau
+local uri = lsp.Uri.parse("file:///path/to/file.luau")
+```
+
+#### `lsp.Uri.file(fsPath: string): Uri`
+Creates a file:// Uri from a filesystem path.
+
+```luau
+local uri = lsp.Uri.file("/path/to/file.luau")
+```
+
+### Uri Object
+
+Uri is a userdata object with the following properties and methods:
+
+**Properties** (read-only):
+- `scheme: string` - URI scheme (e.g., "file")
+- `authority: string` - URI authority
+- `path: string` - URI path
+- `query: string` - URI query string
+- `fragment: string` - URI fragment
+- `fsPath: string` - Platform-specific filesystem path
+
+**Methods**:
+- `:joinPath(...segments: string): Uri` - Join path segments, returns new Uri
+- `:toString(): string` - Convert to URI string
+
+### Error Handling
+
+All filesystem operations throw on error. Use `pcall` to handle errors:
+
+```luau
+local ok, result = pcall(lsp.fs.readFile, uri)
+if not ok then
+    -- result contains error message
+end
+```
+
+Possible errors:
+- `"filesystem access not available"` - Setting is disabled
+- `"only file:// URIs are supported"` - Non-file URI
+- `"access denied: file is outside workspace"` - Security violation
+- `"file not found or cannot be read"` - I/O error
+
+### Example: Reading Configuration
+
+```luau
+return {
+    transformSource = function(source, context)
+        -- Try to read a configuration file
+        local ok, configContent = pcall(function()
+            local rootUri = lsp.workspace.getRootUri()
+            local configUri = rootUri:joinPath(".luau-plugin-config.json")
+            return lsp.fs.readFile(configUri)
+        end)
+
+        if not ok then
+            -- Config file doesn't exist or can't be read, use defaults
+            return nil
+        end
+
+        -- Use configuration to decide how to transform
+        -- ...
+        return nil
+    end
+}
+```
