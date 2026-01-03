@@ -7149,9 +7149,16 @@ declare class CatalogSearchParams
 	AssetTypes: { EnumAvatarAssetType }
 	BundleTypes: { EnumBundleType }
 	CategoryFilter: EnumCatalogCategoryFilter
+	CreatorId: number
+	CreatorName: string
+	CreatorType: EnumCreatorTypeFilter
+	IncludeOffSale: boolean
+	Limit: number
 	MaxPrice: number
 	MinPrice: number
+	SalesTypeFilter: EnumSalesTypeFilter
 	SearchKeyword: string
+	SortAggregation: EnumCatalogSortAggregation
 	SortType: EnumCatalogSortType
 end
 
