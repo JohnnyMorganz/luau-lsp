@@ -2,6 +2,8 @@
 #include "LSP/Workspace.hpp"
 #include "LuauFileUtils.hpp"
 
+#include "nlohmann/json.hpp"
+
 #include "lua.h"
 #include "lualib.h"
 
@@ -21,7 +23,11 @@ static int lspFsReadFile(lua_State* L);
 static int lspUriParse(lua_State* L);
 static int lspUriFile(lua_State* L);
 static int lspClientSendLogMessage(lua_State* L);
+static int lspJsonDeserialize(lua_State* L);
 static int pluginPrint(lua_State* L);
+
+// Helper to push JSON value onto Lua stack
+static void pushJsonValue(lua_State* L, const nlohmann::json& value);
 
 // Helper to get LuaApiContext from upvalue
 static LuaApiContext* getLuaApiContext(lua_State* L)
@@ -282,6 +288,72 @@ static int lspUriFile(lua_State* L)
     return 1;
 }
 
+// ============================================================================
+// JSON API Implementation
+// ============================================================================
+
+static void pushJsonValue(lua_State* L, const nlohmann::json& value)
+{
+    if (value.is_null())
+    {
+        lua_pushnil(L);
+    }
+    else if (value.is_boolean())
+    {
+        lua_pushboolean(L, value.get<bool>());
+    }
+    else if (value.is_number_integer())
+    {
+        lua_pushinteger(L, value.get<int64_t>());
+    }
+    else if (value.is_number())
+    {
+        lua_pushnumber(L, value.get<double>());
+    }
+    else if (value.is_string())
+    {
+        const auto& str = value.get<std::string>();
+        lua_pushlstring(L, str.c_str(), str.size());
+    }
+    else if (value.is_array())
+    {
+        lua_createtable(L, static_cast<int>(value.size()), 0);
+        int index = 1;
+        for (const auto& elem : value)
+        {
+            pushJsonValue(L, elem);
+            lua_rawseti(L, -2, index++);
+        }
+    }
+    else if (value.is_object())
+    {
+        lua_createtable(L, 0, static_cast<int>(value.size()));
+        for (const auto& [key, val] : value.items())
+        {
+            lua_pushlstring(L, key.c_str(), key.size());
+            pushJsonValue(L, val);
+            lua_rawset(L, -3);
+        }
+    }
+}
+
+static int lspJsonDeserialize(lua_State* L)
+{
+    size_t len;
+    const char* jsonStr = luaL_checklstring(L, 1, &len);
+
+    try
+    {
+        auto json = nlohmann::json::parse(jsonStr, jsonStr + len);
+        pushJsonValue(L, json);
+        return 1;
+    }
+    catch (const nlohmann::json::exception& e)
+    {
+        luaL_errorL(L, "JSON parse error: %s", e.what());
+    }
+}
+
 void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string& pluginPath)
 {
     // Create LuaApiContext userdata (persists for lifetime of Lua state)
@@ -323,6 +395,12 @@ void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string&
     lua_pushcfunction(L, lspUriFile, "file");
     lua_setfield(L, -2, "file");
     lua_setfield(L, -2, "Uri");
+
+    // lsp.json table (no context needed)
+    lua_newtable(L);
+    lua_pushcfunction(L, lspJsonDeserialize, "deserialize");
+    lua_setfield(L, -2, "deserialize");
+    lua_setfield(L, -2, "json");
 
     // Set lsp as global
     lua_setglobal(L, "lsp");
