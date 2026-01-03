@@ -53,6 +53,17 @@ public:
         return plugins.size();
     }
 
+    // Check if a URI is a loaded plugin
+    bool isPluginFile(const Uri& uri) const
+    {
+        for (const auto& plugin : plugins)
+        {
+            if (plugin->getUri() == uri)
+                return true;
+        }
+        return false;
+    }
+
     // Clear all plugins
     void clear()
     {

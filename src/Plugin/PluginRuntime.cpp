@@ -29,9 +29,9 @@ void PluginRuntime::interruptCallback(lua_State* L, int gc)
     }
 }
 
-PluginRuntime::PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const std::string& pluginPath, size_t timeoutMs)
+PluginRuntime::PluginRuntime(Luau::NotNull<WorkspaceFolder> workspace, const Uri& pluginUri, size_t timeoutMs)
     : state(nullptr, lua_close)
-    , pluginPath(pluginPath)
+    , pluginUri(pluginUri)
     , timeoutMs(timeoutMs)
     , workspace(workspace)
 {
@@ -48,6 +48,8 @@ PluginRuntime::~PluginRuntime()
 
 std::optional<PluginError> PluginRuntime::load()
 {
+    auto pluginPath = pluginUri.fsPath();
+
     // Read plugin file
     auto source = Luau::FileUtils::readFile(pluginPath);
     if (!source)
@@ -148,6 +150,8 @@ std::optional<PluginError> PluginRuntime::load()
 
 std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(const std::string& source, const PluginContext& context)
 {
+    auto pluginPath = pluginUri.fsPath();
+
     if (!loaded || !state)
     {
         return PluginError{"Plugin not loaded", pluginPath};
