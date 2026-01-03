@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- VSCode: the extension will now automatically activate when your opened folder contains any `.luau` files, not just when you explicitly open a Luau file. This allows the Studio Plugin to start up and connect quicker ([#1278](https://github.com/JohnnyMorganz/luau-lsp/pull/1278))
+
 ## [1.59.0] - 2025-12-28
 
 ### Added
@@ -1806,6 +1810,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
