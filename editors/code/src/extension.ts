@@ -216,7 +216,7 @@ const handleExternalFiles = async (
   }
 
   if (builtinDocumentationFiles) {
-    externalFiles.concat(builtinDocumentationFiles);
+    externalFiles.push(...builtinDocumentationFiles);
     documentationFiles = documentationFiles.concat(
       builtinDocumentationFiles.map((info) => info.outputUri.fsPath),
     );

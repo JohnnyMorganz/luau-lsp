@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - VSCode: fixed cursor being positioned outside of the string after performing automatic quote conversion to backticks ([#1317](https://github.com/JohnnyMorganz/luau-lsp/issues/1317))
+- VSCode: fixed builtin documentation files (api-docs.json) not being downloaded, leading to an error that documentation files do not exist
 
 ## [1.59.0] - 2025-12-28
 
