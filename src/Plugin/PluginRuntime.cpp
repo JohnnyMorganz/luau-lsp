@@ -65,8 +65,8 @@ std::optional<PluginError> PluginRuntime::load()
     // Register Uri userdata metatable (must be before sandbox)
     registerUriUserdata(L);
 
-    // Register lsp API (must be before sandbox)
-    registerLspApi(L, workspace);
+    // Register lsp API and print override (must be before sandbox)
+    registerLspApi(L, workspace, pluginPath);
 
     // Sandbox the environment (removes dangerous functions)
     luaL_sandbox(L);

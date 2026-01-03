@@ -20,6 +20,14 @@ static int lspWorkspaceGetRootUri(lua_State* L);
 static int lspFsReadFile(lua_State* L);
 static int lspUriParse(lua_State* L);
 static int lspUriFile(lua_State* L);
+static int lspClientSendLogMessage(lua_State* L);
+static int pluginPrint(lua_State* L);
+
+// Helper to get LuaApiContext from upvalue
+static LuaApiContext* getLuaApiContext(lua_State* L)
+{
+    return static_cast<LuaApiContext*>(lua_touserdatatagged(L, lua_upvalueindex(1), kLuaApiContextTag));
+}
 
 // ============================================================================
 // Uri Userdata Implementation
@@ -168,17 +176,17 @@ void registerUriUserdata(lua_State* L)
 
 static int lspWorkspaceGetRootUri(lua_State* L)
 {
-    auto* workspace = static_cast<WorkspaceFolder*>(lua_touserdata(L, lua_upvalueindex(1)));
-    pushUri(L, workspace->rootUri);
+    auto* ctx = getLuaApiContext(L);
+    pushUri(L, ctx->workspace->rootUri);
     return 1;
 }
 
 static int lspFsReadFile(lua_State* L)
 {
-    auto* workspace = static_cast<WorkspaceFolder*>(lua_touserdata(L, lua_upvalueindex(1)));
+    auto* ctx = getLuaApiContext(L);
 
     // Check if filesystem access is enabled
-    auto config = workspace->client->getConfiguration(workspace->rootUri);
+    auto config = ctx->workspace->client->getConfiguration(ctx->workspace->rootUri);
     if (!config.plugins.fileSystem.enabled)
     {
         luaL_errorL(L, "filesystem access not available");
@@ -194,7 +202,7 @@ static int lspFsReadFile(lua_State* L)
     }
 
     // Security: check if within workspace
-    if (!workspace->rootUri.isAncestorOf(*targetUri))
+    if (!ctx->workspace->rootUri.isAncestorOf(*targetUri))
     {
         luaL_errorL(L, "access denied: file is outside workspace");
     }
@@ -208,6 +216,56 @@ static int lspFsReadFile(lua_State* L)
 
     lua_pushlstring(L, content->c_str(), content->size());
     return 1;
+}
+
+static int lspClientSendLogMessage(lua_State* L)
+{
+    auto* ctx = getLuaApiContext(L);
+
+    // Get type argument as string ("error", "warning", "info", "log")
+    const char* typeStr = luaL_checkstring(L, 1);
+    lsp::MessageType type;
+    if (strcmp(typeStr, "error") == 0)
+        type = lsp::MessageType::Error;
+    else if (strcmp(typeStr, "warning") == 0)
+        type = lsp::MessageType::Warning;
+    else if (strcmp(typeStr, "info") == 0)
+        type = lsp::MessageType::Info;
+    else if (strcmp(typeStr, "log") == 0)
+        type = lsp::MessageType::Log;
+    else
+        luaL_errorL(L, "invalid message type '%s' (must be 'error', 'warning', 'info', or 'log')", typeStr);
+
+    // Get message argument
+    const char* message = luaL_checkstring(L, 2);
+
+    // Format with prefix and send
+    std::string prefixedMessage = "[Plugin " + ctx->pluginPath + "] " + message;
+    ctx->workspace->client->sendLogMessage(type, prefixedMessage);
+
+    return 0;
+}
+
+static int pluginPrint(lua_State* L)
+{
+    auto* ctx = getLuaApiContext(L);
+
+    // Concatenate all arguments (like standard print)
+    std::string message;
+    int n = lua_gettop(L);
+    for (int i = 1; i <= n; i++)
+    {
+        if (i > 1)
+            message += "\t";
+        message += luaL_tolstring(L, i, nullptr);
+        lua_pop(L, 1); // pop the string from luaL_tolstring
+    }
+
+    // Format with prefix and send as Info
+    std::string prefixedMessage = "[Plugin " + ctx->pluginPath + "] " + message;
+    ctx->workspace->client->sendLogMessage(lsp::MessageType::Info, prefixedMessage);
+
+    return 0;
 }
 
 static int lspUriParse(lua_State* L)
@@ -224,26 +282,41 @@ static int lspUriFile(lua_State* L)
     return 1;
 }
 
-void registerLspApi(lua_State* L, WorkspaceFolder* workspace)
+void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string& pluginPath)
 {
+    // Create LuaApiContext userdata (persists for lifetime of Lua state)
+    void* memory = lua_newuserdatatagged(L, sizeof(LuaApiContext), kLuaApiContextTag);
+    new (memory) LuaApiContext{workspace, pluginPath};
+    int contextIdx = lua_gettop(L);
+
+    // Helper lambda to push context as upvalue and create closure
+    auto pushClosureWithContext = [L, contextIdx](lua_CFunction fn, const char* name) {
+        lua_pushvalue(L, contextIdx); // Push copy of context userdata
+        lua_pushcclosure(L, fn, name, 1);
+    };
+
     // Create lsp global table
     lua_newtable(L);
 
     // lsp.workspace table
     lua_newtable(L);
-    lua_pushlightuserdata(L, workspace);
-    lua_pushcclosure(L, lspWorkspaceGetRootUri, "getRootUri", 1);
+    pushClosureWithContext(lspWorkspaceGetRootUri, "getRootUri");
     lua_setfield(L, -2, "getRootUri");
     lua_setfield(L, -2, "workspace");
 
     // lsp.fs table
     lua_newtable(L);
-    lua_pushlightuserdata(L, workspace);
-    lua_pushcclosure(L, lspFsReadFile, "readFile", 1);
+    pushClosureWithContext(lspFsReadFile, "readFile");
     lua_setfield(L, -2, "readFile");
     lua_setfield(L, -2, "fs");
 
-    // lsp.Uri table (constructor functions)
+    // lsp.client table
+    lua_newtable(L);
+    pushClosureWithContext(lspClientSendLogMessage, "sendLogMessage");
+    lua_setfield(L, -2, "sendLogMessage");
+    lua_setfield(L, -2, "client");
+
+    // lsp.Uri table (constructor functions - no context needed)
     lua_newtable(L);
     lua_pushcfunction(L, lspUriParse, "parse");
     lua_setfield(L, -2, "parse");
@@ -251,8 +324,15 @@ void registerLspApi(lua_State* L, WorkspaceFolder* workspace)
     lua_setfield(L, -2, "file");
     lua_setfield(L, -2, "Uri");
 
-    // Set as global
+    // Set lsp as global
     lua_setglobal(L, "lsp");
+
+    // Override print function
+    pushClosureWithContext(pluginPrint, "print");
+    lua_setglobal(L, "print");
+
+    // Pop the context userdata (it's now referenced by closures)
+    lua_pop(L, 1);
 }
 
 } // namespace Luau::LanguageServer::Plugin

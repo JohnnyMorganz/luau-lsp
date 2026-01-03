@@ -42,29 +42,38 @@ The plugin system allows users to write Luau scripts that transform source code 
 ## Components
 
 ### TextEdit
+
 Simple data structure representing a text edit with a range and replacement text. Uses Luau's `Location` type for the range.
 
 ### SourceMapping
+
 Core position mapping between original and transformed source:
+
 - Built from a list of `TextEdit`s
 - Provides bidirectional position conversion
 - Validates edits don't overlap (throws on overlap)
 - Sorts edits by position before applying
 
 ### PluginTextDocument
+
 Inherits from `TextDocument` and overrides key methods:
+
 - `getText()` - returns transformed content
 - `convertPosition()` - maps positions through SourceMapping
 - LSP operations automatically get correct position mapping
 
 ### PluginRuntime
+
 Executes a single Luau plugin in a sandboxed environment:
+
 - Uses `luaL_sandbox()` for security
 - Timeout enforcement via interrupt callback
 - Plugin must return a table (transformSource is optional)
 
 ### PluginManager
+
 Orchestrates multiple plugins:
+
 - All plugins receive the original source (not chained)
 - Combines edits from all plugins
 - Rejects overlapping edits with an error
@@ -151,15 +160,16 @@ Plugins are configured via LSP client settings:
 
 ```json
 {
-    "luau-lsp.plugins.enabled": true,
-    "luau-lsp.plugins.paths": ["./plugins/my_plugin.luau"],
-    "luau-lsp.plugins.timeoutMs": 5000
+  "luau-lsp.plugins.enabled": true,
+  "luau-lsp.plugins.paths": ["./plugins/my_plugin.luau"],
+  "luau-lsp.plugins.timeoutMs": 5000
 }
 ```
 
 ## Multiple Plugins
 
 When multiple plugins are configured:
+
 1. All plugins receive the **original** source
 2. Each plugin returns edits against the original
 3. All edits are combined into a single list
@@ -178,16 +188,18 @@ Filesystem access is disabled by default. To enable it:
 
 ```json
 {
-    "luau-lsp.plugins.fileSystem.enabled": true
+  "luau-lsp.plugins.fileSystem.enabled": true
 }
 ```
 
 ### API Reference
 
 #### `lsp.workspace.getRootUri(): Uri`
+
 Returns the workspace root as a Uri object.
 
 #### `lsp.fs.readFile(uri: Uri): string`
+
 Reads a file within the workspace. Throws an error on failure.
 
 **Security**: Only files within the workspace can be read. Attempting to read files outside the workspace will throw an "access denied" error.
@@ -206,6 +218,7 @@ end
 ```
 
 #### `lsp.Uri.parse(uriString: string): Uri`
+
 Parses a URI string into a Uri object.
 
 ```luau
@@ -213,6 +226,7 @@ local uri = lsp.Uri.parse("file:///path/to/file.luau")
 ```
 
 #### `lsp.Uri.file(fsPath: string): Uri`
+
 Creates a file:// Uri from a filesystem path.
 
 ```luau
@@ -224,6 +238,7 @@ local uri = lsp.Uri.file("/path/to/file.luau")
 Uri is a userdata object with the following properties and methods:
 
 **Properties** (read-only):
+
 - `scheme: string` - URI scheme (e.g., "file")
 - `authority: string` - URI authority
 - `path: string` - URI path
@@ -232,6 +247,7 @@ Uri is a userdata object with the following properties and methods:
 - `fsPath: string` - Platform-specific filesystem path
 
 **Methods**:
+
 - `:joinPath(...segments: string): Uri` - Join path segments, returns new Uri
 - `:toString(): string` - Convert to URI string
 
@@ -247,6 +263,7 @@ end
 ```
 
 Possible errors:
+
 - `"filesystem access not available"` - Setting is disabled
 - `"only file:// URIs are supported"` - Non-file URI
 - `"access denied: file is outside workspace"` - Security violation
@@ -275,3 +292,24 @@ return {
     end
 }
 ```
+
+## Client API
+
+Plugins can send log messages to the LSP client for debugging and status reporting.
+
+### `lsp.client.sendLogMessage(type: string, message: string)`
+
+Sends a log message to the client.
+
+**Parameters:**
+
+- `type: string` - Message type: `"error"`, `"warning"`, `"info"`, or `"log"`
+- `message: string` - The message content
+
+```luau
+lsp.client.sendLogMessage("info", "Processing file...")
+lsp.client.sendLogMessage("warning", "Deprecated syntax detected")
+lsp.client.sendLogMessage("error", "Failed to parse configuration")
+```
+
+The global `print` function will send a log message at `info` level.

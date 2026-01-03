@@ -1187,3 +1187,170 @@ return {
 }
 
 TEST_SUITE_END();
+
+TEST_SUITE_BEGIN("PluginLoggingAPI");
+
+TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage sends message with prefix")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_log.luau", R"(
+return {
+    transformSource = function(source, context)
+        lsp.client.sendLogMessage("info", "Test message")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+
+    // Verify log message was sent with prefix
+    auto infoMessages = getLogMessages(*client, lsp::MessageType::Info);
+    REQUIRE(infoMessages.size() >= 1);
+    bool foundMessage = false;
+    for (const auto& msg : infoMessages)
+    {
+        if (msg.find("[Plugin") != std::string::npos && msg.find("Test message") != std::string::npos)
+        {
+            foundMessage = true;
+            break;
+        }
+    }
+    CHECK(foundMessage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage supports all message types")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_log_types.luau", R"(
+return {
+    transformSource = function(source, context)
+        lsp.client.sendLogMessage("error", "Error msg")
+        lsp.client.sendLogMessage("warning", "Warning msg")
+        lsp.client.sendLogMessage("info", "Info msg")
+        lsp.client.sendLogMessage("log", "Log msg")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+
+    // Verify all message types were sent
+    auto errorMsgs = getLogMessages(*client, lsp::MessageType::Error);
+    auto warningMsgs = getLogMessages(*client, lsp::MessageType::Warning);
+    auto infoMsgs = getLogMessages(*client, lsp::MessageType::Info);
+    auto logMsgs = getLogMessages(*client, lsp::MessageType::Log);
+
+    CHECK(!errorMsgs.empty());
+    CHECK(!warningMsgs.empty());
+    CHECK(!infoMsgs.empty());
+    CHECK(!logMsgs.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage rejects invalid type")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_log_invalid.luau", R"(
+return {
+    transformSource = function(source, context)
+        local ok, err = pcall(function()
+            lsp.client.sendLogMessage("invalid", "message")
+        end)
+        assert(not ok, "should have thrown")
+        assert(string.find(err, "invalid message type") ~= nil, "wrong error: " .. tostring(err))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "print redirects to log with Info level")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_print.luau", R"(
+return {
+    transformSource = function(source, context)
+        print("Hello from plugin")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+
+    // Verify print message was sent as Info with prefix
+    auto infoMessages = getLogMessages(*client, lsp::MessageType::Info);
+    bool foundMessage = false;
+    for (const auto& msg : infoMessages)
+    {
+        if (msg.find("[Plugin") != std::string::npos && msg.find("Hello from plugin") != std::string::npos)
+        {
+            foundMessage = true;
+            break;
+        }
+    }
+    CHECK(foundMessage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "print handles multiple arguments with tabs")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("test_print_multi.luau", R"(
+return {
+    transformSource = function(source, context)
+        print("a", "b", "c")
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), pluginPath);
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test", "luau"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+
+    // Verify print message has tab-separated values
+    auto infoMessages = getLogMessages(*client, lsp::MessageType::Info);
+    bool foundMessage = false;
+    for (const auto& msg : infoMessages)
+    {
+        if (msg.find("a\tb\tc") != std::string::npos)
+        {
+            foundMessage = true;
+            break;
+        }
+    }
+    CHECK(foundMessage);
+}
+
+TEST_SUITE_END();
