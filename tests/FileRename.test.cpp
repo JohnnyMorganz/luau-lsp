@@ -282,4 +282,54 @@ TEST_CASE_FIXTURE(Fixture, "updates_instance_require_when_moved_to_child_folder"
     CHECK(edit.changes.at(moduleB)[0].newText.find("Subfolder") != std::string::npos);
 }
 
+TEST_CASE_FIXTURE(Fixture, "updates_requires_when_folder_renamed")
+{
+    // Enable the feature
+    client->globalConfig.updateRequiresOnFileMove.enabled = UpdateRequiresOnFileMoveConfig::Always;
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.appliedFirstTimeConfiguration = false;
+    workspace.setupWithConfiguration(client->globalConfig);
+
+    // Create actual files on disk in a subdirectory
+    tempDir.write_child("lib/ModuleA.lua", "return {}");
+    tempDir.write_child("lib/ModuleB.lua", "return {}");
+
+    // Register the files as documents
+    auto moduleA = Uri::file(tempDir.path() + "/lib/ModuleA.lua");
+    auto moduleB = Uri::file(tempDir.path() + "/lib/ModuleB.lua");
+    workspace.openTextDocument(moduleA, {{moduleA, "luau", 0, "return {}"}});
+    workspace.openTextDocument(moduleB, {{moduleB, "luau", 0, "return {}"}});
+
+    // Create a consumer file that requires from the lib folder
+    auto consumer = newDocument("Consumer.lua", R"(
+local A = require("./lib/ModuleA")
+local B = require("./lib/ModuleB")
+return {}
+)");
+
+    // Type-check to build dependency graph
+    workspace.frontend.check(workspace.fileResolver.getModuleName(consumer));
+
+    // Simulate renaming the "lib" folder to "utils"
+    std::vector<lsp::FileRename> renames;
+    renames.push_back(lsp::FileRename{
+        Uri::file(workspace.rootUri.fsPath() + "/lib"),
+        Uri::file(workspace.rootUri.fsPath() + "/utils")});
+
+    auto edit = workspace.onWillRenameFiles(renames);
+
+    REQUIRE_EQ(edit.changes.size(), 1);
+    REQUIRE(edit.changes.count(consumer));
+    REQUIRE_EQ(edit.changes.at(consumer).size(), 2);
+
+    // Order may vary depending on file system traversal, so collect and sort
+    std::vector<std::string> newTexts;
+    for (const auto& e : edit.changes.at(consumer))
+        newTexts.push_back(e.newText);
+    std::sort(newTexts.begin(), newTexts.end());
+
+    CHECK_EQ(newTexts[0], "\"./utils/ModuleA\"");
+    CHECK_EQ(newTexts[1], "\"./utils/ModuleB\"");
+}
+
 TEST_SUITE_END();

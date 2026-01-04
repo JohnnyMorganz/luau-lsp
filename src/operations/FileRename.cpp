@@ -2,6 +2,9 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "LuauFileUtils.hpp"
+
+#include <unordered_set>
 
 namespace
 {
@@ -9,6 +12,54 @@ bool isLuauFile(const Uri& uri)
 {
     auto path = uri.fsPath();
     return endsWith(path, ".lua") || endsWith(path, ".luau");
+}
+
+std::vector<lsp::FileRename> expandFolderRenames(const std::vector<lsp::FileRename>& renames)
+{
+    std::vector<lsp::FileRename> expanded;
+    std::unordered_set<Uri, UriHash> seen;
+
+    for (const auto& rename : renames)
+    {
+        if (isLuauFile(rename.oldUri))
+        {
+            if (seen.insert(rename.oldUri).second)
+                expanded.push_back(rename);
+            continue;
+        }
+
+        if (!rename.oldUri.isDirectory())
+            continue;
+
+        // It's a folder - find all Luau files within it
+        auto oldFolderPath = rename.oldUri.fsPath();
+        auto newFolderPath = rename.newUri.fsPath();
+
+        // Ensure paths end with separator for proper prefix replacement
+        if (!oldFolderPath.empty() && oldFolderPath.back() != '/')
+            oldFolderPath += '/';
+        if (!newFolderPath.empty() && newFolderPath.back() != '/')
+            newFolderPath += '/';
+
+        Luau::FileUtils::traverseDirectoryRecursive(rename.oldUri.fsPath(),
+            [&](const std::string& filePath)
+            {
+                auto fileUri = Uri::file(filePath);
+                if (!isLuauFile(fileUri))
+                    return;
+
+                if (!seen.insert(fileUri).second)
+                    return; // Already processed (deduplication)
+
+                // Compute new path by replacing old folder prefix with new folder prefix
+                auto relativePath = filePath.substr(oldFolderPath.length() - 1); // Keep the leading /
+                auto newFilePath = newFolderPath.substr(0, newFolderPath.length() - 1) + relativePath;
+
+                expanded.push_back(lsp::FileRename{fileUri, Uri::file(newFilePath)});
+            });
+    }
+
+    return expanded;
 }
 } // namespace
 
@@ -21,11 +72,11 @@ lsp::WorkspaceEdit WorkspaceFolder::onWillRenameFiles(const std::vector<lsp::Fil
     if (config.updateRequiresOnFileMove.enabled == UpdateRequiresOnFileMoveConfig::Never)
         return result;
 
-    for (const auto& rename : renames)
-    {
-        if (!isLuauFile(rename.oldUri))
-            continue;
+    // Expand folder renames into individual file renames
+    auto expandedRenames = expandFolderRenames(renames);
 
+    for (const auto& rename : expandedRenames)
+    {
         auto oldModuleName = fileResolver.getModuleName(rename.oldUri);
         auto sourceNode = frontend.sourceNodes.find(oldModuleName);
         if (sourceNode == frontend.sourceNodes.end())
