@@ -32,7 +32,7 @@ return {}
 
     // Simulate renaming ModuleA to RenamedModule
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(workspace.rootUri.fsPath() + "/RenamedModule.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -65,7 +65,7 @@ return {}
 
     // Simulate moving ModuleA to a subdirectory
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(workspace.rootUri.fsPath() + "/subdir/ModuleA.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("subdir/ModuleA.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -98,7 +98,7 @@ return {}
     workspace.frontend.check(workspace.fileResolver.getModuleName(moduleB));
 
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(workspace.rootUri.fsPath() + "/RenamedModule.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -135,7 +135,7 @@ return {}
     workspace.frontend.check(workspace.fileResolver.getModuleName(moduleC));
 
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(workspace.rootUri.fsPath() + "/RenamedModule.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -171,7 +171,7 @@ return {}
 
     // Rename ModuleA, should not affect ModuleB which requires ModuleX
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(workspace.rootUri.fsPath() + "/RenamedModule.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -225,9 +225,8 @@ TEST_CASE_FIXTURE(Fixture, "updates_instance_require_on_rename")
     workspace.frontend.check("game/ReplicatedStorage/ModuleB");
 
     // Simulate renaming ModuleA to RenamedModule
-    auto newUri = Uri::file(workspace.rootUri.fsPath() + "/RenamedModule.lua");
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, newUri});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -267,9 +266,8 @@ TEST_CASE_FIXTURE(Fixture, "updates_instance_require_when_moved_to_child_folder"
     workspace.frontend.check("game/ReplicatedStorage/ModuleB");
 
     // Simulate moving ModuleA to a subfolder
-    auto newUri = Uri::file(workspace.rootUri.fsPath() + "/Subfolder/ModuleA.lua");
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, newUri});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("Subfolder/ModuleA.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -292,8 +290,8 @@ TEST_CASE_FIXTURE(Fixture, "updates_requires_when_folder_renamed")
     tempDir.write_child("lib/ModuleB.lua", "return {}");
 
     // Register the files as documents
-    auto moduleA = Uri::file(tempDir.path() + "/lib/ModuleA.lua");
-    auto moduleB = Uri::file(tempDir.path() + "/lib/ModuleB.lua");
+    auto moduleA = workspace.rootUri.resolvePath("lib/ModuleA.lua");
+    auto moduleB = workspace.rootUri.resolvePath("lib/ModuleB.lua");
     workspace.openTextDocument(moduleA, {{moduleA, "luau", 0, "return {}"}});
     workspace.openTextDocument(moduleB, {{moduleB, "luau", 0, "return {}"}});
 
@@ -309,9 +307,7 @@ return {}
 
     // Simulate renaming the "lib" folder to "utils"
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{
-        Uri::file(workspace.rootUri.fsPath() + "/lib"),
-        Uri::file(workspace.rootUri.fsPath() + "/utils")});
+    renames.push_back(lsp::FileRename{workspace.rootUri.resolvePath("lib"), workspace.rootUri.resolvePath("utils")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
@@ -339,13 +335,13 @@ TEST_CASE_FIXTURE(Fixture, "updates_requires_in_closed_dependent_files")
 
     // Create ModuleA on disk - this is the file being renamed
     tempDir.write_child("ModuleA.lua", "return {}");
-    auto moduleA = Uri::file(tempDir.path() + "/ModuleA.lua");
+    auto moduleA = workspace.rootUri.resolvePath("ModuleA.lua");
     workspace.openTextDocument(moduleA, {{moduleA, "luau", 0, "return {}"}});
 
     // Create ModuleB on disk but do NOT open it as a managed document
     // This simulates a closed file that depends on ModuleA
     tempDir.write_child("ModuleB.lua", "local A = require(\"./ModuleA\")\nreturn {}");
-    auto moduleB = Uri::file(tempDir.path() + "/ModuleB.lua");
+    auto moduleB = workspace.rootUri.resolvePath("ModuleB.lua");
     // Note: We intentionally do NOT call workspace.openTextDocument for ModuleB
 
     // Type-check ModuleB to build the dependency graph
@@ -355,7 +351,7 @@ TEST_CASE_FIXTURE(Fixture, "updates_requires_in_closed_dependent_files")
 
     // Simulate renaming ModuleA to RenamedModule
     std::vector<lsp::FileRename> renames;
-    renames.push_back(lsp::FileRename{moduleA, Uri::file(tempDir.path() + "/RenamedModule.lua")});
+    renames.push_back(lsp::FileRename{moduleA, workspace.rootUri.resolvePath("RenamedModule.lua")});
 
     auto edit = workspace.onWillRenameFiles(renames);
 
