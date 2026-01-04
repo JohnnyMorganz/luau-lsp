@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "LSP/IostreamHelpers.hpp"
 #include "Platform/RobloxPlatform.hpp"
 
 TEST_SUITE_BEGIN("FileRename");
@@ -40,7 +39,7 @@ return {}
     REQUIRE_EQ(edit.changes.size(), 1);
     REQUIRE(edit.changes.count(moduleB));
     REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
-    CHECK(edit.changes.at(moduleB)[0].newText.find("RenamedModule") != std::string::npos);
+    CHECK_EQ(edit.changes.at(moduleB)[0].newText, R"("./RenamedModule")");
 }
 
 TEST_CASE_FIXTURE(Fixture, "updates_require_when_file_moved_to_subdirectory")
@@ -73,7 +72,7 @@ return {}
     REQUIRE_EQ(edit.changes.size(), 1);
     REQUIRE(edit.changes.count(moduleB));
     REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
-    CHECK(edit.changes.at(moduleB)[0].newText.find("subdir") != std::string::npos);
+    CHECK_EQ(edit.changes.at(moduleB)[0].newText, R"("./subdir/ModuleA")");
 }
 
 TEST_CASE_FIXTURE(Fixture, "updates_multiple_requires_in_same_file")
@@ -235,8 +234,7 @@ TEST_CASE_FIXTURE(Fixture, "updates_instance_require_on_rename")
     REQUIRE_EQ(edit.changes.size(), 1);
     REQUIRE(edit.changes.count(moduleB));
     REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
-    // Should generate something like "script.Parent.RenamedModule"
-    CHECK(edit.changes.at(moduleB)[0].newText.find("RenamedModule") != std::string::npos);
+    CHECK_EQ(edit.changes.at(moduleB)[0].newText, "script.Parent.RenamedModule");
 }
 
 TEST_CASE_FIXTURE(Fixture, "updates_instance_require_when_moved_to_child_folder")
@@ -278,8 +276,7 @@ TEST_CASE_FIXTURE(Fixture, "updates_instance_require_when_moved_to_child_folder"
     REQUIRE_EQ(edit.changes.size(), 1);
     REQUIRE(edit.changes.count(moduleB));
     REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
-    // Should generate something like "script.Parent.Subfolder.ModuleA"
-    CHECK(edit.changes.at(moduleB)[0].newText.find("Subfolder") != std::string::npos);
+    CHECK_EQ(edit.changes.at(moduleB)[0].newText, "ReplicatedStorage.Subfolder.ModuleA");
 }
 
 TEST_CASE_FIXTURE(Fixture, "updates_requires_when_folder_renamed")
@@ -328,8 +325,8 @@ return {}
         newTexts.push_back(e.newText);
     std::sort(newTexts.begin(), newTexts.end());
 
-    CHECK_EQ(newTexts[0], "\"./utils/ModuleA\"");
-    CHECK_EQ(newTexts[1], "\"./utils/ModuleB\"");
+    CHECK_EQ(newTexts[0], R"("./utils/ModuleA")");
+    CHECK_EQ(newTexts[1], R"("./utils/ModuleB")");
 }
 
 TEST_CASE_FIXTURE(Fixture, "updates_requires_in_closed_dependent_files")
@@ -366,7 +363,7 @@ TEST_CASE_FIXTURE(Fixture, "updates_requires_in_closed_dependent_files")
     REQUIRE_EQ(edit.changes.size(), 1);
     REQUIRE(edit.changes.count(moduleB));
     REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
-    CHECK(edit.changes.at(moduleB)[0].newText.find("RenamedModule") != std::string::npos);
+    CHECK_EQ(edit.changes.at(moduleB)[0].newText, R"("./RenamedModule")");
 }
 
 TEST_SUITE_END();
