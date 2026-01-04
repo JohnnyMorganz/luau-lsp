@@ -8,6 +8,8 @@
 
 namespace
 {
+const std::string ANNOTATION_ID = "UpdateRequiresOnMove";
+
 bool isLuauFile(const Uri& uri)
 {
     auto path = uri.fsPath();
@@ -130,6 +132,7 @@ lsp::WorkspaceEdit WorkspaceFolder::onWillRenameFiles(const std::vector<lsp::Fil
                 lsp::TextEdit edit;
                 edit.range = textDocument->convertLocation(argExpr->location);
                 edit.newText = *newPath;
+                edit.annotationId = ANNOTATION_ID;
 
                 result.changes[dependentUri].push_back(edit);
             }
@@ -159,6 +162,15 @@ lsp::WorkspaceEdit LanguageServer::onWillRenameFiles(const lsp::RenameFilesParam
         {
             combinedEdit.changes[uri].insert(combinedEdit.changes[uri].end(), edits.begin(), edits.end());
         }
+    }
+
+    if (!combinedEdit.changes.empty())
+    {
+        lsp::ChangeAnnotation annotation;
+        annotation.label = "Update requires";
+        annotation.description = "Update requires after files moved/renamed";
+        annotation.needsConfirmation = true;
+        combinedEdit.changeAnnotations = {{ANNOTATION_ID, annotation}};
     }
 
     return combinedEdit;
