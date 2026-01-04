@@ -456,8 +456,7 @@ TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
 
 TEST_CASE_FIXTURE(Fixture, "resolve_yaml_modules")
 {
-    TempDir t("resolve_yaml_modules");
-    auto path = t.write_child("settings.yaml", "value: 1");
+    auto path = tempDir.write_child("settings.yaml", "value: 1");
 
     auto sourcemap = std::string(R"(
     {
@@ -477,8 +476,7 @@ TEST_CASE_FIXTURE(Fixture, "resolve_yaml_modules")
 
 TEST_CASE_FIXTURE(Fixture, "resolve_yml_modules")
 {
-    TempDir t("resolve_yml_modules");
-    auto path = t.write_child("settings.yml", "value: 1");
+    auto path = tempDir.write_child("settings.yml", "value: 1");
 
     auto sourcemap = std::string(R"(
     {

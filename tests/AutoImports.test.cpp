@@ -1160,7 +1160,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
 
 TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_directory")
 {
-    TempDir main("string_require_includes_aliased_files_from_external_directory");
     TempDir library("include_aliases_external_lib");
     auto module = library.write_child("module.luau", R"(
         return {}
@@ -1177,7 +1176,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_
     loadLuaurc(luaurc);
     auto moduleName = workspace.fileResolver.getModuleName(Uri::file(module));
 
-    workspace.rootUri = Uri::file(main.path()); // Index an empty directory
     client->globalConfig.index.enabled = true;
 
     client->globalConfig.completion.imports.enabled = true;
