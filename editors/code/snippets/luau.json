@@ -1,0 +1,30 @@
+{
+	"Import Overture": {
+		"scope": "lua,luau",
+		"prefix": "overture",
+		"body": [
+			"local Overture = require(game:GetService(\"ReplicatedStorage\"):WaitForChild(\"Overture\"))",
+			"",
+			"$0"
+		],
+		"description": "Add a reference to Overture"
+	},
+
+	"Get Instance through Overture": {
+		"scope": "lua,luau",
+		"prefix": "get",
+		"body": [
+			"local $1 = Overture:Get(\"$2\", \"$1\")"
+		],
+		"description": "Get a remote, bindable, or other Instance through Overture"
+	},
+
+	"Require a module through Overture": {
+		"scope": "lua,luau",
+		"prefix": "LoadLibrary",
+		"body": [
+			"local $1 = Overture:LoadLibrary(\"$1\")"
+		],
+		"description": "`require` a ModuleScript through Overture"
+	}
+}

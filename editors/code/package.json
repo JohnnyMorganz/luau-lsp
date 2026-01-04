@@ -91,6 +91,12 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "luau",
+        "path": "./snippets/luau.json"
+      }
+    ],
     "jsonValidation": [
       {
         "fileMatch": ".luaurc",
