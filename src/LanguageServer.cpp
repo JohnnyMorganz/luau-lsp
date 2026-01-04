@@ -145,11 +145,14 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentOnTypeFormattingProvider = lsp::DocumentOnTypeFormattingOptions{"{", std::nullopt};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
-    // File Operations - register interest in willRenameFiles for updating requires
+    // File Operations
     lsp::FileOperationRegistrationOptions renameFilters;
     renameFilters.filters.push_back(lsp::FileOperationFilter{
         "file",
-        lsp::FileOperationPattern{"**/*.{lua,luau}"}});
+        lsp::FileOperationPattern{"**/*.{lua,luau}", lsp::FileOperationPatternKind::File}});
+    renameFilters.filters.push_back(lsp::FileOperationFilter{
+        "file",
+        lsp::FileOperationPattern{"**/*", lsp::FileOperationPatternKind::Folder}});
     lsp::FileOperationOptions fileOperations;
     fileOperations.willRename = renameFilters;
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities, fileOperations};
