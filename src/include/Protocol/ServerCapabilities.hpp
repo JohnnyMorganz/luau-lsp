@@ -6,6 +6,7 @@
 
 #include "Protocol/SemanticTokens.hpp"
 #include "Protocol/CodeAction.hpp"
+#include "Protocol/FileOperations.hpp"
 
 namespace lsp
 {
@@ -89,9 +90,9 @@ NLOHMANN_DEFINE_OPTIONAL(WorkspaceFoldersServerCapabilities, supported, changeNo
 struct WorkspaceCapabilities
 {
     std::optional<WorkspaceFoldersServerCapabilities> workspaceFolders = std::nullopt;
-    // fileOperations
+    std::optional<FileOperationOptions> fileOperations = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceCapabilities, workspaceFolders);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceCapabilities, workspaceFolders, fileOperations);
 
 struct CompletionOptions
 {

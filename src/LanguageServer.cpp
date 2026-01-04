@@ -145,7 +145,14 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentOnTypeFormattingProvider = lsp::DocumentOnTypeFormattingOptions{"{", std::nullopt};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
-    capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
+    // File Operations - register interest in willRenameFiles for updating requires
+    lsp::FileOperationRegistrationOptions renameFilters;
+    renameFilters.filters.push_back(lsp::FileOperationFilter{
+        "file",
+        lsp::FileOperationPattern{"**/*.{lua,luau}"}});
+    lsp::FileOperationOptions fileOperations;
+    fileOperations.willRename = renameFilters;
+    capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities, fileOperations};
     return capabilities;
 }
 
@@ -342,6 +349,12 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
                 result.insert(result.end(), std::make_move_iterator(report->begin()), std::make_move_iterator(report->end()));
         }
         response = result;
+    }
+    else if (method == "workspace/willRenameFiles")
+    {
+        ASSERT_PARAMS(baseParams, "workspace/willRenameFiles")
+        auto params = baseParams->get<lsp::RenameFilesParams>();
+        response = onWillRenameFiles(params);
     }
     else if (method == "luau-lsp/bytecode")
     {

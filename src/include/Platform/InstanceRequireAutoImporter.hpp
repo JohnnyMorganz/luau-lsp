@@ -95,6 +95,12 @@ lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, 
 /// Optimise an absolute require path by removing the "game/" prefix (e.g., "game/ReplicatedStorage/Foo" -> "ReplicatedStorage/Foo")
 std::string optimiseAbsoluteRequire(const std::string& path);
 
+/// Compute the optimal instance require path between two virtual paths (e.g., "script.Parent.Lib.Module" or "ReplicatedStorage.Lib.Module")
+std::string computeInstanceRequirePath(
+    const Luau::ModuleName& fromVirtualPath,
+    const Luau::ModuleName& toVirtualPath,
+    ImportRequireStyle requireStyle);
+
 std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequireAutoImporterContext& ctx);
 void suggestInstanceRequires(const InstanceRequireAutoImporterContext& ctx, std::vector<lsp::CompletionItem>& items);
 } // namespace Luau::LanguageServer::AutoImports
