@@ -332,4 +332,41 @@ return {}
     CHECK_EQ(newTexts[1], "\"./utils/ModuleB\"");
 }
 
+TEST_CASE_FIXTURE(Fixture, "updates_requires_in_closed_dependent_files")
+{
+    // Enable the feature and use standard platform for string requires
+    client->globalConfig.updateRequiresOnFileMove.enabled = UpdateRequiresOnFileMoveConfig::Always;
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.appliedFirstTimeConfiguration = false;
+    workspace.setupWithConfiguration(client->globalConfig);
+
+    // Create ModuleA on disk - this is the file being renamed
+    tempDir.write_child("ModuleA.lua", "return {}");
+    auto moduleA = Uri::file(tempDir.path() + "/ModuleA.lua");
+    workspace.openTextDocument(moduleA, {{moduleA, "luau", 0, "return {}"}});
+
+    // Create ModuleB on disk but do NOT open it as a managed document
+    // This simulates a closed file that depends on ModuleA
+    tempDir.write_child("ModuleB.lua", "local A = require(\"./ModuleA\")\nreturn {}");
+    auto moduleB = Uri::file(tempDir.path() + "/ModuleB.lua");
+    // Note: We intentionally do NOT call workspace.openTextDocument for ModuleB
+
+    // Type-check ModuleB to build the dependency graph
+    // The frontend will read from disk since it's not a managed document
+    auto moduleBName = workspace.fileResolver.getModuleName(moduleB);
+    workspace.frontend.check(moduleBName);
+
+    // Simulate renaming ModuleA to RenamedModule
+    std::vector<lsp::FileRename> renames;
+    renames.push_back(lsp::FileRename{moduleA, Uri::file(tempDir.path() + "/RenamedModule.lua")});
+
+    auto edit = workspace.onWillRenameFiles(renames);
+
+    // The key assertion: edits should be produced for the CLOSED file ModuleB
+    REQUIRE_EQ(edit.changes.size(), 1);
+    REQUIRE(edit.changes.count(moduleB));
+    REQUIRE_EQ(edit.changes.at(moduleB).size(), 1);
+    CHECK(edit.changes.at(moduleB)[0].newText.find("RenamedModule") != std::string::npos);
+}
+
 TEST_SUITE_END();

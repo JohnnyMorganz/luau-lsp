@@ -107,7 +107,7 @@ lsp::WorkspaceEdit WorkspaceFolder::onWillRenameFiles(const std::vector<lsp::Fil
             auto& require = frontend.requireTrace[dependentModule];
 
             auto dependentUri = fileResolver.getUri(dependentModule);
-            auto textDocument = fileResolver.getTextDocumentFromModuleName(dependentModule);
+            auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(dependentModule);
             if (!textDocument)
                 continue;
 
