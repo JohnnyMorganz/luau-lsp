@@ -119,7 +119,9 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Code Action Provider
-    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
+    capabilities.codeActionProvider = {
+        std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports},
+        /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
     // Folding Range Provider
@@ -147,13 +149,10 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
     // File Operations
     lsp::FileOperationRegistrationOptions renameFilters;
-    renameFilters.filters.push_back(lsp::FileOperationFilter{
-        "file",
-        lsp::FileOperationPattern{"**/*.{lua,luau}", lsp::FileOperationPatternKind::File}});
-    renameFilters.filters.push_back(lsp::FileOperationFilter{
-        "file",
-        lsp::FileOperationPattern{"**/*", lsp::FileOperationPatternKind::Folder}});
-    lsp::FileOperationOptions fileOperations;
+    renameFilters.filters.push_back(
+        lsp::FileOperationFilter{"file", lsp::FileOperationPattern{"**/*.{lua,luau}", lsp::FileOperationPatternKind::File}});
+    renameFilters.filters.push_back(lsp::FileOperationFilter{"file", lsp::FileOperationPattern{"**/*", lsp::FileOperationPatternKind::Folder}});
+    lsp::FileOperationsServerCapabilities fileOperations;
     fileOperations.willRename = renameFilters;
     capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities, fileOperations};
     return capabilities;
