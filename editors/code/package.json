@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.59.0",
+  "version": "1.60.0",
   "engines": {
     "vscode": "^1.67.0"
   },
@@ -28,7 +28,8 @@
     "roblox"
   ],
   "activationEvents": [
-    "onLanguage:luau"
+    "onLanguage:luau",
+    "workspaceContains:**/*.luau"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -531,6 +532,18 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.showAnonymousAutofilledFunction": {
+          "markdownDescription": "Whether to show the auto-generated anonymous function completion item when autocompleting callback arguments",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.showDeprecatedItems": {
+          "markdownDescription": "Whether to show deprecated items in autocomplete suggestions",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.suggestImports": {
           "markdownDescription": "Suggest automatic imports in completion items",
           "type": "boolean",
@@ -805,7 +818,7 @@
     "bytes": "^3.1.2",
     "d3": "^7.9.0",
     "d3-graphviz": "^5.6.0",
-    "express": "^4.21.2",
+    "express": "^4.22.1",
     "undici": "^6.21.2",
     "vscode-languageclient": "^8.1.0-next.6"
   }

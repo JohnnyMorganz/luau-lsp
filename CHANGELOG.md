@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.60.0] - 2026-01-04
+
+### Added
+
+- `luau-lsp analyze` will now respect `luau-lsp.fflags.enableNewSolver` if enabled in the provided `--settings` file ([#1321](https://github.com/JohnnyMorganz/luau-lsp/issues/1321))
+- Added `luau-lsp.completion.showAnonymousAutofilledFunction` setting (enabled by default) to control whether the "function (anonymous autofilled)" completion item is shown when autocompleting callback arguments
+- Added `luau-lsp.completion.showDeprecatedItems` setting (enabled by default) to control whether deprecated items are shown in autocomplete suggestions
+- Added language server support for the upcoming Studio Script Sync release, via the Studio Plugin. ([#1295](https://github.com/JohnnyMorganz/luau-lsp/pull/1295))
+  - When the Studio Plugin is enabled alongside Studio Script Sync, it will also populate file path information for synced instances, enabling require functionality.
+  - The synced tree with file path information will be written to the `sourcemap.json` file, giving access for external tools.
+  - External editors will need to implement the `GET /get-file-paths` endpoint for the local HTTP server to support Studio Script Sync
+
+### Changed
+
+- VSCode: the extension will now automatically activate when your opened folder contains any `.luau` files, not just when you explicitly open a Luau file. This allows the Studio Plugin to start up and connect quicker ([#1278](https://github.com/JohnnyMorganz/luau-lsp/pull/1278))
+- Entries marked as deprecated will now be sorted to the bottom of the autocomplete items list ([#1318](https://github.com/JohnnyMorganz/luau-lsp/issues/1318))
+
+### Fixed
+
+- VSCode: fixed cursor being positioned outside of the string after performing automatic quote conversion to backticks ([#1317](https://github.com/JohnnyMorganz/luau-lsp/issues/1317))
+- VSCode: fixed builtin documentation files (api-docs.json) not being downloaded, leading to an error that documentation files do not exist
+
 ## [1.59.0] - 2025-12-28
 
 ### Added

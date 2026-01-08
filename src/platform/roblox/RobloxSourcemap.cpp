@@ -9,23 +9,62 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
-static void mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginNode* pluginInstance, Luau::TypedAllocator<SourceNode>& allocator)
+static bool mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginNode* pluginInstance, Luau::TypedAllocator<SourceNode>& allocator)
 {
-    // We currently perform purely additive changes where we add in new children
+    bool didUpdateSourcemap = false;
+
+    // Update paths if managed or syncing
+    if ((sourceNode->pluginManaged || !pluginInstance->filePaths.empty()) && sourceNode->filePaths != pluginInstance->filePaths)
+    {
+        didUpdateSourcemap = true;
+        sourceNode->filePaths = pluginInstance->filePaths;
+    }
+    // Update class if managed (eg: renaming foo.client.lua to foo.server.luau needs the foo node to change class)
+    if (sourceNode->pluginManaged && sourceNode->className != pluginInstance->className)
+    {
+        didUpdateSourcemap = true;
+        sourceNode->className = pluginInstance->className;
+    }
+
+    std::unordered_set<std::string> pluginChildNames;
     for (const auto& dmChild : pluginInstance->children)
     {
+        pluginChildNames.insert(dmChild->name);
+
         if (auto existingChildNode = sourceNode->findChild(dmChild->name))
         {
-            mutateSourceNodeWithPluginInfo(*existingChildNode, dmChild, allocator);
+            // Hydrate the existing child with the plugin info
+            didUpdateSourcemap |= mutateSourceNodeWithPluginInfo(*existingChildNode, dmChild, allocator);
         }
         else
         {
+            // Create a new child for this plugin node
             auto childNode = allocator.allocate(SourceNode(dmChild->name, dmChild->className, {}, {}));
+            childNode->pluginManaged = true;
             mutateSourceNodeWithPluginInfo(childNode, dmChild, allocator);
 
             sourceNode->children.push_back(childNode);
+            didUpdateSourcemap = true;
         }
     }
+
+    // Prune plugin-managed children that no longer exist in the plugin info
+    for (auto it = sourceNode->children.begin(); it != sourceNode->children.end();)
+    {
+        auto* child = *it;
+
+        if (child->pluginManaged && pluginChildNames.find(child->name) == pluginChildNames.end())
+        {
+            it = sourceNode->children.erase(it);
+            didUpdateSourcemap = true;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    return didUpdateSourcemap;
 }
 
 static std::optional<Luau::TypeId> getTypeIdForClass(const Luau::ScopePtr& globalScope, std::optional<std::string> className)
@@ -408,12 +447,21 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMapFromContents", "LSP");
     workspaceFolder->client->sendTrace("Sourcemap file read successfully");
 
-    clearSourcemapTypes();
     updateSourceNodeMap(sourceMapContents);
 
     workspaceFolder->client->sendTrace("Loaded sourcemap nodes");
 
-    // Recreate instance types
+    updateSourcemapTypes();
+
+    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
+
+    return true;
+}
+
+void RobloxPlatform::updateSourcemapTypes()
+{
+    clearSourcemapTypes();
+
     auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
     bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 
@@ -428,15 +476,11 @@ bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapCon
         handleSourcemapUpdate(workspaceFolder->frontend, workspaceFolder->frontend.globalsForAutocomplete, expressiveTypes);
     }
 
-    workspaceFolder->client->sendTrace("Updating sourcemap contents COMPLETED");
-
     if (expressiveTypes)
     {
         workspaceFolder->client->sendTrace("Refreshing diagnostics from sourcemap update as strictDatamodelTypes is enabled");
         workspaceFolder->recomputeDiagnostics(config);
     }
-
-    return true;
 }
 
 bool RobloxPlatform::updateSourceMap()
@@ -583,6 +627,9 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
         sourceNodeAllocator.clear();
         return;
     }
+
+    // Mutate with plugin info
+    hydrateSourcemapWithPluginInfo();
 
     // Write paths
     std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";

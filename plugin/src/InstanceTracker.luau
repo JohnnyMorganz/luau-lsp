@@ -153,17 +153,20 @@ end
 --- @param self -- The InstanceTracker instance.
 --- @param instance -- The Instance to encode.
 --- @param includeList -- The list of instances to include.
+--- @param instanceFilePaths -- A mapping of instances to their Luau file paths.
 --- @return types.EncodedInstance -- The encoded representation.
 function InstanceTracker.encode(
 	self: InstanceTracker,
 	instance: Instance,
-	includeList: { Instance }
+	includeList: { Instance },
+	instanceFilePaths: { [Instance]: { string } }
 ): types.EncodedInstance
 	Log.debug(`Encoding {instance:GetFullName()}`)
 
 	local encoded: types.EncodedInstance = {
 		Name = instance.Name,
 		ClassName = instance.ClassName,
+		FilePaths = instanceFilePaths[instance] or {},
 		Children = {},
 	}
 
@@ -172,7 +175,7 @@ function InstanceTracker.encode(
 			continue
 		end
 
-		table.insert(encoded.Children, self:encode(child, includeList))
+		table.insert(encoded.Children, self:encode(child, includeList, instanceFilePaths))
 	end
 
 	return encoded
@@ -180,9 +183,13 @@ end
 
 --- Utility function to encode the entire DataModel into a serializable table.
 --- @param self -- The InstanceTracker instance.
+--- @param instanceFilePaths -- A mapping of instances to their Luau file paths.
 --- @return types.EncodedInstance -- The encoded representation of the DataModel.
-function InstanceTracker.encodeAll(self: InstanceTracker): types.EncodedInstance
-	return self:encode(game, self._getIncludeList())
+function InstanceTracker.encodeAll(
+	self: InstanceTracker,
+	instanceFilePaths: { [Instance]: { string } }
+): types.EncodedInstance
+	return self:encode(game, self._getIncludeList(), instanceFilePaths)
 end
 
 --- Cleans up the InstanceTracker.

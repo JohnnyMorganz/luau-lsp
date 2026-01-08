@@ -5029,10 +5029,26 @@
                 },
                 {
                     "MemberType": "Property",
+                    "Name": "SortAggregation",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CatalogSortAggregation"
+                    }
+                },
+                {
+                    "MemberType": "Property",
                     "Name": "CategoryFilter",
                     "ValueType": {
                         "Category": "Enum",
                         "Name": "CatalogCategoryFilter"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "SalesTypeFilter",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "SalesTypeFilter"
                     }
                 },
                 {
@@ -5049,6 +5065,42 @@
                     "ValueType": {
                         "Name": "Array",
                         "Generic": "Enum.AvatarAssetType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeOffSale",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorName",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CreatorTypeFilter"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorId",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Limit",
+                    "ValueType": {
+                        "Name": "number"
                     }
                 }
             ],

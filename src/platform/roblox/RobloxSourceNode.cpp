@@ -1,11 +1,14 @@
+#include "LSP/JsonRpc.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include <queue>
 
-SourceNode::SourceNode(std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children)
+SourceNode::SourceNode(
+    std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children, bool pluginManaged)
     : name(std::move(name))
     , className(std::move(className))
     , filePaths(std::move(filePaths))
     , children(std::move(children))
+    , pluginManaged(pluginManaged)
 {
 }
 
@@ -89,6 +92,15 @@ std::optional<const SourceNode*> SourceNode::findDescendant(const std::string& c
     return std::nullopt;
 }
 
+bool SourceNode::containsFilePaths() const
+{
+    return !filePaths.empty() || std::any_of(children.begin(), children.end(),
+                                     [](const auto* child)
+                                     {
+                                         return child->containsFilePaths();
+                                     });
+}
+
 std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& ancestorName) const
 {
     auto current = parent;
@@ -117,5 +129,47 @@ SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>
             children.emplace_back(SourceNode::fromJson(child, allocator));
     }
 
-    return allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children)));
+    bool pluginManaged = j.contains("pluginManaged") && j.at("pluginManaged").get<bool>();
+
+    return allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children), pluginManaged));
+}
+
+// Only includes nodes with filepaths to avoid writing every Instance in the DataModel to `sourcemap.json`
+ordered_json SourceNode::toJson() const
+{
+    ordered_json node;
+    node["name"] = name;
+    node["className"] = className;
+    if (pluginManaged)
+    {
+        // When a plugin-managed node is no longer in the plugin info, it must be pruned.
+        // However, when the sourcemap is re-read (ex: file change, reopened editor, LSP restart)
+        // that would make all nodes NOT plugin-managed, so nothing could ever be removed after that.
+        // Therefore, we need to persist pluginManaged in the json.
+        node["pluginManaged"] = pluginManaged;
+    }
+
+    if (!filePaths.empty())
+    {
+        node["filePaths"] = filePaths;
+    }
+
+    if (!children.empty())
+    {
+        ordered_json children_array = ordered_json::array();
+        for (const auto* child : children)
+        {
+            if (!child->containsFilePaths())
+            {
+                continue;
+            }
+            children_array.emplace_back(child->toJson());
+        }
+        if (!children_array.empty())
+        {
+            node["children"] = children_array;
+        }
+    }
+
+    return node;
 }
