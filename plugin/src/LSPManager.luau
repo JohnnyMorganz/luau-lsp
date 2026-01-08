@@ -1,6 +1,6 @@
 --!strict
 local HttpService = game:GetService("HttpService")
-local supportsFileSync, InstanceFileSyncService = pcall(game.GetService, game, "InstanceFileSyncService")
+local InstanceFileSyncService = game:GetService("InstanceFileSyncService")
 
 --- Manages the connection to the Luau Language Server.
 --- Handles connecting, disconnecting, and sending DataModel updates.
@@ -85,23 +85,21 @@ function LSPManager.init(self: LSPManager): ()
 		self:deferredSendFullDMInfo()
 	end)
 
-	if supportsFileSync and InstanceFileSyncService then
-		-- TODO: When the service type exists, remove the any cast
-		self._statusChangedConnection = (InstanceFileSyncService :: any).StatusChanged:Connect(
-			function(instance: Instance): ()
-				if not self._instanceTracker:shouldInclude(instance) then
-					return
-				end
+	self._statusChangedConnection = InstanceFileSyncService.StatusChanged:Connect(function(instance: Instance): ()
+		if not self._instanceTracker:shouldInclude(instance) then
+			return
+		end
 
-				if self._connected then
-					self:deferredSendFullDMInfo()
-				elseif #(InstanceFileSyncService :: any):GetAllInstances() > 0 then
-					Log.debug("Syncing instances, queueing auto connect")
-					self:autoConnect()
-				end
+		if self._connected then
+			self:deferredSendFullDMInfo()
+		else
+			local success, instances = pcall(InstanceFileSyncService.GetAllInstances, InstanceFileSyncService)
+			if success and #instances > 0 then
+				Log.debug("Syncing instances, queueing auto connect")
+				self:autoConnect()
 			end
-		)
-	end
+		end
+	end)
 end
 
 --- Returns whether the plugin is currently connected to the language server.
@@ -207,11 +205,6 @@ end
 --- @param self -- The LSPManager instance.
 --- @return { [Instance]: { string } }? -- A mapping of instances to their Luau file paths, or nil if the server failed to respond.
 function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
-	if not supportsFileSync then
-		Log.debug("InstanceFileSyncService not supported yet")
-		return {}
-	end
-
 	assert(self._address, "LSPManager must be initialized before use")
 	Log.debug("Getting file paths")
 
@@ -250,9 +243,7 @@ function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
 	local instanceFilePaths = {}
 
 	for _, filePath in filePaths do
-		-- TODO: When the service type exists, remove the any cast
-		local getSuccess, instance =
-			pcall((InstanceFileSyncService :: any).GetSyncedInstance, InstanceFileSyncService, filePath)
+		local getSuccess, instance = pcall(InstanceFileSyncService.GetSyncedInstance, InstanceFileSyncService, filePath)
 		if getSuccess and instance then
 			if instanceFilePaths[instance] then
 				table.insert(instanceFilePaths[instance], filePath)

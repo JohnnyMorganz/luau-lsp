@@ -15,7 +15,7 @@ if game:GetService("RunService"):IsRunning() then
 	return
 end
 
-local supportsFileSync, InstanceFileSyncService = pcall(game.GetService, game, "InstanceFileSyncService")
+local InstanceFileSyncService = game:GetService("InstanceFileSyncService")
 
 local Assets = require(script.Assets)
 local InstanceTracker = require(script.InstanceTracker)
@@ -67,10 +67,15 @@ settings:init()
 lspManager:init()
 
 -- Auto-connect if set or if actively syncing.
-if
-	settings:get("startAutomatically")
-	or (supportsFileSync and InstanceFileSyncService and #(InstanceFileSyncService :: any):GetAllInstances() > 0)
-then
+local shouldAutoConnect = settings:get("startAutomatically")
+if not shouldAutoConnect then
+	local success, instances = pcall(InstanceFileSyncService.GetAllInstances, InstanceFileSyncService)
+	if success and #instances > 0 then
+		shouldAutoConnect = true
+	end
+end
+
+if shouldAutoConnect then
 	Log.debug("Starting automatically")
 	lspManager:autoConnect()
 end
