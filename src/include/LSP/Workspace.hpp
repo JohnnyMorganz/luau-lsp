@@ -6,6 +6,7 @@
 #include "Luau/Autocomplete.h"
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
+#include "Protocol/FileOperations.hpp"
 #include "Protocol/SignatureHelp.hpp"
 #include "Protocol/SemanticTokens.hpp"
 #include "Protocol/Extensions.hpp"
@@ -84,6 +85,7 @@ public:
     void closeTextDocument(const lsp::DocumentUri& uri);
 
     void onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>& changes);
+    lsp::WorkspaceEdit onWillRenameFiles(const std::vector<lsp::FileRename>& renames);
 
     /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
     bool isIgnoredFile(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;

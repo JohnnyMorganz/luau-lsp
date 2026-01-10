@@ -629,5 +629,9 @@ std::optional<Uri> RobloxPlatform::getRealPathFromSourceNode(const SourceNode* s
     if (auto filePath = sourceNode->getScriptFilePath())
         return fileResolver->rootUri.resolvePath(*filePath);
 
+    // TODO: WE ARE NOW ADDING DIRECTORIES ETC. TO THE MAPS, IS THIS A PROBLEM?
+    else if (!sourceNode->filePaths.empty())
+        return fileResolver->rootUri.resolvePath(sourceNode->filePaths[0]);
+
     return std::nullopt;
 }

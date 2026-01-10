@@ -114,10 +114,22 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TextDocumentPositionParams, textDocument, pos
 
 struct TextEdit
 {
+    /**
+	 * The range of the text document to be manipulated. To insert
+	 * text into a document create a range where start === end.
+	 */
     Range range;
+    /**
+	 * The string to be inserted. For delete operations use an
+	 * empty string.
+	 */
     std::string newText;
+    /**
+	 * The actual annotation identifier.
+	 */
+    std::optional<std::string> annotationId;
 };
-NLOHMANN_DEFINE_OPTIONAL(TextEdit, range, newText)
+NLOHMANN_DEFINE_OPTIONAL(TextEdit, range, newText, annotationId)
 
 struct Location
 {
@@ -154,12 +166,50 @@ struct MarkupContent
 };
 NLOHMANN_DEFINE_OPTIONAL(MarkupContent, kind, value)
 
+/**
+ * Additional information that describes document changes.
+ *
+ * @since 3.16.0
+ */
+struct ChangeAnnotation
+{
+    /**
+	 * A human-readable string describing the actual change. The string
+	 * is rendered prominent in the user interface.
+	 */
+    std::string label;
+    /**
+	 * A flag which indicates that user confirmation is needed
+	 * before applying the change.
+	 */
+    std::optional<bool> needsConfirmation;
+    /**
+	 * A human-readable string which is rendered less prominent in
+	 * the user interface.
+	 */
+    std::optional<std::string> description;
+};
+NLOHMANN_DEFINE_OPTIONAL(ChangeAnnotation, label, needsConfirmation, description)
+
 struct WorkspaceEdit
 {
-    // TODO: this is optional and there are other options provided
+    /**
+	 * Holds changes to existing resources.
+	 */
     std::unordered_map<Uri, std::vector<TextEdit>, UriHash> changes{};
+    /**
+	 * A map of change annotations that can be referenced in
+	 * `AnnotatedTextEdit`s or create, rename and delete file / folder
+	 * operations.
+	 *
+	 * Whether clients honor this property depends on the client capability
+	 * `workspace.changeAnnotationSupport`.
+	 *
+	 * @since 3.16.0
+	 */
+    std::optional<std::unordered_map<std::string, ChangeAnnotation>> changeAnnotations;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes)
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes, changeAnnotations)
 
 // Alias a std::optional to PartialResponse
 // If it contains std::nullopt, we shouldn't send a result.
