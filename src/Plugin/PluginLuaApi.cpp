@@ -294,6 +294,14 @@ static int lspUriFile(lua_State* L)
 
 static void pushJsonValue(lua_State* L, const nlohmann::json& value)
 {
+    // Ensure we have enough stack space for this operation
+    // We need at least 3 slots: one for the value, and potentially key + value for objects
+    if (!lua_checkstack(L, 3))
+    {
+        luaL_error(L, "JSON structure too deeply nested (stack overflow)");
+        return;
+    }
+
     if (value.is_null())
     {
         lua_pushnil(L);
