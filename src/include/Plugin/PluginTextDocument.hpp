@@ -12,6 +12,10 @@ class PluginTextDocument : public TextDocument
     SourceMapping mapping;
     std::string transformedContent;
     mutable std::optional<std::vector<size_t>> _transformedLineOffsets;
+    mutable std::optional<std::vector<size_t>> _originalLineOffsets;
+
+    // Helper to get line offsets for original content (cached)
+    const std::vector<size_t>& getOriginalLineOffsets() const;
 
 public:
     PluginTextDocument(

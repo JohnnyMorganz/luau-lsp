@@ -46,6 +46,13 @@ std::string PluginTextDocument::getText(std::optional<lsp::Range> range) const
         // Get the range from transformed content
         auto start = offsetAt(range->start);
         auto end = offsetAt(range->end);
+        
+        // Bounds checking
+        start = std::min(start, transformedContent.size());
+        end = std::min(end, transformedContent.size());
+        if (start > end)
+            std::swap(start, end);
+            
         return transformedContent.substr(start, end - start);
     }
 
@@ -82,7 +89,10 @@ size_t PluginTextDocument::offsetAt(const lsp::Position& position) const
         return transformedContent.size();
 
     auto lineOffset = lineOffsets[luauPos.line];
-    return lineOffset + luauPos.column;
+    size_t offset = lineOffset + luauPos.column;
+    
+    // Clamp to content size to prevent out-of-bounds access
+    return std::min(offset, transformedContent.size());
 }
 
 lsp::Position PluginTextDocument::positionAt(size_t offset) const
@@ -119,11 +129,76 @@ lsp::Position PluginTextDocument::positionAt(size_t offset) const
     return convertPosition(transformedPos);
 }
 
+const std::vector<size_t>& PluginTextDocument::getOriginalLineOffsets() const
+{
+    if (!_originalLineOffsets)
+    {
+        _originalLineOffsets = computeLineOffsets(_content, true);
+    }
+    return *_originalLineOffsets;
+}
+
 Luau::Position PluginTextDocument::convertPosition(const lsp::Position& position) const
 {
-    // First convert LSP position to Luau position in original source
-    // This uses the base class conversion which handles UTF-16 to UTF-8
-    Luau::Position originalPos = TextDocument::convertPosition(position);
+    // Convert LSP position to Luau position in ORIGINAL source
+    // We must use original line offsets (not transformed) because getLineOffsets() is virtual
+    // and returns transformed offsets, which would break TextDocument::convertPosition
+    
+    auto originalLineOffsets = getOriginalLineOffsets();
+    
+    // Bounds check on line
+    if (position.line >= originalLineOffsets.size())
+    {
+        // Clamp to end of original content
+        size_t lastLine = originalLineOffsets.size() - 1;
+        size_t lastLineStart = originalLineOffsets[lastLine];
+        size_t lastLineLen = _content.size() - lastLineStart;
+        Luau::Position originalPos{static_cast<unsigned int>(lastLine), static_cast<unsigned int>(lastLineLen)};
+        
+        if (auto transformedPos = mapping.originalToTransformed(originalPos))
+            return *transformedPos;
+        return originalPos;
+    }
+    
+    // Get line content for UTF-16 to UTF-8 conversion
+    size_t lineStart = originalLineOffsets[position.line];
+    size_t nextLineStart = (position.line + 1 < originalLineOffsets.size()) 
+        ? originalLineOffsets[position.line + 1] 
+        : _content.size();
+    std::string lineContent = _content.substr(lineStart, nextLineStart - lineStart);
+    
+    // Convert UTF-16 character offset to UTF-8 byte offset
+    size_t utf8Column = 0;
+    size_t utf16Units = 0;
+    for (size_t i = 0; i < lineContent.size() && utf16Units < position.character; )
+    {
+        unsigned char c = lineContent[i];
+        size_t charBytes = 1;
+        size_t charUtf16Units = 1;
+        
+        if ((c & 0x80) == 0) {
+            charBytes = 1;
+            charUtf16Units = 1;
+        } else if ((c & 0xE0) == 0xC0) {
+            charBytes = 2;
+            charUtf16Units = 1;
+        } else if ((c & 0xF0) == 0xE0) {
+            charBytes = 3;
+            charUtf16Units = 1;
+        } else if ((c & 0xF8) == 0xF0) {
+            charBytes = 4;
+            charUtf16Units = 2;  // Surrogate pair
+        }
+        
+        if (i + charBytes > lineContent.size())
+            break;
+            
+        utf8Column = i + charBytes;
+        utf16Units += charUtf16Units;
+        i += charBytes;
+    }
+    
+    Luau::Position originalPos{static_cast<unsigned int>(position.line), static_cast<unsigned int>(utf8Column)};
 
     // Then map from original to transformed position
     if (auto transformedPos = mapping.originalToTransformed(originalPos))
@@ -140,9 +215,26 @@ lsp::Position PluginTextDocument::convertPosition(const Luau::Position& position
     if (auto mapped = mapping.transformedToOriginal(position))
         originalPos = *mapped;
 
-    // Then convert original Luau position to LSP position
-    // This uses the original content stored in base class
-    return TextDocument::convertPosition(originalPos);
+    // Convert original Luau position to LSP position using ORIGINAL line offsets
+    auto originalLineOffsets = getOriginalLineOffsets();
+
+    // Bounds check
+    if (originalPos.line >= originalLineOffsets.size())
+    {
+        // Clamp to last valid position
+        size_t lastLine = originalLineOffsets.size() - 1;
+        size_t lastLineStart = originalLineOffsets[lastLine];
+        size_t lastLineLen = _content.size() - lastLineStart;
+        return lsp::Position{lastLine, lastLineLen};
+    }
+
+    // Get the line content and compute UTF-16 length
+    size_t lineStart = originalLineOffsets[originalPos.line];
+    size_t columnBytes = std::min(static_cast<size_t>(originalPos.column), _content.size() - lineStart);
+    std::string prefix = _content.substr(lineStart, columnBytes);
+    
+    // Use lspLength to convert UTF-8 bytes to UTF-16 code units
+    return lsp::Position{originalPos.line, lspLength(prefix)};
 }
 
 const std::vector<size_t>& PluginTextDocument::getLineOffsets() const
