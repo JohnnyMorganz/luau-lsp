@@ -2749,6 +2749,7 @@ declare class EnumHttpError_INTERNAL extends Enum
 	ConnectionClosed: EnumHttpError
 	CreatorEnvironmentsNotSupportedByService: EnumHttpError
 	DnsResolve: EnumHttpError
+	InactivityTimeout: EnumHttpError
 	InvalidRedirect: EnumHttpError
 	InvalidUrl: EnumHttpError
 	NetFail: EnumHttpError
@@ -2758,6 +2759,7 @@ declare class EnumHttpError_INTERNAL extends Enum
 	SslConnectFail: EnumHttpError
 	SslVerificationFail: EnumHttpError
 	TimedOut: EnumHttpError
+	TooManyOutstandingRequests: EnumHttpError
 	TooManyRedirects: EnumHttpError
 	Unknown: EnumHttpError
 	function GetEnumItems(self): { EnumHttpError }
@@ -4889,6 +4891,16 @@ declare class EnumScreenOrientation_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumScreenOrientation?
 	function FromValue(self, Value: number): EnumScreenOrientation?
 end
+declare class EnumScreenshotCaptureResult extends EnumItem end
+declare class EnumScreenshotCaptureResult_INTERNAL extends Enum
+	NoDeviceSupport: EnumScreenshotCaptureResult
+	NoSpaceOnDevice: EnumScreenshotCaptureResult
+	OtherError: EnumScreenshotCaptureResult
+	Success: EnumScreenshotCaptureResult
+	function GetEnumItems(self): { EnumScreenshotCaptureResult }
+	function FromName(self, Name: string): EnumScreenshotCaptureResult?
+	function FromValue(self, Value: number): EnumScreenshotCaptureResult?
+end
 declare class EnumScrollBarInset extends EnumItem end
 declare class EnumScrollBarInset_INTERNAL extends Enum
 	Always: EnumScrollBarInset
@@ -6933,6 +6945,7 @@ type ENUM_LIST = {
 	ScopeCheckResult: EnumScopeCheckResult_INTERNAL,
 	ScreenInsets: EnumScreenInsets_INTERNAL,
 	ScreenOrientation: EnumScreenOrientation_INTERNAL,
+	ScreenshotCaptureResult: EnumScreenshotCaptureResult_INTERNAL,
 	ScrollBarInset: EnumScrollBarInset_INTERNAL,
 	ScrollingDirection: EnumScrollingDirection_INTERNAL,
 	SecurityCapability: EnumSecurityCapability_INTERNAL,
@@ -7627,8 +7640,7 @@ type UnbanConfigType = {
 }
 
 type CaptureParams = {
-    UICaptureMode: EnumUICaptureMode,
-    Metadata: string
+    UICaptureMode: EnumUICaptureMode
 }
 
 type Creator = {
@@ -8830,6 +8842,7 @@ declare class AvatarEditorService extends Instance
 	function GetAvatarRulesAsync(self): { [string]: any }
 	function GetBatchItemDetailsAsync(self, itemIds: { any }, itemType: EnumAvatarItemType): { any }
 	function GetFavoriteAsync(self, itemId: number, itemType: EnumAvatarItemType): boolean
+	function GetHeadShapesAsync(self): { any }
 	function GetInventoryAsync(self, assetTypes: { any }): InventoryPages
 	function GetItemDetailsAsync(self, itemId: number, itemType: EnumAvatarItemType): { [string]: any }
 	function GetOutfitDetailsAsync(self, outfitId: number): { [string]: any }
@@ -9185,6 +9198,7 @@ declare class CaptureService extends Instance
 	function StartVideoCaptureAsync(self, onCaptureReady: (capture: VideoCapture) -> (), params: CaptureParams): EnumVideoCaptureStartedResult
 	function StopVideoCapture(self): nil
 	function TakeCapture(self, onCaptureReady: (capture: Capture) -> (), params: CaptureParams): ()
+	function TakeScreenshotCaptureAsync(self, onCaptureReady: ((...any) -> ...any), captureParams: { [string]: any }?): nil
 	function UploadCaptureAsync(self, capture: Capture): any
 end
 
@@ -11956,7 +11970,7 @@ end
 
 declare class NetworkClient extends NetworkPeer
 	ConnectionAccepted: RBXScriptSignal<string, Instance>
-	ConnectionFailed: RBXScriptSignal<string, number, string>
+	ConnectionFailed: RBXScriptSignal<string, number>
 end
 
 declare class NetworkServer extends NetworkPeer
@@ -14230,9 +14244,7 @@ declare class StyleLink extends Instance
 end
 
 declare class StyleQuery extends Instance
-	AspectRatioRange: NumberRange
 	IsActive: boolean
-	MinSize: Vector2
 	function GetCondition(self, name: string): any
 	function GetConditions(self): { [string]: any }
 	function SetCondition(self, name: string, value: any): nil
