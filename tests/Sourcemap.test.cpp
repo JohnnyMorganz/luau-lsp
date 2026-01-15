@@ -1552,4 +1552,72 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_relative_
     CHECK(foundLogMessage);
 }
 
+TEST_CASE_FIXTURE(Fixture, "plugin_update_clears_cached_sourcemap_types_on_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [
+                        {
+                            "name": "Shared",
+                            "className": "Folder",
+                            "children": [{ "name": "Remotes", "className": "Part" }]
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    auto originalRootNode = platform->rootSourceNode;
+
+    auto document = newDocument("foo.luau", R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Remotes = require(ReplicatedStorage.Shared.Remotes)
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = {document};
+    params.position = lsp::Position{2, 59};
+    auto hover = workspace.hover(params, nullptr);
+
+    REQUIRE(hover);
+    CHECK_EQ(hover->contents.value, codeBlock("luau", "Part"));
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ReplicatedStorage",
+                    "ClassName": "ReplicatedStorage",
+                    "FilePaths": [],
+                    "Children": [
+                        {
+                            "Name": "SharedModule",
+                            "ClassName": "Part",
+                            "FilePaths": ["src/ReplicatedStorage/SharedModule.luau"],
+                            "Children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // After a plugin update, we still re-use the old root source node
+    CHECK_EQ(originalRootNode, platform->rootSourceNode);
+
+    auto hover2 = workspace.hover(params, nullptr);
+    REQUIRE(hover2);
+    CHECK_EQ(hover2->contents.value, codeBlock("luau", "Part"));
+}
+
 TEST_SUITE_END();

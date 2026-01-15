@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.704
 
+### Fixed
+
+- Fixed use-after-free in cached DataModel types after a Studio Plugin update with an existing sourcemap, leading to server crashes ([#1331](https://github.com/JohnnyMorganz/luau-lsp/issues/1331))
+
 ## [1.60.0] - 2026-01-04
 
 ### Added
@@ -1832,6 +1836,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
