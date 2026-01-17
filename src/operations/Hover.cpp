@@ -1,6 +1,7 @@
 #include "LSP/Workspace.hpp"
 
 #include "Luau/AstQuery.h"
+#include "Luau/Module.h"
 #include "Luau/ToString.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
@@ -121,6 +122,9 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
     auto sourceModule = frontend.getSourceModule(moduleName);
     auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule)
+        return std::nullopt;
+
+    if (Luau::isWithinComment(*sourceModule, position))
         return std::nullopt;
 
     if (auto hover = platform->handleHover(*textDocument, *sourceModule, position))

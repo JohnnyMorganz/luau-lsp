@@ -658,4 +658,61 @@ TEST_CASE_FIXTURE(Fixture, "hover_respects_cancellation")
     CHECK_THROWS_AS(workspace.hover(lsp::HoverParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_local_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_global_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_anonymous_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local add1 = function(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
 TEST_SUITE_END();

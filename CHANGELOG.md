@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.705
 
+### Fixed
+
+- Hover information is no longer shown when hovering over symbols inside a comment ([#1337](https://github.com/JohnnyMorganz/luau-lsp/issues/1337))
+
 ## [1.60.1] - 2026-01-15
 
 ### Changed
@@ -1842,6 +1846,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
