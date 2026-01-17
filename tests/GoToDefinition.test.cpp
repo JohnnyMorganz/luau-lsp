@@ -725,4 +725,42 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_for_property_on_union_type_with_dif
     CHECK_EQ(result[1].range, lsp::Range{{6, 12}, {6, 16}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_on_original_global_function_definition")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        function global|Function()
+        end
+    )");
+
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range, lsp::Range{{1, 17}, {1, 31}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "go_to_definition_on_original_local_function_definition")
+{
+    auto [source, position] = sourceWithMarker(R"(
+        local function local|Function()
+        end
+    )");
+
+    auto document = newDocument("main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, document);
+    CHECK_EQ(result[0].range, lsp::Range{{1, 23}, {1, 36}});
+}
+
 TEST_SUITE_END();

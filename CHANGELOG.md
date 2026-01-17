@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Go To Definition on the original local function definition now works. This means Ctrl/Cmd+Click on the local function declaration will now open the references panel in VSCode ([#1122](https://github.com/JohnnyMorganz/luau-lsp/issues/1122))
+
 ### Changed
 
 - Sync to upstream Luau 0.705

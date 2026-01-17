@@ -17,6 +17,7 @@
 LUAU_FASTFLAG(LuauSolverV2)
 LUAU_FASTINT(LuauTarjanChildLimit)
 LUAU_FASTINT(LuauTableTypeMaximumStringifierLength)
+LUAU_FASTFLAG(LuauQueryLocalFunctionBinding)
 
 void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, ErrorCallback onError, ErrorCallback onWarning)
 {
@@ -95,4 +96,5 @@ void applyRequiredFlags()
     // NOTE: 40 is the current value on Studio. We check against that so that we don't inadvertently change people's overrides
     if (FInt::LuauTableTypeMaximumStringifierLength == 40)
         FInt::LuauTableTypeMaximumStringifierLength.value = 0;
+    FFlag::LuauQueryLocalFunctionBinding.value = true;
 }
