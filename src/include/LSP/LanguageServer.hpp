@@ -7,6 +7,7 @@
 
 #include "Protocol/Structures.hpp"
 #include "Protocol/LanguageFeatures.hpp"
+#include "Protocol/FileOperations.hpp"
 
 #include "LSP/Client.hpp"
 #include "LSP/Workspace.hpp"
@@ -82,6 +83,8 @@ private:
     void onDidChangeConfiguration(const lsp::DidChangeConfigurationParams& params);
     void onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFoldersParams& params);
     void onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params);
+
+    lsp::WorkspaceEdit onWillRenameFiles(const lsp::RenameFilesParams& params);
 
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);

@@ -1,4 +1,5 @@
 #include "Platform/RobloxPlatform.hpp"
+#include "Platform/InstanceRequireAutoImporter.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
 
 #include "Luau/TimeTrace.h"
@@ -28,6 +29,62 @@ std::optional<Uri> RobloxPlatform::resolveToRealPath(const Luau::ModuleName& nam
     }
 
     return std::nullopt;
+}
+
+std::optional<Luau::ModuleName> RobloxPlatform::inferModuleNameFromUri(const Uri& uri) const
+{
+    // First try direct lookup (if file already exists in sourcemap)
+    if (auto virtualPath = resolveToVirtualPath(uri))
+        return *virtualPath;
+
+    // Infer from parent directory: check if parent is in sourcemap
+    auto parentUri = uri.parent();
+    if (!parentUri)
+        return std::nullopt;
+
+    // Try to find parent's source node
+    if (auto it = realPathsToSourceNodes.find(*parentUri); it != realPathsToSourceNodes.end())
+    {
+        const SourceNode* parentNode = it->second;
+        std::string parentVirtualPath = getVirtualPathFromSourceNode(parentNode);
+
+        // Extract filename without extension for the module name
+        auto filename = uri.filename();
+        filename = removeSuffix(filename, ".luau");
+        filename = removeSuffix(filename, ".lua");
+
+        return parentVirtualPath + "/" + filename;
+    }
+
+    // Cannot infer - file is outside sourcemap
+    return std::nullopt;
+}
+
+std::optional<std::string> RobloxPlatform::computeNewRequirePath(const Luau::ModuleName& dependentModuleName,
+    const Luau::ModuleName& newTargetModuleName, const Luau::AstNode* originalNode, const ClientConfiguration& config) const
+{
+    auto* callExpr = originalNode->as<Luau::AstExprCall>();
+    if (!callExpr || callExpr->args.size == 0)
+        return std::nullopt;
+
+    auto* argExpr = callExpr->args.data[0];
+    bool isStringRequire = argExpr->is<Luau::AstExprConstantString>();
+
+    if (isStringRequire)
+    {
+        return LSPPlatform::computeNewRequirePath(dependentModuleName, newTargetModuleName, originalNode, config);
+    }
+
+    // Instance require - use extracted common function
+    // Need to resolve dependent module name to virtual path
+    auto dependentVirtualPath =
+        isVirtualPath(dependentModuleName) ? dependentModuleName : resolveToVirtualPath(fileResolver->getUri(dependentModuleName)).value_or("");
+
+    if (dependentVirtualPath.empty())
+        return std::nullopt;
+
+    return Luau::LanguageServer::AutoImports::computeInstanceRequirePath(
+        dependentVirtualPath, newTargetModuleName, config.completion.imports.requireStyle);
 }
 
 Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const Uri& path) const
@@ -115,7 +172,8 @@ static std::string mapContext(const std::string& context)
     return context;
 }
 
-std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
+std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(
+    const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)
 {
 
     if (auto parentResult = LSPPlatform::resolveModule(context, node, limits))
