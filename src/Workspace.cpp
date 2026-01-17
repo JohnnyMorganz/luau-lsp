@@ -5,8 +5,11 @@
 #include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
+#include "Plugin/PluginManager.hpp"
+#include "Plugin/PluginDefinitions.hpp"
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/NotNull.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
 
@@ -53,6 +56,9 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
     }
     auto& textDocument = fileResolver.managedFiles.at(uri);
     textDocument.update(params.contentChanges, params.textDocument.version);
+
+    // Invalidate plugin cache for this document - forces re-transformation on next access
+    fileResolver.invalidatePluginDocument(uri);
 
     // Keep a vector of reverse dependencies marked dirty to extend diagnostics for them
     std::vector<Luau::ModuleName> markedDirty{};
@@ -483,6 +489,28 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     auto& tagRegisterGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
     Luau::attachTag(Luau::getGlobalBinding(tagRegisterGlobals, "require"), "Require");
 
+    // Register LSPPlugin environment for plugin type checking
+    client->sendTrace("workspace initialization: registering LSPPlugin environment");
+    frontend.registerBuiltinDefinition(
+        "LSPPlugin",
+        [this](Luau::Frontend& frontend, Luau::GlobalTypes& globals, Luau::ScopePtr scope)
+        {
+            auto result = frontend.loadDefinitionFile(
+                globals, scope, Luau::LanguageServer::Plugin::LSPPLUGIN_DEFINITIONS, "@LSPPlugin", /* captureComments */ true);
+            if (result.success)
+            {
+                TextDocument textDocument(Uri::parse("internal://environments/LSPPlugin"), "luau", 0, Luau::LanguageServer::Plugin::LSPPLUGIN_DEFINITIONS);
+                definitionsSourceModules.emplace("@LSPPlugin", std::make_pair(std::move(textDocument), std::move(result.sourceModule)));
+            }
+            else
+            {
+                client->sendLogMessage(lsp::MessageType::Warning, "Failed to register plugin type definitions");
+            }
+        });
+    frontend.addEnvironment("LSPPlugin");
+    frontend.applyBuiltinDefinitionToEnvironment("LSPPlugin", "LSPPlugin");
+    client->sendTrace("workspace initialization: registering LSPPlugin environment COMPLETED");
+
     if (client->definitionsFiles.empty())
         client->sendLogMessage(lsp::MessageType::Warning, "No definitions file provided by client");
 
@@ -611,6 +639,28 @@ void WorkspaceFolder::setupWithConfiguration(const ClientConfiguration& configur
     client->sendTrace("workspace: apply platform-specific configuration");
 
     platform->setupWithConfiguration(configuration);
+
+    // Configure plugins
+    if (configuration.plugins.enabled && !configuration.plugins.paths.empty())
+    {
+        client->sendTrace("workspace: configuring plugins");
+
+        // Always recreate the plugin manager to ensure clean state
+        fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(client, Luau::NotNull<WorkspaceFolder>{this});
+
+        size_t loadedCount = fileResolver.pluginManager->configure(configuration.plugins.paths, configuration.plugins.timeoutMs);
+        client->sendLogMessage(lsp::MessageType::Info, "Loaded " + std::to_string(loadedCount) + " of " +
+            std::to_string(configuration.plugins.paths.size()) + " plugins");
+
+        // Clear plugin document cache when plugins change
+        fileResolver.clearPluginDocuments();
+    }
+    else if (fileResolver.pluginManager)
+    {
+        // Plugins disabled - clear plugin manager and caches
+        fileResolver.pluginManager.reset();
+        fileResolver.clearPluginDocuments();
+    }
 
     if (configuration.index.enabled)
         indexFiles(configuration);

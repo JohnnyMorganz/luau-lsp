@@ -25,6 +25,8 @@ import { onTypeFormattingMiddleware } from "./onTypeFormattingMiddleware";
 
 import { registerRequireGraph } from "./requireGraph";
 
+import { registerViewInternalSource } from "./internalSource";
+
 import * as roblox from "./roblox";
 import * as utils from "./utils";
 import {
@@ -543,6 +545,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   clientDisposables.push(...registerComputeCompilerRemarks(context, client));
   clientDisposables.push(...registerComputeCodeGen(context, client));
   clientDisposables.push(...registerRequireGraph(context, client));
+  clientDisposables.push(...registerViewInternalSource(context, client));
   clientDisposables.push(
     vscode.commands.registerCommand("luau-lsp.openWalkthrough", () => {
       return vscode.commands.executeCommand(
