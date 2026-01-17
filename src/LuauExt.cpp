@@ -176,6 +176,28 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
     return call.args.data[0];
 }
+
+std::optional<lsp::Location> getTypeLocation(Luau::TypeId ty, WorkspaceFileResolver* fileResolver)
+{
+    ty = Luau::follow(ty);
+
+    auto moduleName = Luau::getDefinitionModuleName(ty);
+    auto location = getLocation(ty);
+
+    if (!moduleName || !location)
+        return std::nullopt;
+
+    auto document = fileResolver->getOrCreateTextDocumentFromModuleName(*moduleName);
+    if (!document)
+        return std::nullopt;
+
+    return lsp::Location{
+        document->uri(),
+        lsp::Range{
+            document->convertPosition(location->begin),
+            document->convertPosition(location->end)}};
+}
+
 } // namespace types
 
 struct FindNodeType : public Luau::AstVisitor

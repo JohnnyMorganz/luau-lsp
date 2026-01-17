@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Go To Definition on the original local function definition now works. This means Ctrl/Cmd+Click on the local function declaration will now open the references panel in VSCode ([#1122](https://github.com/JohnnyMorganz/luau-lsp/issues/1122))
+- Go To Definition and Documentation is now available on named types inside of inlay hints ([#876](https://github.com/JohnnyMorganz/luau-lsp/issues/876), [#877](https://github.com/JohnnyMorganz/luau-lsp/issues/877))
 
 ### Changed
 
