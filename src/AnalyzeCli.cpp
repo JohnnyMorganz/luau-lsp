@@ -360,7 +360,18 @@ int startAnalyze(const argparse::ArgumentParser& program)
                         "definitions files; use `--platform=standard` to silence\n");
     }
 
-    for (const auto& [packageName, definitionsPath] : definitionsPaths)
+    // For backwards compatibility, we need to keep an ordering where a definitions file for '@roblox' is always processed first
+    std::vector<std::pair<std::string, std::string>> definitionsFilesToProcess{};
+    definitionsFilesToProcess.reserve(definitionsPaths.size());
+    if (auto it = definitionsPaths.find("@roblox"); it != definitionsPaths.end())
+        definitionsFilesToProcess.emplace_back(*it);
+    for (const auto& pair : definitionsPaths)
+    {
+        if (pair.first != "@roblox")
+            definitionsFilesToProcess.emplace_back(pair);
+    }
+
+    for (const auto& [packageName, definitionsPath] : definitionsFilesToProcess)
     {
         auto uri = fileResolver.rootUri.resolvePath(definitionsPath);
         if (!uri.exists())
