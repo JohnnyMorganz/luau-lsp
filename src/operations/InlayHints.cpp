@@ -22,9 +22,9 @@ static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(
 
     auto spans = result.typeSpans;
     std::sort(spans.begin(), spans.end(),
-        [](const auto& a, const auto& b)
+        [](const Luau::ToStringSpan& a, const Luau::ToStringSpan& b)
         {
-            return std::get<0>(a) < std::get<0>(b);
+            return a.startPos < b.startPos;
         });
 
     size_t lastEnd = 0;
