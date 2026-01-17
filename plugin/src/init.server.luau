@@ -15,6 +15,8 @@ if game:GetService("RunService"):IsRunning() then
 	return
 end
 
+local InstanceFileSyncService = game:GetService("InstanceFileSyncService")
+
 local Assets = require(script.Assets)
 local InstanceTracker = require(script.InstanceTracker)
 local LSPManager = require(script.LSPManager)
@@ -64,10 +66,18 @@ end)
 settings:init()
 lspManager:init()
 
--- Auto-connect if set.
-if settings:get("startAutomatically") then
+-- Auto-connect if set or if actively syncing.
+local shouldAutoConnect = settings:get("startAutomatically")
+if not shouldAutoConnect then
+	local success, instances = pcall(InstanceFileSyncService.GetAllInstances, InstanceFileSyncService)
+	if success and #instances > 0 then
+		shouldAutoConnect = true
+	end
+end
+
+if shouldAutoConnect then
 	Log.debug("Starting automatically")
-	lspManager:connect()
+	lspManager:autoConnect()
 end
 
 --- Clean up connections when the plugin is unloaded.

@@ -592,6 +592,37 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_class_type
 //         codeBlock("luau", "type DocumentedGlobalVariable = number") + kDocumentationBreaker + "This is a documented global variable\n");
 // }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_all_parts_of_union_point_to_same_location")
+{
+    auto uri = newDocument("foo.luau", R"(
+        type BaseNode<HOS> = {
+	        --[[
+		        Indicates if the node has only a single supporter, this is purely internal
+		        and only used by `object_tree.closest_empty_node`,
+		        as an optimization for trees that have a taper type of "Flat" or "Slope".
+	        ]]
+	        has_one_supporter: HOS,
+        }
+
+        export type Node = BaseNode<true> | BaseNode<false>
+
+        local x: Node = {} :: any
+
+        x.has_one_supporter
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{14, 17}; // 'x.has_one_supporter'
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", FFlag::LuauSolverV2 ? "boolean" : "false | true") + kDocumentationBreaker +
+                                         "Indicates if the node has only a single supporter, this is purely internal\n"
+                                         "and only used by `object_tree.closest_empty_node`,\n"
+                                         "as an optimization for trees that have a taper type of \"Flat\" or \"Slope\".\n");
+}
+
 TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
 {
     auto source = newDocument("types.luau", R"(
@@ -625,6 +656,63 @@ TEST_CASE_FIXTURE(Fixture, "hover_respects_cancellation")
 
     auto document = newDocument("a.luau", "local x = 1");
     CHECK_THROWS_AS(workspace.hover(lsp::HoverParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_local_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_global_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_anonymous_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local add1 = function(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
 }
 
 TEST_SUITE_END();

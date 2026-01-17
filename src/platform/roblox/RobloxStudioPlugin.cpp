@@ -1,13 +1,80 @@
+#include "LuauFileUtils.hpp"
 #include "Platform/RobloxPlatform.hpp"
 
+#include "LSP/Utils.hpp"
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 
+static bool mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginNode* pluginInstance, Luau::TypedAllocator<SourceNode>& allocator)
+{
+    bool didUpdateSourcemap = false;
+
+    // Update paths if managed or syncing
+    if ((sourceNode->pluginManaged || !pluginInstance->filePaths.empty()) && sourceNode->filePaths != pluginInstance->filePaths)
+    {
+        didUpdateSourcemap = true;
+        sourceNode->filePaths = pluginInstance->filePaths;
+    }
+    // Update class if managed (eg: renaming foo.client.lua to foo.server.luau needs the foo node to change class)
+    if (sourceNode->pluginManaged && sourceNode->className != pluginInstance->className)
+    {
+        didUpdateSourcemap = true;
+        sourceNode->className = pluginInstance->className;
+    }
+
+    std::unordered_set<std::string> pluginChildNames;
+    for (const auto& dmChild : pluginInstance->children)
+    {
+        pluginChildNames.insert(dmChild->name);
+
+        if (auto existingChildNode = sourceNode->findChild(dmChild->name))
+        {
+            // Hydrate the existing child with the plugin info
+            didUpdateSourcemap |= mutateSourceNodeWithPluginInfo(*existingChildNode, dmChild, allocator);
+        }
+        else
+        {
+            // Create a new child for this plugin node
+            auto childNode = allocator.allocate(SourceNode(dmChild->name, dmChild->className, {}, {}));
+            childNode->pluginManaged = true;
+            mutateSourceNodeWithPluginInfo(childNode, dmChild, allocator);
+
+            sourceNode->children.push_back(childNode);
+            didUpdateSourcemap = true;
+        }
+    }
+
+    // Prune plugin-managed children that no longer exist in the plugin info
+    for (auto it = sourceNode->children.begin(); it != sourceNode->children.end();)
+    {
+        auto* child = *it;
+
+        if (child->pluginManaged && pluginChildNames.find(child->name) == pluginChildNames.end())
+        {
+            it = sourceNode->children.erase(it);
+            didUpdateSourcemap = true;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    return didUpdateSourcemap;
+}
 
 PluginNode* PluginNode::fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator)
 {
     auto name = j.at("Name").get<std::string>();
     auto className = j.at("ClassName").get<std::string>();
+    std::vector<std::string> filePaths{};
+    if (j.contains("FilePaths"))
+    {
+        for (auto& filePath : j.at("FilePaths"))
+        {
+            filePaths.emplace_back(Luau::FileUtils::normalizePath(resolvePath(filePath.get<std::string>())));
+        }
+    }
 
     std::vector<PluginNode*> children;
     if (j.contains("Children"))
@@ -18,7 +85,72 @@ PluginNode* PluginNode::fromJson(const json& j, Luau::TypedAllocator<PluginNode>
         }
     }
 
-    return allocator.allocate(PluginNode{std::move(name), std::move(className), std::move(children)});
+    return allocator.allocate(PluginNode{std::move(name), std::move(className), std::move(filePaths), std::move(children)});
+}
+
+void RobloxPlatform::clearPluginManagedNodesFromSourcemap(SourceNode* sourceNode)
+{
+    for (auto it = sourceNode->children.begin(); it != sourceNode->children.end();)
+    {
+        auto* child = *it;
+
+        if (child->pluginManaged)
+        {
+            it = sourceNode->children.erase(it);
+        }
+        else
+        {
+            clearPluginManagedNodesFromSourcemap(child);
+            ++it;
+        }
+    }
+}
+
+bool RobloxPlatform::hydrateSourcemapWithPluginInfo()
+{
+    if (!pluginInfo)
+    {
+        return false;
+    }
+
+    // If we don't have a sourcemap yet, we create a DataModel root node
+    if (!rootSourceNode)
+    {
+        rootSourceNode = sourceNodeAllocator.allocate(SourceNode("game", "DataModel", {}, {}));
+    }
+
+
+    if (rootSourceNode->className != "DataModel")
+    {
+        std::cerr << "Attempted to update plugin information for a non-DM instance" << '\n';
+        return false;
+    }
+
+    bool didUpdateSourcemap = mutateSourceNodeWithPluginInfo(rootSourceNode, pluginInfo, sourceNodeAllocator);
+
+    if (didUpdateSourcemap)
+    {
+        // Update the sourcemap file if needed
+        auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+        if (config.sourcemap.autogenerate)
+        {
+            auto sourcemapPath = workspaceFolder->rootUri.resolvePath(config.sourcemap.sourcemapFile);
+
+            workspaceFolder->client->sendLogMessage(
+                lsp::MessageType::Info, "Updating " + config.sourcemap.sourcemapFile + " with information from plugin");
+
+            try
+            {
+                Luau::FileUtils::writeFileIfModified(sourcemapPath.fsPath(), rootSourceNode->toJson().dump(2));
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Failed to write sourcemap file: " << e.what() << '\n';
+            }
+        }
+    }
+
+    return didUpdateSourcemap;
 }
 
 void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
@@ -28,8 +160,9 @@ void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
     pluginNodeAllocator.clear();
     setPluginInfo(PluginNode::fromJson(dataModel, pluginNodeAllocator));
 
-    // Mutate the sourcemap with the new information
-    updateSourceMap();
+    hydrateSourcemapWithPluginInfo();
+    writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+    updateSourcemapTypes();
 }
 
 void RobloxPlatform::onStudioPluginClear()
@@ -40,8 +173,12 @@ void RobloxPlatform::onStudioPluginClear()
     pluginNodeAllocator.clear();
     setPluginInfo(nullptr);
 
-    // Mutate the sourcemap with the new information
-    updateSourceMap();
+    if (rootSourceNode)
+    {
+        clearPluginManagedNodesFromSourcemap(rootSourceNode);
+        writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+        updateSourcemapTypes();
+    }
 }
 
 bool RobloxPlatform::handleNotification(const std::string& method, std::optional<json> params)

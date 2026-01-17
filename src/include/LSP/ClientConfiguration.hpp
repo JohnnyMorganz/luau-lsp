@@ -181,12 +181,16 @@ struct ClientCompletionConfiguration
     bool showPropertiesOnMethodCall = false;
     /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
     bool showKeywords = true;
+    /// Whether to show the "function (anonymous autofilled)" generated function entry
+    bool showAnonymousAutofilledFunction = true;
+    /// Whether to show deprecated items in autocomplete suggestions
+    bool showDeprecatedItems = true;
     /// Enables the experimental fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = false;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {
@@ -225,13 +229,15 @@ struct ClientFFlagsConfiguration
 
     /// Enable all (boolean) Luau FFlags by default. These flags can later be overriden by `#luau-lsp.fflags.override#` and `#luau-lsp.fflags.sync#`
     bool enableByDefault = true;
+    /// Enables the flags required for Luau's new type solver. These flags can be overriden by `#luau-lsp.fflags.override#`
+    bool enableNewSolver = false;
     // Sync currently enabled FFlags with Roblox's published FFlags.\nThis currently only syncs FFlags which begin with 'Luau'
     bool sync = false;
     // Override FFlags passed to Luau
     std::unordered_map<std::string, std::string> override;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, sync, override);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFFlagsConfiguration, enableByDefault, enableNewSolver, sync, override);
 
 struct ClientBytecodeConfiguration
 {
@@ -242,6 +248,13 @@ struct ClientBytecodeConfiguration
     std::string vectorType = "Vector3";
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientBytecodeConfiguration, debugLevel, typeInfoLevel, vectorLib, vectorCtor, vectorType)
+
+struct ClientFormatConfiguration
+{
+    /// Whether to convert single/double quotes to backticks when typing `{` inside strings
+    bool convertQuotes = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFormatConfiguration, convertQuotes);
 
 enum struct LSPPlatformConfig
 {
@@ -280,6 +293,7 @@ struct ClientConfiguration
     ClientIndexConfiguration index{};
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
+    ClientFormatConfiguration format{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);

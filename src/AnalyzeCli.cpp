@@ -197,6 +197,8 @@ void applySettings(const std::string& settingsContents, CliClient& client, std::
     definitionsPaths.insert(definitionsFilesConfiguration.begin(), definitionsFilesConfiguration.end());
 
     // Process any fflags
+    if (client.configuration.fflags.enableNewSolver)
+        FFlag::LuauSolverV2.value = true;
     registerFastFlagsCLI(client.configuration.fflags.override);
     if (!client.configuration.fflags.enableByDefault)
         std::cerr << "warning: `luau-lsp.fflags.enableByDefault` is not respected in CLI Analyze mode. Please instead use the CLI option "

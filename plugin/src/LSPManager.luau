@@ -1,4 +1,6 @@
 --!strict
+local HttpService = game:GetService("HttpService")
+local InstanceFileSyncService = game:GetService("InstanceFileSyncService")
 
 --- Manages the connection to the Luau Language Server.
 --- Handles connecting, disconnecting, and sending DataModel updates.
@@ -21,10 +23,16 @@ type LSPManagerData = {
 	_address: string?,
 	--- Debounce controller for batching DataModel updates.
 	_sendDebounce: Debounce.Debounce?,
+	--- Debounce controller for auto connect attempts.
+	_autoConnectDebounce: Debounce.Debounce?,
 	--- Reference to the Settings instance.
 	_settings: Settings.Settings,
 	--- Reference to the InstanceTracker instance.
 	_instanceTracker: InstanceTracker.InstanceTracker,
+	--- Whether to silence warnings when the server is not found, used to avoid spam during auto connect attempts.
+	_silenceServerNotFoundWarning: boolean,
+	--- The connection to the InstanceFileSyncService's StatusChanged event
+	_statusChangedConnection: RBXScriptConnection?,
 	--- Signal fired when connection state changes.
 	onConnectionChanged: Signal.Signal<boolean>,
 }
@@ -41,8 +49,11 @@ function LSPManager.new(settings: Settings.Settings, instanceTracker: InstanceTr
 		_connected = false,
 		_address = nil,
 		_sendDebounce = nil,
+		_autoConnectDebounce = nil,
 		_settings = settings,
 		_instanceTracker = instanceTracker,
+		_silenceServerNotFoundWarning = false,
+		_statusChangedConnection = nil,
 		onConnectionChanged = Signal.new() :: Signal.Signal<boolean>,
 	}
 	return setmetatable(self, LSPManager)
@@ -59,10 +70,35 @@ function LSPManager.init(self: LSPManager): ()
 		end
 		self:sendFullDMInfo()
 	end)
+	self._autoConnectDebounce = Debounce.new(1, function()
+		if self._connected then
+			-- Already connected, cancel
+			return
+		end
+		self._silenceServerNotFoundWarning = true
+		self:connect()
+		self._silenceServerNotFoundWarning = false
+	end)
 
 	self._instanceTracker.onChanged:connect(function(_instance: Instance): ()
 		-- TODO: Send a delta for this instance instead of resending the full tree
 		self:deferredSendFullDMInfo()
+	end)
+
+	self._statusChangedConnection = InstanceFileSyncService.StatusChanged:Connect(function(instance: Instance): ()
+		if not self._instanceTracker:shouldInclude(instance) then
+			return
+		end
+
+		if self._connected then
+			self:deferredSendFullDMInfo()
+		else
+			local success, instances = pcall(InstanceFileSyncService.GetAllInstances, InstanceFileSyncService)
+			if success and #instances > 0 then
+				Log.debug("Syncing instances, queueing auto connect")
+				self:autoConnect()
+			end
+		end
 	end)
 end
 
@@ -96,11 +132,22 @@ end
 --- @param result -- The error result from the HTTP request.
 function LSPManager._logHttpError(self: LSPManager, operation: string, result: any): ()
 	if result == "HttpError: ConnectFail" then
+		if self._silenceServerNotFoundWarning then
+			return
+		end
 		Log.warn(
 			`{operation} on {self._address} failed. Is the server enabled? Check the settings 'luau-lsp.plugin.enabled' and 'luau-lsp.plugin.port' in your editor`
 		)
 	else
 		Log.warn(`{operation} on {self._address} failed: {result}`)
+	end
+end
+
+--- Queues an auto connect attempt. Will not warn if the server is not found.
+--- @param self -- The LSPManager instance.
+function LSPManager.autoConnect(self: LSPManager): ()
+	if self._autoConnectDebounce then
+		self._autoConnectDebounce:call()
 	end
 end
 
@@ -145,10 +192,68 @@ function LSPManager.disconnect(self: LSPManager): ()
 	if self._sendDebounce then
 		self._sendDebounce:cancel()
 	end
+	if self._autoConnectDebounce then
+		self._autoConnectDebounce:cancel()
+	end
 
 	self._instanceTracker:unwatchAll()
 
 	Log.info("Successfully disconnected")
+end
+
+--- Get a mapping of instances to their Luau file paths.
+--- @param self -- The LSPManager instance.
+--- @return { [Instance]: { string } }? -- A mapping of instances to their Luau file paths, or nil if the server failed to respond.
+function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
+	assert(self._address, "LSPManager must be initialized before use")
+	Log.debug("Getting file paths")
+
+	local result = ServerEndpoints.getFilePaths(self._address)
+	if not result.ok then
+		-- A 404 indicates the endpoint doesn't exist, likely because we're
+		-- connecting to an older language server that predates Script Sync support
+		if string.find(result.error, "404") then
+			Log.warn(
+				"Running against an older version of the language server that does not support Script Sync. Please update luau-lsp for full functionality."
+			)
+			return {}
+		end
+
+		self:_logHttpError("Getting file paths", result.error)
+		return nil
+	end
+
+	local decodeSuccess, decodeResult = pcall(HttpService.JSONDecode, HttpService, result.value.Body)
+	if not decodeSuccess then
+		Log.warn(`Failed to decode file paths response: {decodeResult}`)
+		return {}
+	end
+
+	if typeof(decodeResult) ~= "table" then
+		Log.warn(`File paths response is not a table: {typeof(decodeResult)}`)
+		return {}
+	end
+
+	local filePaths: { string }? = decodeResult["files"]
+	if not filePaths then
+		Log.warn("No file paths found in response")
+		return {}
+	end
+
+	local instanceFilePaths = {}
+
+	for _, filePath in filePaths do
+		local getSuccess, instance = pcall(InstanceFileSyncService.GetSyncedInstance, InstanceFileSyncService, filePath)
+		if getSuccess and instance then
+			if instanceFilePaths[instance] then
+				table.insert(instanceFilePaths[instance], filePath)
+			else
+				instanceFilePaths[instance] = { filePath }
+			end
+		end
+	end
+
+	return instanceFilePaths
 end
 
 --- Sends the complete DataModel tree to the language server.
@@ -159,7 +264,16 @@ function LSPManager.sendFullDMInfo(self: LSPManager): boolean
 	assert(self._address, "LSPManager must be initialized before use")
 	Log.debug("Sending full DM info")
 
-	local tree = self._instanceTracker:encodeAll()
+	local filePaths = self:getFilePaths()
+	if filePaths == nil then
+		-- Server isn't up, don't bother encoding the tree
+		-- since it will fail to send anyway
+		Log.debug("Server failed to respond, cancelling DataModel send")
+		self:disconnect()
+		return false
+	end
+
+	local tree = self._instanceTracker:encodeAll(filePaths)
 
 	local result = ServerEndpoints.full(self._address, tree)
 
@@ -211,6 +325,10 @@ function LSPManager.unload(self: LSPManager): ()
 	self:disconnect()
 	self.onConnectionChanged:destroy()
 	self._instanceTracker:unload()
+	if self._statusChangedConnection then
+		self._statusChangedConnection:Disconnect()
+		self._statusChangedConnection = nil
+	end
 end
 
 return LSPManager

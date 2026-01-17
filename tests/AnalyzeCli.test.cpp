@@ -4,7 +4,9 @@
 #include "Analyze/AnalyzeCli.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
-#include "LSP/Utils.hpp"
+#include "ScopedFlags.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 namespace std
 {
@@ -88,13 +90,25 @@ TEST_CASE("definition_files_from_settings_file_applied")
     CHECK_EQ(definitionPaths["@roblox1"], "global_types/types.d.luau");
 }
 
+TEST_CASE("enable_new_solver_fflag_from_settings_file_applied")
+{
+    ScopedFastFlag sff{FFlag::LuauSolverV2, false};
+
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::unordered_map<std::string, std::string> definitionPaths;
+
+    auto configFile = R"({ "luau-lsp.fflags.enableNewSolver": true })";
+
+    applySettings(configFile, client, ignoreGlobs, definitionPaths);
+
+    CHECK(FFlag::LuauSolverV2);
+}
+
 TEST_CASE_FIXTURE(Fixture, "analysis_relative_file_paths")
 {
-    TempDir t("analyze_cli_relative_file_paths");
-    workspace.fileResolver.rootUri = Uri::file(t.path());
-
-    CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("test.luau")).relativePath, "test.luau");
-    CHECK_EQ(getFilePath(&workspace.fileResolver, t.touch_child("folder/file.luau")).relativePath, "folder/file.luau");
+    CHECK_EQ(getFilePath(&workspace.fileResolver, tempDir.touch_child("test.luau")).relativePath, "test.luau");
+    CHECK_EQ(getFilePath(&workspace.fileResolver, tempDir.touch_child("folder/file.luau")).relativePath, "folder/file.luau");
 }
 
 TEST_CASE("parse_definitions_files_handles_new_syntax")

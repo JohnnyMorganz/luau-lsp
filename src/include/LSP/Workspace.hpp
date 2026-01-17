@@ -126,7 +126,7 @@ public:
     std::optional<std::string> getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
         const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule, const Luau::Position& position);
     std::vector<Reference> findAllTableReferences(
-        const Luau::TypeId ty, const LSPCancellationToken& cancellationToken, std::optional<Luau::Name> property = std::nullopt);
+        const Luau::TypeId ty, const LSPCancellationToken& cancellationToken, const std::optional<Luau::Name>& property = std::nullopt);
     std::vector<Reference> findAllFunctionReferences(const Luau::TypeId ty, const LSPCancellationToken& cancellationToken);
     std::vector<Reference> findAllTypeReferences(
         const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken);
@@ -136,7 +136,7 @@ public:
     std::vector<lsp::DocumentLink> documentLink(const lsp::DocumentLinkParams& params);
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
-    lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params);
+    lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params, const LSPCancellationToken& cancellationToken);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken);
 
@@ -159,6 +159,8 @@ public:
     std::optional<std::vector<lsp::DocumentSymbol>> documentSymbol(const lsp::DocumentSymbolParams& params);
     std::optional<std::vector<lsp::WorkspaceSymbol>> workspaceSymbol(const lsp::WorkspaceSymbolParams& params);
     std::optional<lsp::SemanticTokens> semanticTokens(const lsp::SemanticTokensParams& params, const LSPCancellationToken& cancellationToken);
+
+    lsp::DocumentOnTypeFormattingResult onTypeFormatting(const lsp::DocumentOnTypeFormattingParams& params);
 
     lsp::BytecodeResult bytecode(const lsp::BytecodeParams& params);
     lsp::CompilerRemarksResult compilerRemarks(const lsp::CompilerRemarksParams& params);

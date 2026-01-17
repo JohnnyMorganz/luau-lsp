@@ -36,13 +36,23 @@ $ luau-lsp lsp --definition:@roblox=/path/to/globalTypes.d.luau
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
 
 For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.luau
-(using something like `curl` or `wget` should be sufficient).
+(using something like `curl` or `wget` should be sufficient). Multiple definition files are available depending on the
+API security level.
 
 Optionally, you can define documentation files as well, by passing `--docs=PATH`.
 This provides documentation for any built-in definitions, but is not a requirement.
 
 See https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json for an example of a
 documentation file.
+
+GitHub implements very strong rate limiting for unauthenticated requests. This project provides a Cloudflare-based proxy
+to serve static files on a CDN instead. We recommend using the following URLs when downloading:
+
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+- `https://luau-lsp.pages.dev/api-docs/en-us.json`
 
 ## Configuring FFlags
 
@@ -120,10 +130,11 @@ The Language Server will operate without a sourcemap available, but will not res
 ## Optional: Roblox Studio plugin
 
 A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
-for users who would like intellisense for non-filesystem based DataModel instances.
+for users who would like intellisense for non-Rojo and non-filesystem based DataModel instances.
 
-The companion plugin sends HTTP post requests to the following endpoints on localhost at the user-defined port:
+The companion plugin sends HTTP requests to the following endpoints on localhost at the user-defined port:
 
+- `GET /get-file-paths`
 - `POST /full`
 - `POST /clear`
 

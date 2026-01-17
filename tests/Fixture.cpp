@@ -12,8 +12,10 @@
 
 #include "doctest.h"
 #include <string_view>
+#include <atomic>
 
 static const char* mainModuleName = "MainModule";
+static std::atomic<int> fixtureCounter{0};
 
 LUAU_FASTFLAG(LuauSolverV2)
 
@@ -45,9 +47,15 @@ void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::strin
 }
 } // namespace Luau::LanguageServer
 
+static std::string generateFixtureName()
+{
+    return "luau_lsp_test_" + std::to_string(fixtureCounter.fetch_add(1));
+}
+
 Fixture::Fixture()
     : client(std::make_unique<TestClient>(TestClient{}))
-    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(*Luau::FileUtils::getCurrentWorkingDirectory()), std::nullopt)
+    , tempDir(generateFixtureName())
+    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt)
 {
     client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
@@ -245,4 +253,100 @@ std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
     }
 
     return std::make_pair(source, lsp::Position{line, column});
+}
+
+std::string dedent(std::string source)
+{
+    auto lines = Luau::split(source, '\n');
+
+    size_t minIndent = std::string::npos;
+    for (const auto& line : lines)
+    {
+        if (line.empty())
+            continue;
+        size_t indent = 0;
+        while (indent < line.size() && (line[indent] == ' ' || line[indent] == '\t'))
+            indent++;
+        if (indent < line.size()) // Line has non-whitespace content
+            minIndent = std::min(minIndent, indent);
+    }
+
+    if (minIndent == std::string::npos)
+        minIndent = 0;
+
+    std::string result;
+    bool firstLine = true;
+    for (const auto& line : lines)
+    {
+        if (!firstLine)
+            result += '\n';
+        firstLine = false;
+
+        if (line.empty())
+            continue;
+
+        size_t start = std::min(minIndent, line.size());
+        result += line.substr(start);
+    }
+
+    if (!result.empty() && result[0] == '\n')
+        result = result.substr(1);
+
+    return result;
+}
+
+std::string applyEdit(const std::string& source, const std::vector<lsp::TextEdit>& edits)
+{
+    std::string newSource;
+
+    lsp::Position currentPos{0, 0};
+    std::optional<lsp::Position> editEndPos = std::nullopt;
+
+    for (const auto& c : source)
+    {
+        for (const auto& edit : edits)
+        {
+            if (currentPos == edit.range.start)
+            {
+                newSource += edit.newText;
+                if (!(edit.range.start == edit.range.end))
+                    editEndPos = edit.range.end;
+            }
+        }
+
+        // Skip characters that are being replaced
+        if (editEndPos)
+        {
+            if (currentPos == *editEndPos)
+                editEndPos = std::nullopt;
+            else
+            {
+                // Update position and skip this character (it's being replaced)
+                if (c == '\n')
+                {
+                    currentPos.line += 1;
+                    currentPos.character = 0;
+                }
+                else
+                {
+                    currentPos.character += 1;
+                }
+                continue;
+            }
+        }
+
+        newSource += c;
+
+        if (c == '\n')
+        {
+            currentPos.line += 1;
+            currentPos.character = 0;
+        }
+        else
+        {
+            currentPos.character += 1;
+        }
+    }
+
+    return newSource;
 }

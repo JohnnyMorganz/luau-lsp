@@ -7,7 +7,7 @@ option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 option(LSP_WERROR "Warnings as errors" ON)
 
-set(LSP_VERSION "1.58.0")
+set(LSP_VERSION "1.60.1")
 set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
@@ -60,6 +60,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/platform/LSPPlatform.cpp
         src/platform/StringRequireAutoImporter.cpp
         src/platform/StringRequireSuggester.cpp
+        src/platform/roblox/InstanceRequireAutoImporter.cpp
         src/platform/roblox/RobloxCodeAction.cpp
         src/platform/roblox/RobloxColorProvider.cpp
         src/platform/roblox/RobloxCompletion.cpp
@@ -87,6 +88,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/CallHierarchy.cpp
         src/operations/Bytecode.cpp
         src/operations/RequireGraph.cpp
+        src/operations/OnTypeFormatting.cpp
         src/transport/PipeTransport.cpp
         src/transport/StdioTransport.cpp
         extern/glob/match.cpp
@@ -129,7 +131,9 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
         tests/RequireGraph.test.cpp
+        tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
+        tests/CodeAction.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 
@@ -161,6 +165,8 @@ if (LSP_BUILD_ASAN)
         target_compile_options(Luau.Compiler PRIVATE /fsanitize=address)
         target_compile_options(Luau.Config PRIVATE /fsanitize=address)
         target_compile_options(Luau.VM PRIVATE /fsanitize=address)
+        target_compile_options(Luau.CodeGen PRIVATE /fsanitize=address)
+        target_compile_options(Luau.Common PRIVATE /fsanitize=address)
     else ()
         list(APPEND LUAU_LSP_OPTIONS -fsanitize=address)
         target_compile_options(Luau.Ast PRIVATE -fsanitize=address)
@@ -168,6 +174,8 @@ if (LSP_BUILD_ASAN)
         target_compile_options(Luau.Compiler PRIVATE -fsanitize=address)
         target_compile_options(Luau.Config PRIVATE -fsanitize=address)
         target_compile_options(Luau.VM PRIVATE -fsanitize=address)
+        target_compile_options(Luau.CodeGen PRIVATE -fsanitize=address)
+        target_compile_options(Luau.Common PRIVATE -fsanitize=address)
         target_link_options(Luau.LanguageServer PRIVATE -fsanitize=address)
         target_link_options(Luau.LanguageServer.CLI PRIVATE -fsanitize=address)
         target_link_options(Luau.LanguageServer.Test PRIVATE -fsanitize=address)
@@ -176,6 +184,8 @@ if (LSP_BUILD_ASAN)
         target_link_options(Luau.Compiler PRIVATE -fsanitize=address)
         target_link_options(Luau.Config PRIVATE -fsanitize=address)
         target_link_options(Luau.VM PRIVATE -fsanitize=address)
+        target_link_options(Luau.CodeGen PRIVATE -fsanitize=address)
+        target_link_options(Luau.Common PRIVATE -fsanitize=address)
     endif ()
 endif ()
 

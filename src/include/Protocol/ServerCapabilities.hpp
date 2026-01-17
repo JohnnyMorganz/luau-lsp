@@ -135,6 +135,13 @@ struct CodeActionOptions
 };
 NLOHMANN_DEFINE_OPTIONAL(CodeActionOptions, codeActionKinds, resolveProvider);
 
+struct DocumentOnTypeFormattingOptions
+{
+    std::string firstTriggerCharacter;
+    std::optional<std::vector<std::string>> moreTriggerCharacter = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(DocumentOnTypeFormattingOptions, firstTriggerCharacter, moreTriggerCharacter);
+
 struct ServerCapabilities
 {
     PositionEncodingKind positionEncoding = PositionEncodingKind::UTF16;
@@ -170,16 +177,17 @@ struct ServerCapabilities
      */
     bool workspaceSymbolProvider = false;
     /**
-	 * The server provides call hierarchy support.
-	 *
-	 * @since 3.16.0
-	 */
+     * The server provides call hierarchy support.
+     *
+     * @since 3.16.0
+     */
     bool callHierarchyProvider = false;
     std::optional<SemanticTokensOptions> semanticTokensProvider = std::nullopt;
+    std::optional<DocumentOnTypeFormattingOptions> documentOnTypeFormattingProvider = std::nullopt;
     std::optional<WorkspaceCapabilities> workspace = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider, workspaceSymbolProvider,
-    callHierarchyProvider, semanticTokensProvider, workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider,
+    workspaceSymbolProvider, callHierarchyProvider, semanticTokensProvider, documentOnTypeFormattingProvider, workspace);
 } // namespace lsp

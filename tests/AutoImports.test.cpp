@@ -3,7 +3,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
-#include "TempDir.h"
 
 static std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
@@ -1157,6 +1156,50 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
     REQUIRE_EQ(imports.size(), 1);
     REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(\"@Modules/Module\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_directory")
+{
+    TempDir library("include_aliases_external_lib");
+    auto module = library.write_child("module.luau", R"(
+        return {}
+    )");
+
+    auto luaurc = std::string(R"(
+    {
+        "aliases": {
+            "library": "{filepath}"
+        }
+    }
+    )");
+    replace(luaurc, "{filepath}", library.path());
+    loadLuaurc(luaurc);
+    auto moduleName = workspace.fileResolver.getModuleName(Uri::file(module));
+
+    client->globalConfig.index.enabled = true;
+
+    client->globalConfig.completion.imports.enabled = true;
+    // HACK: Fixture is loaded for RobloxPlatform
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.appliedFirstTimeConfiguration = false;
+    workspace.setupWithConfiguration(client->globalConfig);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("src/client/file.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result);
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local module = require(\"@library/module\")\n");
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_correctly_for_init_luau_file")

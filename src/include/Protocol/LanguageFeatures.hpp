@@ -50,6 +50,7 @@ struct RenameParams : TextDocumentPositionParams
 NLOHMANN_DEFINE_OPTIONAL(RenameParams, textDocument, position, newName)
 
 using RenameResult = std::optional<WorkspaceEdit>;
+using DocumentOnTypeFormattingResult = std::optional<std::vector<TextEdit>>;
 
 struct DocumentLinkParams
 {

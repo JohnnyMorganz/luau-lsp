@@ -787,7 +787,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
+    platform->onStudioPluginFullChange(pluginData);
 
     // Update sourcemap successfully
     REQUIRE(platform->updateSourceMap());
@@ -803,6 +803,697 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_
 
     LUAU_LSP_REQUIRE_NO_ERRORS(result);
     CHECK(Luau::toString(requireType("part")) == "Part");
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_info_hydrates_existing_sourcemap_and_marks_nodes_plugin_managed")
+{
+    // First load a filesystem sourcemap with an existing child
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "filePaths": ["src/ReplicatedStorage.luau"]
+                }
+            ]
+        }
+    )");
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform->rootSourceNode);
+
+    // Verify initial state - ReplicatedStorage exists and is NOT plugin managed
+    auto rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_FALSE((*rsNode)->pluginManaged);
+
+    // Now apply plugin info that adds a new child
+    platform->pluginNodeAllocator.clear();
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ServerStorage",
+                    "ClassName": "ServerStorage"
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // Verify that ReplicatedStorage still exists and is still NOT plugin managed
+    rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_FALSE((*rsNode)->pluginManaged);
+
+    // Verify that ServerStorage was added and IS plugin managed
+    auto ssNode = platform->rootSourceNode->findChild("ServerStorage");
+    REQUIRE(ssNode);
+    CHECK((*ssNode)->pluginManaged);
+    CHECK_EQ((*ssNode)->className, "ServerStorage");
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_info_creates_datamodel_root_when_no_sourcemap_exists")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // Ensure no sourcemap exists initially
+    REQUIRE_FALSE(platform->rootSourceNode);
+
+    // Apply plugin info without any filesystem sourcemap
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Workspace",
+                    "ClassName": "Workspace",
+                    "Children": [
+                        {
+                            "Name": "Part",
+                            "ClassName": "Part"
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    REQUIRE(platform->rootSourceNode);
+    CHECK_EQ(platform->rootSourceNode->name, "game");
+    CHECK_EQ(platform->rootSourceNode->className, "DataModel");
+
+    // Verify children were created
+    auto workspaceNode = platform->rootSourceNode->findChild("Workspace");
+    REQUIRE(workspaceNode);
+    CHECK((*workspaceNode)->pluginManaged);
+
+    auto partNode = (*workspaceNode)->findChild("Part");
+    REQUIRE(partNode);
+    CHECK((*partNode)->pluginManaged);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_clear_removes_plugin_managed_nodes_only")
+{
+    // Load a sourcemap with a filesystem-sourced child
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "filePaths": ["src/ReplicatedStorage.luau"]
+                }
+            ]
+        }
+    )");
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform->rootSourceNode);
+
+    // Apply plugin info that adds a plugin-managed child
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ServerStorage",
+                    "ClassName": "ServerStorage"
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // Verify both children exist
+    REQUIRE(platform->rootSourceNode->findChild("ReplicatedStorage"));
+    REQUIRE(platform->rootSourceNode->findChild("ServerStorage"));
+
+    // Clear plugin-managed nodes (simulates plugin disconnect)
+    platform->onStudioPluginClear();
+
+    // Verify filesystem-sourced child still exists
+    auto rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_FALSE((*rsNode)->pluginManaged);
+
+    // Verify plugin-managed child was removed
+    CHECK_FALSE(platform->rootSourceNode->findChild("ServerStorage"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_managed_flag_persists_through_sourcemap_reload")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    // Load a sourcemap that includes pluginManaged flags (simulating a previously saved sourcemap)
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "filePaths": ["src/ReplicatedStorage.luau"]
+                },
+                {
+                    "name": "ServerStorage",
+                    "className": "ServerStorage",
+                    "pluginManaged": true
+                }
+            ]
+        }
+    )");
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform->rootSourceNode);
+
+    // Verify ReplicatedStorage is NOT plugin managed
+    auto rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_FALSE((*rsNode)->pluginManaged);
+
+    // Verify ServerStorage IS plugin managed (flag persisted from JSON)
+    auto ssNode = platform->rootSourceNode->findChild("ServerStorage");
+    REQUIRE(ssNode);
+    CHECK((*ssNode)->pluginManaged);
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autogenerate_writes_file_when_plugin_info_applied")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    client->globalConfig.sourcemap.enabled = true;
+    client->globalConfig.sourcemap.autogenerate = true;
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // Create a sourcemap file first to establish the root node
+    auto sourcemapPath = tempDir.write_child("sourcemap.json", R"({
+        "name": "game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "filePaths": ["src/shared/init.luau"]
+            }
+        ]
+    })");
+
+    // Load the sourcemap from file
+    platform->updateSourceMap();
+
+    // Apply plugin info with filePaths
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ServerStorage",
+                    "ClassName": "ServerStorage",
+                    "FilePaths": ["src/server/init.luau"]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // Verify the sourcemap file was updated
+    auto updatedContents = Luau::FileUtils::readFile(sourcemapPath);
+    REQUIRE(updatedContents);
+
+    auto updatedJson = json::parse(*updatedContents);
+    CHECK_EQ(updatedJson["name"], "game");
+    CHECK_EQ(updatedJson["className"], "DataModel");
+
+    // Check that both children are in the file
+    REQUIRE(updatedJson.contains("children"));
+    auto& children = updatedJson["children"];
+
+    bool hasReplicatedStorage = false;
+    bool hasServerStorage = false;
+
+    for (const auto& child : children)
+    {
+        if (child["name"] == "ReplicatedStorage")
+        {
+            hasReplicatedStorage = true;
+            CHECK_EQ(child["className"], "ReplicatedStorage");
+        }
+        if (child["name"] == "ServerStorage")
+        {
+            hasServerStorage = true;
+            CHECK_EQ(child["className"], "ServerStorage");
+            CHECK(child.contains("pluginManaged"));
+            CHECK_EQ(child["pluginManaged"], true);
+        }
+    }
+
+    CHECK(hasReplicatedStorage);
+    CHECK(hasServerStorage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_info_updates_file_paths_on_existing_nodes")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    // Load sourcemap with a node that has filePaths
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "filePaths": ["src/shared/init.luau"]
+                }
+            ]
+        }
+    )");
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform->rootSourceNode);
+
+    // Verify initial filePaths
+    auto rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_EQ((*rsNode)->filePaths.size(), 1);
+
+    // Apply plugin info that updates the filePaths for the same node
+    // The condition is: (pluginManaged || !pluginFilePaths.empty()) && filePaths != pluginFilePaths
+    // Since plugin has non-empty filePaths, it WILL update them
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ReplicatedStorage",
+                    "ClassName": "ReplicatedStorage",
+                    "FilePaths": ["src/shared/updated.luau", "src/shared/extra.luau"]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // Verify filePaths were updated
+    rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
+    REQUIRE(rsNode);
+    CHECK_EQ((*rsNode)->filePaths.size(), 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "source_node_to_json_only_includes_nodes_with_file_paths")
+{
+    // Create a source node tree with some nodes having filePaths and some without
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child1 = allocator.allocate(SourceNode("ModuleA", "ModuleScript", {"src/ModuleA.luau"}, {}));
+    auto child2 = allocator.allocate(SourceNode("PartNoFile", "Part", {}, {}));
+    auto child3 = allocator.allocate(SourceNode("ModuleB", "ModuleScript", {"src/ModuleB.luau"}, {}));
+
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {child1, child2, child3}));
+
+    auto jsonOutput = root->toJson();
+
+    CHECK_EQ(jsonOutput["name"], "game");
+    CHECK_EQ(jsonOutput["className"], "DataModel");
+    REQUIRE(jsonOutput.contains("children"));
+
+    // Only nodes with filePaths should be in the output
+    auto& children = jsonOutput["children"];
+    CHECK_EQ(children.size(), 2);
+
+    bool hasModuleA = false;
+    bool hasModuleB = false;
+    bool hasPartNoFile = false;
+
+    for (const auto& child : children)
+    {
+        if (child["name"] == "ModuleA")
+            hasModuleA = true;
+        if (child["name"] == "ModuleB")
+            hasModuleB = true;
+        if (child["name"] == "PartNoFile")
+            hasPartNoFile = true;
+    }
+
+    CHECK(hasModuleA);
+    CHECK(hasModuleB);
+    CHECK_FALSE(hasPartNoFile);
+}
+
+TEST_CASE_FIXTURE(Fixture, "source_node_to_json_includes_plugin_managed_flag")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child = allocator.allocate(SourceNode("ServerStorage", "ServerStorage", {"src/server.luau"}, {}));
+    child->pluginManaged = true;
+
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {child}));
+
+    auto jsonOutput = root->toJson();
+
+    REQUIRE(jsonOutput.contains("children"));
+    auto& children = jsonOutput["children"];
+    REQUIRE_EQ(children.size(), 1);
+
+    CHECK(children[0].contains("pluginManaged"));
+    CHECK_EQ(children[0]["pluginManaged"], true);
+}
+
+TEST_CASE_FIXTURE(Fixture, "on_studio_plugin_full_change_updates_sourcemap")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // Simulate a full plugin change notification
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Workspace",
+                    "ClassName": "Workspace",
+                    "Children": [
+                        {
+                            "Name": "SpawnLocation",
+                            "ClassName": "SpawnLocation"
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+
+    platform->onStudioPluginFullChange(pluginData);
+
+    REQUIRE(platform->rootSourceNode);
+    CHECK_EQ(platform->rootSourceNode->className, "DataModel");
+
+    auto workspaceNode = platform->rootSourceNode->findChild("Workspace");
+    REQUIRE(workspaceNode);
+    CHECK((*workspaceNode)->pluginManaged);
+
+    auto spawnNode = (*workspaceNode)->findChild("SpawnLocation");
+    REQUIRE(spawnNode);
+    CHECK((*spawnNode)->pluginManaged);
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_notification_routes_plugin_full_notification")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "TestService",
+                    "ClassName": "TestService"
+                }
+            ]
+        }
+    )");
+
+    // Call handleNotification with $/plugin/full method
+    bool handled = platform->handleNotification("$/plugin/full", pluginData);
+
+    CHECK(handled);
+    REQUIRE(platform->rootSourceNode);
+    CHECK_EQ(platform->rootSourceNode->className, "DataModel");
+
+    auto testServiceNode = platform->rootSourceNode->findChild("TestService");
+    REQUIRE(testServiceNode);
+    CHECK((*testServiceNode)->pluginManaged);
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_notification_routes_plugin_clear_notification")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // First set up a sourcemap with a plugin-managed child
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "filePaths": ["src/shared.luau"]
+                }
+            ]
+        }
+    )");
+
+    // Add a plugin-managed child
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ServerStorage",
+                    "ClassName": "ServerStorage"
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    REQUIRE(platform->rootSourceNode->findChild("ServerStorage"));
+
+    // Call handleNotification with $/plugin/clear method
+    bool handled = platform->handleNotification("$/plugin/clear", std::nullopt);
+
+    CHECK(handled);
+    // Plugin-managed child should be removed
+    CHECK_FALSE(platform->rootSourceNode->findChild("ServerStorage"));
+    // Filesystem-sourced child should remain
+    REQUIRE(platform->rootSourceNode->findChild("ReplicatedStorage"));
+}
+
+
+TEST_CASE_FIXTURE(Fixture, "plugin_prunes_children_removed_from_plugin_info")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // First plugin update adds two children
+    auto pluginData1 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildA", "ClassName": "Folder" },
+                { "Name": "ChildB", "ClassName": "Folder" }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData1);
+
+    REQUIRE(platform->rootSourceNode);
+    REQUIRE(platform->rootSourceNode->findChild("ChildA"));
+    REQUIRE(platform->rootSourceNode->findChild("ChildB"));
+
+    // Second plugin update removes ChildB
+    auto pluginData2 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildA", "ClassName": "Folder" }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData2);
+
+    // ChildA should still exist
+    REQUIRE(platform->rootSourceNode->findChild("ChildA"));
+    // ChildB should be pruned
+    CHECK_FALSE(platform->rootSourceNode->findChild("ChildB"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "nested_plugin_children_are_all_marked_plugin_managed")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Level1",
+                    "ClassName": "Folder",
+                    "Children": [
+                        {
+                            "Name": "Level2",
+                            "ClassName": "Folder",
+                            "Children": [
+                                {
+                                    "Name": "Level3",
+                                    "ClassName": "Part"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    REQUIRE(platform->rootSourceNode);
+
+    auto level1 = platform->rootSourceNode->findChild("Level1");
+    REQUIRE(level1);
+    CHECK((*level1)->pluginManaged);
+
+    auto level2 = (*level1)->findChild("Level2");
+    REQUIRE(level2);
+    CHECK((*level2)->pluginManaged);
+
+    auto level3 = (*level2)->findChild("Level3");
+    REQUIRE(level3);
+    CHECK((*level3)->pluginManaged);
+}
+
+TEST_CASE("source_node_contains_file_paths_returns_true_when_node_has_file_paths")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto node = allocator.allocate(SourceNode("Module", "ModuleScript", {"src/module.luau"}, {}));
+
+    CHECK(node->containsFilePaths());
+}
+
+TEST_CASE("source_node_contains_file_paths_returns_true_when_descendant_has_file_paths")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child = allocator.allocate(SourceNode("Module", "ModuleScript", {"src/module.luau"}, {}));
+    auto parent = allocator.allocate(SourceNode("Folder", "Folder", {}, {child}));
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {parent}));
+
+    CHECK(root->containsFilePaths());
+    CHECK(parent->containsFilePaths());
+    CHECK(child->containsFilePaths());
+}
+
+TEST_CASE("source_node_contains_file_paths_returns_false_when_no_file_paths_in_tree")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child = allocator.allocate(SourceNode("Part", "Part", {}, {}));
+    auto parent = allocator.allocate(SourceNode("Folder", "Folder", {}, {child}));
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {parent}));
+
+    CHECK_FALSE(root->containsFilePaths());
+    CHECK_FALSE(parent->containsFilePaths());
+    CHECK_FALSE(child->containsFilePaths());
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_node_from_json_parses_file_paths")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "Module",
+            "ClassName": "ModuleScript",
+            "FilePaths": ["src/module.luau", "src/module.meta.json"]
+        }
+    )");
+
+    platform->pluginNodeAllocator.clear();
+    auto pluginNode = PluginNode::fromJson(pluginData, platform->pluginNodeAllocator);
+
+    CHECK_EQ(pluginNode->name, "Module");
+    CHECK_EQ(pluginNode->className, "ModuleScript");
+    CHECK_EQ(pluginNode->filePaths.size(), 2);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_node_from_json_handles_empty_file_paths")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "Folder",
+            "ClassName": "Folder",
+            "FilePaths": []
+        }
+    )");
+
+    platform->pluginNodeAllocator.clear();
+    auto pluginNode = PluginNode::fromJson(pluginData, platform->pluginNodeAllocator);
+
+    CHECK_EQ(pluginNode->filePaths.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_node_from_json_handles_missing_file_paths")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "Part",
+            "ClassName": "Part"
+        }
+    )");
+
+    platform->pluginNodeAllocator.clear();
+    auto pluginNode = PluginNode::fromJson(pluginData, platform->pluginNodeAllocator);
+
+    CHECK_EQ(pluginNode->filePaths.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_file_paths_propagate_to_source_node_during_hydration")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    // Create a sourcemap with an empty filePaths node
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": []
+        }
+    )");
+
+    // Apply plugin info with filePaths
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Module",
+                    "ClassName": "ModuleScript",
+                    "FilePaths": ["src/module.luau"]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    auto moduleNode = platform->rootSourceNode->findChild("Module");
+    REQUIRE(moduleNode);
+    CHECK_EQ((*moduleNode)->filePaths.size(), 1);
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_simple_filename")
@@ -859,6 +1550,74 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_relative_
         }
     }
     CHECK(foundLogMessage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_update_clears_cached_sourcemap_types_on_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [
+                        {
+                            "name": "Shared",
+                            "className": "Folder",
+                            "children": [{ "name": "Remotes", "className": "Part" }]
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    auto originalRootNode = platform->rootSourceNode;
+
+    auto document = newDocument("foo.luau", R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Remotes = require(ReplicatedStorage.Shared.Remotes)
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = {document};
+    params.position = lsp::Position{2, 59};
+    auto hover = workspace.hover(params, nullptr);
+
+    REQUIRE(hover);
+    CHECK_EQ(hover->contents.value, codeBlock("luau", "Part"));
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ReplicatedStorage",
+                    "ClassName": "ReplicatedStorage",
+                    "FilePaths": [],
+                    "Children": [
+                        {
+                            "Name": "SharedModule",
+                            "ClassName": "Part",
+                            "FilePaths": ["src/ReplicatedStorage/SharedModule.luau"],
+                            "Children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // After a plugin update, we still re-use the old root source node
+    CHECK_EQ(originalRootNode, platform->rootSourceNode);
+
+    auto hover2 = workspace.hover(params, nullptr);
+    REQUIRE(hover2);
+    CHECK_EQ(hover2->contents.value, codeBlock("luau", "Part"));
 }
 
 TEST_SUITE_END();

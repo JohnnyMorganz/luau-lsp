@@ -11,7 +11,9 @@
 #define NOMINMAX
 #endif
 #include <direct.h>
+#include <share.h>
 #include <windows.h>
+#include <shellapi.h>
 #else
 #include <dirent.h>
 #include <fcntl.h>
@@ -36,7 +38,7 @@ std::wstring fromUtf8(const std::string& path)
     return buf;
 }
 
-static std::string toUtf8(const std::wstring& path)
+std::string toUtf8(const std::wstring& path)
 {
     size_t result = WideCharToMultiByte(CP_UTF8, 0, path.data(), int(path.size()), nullptr, 0, nullptr, nullptr);
     LUAU_ASSERT(result);
@@ -45,6 +47,25 @@ static std::string toUtf8(const std::wstring& path)
     WideCharToMultiByte(CP_UTF8, 0, path.data(), int(path.size()), &buf[0], int(buf.size()), nullptr, nullptr);
 
     return buf;
+}
+
+std::vector<std::string> getUtf8CommandLineArgs()
+{
+    int argc;
+    LPWSTR* argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (!argvW)
+        return {};
+
+    std::vector<std::string> args;
+    args.reserve(argc);
+
+    for (int i = 0; i < argc; ++i)
+    {
+        args.push_back(toUtf8(argvW[i]));
+    }
+
+    LocalFree(argvW);
+    return args;
 }
 #endif
 
@@ -91,6 +112,29 @@ std::optional<std::string> readFile(const std::string& name)
     // LUAU-LSP DEVIATION: We don't remove shebang here, that is handled in TextDocument
 
     return result;
+}
+
+bool writeFileIfModified(const std::string& name, const std::string& content)
+{
+    // Skip write if file already has the same content
+    if (auto existingContent = readFile(name))
+    {
+        if (*existingContent == content)
+            return true;
+    }
+#ifdef _WIN32
+    FILE* file = _wfsopen(fromUtf8(name).c_str(), L"wb", _SH_DENYWR);
+#else
+    FILE* file = fopen(name.c_str(), "wb");
+#endif
+
+    if (!file)
+        return false;
+
+    size_t written = fwrite(content.data(), 1, content.size(), file);
+    fclose(file);
+
+    return written == content.size();
 }
 
 std::optional<std::string> getCurrentWorkingDirectory()

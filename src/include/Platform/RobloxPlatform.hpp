@@ -15,57 +15,6 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
-struct RobloxFindImportsVisitor : public Luau::LanguageServer::AutoImports::FindImportsVisitor
-{
-public:
-    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
-    std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
-
-    size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber)
-    {
-        if (firstServiceDefinitionLine)
-            minimumLineNumber = *firstServiceDefinitionLine > minimumLineNumber ? *firstServiceDefinitionLine : minimumLineNumber;
-
-        size_t lineNumber = minimumLineNumber;
-        for (auto& [definedService, stat] : serviceLineMap)
-        {
-            auto location = stat->location.end.line;
-            if (definedService < serviceName && location >= lineNumber)
-                lineNumber = location + 1;
-        }
-        return lineNumber;
-    }
-
-    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
-    {
-        if (!isGetService(expr))
-            return false;
-
-        firstServiceDefinitionLine = !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= startLine
-                                         ? startLine
-                                         : firstServiceDefinitionLine.value();
-        lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= endLine ? endLine : lastServiceDefinitionLine.value();
-        serviceLineMap.emplace(std::string(localName->name.value), local);
-
-        return true;
-    }
-
-    [[nodiscard]] size_t getMinimumRequireLine() const override
-    {
-        if (lastServiceDefinitionLine)
-            return *lastServiceDefinitionLine + 1;
-
-        return 0;
-    }
-
-    [[nodiscard]] bool shouldPrependNewline(size_t lineNumber) const override
-    {
-        return lastServiceDefinitionLine && lineNumber - *lastServiceDefinitionLine == 1;
-    }
-};
-
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
@@ -74,12 +23,14 @@ struct SourceNode
     std::vector<std::string> filePaths{};
     std::vector<SourceNode*> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    bool pluginManaged = false;
 
     // The corresponding TypeId for this sourcemap node
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
     mutable std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
-    SourceNode(std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children);
+    SourceNode(
+        std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children, bool pluginManaged = false);
 
     bool isScript() const;
     std::optional<std::string> getScriptFilePath() const;
@@ -89,6 +40,9 @@ struct SourceNode
     // O(n) search for ancestor of name
     std::optional<const SourceNode*> findAncestor(const std::string& name) const;
 
+    bool containsFilePaths() const;
+    ordered_json toJson() const;
+
     static SourceNode* fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator);
 };
 
@@ -96,6 +50,7 @@ struct PluginNode
 {
     std::string name = "";
     std::string className = "";
+    std::vector<std::string> filePaths{};
     std::vector<PluginNode*> children{};
 
     static PluginNode* fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator);
@@ -108,7 +63,6 @@ private:
     PluginNode* pluginInfo = nullptr;
 
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
-    mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
 
     std::optional<const SourceNode*> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
     std::optional<const SourceNode*> getSourceNodeFromRealPath(const Uri& name) const;
@@ -123,6 +77,8 @@ public:
     Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
     Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
 
+    mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
+
     Luau::TypeArena instanceTypes;
 
     /// These are "private" but exposed for unit testing only
@@ -133,8 +89,13 @@ public:
     bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
     void writePathsToMap(SourceNode* node, const std::string& base);
+    void updateSourcemapTypes();
 
     std::optional<Uri> getRealPathFromSourceNode(const SourceNode* sourceNode) const;
+
+    void clearPluginManagedNodesFromSourcemap(SourceNode* sourceNode);
+
+    bool hydrateSourcemapWithPluginInfo();
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
@@ -174,6 +135,10 @@ public:
 
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;
+    void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result) override;
+    std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors) override;
 
     lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module) override;
 
