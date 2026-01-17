@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.60.1] - 2026-01-15
+
+### Changed
+
+- Sync to upstream Luau 0.704
+
+### Fixed
+
+- Fixed use-after-free in cached DataModel types after a Studio Plugin update with an existing sourcemap, leading to server crashes ([#1331](https://github.com/JohnnyMorganz/luau-lsp/issues/1331))
+
 ## [1.60.0] - 2026-01-04
 
 ### Added

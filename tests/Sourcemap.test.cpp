@@ -787,7 +787,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
+    platform->onStudioPluginFullChange(pluginData);
 
     // Update sourcemap successfully
     REQUIRE(platform->updateSourceMap());
@@ -844,9 +844,7 @@ TEST_CASE_FIXTURE(Fixture, "plugin_info_hydrates_existing_sourcemap_and_marks_no
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    bool updated = platform->hydrateSourcemapWithPluginInfo();
-    CHECK(updated);
+    platform->onStudioPluginFullChange(pluginData);
 
     // Verify that ReplicatedStorage still exists and is still NOT plugin managed
     rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
@@ -868,7 +866,6 @@ TEST_CASE_FIXTURE(Fixture, "plugin_info_creates_datamodel_root_when_no_sourcemap
     REQUIRE_FALSE(platform->rootSourceNode);
 
     // Apply plugin info without any filesystem sourcemap
-    platform->pluginNodeAllocator.clear();
     auto pluginData = json::parse(R"(
         {
             "Name": "game",
@@ -887,10 +884,8 @@ TEST_CASE_FIXTURE(Fixture, "plugin_info_creates_datamodel_root_when_no_sourcemap
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    bool updated = platform->hydrateSourcemapWithPluginInfo();
+    platform->onStudioPluginFullChange(pluginData);
 
-    CHECK(updated);
     REQUIRE(platform->rootSourceNode);
     CHECK_EQ(platform->rootSourceNode->name, "game");
     CHECK_EQ(platform->rootSourceNode->className, "DataModel");
@@ -926,7 +921,6 @@ TEST_CASE_FIXTURE(Fixture, "plugin_clear_removes_plugin_managed_nodes_only")
     REQUIRE(platform->rootSourceNode);
 
     // Apply plugin info that adds a plugin-managed child
-    platform->pluginNodeAllocator.clear();
     auto pluginData = json::parse(R"(
         {
             "Name": "game",
@@ -939,15 +933,14 @@ TEST_CASE_FIXTURE(Fixture, "plugin_clear_removes_plugin_managed_nodes_only")
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    platform->hydrateSourcemapWithPluginInfo();
+    platform->onStudioPluginFullChange(pluginData);
 
     // Verify both children exist
     REQUIRE(platform->rootSourceNode->findChild("ReplicatedStorage"));
     REQUIRE(platform->rootSourceNode->findChild("ServerStorage"));
 
     // Clear plugin-managed nodes (simulates plugin disconnect)
-    platform->clearPluginManagedNodesFromSourcemap(platform->rootSourceNode);
+    platform->onStudioPluginClear();
 
     // Verify filesystem-sourced child still exists
     auto rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
@@ -1034,10 +1027,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autogenerate_writes_file_when_plugin_info_
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    bool didUpdate = platform->hydrateSourcemapWithPluginInfo();
-
-    CHECK(didUpdate);
+    platform->onStudioPluginFullChange(pluginData);
 
     // Verify the sourcemap file was updated
     auto updatedContents = Luau::FileUtils::readFile(sourcemapPath);
@@ -1117,10 +1107,7 @@ TEST_CASE_FIXTURE(Fixture, "plugin_info_updates_file_paths_on_existing_nodes")
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    bool didUpdate = platform->hydrateSourcemapWithPluginInfo();
-
-    CHECK(didUpdate);
+    platform->onStudioPluginFullChange(pluginData);
 
     // Verify filePaths were updated
     rsNode = platform->rootSourceNode->findChild("ReplicatedStorage");
@@ -1274,7 +1261,6 @@ TEST_CASE_FIXTURE(Fixture, "handle_notification_routes_plugin_clear_notification
     )");
 
     // Add a plugin-managed child
-    platform->pluginNodeAllocator.clear();
     auto pluginData = json::parse(R"(
         {
             "Name": "game",
@@ -1287,8 +1273,7 @@ TEST_CASE_FIXTURE(Fixture, "handle_notification_routes_plugin_clear_notification
             ]
         }
     )");
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    platform->hydrateSourcemapWithPluginInfo();
+    platform->onStudioPluginFullChange(pluginData);
 
     REQUIRE(platform->rootSourceNode->findChild("ServerStorage"));
 
@@ -1504,9 +1489,7 @@ TEST_CASE_FIXTURE(Fixture, "plugin_file_paths_propagate_to_source_node_during_hy
             ]
         }
     )");
-    platform->pluginNodeAllocator.clear();
-    platform->setPluginInfo(PluginNode::fromJson(pluginData, platform->pluginNodeAllocator));
-    platform->hydrateSourcemapWithPluginInfo();
+    platform->onStudioPluginFullChange(pluginData);
 
     auto moduleNode = platform->rootSourceNode->findChild("Module");
     REQUIRE(moduleNode);
@@ -1567,6 +1550,74 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_file_change_detection_works_with_relative_
         }
     }
     CHECK(foundLogMessage);
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_update_clears_cached_sourcemap_types_on_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [
+                        {
+                            "name": "Shared",
+                            "className": "Folder",
+                            "children": [{ "name": "Remotes", "className": "Part" }]
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    auto originalRootNode = platform->rootSourceNode;
+
+    auto document = newDocument("foo.luau", R"(
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Remotes = require(ReplicatedStorage.Shared.Remotes)
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = {document};
+    params.position = lsp::Position{2, 59};
+    auto hover = workspace.hover(params, nullptr);
+
+    REQUIRE(hover);
+    CHECK_EQ(hover->contents.value, codeBlock("luau", "Part"));
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "ReplicatedStorage",
+                    "ClassName": "ReplicatedStorage",
+                    "FilePaths": [],
+                    "Children": [
+                        {
+                            "Name": "SharedModule",
+                            "ClassName": "Part",
+                            "FilePaths": ["src/ReplicatedStorage/SharedModule.luau"],
+                            "Children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    // After a plugin update, we still re-use the old root source node
+    CHECK_EQ(originalRootNode, platform->rootSourceNode);
+
+    auto hover2 = workspace.hover(params, nullptr);
+    REQUIRE(hover2);
+    CHECK_EQ(hover2->contents.value, codeBlock("luau", "Part"));
 }
 
 TEST_SUITE_END();

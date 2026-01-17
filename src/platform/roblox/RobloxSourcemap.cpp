@@ -432,6 +432,13 @@ static void clearSourcemapGeneratedTypes(Luau::GlobalTypes& globals)
     }
 }
 
+static void clearTypesFromSourcemapNodes(SourceNode* node)
+{
+    node->tys.clear();
+    for (const auto& child : node->children)
+        clearTypesFromSourcemapNodes(child);
+}
+
 void RobloxPlatform::clearSourcemapTypes()
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::clearSourcemapTypes", "LSP");
@@ -440,6 +447,8 @@ void RobloxPlatform::clearSourcemapTypes()
     clearSourcemapGeneratedTypes(workspaceFolder->frontend.globals);
     if (!FFlag::LuauSolverV2)
         clearSourcemapGeneratedTypes(workspaceFolder->frontend.globalsForAutocomplete);
+    if (rootSourceNode)
+        clearTypesFromSourcemapNodes(rootSourceNode);
 }
 
 bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
