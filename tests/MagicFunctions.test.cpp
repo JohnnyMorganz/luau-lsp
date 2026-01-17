@@ -1,6 +1,8 @@
 #include "doctest.h"
 #include "Fixture.h"
 
+LUAU_FASTFLAG(LuauTypeCheckerUdtfRenameClassToExtern)
+
 TEST_SUITE_BEGIN("MagicFunctions");
 
 TEST_CASE_FIXTURE(Fixture, "instance_new")
@@ -114,7 +116,10 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
+    else
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "enum_is_a")
@@ -170,7 +175,10 @@ TEST_CASE_FIXTURE(Fixture, "is_property_modified_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
+    else
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "reset_property_to_default")
@@ -191,7 +199,10 @@ TEST_CASE_FIXTURE(Fixture, "reset_property_to_default_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
+    else
+        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
 }
 
 TEST_SUITE_END();
