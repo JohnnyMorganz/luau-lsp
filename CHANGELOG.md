@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Hover information is no longer shown when hovering over symbols inside a comment ([#1337](https://github.com/JohnnyMorganz/luau-lsp/issues/1337))
 - `luau-lsp analyze` will now process `@roblox` definition files before others, matching the behavior of the language server ([#1341](https://github.com/JohnnyMorganz/luau-lsp/pull/1341))
+- Studio plugin no longer crashes when lacking script injection permission ([#1343](https://github.com/JohnnyMorganz/luau-lsp/pull/1343))
 
 ## [1.60.1] - 2026-01-15
 
