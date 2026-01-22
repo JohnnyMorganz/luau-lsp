@@ -134,6 +134,7 @@ ConnectAction.Triggered:Connect(toggleConnection)
 local SettingsButton = toolbar:CreateButton("Settings", "Open Settings", Assets.SettingsIcon) :: PluginToolbarButton
 SettingsButton.ClickableWhenViewportHidden = true
 SettingsButton.Click:Connect(function()
+	settings:injectModule()
 	settings:edit()
 end)
 
