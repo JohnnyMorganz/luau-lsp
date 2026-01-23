@@ -72,8 +72,8 @@ function Settings.init(self: Settings): ()
 	if not self._module then
 		local newModule = self._defaultSettingsModule:Clone() :: ModuleScript
 		newModule.Name = "LuauLSP_Settings"
-		newModule.Parent = TestService
 		self._module = newModule
+		self:injectModule()
 	end
 	assert(self._module, "Failed to get settings module")
 
@@ -87,6 +87,19 @@ function Settings.init(self: Settings): ()
 	end)
 
 	self:load()
+end
+
+function Settings.injectModule(self: Settings): ()
+	local success, result = pcall(function()
+		if self._module and self._module.Parent ~= TestService then
+			self._module.Parent = TestService
+		end
+	end)
+
+	if not success then
+		Log.warn("Failed to inject settings module:", result)
+		return
+	end
 end
 
 --- Returns whether settings have been successfully loaded.
