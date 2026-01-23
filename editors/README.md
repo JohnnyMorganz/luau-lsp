@@ -30,7 +30,7 @@ The `name` should be a unique reference to the definitions file.
 This can be done multiple times:
 
 ```sh
-$ luau-lsp lsp --definition:@roblox=/path/to/globalTypes.d.luau
+$ luau-lsp lsp --definitions:@roblox=/path/to/globalTypes.d.luau
 ```
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
