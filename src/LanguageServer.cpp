@@ -371,6 +371,16 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->requireGraph(params);
     }
+    else if (method == "luau-lsp/debug/viewInternalSource")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/debug/viewInternalSource")
+        auto params = baseParams->get<lsp::InternalSourceParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto textDocument = workspace->fileResolver.getTextDocument(params.textDocument.uri);
+        if (!textDocument)
+            throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+        response = textDocument->getText();
+    }
     else
     {
         throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
