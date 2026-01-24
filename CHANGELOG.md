@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.61.0] - 2026-01-24
+
 ### Added
 
 - Go To Definition on the original local function definition now works. This means Ctrl/Cmd+Click on the local function declaration will now open the references panel in VSCode ([#1122](https://github.com/JohnnyMorganz/luau-lsp/issues/1122))
@@ -1853,7 +1855,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
