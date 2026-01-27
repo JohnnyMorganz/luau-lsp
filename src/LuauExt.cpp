@@ -442,7 +442,7 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::Fi
     diagnostic.message = message;
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {toUTF16(textDocument, error.location.begin), toUTF16(textDocument, error.location.end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau.org/typecheck")};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/types")};
     return diagnostic;
 }
 
