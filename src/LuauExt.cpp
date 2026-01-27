@@ -442,7 +442,7 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::Fi
     diagnostic.message = message;
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {toUTF16(textDocument, error.location.begin), toUTF16(textDocument, error.location.end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/typecheck")};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/typecheck")};
     return diagnostic;
 }
 
@@ -456,7 +456,7 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDo
     diagnostic.message = lintName + ": " + lint.text;
     diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
     diagnostic.range = {toUTF16(textDocument, lint.location.begin), toUTF16(textDocument, lint.location.end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
 
     if (lint.code == Luau::LintWarning::Code::Code_LocalUnused || lint.code == Luau::LintWarning::Code::Code_ImportUnused ||
         lint.code == Luau::LintWarning::Code::Code_FunctionUnused)
@@ -479,7 +479,7 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
     diagnostic.message = "SyntaxError: " + error.getMessage();
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {toUTF16(textDocument, error.getLocation().begin), toUTF16(textDocument, error.getLocation().end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/syntax")};
     return diagnostic;
 }
 
