@@ -61,6 +61,16 @@ public:
 
     [[nodiscard]] virtual std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const;
 
+    /// Infer the module name for a URI which may not currently exist (e.g. for rename operations)
+    [[nodiscard]] virtual std::optional<Luau::ModuleName> inferModuleNameFromUri(const Uri& uri) const;
+
+    /// Compute the new optimal require path to a file
+    [[nodiscard]] virtual std::optional<std::string> computeNewRequirePath(
+        const Luau::ModuleName& dependentModuleName,
+        const Luau::ModuleName& newTargetModuleName,
+        const Luau::AstNode* originalNode,
+        const ClientConfiguration& config) const;
+
     [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const
     {
         return Luau::SourceCode::Type::Module;

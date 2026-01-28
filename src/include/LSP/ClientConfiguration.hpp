@@ -256,6 +256,24 @@ struct ClientFormatConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFormatConfiguration, convertQuotes);
 
+enum struct UpdateRequiresOnFileMoveConfig
+{
+    Always,
+    Never,
+    // Prompt, // TODO: Future support
+};
+NLOHMANN_JSON_SERIALIZE_ENUM(UpdateRequiresOnFileMoveConfig, {
+                                                                  {UpdateRequiresOnFileMoveConfig::Always, "always"},
+                                                                  {UpdateRequiresOnFileMoveConfig::Never, "never"},
+                                                              })
+
+struct ClientUpdateRequiresOnFileMoveConfiguration
+{
+    /// Whether to update requires when files are moved/renamed
+    UpdateRequiresOnFileMoveConfig enabled = UpdateRequiresOnFileMoveConfig::Never;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientUpdateRequiresOnFileMoveConfiguration, enabled);
+
 enum struct LSPPlatformConfig
 {
     Standard,
@@ -294,6 +312,7 @@ struct ClientConfiguration
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
     ClientFormatConfiguration format{};
+    ClientUpdateRequiresOnFileMoveConfiguration updateRequiresOnFileMove{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format, updateRequiresOnFileMove);
