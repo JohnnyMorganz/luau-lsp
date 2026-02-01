@@ -19,19 +19,19 @@ git submodule update --init --recursive
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug  # Use Debug for faster builds during development
 
-# Build the CLI
-cmake --build . --target Luau.LanguageServer.CLI --config Debug
+# Build the CLI (use -j for parallel builds)
+cmake --build . --target Luau.LanguageServer.CLI --config Debug -j$(nproc)
 
 # Build tests (use Debug for faster iteration)
-cmake --build . --target Luau.LanguageServer.Test --config Debug
+cmake --build . --target Luau.LanguageServer.Test --config Debug -j$(nproc)
 
 # For release/production builds, use Release mode:
 # cmake .. -DCMAKE_BUILD_TYPE=Release
-# cmake --build . --target Luau.LanguageServer.CLI --config Release
+# cmake --build . --target Luau.LanguageServer.CLI --config Release -j$(nproc)
 
 # Build with ASAN (Linux/macOS)
 cmake .. -DLSP_BUILD_ASAN:BOOL=ON
-cmake --build . --target Luau.LanguageServer.Test
+cmake --build . --target Luau.LanguageServer.Test -j$(nproc)
 ```
 
 ## Running Tests
