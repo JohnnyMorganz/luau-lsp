@@ -15,13 +15,19 @@ git clone https://github.com/JohnnyMorganz/luau-lsp.git --recurse-submodules
 # Update submodules
 git submodule update --init --recursive
 
-# Build the CLI
+# Configure build (from repo root)
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target Luau.LanguageServer.CLI --config Release
+cmake .. -DCMAKE_BUILD_TYPE=Debug  # Use Debug for faster builds during development
 
-# Build tests
-cmake --build . --target Luau.LanguageServer.Test --config Release
+# Build the CLI
+cmake --build . --target Luau.LanguageServer.CLI --config Debug
+
+# Build tests (use Debug for faster iteration)
+cmake --build . --target Luau.LanguageServer.Test --config Debug
+
+# For release/production builds, use Release mode:
+# cmake .. -DCMAKE_BUILD_TYPE=Release
+# cmake --build . --target Luau.LanguageServer.CLI --config Release
 
 # Build with ASAN (Linux/macOS)
 cmake .. -DLSP_BUILD_ASAN:BOOL=ON
