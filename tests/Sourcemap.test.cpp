@@ -2,7 +2,6 @@
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "Protocol/Workspace.hpp"
-#include "ScopedFlags.h"
 #include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("SourcemapTests");
@@ -661,7 +660,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_updates_marks_files_as_dirty")
 
 TEST_CASE_FIXTURE(Fixture, "can_modify_the_parent_of_types_in_strict_mode")
 {
-    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+    ENABLE_NEW_SOLVER();
 
     client->globalConfig.diagnostics.strictDatamodelTypes = true;
     loadSourcemap(R"(

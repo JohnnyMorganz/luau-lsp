@@ -3,8 +3,6 @@
 #include "LSP/IostreamHelpers.hpp"
 #include "Luau/Common.h"
 
-LUAU_FASTFLAG(LuauSolverV2)
-
 TEST_SUITE_BEGIN("InlayHints");
 
 static std::string labelToString(const std::vector<lsp::InlayHintLabelPart>& parts)
