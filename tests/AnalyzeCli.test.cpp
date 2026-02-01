@@ -4,9 +4,6 @@
 #include "Analyze/AnalyzeCli.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
-#include "ScopedFlags.h"
-
-LUAU_FASTFLAG(LuauSolverV2)
 
 namespace std
 {

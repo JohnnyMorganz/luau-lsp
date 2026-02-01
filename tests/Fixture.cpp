@@ -17,8 +17,6 @@
 static const char* mainModuleName = "MainModule";
 static std::atomic<int> fixtureCounter{0};
 
-LUAU_FASTFLAG(LuauSolverV2)
-
 namespace Luau::LanguageServer
 {
 ClientConfiguration defaultTestClientConfiguration()

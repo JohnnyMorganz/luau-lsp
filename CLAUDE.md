@@ -124,6 +124,22 @@ TEST_CASE_FIXTURE(Fixture, "FeatureName")
 - `loadSourcemap()`: Load Rojo sourcemap for Roblox tests
 - `sourceWithMarker()`: Parse source with `|` cursor position marker
 
+### Testing with the New Type Solver
+
+When writing tests that require the new Luau type solver (`LuauSolverV2`), use the `ENABLE_NEW_SOLVER()` macro at the start of the test:
+
+```cpp
+TEST_CASE_FIXTURE(Fixture, "feature_requiring_new_solver")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto uri = newDocument("test.luau", "local x = 1");
+    // Test code...
+}
+```
+
+**Important:** Do not use `ScopedFastFlag{FFlag::LuauSolverV2, true}` directly. The Frontend caches the solver mode at construction time, so the `ENABLE_NEW_SOLVER()` macro is required to properly update both the FFlag and the Frontend's cached solver mode.
+
 ## Key CMake Targets
 
 - `Luau.LanguageServer`: Static library containing LSP implementation
