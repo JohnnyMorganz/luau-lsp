@@ -129,19 +129,19 @@ jobs:
               chmod 777 editors/code/bin/crashpad_handler
           fi
 
-    #   - name: Setup Sentry CLI
-    #     uses: matbour/setup-sentry-cli@v2
-    #     if: matrix.crash-reporting == true
-    #     with:
-    #       token: ${{ secrets.SENTRY_AUTH_TOKEN }} //! we can use our own sentry here
-    #       organization: luau-lsp
-    #       project: luau-lsp
+      #   - name: Setup Sentry CLI
+      #     uses: matbour/setup-sentry-cli@v2
+      #     if: matrix.crash-reporting == true
+      #     with:
+      #       token: ${{ secrets.SENTRY_AUTH_TOKEN }} //! we can use our own sentry here
+      #       organization: luau-lsp
+      #       project: luau-lsp
 
-      - name: Upload debug symbols
-        shell: bash
-        if: matrix.crash-reporting == true
-        run: |
-          sentry-cli debug-files upload --include-sources build
+      #   - name: Upload debug symbols
+      #     shell: bash
+      #     if: matrix.crash-reporting == true
+      #     run: |
+      #       sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
         shell: bash
