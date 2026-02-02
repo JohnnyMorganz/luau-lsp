@@ -1,9 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
-#include "ScopedFlags.h"
-
-LUAU_FASTFLAG(LuauSolverV2)
 
 TEST_SUITE_BEGIN("SignatureHelp");
 
@@ -102,7 +99,7 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_respects_cancellation")
 
 TEST_CASE_FIXTURE(Fixture, "signature_help_does_not_show_first_argument_on_method_calls_from_type_function_ftv")
 {
-    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+    ENABLE_NEW_SOLVER();
 
     auto [source, marker] = sourceWithMarker(R"(
         type function repro()

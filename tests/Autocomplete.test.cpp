@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "ScopedFlags.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
@@ -1826,7 +1825,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_still_puts_cursor_inside_of_call_if_the
 
 TEST_CASE_FIXTURE(Fixture, "autocomplete_label_does_not_show_hidden_variadics")
 {
-    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+    ENABLE_NEW_SOLVER();
 
     auto [source, marker] = sourceWithMarker(R"(
         local function isabsolute(path: string)
@@ -1851,7 +1850,7 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_label_does_not_show_hidden_variadics")
 
 TEST_CASE_FIXTURE(Fixture, "prioritise_properties_when_sorting_autocomplete_in_table")
 {
-    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+    ENABLE_NEW_SOLVER();
 
     auto [source, marker] = sourceWithMarker(R"(
         type Options = {
@@ -1885,7 +1884,7 @@ TEST_CASE_FIXTURE(Fixture, "prioritise_properties_when_sorting_autocomplete_in_t
 
 TEST_CASE_FIXTURE(Fixture, "prioritise_relevant_keywords_when_inside_of_if")
 {
-    ScopedFastFlag sff{FFlag::LuauSolverV2, true};
+    ENABLE_NEW_SOLVER();
 
     auto [source, marker] = sourceWithMarker(R"(
         if true then

@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sync to upstream Luau 0.707
+
+## [1.61.0] - 2026-01-24
+
+### Added
+
+- Go To Definition on the original local function definition now works. This means Ctrl/Cmd+Click on the local function declaration will now open the references panel in VSCode ([#1122](https://github.com/JohnnyMorganz/luau-lsp/issues/1122))
+- Go To Definition and Documentation is now available on named types inside of inlay hints ([#876](https://github.com/JohnnyMorganz/luau-lsp/issues/876), [#877](https://github.com/JohnnyMorganz/luau-lsp/issues/877))
+
+### Changed
+
+- Sync to upstream Luau 0.706
+
+### Fixed
+
+- Hover information is no longer shown when hovering over symbols inside a comment ([#1337](https://github.com/JohnnyMorganz/luau-lsp/issues/1337))
+- `luau-lsp analyze` will now process `@roblox` definition files before others, matching the behavior of the language server ([#1341](https://github.com/JohnnyMorganz/luau-lsp/pull/1341))
+- Studio plugin no longer crashes when lacking script injection permission ([#1343](https://github.com/JohnnyMorganz/luau-lsp/pull/1343))
+
 ## [1.60.1] - 2026-01-15
 
 ### Changed

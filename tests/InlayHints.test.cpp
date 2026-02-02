@@ -3,9 +3,15 @@
 #include "LSP/IostreamHelpers.hpp"
 #include "Luau/Common.h"
 
-LUAU_FASTFLAG(LuauSolverV2)
-
 TEST_SUITE_BEGIN("InlayHints");
+
+static std::string labelToString(const std::vector<lsp::InlayHintLabelPart>& parts)
+{
+    std::string result;
+    for (const auto& part : parts)
+        result += part.value;
+    return result;
+}
 
 static lsp::InlayHintResult processInlayHint(Fixture* fixture, const std::string source)
 {
@@ -26,7 +32,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 15});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -48,7 +54,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_multiple_local_definition")
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 15});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -59,7 +65,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_multiple_local_definition")
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{1, 15}, {1, 15}});
 
     CHECK_EQ(result[1].position, lsp::Position{1, 18});
-    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(labelToString(result[1].label), ": string");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -141,7 +147,7 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 15});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -160,7 +166,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_local_definition")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 15});
-    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(labelToString(result[0].label), ": *error-type*");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -194,7 +200,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_in_for_loop")
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{3, 13});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -205,7 +211,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_in_for_loop")
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{3, 13}, {3, 13}});
 
     CHECK_EQ(result[1].position, lsp::Position{3, 16});
-    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(labelToString(result[1].label), ": string");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -244,7 +250,7 @@ TEST_CASE_FIXTURE(Fixture, "hide_inlay_hints_on_underscore_in_for_loop")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{3, 16});
-    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(labelToString(result[0].label), ": string");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -298,7 +304,7 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{3, 13});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -306,7 +312,7 @@ TEST_CASE_FIXTURE(Fixture, "respect_variable_types_make_insertable_configuration
     CHECK_EQ(result[0].textEdits.size(), 0);
 
     CHECK_EQ(result[1].position, lsp::Position{3, 16});
-    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(labelToString(result[1].label), ": string");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -326,7 +332,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_for_loop")
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 13});
-    CHECK_EQ(result[0].label, ": *error-type*");
+    CHECK_EQ(labelToString(result[0].label), ": *error-type*");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -334,7 +340,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_error_types_for_loop")
     CHECK_EQ(result[0].textEdits.size(), 0);
 
     CHECK_EQ(result[1].position, lsp::Position{1, 15});
-    CHECK_EQ(result[1].label, ": *error-type*");
+    CHECK_EQ(labelToString(result[1].label), ": *error-type*");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -370,7 +376,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_type")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{3, 28});
-    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(labelToString(result[0].label), ": string");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -422,7 +428,7 @@ TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_method")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 24});
-    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(labelToString(result[0].label), ": string");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -445,7 +451,7 @@ TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_vararg")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 29});
-    CHECK_EQ(result[0].label, ": any");
+    CHECK_EQ(labelToString(result[0].label), ": any");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -468,7 +474,7 @@ TEST_CASE_FIXTURE(Fixture, "handle_parameter_types_inlay_hint_for_vararg_2")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 40});
-    CHECK_EQ(result[0].label, ": any");
+    CHECK_EQ(labelToString(result[0].label), ": any");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -519,7 +525,7 @@ TEST_CASE_FIXTURE(Fixture, "respect_parameter_types_make_insertable_configuratio
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{3, 28});
-    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(labelToString(result[0].label), ": string");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -540,7 +546,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_return_type")
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 62});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -578,7 +584,7 @@ TEST_CASE_FIXTURE(Fixture, "respect_function_return_type_make_insertable_configu
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 62});
-    CHECK_EQ(result[0].label, ": number");
+    CHECK_EQ(labelToString(result[0].label), ": number");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -600,7 +606,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_name_in_call_with_lite
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{4, 11});
-    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(labelToString(result[0].label), "value:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -623,7 +629,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_parameter_name_in_call_with_vari
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 11});
-    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(labelToString(result[0].label), "value:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -676,7 +682,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_variable_matches_parameter_name_a
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 11});
-    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(labelToString(result[0].label), "value:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -715,7 +721,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_if_indexed_expression_matches_parame
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 11});
-    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(labelToString(result[0].label), "value:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -738,7 +744,7 @@ TEST_CASE_FIXTURE(Fixture, "only_show_parameter_name_for_literal_based_on_config
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 17});
-    CHECK_EQ(result[0].label, "value2:");
+    CHECK_EQ(labelToString(result[0].label), "value2:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -761,7 +767,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_show_inlay_hint_for_self_type_when_calling_with
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 13});
-    CHECK_EQ(result[0].label, "value:");
+    CHECK_EQ(labelToString(result[0].label), "value:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -784,7 +790,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_self_type_when_calling_with_dot"
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{5, 13});
-    CHECK_EQ(result[0].label, "self:");
+    CHECK_EQ(labelToString(result[0].label), "self:");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -792,7 +798,7 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_for_self_type_when_calling_with_dot"
     CHECK_EQ(result[0].textEdits.size(), 0);
 
     CHECK_EQ(result[1].position, lsp::Position{5, 16});
-    CHECK_EQ(result[1].label, "value:");
+    CHECK_EQ(labelToString(result[1].label), "value:");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Parameter);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -829,9 +835,9 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions")
 
     CHECK_EQ(result[0].position, lsp::Position{2, 30});
     if (FFlag::LuauSolverV2)
-        CHECK_EQ(result[0].label, ": unknown");
+        CHECK_EQ(labelToString(result[0].label), ": unknown");
     else
-        CHECK_EQ(result[0].label, ": a");
+        CHECK_EQ(labelToString(result[0].label), ": a");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -866,7 +872,7 @@ TEST_CASE_FIXTURE(Fixture, "skip_self_as_first_parameter_on_method_definitions_2
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{6, 30});
-    CHECK_EQ(result[0].label, ": string");
+    CHECK_EQ(labelToString(result[0].label), ": string");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -898,7 +904,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_f
     REQUIRE_EQ(result.size(), 2);
 
     CHECK_EQ(result[0].position, lsp::Position{6, 31});
-    CHECK_EQ(result[0].label, ": Class");
+    CHECK_EQ(labelToString(result[0].label), ": Class");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK_EQ(result[0].paddingLeft, false);
@@ -909,7 +915,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_skip_self_as_first_parameter_when_using_plain_f
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{6, 31}, {6, 31}});
 
     CHECK_EQ(result[1].position, lsp::Position{6, 36});
-    CHECK_EQ(result[1].label, ": string");
+    CHECK_EQ(labelToString(result[1].label), ": string");
     CHECK_EQ(result[1].kind, lsp::InlayHintKind::Type);
     CHECK_EQ(result[1].tooltip, std::nullopt);
     CHECK_EQ(result[1].paddingLeft, false);
@@ -927,6 +933,106 @@ TEST_CASE_FIXTURE(Fixture, "inlay_hints_respects_cancellation")
 
     auto document = newDocument("a.luau", "local x = 1");
     CHECK_THROWS_AS(workspace.inlayHint(lsp::InlayHintParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_label_uses_parts")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        local x = 1
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    REQUIRE_GE(result[0].label.size(), 2);
+    CHECK_EQ(result[0].label[0].value, ": ");
+    CHECK_EQ(result[0].label[1].value, "number");
+    CHECK_EQ(result[0].label[1].location, std::nullopt); // Primitive types don't have location
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_custom_type_has_separate_part")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        type Player = { name: string }
+        local p: Player = { name = "test" }
+        local x = p
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    REQUIRE_EQ(result[0].label.size(), 2);
+    CHECK_EQ(result[0].label[0].value, ": ");
+    CHECK_EQ(result[0].label[1].value, "Player");
+    REQUIRE(result[0].label[1].location);
+    CHECK_EQ(result[0].label[1].location->range, lsp::Range{{1, 22}, {1, 38}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_union_type_of_primitives_has_no_parts")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        local x: string | number = "test"
+        local y = x
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    REQUIRE_EQ(result[0].label.size(), 2);
+    CHECK_EQ(result[0].label[0].value, ": ");
+    CHECK_EQ(result[0].label[1].value, "number | string");
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_union_with_custom_types_has_separate_parts")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    auto source = R"(
+        type Foo = { x: number }
+        type Bar = { y: string }
+        local x: Foo | Bar = { x = 1 }
+        local y = x
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    REQUIRE_EQ(result[0].label.size(), 4);
+    CHECK_EQ(result[0].label[0].value, ": ");
+    CHECK_EQ(result[0].label[1].value, "Bar");
+    REQUIRE(result[0].label[1].location);
+    CHECK_EQ(result[0].label[1].location->range, lsp::Range{{2, 19}, {2, 32}});
+    CHECK_EQ(result[0].label[2].value, " | ");
+    CHECK_EQ(result[0].label[3].value, "Foo");
+    REQUIRE(result[0].label[3].location);
+    CHECK_EQ(result[0].label[3].location->range, lsp::Range{{1, 19}, {1, 32}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_generics_and_extern_type")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->documentation["@roblox/globaltype/Instance"] = Luau::BasicDocumentation{"Example Class Documentation"};
+    auto source = R"(
+        type Box<T> = { inner: T }
+        local x: Box<Instance>
+        local y = x
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    REQUIRE_EQ(result[0].label.size(), 5);
+    CHECK_EQ(result[0].label[0].value, ": ");
+    CHECK_EQ(result[0].label[1].value, "Box");
+    REQUIRE(result[0].label[1].location);
+    CHECK_EQ(result[0].label[1].location->range, lsp::Range{{2, 17}, {2, 30}});
+    CHECK_EQ(result[0].label[2].value, "<");
+    CHECK_EQ(result[0].label[3].value, "Instance");
+    REQUIRE(result[0].label[3].tooltip);
+    CHECK_EQ(result[0].label[3].tooltip->value, "Example Class Documentation");
+    CHECK_EQ(result[0].label[4].value, ">");
 }
 
 TEST_SUITE_END();

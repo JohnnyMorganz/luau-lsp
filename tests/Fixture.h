@@ -15,6 +15,7 @@
 
 #include "LSP/Workspace.hpp"
 #include "TempDir.h"
+#include "ScopedFlags.h"
 
 #include <iostream>
 #include <string>
@@ -23,6 +24,8 @@
 #include <optional>
 
 #include "TestClient.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 // TODO: the rest should be part of this namespace...
 namespace Luau::LanguageServer
@@ -99,3 +102,10 @@ std::string applyEdit(const std::string& source, const std::vector<lsp::TextEdit
 
 /// Remove common leading whitespace from each line (like Python's textwrap.dedent)
 std::string dedent(std::string source);
+
+/// Enables the new Luau type solver (LuauSolverV2) for the duration of the current scope.
+/// This macro sets both the FFlag and updates the Frontend's solver mode, which is necessary
+/// because the Frontend caches the solver mode at construction time.
+#define ENABLE_NEW_SOLVER() \
+    ScopedFastFlag _sff_new_solver_{FFlag::LuauSolverV2, true}; \
+    workspace.frontend.setLuauSolverMode(Luau::SolverMode::New)

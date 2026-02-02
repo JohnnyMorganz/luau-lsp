@@ -15,17 +15,23 @@ git clone https://github.com/JohnnyMorganz/luau-lsp.git --recurse-submodules
 # Update submodules
 git submodule update --init --recursive
 
-# Build the CLI
+# Configure build (from repo root)
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target Luau.LanguageServer.CLI --config Release
+cmake .. -DCMAKE_BUILD_TYPE=Debug  # Use Debug for faster builds during development
 
-# Build tests
-cmake --build . --target Luau.LanguageServer.Test --config Release
+# Build the CLI (use -j for parallel builds)
+cmake --build . --target Luau.LanguageServer.CLI --config Debug -j$(nproc)
+
+# Build tests (use Debug for faster iteration)
+cmake --build . --target Luau.LanguageServer.Test --config Debug -j$(nproc)
+
+# For release/production builds, use Release mode:
+# cmake .. -DCMAKE_BUILD_TYPE=Release
+# cmake --build . --target Luau.LanguageServer.CLI --config Release -j$(nproc)
 
 # Build with ASAN (Linux/macOS)
 cmake .. -DLSP_BUILD_ASAN:BOOL=ON
-cmake --build . --target Luau.LanguageServer.Test
+cmake --build . --target Luau.LanguageServer.Test -j$(nproc)
 ```
 
 ## Running Tests
@@ -117,6 +123,22 @@ TEST_CASE_FIXTURE(Fixture, "FeatureName")
 - `loadDefinition()`: Load type definition files
 - `loadSourcemap()`: Load Rojo sourcemap for Roblox tests
 - `sourceWithMarker()`: Parse source with `|` cursor position marker
+
+### Testing with the New Type Solver
+
+When writing tests that require the new Luau type solver (`LuauSolverV2`), use the `ENABLE_NEW_SOLVER()` macro at the start of the test:
+
+```cpp
+TEST_CASE_FIXTURE(Fixture, "feature_requiring_new_solver")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto uri = newDocument("test.luau", "local x = 1");
+    // Test code...
+}
+```
+
+**Important:** Do not use `ScopedFastFlag{FFlag::LuauSolverV2, true}` directly. The Frontend caches the solver mode at construction time, so the `ENABLE_NEW_SOLVER()` macro is required to properly update both the FFlag and the Frontend's cached solver mode.
 
 ## Key CMake Targets
 
