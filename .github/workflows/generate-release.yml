@@ -2,11 +2,11 @@ name: Generate new release (manual)
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "New Version (without leading v)"
-        required: true
-        type: string
+    # inputs:
+    #   version:
+    #     description: "New Version (without leading v)"
+    #     required: true
+    #     type: string
 
 jobs:
   generate-release:

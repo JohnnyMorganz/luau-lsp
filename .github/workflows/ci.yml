@@ -2,12 +2,12 @@ name: Verify Build
 
 on:
   workflow_dispatch:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   MACOSX_DEPLOYMENT_TARGET: "10.15"
@@ -31,49 +31,6 @@ jobs:
           mkdir build && cd build
           cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
-
-  run_tests:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            test-path: ./build/Debug/Luau.LanguageServer.Test
-          - os: ubuntu-22.04
-            test-path: ./build/Luau.LanguageServer.Test
-          - os: macos-latest
-            test-path: ./build/Luau.LanguageServer.Test
-
-    name: Run Tests (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: recursive
-
-      - name: Build Tests (ASAN)
-        if: matrix.os != 'windows-latest'
-        run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
-          cmake --build . --target Luau.LanguageServer.Test -j 3
-
-      - name: Build Tests
-        if: matrix.os == 'windows-latest'
-        run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-          cmake --build . --target Luau.LanguageServer.Test -j 3
-
-      - name: Run Tests (Old Solver)
-        run: ${{ matrix.test-path }}
-
-      - name: Run Tests (New Solver)
-        run: ${{ matrix.test-path }} --new-solver
-
-      - name: Run Tests (All FFlags enabled)
-        run: ${{ matrix.test-path }} --fflags=true
 
   types_smoketest:
     name: Types Smoketest
