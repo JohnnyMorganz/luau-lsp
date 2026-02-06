@@ -547,7 +547,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand("luau-lsp.openWalkthrough", () => {
       return vscode.commands.executeCommand(
         "workbench.action.openWalkthrough",
-        "JohnnyMorganz.luau-lsp#getting-started",
+        "devSparkle.overture-lsp#getting-started",
         false,
       );
     }),
@@ -573,7 +573,7 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 };
 
 export async function activate(context: vscode.ExtensionContext) {
-  console.log("Luau LSP activated");
+  console.log("Overture LSP activated");
 
   await roblox.onActivate(platformContext, context);
 
@@ -594,7 +594,7 @@ export async function activate(context: vscode.ExtensionContext) {
       if (e.affectsConfiguration("luau-lsp.server")) {
         vscode.window
           .showInformationMessage(
-            "Luau LSP server configuration has changed, reload server for this to take effect.",
+            "Overture LSP server configuration has changed, reload server for this to take effect.",
             "Reload Language Server",
           )
           .then((command) => {

@@ -15,7 +15,7 @@ export let platformEol: string;
  * Activates the vscode.lsp-sample extension
  */
 export async function activate(docUri: vscode.Uri) {
-  const ext = vscode.extensions.getExtension("johnnymorganz.luau-lsp")!;
+  const ext = vscode.extensions.getExtension("devsparkle.overture-lsp")!;
   await ext.activate();
   try {
     doc = await vscode.workspace.openTextDocument(docUri);
