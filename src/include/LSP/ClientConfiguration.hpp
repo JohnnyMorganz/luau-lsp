@@ -256,6 +256,26 @@ struct ClientFormatConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientFormatConfiguration, convertQuotes);
 
+struct ClientPluginFileSystemConfiguration
+{
+    /// Whether filesystem access is enabled for plugins
+    bool enabled = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginFileSystemConfiguration, enabled)
+
+struct ClientPluginConfiguration
+{
+    /// Whether plugins are enabled
+    bool enabled = false;
+    /// Paths to plugin Luau scripts
+    std::vector<std::string> paths{};
+    /// Timeout for plugin execution in milliseconds
+    size_t timeoutMs = 5000;
+    /// Configuration for plugin filesystem access
+    ClientPluginFileSystemConfiguration fileSystem{};
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientPluginConfiguration, enabled, paths, timeoutMs, fileSystem)
+
 enum struct LSPPlatformConfig
 {
     Standard,
@@ -294,6 +314,7 @@ struct ClientConfiguration
     ClientFFlagsConfiguration fflags{};
     ClientBytecodeConfiguration bytecode{};
     ClientFormatConfiguration format{};
+    ClientPluginConfiguration plugins{};
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);
+    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format, plugins);

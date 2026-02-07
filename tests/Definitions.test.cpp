@@ -2,6 +2,7 @@
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LuauFileUtils.hpp"
+#include "Luau/Parser.h"
 
 using namespace Luau::LanguageServer;
 
