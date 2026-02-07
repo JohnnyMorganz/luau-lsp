@@ -132,7 +132,7 @@ bool RobloxPlatform::hydrateSourcemapWithPluginInfo()
     {
         // Update the sourcemap file if needed
         auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
-        if (config.sourcemap.autogenerate)
+        if (config.sourcemap.enabled && config.sourcemap.autogenerate)
         {
             auto sourcemapPath = workspaceFolder->rootUri.resolvePath(config.sourcemap.sourcemapFile);
 
