@@ -1,6 +1,6 @@
 {
   "name": "overture-lsp",
-  "displayName": "Luau Language Server for Overture",
+  "displayName": "Luau LSP for Overture",
   "description": "A temporary fork of Luau LSP with Overture support.",
   "publisher": "devSparkle",
   "license": "MIT",
