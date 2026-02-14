@@ -715,4 +715,62 @@ TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_anonymous_function_body
     CHECK_FALSE(result.has_value());
 }
 
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_base_table_member_of_setmetatable_type")
+{
+    auto source = R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.prop_a
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{13, 22};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK(result->contents.value.find("Documentation for prop_a.") != std::string::npos);
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_index_member_of_setmetatable_type")
+{
+    auto source = R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.prop_b
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{13, 22};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK(result->contents.value.find("Documentation for prop_b.") != std::string::npos);
+}
+
 TEST_SUITE_END();

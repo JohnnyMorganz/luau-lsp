@@ -1997,4 +1997,70 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_property_on_union_typ
     CHECK_EQ(item->documentation->value, "This is a documentation comment");
 }
 
+TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_base_table_property_on_setmetatable_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = getItem(result, "prop_a");
+    REQUIRE(item);
+    REQUIRE(item->documentation);
+    CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item->documentation->value);
+    CHECK_EQ(item->documentation->value, "Documentation for prop_a.");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_setmetatable_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = getItem(result, "prop_b");
+    REQUIRE(item);
+    REQUIRE(item->documentation);
+    CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
+    trim(item->documentation->value);
+    CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
+}
+
 TEST_SUITE_END();
