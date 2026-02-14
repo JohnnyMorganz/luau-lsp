@@ -604,8 +604,9 @@ TEST_CASE_FIXTURE(Fixture, "instance_is_a_contains_classnames")
 
     auto result = workspace.completion(params, nullptr);
 
-    CHECK_EQ(result.size(), 8);
+    CHECK_EQ(result.size(), 9);
     checkStringCompletionExists(result, "Instance");
+    checkStringCompletionExists(result, "BasePart");
     checkStringCompletionExists(result, "Part");
     checkStringCompletionExists(result, "TextLabel");
     checkStringCompletionExists(result, "ReplicatedStorage");

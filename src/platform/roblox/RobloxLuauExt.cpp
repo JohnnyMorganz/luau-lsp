@@ -4,6 +4,86 @@
 #include "Luau/ConstraintSolver.h"
 #include "Luau/TypeInfer.h"
 
+// Parse class names from QueryDescendants CSS-like selector strings.
+// Returns the class name from the last compound selector of each comma-separated group.
+std::vector<std::string> parseClassNamesFromSelector(const std::string& selector)
+{
+    std::vector<std::string> result;
+
+    // Split into comma-separated groups at depth 0
+    std::vector<std::string> groups;
+    {
+        int depth = 0;
+        size_t groupStart = 0;
+        for (size_t i = 0; i < selector.size(); i++)
+        {
+            char c = selector[i];
+            if (c == '(')
+                depth++;
+            else if (c == ')')
+                depth--;
+            else if (c == ',' && depth == 0)
+            {
+                groups.push_back(selector.substr(groupStart, i - groupStart));
+                groupStart = i + 1;
+            }
+        }
+        groups.push_back(selector.substr(groupStart));
+    }
+
+    for (const auto& group : groups)
+    {
+        // Find the last combinator (> or >>) at depth 0 to isolate the last compound selector
+        int depth = 0;
+        size_t lastCombinatorEnd = 0; // position after the last combinator (start of last compound)
+
+        for (size_t i = 0; i < group.size(); i++)
+        {
+            char c = group[i];
+            if (c == '(')
+                depth++;
+            else if (c == ')')
+                depth--;
+            else if (c == '>' && depth == 0)
+            {
+                // Skip >> (treat as single combinator)
+                size_t next = i + 1;
+                if (next < group.size() && group[next] == '>')
+                    next++;
+                lastCombinatorEnd = next;
+            }
+        }
+
+        // Extract the last compound selector (after the last combinator)
+        std::string compound = group.substr(lastCombinatorEnd);
+
+        // Strip leading whitespace
+        size_t start = 0;
+        while (start < compound.size() && (compound[start] == ' ' || compound[start] == '\t'))
+            start++;
+
+        if (start >= compound.size())
+            continue;
+
+        // A class name is a leading bare uppercase identifier not preceded by . # [ :
+        // It must start with an uppercase letter [A-Z]
+        if (compound[start] >= 'A' && compound[start] <= 'Z')
+        {
+            // Read the identifier
+            size_t end = start;
+            while (end < compound.size() && (std::isalnum(static_cast<unsigned char>(compound[end])) || compound[end] == '_'))
+                end++;
+
+            std::string className = compound.substr(start, end - start);
+            if (!className.empty())
+                result.push_back(std::move(className));
+        }
+        // Otherwise (starts with . # [ : or lowercase) — no class name in this group
+    }
+
+    return result;
+}
+
 // Magic function for `Instance:IsA("ClassName")` predicate
 struct MagicInstanceIsA final : Luau::MagicFunction
 {
@@ -359,6 +439,102 @@ bool MagicInstancePropertyCheck::infer(const Luau::MagicFunctionCallContext& con
     return false;
 }
 
+// Magic function for `Instance:QueryDescendants("Selector")`, narrowing the return type based on class names in the selector
+struct MagicQueryDescendants final : Luau::MagicFunction
+{
+    std::optional<Luau::WithPredicate<Luau::TypePackId>> handleOldSolver(struct Luau::TypeChecker& typeChecker,
+        const std::shared_ptr<struct Luau::Scope>& scope, const class Luau::AstExprCall& expr,
+        Luau::WithPredicate<Luau::TypePackId> withPredicate) override;
+    bool infer(const Luau::MagicFunctionCallContext& context) override;
+};
+
+std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicQueryDescendants::handleOldSolver(struct Luau::TypeChecker& typeChecker,
+    const std::shared_ptr<struct Luau::Scope>& scope, const class Luau::AstExprCall& expr, Luau::WithPredicate<Luau::TypePackId> withPredicate)
+{
+    if (expr.args.size < 1)
+        return std::nullopt;
+
+    auto str = expr.args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return std::nullopt;
+
+    std::string selectorStr(str->value.data, str->value.size);
+    auto classNames = parseClassNamesFromSelector(selectorStr);
+
+    if (classNames.empty())
+        return std::nullopt;
+
+    std::vector<Luau::TypeId> classTypes;
+    for (const auto& className : classNames)
+    {
+        std::optional<Luau::TypeFun> tfun = typeChecker.globalScope->lookupType(className);
+        if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+        {
+            typeChecker.reportError(Luau::TypeError{expr.args.data[0]->location, Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}});
+            return std::nullopt;
+        }
+        classTypes.push_back(Luau::follow(tfun->type));
+    }
+
+    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+
+    Luau::TypeId elementType;
+    if (classTypes.size() == 1)
+    {
+        elementType = classTypes[0];
+    }
+    else
+    {
+        elementType = arena.addType(Luau::UnionType{std::move(classTypes)});
+    }
+
+    Luau::TypeId arrayType = arena.addType(Luau::TableType{{}, Luau::TableIndexer{typeChecker.numberType, elementType}, Luau::TypeLevel{}, Luau::TableState::Sealed});
+    return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({arrayType})};
+}
+
+bool MagicQueryDescendants::infer(const Luau::MagicFunctionCallContext& context)
+{
+    if (context.callSite->args.size < 1)
+        return false;
+
+    auto str = context.callSite->args.data[0]->as<Luau::AstExprConstantString>();
+    if (!str)
+        return false;
+
+    std::string selectorStr(str->value.data, str->value.size);
+    auto classNames = parseClassNamesFromSelector(selectorStr);
+
+    if (classNames.empty())
+        return false;
+
+    std::vector<Luau::TypeId> classTypes;
+    for (const auto& className : classNames)
+    {
+        std::optional<Luau::TypeFun> tfun = context.solver->rootScope->lookupType(className);
+        if (!tfun || !tfun->typeParams.empty() || !tfun->typePackParams.empty())
+        {
+            context.solver->reportError(Luau::UnknownSymbol{className, Luau::UnknownSymbol::Type}, str->location);
+            return false;
+        }
+        classTypes.push_back(Luau::follow(tfun->type));
+    }
+
+    Luau::TypeId elementType;
+    if (classTypes.size() == 1)
+    {
+        elementType = classTypes[0];
+    }
+    else
+    {
+        elementType = context.solver->arena->addType(Luau::UnionType{std::move(classTypes)});
+    }
+
+    Luau::TypeId arrayType = context.solver->arena->addType(
+        Luau::TableType{{}, Luau::TableIndexer{context.solver->builtinTypes->numberType, elementType}, Luau::TypeLevel{}, Luau::TableState::Sealed});
+    asMutable(context.result)->ty.emplace<Luau::BoundTypePack>(context.solver->arena->addTypePack({arrayType}));
+    return true;
+}
+
 // Since in Roblox land, debug is extended to introduce more methods, but the api-docs
 // mark the package name as `@luau` instead of `@roblox`
 static void fixDebugDocumentationSymbol(Luau::TypeId ty, const std::string& libraryName)
@@ -528,6 +704,7 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             attachMagicFunctionSafe(ctv->props, "Clone", std::make_shared<MagicInstanceClone>());
             attachMagicFunctionSafe(ctv->props, "IsPropertyModified", std::make_shared<MagicInstancePropertyCheck>());
             attachMagicFunctionSafe(ctv->props, "ResetPropertyToDefault", std::make_shared<MagicInstancePropertyCheck>());
+            attachMagicFunctionSafe(ctv->props, "QueryDescendants", std::make_shared<MagicQueryDescendants>());
 
             // Autocomplete ClassNames for :IsA("") and counterparts
             attachTagSafe(ctv->props, "FindFirstChildWhichIsA", "ClassNames");

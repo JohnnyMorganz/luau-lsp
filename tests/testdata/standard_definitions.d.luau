@@ -71,9 +71,14 @@ declare class Instance extends Object
     function SetAttribute(self, attribute: string, value: any): nil
     function WaitForChild(self, name: string): Instance
     function WaitForChild(self, name: string, timeout: number): Instance?
+    function QueryDescendants(self, selector: string): { Instance }
 end
 
-declare class Part extends Instance
+declare class BasePart extends Instance
+    Anchored: boolean
+end
+
+declare class Part extends BasePart
     Anchored: boolean
 end
 
