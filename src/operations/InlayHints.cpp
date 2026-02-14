@@ -27,14 +27,20 @@ static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(
             return a.startPos < b.startPos;
         });
 
+    size_t nameLen = result.name.length();
     size_t lastEnd = 0;
     for (const auto& [start, end, typeId] : spans)
     {
+        if (start >= nameLen)
+            break;
+
+        size_t clampedEnd = std::min(end, nameLen);
+
         if (start > lastEnd)
             parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd, start - lastEnd)});
 
         lsp::InlayHintLabelPart part;
-        part.value = result.name.substr(start, end - start);
+        part.value = result.name.substr(start, clampedEnd - start);
         part.location = types::getTypeLocation(typeId, fileResolver);
         if (typeId->documentationSymbol)
         {
@@ -43,10 +49,10 @@ static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(
         }
         parts.push_back(part);
 
-        lastEnd = end;
+        lastEnd = clampedEnd;
     }
 
-    if (lastEnd < result.name.length())
+    if (lastEnd < nameLen)
         parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd)});
 
     return parts;

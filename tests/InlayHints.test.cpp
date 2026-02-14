@@ -1035,4 +1035,29 @@ TEST_CASE_FIXTURE(Fixture, "inlay_hint_generics_and_extern_type")
     CHECK_EQ(result[0].label[4].value, ">");
 }
 
+TEST_CASE_FIXTURE(Fixture, "inlay_hint_does_not_crash_on_truncated_intersection_type_with_spans")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    // The intersection type produced by Controller<Class> & Class is long enough
+    // to trigger truncation at the default typeHintMaxLength (50), and the
+    // intersection stringifier records typeSpans for parts that were never
+    // actually emitted, causing out-of-range substr in toInlayHintLabelParts.
+    auto source = R"(
+        type Controller<Class> = {
+            Method: (self: Controller<Class>) -> (),
+            Method2: (self: Controller<Class>) -> (),
+        } & Class
+
+        type Test = Controller<{
+            TestMethod: (self: Test, testArgument: any | Instance) -> (),
+        }>
+
+        local Table: Test = {} :: Test
+        local x = Table
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_GE(result.size(), 1);
+}
+
 TEST_SUITE_END();
