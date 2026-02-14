@@ -56,6 +56,11 @@ struct PluginNode
     static PluginNode* fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator);
 };
 
+/// Parses class names from QueryDescendants CSS-like selector strings.
+/// Returns the class name from the last compound selector of each comma-separated group.
+/// E.g., "Model >> BasePart" → {"BasePart"}, "Part, TextLabel" → {"Part", "TextLabel"}
+std::vector<std::string> parseClassNamesFromSelector(const std::string& selector);
+
 class RobloxPlatform : public LSPPlatform
 {
 private:
