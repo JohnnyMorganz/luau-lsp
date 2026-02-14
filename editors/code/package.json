@@ -690,6 +690,20 @@
           "markdownDeprecationMessage": "**Deprecated**: Use the new require-by-string semantics instead. This option may be removed at any time in the future",
           "deprecationMessage": "Deprecated: Use the new require-by-string semantics instead. This option may be removed at any time in the future"
         },
+        "luau-lsp.updateRequiresOnFileMove.enabled": {
+          "type": "string",
+          "default": "never",
+          "enum": [
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Always update requires when files are moved or renamed",
+            "Never update requires when files are moved or renamed"
+          ],
+          "scope": "resource",
+          "markdownDescription": "Whether to automatically update require paths when files are moved or renamed"
+        },
         "luau-lsp.index.enabled": {
           "type": "boolean",
           "default": true,

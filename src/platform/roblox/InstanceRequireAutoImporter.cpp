@@ -30,6 +30,34 @@ std::string optimiseAbsoluteRequire(const std::string& path)
     return path;
 }
 
+std::string computeInstanceRequirePath(
+    const Luau::ModuleName& fromVirtualPath,
+    const Luau::ModuleName& toVirtualPath,
+    ImportRequireStyle requireStyle)
+{
+    std::string requirePath;
+    auto parent1 = getParentPath(fromVirtualPath), parent2 = getParentPath(toVirtualPath);
+
+    bool useRelative = requireStyle == ImportRequireStyle::AlwaysRelative ||
+        Luau::startsWith(toVirtualPath, "ProjectRoot/") || // All model projects should always require relatively
+        (requireStyle != ImportRequireStyle::AlwaysAbsolute &&
+            (Luau::startsWith(fromVirtualPath, toVirtualPath) ||
+             Luau::startsWith(toVirtualPath, fromVirtualPath) ||
+             parent1 == parent2));
+
+    if (useRelative)
+    {
+        // HACK: using Uri's purely to access lexicallyRelative
+        requirePath = "./" + Uri::file(toVirtualPath).lexicallyRelative(Uri::file(fromVirtualPath));
+    }
+    else
+    {
+        requirePath = optimiseAbsoluteRequire(toVirtualPath);
+    }
+
+    return convertToScriptPath(requirePath);
+}
+
 std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequireAutoImporterContext& ctx)
 {
     std::vector<InstanceRequireResult> results;
@@ -48,33 +76,22 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             scriptFilePath && ctx.workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath))
             continue;
 
-        std::string requirePath;
         std::optional<std::pair<std::string, lsp::TextEdit>> serviceEdit;
 
-        // Compute the style of require
-        bool isRelative = false;
-        auto parent1 = getParentPath(ctx.from), parent2 = getParentPath(path);
-        if (ctx.config->requireStyle == ImportRequireStyle::AlwaysRelative ||
-            Luau::startsWith(path, "ProjectRoot/") || // All model projects should always require relatively
-            (ctx.config->requireStyle != ImportRequireStyle::AlwaysAbsolute &&
-                (Luau::startsWith(ctx.from, path) || Luau::startsWith(path, ctx.from) || parent1 == parent2)))
-        {
-            // HACK: using Uri's purely to access lexicallyRelative
-            requirePath = "./" + Uri::file(path).lexicallyRelative(Uri::file(ctx.from));
-            isRelative = true;
-        }
-        else
-            requirePath = optimiseAbsoluteRequire(path);
+        // Compute the instance require path using the shared function
+        auto require = computeInstanceRequirePath(ctx.from, path, ctx.config->requireStyle);
 
-        auto require = convertToScriptPath(requirePath);
+        // Determine if this is a relative require (for service imports and sorting)
+        bool isRelative = Luau::startsWith(require, "script.");
 
         size_t lineNumber = computeBestLineForRequire(*ctx.importsVisitor, *ctx.textDocument, require, minimumLineNumber);
 
         if (!isRelative)
         {
-            // Service will be the first part of the path
+            // Service will be the first part of the require path (e.g., "ReplicatedStorage" from "ReplicatedStorage.Lib.Module")
             // If we haven't imported the service already, then we auto-import it
-            auto service = requirePath.substr(0, requirePath.find('/'));
+            auto dotPos = require.find('.');
+            auto service = dotPos != std::string::npos ? require.substr(0, dotPos) : require;
             if (!contains(ctx.importsVisitor->serviceLineMap, service))
             {
                 auto serviceLineNumber = ctx.importsVisitor->findBestLineForService(service, ctx.hotCommentsLineNumber);
