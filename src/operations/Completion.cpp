@@ -1,3 +1,4 @@
+#include <cctype>
 #include <unordered_set>
 #include <utility>
 
@@ -547,14 +548,33 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     std::unordered_set<std::string> tags;
 
+    auto position = textDocument->convertPosition(params.position);
+
     auto stringCompletionCB = [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
                                   std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
     {
         tags.insert(tag);
+
+        // For QuerySelector, compute the selector content up to the cursor position
+        // so that context detection works correctly for mid-string completions
+        if (tag == "QuerySelector" && contents.has_value())
+        {
+            auto line = textDocument->getLine(position.line);
+            size_t cursorCol = position.column;
+            // Search backward from cursor to find the opening quote
+            size_t quotePos = cursorCol;
+            while (quotePos > 0)
+            {
+                quotePos--;
+                if (line[quotePos] == '"' || line[quotePos] == '\'')
+                    break;
+            }
+            std::string contentUpToCursor = line.substr(quotePos + 1, cursorCol - quotePos - 1);
+            return platform->completionCallback(tag, ctx, std::move(contentUpToCursor), moduleName);
+        }
+
         return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
     };
-
-    auto position = textDocument->convertPosition(params.position);
 
     Luau::FragmentAutocompleteStatusResult fragmentStatusResult;
     Luau::AutocompleteResult result;
@@ -609,6 +629,15 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         throwIfCancelled(cancellationToken);
 
         result = Luau::autocomplete(frontend, moduleName, position, stringCompletionCB);
+    }
+
+    // These trigger characters were added for QuerySelector support.
+    // Suppress completion if we're not actually in a QuerySelector context.
+    if (params.context && params.context->triggerCharacter && !tags.count("QuerySelector") &&
+        (*params.context->triggerCharacter == "[" || *params.context->triggerCharacter == "," || *params.context->triggerCharacter == "(" ||
+            *params.context->triggerCharacter == ">"))
+    {
+        return {};
     }
 
     std::vector<lsp::CompletionItem> items{};
@@ -699,9 +728,52 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             }
         }
 
+        // For QuerySelector completions, replace only the current token (not the entire string)
+        if (entry.kind == Luau::AutocompleteEntryKind::String && tags.count("QuerySelector"))
+        {
+            auto lastAst = result.ancestry.back();
+            if (auto str = lastAst->as<Luau::AstExprConstantString>())
+            {
+                // Compute cursor offset within the string content
+                unsigned cursorOffset = position.column - (str->location.begin.column + 1);
+
+                // Find the start of the current token by scanning backward from cursor past identifier characters
+                size_t tokenStart = cursorOffset;
+                std::string fullContent(str->value.data, str->value.size);
+                while (tokenStart > 0 &&
+                       (std::isalnum(static_cast<unsigned char>(fullContent[tokenStart - 1])) || fullContent[tokenStart - 1] == '_'))
+                    tokenStart--;
+
+                lsp::TextEdit textEdit;
+                textEdit.newText = name;
+
+                // For pseudo-class completions (e.g. :not, :has), add parentheses as a snippet and documentation
+                if (std::find(entry.tags.begin(), entry.tags.end(), "SelectorPseudoClass") != entry.tags.end())
+                {
+                    if (canUseSnippets(client->capabilities))
+                    {
+                        textEdit.newText = name + "($0)";
+                        item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                    }
+
+                    if (name == "not")
+                        item.documentation = {lsp::MarkupKind::Markdown,
+                            "Select instances that do not match any of the selectors inside"};
+                    else if (name == "has")
+                        item.documentation = {lsp::MarkupKind::Markdown,
+                            "Select instances based on which instances they contain inside"};
+                }
+
+                textEdit.range = {
+                    textDocument->convertPosition(
+                        Luau::Position{str->location.begin.line, str->location.begin.column + 1 + static_cast<unsigned>(tokenStart)}),
+                    textDocument->convertPosition(Luau::Position{position.line, position.column})};
+                item.textEdit = textEdit;
+            }
+        }
         // If autocompleting in a string and the autocompleting text contains a '/' character, then it won't replace correctly due to word boundaries
         // Apply a complete text edit instead
-        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String &&
+        else if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String &&
             entry.kind != Luau::AutocompleteEntryKind::RequirePath)
         {
             auto lastAst = result.ancestry.back();
