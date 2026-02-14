@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `Instance:QueryDescendants()` now narrows the return type based on class names in the selector string (e.g., `"BasePart"` returns `{BasePart}`) ([#1365](https://github.com/JohnnyMorganz/luau-lsp/issues/1365))
+
 ### Changed
 
 - Sync to upstream Luau 0.708
