@@ -1151,6 +1151,14 @@ declare class EnumCameraMode_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumCameraMode?
 	function FromValue(self, Value: number): EnumCameraMode?
 end
+declare class EnumCameraNavigationModel extends EnumItem end
+declare class EnumCameraNavigationModel_INTERNAL extends Enum
+	IndustryCompatible: EnumCameraNavigationModel
+	Roblox: EnumCameraNavigationModel
+	function GetEnumItems(self): { EnumCameraNavigationModel }
+	function FromName(self, Name: string): EnumCameraNavigationModel?
+	function FromValue(self, Value: number): EnumCameraNavigationModel?
+end
 declare class EnumCameraPanMode extends EnumItem end
 declare class EnumCameraPanMode_INTERNAL extends Enum
 	Classic: EnumCameraPanMode
@@ -6697,6 +6705,7 @@ type ENUM_LIST = {
 	ButtonStyle: EnumButtonStyle_INTERNAL,
 	CageType: EnumCageType_INTERNAL,
 	CameraMode: EnumCameraMode_INTERNAL,
+	CameraNavigationModel: EnumCameraNavigationModel_INTERNAL,
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
 	CameraSpeedAdjustBinding: EnumCameraSpeedAdjustBinding_INTERNAL,
 	CameraType: EnumCameraType_INTERNAL,
@@ -8295,6 +8304,7 @@ declare class AnalyticsService extends Instance
 		function FireLogEvent(self, player: Instance, logLevel: EnumAnalyticsLogLevel, message: string, debugInfo: any, customData: any): nil
 	@deprecated
 		function FirePlayerProgressionEvent(self, player: Instance, category: string, progressionStatus: EnumAnalyticsProgressionStatus, location: any, statistics: any, customData: any): nil
+	function GetDurationLoggerTimestamp(self): number
 	function LogCustomEvent(self, player: Player, eventName: string, value: number?, customFields: { [string]: any }?): nil
 	function LogEconomyEvent(self, player: Player, flowType: EnumAnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string?, customFields: { [string]: any }?): nil
 	function LogFunnelStepEvent(self, player: Player, funnelName: string, funnelSessionId: string?, step: number?, stepName: string?, customFields: { [string]: any }?): nil
@@ -9353,9 +9363,12 @@ declare class BodyColors extends CharacterAppearance
 end
 
 declare class CharacterMesh extends CharacterAppearance
+	BaseTextureContent: Content
 	BaseTextureId: number
 	BodyPart: EnumBodyPart
+	MeshContent: Content
 	MeshId: number
+	OverlayTextureContent: Content
 	OverlayTextureId: number
 end
 
@@ -9996,6 +10009,7 @@ declare class DataStoreService extends Instance
 	function GetOrderedDataStore(self, name: string, scope: string?): OrderedDataStore
 	function GetRequestBudgetForRequestType(self, requestType: EnumDataStoreRequestType): number
 	function ListDataStoresAsync(self, prefix: string?, pageSize: number?, cursor: string?): DataStoreListingPages
+	function SetRateLimitForRequestType(self, requestType: EnumDataStoreRequestType, baseLimit: number, perPlayerLimit: number): nil
 end
 
 declare class DataStoreSetOptions extends Instance
@@ -11215,6 +11229,7 @@ declare class HumanoidDescription extends Instance
 	RunAnimation: number
 	Shirt: number
 	ShouldersAccessory: string
+	StaticFacialAnimation: boolean
 	SwimAnimation: number
 	Torso: number
 	TorsoColor: Color3
@@ -11431,6 +11446,7 @@ end
 
 declare class InputBinding extends Instance
 	Backward: EnumKeyCode
+	ClampMagnitudeToOne: boolean
 	Down: EnumKeyCode
 	Forward: EnumKeyCode
 	KeyCode: EnumKeyCode
@@ -13651,6 +13667,7 @@ declare class Sound extends Instance
 		function play(self): nil
 	@[deprecated {use = "Sound:Stop"}]
 		function stop(self): nil
+	AcousticSimulationEnabled: boolean
 	AudioContent: Content
 	DidLoop: RBXScriptSignal<string, number>
 	Ended: RBXScriptSignal<string>
@@ -14016,9 +14033,6 @@ declare class StudioCallout extends Instance
 end
 
 declare class StudioCameraService extends Instance
-	LockCameraSpeed: boolean
-	LoggingEnabled: boolean
-	ShowCameraSpeed: RBXScriptSignal<number>
 end
 
 declare class StudioData extends Instance
@@ -14080,8 +14094,10 @@ declare class StyleRule extends StyleBase
 	SelectorError: string
 	function GetProperties(self): { [string]: any }
 	function GetProperty(self, name: string): any
+	function GetPropertyTransitions(self): { [string]: any }
 	function SetProperties(self, styleProperties: { [string]: any }): nil
 	function SetProperty(self, name: string, value: any): nil
+	function SetPropertyTransitions(self, properties: { [string]: any }): nil
 end
 
 declare class StyleSheet extends StyleBase
@@ -14231,8 +14247,11 @@ declare class TestService extends Instance
 	function Message(self, text: string, source: Instance?, line: number?): nil
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function ScopeTime(self): { [string]: any }
+	function StartTestSession(self): nil
+	function StopTestSession(self): nil
 	function TakeSnapshot(self, snapshotname: string, source: Instance?): nil
 	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
+	function getTestSessionProviderStats(self, providerName: string): { [string]: any }
 	function isFeatureEnabled(self, name: string): boolean
 end
 
