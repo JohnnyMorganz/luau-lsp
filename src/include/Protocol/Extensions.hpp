@@ -69,4 +69,12 @@ NLOHMANN_DEFINE_OPTIONAL(RequireGraphParams, textDocument, fromTextDocumentOnly)
 
 /// Returns a dot-file representation
 using RequireGraphResult = std::string;
+
+struct InternalSourceParams
+{
+    TextDocumentIdentifier textDocument;
+};
+NLOHMANN_DEFINE_OPTIONAL(InternalSourceParams, textDocument)
+
+using InternalSourceResult = std::string;
 } // namespace lsp
