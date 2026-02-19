@@ -117,6 +117,14 @@ public:
 
     std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const override;
 
+    std::optional<Luau::ModuleName> inferModuleNameFromUri(const Uri& uri) const override;
+
+    std::optional<std::string> computeNewRequirePath(
+        const Luau::ModuleName& dependentModuleName,
+        const Luau::ModuleName& newTargetModuleName,
+        const Luau::AstNode* originalNode,
+        const ClientConfiguration& config) const override;
+
     Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const override;
 
     std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;

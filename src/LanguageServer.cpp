@@ -119,7 +119,9 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Code Action Provider
-    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
+    capabilities.codeActionProvider = {
+        std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports},
+        /* resolveProvider: */ false};
     // Rename Provider
     capabilities.renameProvider = true;
     // Folding Range Provider
@@ -145,7 +147,14 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     capabilities.documentOnTypeFormattingProvider = lsp::DocumentOnTypeFormattingOptions{"{", std::nullopt};
     // Workspaces
     lsp::WorkspaceFoldersServerCapabilities workspaceFolderCapabilities{true, false};
-    capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities};
+    // File Operations
+    lsp::FileOperationRegistrationOptions renameFilters;
+    renameFilters.filters.push_back(
+        lsp::FileOperationFilter{"file", lsp::FileOperationPattern{"**/*.{lua,luau}", lsp::FileOperationPatternKind::File}});
+    renameFilters.filters.push_back(lsp::FileOperationFilter{"file", lsp::FileOperationPattern{"**/*", lsp::FileOperationPatternKind::Folder}});
+    lsp::FileOperationsServerCapabilities fileOperations;
+    fileOperations.willRename = renameFilters;
+    capabilities.workspace = lsp::WorkspaceCapabilities{workspaceFolderCapabilities, fileOperations};
     return capabilities;
 }
 
@@ -342,6 +351,12 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
                 result.insert(result.end(), std::make_move_iterator(report->begin()), std::make_move_iterator(report->end()));
         }
         response = result;
+    }
+    else if (method == "workspace/willRenameFiles")
+    {
+        ASSERT_PARAMS(baseParams, "workspace/willRenameFiles")
+        auto params = baseParams->get<lsp::RenameFilesParams>();
+        response = onWillRenameFiles(params);
     }
     else if (method == "luau-lsp/bytecode")
     {

@@ -38,6 +38,27 @@ std::optional<Uri> LSPPlatform::resolveToRealPath(const Luau::ModuleName& name) 
     return fileResolver->getUri(name);
 }
 
+std::optional<Luau::ModuleName> LSPPlatform::inferModuleNameFromUri(const Uri& uri) const
+{
+    return fileResolver->getModuleName(uri);
+}
+
+std::optional<std::string> LSPPlatform::computeNewRequirePath(
+    const Luau::ModuleName& dependentModuleName,
+    const Luau::ModuleName& newTargetModuleName,
+    const Luau::AstNode* originalNode,
+    const ClientConfiguration& config) const
+{
+    auto dependentUri = fileResolver->getUri(dependentModuleName);
+    auto targetUri = fileResolver->getUri(newTargetModuleName);
+
+    auto availableAliases = fileResolver->getConfig(dependentModuleName, workspaceFolder->limits).aliases;
+    auto [newPath, _] = Luau::LanguageServer::AutoImports::computeRequirePath(
+        dependentUri, targetUri, availableAliases, config.completion.imports.requireStyle);
+
+    return "\"" + newPath + "\"";
+}
+
 std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const Uri& path) const
 {
     LUAU_TIMETRACE_SCOPE("LSPPlatform::readSourceCode", "LSP");
