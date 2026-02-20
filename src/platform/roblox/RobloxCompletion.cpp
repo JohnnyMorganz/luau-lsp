@@ -11,6 +11,108 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+enum class SelectorContext
+{
+    ClassName,
+    PseudoClass,
+    PropertyName,
+    None
+};
+
+static SelectorContext detectSelectorContext(const std::string& contents)
+{
+    // Find the end of meaningful content (strip trailing identifier characters to get the "trigger" position)
+    size_t end = contents.size();
+    while (end > 0 && (std::isalnum(static_cast<unsigned char>(contents[end - 1])) || contents[end - 1] == '_'))
+        end--;
+
+    if (end == 0)
+        return SelectorContext::ClassName;
+
+    char trigger = contents[end - 1];
+
+    if (trigger == '>' || trigger == ',' || trigger == '(')
+        return SelectorContext::ClassName;
+
+    if (trigger == ':')
+        return SelectorContext::PseudoClass;
+
+    if (trigger == '[')
+        return SelectorContext::PropertyName;
+
+    if (trigger == '.' || trigger == '#')
+        return SelectorContext::None;
+
+    if (trigger == ' ' || trigger == '\t')
+        return SelectorContext::ClassName;
+
+    return SelectorContext::None;
+}
+
+static std::string findPrecedingClassName(const std::string& contents)
+{
+    // Scan backward from the last '[' to find a preceding uppercase-starting identifier (class name)
+    size_t bracketPos = contents.rfind('[');
+    if (bracketPos == std::string::npos || bracketPos == 0)
+        return "";
+
+    // Skip whitespace before '['
+    size_t pos = bracketPos - 1;
+    while (pos > 0 && (contents[pos] == ' ' || contents[pos] == '\t'))
+        pos--;
+
+    // Collect identifier characters backward
+    size_t identEnd = pos + 1;
+    while (pos > 0 && (std::isalnum(static_cast<unsigned char>(contents[pos - 1])) || contents[pos - 1] == '_'))
+        pos--;
+    // Check the character at pos itself
+    if (!(std::isalnum(static_cast<unsigned char>(contents[pos])) || contents[pos] == '_'))
+        pos++;
+
+    if (pos >= identEnd)
+        return "";
+
+    std::string ident = contents.substr(pos, identEnd - pos);
+
+    // Class names start with uppercase
+    if (!ident.empty() && std::isupper(static_cast<unsigned char>(ident[0])))
+    {
+        // Make sure it's not preceded by '.' or '#' (which would make it a tag/name selector)
+        if (pos > 0 && (contents[pos - 1] == '.' || contents[pos - 1] == '#'))
+            return "";
+        return ident;
+    }
+
+    return "";
+}
+
+static Luau::AutocompleteEntryMap getPropertiesOfType(const Luau::ExternType* ctv, Luau::TypeId stringType)
+{
+    Luau::AutocompleteEntryMap result;
+    while (ctv)
+    {
+        for (auto& [propName, prop] : ctv->props)
+        {
+            LUAU_ASSERT(prop.readTy);
+            auto ty = Luau::follow(*prop.readTy);
+            if (Luau::get<Luau::FunctionType>(ty) || Luau::isOverloadedFunction(ty))
+                continue;
+            else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
+                continue;
+            else if (Luau::hasTag(prop, kSourcemapGeneratedTag))
+                continue;
+
+            result.insert_or_assign(
+                propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, stringType, false, false, Luau::TypeCorrectKind::Correct});
+        }
+        if (ctv->parent)
+            ctv = Luau::get<Luau::ExternType>(*ctv->parent);
+        else
+            break;
+    }
+    return result;
+}
+
 static constexpr const char* COMMON_SERVICES[] = {
     "Players",
     "ReplicatedStorage",
@@ -101,34 +203,7 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
     else if (tag == "Properties")
     {
         if (ctx && ctx.value())
-        {
-            Luau::AutocompleteEntryMap result;
-            auto ctv = ctx.value();
-            while (ctv)
-            {
-                for (auto& [propName, prop] : ctv->props)
-                {
-                    // Don't include functions or events
-                    LUAU_ASSERT(prop.readTy);
-                    auto ty = Luau::follow(*prop.readTy);
-                    if (Luau::get<Luau::FunctionType>(ty) || Luau::isOverloadedFunction(ty))
-                        continue;
-                    else if (auto ttv = Luau::get<Luau::TableType>(ty); ttv && ttv->name && ttv->name.value() == "RBXScriptSignal")
-                        continue;
-                    else if (Luau::hasTag(prop, kSourcemapGeneratedTag))
-                        continue;
-
-                    result.insert_or_assign(
-                        propName, Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType,
-                                      false, false, Luau::TypeCorrectKind::Correct});
-                }
-                if (ctv->parent)
-                    ctv = Luau::get<Luau::ExternType>(*ctv->parent);
-                else
-                    break;
-            }
-            return result;
-        }
+            return getPropertiesOfType(ctx.value(), workspaceFolder->frontend.builtinTypes->stringType);
     }
     else if (tag == "Children")
     {
@@ -186,6 +261,59 @@ std::optional<Luau::AutocompleteEntryMap> RobloxPlatform::completionCallback(
         }
 
         return result;
+    }
+    else if (tag == "QuerySelector")
+    {
+        if (!contents.has_value())
+            return std::nullopt;
+
+        auto context = detectSelectorContext(contents.value());
+
+        if (context == SelectorContext::ClassName)
+        {
+            if (auto instanceType = workspaceFolder->frontend.globals.globalScope->lookupType("Instance"))
+            {
+                if (auto* instanceCtv = Luau::get<Luau::ExternType>(instanceType->type))
+                {
+                    Luau::AutocompleteEntryMap result;
+                    for (auto& [_, ty] : workspaceFolder->frontend.globals.globalScope->exportedTypeBindings)
+                    {
+                        if (auto* c = Luau::get<Luau::ExternType>(ty.type))
+                        {
+                            if (Luau::isSubclass(c, instanceCtv))
+                                result.insert_or_assign(c->name,
+                                    Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::String,
+                                        workspaceFolder->frontend.builtinTypes->stringType, false, false, Luau::TypeCorrectKind::Correct});
+                        }
+                    }
+                    return result;
+                }
+            }
+        }
+        else if (context == SelectorContext::PseudoClass)
+        {
+            Luau::AutocompleteEntryMap result;
+            for (const auto& pseudoClass : {"not", "has"})
+            {
+                Luau::AutocompleteEntry entry{Luau::AutocompleteEntryKind::String, workspaceFolder->frontend.builtinTypes->stringType, false, false,
+                    Luau::TypeCorrectKind::Correct};
+                entry.tags.push_back("SelectorPseudoClass");
+                result.insert_or_assign(pseudoClass, std::move(entry));
+            }
+            return result;
+        }
+        else if (context == SelectorContext::PropertyName)
+        {
+            std::string className = findPrecedingClassName(contents.value());
+            std::string lookupName = className.empty() ? "Instance" : className;
+            if (auto classType = workspaceFolder->frontend.globals.globalScope->lookupType(lookupName))
+            {
+                if (auto* ctv = Luau::get<Luau::ExternType>(classType->type))
+                    return getPropertiesOfType(ctv, workspaceFolder->frontend.builtinTypes->stringType);
+            }
+        }
+
+        return std::nullopt;
     }
 
     return std::nullopt;
