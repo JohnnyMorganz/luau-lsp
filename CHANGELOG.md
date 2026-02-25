@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.709
 
+### Added
+
+- `luau-lsp.require.dataFilesUseLiteralStrings` for the roblox platform type.
+
+### Fixed
+
+- roblox platform requires to JSON files now support require-by-string.
+
 ## [1.62.0] - 2026-02-14
 
 ### Added

@@ -276,6 +276,115 @@ TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extens
 #endif
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_json_module")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto jsonPath = tempDir.write_child("project/settings.json", R"({"value": 1})");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./settings", workspace.limits);
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(Uri::file(resolved->name), Uri::file(jsonPath));
+
+    auto source = workspace.fileResolver.readSource(resolved->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_toml_module")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto tomlPath = tempDir.write_child("project/settings.toml", R"(value = 1)");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./settings", workspace.limits);
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(Uri::file(resolved->name), Uri::file(tomlPath));
+
+    auto source = workspace.fileResolver.readSource(resolved->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_yaml_module")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto yamlPath = tempDir.write_child("project/settings.yaml", "value: 1");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./settings", workspace.limits);
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(Uri::file(resolved->name), Uri::file(yamlPath));
+
+    auto source = workspace.fileResolver.readSource(resolved->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_prefers_luau_over_json")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto luauPath = tempDir.touch_child("project/settings.luau");
+    tempDir.write_child("project/settings.json", R"({"value": 1})");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./settings", workspace.limits);
+    REQUIRE(resolved.has_value());
+    CHECK_EQ(Uri::file(resolved->name), Uri::file(luauPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_grabs_corretc_module_name_json")
+{
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "config.json", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\config.json"));
+#else
+    CHECK(endsWith(resolved->name, "/config.json"));
+#endif
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_grabs_corretc_module_name_toml")
+{
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "config.toml", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\config.toml"));
+#else
+    CHECK(endsWith(resolved->name, "/config.toml"));
+#endif
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_grabs_corretc_module_name_yaml")
+{
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "config.yaml", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\config.yaml"));
+#else
+    CHECK(endsWith(resolved->name, "/config.yaml"));
+#endif
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_grabs_corretc_module_name_yml")
+{
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "config.yml", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\config.yml"));
+#else
+    CHECK(endsWith(resolved->name, "/config.yml"));
+#endif
+}
+
 TEST_CASE("string_require_resolves_relative_to_file_integration_test")
 {
     // This integration test needs access to real test data files, so we create a workspace

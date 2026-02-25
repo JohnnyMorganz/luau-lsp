@@ -9,6 +9,6 @@
 
 #include <string>
 
-std::string jsonValueToLuau(const nlohmann::json& val);
-std::string tomlValueToLuau(const toml::value& val);
-std::string yamlValueToLuau(ryml::ConstNodeRef node);
+std::string jsonValueToLuau(const nlohmann::json& val, bool literalStrings = false);
+std::string tomlValueToLuau(const toml::value& val, bool literalStrings = false);
+std::string yamlValueToLuau(ryml::ConstNodeRef node, bool literalStrings = false);

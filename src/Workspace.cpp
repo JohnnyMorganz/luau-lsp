@@ -211,7 +211,8 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             // Recompute diagnostics
             recomputeDiagnostics(config);
         }
-        else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau")
+        else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau" || change.uri.extension() == ".json" ||
+                 change.uri.extension() == ".toml" || change.uri.extension() == ".yaml" || change.uri.extension() == ".yml")
         {
             // Notify if it was a definitions file
             if (isDefinitionFile(change.uri, config))
@@ -386,7 +387,8 @@ void WorkspaceFolder::indexFiles(const ClientConfiguration& config)
 
                 auto uri = Uri::file(path);
                 auto ext = uri.extension();
-                if ((ext == ".lua" || ext == ".luau") && !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
+                if ((ext == ".lua" || ext == ".luau" || ext == ".json" || ext == ".toml" || ext == ".yaml" || ext == ".yml") &&
+                    !isDefinitionFile(uri, config) && !isIgnoredFile(uri, config))
                 {
                     auto moduleName = fileResolver.getModuleName(uri);
                     moduleNames.emplace_back(moduleName);

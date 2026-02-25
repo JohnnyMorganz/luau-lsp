@@ -690,6 +690,12 @@
           "markdownDeprecationMessage": "**Deprecated**: Use the new require-by-string semantics instead. This option may be removed at any time in the future",
           "deprecationMessage": "Deprecated: Use the new require-by-string semantics instead. This option may be removed at any time in the future"
         },
+        "luau-lsp.require.dataFilesUseLiteralStrings": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Whether string values in roblox platform data files (JSON/TOML/YAML) should use singleton type casts. I.e., (\"hello\" :: \"Hello\") instead of \"hello\""
+        },
         "luau-lsp.index.enabled": {
           "type": "boolean",
           "default": true,

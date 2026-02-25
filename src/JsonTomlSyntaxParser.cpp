@@ -2,11 +2,14 @@
 #include "LSP/JsonTomlSyntaxParser.hpp"
 #include "Luau/StringUtils.h"
 
-std::string jsonValueToLuau(const nlohmann::json& val)
+std::string jsonValueToLuau(const nlohmann::json& val, bool literalStrings)
 {
     if (val.is_string())
     {
-        return '"' + Luau::escape(val.get<std::string>()) + '"';
+        auto escaped = '"' + Luau::escape(val.get<std::string>()) + '"';
+        if (literalStrings)
+            return "(" + escaped + " :: " + escaped + ")";
+        return escaped;
     }
     else if (val.is_number() || val.is_boolean())
     {
@@ -21,7 +24,7 @@ std::string jsonValueToLuau(const nlohmann::json& val)
         std::string out = "{";
         for (auto& elem : val)
         {
-            out += jsonValueToLuau(elem);
+            out += jsonValueToLuau(elem, literalStrings);
             out += ";";
         }
 
@@ -35,7 +38,7 @@ std::string jsonValueToLuau(const nlohmann::json& val)
         for (auto& [key, value] : val.items())
         {
             out += "[\"" + Luau::escape(key) + "\"] = ";
-            out += jsonValueToLuau(value);
+            out += jsonValueToLuau(value, literalStrings);
             out += ";";
         }
 
@@ -48,12 +51,15 @@ std::string jsonValueToLuau(const nlohmann::json& val)
     }
 }
 
-std::string tomlValueToLuau(const toml::value& val)
+std::string tomlValueToLuau(const toml::value& val, bool literalStrings)
 {
     if (val.is_string())
     {
         std::string str = val.as_string();
-        return '"' + Luau::escape(str) + '"';
+        auto escaped = '"' + Luau::escape(str) + '"';
+        if (literalStrings)
+            return "(" + escaped + " :: " + escaped + ")";
+        return escaped;
     }
     else if (val.is_integer() || val.is_floating() || val.is_boolean())
     {
@@ -69,7 +75,7 @@ std::string tomlValueToLuau(const toml::value& val)
         std::string out = "{";
         for (auto& elem : val.as_array())
         {
-            out += tomlValueToLuau(elem);
+            out += tomlValueToLuau(elem, literalStrings);
             out += ";";
         }
 
@@ -82,7 +88,7 @@ std::string tomlValueToLuau(const toml::value& val)
         for (auto& [key, value] : val.as_table())
         {
             out += "[\"" + Luau::escape(key) + "\"] = ";
-            out += tomlValueToLuau(value);
+            out += tomlValueToLuau(value, literalStrings);
             out += ";";
         }
 
@@ -96,14 +102,14 @@ std::string tomlValueToLuau(const toml::value& val)
     }
 }
 
-std::string yamlValueToLuau(ryml::ConstNodeRef node)
+std::string yamlValueToLuau(ryml::ConstNodeRef node, bool literalStrings)
 {
     if (node.is_seq())
     {
         std::string out = "{";
         for (const auto& child : node.children())
         {
-            out += yamlValueToLuau(child);
+            out += yamlValueToLuau(child, literalStrings);
             out += ";";
         }
         out += "}";
@@ -118,7 +124,7 @@ std::string yamlValueToLuau(ryml::ConstNodeRef node)
             ryml::csubstr keyView = child.key();
             std::string key(keyView.str, keyView.len);
             out += "[\"" + Luau::escape(key) + "\"] = ";
-            out += yamlValueToLuau(child);
+            out += yamlValueToLuau(child, literalStrings);
             out += ";";
         }
         out += "}";
@@ -155,5 +161,8 @@ std::string yamlValueToLuau(ryml::ConstNodeRef node)
         return std::to_string(doubleVal);
     }
 
-    return '"' + Luau::escape(strVal) + '"';
+    auto escaped = '"' + Luau::escape(strVal) + '"';
+    if (literalStrings)
+        return "(" + escaped + " :: " + escaped + ")";
+    return escaped;
 }
