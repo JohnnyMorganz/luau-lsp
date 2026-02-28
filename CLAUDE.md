@@ -20,18 +20,19 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug  # Use Debug for faster builds during development
 
 # Build the CLI (use -j for parallel builds)
-cmake --build . --target Luau.LanguageServer.CLI --config Debug -j$(nproc)
+NUM_CPUS=$(nproc)
+cmake --build . --target Luau.LanguageServer.CLI --config Debug -j$NUM_CPUS
 
 # Build tests (use Debug for faster iteration)
-cmake --build . --target Luau.LanguageServer.Test --config Debug -j$(nproc)
+cmake --build . --target Luau.LanguageServer.Test --config Debug -j$NUM_CPUS
 
 # For release/production builds, use Release mode:
 # cmake .. -DCMAKE_BUILD_TYPE=Release
-# cmake --build . --target Luau.LanguageServer.CLI --config Release -j$(nproc)
+# cmake --build . --target Luau.LanguageServer.CLI --config Release -j$NUM_CPUS
 
 # Build with ASAN (Linux/macOS)
 cmake .. -DLSP_BUILD_ASAN:BOOL=ON
-cmake --build . --target Luau.LanguageServer.Test -j$(nproc)
+cmake --build . --target Luau.LanguageServer.Test -j$NUM_CPUS
 ```
 
 ## Running Tests
@@ -105,6 +106,11 @@ Located in `extern/` and `luau/`:
 - 4-space indentation, no tabs
 - 150 column limit
 - Luau code uses StyLua for formatting
+
+## Committing Changes
+
+- For user-facing changes (particularly when responding to a GitHub issue), make sure there is always an entry in `CHANGELOG.md`
+- Commit messages should reference the GitHub issue in the commit body, not the header (e.g., `Fixes #1234`, `Closes #1234`)
 
 ## Testing Patterns
 

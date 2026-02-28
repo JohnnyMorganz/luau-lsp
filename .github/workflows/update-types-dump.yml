@@ -42,6 +42,11 @@ jobs:
           mkdir -p scripts/api-docs
           curl https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json > scripts/api-docs/en-us.json
 
+      - name: Extract Luau API docs
+        run: |
+          cd scripts
+          python extractLuauDocs.py
+
       - name: Create Pull Request
         id: create_pull_request
         uses: peter-evans/create-pull-request@v6

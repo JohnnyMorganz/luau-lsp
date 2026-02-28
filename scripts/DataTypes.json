@@ -4807,6 +4807,13 @@
                 },
                 {
                     "MemberType": "Property",
+                    "Name": "Tolerance",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
                     "Name": "RespectCanCollide",
                     "ValueType": {
                         "Name": "boolean"

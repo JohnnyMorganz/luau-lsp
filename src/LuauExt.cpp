@@ -151,7 +151,7 @@ Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau:
 {
     size_t retSize = Luau::size(retTypes);
     bool hasTail = !Luau::finite(retTypes);
-    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize > 1);
 
     auto result = Luau::toStringDetailed(retTypes, options);
     if (wrap)

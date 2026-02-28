@@ -407,10 +407,10 @@ std::vector<std::string> WorkspaceFolder::getComments(const Luau::ModuleName& mo
     Luau::SourceModule* sourceModule;
     TextDocumentPtr textDocument{nullptr};
 
-    if (auto it = definitionsSourceModules.find(moduleName); it != definitionsSourceModules.end())
+    if (auto it = definitionsFileState.find(moduleName); it != definitionsFileState.end())
     {
-        sourceModule = &it->second.second;
-        textDocument = TextDocumentPtr(&it->second.first);
+        sourceModule = &it->second.sourceModule;
+        textDocument = TextDocumentPtr(&it->second.textDocument);
     }
     else
     {

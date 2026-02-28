@@ -12,6 +12,7 @@ import * as utils from "./utils";
 let pluginServer: Server | undefined = undefined;
 
 const API_DOCS = "https://luau-lsp.pages.dev/api-docs/en-us.json";
+const LUAU_API_DOCS = "https://luau-lsp.pages.dev/api-docs/luau-en-us.json";
 const STUDIO_PLUGIN_URL =
   "https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion";
 
@@ -51,6 +52,10 @@ const globalTypesUri = (
 
 const apiDocsUri = (context: vscode.ExtensionContext) => {
   return vscode.Uri.joinPath(context.globalStorageUri, "api-docs.json");
+};
+
+const luauApiDocsUri = (context: vscode.ExtensionContext) => {
+  return vscode.Uri.joinPath(context.globalStorageUri, "luau-api-docs.json");
 };
 
 const getRojoProjectFile = async (
@@ -564,8 +569,10 @@ export const preLanguageServerStart = async (
     };
   } else {
     return {
-      definition: undefined,
-      documentation: undefined,
+      definitions: undefined,
+      documentation: [
+        { url: LUAU_API_DOCS, outputUri: luauApiDocsUri(context) },
+      ],
     };
   }
 };

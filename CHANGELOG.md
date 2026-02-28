@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Documentation for built-in Luau functions (e.g. `math.abs`, `table.find`) is now provided in standard platform mode ([#1357](https://github.com/JohnnyMorganz/luau-lsp/issues/1357))
+
 ### Changed
 
-- Sync to upstream Luau 0.709
+- Sync to upstream Luau 0.710
+
+### Fixed
+
+- Fixed inlay hints showing `: (())` instead of `: ()` for functions returning empty type packs ([#1381](https://github.com/JohnnyMorganz/luau-lsp/issues/1381))
+- Fixed type functions in definition files causing `user-defined type function module has expired` errors ([#1382](https://github.com/JohnnyMorganz/luau-lsp/issues/1382))
 
 ### Fixed
 

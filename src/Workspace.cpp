@@ -472,6 +472,25 @@ static void clearDisabledGlobals(const Client* client, const Luau::GlobalTypes& 
     }
 }
 
+Luau::LoadDefinitionFileResult WorkspaceFolder::loadDefinitionFile(
+    const std::string& packageName, const std::string& source, std::optional<nlohmann::json> metadata)
+{
+    auto result = types::registerDefinitions(frontend, frontend.globals, packageName, source);
+    if (!FFlag::LuauSolverV2)
+        types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, source);
+
+    platform->mutateRegisteredDefinitions(frontend.globals, metadata);
+    platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, metadata);
+
+    if (result.success)
+    {
+        TextDocument textDocument(Uri(), "luau", 0, source);
+        definitionsFileState.emplace(packageName, DefinitionsFileState{std::move(textDocument), result.sourceModule, std::move(result.module)});
+    }
+
+    return result;
+}
+
 void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlobals)
 {
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::initialize", "LSP");
@@ -518,14 +537,8 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         client->sendTrace("workspace initialization: parsing definitions file metadata COMPLETED", json(definitionsFileMetadata).dump());
 
         client->sendTrace("workspace initialization: registering types definition");
-        auto result = types::registerDefinitions(frontend, frontend.globals, packageName, *definitionsContents);
-        if (!FFlag::LuauSolverV2)
-            types::registerDefinitions(frontend, frontend.globalsForAutocomplete, packageName, *definitionsContents);
+        auto result = loadDefinitionFile(packageName, *definitionsContents, metadata);
         client->sendTrace("workspace initialization: registering types definition COMPLETED");
-
-        client->sendTrace("workspace: applying platform mutations on definitions");
-        platform->mutateRegisteredDefinitions(frontend.globals, metadata);
-        platform->mutateRegisteredDefinitions(frontend.globalsForAutocomplete, metadata);
 
         auto uri = Uri::file(resolvedFilePath);
 
@@ -533,8 +546,10 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         {
             // Clear any set diagnostics
             client->publishDiagnostics({uri, std::nullopt, {}});
-            TextDocument textDocument(Uri::file(resolvedFilePath), "luau", 0, *definitionsContents);
-            definitionsSourceModules.emplace(packageName, std::make_pair(textDocument, result.sourceModule));
+
+            // Update the text document URI to point to the actual file on disk
+            if (auto it = definitionsFileState.find(packageName); it != definitionsFileState.end())
+                it->second.textDocument = TextDocument(uri, "luau", 0, *definitionsContents);
         }
         else
         {

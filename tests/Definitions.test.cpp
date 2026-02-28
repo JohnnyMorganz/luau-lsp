@@ -171,4 +171,20 @@ TEST_CASE("support_disabling_methods_in_extern_types_globals")
     CHECK_EQ(err->key, "BindToClose");
 }
 
+TEST_CASE_FIXTURE(Fixture, "type_functions_in_definition_files_work")
+{
+    ENABLE_NEW_SOLVER();
+
+    loadDefinition("@test", R"(
+        export type function foo(ty)
+            return types.negationof(ty)
+        end
+    )");
+
+    auto result = check(R"(
+        local x: foo<number> = nil :: any
+    )");
+    REQUIRE(result.errors.empty());
+}
+
 TEST_SUITE_END();

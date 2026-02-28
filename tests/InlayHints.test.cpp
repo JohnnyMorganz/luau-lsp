@@ -1035,6 +1035,25 @@ TEST_CASE_FIXTURE(Fixture, "inlay_hint_generics_and_extern_type")
     CHECK_EQ(result[0].label[4].value, ">");
 }
 
+TEST_CASE_FIXTURE(Fixture, "show_correct_inlay_hint_for_function_returning_empty_pack")
+{
+    client->globalConfig.inlayHints.functionReturnTypes = true;
+    auto source = R"(
+        local function example()
+            print("hello")
+        end
+    )";
+
+    auto result = processInlayHint(this, source);
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(labelToString(result[0].label), ": ()");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+
+    REQUIRE(result[0].textEdits.size() == 1);
+    CHECK_EQ(result[0].textEdits[0].newText, ": ()");
+}
+
 TEST_CASE_FIXTURE(Fixture, "inlay_hint_does_not_crash_on_truncated_intersection_type_with_spans")
 {
     client->globalConfig.inlayHints.variableTypes = true;

@@ -51,9 +51,19 @@ public:
     bool isReady = false;
 
 private:
-    /// Mapping between a definitions package name to the TextDocument / SourceModule that contains this definitions.
-    /// Used for documentation comment lookup within definition files.
-    std::unordered_map<std::string, std::pair<TextDocument, Luau::SourceModule>> definitionsSourceModules{};
+    struct DefinitionsFileState
+    {
+        TextDocument textDocument;
+        Luau::SourceModule sourceModule;
+        /// The checked module must be kept alive so that weak_ptr references
+        /// in UserDefinedFunctionData::owner (used by type functions) remain valid.
+        Luau::ModulePtr checkedModule;
+    };
+
+    /// Mapping between a definitions package name to its loaded state.
+    /// Used for documentation comment lookup within definition files and
+    /// to keep checked modules alive for type function lifetime.
+    std::unordered_map<std::string, DefinitionsFileState> definitionsFileState{};
 
 public:
     WorkspaceFolder(Client* client, std::string name, const lsp::DocumentUri& uri, std::optional<Luau::Config> defaultConfig)
@@ -107,6 +117,12 @@ public:
     Luau::CheckResult checkStrict(const Luau::ModuleName& moduleName, const LSPCancellationToken& cancellationToken, bool forAutocomplete = true);
     // TODO: Clip once new type solver is live
     const Luau::ModulePtr getModule(const Luau::ModuleName& moduleName, bool forAutocomplete = false) const;
+
+    /// Loads a single definition file into the frontend globals (and autocomplete globals for old solver).
+    /// Applies platform mutations and stores the checked module in definitionsFileState.
+    /// Callers are responsible for unfreezing/freezing the global type arenas.
+    Luau::LoadDefinitionFileResult loadDefinitionFile(
+        const std::string& packageName, const std::string& source, std::optional<nlohmann::json> metadata = std::nullopt);
 
 private:
     void registerTypes(const std::vector<std::string>& disabledGlobals);

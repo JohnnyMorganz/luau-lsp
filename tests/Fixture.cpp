@@ -169,17 +169,17 @@ Luau::TypeId Fixture::requireType(Luau::ModulePtr module, const std::string& nam
     return Luau::follow(*ty);
 }
 
-Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packageName, const std::string& source, bool forAutocomplete)
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packageName, const std::string& source)
 {
-    RobloxPlatform platform;
+    Luau::unfreeze(workspace.frontend.globals.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::unfreeze(workspace.frontend.globalsForAutocomplete.globalTypes);
 
-    forAutocomplete = forAutocomplete && !FFlag::LuauSolverV2;
-    auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
+    auto result = workspace.loadDefinitionFile(packageName, source);
 
-    Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, packageName, source);
-    platform.mutateRegisteredDefinitions(globals, std::nullopt);
-    Luau::freeze(globals.globalTypes);
+    Luau::freeze(workspace.frontend.globals.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::freeze(workspace.frontend.globalsForAutocomplete.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");
     return result;
