@@ -200,4 +200,47 @@ quoteKey: 'a"b'
     expectItem(table, "quoteKey", "'a\\\"b'");
 }
 
+TEST_CASE("jsonValueToLuau_literal_strings_casts_strings")
+{
+    nlohmann::json json = "hello";
+    CHECK_EQ(jsonValueToLuau(json, false), "\"hello\"");
+    CHECK_EQ(jsonValueToLuau(json, true), "(\"hello\" :: \"hello\")");
+}
+
+TEST_CASE("jsonValueToLuau_literal_strings_nested")
+{
+    nlohmann::json json = {{"key", "value"}, {"arr", {"a", "b"}}};
+    auto result = jsonValueToLuau(json, true);
+    CHECK(result.find("(\"value\" :: \"value\")") != std::string::npos);
+    CHECK(result.find("(\"a\" :: \"a\")") != std::string::npos);
+    CHECK(result.find("(\"b\" :: \"b\")") != std::string::npos);
+}
+
+TEST_CASE("jsonValueToLuau_literal_strings_escapes_correctly")
+{
+    nlohmann::json json = "a\"b";
+    auto result = jsonValueToLuau(json, true);
+    CHECK_EQ(result, "(\"a\\\"b\" :: \"a\\\"b\")");
+}
+
+TEST_CASE("tomlValueToLuau_literal_strings_casts_strings")
+{
+    toml::value toml = R"(key = "hello")"_toml;
+    auto withoutLiteral = tomlValueToLuau(toml, false);
+    auto withLiteral = tomlValueToLuau(toml, true);
+    CHECK(withoutLiteral.find("\"hello\"") != std::string::npos);
+    CHECK(withLiteral.find("(\"hello\" :: \"hello\")") != std::string::npos);
+}
+
+TEST_CASE("yamlValueToLuau_literal_strings_casts_strings")
+{
+    const char yaml_str[] = "key: hello\n";
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+
+    auto withoutLiteral = yamlValueToLuau(tree.rootref(), false);
+    auto withLiteral = yamlValueToLuau(tree.rootref(), true);
+    CHECK(withoutLiteral.find("\"hello\"") != std::string::npos);
+    CHECK(withLiteral.find("(\"hello\" :: \"hello\")") != std::string::npos);
+}
+
 TEST_SUITE_END();

@@ -207,9 +207,11 @@ struct ClientRequireConfiguration
     std::unordered_map<std::string, std::string> directoryAliases;
     // DEPRECATED: USE NEW REQUIRE-BY-STRING SEMANTICS INSTEAD.
     bool useOriginalRequireByStringSemantics = false;
+    // Whether string values in data files (JSON/TOML/YAML) should use singleton type casts, i.e., ("hello" :: "hello") instead of "hello"
+    bool dataFilesUseLiteralStrings = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases, useOriginalRequireByStringSemantics);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientRequireConfiguration, fileAliases, directoryAliases, useOriginalRequireByStringSemantics, dataFilesUseLiteralStrings);
 
 struct ClientIndexConfiguration
 {

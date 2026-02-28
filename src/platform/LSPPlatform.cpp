@@ -2,6 +2,7 @@
 
 #include "LuauFileUtils.hpp"
 #include "LSP/ClientConfiguration.hpp"
+#include "LSP/JsonTomlSyntaxParser.hpp"
 #include "LSP/Workspace.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
@@ -9,6 +10,7 @@
 
 #include "Luau/TimeTrace.h"
 #include <memory>
+#include <sstream>
 #include <unordered_set>
 
 LSPPlatform::LSPPlatform(WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder)
@@ -184,15 +186,28 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
         fileUri = fileUri.resolvePath("init");
 
     // Add file endings
-    if (fileUri.extension() != ".luau" && fileUri.extension() != ".lua")
+    if (
+        fileUri.extension() != ".luau" && fileUri.extension() != ".lua" &&
+        fileUri.extension() != ".json" && fileUri.extension() != ".toml" &&
+        fileUri.extension() != ".yaml" && fileUri.extension() != ".yml"
+    )
     {
-        auto fileUriWithExtension = fileUri;
-        fileUriWithExtension.path = fileUri.path + ".luau";
-        if (!fileUriWithExtension.exists())
-            // fall back to .lua if a module with .luau doesn't exist
+        static const char* extensions[] = {".luau", ".lua", ".json", ".toml", ".yaml", ".yml"};
+        bool found = false;
+        for (const char* extension : extensions)
+        {
+            auto candidate = fileUri;
+            candidate.path = fileUri.path + extension;
+            if (candidate.exists())
+            {
+                fileUri = candidate;
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            // fall back to .lua if a module with a valid extension doesn't exist
             fileUri.path += ".lua";
-        else
-            fileUri.path = fileUriWithExtension.path;
     }
 
     return Luau::ModuleInfo{fileResolver->getModuleName(fileUri)};

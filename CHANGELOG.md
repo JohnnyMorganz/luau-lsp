@@ -14,6 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed inlay hints showing `: (())` instead of `: ()` for functions returning empty type packs ([#1381](https://github.com/JohnnyMorganz/luau-lsp/issues/1381))
 
+### Added
+
+- `luau-lsp.require.dataFilesUseLiteralStrings` for the roblox platform type.
+
+### Fixed
+
+- roblox platform requires to JSON files now support require-by-string.
+
 ## [1.62.0] - 2026-02-14
 
 ### Added

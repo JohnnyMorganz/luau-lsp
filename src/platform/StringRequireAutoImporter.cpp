@@ -18,6 +18,10 @@ std::string requireNameFromModuleName(const Luau::ModuleName& name)
 #endif
     fileName = removeSuffix(fileName, ".luau");
     fileName = removeSuffix(fileName, ".lua");
+    fileName = removeSuffix(fileName, ".json");
+    fileName = removeSuffix(fileName, ".toml");
+    fileName = removeSuffix(fileName, ".yaml");
+    fileName = removeSuffix(fileName, ".yml");
     return makeValidVariableName(fileName);
 }
 
@@ -46,6 +50,10 @@ std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap&
     {
         bestAliasedPath = removeSuffix(*bestAliasedPath, ".luau");
         bestAliasedPath = removeSuffix(*bestAliasedPath, ".lua");
+        bestAliasedPath = removeSuffix(*bestAliasedPath, ".json");
+        bestAliasedPath = removeSuffix(*bestAliasedPath, ".toml");
+        bestAliasedPath = removeSuffix(*bestAliasedPath, ".yaml");
+        bestAliasedPath = removeSuffix(*bestAliasedPath, ".yml");
     }
 
     return bestAliasedPath;
@@ -80,6 +88,10 @@ std::pair<std::string, SortText::SortTextT> computeRequirePath(
     auto relativePath = to.lexicallyRelative(fromParent ? *fromParent : from);
     relativePath = removeSuffix(relativePath, ".luau");
     relativePath = removeSuffix(relativePath, ".lua");
+    relativePath = removeSuffix(relativePath, ".json");
+    relativePath = removeSuffix(relativePath, ".toml");
+    relativePath = removeSuffix(relativePath, ".yaml");
+    relativePath = removeSuffix(relativePath, ".yml");
 
     if (isInitLuauFile(from))
     {
