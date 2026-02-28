@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed inlay hints showing `: (())` instead of `: ()` for functions returning empty type packs ([#1381](https://github.com/JohnnyMorganz/luau-lsp/issues/1381))
 - Fixed type functions in definition files causing `user-defined type function module has expired` errors ([#1382](https://github.com/JohnnyMorganz/luau-lsp/issues/1382))
+- Fixed auto-imports incorrectly showing when indexing a variable inside a table literal ([#1384](https://github.com/JohnnyMorganz/luau-lsp/issues/1384))
 
 ## [1.62.0] - 2026-02-14
 

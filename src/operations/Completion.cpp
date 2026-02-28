@@ -800,17 +800,19 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         }
         else if (result.context == Luau::AutocompleteContext::Property)
         {
-            bool isTableLiteral = false;
-            for (auto node : result.ancestry)
+            bool isDirectTableLiteral = false;
+            for (auto it = result.ancestry.rbegin(); it != result.ancestry.rend(); ++it)
             {
-                if (node->is<Luau::AstExprTable>())
+                if ((*it)->is<Luau::AstExprTable>())
                 {
-                    isTableLiteral = true;
+                    isDirectTableLiteral = true;
                     break;
                 }
+                if ((*it)->is<Luau::AstExprIndexName>())
+                    break;
             }
 
-            if (isTableLiteral)
+            if (isDirectTableLiteral)
                 suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
         }
         else if (result.context == Luau::AutocompleteContext::Type)

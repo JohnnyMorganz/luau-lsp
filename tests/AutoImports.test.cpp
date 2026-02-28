@@ -1547,4 +1547,24 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_completion_property")
     CHECK_FALSE(getItem(result, "ReplicatedStorage"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_indexing_variable_inside_table")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    auto [source, marker] = sourceWithMarker(R"(
+        local foo = {}
+        local x = {
+            foo.|
+        }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "ReplicatedStorage"));
+}
+
 TEST_SUITE_END();
