@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.709
 
+### Fixed
+
+- Fix require-by-string resolution not following symlinks ([#896](https://github.com/JohnnyMorganz/luau-lsp/issues/896))
+
 ## [1.62.0] - 2026-02-14
 
 ### Added

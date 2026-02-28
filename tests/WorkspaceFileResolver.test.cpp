@@ -513,4 +513,36 @@ TEST_CASE_FIXTURE(Fixture, "support_config_luau")
     CHECK(fooConfig.aliases.find("test"));
 }
 
+#ifndef _WIN32
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_file")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto targetPath = tempDir.touch_child("project/real_module.luau");
+
+    // Create a symlink: project/linked_module.luau -> project/real_module.luau
+    std::filesystem::create_symlink(targetPath, tempDir.path() + "/project/linked_module.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./linked_module", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+    CHECK(endsWith(resolved->name, "/project/linked_module.luau"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_directory")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    tempDir.touch_child("real_lib/init.luau");
+
+    // Create a symlink: project/lib -> real_lib
+    std::filesystem::create_symlink(tempDir.path() + "/real_lib", tempDir.path() + "/project/lib");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./lib", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+    CHECK(endsWith(resolved->name, "/project/lib/init.luau"));
+}
+#endif
+
 TEST_SUITE_END();

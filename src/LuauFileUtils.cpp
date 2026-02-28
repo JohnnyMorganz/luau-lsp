@@ -311,6 +311,7 @@ bool exists(const std::string& path)
     return true;
 #else
     struct stat st = {};
+    // LUAU-LSP DEVIATION: use stat() instead of lstat() to follow symlinks
     return stat(path.c_str(), &st) == 0;
 #endif
 }
@@ -324,6 +325,7 @@ bool isFile(const std::string& path)
     return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #else
     struct stat st = {};
+    // LUAU-LSP DEVIATION: use stat() instead of lstat() to follow symlinks
     if (stat(path.c_str(), &st) != 0)
         return false;
     return (st.st_mode & S_IFMT) == S_IFREG;
@@ -339,6 +341,7 @@ bool isDirectory(const std::string& path)
     return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #else
     struct stat st = {};
+    // LUAU-LSP DEVIATION: use stat() instead of lstat() to follow symlinks
     if (stat(path.c_str(), &st) != 0)
         return false;
     return (st.st_mode & S_IFMT) == S_IFDIR;
