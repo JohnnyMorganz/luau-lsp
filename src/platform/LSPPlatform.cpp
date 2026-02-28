@@ -208,8 +208,6 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
         if (!found)
             // fall back to .lua if a module with a valid extension doesn't exist
             fileUri.path += ".lua";
-        else
-            fileUri.path = fileUriWithExtension.path;
     }
 
     return Luau::ModuleInfo{fileResolver->getModuleName(fileUri)};
