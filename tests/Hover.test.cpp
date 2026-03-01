@@ -395,7 +395,7 @@ TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_external_type_references"
     )");
 
     auto uri = newDocument("source.luau", R"(
-        local Types = require("./types")
+        local Types = require("types.luau")
 
         local x: Types.Value
     )");
@@ -631,7 +631,7 @@ TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
     )");
 
     auto uri = newDocument("source.luau", R"(
-        local Types = require("./types")
+        local Types = require("types.luau")
 
         local x: Types.Value
     )");

@@ -90,8 +90,8 @@ TEST_CASE_FIXTURE(Fixture, "simple_require_graph")
     )");
 
     auto uri = newDocument("base.luau", R"(
-        local firstDependency = require("./firstDependency")
-        local secondDependency = require("./secondDependency")
+        local firstDependency = require("firstDependency.luau")
+        local secondDependency = require("secondDependency.luau")
     )");
 
     // Index dependencies
@@ -128,8 +128,8 @@ TEST_CASE_FIXTURE(Fixture, "full_require_graph_with_disconnected_module")
     )");
 
     auto uri = newDocument("base.luau", R"(
-        local firstDependency = require("./firstDependency")
-        local secondDependency = require("./secondDependency")
+        local firstDependency = require("firstDependency.luau")
+        local secondDependency = require("secondDependency.luau")
     )");
 
     // Index dependencies
