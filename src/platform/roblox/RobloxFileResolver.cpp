@@ -1,5 +1,6 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
+#include "LSP/Workspace.hpp"
 
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
@@ -57,11 +58,13 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
     if (!source)
         return std::nullopt;
 
+    auto config = workspaceFolder->client->getConfiguration(path);
+
     if (path.extension() == ".json")
     {
         try
         {
-            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source));
+            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source), config.require.dataFilesUseLiteralStrings);
         }
         catch (const std::exception& e)
         {
@@ -76,7 +79,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         {
             std::string tomlSource(*source);
             std::istringstream tomlSourceStream(tomlSource, std::ios_base::binary | std::ios_base::in);
-            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.fsPath()));
+            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.fsPath()), config.require.dataFilesUseLiteralStrings);
         }
         catch (const std::exception& e)
         {
@@ -90,7 +93,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         try
         {
             ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(*source));
-            source = "--!strict\nreturn " + yamlValueToLuau(tree.rootref());
+            source = "--!strict\nreturn " + yamlValueToLuau(tree.rootref(), config.require.dataFilesUseLiteralStrings);
         }
         catch (const std::exception& e)
         {
