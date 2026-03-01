@@ -258,7 +258,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_fun
     )");
 
     auto user = newDocument("user.luau", R"(
-        local useFunction = require("./useFunction")
+        local useFunction = require("useFunction.luau")
 
         local value = useFunction()
     )");
@@ -273,9 +273,9 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_fun
     auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
-    // The new solver does not store `require("./useFunction")` in the astTypes of a module
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
     // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
-    // Note that `require("./useFunction")()` *would* resolve as a reference.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
     if (FFlag::LuauSolverV2)
         REQUIRE_EQ(3, result->size());
     else
@@ -295,7 +295,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_fun
     else
     {
         CHECK_EQ(result->at(2).uri, user);
-        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 52}});
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
         CHECK_EQ(result->at(3).uri, user);
         CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
     }
@@ -311,7 +311,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_fu
     )");
 
     auto user = newDocument("user.luau", R"(
-        local useFunction = require("./useFunction")
+        local useFunction = require("useFunction.luau")
 
         local value = useFunction()
     )");
@@ -326,9 +326,9 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_fu
     auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
-    // The new solver does not store `require("./useFunction")` in the astTypes of a module
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
     // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
-    // Note that `require("./useFunction")()` *would* resolve as a reference.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
     if (FFlag::LuauSolverV2)
         REQUIRE_EQ(3, result->size());
     else
@@ -348,7 +348,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_fu
     else
     {
         CHECK_EQ(result->at(2).uri, user);
-        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 52}});
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
         CHECK_EQ(result->at(3).uri, user);
         CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
     }
@@ -363,7 +363,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
     )");
 
     auto user = newDocument("user.luau", R"(
-        local tbl = require("./tbl")
+        local tbl = require("tbl.luau")
 
         local value = tbl
     )");
@@ -378,9 +378,9 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
     auto result = workspace.references(params, nullptr);
     REQUIRE(result);
 
-    // The new solver does not store `require("./useFunction")` in the astTypes of a module
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
     // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
-    // Note that `require("./useFunction")()` *would* resolve as a reference.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
     if (FFlag::LuauSolverV2)
         REQUIRE_EQ(3, result->size());
     else
@@ -400,7 +400,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
     else
     {
         CHECK_EQ(result->at(2).uri, user);
-        CHECK_EQ(result->at(2).range, lsp::Range{{1, 20}, {1, 36}});
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 20}, {1, 39}});
         CHECK_EQ(result->at(3).uri, user);
         CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 25}});
     }
@@ -416,7 +416,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_an_exported_table_ty
     )");
 
     auto user = newDocument("user.luau", R"(
-        local tbl = require("./tbl")
+        local tbl = require("tbl.luau")
 
         local t: tbl.Table
         local v = t.Property
@@ -451,7 +451,7 @@ TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_an_exported_table_ty
     )");
 
     auto user = newDocument("user.luau", R"(
-        local tbl = require("./tbl")
+        local tbl = require("tbl.luau")
 
         local t: tbl.Table
         local v = t.Property

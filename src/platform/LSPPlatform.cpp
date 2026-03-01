@@ -3,15 +3,11 @@
 #include "LuauFileUtils.hpp"
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/Workspace.hpp"
-#include "Platform/LSPNavigationContext.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
-#include "Luau/RequireNavigator.h"
-#include "Luau/StringUtils.h"
 #include "Luau/TimeTrace.h"
-#include "lua.h"
 #include <memory>
 #include <unordered_set>
 
@@ -121,87 +117,28 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
     if (!contextPath)
         return std::nullopt;
 
-    ClientConfiguration clientConfig;
-    if (fileResolver->client)
-        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
-
-    // DEPRECATED: Fall back to legacy resolution for deprecated configuration option.
-    // Alias paths (@foo/bar) still go through the Navigator since it handles aliases natively.
-    if (clientConfig.require.useOriginalRequireByStringSemantics && !Luau::startsWith(requiredString, "@"))
-        return resolveStringRequireLegacy(context, requiredString, limits);
-
-    LSPNavigationContext navigationContext(contextPath->fsPath());
-
-    struct ConfigInterruptInfo
-    {
-        const Luau::TypeCheckLimits& limits;
-        std::string module;
-    };
-
-    ConfigInterruptInfo info{limits, requiredString};
-    navigationContext.luauConfigInit = [&info](lua_State* L)
-    {
-        lua_setthreaddata(L, &info);
-    };
-    navigationContext.luauConfigInterrupt = [](lua_State* L, int gc)
-    {
-        auto* info = static_cast<ConfigInterruptInfo*>(lua_getthreaddata(L));
-        if (!info)
-            return;
-
-        if (info->limits.finishTime && Luau::TimeTrace::getClock() > *info->limits.finishTime)
-            throw Luau::TimeLimitError{info->module};
-        if (info->limits.cancellationToken && info->limits.cancellationToken->requested())
-            throw Luau::UserCancelError{info->module};
-    };
-
-    Luau::Require::ErrorHandler errorHandler;
-    Luau::Require::Navigator navigator(navigationContext, errorHandler);
-
-    auto status = navigator.navigate(std::string(requiredString));
-
-    if (status == Luau::Require::Navigator::Status::ErrorReported)
-        return std::nullopt;
-
-    if (navigationContext.isModulePresent())
-    {
-        auto resolvedUri = Uri::file(navigationContext.getResolvedPath());
-        return Luau::ModuleInfo{fileResolver->getModuleName(resolvedUri)};
-    }
-
-    // The file doesn't exist on disk (yet). Return a fallback path for error reporting / go-to-definition.
-    auto fallbackPath = navigationContext.getFallbackPath();
-    if (!fallbackPath.empty())
-    {
-        auto fallbackUri = Uri::file(fallbackPath);
-        return Luau::ModuleInfo{fileResolver->getModuleName(fallbackUri)};
-    }
-
-    return std::nullopt;
-}
-
-std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequireLegacy(
-    const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
-{
-    LUAU_ASSERT(context);
-
-    // This legacy path should only be reached when the deprecated flag is set
-    ClientConfiguration clientConfig;
-    if (fileResolver->client)
-        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
-    LUAU_ASSERT(clientConfig.require.useOriginalRequireByStringSemantics);
-
-    auto contextPath = resolveToRealPath(context->name);
-    if (!contextPath)
-        return std::nullopt;
-
-    // In original require mode, resolution is always relative to the file's directory
-    // (no special init.luau parent-directory semantics).
     auto baseUri = contextPath->parent();
     if (!baseUri)
         return std::nullopt;
 
+    ClientConfiguration clientConfig;
+    if (fileResolver->client)
+        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
+
+    if (isInitLuauFile(*contextPath) && !clientConfig.require.useOriginalRequireByStringSemantics)
+    {
+        baseUri = baseUri->parent();
+        if (!baseUri)
+            return std::nullopt;
+    }
+
     auto fileUri = baseUri->resolvePath(requiredString);
+
+    auto luauConfig = fileResolver->getConfig(context->name, limits);
+    if (auto aliasedPath = resolveAlias(requiredString, luauConfig, *contextPath->parent()))
+    {
+        fileUri = aliasedPath.value();
+    }
 
     // Handle "init.luau" files in a directory
     if (fileUri.isDirectory())

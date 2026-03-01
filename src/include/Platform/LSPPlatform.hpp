@@ -39,10 +39,6 @@ protected:
     WorkspaceFileResolver* fileResolver;
     WorkspaceFolder* workspaceFolder;
 
-    /// DEPRECATED: used only for useOriginalRequireByStringSemantics
-    std::optional<Luau::ModuleInfo> resolveStringRequireLegacy(
-        const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
-
 public:
     virtual void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) {}
 

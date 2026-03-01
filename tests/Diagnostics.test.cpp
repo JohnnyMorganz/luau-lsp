@@ -62,7 +62,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_marks_dependent_files_as_dirty"
     )");
     auto secondDocument = newDocument("b.luau", R"(
         --!strict
-        local a = require("./a")
+        local a = require("./a.luau")
         print(a.hello)
     )");
 
@@ -96,7 +96,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_triggers_dependent_diagnostics_
     )");
     auto secondDocument = newDocument("b.luau", R"(
         --!strict
-        local a = require("./a")
+        local a = require("./a.luau")
         print(a.hello)
     )");
 
@@ -137,7 +137,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_update_does_not_update_workspace_diagn
     )");
     auto secondDocument = newDocument("b.luau", R"(
         --!strict
-        local a = require("./a")
+        local a = require("./a.luau")
         print(a.hello)
     )");
 
@@ -167,7 +167,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_auto_updates_workspace_diagnostic
     )");
     auto secondDocument = newDocument("b.luau", R"(
         --!strict
-        local a = require("./a")
+        local a = require("./a.luau")
         print(a.hello)
     )");
 
@@ -214,7 +214,7 @@ TEST_CASE_FIXTURE(Fixture, "text_document_save_does_not_update_workspace_diagnos
     )");
     auto secondDocument = newDocument("b.luau", R"(
         --!strict
-        local a = require("./a")
+        local a = require("./a.luau")
         print(a.hello)
     )");
 

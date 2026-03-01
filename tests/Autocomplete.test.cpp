@@ -186,7 +186,7 @@ TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_
     )";
 
     auto [source, marker] = sourceWithMarker(R"(
-        local bar = require("./bar")
+        local bar = require("bar.luau")
         local item: bar.B = nil
         item.|
     )");
@@ -289,7 +289,7 @@ TEST_CASE_FIXTURE(Fixture, "imported_type_reference_has_documentation")
     )");
 
     auto [source, marker] = sourceWithMarker(R"(
-        local library = require("./library")
+        local library = require("library.luau")
 
         local var: library.Some|
     )");

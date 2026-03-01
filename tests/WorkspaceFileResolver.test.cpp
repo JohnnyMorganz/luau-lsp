@@ -222,10 +222,10 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
     CHECK_EQ(resolveAlias("@self/foo", workspace.fileResolver.defaultConfig, basePath), basePath.resolvePath("foo"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "string require resolves module without extension")
+TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
     Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./Module", workspace.limits);
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau", workspace.limits);
 
     REQUIRE(resolved.has_value());
 #ifdef _WIN32
@@ -235,16 +235,16 @@ TEST_CASE_FIXTURE(Fixture, "string require resolves module without extension")
 #endif
 }
 
-TEST_CASE_FIXTURE(Fixture, "string require treats non-luau extension as component name")
+TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
 {
     Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
-    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "./Module.mod", workspace.limits);
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod", workspace.limits);
 
     REQUIRE(resolved.has_value());
 #ifdef _WIN32
-    CHECK(endsWith(resolved->name, "\\Module.mod.luau"));
+    CHECK(endsWith(resolved->name, "\\Module.mod.lua"));
 #else
-    CHECK(endsWith(resolved->name, "/Module.mod.luau"));
+    CHECK(endsWith(resolved->name, "/Module.mod.lua"));
 #endif
 }
 
@@ -319,7 +319,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_in
         Uri::file(toolsFilePath));
 
     CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name),
-        Uri::file(tempDir.path() + "/project/utils.luau"));
+        Uri::file(tempDir.path() + "/project/utils.lua"));
     CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils", workspace.limits)->name),
         Uri::file(projectDirectoryUtilsPath));
 }
@@ -483,38 +483,6 @@ TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 
     CHECK_EQ(fooConfig.aliases.size(), 1);
     CHECK(fooConfig.aliases.find("test"));
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_require_navigates_through_ambiguous_parent_directory")
-{
-    // Create a directory structure where the parent is ambiguous:
-    // project/lib.luau exists AND project/lib/init.luau exists (ambiguous).
-    // Navigating from project/lib/main.luau to ../other should still succeed
-    // because toParent() should not fail on ambiguous parents.
-    auto mainPath = tempDir.touch_child("project/lib/main.luau");
-    tempDir.touch_child("project/lib.luau");
-    tempDir.touch_child("project/lib/init.luau");
-    auto otherPath = tempDir.touch_child("project/other.luau");
-
-    Luau::ModuleInfo baseContext{mainPath};
-    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits);
-
-    REQUIRE(resolved.has_value());
-    CHECK_EQ(Uri::file(resolved->name), Uri::file(otherPath));
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_require_resolves_alias_with_original_require_semantics_enabled")
-{
-    client->globalConfig.require.useOriginalRequireByStringSemantics = true;
-
-    auto projectInitPath = tempDir.touch_child("project/init.luau");
-    auto projectUtilsPath = tempDir.touch_child("project/utils.luau");
-
-    Luau::ModuleInfo baseContext{projectInitPath};
-    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils", workspace.limits);
-
-    REQUIRE(resolved.has_value());
-    CHECK_EQ(Uri::file(resolved->name), Uri::file(projectUtilsPath));
 }
 
 #ifndef _WIN32

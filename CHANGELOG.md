@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.63.0] - 2026-03-01
+
 ### Removed
 
 - Removed deprecated `luau-lsp.require.fileAliases` and `luau-lsp.require.directoryAliases` configuration options. Use `.luaurc` / `.config.luau` aliases instead
@@ -17,7 +19,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.710
-- Aligned internal implementation of require-by-string to use Luau's RequireNavigator mechanism. Note that this now prevents relative string requires without a `./`, as well as string requires with a file extension, which are both invalid in Luau's official require-by-string semantics. If you rely on the old semantics, enable `luau-lsp.require.useOriginalRequireByStringSemantics` (however, expect this to be removed in a future release). ([#1266](https://github.com/JohnnyMorganz/luau-lsp/issues/1266))
 
 ### Fixed
 
@@ -1891,7 +1892,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

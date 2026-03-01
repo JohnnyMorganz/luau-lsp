@@ -192,9 +192,9 @@ jobs:
       - name: Run Luau Analyze (Cloud Scripts)
         run: |
           lune setup
-          echo '{ "luau-lsp.require.directoryAliases": {"@lune/": "~/.lune/.typedefs/0.8.9/"} }' > settings.json
+          echo '{ "aliases": { "lune": "'"$HOME"'/.lune/.typedefs/0.8.9" } }' > .luaurc
           rojo sourcemap test.project.json --output test-sourcemap.json
-          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --settings=settings.json --flag:LuauFixIndexerSubtypingOrdering=True cloud
+          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --flag:LuauFixIndexerSubtypingOrdering=True cloud
         working-directory: plugin
 
       - name: Build Plugin
