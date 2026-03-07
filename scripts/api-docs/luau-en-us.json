@@ -3855,389 +3855,6 @@
     "learn_more_link": "https://luau.org/library/#coroutine-library",
     "code_sample": ""
   },
-  "@luau/global/vector": {
-    "documentation": "A library of vector functions.",
-    "keys": {
-      "create": "@luau/global/vector.create",
-      "magnitude": "@luau/global/vector.magnitude",
-      "normalize": "@luau/global/vector.normalize",
-      "cross": "@luau/global/vector.cross",
-      "dot": "@luau/global/vector.dot",
-      "angle": "@luau/global/vector.angle",
-      "floor": "@luau/global/vector.floor",
-      "ceil": "@luau/global/vector.ceil",
-      "abs": "@luau/global/vector.abs",
-      "sign": "@luau/global/vector.sign",
-      "clamp": "@luau/global/vector.clamp",
-      "lerp": "@luau/global/vector.lerp",
-      "max": "@luau/global/vector.max",
-      "min": "@luau/global/vector.min",
-      "zero": "@luau/global/vector.zero",
-      "one": "@luau/global/vector.one"
-    },
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.create/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.create/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.create/param/2": {
-    "documentation": ""
-  },
-  "@luau/global/vector.create/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.create": {
-    "documentation": "Creates a new vector with the given component values.",
-    "params": [
-      {
-        "name": "x",
-        "documentation": "@luau/global/vector.create/param/0"
-      },
-      {
-        "name": "y",
-        "documentation": "@luau/global/vector.create/param/1"
-      },
-      {
-        "name": "z",
-        "documentation": "@luau/global/vector.create/param/2"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.create/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.magnitude/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.magnitude/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.magnitude": {
-    "documentation": "Calculates the magnitude of a given vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.magnitude/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.magnitude/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.normalize/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.normalize/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.normalize": {
-    "documentation": "Computes the normalized version (unit vector) of a given vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.normalize/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.normalize/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.cross/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.cross/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.cross/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.cross": {
-    "documentation": "Computes the cross product of two vectors.",
-    "params": [
-      {
-        "name": "vec1",
-        "documentation": "@luau/global/vector.cross/param/0"
-      },
-      {
-        "name": "vec2",
-        "documentation": "@luau/global/vector.cross/param/1"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.cross/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.dot/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.dot/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.dot/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.dot": {
-    "documentation": "Computes the dot product of two vectors.",
-    "params": [
-      {
-        "name": "vec1",
-        "documentation": "@luau/global/vector.dot/param/0"
-      },
-      {
-        "name": "vec2",
-        "documentation": "@luau/global/vector.dot/param/1"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.dot/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.angle/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.angle/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.angle/param/2": {
-    "documentation": ""
-  },
-  "@luau/global/vector.angle/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.angle": {
-    "documentation": "Computes the angle between two vectors in radians.",
-    "params": [
-      {
-        "name": "vec1",
-        "documentation": "@luau/global/vector.angle/param/0"
-      },
-      {
-        "name": "vec2",
-        "documentation": "@luau/global/vector.angle/param/1"
-      },
-      {
-        "name": "axis",
-        "documentation": "@luau/global/vector.angle/param/2"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.angle/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.floor/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.floor/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.floor": {
-    "documentation": "Applies <code>math.floor()</code> to every component of the input vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.floor/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.floor/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.ceil/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.ceil/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.ceil": {
-    "documentation": "Applies <code>math.ceil()</code> to every component of the input vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.ceil/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.ceil/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.abs/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.abs/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.abs": {
-    "documentation": "Applies <code>math.abs()</code> to every component of the input vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.abs/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.abs/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.sign/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.sign/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.sign": {
-    "documentation": "Applies <code>math.sign()</code> to every component of the input vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.sign/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.sign/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.clamp/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.clamp/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.clamp/param/2": {
-    "documentation": ""
-  },
-  "@luau/global/vector.clamp/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.clamp": {
-    "documentation": "Applies <code>math.clamp()</code> to every component of the input vector.",
-    "params": [
-      {
-        "name": "vec",
-        "documentation": "@luau/global/vector.clamp/param/0"
-      },
-      {
-        "name": "min",
-        "documentation": "@luau/global/vector.clamp/param/1"
-      },
-      {
-        "name": "max",
-        "documentation": "@luau/global/vector.clamp/param/2"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.clamp/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.lerp/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.lerp/param/1": {
-    "documentation": ""
-  },
-  "@luau/global/vector.lerp/param/2": {
-    "documentation": ""
-  },
-  "@luau/global/vector.lerp/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.lerp": {
-    "documentation": "Returns a vector linearly interpolated between two vectors by a fractional alpha.",
-    "params": [
-      {
-        "name": "vec1",
-        "documentation": "@luau/global/vector.lerp/param/0"
-      },
-      {
-        "name": "vec2",
-        "documentation": "@luau/global/vector.lerp/param/1"
-      },
-      {
-        "name": "alpha",
-        "documentation": "@luau/global/vector.lerp/param/2"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.lerp/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.max/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.max/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.max": {
-    "documentation": "Applies <code>math.max()</code> to the corresponding components of the input vectors.",
-    "params": [
-      {
-        "name": "...",
-        "documentation": "@luau/global/vector.max/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.max/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.min/param/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.min/return/0": {
-    "documentation": ""
-  },
-  "@luau/global/vector.min": {
-    "documentation": "Applies <code>math.min()</code> to the corresponding components of the input vectors.",
-    "params": [
-      {
-        "name": "...",
-        "documentation": "@luau/global/vector.min/param/0"
-      }
-    ],
-    "returns": [
-      "@luau/global/vector.min/return/0"
-    ],
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.zero": {
-    "documentation": "Constant vector with all components set to <code>0</code>.",
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
-  "@luau/global/vector.one": {
-    "documentation": "Constant vector with all components set to <code>1</code>.",
-    "learn_more_link": "https://luau.org/library/#vector-library",
-    "code_sample": ""
-  },
   "@luau/global/assert/param/0": {
     "documentation": "The value that will be asserted against."
   },
@@ -4891,6 +4508,389 @@
   "@luau/global/_VERSION": {
     "documentation": "A global variable that holds a string containing the current interpreter version.",
     "learn_more_link": "https://luau.org/library/#global-functions",
+    "code_sample": ""
+  },
+  "@luau/global/vector": {
+    "documentation": "A library of vector functions.",
+    "keys": {
+      "create": "@luau/global/vector.create",
+      "magnitude": "@luau/global/vector.magnitude",
+      "normalize": "@luau/global/vector.normalize",
+      "cross": "@luau/global/vector.cross",
+      "dot": "@luau/global/vector.dot",
+      "angle": "@luau/global/vector.angle",
+      "floor": "@luau/global/vector.floor",
+      "ceil": "@luau/global/vector.ceil",
+      "abs": "@luau/global/vector.abs",
+      "sign": "@luau/global/vector.sign",
+      "clamp": "@luau/global/vector.clamp",
+      "lerp": "@luau/global/vector.lerp",
+      "max": "@luau/global/vector.max",
+      "min": "@luau/global/vector.min",
+      "zero": "@luau/global/vector.zero",
+      "one": "@luau/global/vector.one"
+    },
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.create/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.create/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.create/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/vector.create/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.create": {
+    "documentation": "Creates a new vector with the given component values.",
+    "params": [
+      {
+        "name": "x",
+        "documentation": "@luau/global/vector.create/param/0"
+      },
+      {
+        "name": "y",
+        "documentation": "@luau/global/vector.create/param/1"
+      },
+      {
+        "name": "z",
+        "documentation": "@luau/global/vector.create/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.create/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.magnitude/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.magnitude/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.magnitude": {
+    "documentation": "Calculates the magnitude of a given vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.magnitude/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.magnitude/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.normalize/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.normalize/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.normalize": {
+    "documentation": "Computes the normalized version (unit vector) of a given vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.normalize/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.normalize/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.cross/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.cross/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.cross/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.cross": {
+    "documentation": "Computes the cross product of two vectors.",
+    "params": [
+      {
+        "name": "vec1",
+        "documentation": "@luau/global/vector.cross/param/0"
+      },
+      {
+        "name": "vec2",
+        "documentation": "@luau/global/vector.cross/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.cross/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.dot/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.dot/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.dot/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.dot": {
+    "documentation": "Computes the dot product of two vectors.",
+    "params": [
+      {
+        "name": "vec1",
+        "documentation": "@luau/global/vector.dot/param/0"
+      },
+      {
+        "name": "vec2",
+        "documentation": "@luau/global/vector.dot/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.dot/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.angle/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.angle/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.angle/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/vector.angle/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.angle": {
+    "documentation": "Computes the angle between two vectors in radians.",
+    "params": [
+      {
+        "name": "vec1",
+        "documentation": "@luau/global/vector.angle/param/0"
+      },
+      {
+        "name": "vec2",
+        "documentation": "@luau/global/vector.angle/param/1"
+      },
+      {
+        "name": "axis",
+        "documentation": "@luau/global/vector.angle/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.angle/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.floor/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.floor/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.floor": {
+    "documentation": "Applies <code>math.floor()</code> to every component of the input vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.floor/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.floor/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.ceil/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.ceil/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.ceil": {
+    "documentation": "Applies <code>math.ceil()</code> to every component of the input vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.ceil/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.ceil/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.abs/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.abs/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.abs": {
+    "documentation": "Applies <code>math.abs()</code> to every component of the input vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.abs/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.abs/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.sign/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.sign/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.sign": {
+    "documentation": "Applies <code>math.sign()</code> to every component of the input vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.sign/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.sign/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.clamp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.clamp/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.clamp/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/vector.clamp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.clamp": {
+    "documentation": "Applies <code>math.clamp()</code> to every component of the input vector.",
+    "params": [
+      {
+        "name": "vec",
+        "documentation": "@luau/global/vector.clamp/param/0"
+      },
+      {
+        "name": "min",
+        "documentation": "@luau/global/vector.clamp/param/1"
+      },
+      {
+        "name": "max",
+        "documentation": "@luau/global/vector.clamp/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.clamp/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.lerp/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.lerp/param/1": {
+    "documentation": ""
+  },
+  "@luau/global/vector.lerp/param/2": {
+    "documentation": ""
+  },
+  "@luau/global/vector.lerp/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.lerp": {
+    "documentation": "Returns a vector linearly interpolated between two vectors by a fractional alpha.",
+    "params": [
+      {
+        "name": "vec1",
+        "documentation": "@luau/global/vector.lerp/param/0"
+      },
+      {
+        "name": "vec2",
+        "documentation": "@luau/global/vector.lerp/param/1"
+      },
+      {
+        "name": "alpha",
+        "documentation": "@luau/global/vector.lerp/param/2"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.lerp/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.max/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.max/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.max": {
+    "documentation": "Applies <code>math.max()</code> to the corresponding components of the input vectors.",
+    "params": [
+      {
+        "name": "...",
+        "documentation": "@luau/global/vector.max/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.max/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.min/param/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.min/return/0": {
+    "documentation": ""
+  },
+  "@luau/global/vector.min": {
+    "documentation": "Applies <code>math.min()</code> to the corresponding components of the input vectors.",
+    "params": [
+      {
+        "name": "...",
+        "documentation": "@luau/global/vector.min/param/0"
+      }
+    ],
+    "returns": [
+      "@luau/global/vector.min/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.zero": {
+    "documentation": "Constant vector with all components set to <code>0</code>.",
+    "learn_more_link": "https://luau.org/library/#vector-library",
+    "code_sample": ""
+  },
+  "@luau/global/vector.one": {
+    "documentation": "Constant vector with all components set to <code>1</code>.",
+    "learn_more_link": "https://luau.org/library/#vector-library",
     "code_sample": ""
   }
 }
