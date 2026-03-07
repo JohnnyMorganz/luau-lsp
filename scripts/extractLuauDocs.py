@@ -36,4 +36,3 @@ for id, docs_entry in luau_docs.items():
 
 with open("api-docs/luau-en-us.json", "w") as f:
     dump(luau_docs, f, indent=2)
-    f.close()
