@@ -2,7 +2,6 @@ from json import load, dump
 
 with open("api-docs/en-us.json") as f:
     data: dict[str, dict[str, str]] = load(f)
-    f.close()
 
 luau_docs = {k: v for k, v in data.items() if k.startswith("@luau")}
 
