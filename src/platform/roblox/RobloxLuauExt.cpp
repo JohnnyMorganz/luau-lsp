@@ -715,6 +715,8 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
             attachTagSafe(ctv->props, "IsPropertyModified", "Properties");
             attachTagSafe(ctv->props, "ResetPropertyToDefault", "Properties");
 
+            attachTagSafe(ctv->props, "QueryDescendants", "QuerySelector");
+
             // Go through all the defined classes and if they are a subclass of Instance then give them the
             // same metatable identity as Instance so that equality comparison works.
             // NOTE: This will OVERWRITE any metatables set on these classes!

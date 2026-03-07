@@ -2064,4 +2064,424 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_set
     CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
 }
 
+TEST_CASE_FIXTURE(Fixture, "query_descendants_empty_selector_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Instance");
+    checkStringCompletionExists(result, "BasePart");
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_direct_child_combinator_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part > |")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_descendant_combinator_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part >> |")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_comma_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part, |")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_colon_suggests_pseudo_classes")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part:|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 2);
+
+    auto notItem = requireItem(result, "not");
+    CHECK_EQ(notItem.kind, lsp::CompletionItemKind::Constant);
+    REQUIRE(notItem.textEdit);
+    CHECK_EQ(notItem.textEdit->newText, "not($0)");
+    CHECK_EQ(notItem.insertTextFormat, lsp::InsertTextFormat::Snippet);
+
+    auto hasItem = requireItem(result, "has");
+    CHECK_EQ(hasItem.kind, lsp::CompletionItemKind::Constant);
+    REQUIRE(hasItem.textEdit);
+    CHECK_EQ(hasItem.textEdit->newText, "has($0)");
+    CHECK_EQ(hasItem.insertTextFormat, lsp::InsertTextFormat::Snippet);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_inside_not_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"DIFFDELIM(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants(":not(|)")
+    )DIFFDELIM");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_inside_brackets_suggests_properties")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part[|]")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_implicit_descendant_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part |")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    checkStringCompletionExists(result, "Part");
+    checkStringCompletionExists(result, "TextLabel");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_dot_no_completions")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants(".|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_after_hash_no_completions")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("#|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_mid_identifier_suggests_class_names")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part > Te|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 9);
+    auto item = requireItem(result, "TextLabel");
+    REQUIRE(item.textEdit);
+    // Should only replace the partial token "Te", not the entire string
+    CHECK_EQ(item.textEdit->newText, "TextLabel");
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{marker.line, marker.character - 2});
+    CHECK_EQ(item.textEdit->range.end, marker);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_mid_identifier_pseudo_class")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part:no|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 2);
+    auto item = requireItem(result, "not");
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->newText, "not($0)");
+    // Should replace "no" starting 2 characters before cursor
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{marker.line, marker.character - 2});
+    CHECK_EQ(item.textEdit->range.end, marker);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_mid_identifier_property")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part[An|]")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 4);
+    auto item = requireItem(result, "Anchored");
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->newText, "Anchored");
+    CHECK_EQ(item.textEdit->range.start, lsp::Position{marker.line, marker.character - 2});
+    CHECK_EQ(item.textEdit->range.end, marker);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_pseudo_class_documentation")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part:|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto notItem = requireItem(result, "not");
+    REQUIRE(notItem.documentation);
+    CHECK_EQ(notItem.documentation->value, "Select instances that do not match any of the selectors inside");
+
+    auto hasItem = requireItem(result, "has");
+    REQUIRE(hasItem.documentation);
+    CHECK_EQ(hasItem.documentation->value, "Select instances based on which instances they contain inside");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_pseudo_class_without_snippet_support")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part:|")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 2);
+    auto item = requireItem(result, "not");
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->newText, "not");
+    CHECK_NE(item.insertTextFormat, lsp::InsertTextFormat::Snippet);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_brackets_no_preceding_class_falls_back_to_instance")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("[|]")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    // Instance has: Name, Parent (from Instance), ClassName (from Object) = 3 properties
+    CHECK_EQ(result.size(), 3);
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+    checkStringCompletionExists(result, "ClassName");
+    // Anchored should NOT be present (it's a Part/BasePart property)
+    CHECK_EQ(getItem(result, "Anchored"), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_brackets_with_whitespace_before_bracket")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part [|]")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK_EQ(result.size(), 4);
+    checkStringCompletionExists(result, "Anchored");
+    checkStringCompletionExists(result, "ClassName");
+    checkStringCompletionExists(result, "Name");
+    checkStringCompletionExists(result, "Parent");
+}
+
+TEST_CASE_FIXTURE(Fixture, "query_descendants_class_name_textedit_replaces_only_token")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x: Instance = Instance.new("Part")
+        x:QueryDescendants("Part, |")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto item = requireItem(result, "TextLabel");
+    REQUIRE(item.textEdit);
+    CHECK_EQ(item.textEdit->newText, "TextLabel");
+    // Empty token: range start should equal cursor position
+    CHECK_EQ(item.textEdit->range.start, marker);
+    CHECK_EQ(item.textEdit->range.end, marker);
+}
+
 TEST_SUITE_END();
