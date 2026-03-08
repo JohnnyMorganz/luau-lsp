@@ -271,6 +271,7 @@ lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> LanguageServer::workspaceDi
 
     for (auto& workspace : workspaceFolders)
     {
+        workspace->lazyInitialize();
         auto report = workspace->workspaceDiagnostics(params);
         fullReport.items.insert(fullReport.items.end(), std::make_move_iterator(report.items.begin()), std::make_move_iterator(report.items.end()));
     }

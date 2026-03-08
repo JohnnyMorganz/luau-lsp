@@ -291,5 +291,5 @@ struct ClientConfiguration
     ClientBytecodeConfiguration bytecode{};
     ClientFormatConfiguration format{};
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics, types,
-    inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientConfiguration, autocompleteEnd, ignoreGlobs, platform, sourcemap, diagnostics,
+    types, inlayHints, hover, completion, signatureHelp, require, index, fflags, bytecode, format);
