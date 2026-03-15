@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.712
 - Fragment autocomplete is now enabled by default ([#1268](https://github.com/JohnnyMorganz/luau-lsp/issues/1268))
+- Updated syntax file with improvements to TextMate grammar:
+  - Added support for type instantiation syntax (`<<`/`>>`) (e.g. `Map<<string, number>>`)
+  - Fixed nested type declarations inside indented blocks (e.g. inside `if`/`do` blocks) not being highlighted correctly
+  - Fixed multiline type declarations (e.g. `type Foo = \n  | string \n  | number`) losing type highlighting on continuation lines
+  - Fixed fenced ` ```luau ` code blocks in doc comments allowing syntax errors to escape past the closing ` ``` ` boundary
 
 ## [1.63.0] - 2026-03-01
 
