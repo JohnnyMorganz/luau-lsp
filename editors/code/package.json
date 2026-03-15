@@ -628,13 +628,10 @@
           "scope": "resource"
         },
         "luau-lsp.completion.enableFragmentAutocomplete": {
-          "markdownDescription": "Enables the experimental fragment autocomplete system for performance improvements",
+          "markdownDescription": "Enables the fragment autocomplete system for performance improvements",
           "type": "boolean",
-          "default": false,
-          "scope": "resource",
-          "tags": [
-            "preview"
-          ]
+          "default": true,
+          "scope": "resource"
         },
         "luau-lsp.signatureHelp.enabled": {
           "markdownDescription": "Enable signature help",
