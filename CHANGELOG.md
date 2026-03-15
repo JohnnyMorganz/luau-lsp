@@ -6,10 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Fixed
-
-- Fixed compilation failure after syncing to upstream Luau 0.712 due to removed FFlags (`LuauQueryLocalFunctionBinding`, `LuauToStringDecomposition`)
-
 ### Changed
 
 - Sync to upstream Luau 0.712
