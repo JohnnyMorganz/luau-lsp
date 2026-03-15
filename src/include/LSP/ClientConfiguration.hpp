@@ -185,8 +185,8 @@ struct ClientCompletionConfiguration
     bool showAnonymousAutofilledFunction = true;
     /// Whether to show deprecated items in autocomplete suggestions
     bool showDeprecatedItems = true;
-    /// Enables the experimental fragment autocomplete system for performance improvements
-    bool enableFragmentAutocomplete = false;
+    /// Enables the fragment autocomplete system for performance improvements
+    bool enableFragmentAutocomplete = true;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,

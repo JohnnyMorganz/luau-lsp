@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.712
+- Fragment autocomplete is now enabled by default ([#1268](https://github.com/JohnnyMorganz/luau-lsp/issues/1268))
 
 ## [1.63.0] - 2026-03-01
 
