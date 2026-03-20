@@ -139,6 +139,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/RequireGraph.test.cpp
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
+        tests/Plugin.test.cpp
         tests/CodeAction.test.cpp
         tests/Plugin.test.cpp
         src/AnalyzeCli.cpp # For testing
