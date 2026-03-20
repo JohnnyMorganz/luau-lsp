@@ -18,6 +18,7 @@ end
 declare lsp: {
     workspace: {
         getRootUri: () -> Uri,
+        getWorkspaceFolders: () -> {Uri},
     },
     fs: {
         readFile: (uri: Uri) -> string,
