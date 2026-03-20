@@ -196,13 +196,28 @@ Filesystem access is disabled by default. To enable it:
 
 #### `lsp.workspace.getRootUri(): Uri`
 
-Returns the workspace root as a Uri object.
+Returns the root Uri of the workspace folder that this plugin belongs to.
+
+#### `lsp.workspace.getWorkspaceFolders(): {Uri}`
+
+Returns an array of Uri objects for all workspace folders in the current session. This is useful when working with multi-root workspaces where a plugin needs to access files across workspace boundaries (e.g., reading sourcemaps from sibling workspace folders).
+
+```luau
+local folders = lsp.workspace.getWorkspaceFolders()
+for _, folder in folders do
+    local ok, content = pcall(lsp.fs.readFile, folder:joinPath("sourcemap.json"))
+    if ok then
+        local sourcemap = lsp.json.deserialize(content)
+        -- process sourcemap...
+    end
+end
+```
 
 #### `lsp.fs.readFile(uri: Uri): string`
 
 Reads a file within the workspace. Throws an error on failure.
 
-**Security**: Only files within the workspace can be read. Attempting to read files outside the workspace will throw an "access denied" error.
+**Security**: Only files within any of the workspace folders can be read. Attempting to read files outside all workspace folders will throw an "access denied" error.
 
 ```luau
 local ok, content = pcall(function()
