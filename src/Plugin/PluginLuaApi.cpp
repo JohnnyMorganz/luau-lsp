@@ -19,6 +19,7 @@ static int uriEqual(lua_State* L);
 static int uriJoinPath(lua_State* L);
 
 static int lspWorkspaceGetRootUri(lua_State* L);
+static int lspWorkspaceGetWorkspaceFolders(lua_State* L);
 static int lspFsReadFile(lua_State* L);
 static int lspUriParse(lua_State* L);
 static int lspUriFile(lua_State* L);
@@ -187,6 +188,20 @@ static int lspWorkspaceGetRootUri(lua_State* L)
     return 1;
 }
 
+static int lspWorkspaceGetWorkspaceFolders(lua_State* L)
+{
+    auto* ctx = getLuaApiContext(L);
+    const auto& folders = ctx->workspace->client->workspaceFolderUris;
+
+    lua_createtable(L, static_cast<int>(folders.size()), 0);
+    for (size_t i = 0; i < folders.size(); i++)
+    {
+        pushUri(L, folders[i]);
+        lua_rawseti(L, -2, static_cast<int>(i + 1));
+    }
+    return 1;
+}
+
 static int lspFsReadFile(lua_State* L)
 {
     auto* ctx = getLuaApiContext(L);
@@ -207,8 +222,17 @@ static int lspFsReadFile(lua_State* L)
         luaL_errorL(L, "only file:// URIs are supported");
     }
 
-    // Security: check if within workspace
-    if (!ctx->workspace->rootUri.isAncestorOf(*targetUri))
+    // Security: check if within any workspace folder
+    bool withinWorkspace = false;
+    for (const auto& folderUri : ctx->workspace->client->workspaceFolderUris)
+    {
+        if (folderUri.isAncestorOf(*targetUri))
+        {
+            withinWorkspace = true;
+            break;
+        }
+    }
+    if (!withinWorkspace)
     {
         luaL_errorL(L, "access denied: file is outside workspace");
     }
@@ -382,6 +406,8 @@ void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string&
     lua_newtable(L);
     pushClosureWithContext(lspWorkspaceGetRootUri, "getRootUri");
     lua_setfield(L, -2, "getRootUri");
+    pushClosureWithContext(lspWorkspaceGetWorkspaceFolders, "getWorkspaceFolders");
+    lua_setfield(L, -2, "getWorkspaceFolders");
     lua_setfield(L, -2, "workspace");
 
     // lsp.fs table

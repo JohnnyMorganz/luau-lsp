@@ -44,6 +44,9 @@ public:
 
     ConfigChangedCallback configChangedCallback;
 
+    /// URIs of all workspace folders, kept in sync for plugin API access
+    std::vector<Uri> workspaceFolderUris{};
+
     // A partial result token for workspace diagnostics
     // If this is present, we can stream results
     std::optional<id_type> workspaceDiagnosticsRequestId = std::nullopt;

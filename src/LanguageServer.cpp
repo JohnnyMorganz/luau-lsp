@@ -707,6 +707,11 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
         workspaceFolders.push_back(std::make_shared<WorkspaceFolder>(client, "$ROOT", params.rootUri.value(), defaultConfig));
     }
 
+    // Populate workspace folder URIs for plugin API access
+    client->workspaceFolderUris.clear();
+    for (const auto& workspace : workspaceFolders)
+        client->workspaceFolderUris.push_back(workspace->rootUri);
+
     isInitialized = true;
     lsp::InitializeResult result;
     result.capabilities = getServerCapabilities();
@@ -896,6 +901,11 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
         configItems.emplace_back(folder.uri);
     }
     client->requestConfiguration(configItems);
+
+    // Rebuild workspace folder URIs for plugin API access
+    client->workspaceFolderUris.clear();
+    for (const auto& workspace : workspaceFolders)
+        client->workspaceFolderUris.push_back(workspace->rootUri);
 }
 
 void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
