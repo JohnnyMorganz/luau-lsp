@@ -15913,6 +15913,11 @@ declare SecurityCapabilities: {
 }
 
 
+declare class CollectionHandle extends Object
+	function Destroy(self): nil
+	function ForEach(self, iterator: ((...any) -> ...any)): nil
+end
+
 export type RaycastResult<T = BasePart> = {
     Instance: T,
     Position: Vector3,

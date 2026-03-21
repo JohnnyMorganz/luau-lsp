@@ -537,6 +537,11 @@ declare ValueCurveKey: {
 # More hardcoded types, but go at the end of the file
 # Useful if they rely on previously defined types
 END_BASE = """
+declare class CollectionHandle extends Object
+	function Destroy(self): nil
+	function ForEach(self, iterator: ((...any) -> ...any)): nil
+end
+
 export type RaycastResult<T = BasePart> = {
     Instance: T,
     Position: Vector3,

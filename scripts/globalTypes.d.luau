@@ -9276,6 +9276,11 @@ declare class AudioTremolo extends Instance
 	function GetOutputPins(self): { any }
 end
 
+declare class CollectionHandle extends Object
+	function Destroy(self): nil
+	function ForEach(self, iterator: ((...any) -> ...any)): nil
+end
+
 declare class AuroraScriptObject extends Instance
 	FrameId: number
 	LODLevel: number
@@ -18113,6 +18118,11 @@ declare SecurityCapabilities: {
 	fromCurrent: (() -> SecurityCapabilities),
 }
 
+
+declare class CollectionHandle extends Object
+	function Destroy(self): nil
+	function ForEach(self, iterator: ((...any) -> ...any)): nil
+end
 
 export type RaycastResult<T = BasePart> = {
     Instance: T,
