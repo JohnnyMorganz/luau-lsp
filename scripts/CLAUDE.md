@@ -1,6 +1,6 @@
 # scripts/
 
-See `README.md` in this directory for full documentation on how these scripts work and how to contribute corrections.
+@README.md
 
 ## AI-specific notes
 
@@ -8,3 +8,28 @@ See `README.md` in this directory for full documentation on how these scripts wo
 - When adding a new type that extends a Roblox API class (e.g. `extends Object`), use `END_BASE`, not `START_BASE`.
 - `Corrections.json` is legacy — new corrections go in `dumpRobloxTypes.py` directly.
 - `release.py` and `update_luau_and_changelog.py` must be run from the **repo root**, not from `scripts/`.
+
+## Testing generated types
+
+After modifying `dumpRobloxTypes.py` and regenerating, validate the output with the types smoketest:
+
+```bash
+# From repo root — build the CLI first if needed
+cmake --build build --target Luau.LanguageServer.CLI --config Debug -j$(nproc)
+
+# Regenerate types
+cd scripts
+python dumpRobloxTypes.py > globalTypes.d.luau
+
+# Smoketest: analyze an empty file with the generated types (should produce no errors)
+touch ../test.lua
+../build/luau-lsp analyze --defs=scripts/globalTypes.d.luau ../test.lua
+
+# Also validate Remodel types
+touch ../remodel_test.lua
+../build/luau-lsp analyze --defs=scripts/remodel.d.lua ../remodel_test.lua
+```
+
+The smoketest passes if `luau-lsp analyze` exits without errors. It checks that the generated definitions are syntactically valid Luau and can be loaded by the analyzer.
+
+The full CI also validates the plugin source and cloud scripts against `globalTypes.d.luau` (see `.github/workflows/ci.yml`, `types_smoketest` and `build_plugin` jobs).
