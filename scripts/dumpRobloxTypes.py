@@ -14,7 +14,7 @@ API_DUMP_URL = "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Trac
 LUAU_TYPES_URL = "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/LuauTypes.d.luau"
 BRICK_COLORS_URL = "https://gist.githubusercontent.com/Anaminus/49ac255a68e7a7bc3cdd72b602d5071f/raw/f1534dcae312dbfda716b7677f8ac338b565afc3/BrickColor.json"
 
-# Whether to include deprecated members that cannot be assigned the @deprecated attribute (i.e. deprecated non-functions). 
+# Whether to include deprecated members that cannot be assigned the @deprecated attribute (i.e. deprecated non-functions).
 # Deprecated functions will always be defined, with their corresponding @deprecated attribute.
 INCLUDE_DEPRECATED_MEMBERS = False
 
@@ -41,41 +41,41 @@ DELETED_LUAU_SECTIONS = [
 LUAU_SNIPPET_PATCHES = {
     "declare function delay(delay: number?, callback: () -> ())":
         "@[deprecated{ use = \"task.delay\" }]\ndeclare function delay(delay: number?, callback: (dt: number, gt: number) -> ())",
-    
+
     "declare function collectgarbage(mode: string): number":
         "@[deprecated{ use = \"gcinfo\" }]\ndeclare function collectgarbage(mode: \"count\"): number",
-    
+
     "declare function stats()":
         "@[deprecated{ use = 'game:GetService(\"Stats\")' }]\ndeclare function stats(): Stats",
-    
-    "declare function wait(delay: number?): (number, number)": 
+
+    "declare function wait(delay: number?): (number, number)":
         "@[deprecated{ use = \"task.wait\" }]\ndeclare function wait(delay: number?): (number, number)",
-    
+
     "declare function printidentity(prefix: string?)":
         "@deprecated declare function printidentity(prefix: string?)",
 
     "declare function version(): string":
         "@deprecated declare function version(): string",
-    
+
     "declare game: any": "declare game: DataModel",
     "declare workspace: any": "declare workspace: Workspace",
     "declare script: any": "declare script: LuaSourceContainer",
 
-    "declare Delay: typeof(delay)": 
+    "declare Delay: typeof(delay)":
         "@[deprecated{ use = \"task.delay\" }]\ndeclare function Delay(delay: number?, callback: (dt: number, gt: number) -> ())",
-    
-    "declare Wait: typeof(wait)": 
+
+    "declare Wait: typeof(wait)":
         "@[deprecated{ use = \"task.wait\" }]\ndeclare function Wait(delay: number?): (number, number)",
-    
-    "declare ElapsedTime: typeof(elapsedTime)": 
+
+    "declare ElapsedTime: typeof(elapsedTime)":
         "@[deprecated{ use = \"elapsedTime\" }]\ndeclare function ElapsedTime(): number",
-    
+
     "declare Stats: typeof(stats)":
         "@[deprecated{ use = 'game:GetService(\"Stats\")' }]\ndeclare function Stats(): Stats",
-    
-    "declare Version: typeof(version)": 
+
+    "declare Version: typeof(version)":
         "@[deprecated{ use = \"version\" }]\ndeclare function Version(): string",
-    
+
     "declare Workspace: any": "",
     "declare Game: any": "",
 }
@@ -430,15 +430,7 @@ type ProtectedString = string
 type BinaryString = string
 type QDir = string
 type QFont = string
-type FloatCurveKey = any
-type RotationCurveKey = any
-type Secret = any
-type Path2DControlPoint = any
-type UniqueId = any
-type SecurityCapabilities = any
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
-type SystemAddress = any
-type AdReward = any
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -486,9 +478,6 @@ declare class SharedTable
   [string | number]: any
   function __iter(self): (any, number) -> (number, any)
 end
-
-export type OpenCloudModel = any
-export type ClipEvaluator = any
 
 export type RBXScriptSignal<T... = ...any> = {
     Wait: (self: RBXScriptSignal<T...>) -> T...,
@@ -668,7 +657,7 @@ ApiParameter = TypedDict(
 )
 
 ApiPropertySecurityLevel = TypedDict(
-    "ApiPropertySecurityLevel", 
+    "ApiPropertySecurityLevel",
     {
         "Read": ApiSecurityLevel,
         "Write": ApiSecurityLevel
@@ -788,19 +777,43 @@ assert (
 # Cache for looking up members by name when resolving deprecations
 classesWithMemberName: dict[str, List[ApiClass]] = {}
 
-# Keep track of declared Luau types as a failsafe if we need to declare them.
-# This needs to be kept in-sync with any Luau type declarations
-# added in EXTRA_MEMBERS
-
-declaredLuauTypes: Set[str] = {
+# Types referenced in the API dump / EXTRA_MEMBERS / Corrections that we need to track for auto-declaration.
+# Seeded with types from EXTRA_MEMBERS that bypass resolveType().
+referenced_types: Set[str] = {
     "ReviewableContentEvent",
     "AutoSetupParams",
     "CaptureParams",
     "VideoSample",
 }
 
+LUAU_PRIMITIVES = {"string", "number", "boolean", "nil", "any", "unknown", "never", "buffer", "thread", "vector"}
+
+# All types that are defined (populated incrementally during generation).
+# Seeded with static sources; classes, datatypes, and enums are added during printing.
+def extractDefinedNames(text: str) -> Set[str]:
+    """Extract type/class/declare names from Luau definition text."""
+    names: Set[str] = set()
+    for m in re.finditer(r'(?:export\s+)?type\s+(\w+)', text):
+        names.add(m.group(1))
+    for m in re.finditer(r'declare\s+class\s+(\w+)', text):
+        names.add(m.group(1))
+    for m in re.finditer(r'declare\s+(\w+)\s*:', text):
+        names.add(m.group(1))
+    return names
+
+def _seed_defined_types() -> Set[str]:
+    types: Set[str] = set()
+    types.update(LUAU_PRIMITIVES)
+    types.update(TYPE_INDEX.values())
+    types.update(IGNORED_INSTANCES)
+    for base in [START_BASE, POST_DATATYPES_BASE, END_BASE]:
+        types.update(extractDefinedNames(base))
+    return types
+
+defined_types: Set[str] = _seed_defined_types()
+
 def isIdentifier(name: str):
-    return re.match(r"^[a-zA-Z_]+[a-zA-Z_0-9]*$", name)  # TODO: 'function'
+    return re.match(r"^[A-Za-z_]\w*$", name)
 
 def escapeName(name: str):
     """Escape a name string to be property-compatible"""
@@ -845,7 +858,10 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
     if category == "Enum":
         return "Enum" + name
     else:
-        return TYPE_INDEX[name] if name in TYPE_INDEX else name
+        resolved = TYPE_INDEX[name] if name in TYPE_INDEX else name
+        if resolved not in LUAU_PRIMITIVES and isIdentifier(resolved):
+            referenced_types.add(resolved)
+        return resolved
 
 
 def resolveParameter(param: ApiParameter):
@@ -874,15 +890,15 @@ def resolveReturnType(member: Union[ApiFunction, ApiCallback]) -> str:
         return "(" + ", ".join(types) + ")"
     elif member["ReturnType"] is not None:
         return resolveType(member["ReturnType"])
-    
+
     return "nil"
 
 def resolveDeprecation(member: ApiMember, klass: ApiClass | DataType) -> str:
     tags: Optional[List[Union[str, ApiDeprecatedInfo]]] = None
-    
+
     if "Tags" in member:
         tags = member["Tags"]
-    
+
     result = ""
 
     if tags is not None:
@@ -915,7 +931,7 @@ def resolveDeprecation(member: ApiMember, klass: ApiClass | DataType) -> str:
                             if member["Name"] == preferred:
                                 bestMember = member
                                 break
-                        
+
                         if bestMember is not None:
                             # Use the classname and member name, we found a different class to point to!
                             result = f"@[deprecated {{use = \"{bestClass['Name']}{':' if bestMember['MemberType'] == 'Function' else '.'}{preferred}\"}}]\n\t\t"
@@ -951,15 +967,15 @@ def filterMember(klassName: str, member: ApiMember):
         and member["MemberType"] != "Function"
     ):
         return False
-    
+
     if ("Tags" in member and
         member["Tags"] is not None
         and "NotScriptable" in member["Tags"]):
         return False
-    
+
     if member["Name"] in classIgnoredMembers(klassName):
         return False
-    
+
 
     if "Security" in member:
         if isinstance(member["Security"], str):
@@ -980,6 +996,8 @@ def filterMember(klassName: str, member: ApiMember):
 def declareClass(klass: Union[ApiClass, DataType]) -> str:
     if klass["Name"] in IGNORED_INSTANCES:
         return ""
+
+    defined_types.add(klass["Name"])
 
     out = "declare class " + klass["Name"]
     if "Superclass" in klass and klass["Superclass"] != "<<<ROOT>>>":
@@ -1028,6 +1046,7 @@ def printEnums(dump: ApiDump):
     # Declare each enum individually
     out = ""
     for enum, items in enums.items():
+        defined_types.add("Enum" + enum)
         # Declare an atom for the enum
         out += f"declare class Enum{enum} extends EnumItem end\n"
         out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
@@ -1071,6 +1090,7 @@ def printDataTypeConstructors(types: DataTypesDump):
         if klass["Name"] in IGNORED_INSTANCES:
             continue
         name = klass["Name"]
+        defined_types.add(name)
         members = klass["Members"]
 
         isBrickColorNew = False
@@ -1124,6 +1144,14 @@ def printDataTypeConstructors(types: DataTypesDump):
 
         out += "}"
         print(out)
+        print()
+
+
+def printUndefinedTypeStubs():
+    undefined = sorted(referenced_types - defined_types)
+    if undefined:
+        for name in undefined:
+            print(f"type {name} = any")
         print()
 
 
@@ -1194,7 +1222,7 @@ def loadMembersIntoStructures(klass: ApiClass):
             classesWithMemberName[name] = [klass]
         else:
             classesWithMemberName[name].append(klass)
-            
+
 
 def loadClassesIntoStructures(dump: ApiDump):
     for klass in dump["Classes"]:
@@ -1216,14 +1244,14 @@ def loadClassesIntoStructures(dump: ApiDump):
 def registerDeclaredInType(type: CorrectionsValueType | None):
     if type is not None:
         if "Declared" in type and type["Declared"] is not None:
-            if type["Declared"] not in declaredLuauTypes:
+            if type["Declared"] not in referenced_types:
                 declaredType = type["Declared"]
 
                 if declaredType.endswith("?"):
                     declaredType = declaredType[:-1]
 
-                if re.match("^[A-z0-9_]+$", declaredType):
-                    declaredLuauTypes.add(declaredType)
+                if isIdentifier(declaredType):
+                    referenced_types.add(declaredType)
 
 def registerDeclared(dump: CorrectionsDump):
     for klass in dump["Classes"]:
@@ -1231,7 +1259,7 @@ def registerDeclared(dump: CorrectionsDump):
             if "TupleReturns" in member and member["TupleReturns"] is not None:
                 for ret in member["TupleReturns"]:
                     registerDeclaredInType(ret)
-            
+
             if "ReturnType" in member:
                 if isinstance(member["ReturnType"], list):
                     for ret in member["ReturnType"]:
@@ -1243,7 +1271,7 @@ def registerDeclared(dump: CorrectionsDump):
             if "ValueType" in member:
                 value = member["ValueType"]
                 registerDeclaredInType(value)
-            
+
             if "Parameters" in member and member["Parameters"] is not None:
                 for param in member["Parameters"]:
                     if "Type" in param:
@@ -1268,7 +1296,7 @@ def printLuauTypes():
 
     while not luauLines[0].startswith("-- SECTION BEGIN:"):
         luauLines.pop(0)
-    
+
     # Begin capturing sections from SECTION BEGIN to SECTION END
     luauSections: dict[str, list[str]] = dict()
     sectionNames: list[str] = []
@@ -1283,12 +1311,12 @@ def printLuauTypes():
             if currentSection is not None:
                 luauSections[sectionName] = currentSection
                 currentSection = None
-            
+
             sectionNames.append(sectionName)
         elif currentSection is not None:
             if line in LUAU_SNIPPET_PATCHES.keys():
                 line = LUAU_SNIPPET_PATCHES[line]
-            
+
             line = line.replace("Enum.", "Enum")
             currentSection.append(line)
 
@@ -1302,27 +1330,17 @@ def printLuauTypes():
 
             for line in sectionLines:
                 writtenLines.add(line)
-            
+
             luauTypes += "\n".join(sectionLines) + "\n"
-    
+
     # Fail-safe: Append any patches that were not written
     for patch in LUAU_SNIPPET_PATCHES.values():
         if patch not in writtenLines:
             luauTypes += patch + "\n"
 
-    # Fail-safe: Declare any missing types that were marked as declared
-    for declaredType in declaredLuauTypes:
-        declaration = f"type {declaredType} = any"
-        found = False
+    # Extract type/class names defined in LuauTypes for use by printUndefinedTypeStubs
+    defined_types.update(extractDefinedNames(luauTypes))
 
-        for line in writtenLines:
-            if line.find(declaredType) != -1:
-                found = True
-                break
-
-        if not found:
-            luauTypes += declaration + "\n"
-    
     print(luauTypes)
 
 # Load BrickColors
@@ -1349,4 +1367,5 @@ print(POST_DATATYPES_BASE)
 printLuauTypes()
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
+printUndefinedTypeStubs()
 print(END_BASE)
