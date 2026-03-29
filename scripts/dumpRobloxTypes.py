@@ -1155,6 +1155,48 @@ def printUndefinedTypeStubs():
         print()
 
 
+def prescanAndSeedTypes(dump: ApiDump, dataTypes: DataTypesDump):
+    """Pre-populate referenced_types and defined_types before any output is generated.
+
+    This ensures that printUndefinedTypeStubs() can be called early (before class
+    declarations) so that type stubs appear before the classes that reference them.
+    Luau processes declaration files in order, so stubs must precede their usages.
+    """
+    # Pre-seed defined_types with all names that will be defined during generation,
+    # so that printUndefinedTypeStubs() doesn't emit stubs for those.
+    for klass in dump["Classes"]:
+        if klass["Name"] not in IGNORED_INSTANCES:
+            defined_types.add(klass["Name"])
+    for klass in dataTypes["DataTypes"]:
+        if klass["Name"] not in IGNORED_INSTANCES:
+            defined_types.add(klass["Name"])
+    for klass in dataTypes["Constructors"]:
+        defined_types.add(klass["Name"])
+    for enum in dump["Enums"]:
+        defined_types.add("Enum" + enum["Name"])
+
+    # Pre-scan all member types to populate referenced_types.
+    for klass in list(dataTypes["DataTypes"]) + list(dump["Classes"]):
+        if klass.get("Name") in IGNORED_INSTANCES:
+            continue
+        for member in klass["Members"]:
+            if member["MemberType"] == "Property" and "ValueType" in member:
+                resolveType(member["ValueType"])
+            elif member["MemberType"] in ("Function", "Callback"):
+                for param in member.get("Parameters", []):
+                    resolveType(param["Type"])
+                ret = member.get("ReturnType")
+                if ret is not None:
+                    if isinstance(ret, list):
+                        for r in ret:
+                            resolveType(r)
+                    else:
+                        resolveType(ret)
+            elif member["MemberType"] == "Event":
+                for param in member.get("Parameters", []):
+                    resolveType(param["Type"])
+
+
 def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
     for klass in corrections["Classes"]:
         for otherClass in dump["Classes"]:
@@ -1288,7 +1330,12 @@ def printJsonPrologue():
     print("--#METADATA#" + json.dumps(data, indent=None))
     print()
 
-def printLuauTypes():
+def fetchLuauTypes() -> str:
+    """Fetch, process and return the LuauTypes content as a string (without printing).
+
+    Also updates defined_types with all type/class names found in the content, so that
+    printUndefinedTypeStubs() won't emit stubs for types already defined in LuauTypes.
+    """
     luauTypes: str = requests.get(LUAU_TYPES_URL).text
 
     # Split luauTypes into lines
@@ -1338,9 +1385,14 @@ def printLuauTypes():
         if patch not in writtenLines:
             luauTypes += patch + "\n"
 
-    # Extract type/class names defined in LuauTypes for use by printUndefinedTypeStubs
+    # Extract type/class names defined in LuauTypes so that printUndefinedTypeStubs()
+    # won't emit stubs for types that are already properly defined here.
     defined_types.update(extractDefinedNames(luauTypes))
 
+    return luauTypes
+
+
+def printLuauTypes(luauTypes: str):
     print(luauTypes)
 
 # Load BrickColors
@@ -1359,13 +1411,21 @@ corrections: CorrectionsDump = json.load(CORRECTIONS)
 applyCorrections(dump, corrections)
 registerDeclared(corrections)
 
+# Fetch LuauTypes early so defined_types is seeded with its type names before
+# printUndefinedTypeStubs() runs (avoiding false stubs for types defined in LuauTypes).
+luauTypesContent = fetchLuauTypes()
+
+# Pre-scan all member types and seed defined_types with future definitions so that
+# printUndefinedTypeStubs() can be called early (before class declarations).
+prescanAndSeedTypes(dump, dataTypes)
+
 printJsonPrologue()
 print(START_BASE)
+printUndefinedTypeStubs()
 printEnums(dump)
 printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]), dump)
 print(POST_DATATYPES_BASE)
-printLuauTypes()
+printLuauTypes(luauTypesContent)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
-printUndefinedTypeStubs()
 print(END_BASE)
