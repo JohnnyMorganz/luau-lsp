@@ -3,6 +3,7 @@
 import re
 from typing import List, Literal, Optional, Set, Union, TypedDict
 from collections import defaultdict
+from itertools import chain
 import requests
 import json
 import sys
@@ -1172,7 +1173,7 @@ def prescanAndSeedTypes(dump: ApiDump, dataTypes: DataTypesDump):
         defined_types.add("Enum" + enum["Name"])
 
     # Pre-scan all member types to populate referenced_types.
-    for klass in list(dataTypes["DataTypes"]) + list(dump["Classes"]):
+    for klass in chain(dataTypes["DataTypes"], dump["Classes"]):
         if klass.get("Name") in IGNORED_INSTANCES:
             continue
         for member in klass["Members"]:
@@ -1388,9 +1389,6 @@ def fetchLuauTypes() -> str:
     return luauTypes
 
 
-def printLuauTypes(luauTypes: str):
-    print(luauTypes)
-
 # Load BrickColors
 brickColors = json.loads(requests.get(BRICK_COLORS_URL).text)
 processBrickColors(brickColors)
@@ -1421,7 +1419,7 @@ printUndefinedTypeStubs()
 printEnums(dump)
 printDataTypes(sorted(dataTypes["DataTypes"], key=lambda klass: klass["Name"]), dump)
 print(POST_DATATYPES_BASE)
-printLuauTypes(luauTypesContent)
+print(luauTypesContent)
 printClasses(dump)
 printDataTypeConstructors(dataTypes)
 print(END_BASE)
