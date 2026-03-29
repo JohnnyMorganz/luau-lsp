@@ -997,8 +997,6 @@ def declareClass(klass: Union[ApiClass, DataType]) -> str:
     if klass["Name"] in IGNORED_INSTANCES:
         return ""
 
-    defined_types.add(klass["Name"])
-
     out = "declare class " + klass["Name"]
     if "Superclass" in klass and klass["Superclass"] != "<<<ROOT>>>":
         out += " extends " + klass["Superclass"]
@@ -1046,7 +1044,6 @@ def printEnums(dump: ApiDump):
     # Declare each enum individually
     out = ""
     for enum, items in enums.items():
-        defined_types.add("Enum" + enum)
         # Declare an atom for the enum
         out += f"declare class Enum{enum} extends EnumItem end\n"
         out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
@@ -1090,7 +1087,6 @@ def printDataTypeConstructors(types: DataTypesDump):
         if klass["Name"] in IGNORED_INSTANCES:
             continue
         name = klass["Name"]
-        defined_types.add(name)
         members = klass["Members"]
 
         isBrickColorNew = False
