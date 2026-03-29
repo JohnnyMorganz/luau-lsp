@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Fixed nested type declarations inside indented blocks (e.g. inside `if`/`do` blocks) not being highlighted correctly
   - Fixed multiline type declarations (e.g. `type Foo = \n  | string \n  | number`) losing type highlighting on continuation lines
   - Fixed fenced ` ```luau ` code blocks in doc comments allowing syntax errors to escape past the closing ` ``` ` boundary
+  - Added syntax highlighting support for the `const` keyword, including `const` variable declarations and `const function` definitions
 
 ## [1.63.0] - 2026-03-01
 
@@ -1902,6 +1903,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
