@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.64.1] - 2026-03-30
+
 ### Changed
 
 - Sync to upstream Luau 0.714
