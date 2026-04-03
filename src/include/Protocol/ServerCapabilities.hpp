@@ -6,6 +6,7 @@
 
 #include "Protocol/SemanticTokens.hpp"
 #include "Protocol/CodeAction.hpp"
+#include "Protocol/FileOperations.hpp"
 
 namespace lsp
 {
@@ -86,12 +87,51 @@ struct WorkspaceFoldersServerCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(WorkspaceFoldersServerCapabilities, supported, changeNotifications);
 
+/**
+ * The server is interested in file notifications/requests.
+ *
+ * @since 3.16.0
+ */
+struct FileOperationsServerCapabilities
+{
+    /**
+     * The server is interested in receiving didCreateFiles notifications.
+     */
+    std::optional<FileOperationRegistrationOptions> didCreate = std::nullopt;
+
+    /**
+     * The server is interested in receiving willCreateFiles requests.
+     */
+    std::optional<FileOperationRegistrationOptions> willCreate = std::nullopt;
+
+    /**
+     * The server is interested in receiving didRenameFiles notifications.
+     */
+    std::optional<FileOperationRegistrationOptions> didRename = std::nullopt;
+
+    /**
+     * The server is interested in receiving willRenameFiles requests.
+     */
+    std::optional<FileOperationRegistrationOptions> willRename = std::nullopt;
+
+    /**
+     * The server is interested in receiving didDeleteFiles file notifications.
+     */
+    std::optional<FileOperationRegistrationOptions> didDelete = std::nullopt;
+
+    /**
+     * The server is interested in receiving willDeleteFiles file requests.
+     */
+    std::optional<FileOperationRegistrationOptions> willDelete = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(FileOperationsServerCapabilities, didCreate, willCreate, didRename, willRename, didDelete, willDelete)
+
 struct WorkspaceCapabilities
 {
     std::optional<WorkspaceFoldersServerCapabilities> workspaceFolders = std::nullopt;
-    // fileOperations
+    std::optional<FileOperationsServerCapabilities> fileOperations = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceCapabilities, workspaceFolders);
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceCapabilities, workspaceFolders, fileOperations);
 
 struct CompletionOptions
 {
