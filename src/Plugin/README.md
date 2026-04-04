@@ -56,10 +56,10 @@ Core position mapping between original and transformed source:
 
 ### PluginTextDocument
 
-Inherits from `TextDocument` and overrides key methods:
+Inherits from `TextDocument`, with the base class holding **transformed** content (what Luau sees). An internal `TextDocument` member holds the **original** content (what the user sees):
 
-- `getText()` - returns transformed content
-- `convertPosition()` - maps positions through SourceMapping
+- Base `getText()`, `getLineOffsets()`, etc. operate on transformed content automatically
+- `convertPosition()` uses the internal original document for UTF-16 conversion, then maps through SourceMapping
 - LSP operations automatically get correct position mapping
 
 ### PluginRuntime

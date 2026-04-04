@@ -12,8 +12,6 @@ private:
     lsp::DocumentUri _uri;
     std::string _languageId;
     size_t _version;
-
-protected:
     std::string _content;
     mutable std::optional<std::vector<size_t>> _lineOffsets = std::nullopt;
 
@@ -43,11 +41,11 @@ public:
         return _version;
     }
 
-    virtual std::string getText(std::optional<lsp::Range> range = std::nullopt) const;
-    virtual std::string getLine(size_t index) const;
+    std::string getText(std::optional<lsp::Range> range = std::nullopt) const;
+    std::string getLine(size_t index) const;
 
-    virtual lsp::Position positionAt(size_t offset) const;
-    virtual size_t offsetAt(const lsp::Position& position) const;
+    lsp::Position positionAt(size_t offset) const;
+    size_t offsetAt(const lsp::Position& position) const;
 
     virtual Luau::Position convertPosition(const lsp::Position& position) const;
     virtual lsp::Position convertPosition(const Luau::Position& position) const;
@@ -57,6 +55,6 @@ public:
 
     void update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version);
 
-    virtual const std::vector<size_t>& getLineOffsets() const;
-    virtual size_t lineCount() const;
+    const std::vector<size_t>& getLineOffsets() const;
+    size_t lineCount() const;
 };

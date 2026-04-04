@@ -383,6 +383,99 @@ TEST_CASE("PluginTextDocument convertPosition maps correctly")
     CHECK(backLspPos.character == 23);  // Maps back to original
 }
 
+TEST_CASE("PluginTextDocument convertPosition with multiline insertion")
+{
+    // Plugin inserts a longer line before short original content.
+    // The bug: base TextDocument::convertPosition uses getLineOffsets() (virtual,
+    // returns transformed offsets) but substr's from _content (original).
+    // When lines have different lengths, the offset mismatch corrupts columns.
+    std::string original = "ab\ncd";
+    // Insert a longer header line so the transformed line offsets diverge from original
+    std::vector<TextEdit> edits = {
+        {{{0, 0}, {0, 0}}, "-- long header line\n"}
+    };
+
+    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto transformedSource = mapping.getTransformedSource();
+    // transformed = "-- long header line\nab\ncd"
+    // original offsets:    [0, 3]         (line 0: "ab\n", line 1: "cd")
+    // transformed offsets: [0, 20, 23]    (line 0: "-- long header line\n", line 1: "ab\n", line 2: "cd")
+    PluginTextDocument doc(
+        Uri::parse("file://test.luau"),
+        "luau",
+        1,
+        original,
+        std::move(transformedSource),
+        std::move(mapping)
+    );
+
+    // LSP position {1, 1} is column 1 on line 1 of ORIGINAL ("cd")
+    // Should map to {2, 1} in transformed
+    lsp::Position lspPos{1, 1};
+    auto luauPos = doc.convertPosition(lspPos);
+    CHECK(luauPos.line == 2);
+    CHECK(luauPos.column == 1);
+}
+
+TEST_CASE("PluginTextDocument convertPosition reverse with multiline insertion")
+{
+    // Reverse: Luau position in transformed -> LSP position in original.
+    // Same mismatch: base convertPosition(Luau::Position) uses getLineOffsets()
+    // (transformed) with _content (original).
+    std::string original = "ab\ncd";
+    std::vector<TextEdit> edits = {
+        {{{0, 0}, {0, 0}}, "-- long header line\n"}
+    };
+
+    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto transformedSource = mapping.getTransformedSource();
+    PluginTextDocument doc(
+        Uri::parse("file://test.luau"),
+        "luau",
+        1,
+        original,
+        std::move(transformedSource),
+        std::move(mapping)
+    );
+
+    // Luau position {2, 1} in transformed is "d" on line 2 ("cd")
+    // Should map back to LSP position {1, 1} in original
+    Luau::Position transformedPos{2, 1};
+    auto lspPos = doc.convertPosition(transformedPos);
+    CHECK(lspPos.line == 1);
+    CHECK(lspPos.character == 1);
+}
+
+TEST_CASE("PluginTextDocument convertPosition with line-changing edit preserves round trip")
+{
+    // A more complex case: plugin wraps code, adding lines both before and after.
+    // Round-tripping original->transformed->original should give back the same position.
+    std::string original = "print('hello')";
+    std::vector<TextEdit> edits = {
+        {{{0, 0}, {0, 0}}, "do\n"},           // Insert "do\n" at start
+        {{{0, 14}, {0, 14}}, "\nend"}          // Append "\nend" at end
+    };
+
+    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto transformedSource = mapping.getTransformedSource();
+    // transformed = "do\nprint('hello')\nend"
+    PluginTextDocument doc(
+        Uri::parse("file://test.luau"),
+        "luau",
+        1,
+        original,
+        std::move(transformedSource),
+        std::move(mapping)
+    );
+
+    // Original position {0, 6} -> should map to transformed {1, 6} -> back to {0, 6}
+    lsp::Position originalPos{0, 6};
+    auto luauPos = doc.convertPosition(originalPos);
+    auto roundTripped = doc.convertPosition(luauPos);
+    CHECK(roundTripped.line == originalPos.line);
+    CHECK(roundTripped.character == originalPos.character);
+}
+
 TEST_CASE("PluginTextDocument lineCount uses transformed")
 {
     std::string original = "local x = 1";
