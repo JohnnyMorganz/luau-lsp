@@ -62,16 +62,6 @@ Uri* checkUri(lua_State* L, int idx)
     return static_cast<Uri*>(ud);
 }
 
-static int uriDestructor(lua_State* L)
-{
-    Uri* uri = static_cast<Uri*>(lua_touserdatatagged(L, 1, kUriUserdataTag));
-    if (uri)
-    {
-        uri->~Uri();
-    }
-    return 0;
-}
-
 static int uriIndex(lua_State* L)
 {
     Uri* uri = checkUri(L, 1);
@@ -158,6 +148,11 @@ static int uriJoinPath(lua_State* L)
 
 void registerUriUserdata(lua_State* L)
 {
+    // Register tag destructor for Uri userdata (Luau doesn't support __gc metamethods)
+    lua_setuserdatadtor(L, kUriUserdataTag, [](lua_State*, void* data) {
+        static_cast<Uri*>(data)->~Uri();
+    });
+
     // Create metatable for Uri userdata
     luaL_newmetatable(L, "lsp.Uri");
 
@@ -169,9 +164,6 @@ void registerUriUserdata(lua_State* L)
 
     lua_pushcfunction(L, uriEqual, "__eq");
     lua_setfield(L, -2, "__eq");
-
-    lua_pushcfunction(L, uriDestructor, "__gc");
-    lua_setfield(L, -2, "__gc");
 
     lua_pop(L, 1); // Pop metatable
 }
@@ -359,6 +351,11 @@ static int lspJsonDeserialize(lua_State* L)
 
 void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string& pluginPath)
 {
+    // Register tag destructor for LuaApiContext (Luau doesn't support __gc metamethods)
+    lua_setuserdatadtor(L, kLuaApiContextTag, [](lua_State*, void* data) {
+        static_cast<LuaApiContext*>(data)->~LuaApiContext();
+    });
+
     // Create LuaApiContext userdata (persists for lifetime of Lua state)
     void* memory = lua_newuserdatatagged(L, sizeof(LuaApiContext), kLuaApiContextTag);
     new (memory) LuaApiContext{workspace, pluginPath};
