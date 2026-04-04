@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed crash when parsing YAML files with empty values (e.g. `key:` with no value)
+- Find All References, Rename, and auto imports no longer break after a sourcemap update ([#1115](https://github.com/JohnnyMorganz/luau-lsp/issues/1115))
 
 ## [1.64.1] - 2026-03-30
 
