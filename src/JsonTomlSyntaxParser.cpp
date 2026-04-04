@@ -132,7 +132,7 @@ std::string yamlValueToLuau(ryml::ConstNodeRef node)
 
     ryml::csubstr val = node.val();
 
-    if (val == "~" || val == "null" || val == "Null" || val == "NULL")
+    if (val.empty() || val == "~" || val == "null" || val == "Null" || val == "NULL")
     {
         return "nil";
     }

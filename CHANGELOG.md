@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.715
 
+### Fixed
+
+- Fixed crash when parsing YAML files with empty values (e.g. `key:` with no value)
+
 ## [1.64.1] - 2026-03-30
 
 ### Changed

@@ -200,4 +200,24 @@ quoteKey: 'a"b'
     expectItem(table, "quoteKey", "'a\\\"b'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau handles keys with empty values")
+{
+    const char yaml_str[] = R"(experience_id: 12345
+passes:
+
+products:
+)";
+
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+    auto result = yamlValueToLuau(tree.rootref());
+
+    auto block = parse("return " + result);
+    auto table = parseLuauTable(block);
+
+    REQUIRE(table);
+    expectItem(table, "experience_id", "12345");
+    expectItem(table, "passes", "nil");
+    expectItem(table, "products", "nil");
+}
+
 TEST_SUITE_END();
