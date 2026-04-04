@@ -519,7 +519,8 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
             if (result.success)
             {
                 TextDocument textDocument(Uri::parse("internal://environments/LSPPlugin"), "luau", 0, Luau::LanguageServer::Plugin::LSPPLUGIN_DEFINITIONS);
-                definitionsSourceModules.emplace("@LSPPlugin", std::make_pair(std::move(textDocument), std::move(result.sourceModule)));
+                definitionsFileState.emplace(
+                    "@LSPPlugin", DefinitionsFileState{std::move(textDocument), std::move(result.sourceModule), std::move(result.module)});
             }
             else
             {
