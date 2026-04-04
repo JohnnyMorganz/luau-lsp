@@ -140,6 +140,10 @@ public:
         const Uri& configPath, const std::string& contents, Luau::Config& result, const Luau::TypeCheckLimits& limits);
     const Luau::Config& readConfigRec(const Uri& path, const Luau::TypeCheckLimits& limits) const;
 
+    /// Apply plugin transformation to source, returning the SourceMapping if edits were produced.
+    std::optional<Luau::LanguageServer::Plugin::SourceMapping> applyPluginTransformation(
+        const std::string& source, const Uri& uri, const std::string& moduleName) const;
+
     // Plugin environment support
     bool isPluginFile(const Luau::ModuleName& name) const;
 };

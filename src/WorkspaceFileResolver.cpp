@@ -72,33 +72,21 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
 
     // Apply plugins to transform the document
     auto moduleName = getModuleName(uri);
-    auto edits = pluginManager->transform(original->getText(), uri, moduleName);
+    auto transformed = applyPluginTransformation(original->getText(), uri, moduleName);
 
-    if (edits.empty())
-        return original;  // No transformation or error
-
-    // Build plugin document with mapping
-    try
-    {
-        auto mapping = Luau::LanguageServer::Plugin::SourceMapping::fromEdits(original->getText(), edits);
-        auto transformedSource = mapping.getTransformedSource();
-        auto pluginDoc = std::make_unique<Luau::LanguageServer::Plugin::PluginTextDocument>(
-            original->uri(),
-            original->languageId(),
-            original->version(),
-            original->getText(),
-            std::move(transformedSource),
-            std::move(mapping));
-
-        pluginDocuments[uri] = std::move(pluginDoc);
-        return pluginDocuments[uri].get();
-    }
-    catch (const std::exception& e)
-    {
-        if (client)
-            client->sendLogMessage(lsp::MessageType::Error, "Failed to create plugin document: " + std::string(e.what()));
+    if (!transformed)
         return original;
-    }
+
+    auto pluginDoc = std::make_unique<Luau::LanguageServer::Plugin::PluginTextDocument>(
+        original->uri(),
+        original->languageId(),
+        original->version(),
+        original->getText(),
+        transformed->getTransformedSource(),
+        std::move(*transformed));
+
+    pluginDocuments[uri] = std::move(pluginDoc);
+    return pluginDocuments[uri].get();
 }
 
 void WorkspaceFileResolver::invalidatePluginDocument(const lsp::DocumentUri& uri)
@@ -109,6 +97,28 @@ void WorkspaceFileResolver::invalidatePluginDocument(const lsp::DocumentUri& uri
 void WorkspaceFileResolver::clearPluginDocuments()
 {
     pluginDocuments.clear();
+}
+
+std::optional<Luau::LanguageServer::Plugin::SourceMapping> WorkspaceFileResolver::applyPluginTransformation(
+    const std::string& source, const Uri& uri, const std::string& moduleName) const
+{
+    if (!pluginManager || !pluginManager->hasPlugins())
+        return std::nullopt;
+
+    auto edits = pluginManager->transform(source, uri, moduleName);
+    if (edits.empty())
+        return std::nullopt;
+
+    try
+    {
+        return Luau::LanguageServer::Plugin::SourceMapping::fromEdits(source, edits);
+    }
+    catch (const std::exception& e)
+    {
+        if (client)
+            client->sendLogMessage(lsp::MessageType::Error, "Failed to apply plugin transformation: " + std::string(e.what()));
+        return std::nullopt;
+    }
 }
 
 const TextDocument* WorkspaceFileResolver::getTextDocumentFromModuleName(const Luau::ModuleName& name) const
@@ -145,24 +155,8 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     // Fallback to reading from platform
     if (auto source = platform->readSourceCode(name, uri))
     {
-        // Apply plugins to non-managed files too
-        if (pluginManager && pluginManager->hasPlugins())
-        {
-            auto edits = pluginManager->transform(*source, uri, name);
-            if (!edits.empty())
-            {
-                try
-                {
-                    auto mapping = Luau::LanguageServer::Plugin::SourceMapping::fromEdits(*source, edits);
-                    return Luau::SourceCode{mapping.getTransformedSource(), sourceType};
-                }
-                catch (const std::exception& e)
-                {
-                    if (client)
-                        client->sendLogMessage(lsp::MessageType::Error, "Failed to apply plugin transformation: " + std::string(e.what()));
-                }
-            }
-        }
+        if (auto transformed = applyPluginTransformation(*source, uri, name))
+            return Luau::SourceCode{transformed->getTransformedSource(), sourceType};
         return Luau::SourceCode{*source, sourceType};
     }
 

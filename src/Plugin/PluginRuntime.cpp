@@ -10,6 +10,36 @@
 namespace Luau::LanguageServer::Plugin
 {
 
+namespace
+{
+
+// Parse a Lua position table {line: number, column: number} from the stack at the given index.
+// Returns false on error (caller should handle cleanup).
+bool parsePosition(lua_State* L, int tableIdx, unsigned int& outLine, unsigned int& outColumn)
+{
+    lua_getfield(L, tableIdx, "line");
+    if (!lua_isnumber(L, -1))
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    outLine = static_cast<unsigned int>(lua_tonumber(L, -1));
+    lua_pop(L, 1);
+
+    lua_getfield(L, tableIdx, "column");
+    if (!lua_isnumber(L, -1))
+    {
+        lua_pop(L, 1);
+        return false;
+    }
+    outColumn = static_cast<unsigned int>(lua_tonumber(L, -1));
+    lua_pop(L, 1);
+
+    return true;
+}
+
+} // anonymous namespace
+
 void PluginRuntime::interruptCallback(lua_State* L, int gc)
 {
     if (gc >= 0)
@@ -239,59 +269,33 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
         }
 
         // Get start position
+        unsigned int startLine, startColumn;
         lua_getfield(L, -1, "start");
         if (!lua_istable(L, -1))
         {
             lua_pop(L, 4);
             return PluginError{"Range must have a 'start' position", pluginPath};
         }
-
-        lua_getfield(L, -1, "line");
-        if (!lua_isnumber(L, -1))
+        if (!parsePosition(L, -1, startLine, startColumn))
         {
-            lua_pop(L, 5);
-            return PluginError{"Position must have a 'line' number", pluginPath};
+            lua_pop(L, 4);
+            return PluginError{"Position must have 'line' and 'column' numbers", pluginPath};
         }
-        unsigned int startLine = static_cast<unsigned int>(lua_tonumber(L, -1));
-        lua_pop(L, 1);
-
-        lua_getfield(L, -1, "column");
-        if (!lua_isnumber(L, -1))
-        {
-            lua_pop(L, 5);
-            return PluginError{"Position must have a 'column' number", pluginPath};
-        }
-        unsigned int startColumn = static_cast<unsigned int>(lua_tonumber(L, -1));
-        lua_pop(L, 1);
-
         lua_pop(L, 1); // Pop start table
 
         // Get end position
+        unsigned int endLine, endColumn;
         lua_getfield(L, -1, "end");
         if (!lua_istable(L, -1))
         {
             lua_pop(L, 4);
             return PluginError{"Range must have an 'end' position", pluginPath};
         }
-
-        lua_getfield(L, -1, "line");
-        if (!lua_isnumber(L, -1))
+        if (!parsePosition(L, -1, endLine, endColumn))
         {
-            lua_pop(L, 5);
-            return PluginError{"Position must have a 'line' number", pluginPath};
+            lua_pop(L, 4);
+            return PluginError{"Position must have 'line' and 'column' numbers", pluginPath};
         }
-        unsigned int endLine = static_cast<unsigned int>(lua_tonumber(L, -1));
-        lua_pop(L, 1);
-
-        lua_getfield(L, -1, "column");
-        if (!lua_isnumber(L, -1))
-        {
-            lua_pop(L, 5);
-            return PluginError{"Position must have a 'column' number", pluginPath};
-        }
-        unsigned int endColumn = static_cast<unsigned int>(lua_tonumber(L, -1));
-        lua_pop(L, 1);
-
         lua_pop(L, 1); // Pop end table
         lua_pop(L, 1); // Pop range table
 

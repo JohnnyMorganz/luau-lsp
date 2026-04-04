@@ -212,21 +212,19 @@ TEST_CASE("SourceMapping.fromEdits mixed size edits same line")
     auto mapping = SourceMapping::fromEdits(original, edits);
     CHECK(mapping.getTransformedSource() == "AAAA B CC DDD");
 
-    // Test position after all edits
-    // Original has nothing after column 11, but let's check column 11 maps correctly
-    // Cumulative delta: +2, -1, 0, +1 = +2
-    // But wait, column 11 is at the end of the last edit
-    // Let's check a position after the last edit range (there isn't one in this case)
-    // Let's verify positions between edits instead
-
-    // Position between 'bb' and 'cc' in original (column 6, start of 'cc')
-    // This is inside the third edit's range, should map to transformed range start
+    // Position inside third edit range (col 6 = start of 'cc') maps to transformed start of that edit
+    // Transformed: "AAAA B CC DDD" — 'CC' starts at col 7
     auto pos = mapping.originalToTransformed({0, 6});
     CHECK(pos.has_value());
-    // This is at start of third edit
+    CHECK(pos->line == 0);
+    CHECK(pos->column == 7);
 
-    // Position at very end (after 'dd')
-    // Actually original ends at column 11, there's nothing after
+    // Space between first and second edit (col 2 in original)
+    // After first edit grows by 2: col 2 + 2 = col 4
+    pos = mapping.originalToTransformed({0, 2});
+    CHECK(pos.has_value());
+    CHECK(pos->line == 0);
+    CHECK(pos->column == 4);
 }
 
 TEST_CASE("SourceMapping.fromEdits position mapping between same-line edits")

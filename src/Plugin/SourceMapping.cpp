@@ -117,97 +117,68 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
             throw std::runtime_error("Plugin returned overlapping edits");
     }
 
-    // Apply edits and build mapping
-    std::string transformed = originalSource;
+    // Build transformed string in a single pass over originalSource, computing
+    // position mappings via cumulative line/column deltas.
+    std::string transformed;
+    transformed.reserve(originalSource.size());
     std::vector<AppliedEdit> appliedEdits;
+    size_t lastOffset = 0;
 
-    // Track cumulative offset in lines and columns
-    // We need to adjust positions as we apply each edit
     int cumulativeLineDelta = 0;
-    // Track cumulative column delta for edits on the same original line
     int cumulativeColumnDelta = 0;
-    // Track which original line we're accumulating column deltas for (-1 means none)
     int currentOriginalLine = -1;
 
     for (const auto& edit : sortedEdits)
     {
-        // Calculate the adjusted position in the current transformed source
-        Luau::Position adjustedStart = edit.range.begin;
-        Luau::Position adjustedEnd = edit.range.end;
+        // Convert original positions to byte offsets (against immutable originalSource)
+        size_t startOffset = positionToOffset(originalSource, edit.range.begin);
+        size_t endOffset = positionToOffset(originalSource, edit.range.end);
+        if (endOffset > originalSource.size())
+            endOffset = originalSource.size();
 
-        // Apply cumulative line delta
-        adjustedStart.line += cumulativeLineDelta;
-        adjustedEnd.line += cumulativeLineDelta;
+        // Copy unchanged text before this edit, then insert replacement
+        transformed.append(originalSource, lastOffset, startOffset - lastOffset);
+        transformed.append(edit.newText);
+        lastOffset = endOffset;
 
-        // If this edit is on the same original line as previous edits, apply cumulative column delta
+        // Compute transformed range via cumulative deltas
+        Luau::Position transformedStart = edit.range.begin;
+        transformedStart.line += cumulativeLineDelta;
         if (static_cast<int>(edit.range.begin.line) == currentOriginalLine)
-        {
-            adjustedStart.column += cumulativeColumnDelta;
-            // If the edit is entirely on one line, also adjust the end column
-            if (edit.range.begin.line == edit.range.end.line)
-                adjustedEnd.column += cumulativeColumnDelta;
-        }
-        else
-        {
-            // New original line - reset column delta tracking
-            cumulativeColumnDelta = 0;
-            currentOriginalLine = static_cast<int>(edit.range.begin.line);
-        }
+            transformedStart.column += cumulativeColumnDelta;
 
-        // Get byte offsets in current transformed source
-        size_t startOffset = positionToOffset(transformed, adjustedStart);
-        size_t endOffset = positionToOffset(transformed, adjustedEnd);
-
-        // Calculate the size of the original text being replaced (in original coordinates)
-        size_t originalRangeLength = 0;
-        if (edit.range.begin.line == edit.range.end.line)
-        {
-            originalRangeLength = edit.range.end.column - edit.range.begin.column;
-        }
-        else
-        {
-            // For multiline edits, use the actual text length from transformed
-            originalRangeLength = (endOffset > startOffset) ? (endOffset - startOffset) : 0;
-        }
-
-        // Calculate the size of the new text
-        auto newSize = calculateTextSize(edit.newText);
-
-        // Calculate transformed range
-        Luau::Position transformedStart = adjustedStart;
         Luau::Position transformedEnd = calculateEndPosition(transformedStart, edit.newText);
 
-        // Apply the edit to transformed source
-        if (endOffset > transformed.size())
-            endOffset = transformed.size();
-        transformed = transformed.substr(0, startOffset) + edit.newText + transformed.substr(endOffset);
-
-        // Store the applied edit
         appliedEdits.push_back(AppliedEdit{
-            edit.range,                                      // originalRange
-            edit.newText,                                    // newText
-            Luau::Location{transformedStart, transformedEnd} // transformedRange
+            edit.range,
+            edit.newText,
+            Luau::Location{transformedStart, transformedEnd},
         });
 
-        // Update cumulative line delta
+        // Update cumulative deltas
         int originalLines = static_cast<int>(edit.range.end.line) - static_cast<int>(edit.range.begin.line);
+        auto newSize = calculateTextSize(edit.newText);
         cumulativeLineDelta += (newSize.lineDelta - originalLines);
 
-        // Update cumulative column delta for same-line tracking
+        size_t originalRangeLength = endOffset - startOffset;
         if (edit.range.begin.line == edit.range.end.line && newSize.lineDelta == 0)
         {
-            // Single line edit staying on same line - accumulate column delta
-            int editColumnDelta = static_cast<int>(edit.newText.size()) - static_cast<int>(originalRangeLength);
-            cumulativeColumnDelta += editColumnDelta;
+            if (static_cast<int>(edit.range.begin.line) != currentOriginalLine)
+            {
+                cumulativeColumnDelta = 0;
+                currentOriginalLine = static_cast<int>(edit.range.begin.line);
+            }
+            cumulativeColumnDelta += static_cast<int>(edit.newText.size()) - static_cast<int>(originalRangeLength);
         }
         else
         {
-            // Multiline edit - subsequent edits will be on different lines
-            // Reset column tracking since line structure changed
             currentOriginalLine = -1;
             cumulativeColumnDelta = 0;
         }
     }
+
+    // Copy remaining text after last edit
+    transformed.append(originalSource, lastOffset, originalSource.size() - lastOffset);
 
     return SourceMapping{originalSource, transformed, appliedEdits};
 }
