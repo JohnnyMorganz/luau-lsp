@@ -294,6 +294,8 @@ static int lspUriFile(lua_State* L)
 
 static void pushJsonValue(lua_State* L, const nlohmann::json& value)
 {
+    lua_rawcheckstack(L, 1);
+
     if (value.is_null())
     {
         lua_pushnil(L);
@@ -328,6 +330,7 @@ static void pushJsonValue(lua_State* L, const nlohmann::json& value)
     else if (value.is_object())
     {
         lua_createtable(L, 0, static_cast<int>(value.size()));
+        lua_rawcheckstack(L, 2); // key + value
         for (const auto& [key, val] : value.items())
         {
             lua_pushlstring(L, key.c_str(), key.size());
