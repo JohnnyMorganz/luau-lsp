@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 
 static std::optional<lsp::CodeAction> findAction(const lsp::CodeActionResult& result, const std::string& title)
@@ -750,6 +751,34 @@ t.fOo()
 
     auto action = findAction(result, "Change 'fOo' to 'Foo'");
     CHECK_FALSE(action);
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_unknown_symbol_fix_suggests_string_require")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    std::string source = dedent(R"(
+        local x = ModuleB
+    )");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 10}, {0, 17}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+    auto action = findAction(result, "Add require for 'ModuleB' from \"./ModuleB\"");
+    REQUIRE(action);
+    REQUIRE(action->edit);
+    auto& changes = action->edit->changes.at(uri);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ModuleB = require("./ModuleB")
+        local x = ModuleB
+    )"));
 }
 
 TEST_SUITE_END();

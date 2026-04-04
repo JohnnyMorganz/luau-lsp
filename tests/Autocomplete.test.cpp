@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
@@ -2062,6 +2063,50 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_set
     CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
     trim(item->documentation->value);
     CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_datamodel_siblings")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFileCompletionExists(result, "ModuleB", "./ModuleB");
+    checkFolderCompletionExists(result, "Nested", "./Nested");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@game/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFolderCompletionExists(result, "ReplicatedStorage", "@game/ReplicatedStorage");
+    checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
 }
 
 TEST_SUITE_END();

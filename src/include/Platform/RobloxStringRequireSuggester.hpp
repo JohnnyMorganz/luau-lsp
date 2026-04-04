@@ -1,22 +1,22 @@
 #pragma once
 
-#include "LSP/WorkspaceFileResolver.hpp"
+#include "Luau/Config.h"
+#include "Luau/ConfigResolver.h"
+#include "Luau/FileResolver.h"
 
 #include <memory>
 
-class FileRequireNode : public Luau::RequireNode
+class WorkspaceFolder;
+struct SourceNode;
+class RobloxPlatform;
+
+class SourceNodeRequireNode : public Luau::RequireNode
 {
 public:
-    FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder)
-        : uri(std::move(uri))
-        , isDirectory(isDirectory)
-        , workspaceFolder(workspaceFolder)
-    {
-    }
-
-    FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder, std::shared_ptr<const Luau::Config> mainRequirerNodeConfig)
-        : uri(std::move(uri))
-        , isDirectory(isDirectory)
+    SourceNodeRequireNode(
+        const SourceNode* node, const SourceNode* rootNode, std::shared_ptr<const Luau::Config> mainRequirerNodeConfig, WorkspaceFolder* workspaceFolder)
+        : node(node)
+        , rootNode(rootNode)
         , mainRequirerNodeConfig(std::move(mainRequirerNodeConfig))
         , workspaceFolder(workspaceFolder)
     {
@@ -30,22 +30,17 @@ public:
     std::vector<Luau::RequireAlias> getAvailableAliases() const override;
 
 private:
-    Uri uri;
-    bool isDirectory = false;
-
-    /// The resolved configuration for the main requirer node
-    /// This is for alias resolution
+    const SourceNode* node;
+    const SourceNode* rootNode;
     std::shared_ptr<const Luau::Config> mainRequirerNodeConfig;
-
-    /// The workspace folder that the files belong to
-    /// Used to check ignoreGlobs
     WorkspaceFolder* workspaceFolder;
 };
 
-class StringRequireSuggester : public Luau::RequireSuggester
+class RobloxStringRequireSuggester : public Luau::RequireSuggester
 {
 public:
-    StringRequireSuggester(WorkspaceFolder* workspaceFolder, Luau::ConfigResolver* configResolver, LSPPlatform* platform)
+    RobloxStringRequireSuggester(
+        WorkspaceFolder* workspaceFolder, Luau::ConfigResolver* configResolver, const RobloxPlatform* platform)
         : workspaceFolder(workspaceFolder)
         , configResolver(configResolver)
         , platform(platform)
@@ -58,5 +53,5 @@ protected:
 private:
     WorkspaceFolder* workspaceFolder;
     Luau::ConfigResolver* configResolver;
-    LSPPlatform* platform;
+    const RobloxPlatform* platform;
 };
