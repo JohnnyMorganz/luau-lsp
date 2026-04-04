@@ -1,6 +1,5 @@
 #pragma once
 #include "Plugin/TextEdit.hpp"
-#include "Plugin/SourceMapping.hpp"
 #include "Plugin/PluginRuntime.hpp"
 #include "LSP/Uri.hpp"
 #include "Luau/NotNull.h"
@@ -38,10 +37,8 @@ public:
 
     // Apply all plugins to transform source code.
     // Returns edits to apply, or empty vector if no transformation or error.
+    // Callers should pass the edits to SourceMapping::fromEdits() which validates and builds the mapping.
     std::vector<TextEdit> transform(const std::string& source, const Uri& uri, const std::string& moduleName);
-
-    // Create a SourceMapping from the given source and edits
-    SourceMapping createMapping(const std::string& source, const std::vector<TextEdit>& edits);
 
     bool hasPlugins() const
     {

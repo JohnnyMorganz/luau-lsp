@@ -60,29 +60,7 @@ std::vector<TextEdit> PluginManager::transform(const std::string& source, const 
         }
     }
 
-    if (allEdits.empty())
-        return {};
-
-    // Validate combined edits - SourceMapping::fromEdits will throw if edits overlap
-    try
-    {
-        SourceMapping::fromEdits(source, allEdits);
-    }
-    catch (const std::exception& e)
-    {
-        sendLogMessage(lsp::MessageType::Error, "Plugin edits overlap: " + std::string(e.what()));
-        return {};
-    }
-
     return allEdits;
-}
-
-SourceMapping PluginManager::createMapping(const std::string& source, const std::vector<TextEdit>& edits)
-{
-    if (edits.empty())
-        return SourceMapping{};
-
-    return SourceMapping::fromEdits(source, edits);
 }
 
 void PluginManager::sendLogMessage(lsp::MessageType type, const std::string& message) const

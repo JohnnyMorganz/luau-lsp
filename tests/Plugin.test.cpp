@@ -952,16 +952,14 @@ return {
     CHECK(manager.pluginCount() == 0);
 }
 
-TEST_CASE_FIXTURE(Fixture, "PluginManager createMapping builds correct mapping")
+TEST_CASE_FIXTURE(Fixture, "PluginManager SourceMapping builds correct mapping from edits")
 {
-    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
-
     std::string source = "local x = 1";
     std::vector<TextEdit> edits = {
         {{{0, 6}, {0, 7}}, "y"}
     };
 
-    auto mapping = manager.createMapping(source, edits);
+    auto mapping = SourceMapping::fromEdits(source, edits);
 
     CHECK(mapping.getTransformedSource() == "local y = 1");
     CHECK(mapping.hasEdits());
@@ -1014,7 +1012,7 @@ return {
     REQUIRE(edits.size() == 2);
 }
 
-TEST_CASE_FIXTURE(Fixture, "PluginManager rejects overlapping edits from multiple plugins")
+TEST_CASE_FIXTURE(Fixture, "PluginManager overlapping edits rejected by SourceMapping")
 {
     TempDir dir("plugin_test");
 
@@ -1057,13 +1055,9 @@ return {
 
     auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
 
-    // Overlapping edits should result in empty return
-    CHECK(edits.empty());
-
-    // Verify error was logged about overlapping edits
-    auto errors = getLogMessages(*client, lsp::MessageType::Error);
-    REQUIRE(errors.size() == 1);
-    CHECK(errors[0].find("overlap") != std::string::npos);
+    // transform() returns the raw edits; overlap is caught when building the SourceMapping
+    CHECK(!edits.empty());
+    CHECK_THROWS_AS(SourceMapping::fromEdits("local x = 1", edits), std::runtime_error);
 }
 
 TEST_SUITE_END();
