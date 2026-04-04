@@ -77,6 +77,9 @@ struct Fixture
 
     void dumpErrors(std::ostream& os, const std::vector<Luau::TypeError>& errors);
     std::string getErrors(const Luau::CheckResult& cr);
+
+    /// Switch the workspace to Standard platform (fixture defaults to Roblox)
+    void switchToStandardPlatform();
 };
 
 #define LUAU_LSP_REQUIRE_ERRORS(result) \

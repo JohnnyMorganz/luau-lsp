@@ -1134,10 +1134,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
 
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("src/shared/Modules/Module.luau", "return {}");
 
@@ -1180,9 +1177,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_
     client->globalConfig.index.enabled = true;
 
     client->globalConfig.completion.imports.enabled = true;
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
+    switchToStandardPlatform();
     workspace.setupWithConfiguration(client->globalConfig);
 
     auto [source, marker] = sourceWithMarker(R"(
@@ -1229,10 +1224,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 
@@ -1259,10 +1251,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 
@@ -1290,10 +1279,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments_2")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 

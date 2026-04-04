@@ -203,6 +203,14 @@ std::string Fixture::getErrors(const Luau::CheckResult& cr)
     return ss.str();
 }
 
+void Fixture::switchToStandardPlatform()
+{
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.platform = LSPPlatform::getPlatform(client->globalConfig, &workspace.fileResolver, &workspace);
+    workspace.fileResolver.platform = workspace.platform.get();
+    workspace.fileResolver.requireSuggester = workspace.fileResolver.platform->getRequireSuggester();
+}
+
 void Fixture::loadSourcemap(const std::string& contents)
 {
     dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
