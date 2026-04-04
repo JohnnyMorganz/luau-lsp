@@ -121,7 +121,7 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
 
     if (!requiredString.empty() && requiredString[0] == '@')
     {
-        auto luauConfig = fileResolver->getConfig(context->name, limits);
+        const auto& luauConfig = fileResolver->getConfig(context->name, limits);
 
         size_t slashPos = requiredString.find('/');
         std::string aliasName = requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
@@ -196,15 +196,29 @@ std::unique_ptr<Luau::RequireSuggester> RobloxPlatform::getRequireSuggester()
     return std::make_unique<RobloxStringRequireSuggester>(workspaceFolder, fileResolver, this);
 }
 
-static std::optional<std::pair<std::string, const char*>> computeSourcemapRequirePath(
-    const RobloxPlatform* platform, const Luau::ModuleName& from, const Luau::ModuleName& target, ImportRequireStyle style)
+static const SourceNode* getServiceNode(const SourceNode* n)
 {
-    auto fromIt = platform->virtualPathsToSourceNodes.find(from);
+    const SourceNode* prev = n;
+    while (n && n->parent)
+    {
+        prev = n;
+        n = n->parent;
+    }
+    return prev;
+}
+
+static std::optional<std::pair<std::string, const char*>> computeSourcemapRequirePath(
+    const RobloxPlatform* platform,
+    const SourceNode* fromNode,
+    const std::unordered_set<const SourceNode*>& fromAncestors,
+    const SourceNode* fromService,
+    const Luau::ModuleName& target,
+    ImportRequireStyle style)
+{
     auto targetIt = platform->virtualPathsToSourceNodes.find(target);
-    if (fromIt == platform->virtualPathsToSourceNodes.end() || targetIt == platform->virtualPathsToSourceNodes.end())
+    if (targetIt == platform->virtualPathsToSourceNodes.end())
         return std::nullopt;
 
-    const SourceNode* fromNode = fromIt->second;
     const SourceNode* targetNode = targetIt->second;
 
     if (!targetNode->isScript())
@@ -223,10 +237,6 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
         return computeAbsolute();
 
     // Find lowest common ancestor
-    std::unordered_set<const SourceNode*> fromAncestors;
-    for (auto n = fromNode->parent; n; n = n->parent)
-        fromAncestors.insert(n);
-
     const SourceNode* commonAncestor = nullptr;
     for (auto n = targetNode; n; n = n->parent)
     {
@@ -268,19 +278,7 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
         return std::pair{relativePath, SortText::AutoImports};
 
     // Auto: use relative if same service subtree, otherwise @game
-    // Check if fromNode and targetNode share the same second-level ancestor (service)
-    auto getService = [](const SourceNode* n) -> const SourceNode*
-    {
-        const SourceNode* prev = n;
-        while (n && n->parent)
-        {
-            prev = n;
-            n = n->parent;
-        }
-        return prev;
-    };
-
-    if (getService(fromNode) == getService(targetNode))
+    if (fromService == getServiceNode(targetNode))
         return std::pair{relativePath, SortText::AutoImports};
 
     return computeAbsolute();
@@ -291,15 +289,24 @@ void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImp
     if (!rootSourceNode)
         return;
 
-    if (virtualPathsToSourceNodes.find(ctx.from) == virtualPathsToSourceNodes.end())
+    auto fromIt = virtualPathsToSourceNodes.find(ctx.from);
+    if (fromIt == virtualPathsToSourceNodes.end())
         return;
 
+    const SourceNode* fromNode = fromIt->second;
     auto style = ctx.config->requireStyle;
 
-    ctx.requirePathComputer = [this, style](const Luau::ModuleName& from, const Luau::ModuleName& target)
+    // Precompute ancestors of fromNode once, reused across all candidate modules
+    std::unordered_set<const SourceNode*> fromAncestors;
+    for (auto n = fromNode->parent; n; n = n->parent)
+        fromAncestors.insert(n);
+    const SourceNode* fromService = getServiceNode(fromNode);
+
+    ctx.requirePathComputer = [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style](
+                                  const Luau::ModuleName& /*from*/, const Luau::ModuleName& target)
         -> std::optional<std::pair<std::string, const char*>>
     {
-        return computeSourcemapRequirePath(this, from, target, style);
+        return computeSourcemapRequirePath(this, fromNode, fromAncestors, fromService, target, style);
     };
 
     ctx.modules = [this](const std::function<void(const Luau::ModuleName&)>& visit)

@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - String requires are now sourcemap-aware when in Roblox mode. Relative requires from sourcemap-managed files walk the DataModel tree instead of the filesystem ([#1141](https://github.com/JohnnyMorganz/luau-lsp/issues/1141))
-- Added built-in `@game` alias for string requires in Roblox mode, resolving from the sourcemap root. User-defined `@game` in `.luaurc` takes precedence ([#1347](https://github.com/JohnnyMorganz/luau-lsp/issues/1347))
+- Added built-in `@game` alias for string requires in Roblox mode, resolving from the sourcemap root. User-defined `@game` in `.luaurc` takes precedence ([#1347](https://github.com/JohnnyMorganz/luau-lsp/issues/1347)). This alias is now considered during string require autocomplete when in Roblox mode.
 
 ### Changed
 
@@ -1924,6 +1924,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
