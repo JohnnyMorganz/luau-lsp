@@ -177,6 +177,11 @@ std::optional<Luau::AutocompleteEntryMap> LSPPlatform::completionCallback(
     return std::nullopt;
 }
 
+Luau::LanguageServer::AutoImports::ModuleVisitor LSPPlatform::getAutoImportsModuleVisitor(const Luau::ModuleName& /*from*/)
+{
+    return Luau::LanguageServer::AutoImports::defaultModuleVisitor(workspaceFolder->frontend);
+}
+
 void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
     size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
 {
@@ -190,13 +195,13 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
         module.name,
         Luau::NotNull(&textDocument),
-        Luau::LanguageServer::AutoImports::defaultModuleVisitor(workspaceFolder->frontend),
+        getAutoImportsModuleVisitor(module.name),
         Luau::NotNull(workspaceFolder),
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
+        getAutoImportsRequirePathComputer(module.name, config.completion.imports.requireStyle),
     };
-    customizeStringRequireContext(ctx);
 
     return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }
@@ -217,17 +222,17 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        Luau::LanguageServer::AutoImports::defaultModuleVisitor(ctx.workspaceFolder->frontend),
+        getAutoImportsModuleVisitor(ctx.sourceModule->name),
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
+        getAutoImportsRequirePathComputer(ctx.sourceModule->name, config.completion.imports.requireStyle),
         [&unknownSymbol](const std::string& requireName)
         {
             return requireName == unknownSymbol.name;
         },
     };
-    customizeStringRequireContext(importCtx);
 
     const auto results = Luau::LanguageServer::AutoImports::computeAllStringRequires(importCtx);
     for (const auto& stringRequire : results)
@@ -274,17 +279,17 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        Luau::LanguageServer::AutoImports::defaultModuleVisitor(ctx.workspaceFolder->frontend),
+        getAutoImportsModuleVisitor(ctx.sourceModule->name),
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
+        getAutoImportsRequirePathComputer(ctx.sourceModule->name, config.completion.imports.requireStyle),
         [&unknownSymbols](const std::string& requireName)
         {
             return contains(unknownSymbols, requireName);
         },
     };
-    customizeStringRequireContext(importCtx);
 
     const auto results = computeAllStringRequires(importCtx);
     for (const auto& stringRequire : results)

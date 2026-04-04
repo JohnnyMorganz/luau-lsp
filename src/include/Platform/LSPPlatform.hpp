@@ -2,6 +2,7 @@
 
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/TextDocument.hpp"
+#include "Platform/StringRequireTypes.hpp"
 #include "Luau/Ast.h"
 #include "Luau/Autocomplete.h"
 #include "Luau/Error.h"
@@ -23,11 +24,6 @@
 
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
-
-namespace Luau::LanguageServer::AutoImports
-{
-struct StringRequireAutoImporterContext;
-}
 
 /// Context for generating unknown symbol quick fixes
 struct UnknownSymbolFixContext
@@ -53,7 +49,12 @@ public:
 
     virtual std::unique_ptr<Luau::RequireSuggester> getRequireSuggester();
 
-    virtual void customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx) {}
+    virtual Luau::LanguageServer::AutoImports::ModuleVisitor getAutoImportsModuleVisitor(const Luau::ModuleName& from);
+    virtual std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> getAutoImportsRequirePathComputer(
+        const Luau::ModuleName& from, ImportRequireStyle style)
+    {
+        return std::nullopt;
+    }
 
     /// The name points to a virtual path (i.e. for Roblox, game/ or ProjectRoot/)
     [[nodiscard]] virtual bool isVirtualPath(const Luau::ModuleName& name) const

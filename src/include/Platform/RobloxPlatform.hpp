@@ -129,7 +129,9 @@ public:
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
 
     std::unique_ptr<Luau::RequireSuggester> getRequireSuggester() override;
-    void customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx) override;
+    Luau::LanguageServer::AutoImports::ModuleVisitor getAutoImportsModuleVisitor(const Luau::ModuleName& from) override;
+    std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> getAutoImportsRequirePathComputer(
+        const Luau::ModuleName& from, ImportRequireStyle style) override;
 
     void updateSourceNodeMap(const std::string& sourceMapContents);
 

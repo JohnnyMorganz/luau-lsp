@@ -284,17 +284,29 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     return computeAbsolute();
 }
 
-void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx)
+Luau::LanguageServer::AutoImports::ModuleVisitor RobloxPlatform::getAutoImportsModuleVisitor(const Luau::ModuleName& from)
+{
+    if (!rootSourceNode || virtualPathsToSourceNodes.find(from) == virtualPathsToSourceNodes.end())
+        return LSPPlatform::getAutoImportsModuleVisitor(from);
+
+    return [this](const std::function<void(const Luau::ModuleName&)>& visit)
+    {
+        for (const auto& [name, _] : virtualPathsToSourceNodes)
+            visit(name);
+    };
+}
+
+std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> RobloxPlatform::getAutoImportsRequirePathComputer(
+    const Luau::ModuleName& from, ImportRequireStyle style)
 {
     if (!rootSourceNode)
-        return;
+        return std::nullopt;
 
-    auto fromIt = virtualPathsToSourceNodes.find(ctx.from);
+    auto fromIt = virtualPathsToSourceNodes.find(from);
     if (fromIt == virtualPathsToSourceNodes.end())
-        return;
+        return std::nullopt;
 
     const SourceNode* fromNode = fromIt->second;
-    auto style = ctx.config->requireStyle;
 
     // Precompute ancestors of fromNode once, reused across all candidate modules
     std::unordered_set<const SourceNode*> fromAncestors;
@@ -302,17 +314,11 @@ void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImp
         fromAncestors.insert(n);
     const SourceNode* fromService = getServiceNode(fromNode);
 
-    ctx.requirePathComputer = [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style](
-                                  const Luau::ModuleName& /*from*/, const Luau::ModuleName& target)
+    return [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style](
+               const Luau::ModuleName& /*from*/, const Luau::ModuleName& target)
         -> std::optional<std::pair<std::string, const char*>>
     {
         return computeSourcemapRequirePath(this, fromNode, fromAncestors, fromService, target, style);
-    };
-
-    ctx.modules = [this](const std::function<void(const Luau::ModuleName&)>& visit)
-    {
-        for (const auto& [name, _] : virtualPathsToSourceNodes)
-            visit(name);
     };
 }
 

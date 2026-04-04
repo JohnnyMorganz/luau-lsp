@@ -282,13 +282,13 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
             Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
                 module.name,
                 Luau::NotNull(&textDocument),
-                Luau::LanguageServer::AutoImports::defaultModuleVisitor(workspaceFolder->frontend),
+                getAutoImportsModuleVisitor(module.name),
                 Luau::NotNull(workspaceFolder),
                 Luau::NotNull(&config.completion.imports),
                 hotCommentsLineNumber,
                 Luau::NotNull(&importsVisitor),
+                getAutoImportsRequirePathComputer(module.name, config.completion.imports.requireStyle),
             };
-            customizeStringRequireContext(ctx);
 
             return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
         }
