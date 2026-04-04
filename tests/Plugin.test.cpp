@@ -359,12 +359,13 @@ TEST_CASE("PluginTextDocument convertPosition maps correctly")
     };
 
     auto mapping = SourceMapping::fromEdits(original, edits);
+    auto transformedSource = mapping.getTransformedSource();
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        mapping.getTransformedSource(),
+        std::move(transformedSource),
         std::move(mapping)
     );
 
@@ -482,12 +483,13 @@ TEST_CASE("PluginTextDocument lineCount uses transformed")
     };
 
     auto mapping = SourceMapping::fromEdits(original, edits);
+    auto transformedSource = mapping.getTransformedSource();
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        mapping.getTransformedSource(),
+        std::move(transformedSource),
         std::move(mapping)
     );
 

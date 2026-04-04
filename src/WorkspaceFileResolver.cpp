@@ -77,12 +77,13 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
     if (!transformed)
         return original;
 
+    auto transformedSource = transformed->getTransformedSource();
     auto pluginDoc = std::make_unique<Luau::LanguageServer::Plugin::PluginTextDocument>(
         original->uri(),
         original->languageId(),
         original->version(),
         original->getText(),
-        transformed->getTransformedSource(),
+        std::move(transformedSource),
         std::move(*transformed));
 
     pluginDocuments[uri] = std::move(pluginDoc);
