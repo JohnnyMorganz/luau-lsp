@@ -89,11 +89,11 @@ std::unique_ptr<Luau::RequireNode> RobloxStringRequireSuggester::getNode(const L
     auto config = std::make_shared<const Luau::Config>(configResolver->getConfig(name, workspaceFolder->limits));
 
     if (auto it = platform->virtualPathsToSourceNodes.find(name); it != platform->virtualPathsToSourceNodes.end())
-        return std::make_unique<SourceNodeRequireNode>(it->second, platform->rootSourceNode, config, workspaceFolder);
+        return std::make_unique<SourceNodeRequireNode>(it->second, platform->rootSourceNode, std::move(config), workspaceFolder);
 
     // Fall back to filesystem-based node for modules not in the sourcemap
     if (auto realUri = platform->resolveToRealPath(name))
-        return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, *config);
+        return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, std::move(config));
 
     return nullptr;
 }

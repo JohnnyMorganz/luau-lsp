@@ -14,14 +14,6 @@ public:
     {
     }
 
-    FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder, Luau::Config mainRequirerNodeConfig)
-        : uri(uri)
-        , isDirectory(isDirectory)
-        , mainRequirerNodeConfig(std::make_shared<const Luau::Config>(std::move(mainRequirerNodeConfig)))
-        , workspaceFolder(workspaceFolder)
-    {
-    }
-
     FileRequireNode(Uri uri, bool isDirectory, WorkspaceFolder* workspaceFolder, std::shared_ptr<const Luau::Config> mainRequirerNodeConfig)
         : uri(std::move(uri))
         , isDirectory(isDirectory)
