@@ -1,3 +1,4 @@
+#include "Luau/Common.h"
 #include "Luau/FileResolver.h"
 #include "Platform/StringRequireSuggester.hpp"
 #include "LSP/Workspace.hpp"
@@ -31,11 +32,10 @@ std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std:
     if (!basePath)
         return nullptr;
 
-    static const Luau::Config emptyConfig;
-    const auto& config = mainRequirerNodeConfig ? *mainRequirerNodeConfig : emptyConfig;
+    LUAU_ASSERT(mainRequirerNodeConfig);
 
     Uri relativeNodeUri;
-    if (auto luaurcAlias = resolveAlias(requireString, config, *basePath))
+    if (auto luaurcAlias = resolveAlias(requireString, *mainRequirerNodeConfig, *basePath))
         relativeNodeUri = luaurcAlias.value();
     else if (isInitLuauFile(uri))
     {
@@ -78,8 +78,7 @@ std::vector<Luau::RequireAlias> FileRequireNode::getAvailableAliases() const
 {
     std::vector<Luau::RequireAlias> results;
 
-    if (!mainRequirerNodeConfig)
-        return results;
+    LUAU_ASSERT(mainRequirerNodeConfig);
 
     for (const auto& [_, aliasInfo] : mainRequirerNodeConfig->aliases)
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});

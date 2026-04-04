@@ -1,3 +1,4 @@
+#include "Luau/Common.h"
 #include "Platform/RobloxStringRequireSuggester.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
@@ -24,6 +25,8 @@ std::vector<std::string> SourceNodeRequireNode::getTags() const
 
 std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(const std::string& requireString) const
 {
+    LUAU_ASSERT(mainRequirerNodeConfig);
+
     if (!requireString.empty() && requireString[0] == '@')
     {
         // Check user-defined aliases — fall back to filesystem-based FileRequireNode
@@ -71,6 +74,8 @@ std::vector<std::unique_ptr<Luau::RequireNode>> SourceNodeRequireNode::getChildr
 
 std::vector<Luau::RequireAlias> SourceNodeRequireNode::getAvailableAliases() const
 {
+    LUAU_ASSERT(mainRequirerNodeConfig);
+
     std::vector<Luau::RequireAlias> results;
 
     for (const auto& [_, aliasInfo] : mainRequirerNodeConfig->aliases)
