@@ -116,9 +116,7 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
     if (!context)
         return std::nullopt;
 
-    // Only intercept when the context is a virtual path (i.e., in the sourcemap)
-    auto contextNode = getSourceNodeFromVirtualPath(context->name);
-    if (!contextNode)
+    if (!isVirtualPath(context->name))
         return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
     if (!requiredString.empty() && requiredString[0] == '@')
@@ -132,28 +130,53 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
         if (luauConfig.aliases.find(aliasNameLower))
             return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
-        // Built-in @game alias: resolve from sourcemap root
         if (aliasNameLower == "game" && rootSourceNode)
         {
             std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
-            auto targetNode = rootSourceNode->walkPath(remainder);
-            if (targetNode && targetNode->isScript())
-                return Luau::ModuleInfo{targetNode->virtualPath};
-            return std::nullopt;
+            if (remainder.empty())
+                return Luau::ModuleInfo{rootSourceNode->virtualPath};
+            return Luau::ModuleInfo{rootSourceNode->virtualPath + "/" + remainder};
         }
 
         return std::nullopt;
     }
 
-    const SourceNode* baseNode = (*contextNode)->parent;
-    if (!baseNode)
+    auto parentPath = getParentPath(context->name);
+    if (!parentPath)
         return std::nullopt;
 
-    auto targetNode = baseNode->walkPath(requiredString);
-    if (targetNode && targetNode->isScript())
-        return Luau::ModuleInfo{targetNode->virtualPath};
+    std::string base = *parentPath;
+    size_t start = 0;
+    while (start < requiredString.size())
+    {
+        if (requiredString.compare(start, 2, "./") == 0)
+        {
+            start += 2;
+            continue;
+        }
 
-    return std::nullopt;
+        size_t end = requiredString.find('/', start);
+        std::string segment = (end == std::string::npos) ? requiredString.substr(start) : requiredString.substr(start, end - start);
+        start = (end == std::string::npos) ? requiredString.size() : end + 1;
+
+        if (segment.empty() || segment == ".")
+            continue;
+
+        if (segment == "..")
+        {
+            auto parent = getParentPath(base);
+            if (!parent)
+                return std::nullopt;
+            base = *parent;
+        }
+        else
+        {
+            base += '/';
+            base += segment;
+        }
+    }
+
+    return Luau::ModuleInfo{base};
 }
 
 /// Modify the context so that game/Players/LocalPlayer items point to the correct place
@@ -271,8 +294,7 @@ void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImp
     if (virtualPathsToSourceNodes.find(ctx.from) == virtualPathsToSourceNodes.end())
         return;
 
-    auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
-    auto style = config.completion.imports.requireStyle;
+    auto style = ctx.config->requireStyle;
 
     ctx.requirePathComputer = [this, style](const Luau::ModuleName& from, const Luau::ModuleName& target)
         -> std::optional<std::pair<std::string, const char*>>

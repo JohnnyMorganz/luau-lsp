@@ -580,7 +580,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_cross_service")
     CHECK_EQ(result->name, "game/ServerScriptService/ServerModule");
 }
 
-TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_for_nonexistent")
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_nonexistent_path")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
@@ -588,7 +588,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_for_nonexis
     Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
     auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./NonExistent", workspace.limits);
 
-    CHECK_FALSE(result.has_value());
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/NonExistent");
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_past_root")
@@ -630,7 +631,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_from_root")
     CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleA");
 }
 
-TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_returns_nullopt_for_nonexistent")
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_nonexistent_path")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
@@ -638,7 +639,8 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_returns_nullopt_for_nonexistent
     Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
     auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/NonExistent/Module", workspace.limits);
 
-    CHECK_FALSE(result.has_value());
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/NonExistent/Module");
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")
