@@ -145,6 +145,8 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
     if (!parentPath)
         return std::nullopt;
 
+    // Walk the path using string manipulation rather than SourceNode::walkPath because
+    // validation is handled downstream — walkPath rejects missing children via findChild.
     std::string base = *parentPath;
     size_t start = 0;
     while (start < requiredString.size())
@@ -249,7 +251,9 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     if (!commonAncestor)
         return computeAbsolute();
 
-    // Count hops up from fromNode->parent to common ancestor
+    // Count hops up from fromNode->parent to common ancestor.
+    // Safe: commonAncestor is guaranteed to be in fromAncestors, so
+    // n will reach it before becoming nullptr.
     int hopsUp = 0;
     for (auto n = fromNode->parent; n != commonAncestor; n = n->parent)
         hopsUp++;
