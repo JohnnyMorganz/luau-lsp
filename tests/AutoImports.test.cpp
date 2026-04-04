@@ -1575,7 +1575,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_sibling_uses_relative_path")
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1596,7 +1596,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_nested_uses_relative_path")
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1618,7 +1618,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_absolute_style_uses_game_alias
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1639,7 +1639,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_cross_service_defaults_to_game
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -1661,7 +1661,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_respects_always_relative_acros
     loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};

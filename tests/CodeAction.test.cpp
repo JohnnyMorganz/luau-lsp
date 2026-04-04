@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 
 static std::optional<lsp::CodeAction> findAction(const lsp::CodeActionResult& result, const std::string& title)
@@ -752,29 +753,6 @@ t.fOo()
     CHECK_FALSE(action);
 }
 
-static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
-{
-    "name": "Game",
-    "className": "DataModel",
-    "children": [
-        {
-            "name": "ReplicatedStorage",
-            "className": "ReplicatedStorage",
-            "children": [
-                {
-                    "name": "Shared",
-                    "className": "Folder",
-                    "children": [
-                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
-                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]}
-                    ]
-                }
-            ]
-        }
-    ]
-}
-)";
-
 TEST_CASE_FIXTURE(Fixture, "sourcemap_unknown_symbol_fix_suggests_string_require")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
@@ -783,7 +761,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_unknown_symbol_fix_suggests_string_require
     std::string source = dedent(R"(
         local x = ModuleB
     )");
-    auto uri = newDocument("src/shared/ModuleA.luau", source);
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
 
     lsp::CodeActionParams params;
     params.textDocument.uri = uri;

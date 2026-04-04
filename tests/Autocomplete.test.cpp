@@ -2075,7 +2075,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_datamodel_siblings")
         local x = require("./|")
     )");
 
-    auto uri = newDocument(tempDir.write_child("src/shared/ModuleA.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -2097,7 +2097,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
         local x = require("@game/|")
     )");
 
-    auto uri = newDocument(tempDir.write_child("src/shared/ModuleA.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
