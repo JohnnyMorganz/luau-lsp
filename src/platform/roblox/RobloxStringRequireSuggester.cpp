@@ -1,9 +1,8 @@
 #include "Platform/RobloxStringRequireSuggester.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Platform/StringRequireSuggester.hpp"
+#include "LSP/Utils.hpp"
 #include "LSP/Workspace.hpp"
-
-// SourceNodeRequireNode implementation
 
 std::string SourceNodeRequireNode::getPathComponent() const
 {
@@ -25,22 +24,15 @@ std::vector<std::string> SourceNodeRequireNode::getTags() const
 
 std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(const std::string& requireString) const
 {
-    // Check user aliases first
     if (!requireString.empty() && requireString[0] == '@')
     {
         // Check user-defined aliases — fall back to filesystem-based FileRequireNode
-        if (auto aliasedPath = resolveAlias(requireString, mainRequirerNodeConfig, Uri{}))
+        if (auto aliasedPath = resolveAlias(requireString, *mainRequirerNodeConfig, Uri{}))
             return std::make_unique<FileRequireNode>(*aliasedPath, aliasedPath->isDirectory(), workspaceFolder);
 
-        // Built-in @game alias
         size_t slashPos = requireString.find('/');
         std::string aliasName = requireString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
-        std::string aliasNameLower = aliasName;
-        std::transform(aliasNameLower.begin(), aliasNameLower.end(), aliasNameLower.begin(),
-            [](unsigned char c)
-            {
-                return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
-            });
+        std::string aliasNameLower = toLower(aliasName);
 
         if (aliasNameLower == "game" && rootNode)
         {
@@ -53,7 +45,6 @@ std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(cons
         return nullptr;
     }
 
-    // Relative path: walk from parent
     const SourceNode* baseNode = node->parent;
     if (!baseNode)
         return nullptr;
@@ -82,29 +73,27 @@ std::vector<Luau::RequireAlias> SourceNodeRequireNode::getAvailableAliases() con
 {
     std::vector<Luau::RequireAlias> results;
 
-    for (const auto& [_, aliasInfo] : mainRequirerNodeConfig.aliases)
+    for (const auto& [_, aliasInfo] : mainRequirerNodeConfig->aliases)
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
 
     // Add built-in @game alias if not user-defined
     std::string gameLower = "game";
-    if (!mainRequirerNodeConfig.aliases.find(gameLower))
+    if (!mainRequirerNodeConfig->aliases.find(gameLower))
         results.emplace_back(Luau::RequireAlias{"game", {"Alias"}});
 
     return results;
 }
 
-// RobloxStringRequireSuggester implementation
-
 std::unique_ptr<Luau::RequireNode> RobloxStringRequireSuggester::getNode(const Luau::ModuleName& name) const
 {
-    auto config = configResolver->getConfig(name, workspaceFolder->limits);
+    auto config = std::make_shared<const Luau::Config>(configResolver->getConfig(name, workspaceFolder->limits));
 
     if (auto it = platform->virtualPathsToSourceNodes.find(name); it != platform->virtualPathsToSourceNodes.end())
         return std::make_unique<SourceNodeRequireNode>(it->second, platform->rootSourceNode, config, workspaceFolder);
 
     // Fall back to filesystem-based node for modules not in the sourcemap
     if (auto realUri = platform->resolveToRealPath(name))
-        return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, config);
+        return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, *config);
 
     return nullptr;
 }

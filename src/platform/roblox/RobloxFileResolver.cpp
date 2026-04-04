@@ -3,9 +3,12 @@
 #include "Platform/StringRequireAutoImporter.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
 #include "LSP/Completion.hpp"
+#include "LSP/Utils.hpp"
 
 #include "Luau/Config.h"
 #include "Luau/TimeTrace.h"
+
+#include <unordered_set>
 #include "LuauFileUtils.hpp"
 
 std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const Uri& uri) const
@@ -118,24 +121,14 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
     if (!contextNode)
         return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
-    // Handle aliases: check user-defined aliases first
     if (!requiredString.empty() && requiredString[0] == '@')
     {
         auto luauConfig = fileResolver->getConfig(context->name, limits);
 
-        // Extract alias name (everything between @ and first /)
         size_t slashPos = requiredString.find('/');
         std::string aliasName = requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
+        std::string aliasNameLower = toLower(aliasName);
 
-        // Lowercase for case-insensitive comparison
-        std::string aliasNameLower = aliasName;
-        std::transform(aliasNameLower.begin(), aliasNameLower.end(), aliasNameLower.begin(),
-            [](unsigned char c)
-            {
-                return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
-            });
-
-        // Check if user has defined this alias in .luaurc
         if (luauConfig.aliases.find(aliasNameLower))
             return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
@@ -152,7 +145,6 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
         return std::nullopt;
     }
 
-    // Relative/bare path: walk from the context node's parent
     const SourceNode* baseNode = (*contextNode)->parent;
     if (!baseNode)
         return std::nullopt;
@@ -208,20 +200,19 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
         return computeAbsolute();
 
     // Find lowest common ancestor
-    std::vector<const SourceNode*> fromAncestors;
+    std::unordered_set<const SourceNode*> fromAncestors;
     for (auto n = fromNode->parent; n; n = n->parent)
-        fromAncestors.push_back(n);
+        fromAncestors.insert(n);
 
-    auto findCommonAncestor = [&]() -> const SourceNode*
+    const SourceNode* commonAncestor = nullptr;
+    for (auto n = targetNode; n; n = n->parent)
     {
-        for (auto* fa : fromAncestors)
-            for (auto n = targetNode; n; n = n->parent)
-                if (fa == n)
-                    return fa;
-        return nullptr;
-    };
-
-    const SourceNode* commonAncestor = findCommonAncestor();
+        if (fromAncestors.count(n))
+        {
+            commonAncestor = n;
+            break;
+        }
+    }
     if (!commonAncestor)
         return computeAbsolute();
 
@@ -277,7 +268,6 @@ void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImp
     if (!rootSourceNode)
         return;
 
-    // Only inject when the source module is in the sourcemap
     if (virtualPathsToSourceNodes.find(ctx.from) == virtualPathsToSourceNodes.end())
         return;
 

@@ -31,8 +31,11 @@ std::unique_ptr<Luau::RequireNode> FileRequireNode::resolvePathToNode(const std:
     if (!basePath)
         return nullptr;
 
+    static const Luau::Config emptyConfig;
+    const auto& config = mainRequirerNodeConfig ? *mainRequirerNodeConfig : emptyConfig;
+
     Uri relativeNodeUri;
-    if (auto luaurcAlias = resolveAlias(requireString, mainRequirerNodeConfig, *basePath))
+    if (auto luaurcAlias = resolveAlias(requireString, config, *basePath))
         relativeNodeUri = luaurcAlias.value();
     else if (isInitLuauFile(uri))
     {
@@ -75,7 +78,10 @@ std::vector<Luau::RequireAlias> FileRequireNode::getAvailableAliases() const
 {
     std::vector<Luau::RequireAlias> results;
 
-    for (const auto& [_, aliasInfo] : mainRequirerNodeConfig.aliases)
+    if (!mainRequirerNodeConfig)
+        return results;
+
+    for (const auto& [_, aliasInfo] : mainRequirerNodeConfig->aliases)
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
 
     // Include @self alias for init.lua files

@@ -279,15 +279,10 @@ void RobloxPlatform::handleSuggestImports(const TextDocument& textDocument, cons
     {
         if (config.completion.imports.stringRequires.enabled)
         {
-            auto& frontend = workspaceFolder->frontend;
             Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
                 module.name,
                 Luau::NotNull(&textDocument),
-                [&frontend](const auto& visit)
-                {
-                    for (const auto& [name, _] : frontend.sourceNodes)
-                        visit(name);
-                },
+                Luau::LanguageServer::AutoImports::defaultModuleVisitor(workspaceFolder->frontend),
                 Luau::NotNull(workspaceFolder),
                 Luau::NotNull(&config.completion.imports),
                 hotCommentsLineNumber,

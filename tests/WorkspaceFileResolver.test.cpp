@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
@@ -516,44 +517,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_directory")
     CHECK(endsWith(resolved->name, "/project/lib/init.luau"));
 }
 #endif
-
-static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
-{
-    "name": "Game",
-    "className": "DataModel",
-    "children": [
-        {
-            "name": "ReplicatedStorage",
-            "className": "ReplicatedStorage",
-            "children": [
-                {
-                    "name": "Shared",
-                    "className": "Folder",
-                    "children": [
-                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
-                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]},
-                        {
-                            "name": "Nested",
-                            "className": "Folder",
-                            "children": [
-                                {"name": "DeepModule", "className": "ModuleScript", "filePaths": ["src/shared/Nested/DeepModule.luau"]}
-                            ]
-                        }
-                    ]
-                },
-                {"name": "Utils", "className": "ModuleScript", "filePaths": ["src/shared/Utils.luau"]}
-            ]
-        },
-        {
-            "name": "ServerScriptService",
-            "className": "ServerScriptService",
-            "children": [
-                {"name": "ServerModule", "className": "ModuleScript", "filePaths": ["src/server/ServerModule.luau"]}
-            ]
-        }
-    ]
-}
-)";
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_sibling")
 {

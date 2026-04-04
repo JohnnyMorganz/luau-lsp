@@ -15,6 +15,16 @@ using RequirePathComputer = std::function<
 /// Callback to visit all candidate module names for auto-import.
 using ModuleVisitor = std::function<void(const std::function<void(const Luau::ModuleName&)>&)>;
 
+/// Creates a ModuleVisitor that iterates all sourceNodes in the given frontend.
+inline ModuleVisitor defaultModuleVisitor(const Luau::Frontend& frontend)
+{
+    return [&frontend](const std::function<void(const Luau::ModuleName&)>& visit)
+    {
+        for (const auto& [name, _] : frontend.sourceNodes)
+            visit(name);
+    };
+}
+
 struct StringRequireAutoImporterContext
 {
     Luau::ModuleName from;

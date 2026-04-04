@@ -187,15 +187,10 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(module.root);
 
-    auto& frontend = workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
         module.name,
         Luau::NotNull(&textDocument),
-        [&frontend](const auto& visit)
-        {
-            for (const auto& [name, _] : frontend.sourceNodes)
-                visit(name);
-        },
+        Luau::LanguageServer::AutoImports::defaultModuleVisitor(workspaceFolder->frontend),
         Luau::NotNull(workspaceFolder),
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
@@ -219,15 +214,10 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
-    auto& frontend = ctx.workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        [&frontend](const auto& visit)
-        {
-            for (const auto& [name, _] : frontend.sourceNodes)
-                visit(name);
-        },
+        Luau::LanguageServer::AutoImports::defaultModuleVisitor(ctx.workspaceFolder->frontend),
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
@@ -281,15 +271,10 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
         unknownSymbols.emplace_back(unknownSymbol->name);
     }
 
-    auto& frontend = ctx.workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        [&frontend](const auto& visit)
-        {
-            for (const auto& [name, _] : frontend.sourceNodes)
-                visit(name);
-        },
+        Luau::LanguageServer::AutoImports::defaultModuleVisitor(ctx.workspaceFolder->frontend),
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,

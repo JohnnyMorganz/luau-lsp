@@ -4,6 +4,8 @@
 #include "Luau/ConfigResolver.h"
 #include "Luau/FileResolver.h"
 
+#include <memory>
+
 class WorkspaceFolder;
 struct SourceNode;
 class RobloxPlatform;
@@ -11,7 +13,8 @@ class RobloxPlatform;
 class SourceNodeRequireNode : public Luau::RequireNode
 {
 public:
-    SourceNodeRequireNode(const SourceNode* node, const SourceNode* rootNode, Luau::Config mainRequirerNodeConfig, WorkspaceFolder* workspaceFolder)
+    SourceNodeRequireNode(
+        const SourceNode* node, const SourceNode* rootNode, std::shared_ptr<const Luau::Config> mainRequirerNodeConfig, WorkspaceFolder* workspaceFolder)
         : node(node)
         , rootNode(rootNode)
         , mainRequirerNodeConfig(std::move(mainRequirerNodeConfig))
@@ -29,7 +32,7 @@ public:
 private:
     const SourceNode* node;
     const SourceNode* rootNode;
-    Luau::Config mainRequirerNodeConfig;
+    std::shared_ptr<const Luau::Config> mainRequirerNodeConfig;
     WorkspaceFolder* workspaceFolder;
 };
 

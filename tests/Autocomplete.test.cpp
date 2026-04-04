@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
@@ -2063,44 +2064,6 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_set
     trim(item->documentation->value);
     CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
 }
-
-static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
-{
-    "name": "Game",
-    "className": "DataModel",
-    "children": [
-        {
-            "name": "ReplicatedStorage",
-            "className": "ReplicatedStorage",
-            "children": [
-                {
-                    "name": "Shared",
-                    "className": "Folder",
-                    "children": [
-                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
-                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]},
-                        {
-                            "name": "Nested",
-                            "className": "Folder",
-                            "children": [
-                                {"name": "DeepModule", "className": "ModuleScript", "filePaths": ["src/shared/Nested/DeepModule.luau"]}
-                            ]
-                        }
-                    ]
-                },
-                {"name": "Utils", "className": "ModuleScript", "filePaths": ["src/shared/Utils.luau"]}
-            ]
-        },
-        {
-            "name": "ServerScriptService",
-            "className": "ServerScriptService",
-            "children": [
-                {"name": "ServerModule", "className": "ModuleScript", "filePaths": ["src/server/ServerModule.luau"]}
-            ]
-        }
-    ]
-}
-)";
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_datamodel_siblings")
 {
