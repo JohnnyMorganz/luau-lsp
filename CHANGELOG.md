@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- String requires are now sourcemap-aware when in Roblox mode. Relative requires from sourcemap-managed files walk the DataModel tree instead of the filesystem ([#1141](https://github.com/JohnnyMorganz/luau-lsp/issues/1141))
+- Added built-in `@game` alias for string requires in Roblox mode, resolving from the sourcemap root. User-defined `@game` in `.luaurc` takes precedence ([#1347](https://github.com/JohnnyMorganz/luau-lsp/issues/1347))
+
 ### Changed
 
 - Sync to upstream Luau 0.715
