@@ -39,6 +39,9 @@ struct SourceNode
     std::optional<const SourceNode*> findDescendant(const std::string& name) const;
     // O(n) search for ancestor of name
     std::optional<const SourceNode*> findAncestor(const std::string& name) const;
+    /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
+    /// Returns nullptr if any segment fails to resolve.
+    const SourceNode* walkPath(const std::string& path) const;
 
     bool containsFilePaths() const;
     ordered_json toJson() const;
@@ -121,7 +124,12 @@ public:
 
     std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;
 
+    std::optional<Luau::ModuleInfo> resolveStringRequire(
+        const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits) override;
     std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
+
+    std::unique_ptr<Luau::RequireSuggester> getRequireSuggester() override;
+    void customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx) override;
 
     void updateSourceNodeMap(const std::string& sourceMapContents);
 

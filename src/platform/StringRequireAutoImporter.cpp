@@ -110,21 +110,33 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
     auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from, ctx.workspaceFolder->limits).aliases;
 
-    for (const auto& [moduleName, sourceNode] : ctx.frontend->sourceNodes)
+    auto processModule = [&](const Luau::ModuleName& moduleName)
     {
         auto name = requireNameFromModuleName(moduleName);
 
         if (moduleName == ctx.from || ctx.importsVisitor->containsRequire(name))
-            continue;
+            return;
 
         if (ctx.moduleFilter && !(*ctx.moduleFilter)(name))
-            continue;
+            return;
 
         auto uri = ctx.workspaceFolder->fileResolver.getUri(moduleName);
         if (ctx.workspaceFolder->isIgnoredFileForAutoImports(uri))
-            continue;
+            return;
 
-        auto [require, sortText] = computeRequirePath(fromUri, uri, availableAliases, ctx.config->requireStyle);
+        std::string require;
+        const char* sortText;
+        if (ctx.requirePathComputer)
+        {
+            auto computed = (*ctx.requirePathComputer)(ctx.from, moduleName);
+            if (!computed)
+                return;
+            std::tie(require, sortText) = *computed;
+        }
+        else
+        {
+            std::tie(require, sortText) = computeRequirePath(fromUri, uri, availableAliases, ctx.config->requireStyle);
+        }
 
         size_t lineNumber = computeBestLineForRequire(*ctx.importsVisitor, *ctx.textDocument, require, minimumLineNumber);
 
@@ -137,7 +149,9 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
             createRequireTextEdit(name, '"' + require + '"', lineNumber, prependNewline),
             sortText,
         });
-    }
+    };
+
+    ctx.modules(processModule);
 
     return result;
 }

@@ -517,4 +517,207 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_directory")
 }
 #endif
 
+static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {
+                    "name": "Shared",
+                    "className": "Folder",
+                    "children": [
+                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
+                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]},
+                        {
+                            "name": "Nested",
+                            "className": "Folder",
+                            "children": [
+                                {"name": "DeepModule", "className": "ModuleScript", "filePaths": ["src/shared/Nested/DeepModule.luau"]}
+                            ]
+                        }
+                    ]
+                },
+                {"name": "Utils", "className": "ModuleScript", "filePaths": ["src/shared/Utils.luau"]}
+            ]
+        },
+        {
+            "name": "ServerScriptService",
+            "className": "ServerScriptService",
+            "children": [
+                {"name": "ServerModule", "className": "ModuleScript", "filePaths": ["src/server/ServerModule.luau"]}
+            ]
+        }
+    ]
+}
+)";
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_sibling")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./ModuleB", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_bare_name")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "ModuleB", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_parent_traversal")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../Utils", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Utils");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_nested_path")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./Nested/DeepModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/Nested/DeepModule");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_cross_service")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    // From ModuleA (parent=Shared), ../../ goes Shared->ReplicatedStorage->Game(root)
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "../../ServerScriptService/ServerModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ServerScriptService/ServerModule");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_for_nonexistent")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./NonExistent", workspace.limits);
+
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_past_root")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Utils"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../../../..", workspace.limits);
+
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_falls_back_for_non_sourcemap_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto mainPath = tempDir.touch_child("standalone/main.luau");
+    auto otherPath = tempDir.touch_child("standalone/other.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./other", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(otherPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_from_root")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ServerScriptService/ServerModule"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "@game/ReplicatedStorage/Shared/ModuleA", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleA");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_returns_nullopt_for_nonexistent")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/NonExistent/Module", workspace.limits);
+
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto gameDirModule = tempDir.touch_child("game_alias/MyModule.luau");
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "game": "game_alias"
+        }
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/MyModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(gameDirModule));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_alias_resolves_via_filesystem")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto sharedModule = tempDir.touch_child("shared_libs/Helper.luau");
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "shared": "shared_libs"
+        }
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@shared/Helper", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(sharedModule));
+}
+
 TEST_SUITE_END();

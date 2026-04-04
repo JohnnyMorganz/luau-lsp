@@ -1,6 +1,10 @@
 #include "Platform/RobloxPlatform.hpp"
+#include "Platform/RobloxStringRequireSuggester.hpp"
+#include "Platform/StringRequireAutoImporter.hpp"
 #include "LSP/JsonTomlSyntaxParser.hpp"
+#include "LSP/Completion.hpp"
 
+#include "Luau/Config.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
 
@@ -103,6 +107,63 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
     return source;
 }
 
+std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
+    const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
+{
+    if (!context)
+        return std::nullopt;
+
+    // Only intercept when the context is a virtual path (i.e., in the sourcemap)
+    auto contextNode = getSourceNodeFromVirtualPath(context->name);
+    if (!contextNode)
+        return LSPPlatform::resolveStringRequire(context, requiredString, limits);
+
+    // Handle aliases: check user-defined aliases first
+    if (!requiredString.empty() && requiredString[0] == '@')
+    {
+        auto luauConfig = fileResolver->getConfig(context->name, limits);
+
+        // Extract alias name (everything between @ and first /)
+        size_t slashPos = requiredString.find('/');
+        std::string aliasName = requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
+
+        // Lowercase for case-insensitive comparison
+        std::string aliasNameLower = aliasName;
+        std::transform(aliasNameLower.begin(), aliasNameLower.end(), aliasNameLower.begin(),
+            [](unsigned char c)
+            {
+                return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
+            });
+
+        // Check if user has defined this alias in .luaurc
+        if (luauConfig.aliases.find(aliasNameLower))
+            return LSPPlatform::resolveStringRequire(context, requiredString, limits);
+
+        // Built-in @game alias: resolve from sourcemap root
+        if (aliasNameLower == "game" && rootSourceNode)
+        {
+            std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
+            auto targetNode = rootSourceNode->walkPath(remainder);
+            if (targetNode && targetNode->isScript())
+                return Luau::ModuleInfo{targetNode->virtualPath};
+            return std::nullopt;
+        }
+
+        return std::nullopt;
+    }
+
+    // Relative/bare path: walk from the context node's parent
+    const SourceNode* baseNode = (*contextNode)->parent;
+    if (!baseNode)
+        return std::nullopt;
+
+    auto targetNode = baseNode->walkPath(requiredString);
+    if (targetNode && targetNode->isScript())
+        return Luau::ModuleInfo{targetNode->virtualPath};
+
+    return std::nullopt;
+}
+
 /// Modify the context so that game/Players/LocalPlayer items point to the correct place
 static std::string mapContext(const std::string& context)
 {
@@ -113,6 +174,127 @@ static std::string mapContext(const std::string& context)
     else if (context == "game/Players/LocalPlayer/StarterGear")
         return "game/StarterPack";
     return context;
+}
+
+std::unique_ptr<Luau::RequireSuggester> RobloxPlatform::getRequireSuggester()
+{
+    return std::make_unique<RobloxStringRequireSuggester>(workspaceFolder, fileResolver, this);
+}
+
+static std::optional<std::pair<std::string, const char*>> computeSourcemapRequirePath(
+    const RobloxPlatform* platform, const Luau::ModuleName& from, const Luau::ModuleName& target, ImportRequireStyle style)
+{
+    auto fromIt = platform->virtualPathsToSourceNodes.find(from);
+    auto targetIt = platform->virtualPathsToSourceNodes.find(target);
+    if (fromIt == platform->virtualPathsToSourceNodes.end() || targetIt == platform->virtualPathsToSourceNodes.end())
+        return std::nullopt;
+
+    const SourceNode* fromNode = fromIt->second;
+    const SourceNode* targetNode = targetIt->second;
+
+    if (!targetNode->isScript())
+        return std::nullopt;
+
+    // Compute absolute path: @game/<virtual path without "game/" prefix>
+    auto computeAbsolute = [&]() -> std::pair<std::string, const char*>
+    {
+        std::string path = targetNode->virtualPath;
+        if (Luau::startsWith(path, "game/"))
+            path = path.substr(5);
+        return {"@game/" + path, SortText::AutoImportsAbsolute};
+    };
+
+    if (style == ImportRequireStyle::AlwaysAbsolute)
+        return computeAbsolute();
+
+    // Find lowest common ancestor
+    std::vector<const SourceNode*> fromAncestors;
+    for (auto n = fromNode->parent; n; n = n->parent)
+        fromAncestors.push_back(n);
+
+    auto findCommonAncestor = [&]() -> const SourceNode*
+    {
+        for (auto* fa : fromAncestors)
+            for (auto n = targetNode; n; n = n->parent)
+                if (fa == n)
+                    return fa;
+        return nullptr;
+    };
+
+    const SourceNode* commonAncestor = findCommonAncestor();
+    if (!commonAncestor)
+        return computeAbsolute();
+
+    // Count hops up from fromNode->parent to common ancestor
+    int hopsUp = 0;
+    for (auto n = fromNode->parent; n != commonAncestor; n = n->parent)
+        hopsUp++;
+
+    // Build path down from common ancestor to target
+    std::vector<std::string> pathDown;
+    for (auto n = targetNode; n != commonAncestor; n = n->parent)
+        pathDown.push_back(n->name);
+    std::reverse(pathDown.begin(), pathDown.end());
+
+    std::string relativePath;
+    if (hopsUp == 0)
+        relativePath = "./";
+    else
+        for (int i = 0; i < hopsUp; i++)
+            relativePath += "../";
+
+    for (size_t i = 0; i < pathDown.size(); i++)
+    {
+        if (i > 0)
+            relativePath += "/";
+        relativePath += pathDown[i];
+    }
+
+    if (style == ImportRequireStyle::AlwaysRelative)
+        return std::pair{relativePath, SortText::AutoImports};
+
+    // Auto: use relative if same service subtree, otherwise @game
+    // Check if fromNode and targetNode share the same second-level ancestor (service)
+    auto getService = [](const SourceNode* n) -> const SourceNode*
+    {
+        const SourceNode* prev = n;
+        while (n && n->parent)
+        {
+            prev = n;
+            n = n->parent;
+        }
+        return prev;
+    };
+
+    if (getService(fromNode) == getService(targetNode))
+        return std::pair{relativePath, SortText::AutoImports};
+
+    return computeAbsolute();
+}
+
+void RobloxPlatform::customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx)
+{
+    if (!rootSourceNode)
+        return;
+
+    // Only inject when the source module is in the sourcemap
+    if (virtualPathsToSourceNodes.find(ctx.from) == virtualPathsToSourceNodes.end())
+        return;
+
+    auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto style = config.completion.imports.requireStyle;
+
+    ctx.requirePathComputer = [this, style](const Luau::ModuleName& from, const Luau::ModuleName& target)
+        -> std::optional<std::pair<std::string, const char*>>
+    {
+        return computeSourcemapRequirePath(this, from, target, style);
+    };
+
+    ctx.modules = [this](const std::function<void(const Luau::ModuleName&)>& visit)
+    {
+        for (const auto& [name, _] : virtualPathsToSourceNodes)
+            visit(name);
+    };
 }
 
 std::optional<Luau::ModuleInfo> RobloxPlatform::resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits)

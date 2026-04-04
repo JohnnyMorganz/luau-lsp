@@ -187,15 +187,21 @@ void LSPPlatform::handleSuggestImports(const TextDocument& textDocument, const L
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(module.root);
 
+    auto& frontend = workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext ctx{
         module.name,
         Luau::NotNull(&textDocument),
-        Luau::NotNull(&workspaceFolder->frontend),
+        [&frontend](const auto& visit)
+        {
+            for (const auto& [name, _] : frontend.sourceNodes)
+                visit(name);
+        },
         Luau::NotNull(workspaceFolder),
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
         Luau::NotNull(&importsVisitor),
     };
+    customizeStringRequireContext(ctx);
 
     return Luau::LanguageServer::AutoImports::suggestStringRequires(ctx, items);
 }
@@ -213,10 +219,15 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
+    auto& frontend = ctx.workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        Luau::NotNull(&ctx.workspaceFolder->frontend),
+        [&frontend](const auto& visit)
+        {
+            for (const auto& [name, _] : frontend.sourceNodes)
+                visit(name);
+        },
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
@@ -226,6 +237,7 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
             return requireName == unknownSymbol.name;
         },
     };
+    customizeStringRequireContext(importCtx);
 
     const auto results = Luau::LanguageServer::AutoImports::computeAllStringRequires(importCtx);
     for (const auto& stringRequire : results)
@@ -269,10 +281,15 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
         unknownSymbols.emplace_back(unknownSymbol->name);
     }
 
+    auto& frontend = ctx.workspaceFolder->frontend;
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
         ctx.sourceModule->name,
         Luau::NotNull(ctx.textDocument),
-        Luau::NotNull(&ctx.workspaceFolder->frontend),
+        [&frontend](const auto& visit)
+        {
+            for (const auto& [name, _] : frontend.sourceNodes)
+                visit(name);
+        },
         ctx.workspaceFolder,
         Luau::NotNull(&config.completion.imports),
         hotCommentsLineNumber,
@@ -282,6 +299,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
             return contains(unknownSymbols, requireName);
         },
     };
+    customizeStringRequireContext(importCtx);
 
     const auto results = computeAllStringRequires(importCtx);
     for (const auto& stringRequire : results)

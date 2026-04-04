@@ -973,10 +973,15 @@ static StringRequireAutoImporterContext createContext(Fixture* fixture, const Ur
     // Need to pass the visitor in so that it isn't destroyed after function ends
     importsVisitor->visit(sourceModule->root);
 
+    auto& frontend = fixture->workspace.frontend;
     StringRequireAutoImporterContext ctx{
         moduleName,
         Luau::NotNull(textDocument),
-        Luau::NotNull(&fixture->workspace.frontend),
+        [&frontend](const auto& visit)
+        {
+            for (const auto& [name, _] : frontend.sourceNodes)
+                visit(name);
+        },
         Luau::NotNull(&fixture->workspace),
         Luau::NotNull(&fixture->client->globalConfig.completion.imports),
         0,
@@ -1565,6 +1570,151 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_indexing_variable_insi
 
     auto result = workspace.completion(params, nullptr);
     CHECK_FALSE(getItem(result, "ReplicatedStorage"));
+}
+
+static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {
+                    "name": "Shared",
+                    "className": "Folder",
+                    "children": [
+                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
+                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]},
+                        {
+                            "name": "Nested",
+                            "className": "Folder",
+                            "children": [
+                                {"name": "DeepModule", "className": "ModuleScript", "filePaths": ["src/shared/Nested/DeepModule.luau"]}
+                            ]
+                        }
+                    ]
+                },
+                {"name": "Utils", "className": "ModuleScript", "filePaths": ["src/shared/Utils.luau"]}
+            ]
+        },
+        {
+            "name": "ServerScriptService",
+            "className": "ServerScriptService",
+            "children": [
+                {"name": "ServerModule", "className": "ModuleScript", "filePaths": ["src/server/ServerModule.luau"]}
+            ]
+        }
+    ]
+}
+)";
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_sibling_uses_relative_path")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ModuleB");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"./ModuleB\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_nested_uses_relative_path")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "DeepModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local DeepModule = require(\"./Nested/DeepModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_absolute_style_uses_game_alias")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysAbsolute;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ModuleB");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@game/ReplicatedStorage/Shared/ModuleB\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_cross_service_defaults_to_game_alias")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ServerModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ServerModule = require(\"@game/ServerScriptService/ServerModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_respects_always_relative_across_services")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysRelative;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ServerModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ServerModule = require(\"../../ServerScriptService/ServerModule\")\n");
 }
 
 TEST_SUITE_END();

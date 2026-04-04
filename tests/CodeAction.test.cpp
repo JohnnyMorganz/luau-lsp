@@ -752,4 +752,55 @@ t.fOo()
     CHECK_FALSE(action);
 }
 
+static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {
+                    "name": "Shared",
+                    "className": "Folder",
+                    "children": [
+                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
+                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]}
+                    ]
+                }
+            ]
+        }
+    ]
+}
+)";
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_unknown_symbol_fix_suggests_string_require")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    std::string source = dedent(R"(
+        local x = ModuleB
+    )");
+    auto uri = newDocument("src/shared/ModuleA.luau", source);
+
+    lsp::CodeActionParams params;
+    params.textDocument.uri = uri;
+    params.range = {{0, 10}, {0, 17}};
+    params.context.only = {lsp::CodeActionKind::QuickFix};
+
+    auto result = workspace.codeAction(params, nullptr);
+    auto action = findAction(result, "Add require for 'ModuleB' from \"./ModuleB\"");
+    REQUIRE(action);
+    REQUIRE(action->edit);
+    auto& changes = action->edit->changes.at(uri);
+
+    auto newSource = applyEdit(source, changes);
+    CHECK_EQ(newSource, dedent(R"(
+        local ModuleB = require("./ModuleB")
+        local x = ModuleB
+    )"));
+}
+
 TEST_SUITE_END();

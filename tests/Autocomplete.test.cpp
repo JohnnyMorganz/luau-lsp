@@ -2064,4 +2064,86 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_set
     CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
 }
 
+static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {
+                    "name": "Shared",
+                    "className": "Folder",
+                    "children": [
+                        {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/shared/ModuleA.luau"]},
+                        {"name": "ModuleB", "className": "ModuleScript", "filePaths": ["src/shared/ModuleB.luau"]},
+                        {
+                            "name": "Nested",
+                            "className": "Folder",
+                            "children": [
+                                {"name": "DeepModule", "className": "ModuleScript", "filePaths": ["src/shared/Nested/DeepModule.luau"]}
+                            ]
+                        }
+                    ]
+                },
+                {"name": "Utils", "className": "ModuleScript", "filePaths": ["src/shared/Utils.luau"]}
+            ]
+        },
+        {
+            "name": "ServerScriptService",
+            "className": "ServerScriptService",
+            "children": [
+                {"name": "ServerModule", "className": "ModuleScript", "filePaths": ["src/server/ServerModule.luau"]}
+            ]
+        }
+    ]
+}
+)";
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_datamodel_siblings")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("src/shared/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFileCompletionExists(result, "ModuleB", "./ModuleB");
+    checkFolderCompletionExists(result, "Nested", "./Nested");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@game/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("src/shared/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFolderCompletionExists(result, "ReplicatedStorage", "@game/ReplicatedStorage");
+    checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
+}
+
 TEST_SUITE_END();

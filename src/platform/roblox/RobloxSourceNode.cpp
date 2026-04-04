@@ -113,6 +113,43 @@ std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& anc
     return std::nullopt;
 }
 
+const SourceNode* SourceNode::walkPath(const std::string& path) const
+{
+    const SourceNode* base = this;
+    size_t start = 0;
+    while (start < path.size())
+    {
+        if (path.compare(start, 2, "./") == 0)
+        {
+            start += 2;
+            continue;
+        }
+
+        size_t end = path.find('/', start);
+        std::string segment = (end == std::string::npos) ? path.substr(start) : path.substr(start, end - start);
+        start = (end == std::string::npos) ? path.size() : end + 1;
+
+        if (segment.empty() || segment == ".")
+            continue;
+
+        if (segment == "..")
+        {
+            base = base->parent;
+            if (!base)
+                return nullptr;
+        }
+        else
+        {
+            auto child = base->findChild(segment);
+            if (!child)
+                return nullptr;
+            base = *child;
+        }
+    }
+
+    return base;
+}
+
 SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator)
 {
     auto name = j.at("name").get<std::string>();

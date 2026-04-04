@@ -24,6 +24,11 @@
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
 
+namespace Luau::LanguageServer::AutoImports
+{
+struct StringRequireAutoImporterContext;
+}
+
 /// Context for generating unknown symbol quick fixes
 struct UnknownSymbolFixContext
 {
@@ -48,6 +53,8 @@ public:
 
     virtual std::unique_ptr<Luau::RequireSuggester> getRequireSuggester();
 
+    virtual void customizeStringRequireContext(Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext& ctx) {}
+
     /// The name points to a virtual path (i.e. for Roblox, game/ or ProjectRoot/)
     [[nodiscard]] virtual bool isVirtualPath(const Luau::ModuleName& name) const
     {
@@ -68,7 +75,7 @@ public:
 
     [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const;
 
-    std::optional<Luau::ModuleInfo> resolveStringRequire(
+    virtual std::optional<Luau::ModuleInfo> resolveStringRequire(
         const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
     virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits);
 
