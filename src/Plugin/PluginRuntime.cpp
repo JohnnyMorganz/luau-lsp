@@ -14,6 +14,7 @@ namespace
 {
 
 // Parse a Lua position table {line: number, column: number} from the stack at the given index.
+// Plugin positions are 1-indexed (matching Luau conventions); this converts to 0-indexed internally.
 // Returns false on error (caller should handle cleanup).
 bool parsePosition(lua_State* L, int tableIdx, unsigned int& outLine, unsigned int& outColumn)
 {
@@ -23,7 +24,7 @@ bool parsePosition(lua_State* L, int tableIdx, unsigned int& outLine, unsigned i
         lua_pop(L, 1);
         return false;
     }
-    outLine = static_cast<unsigned int>(lua_tonumber(L, -1));
+    double rawLine = lua_tonumber(L, -1);
     lua_pop(L, 1);
 
     lua_getfield(L, tableIdx, "column");
@@ -32,8 +33,14 @@ bool parsePosition(lua_State* L, int tableIdx, unsigned int& outLine, unsigned i
         lua_pop(L, 1);
         return false;
     }
-    outColumn = static_cast<unsigned int>(lua_tonumber(L, -1));
+    double rawColumn = lua_tonumber(L, -1);
     lua_pop(L, 1);
+
+    if (rawLine < 1 || rawColumn < 1)
+        return false;
+
+    outLine = static_cast<unsigned int>(rawLine) - 1;
+    outColumn = static_cast<unsigned int>(rawColumn) - 1;
 
     return true;
 }

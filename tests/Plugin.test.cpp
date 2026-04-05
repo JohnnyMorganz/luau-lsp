@@ -668,8 +668,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 6 },
-                    ["end"] = { line = 0, column = 7 }
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 8 }
                 },
                 newText = "y"
             }
@@ -913,8 +913,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 6 },
-                    ["end"] = { line = 0, column = 7 }
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 8 }
                 },
                 newText = "y"
             }
@@ -976,8 +976,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 6 },
-                    ["end"] = { line = 0, column = 7 }
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 8 }
                 },
                 newText = "foo"
             }
@@ -993,8 +993,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 10 },
-                    ["end"] = { line = 0, column = 11 }
+                    start = { line = 1, column = 11 },
+                    ["end"] = { line = 1, column = 12 }
                 },
                 newText = "42"
             }
@@ -1023,8 +1023,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 6 },
-                    ["end"] = { line = 0, column = 10 }
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 11 }
                 },
                 newText = "foo"
             }
@@ -1040,8 +1040,8 @@ return {
         return {
             {
                 range = {
-                    start = { line = 0, column = 8 },
-                    ["end"] = { line = 0, column = 11 }
+                    start = { line = 1, column = 9 },
+                    ["end"] = { line = 1, column = 12 }
                 },
                 newText = "bar"
             }

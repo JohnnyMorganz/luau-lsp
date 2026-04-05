@@ -35,8 +35,8 @@ declare lsp: {
 }
 
 export type Position = {
-    line: number,
-    column: number,
+    line: number,    -- 1-indexed
+    column: number,  -- 1-indexed, UTF-8 byte offset
 }
 
 export type Range = {

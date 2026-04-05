@@ -98,8 +98,8 @@ return {
 
 ```luau
 type Position = {
-    line: number,    -- 0-indexed
-    column: number,  -- 0-indexed, UTF-8 byte offset
+    line: number,    -- 1-indexed
+    column: number,  -- 1-indexed, UTF-8 byte offset
 }
 
 type Range = {
@@ -131,12 +131,11 @@ return {
             local start, finish = string.find(source, "DEBUG", pos, true)
             if not start then break end
 
-            -- Convert to 0-indexed line/column
-            local line, col = 0, start - 1
+            local line, col = 1, start
             for i = 1, start - 1 do
                 if string.sub(source, i, i) == "\n" then
                     line = line + 1
-                    col = start - i - 1
+                    col = start - i
                 end
             end
 
