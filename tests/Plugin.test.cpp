@@ -1060,6 +1060,103 @@ return {
     CHECK_THROWS_AS(SourceMapping::fromEdits("local x = 1", edits), std::runtime_error);
 }
 
+TEST_CASE_FIXTURE(Fixture, "PluginManager reload reloads plugins from disk")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("plugin.luau", R"(
+return {
+    transformSource = function(source, context)
+        return {
+            {
+                range = {
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 8 }
+                },
+                newText = "y"
+            }
+        }
+    end
+}
+)");
+
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
+    manager.configure({pluginPath});
+
+    // Verify initial transformation: "x" -> "y"
+    auto edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
+    REQUIRE(edits.size() == 1);
+    CHECK(edits[0].newText == "y");
+
+    // Update the plugin file on disk to replace with "z" instead
+    dir.write_child("plugin.luau", R"(
+return {
+    transformSource = function(source, context)
+        return {
+            {
+                range = {
+                    start = { line = 1, column = 7 },
+                    ["end"] = { line = 1, column = 8 }
+                },
+                newText = "z"
+            }
+        }
+    end
+}
+)");
+
+    // Reload and verify updated transformation
+    size_t reloaded = manager.reload();
+    CHECK(reloaded == 1);
+
+    edits = manager.transform("local x = 1", Uri::parse("file:///test.luau"), "test");
+    REQUIRE(edits.size() == 1);
+    CHECK(edits[0].newText == "z");
+}
+
+TEST_CASE_FIXTURE(Fixture, "PluginManager reload handles plugin that becomes invalid")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("plugin.luau", R"(
+return {
+    transformSource = function(source, context)
+        return nil
+    end
+}
+)");
+
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
+    manager.configure({pluginPath});
+    CHECK(manager.pluginCount() == 1);
+
+    // Overwrite plugin with invalid content
+    dir.write_child("plugin.luau", R"(
+return "not a table"
+)");
+
+    size_t reloaded = manager.reload();
+    CHECK(reloaded == 0);
+
+    // Plugin count remains the same (still in the list, just failed to load)
+    CHECK(manager.pluginCount() == 1);
+
+    auto errors = getLogMessages(*client, lsp::MessageType::Error);
+    CHECK(!errors.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "PluginManager isPluginFile matches loaded plugins")
+{
+    TempDir dir("plugin_test");
+    std::string pluginPath = dir.write_child("plugin.luau", R"(
+return {}
+)");
+
+    PluginManager manager(client.get(), getWorkspaceNotNull(*this));
+    manager.configure({pluginPath});
+
+    CHECK(manager.isPluginFile(Uri::file(pluginPath)));
+    CHECK_FALSE(manager.isPluginFile(Uri::parse("file:///some/other/file.luau")));
+}
+
 TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("PluginFilesystemAPI");

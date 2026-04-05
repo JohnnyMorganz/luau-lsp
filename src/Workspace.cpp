@@ -204,6 +204,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
 
     std::vector<Luau::ModuleName> dirtyFiles;
     std::vector<Uri> deletedFiles;
+    bool pluginFileChanged = false;
 
     for (const auto& change : changes)
     {
@@ -227,6 +228,9 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                 continue;
             }
 
+            if (!pluginFileChanged && isPluginFile(change.uri))
+                pluginFileChanged = true;
+
             // Note: we should always mark as dirty, even if the file is ignored
             auto moduleName = fileResolver.getModuleName(change.uri);
             frontend.markDirty(moduleName, &dirtyFiles);
@@ -235,6 +239,9 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                 deletedFiles.push_back(change.uri);
         }
     }
+
+    if (pluginFileChanged)
+        reloadPlugins();
 
     // Parse require graph for files if indexing enable
     if (config.index.enabled && appliedFirstTimeConfiguration)
@@ -292,6 +299,29 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
     }
 
     return false;
+}
+
+bool WorkspaceFolder::isPluginFile(const Uri& uri) const
+{
+    return fileResolver.pluginManager && fileResolver.pluginManager->isPluginFile(uri);
+}
+
+void WorkspaceFolder::reloadPlugins()
+{
+    if (!fileResolver.pluginManager)
+        return;
+
+    client->sendLogMessage(lsp::MessageType::Info, "Plugin file changed, reloading plugins");
+
+    fileResolver.pluginManager->reload();
+    fileResolver.clearPluginDocuments();
+
+    // Any open document could have plugin transformations applied, so mark all dirty
+    for (const auto& [uri, _] : fileResolver.managedFiles)
+    {
+        auto moduleName = fileResolver.getModuleName(uri);
+        frontend.markDirty(moduleName);
+    }
 }
 
 // Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.

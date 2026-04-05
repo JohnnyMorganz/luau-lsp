@@ -87,6 +87,10 @@ std::optional<PluginError> PluginRuntime::load()
 {
     auto pluginPath = pluginUri.fsPath();
 
+    // Reset state from any previous load
+    loaded = false;
+    transformSourceRef = LUA_NOREF;
+
     // Read plugin file
     auto source = Luau::FileUtils::readFile(pluginPath);
     if (!source)

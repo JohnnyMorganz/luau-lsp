@@ -35,6 +35,9 @@ public:
     // Configure plugins from paths. Returns number of successfully loaded plugins.
     size_t configure(const std::vector<std::string>& pluginPaths, size_t timeoutMs = 5000);
 
+    // Reload all currently loaded plugins from disk. Returns number of successfully reloaded plugins.
+    size_t reload();
+
     // Apply all plugins to transform source code.
     // Returns edits to apply, or empty vector if no transformation or error.
     // Callers should pass the edits to SourceMapping::fromEdits() which validates and builds the mapping.

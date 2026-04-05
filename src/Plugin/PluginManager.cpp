@@ -34,6 +34,27 @@ size_t PluginManager::configure(const std::vector<std::string>& pluginPaths, siz
     return loaded;
 }
 
+size_t PluginManager::reload()
+{
+    size_t loaded = 0;
+
+    for (auto& plugin : plugins)
+    {
+        sendLogMessage(lsp::MessageType::Info, "Reloading plugin: " + plugin->getUri().fsPath());
+
+        if (auto error = plugin->load())
+        {
+            sendLogMessage(lsp::MessageType::Error, "Failed to reload plugin '" + plugin->getUri().fsPath() + "': " + error->message);
+            continue;
+        }
+
+        sendLogMessage(lsp::MessageType::Info, "Successfully reloaded plugin: " + plugin->getUri().fsPath());
+        loaded++;
+    }
+
+    return loaded;
+}
+
 std::vector<TextEdit> PluginManager::transform(const std::string& source, const Uri& uri, const std::string& moduleName)
 {
     if (plugins.empty())
