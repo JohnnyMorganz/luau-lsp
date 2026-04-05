@@ -194,3 +194,13 @@ A custom LSP request message is implemented:
   - `fromTextDocumentOnly`: whether the require graph should only include the dependencies from the selected text document. If false, the graph includes all indexed modules from the selected text document's workspace
 
 You can implement this request via a custom command to surface this information in your editor. You may need a `dot` visualizer.
+
+## Optional: View Internal Source (Debug)
+
+The language server supports [source code transformation plugins](../src/Plugin/README.md). Plugin configuration is handled through standard client settings and requires no special editor support.
+
+A custom LSP request is available to view the transformed source that Luau type-checks after plugin transformations:
+
+- `luau-lsp/debug/viewInternalSource`: `{ textDocument: TextDocumentIdentifier }`, returns `string` - the transformed source
+
+You can implement this request via a custom command to surface this information in your editor.

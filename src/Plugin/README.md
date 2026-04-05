@@ -1,95 +1,53 @@
 # Plugin System
 
-The plugin system allows users to write Luau scripts that transform source code before type checking. This enables custom syntax extensions, macro expansions, or other source transformations while maintaining correct position mapping for LSP features.
+The plugin system allows you to write Luau scripts that transform source code before type checking. This enables custom syntax extensions, macro expansions, or other source transformations while maintaining correct position mapping for LSP features (diagnostics, hover, go-to-definition, etc.).
 
-## Architecture
+## Getting Started
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Editor                                    │
-│                  (shows original source)                         │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    WorkspaceFileResolver                         │
-│                                                                  │
-│  1. getTextDocument(uri) called                                  │
-│  2. If plugins configured:                                       │
-│     - All plugins transform original source (parallel)           │
-│     - Edits combined, overlap check performed                    │
-│     - PluginTextDocument created with SourceMapping              │
-│  3. Returns PluginTextDocument (or original if no plugins)       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    PluginTextDocument                            │
-│                                                                  │
-│  - Inherits from TextDocument                                    │
-│  - getText() returns transformed source                          │
-│  - convertPosition() maps between original and transformed       │
-│  - LSP operations work transparently                             │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Luau Frontend                               │
-│                  (type checks transformed source)                │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. Create a Luau plugin script
+2. Enable plugins in your editor settings
+3. Add the plugin path to the configuration
 
-## Components
-
-### TextEdit
-
-Simple data structure representing a text edit with a range and replacement text. Uses Luau's `Location` type for the range.
-
-### SourceMapping
-
-Core position mapping between original and transformed source:
-
-- Built from a list of `TextEdit`s
-- Provides bidirectional position conversion
-- Validates edits don't overlap (throws on overlap)
-- Sorts edits by position before applying
-
-### PluginTextDocument
-
-Inherits from `TextDocument`, with the base class holding **transformed** content (what Luau sees). An internal `TextDocument` member holds the **original** content (what the user sees):
-
-- Base `getText()`, `getLineOffsets()`, etc. operate on transformed content automatically
-- `convertPosition()` uses the internal original document for UTF-16 conversion, then maps through SourceMapping
-- LSP operations automatically get correct position mapping
-
-### PluginRuntime
-
-Executes a single Luau plugin in a sandboxed environment:
-
-- Uses `luaL_sandbox()` for security
-- Timeout enforcement via interrupt callback
-- Plugin must return a table (transformSource is optional)
-
-### PluginManager
-
-Orchestrates multiple plugins:
-
-- All plugins receive the original source (not chained)
-- Combines edits from all plugins
-- Rejects overlapping edits with an error
-- Logs plugin loading and errors via Client
-
-## Plugin API
-
-Plugins are Luau scripts that return a table:
+### Minimal Plugin
 
 ```luau
 return {
-    -- Optional: transform source code
+    transformSource = function(source, context)
+        -- Return nil or {} for no changes
+        -- Return a list of TextEdits to transform the source
+        return nil
+    end
+}
+```
+
+## Configuration
+
+Plugins are configured via LSP client settings:
+
+```json
+{
+  "luau-lsp.plugins.enabled": true,
+  "luau-lsp.plugins.paths": ["./plugins/my_plugin.luau"],
+  "luau-lsp.plugins.timeoutMs": 5000
+}
+```
+
+| Setting                               | Type       | Default | Description                                               |
+| ------------------------------------- | ---------- | ------- | --------------------------------------------------------- |
+| `luau-lsp.plugins.enabled`            | `boolean`  | `false` | Enable source code transformation plugins                 |
+| `luau-lsp.plugins.paths`              | `string[]` | `[]`    | Paths to Luau plugin scripts (relative to workspace root) |
+| `luau-lsp.plugins.timeoutMs`          | `number`   | `5000`  | Timeout in milliseconds for plugin execution              |
+| `luau-lsp.plugins.fileSystem.enabled` | `boolean`  | `false` | Allow plugins to read files within the workspace          |
+
+## Plugin API
+
+A plugin is a Luau script that returns a table with a `transformSource` function:
+
+```luau
+return {
     transformSource = function(source: string, context: PluginContext): {TextEdit}?
         -- Return nil or {} for no changes
         -- Return list of edits to transform the source
-        -- Edits must not overlap (including with other plugins)
     end
 }
 ```
@@ -119,89 +77,70 @@ type PluginContext = {
 }
 ```
 
-### Example Plugin
+### Important: 1-Indexed Positions
+
+Positions use **1-based** line and column numbers (not 0-based like LSP). The first character of a file is at line 1, column 1. Columns are measured in UTF-8 byte offsets.
+
+### Sandbox Environment
+
+Plugins run in a sandboxed Luau environment. Standard libraries (`string`, `table`, `math`, `bit32`, `buffer`, `coroutine`, `utf8`) are available. Direct filesystem and OS access (`io`, `os`, `debug`) is not available; use the `lsp.fs` API instead.
+
+Plugin files that are listed in `plugins.paths` are automatically recognized by the language server and receive type information for the `lsp.*` API, giving you autocomplete and type checking while editing your plugins.
+
+### How It Works
+
+- Your plugin receives the **original** source code and returns a list of text edits
+- The language server applies these edits to produce transformed source code
+- Luau type-checks the transformed source
+- LSP features (diagnostics, hover, etc.) automatically map positions back to your original source
+
+### Multiple Plugins
+
+When multiple plugins are configured, all plugins receive the **original** source (they are not chained). All edits from all plugins are combined. If any edits overlap, an error is logged and no transformation is applied.
+
+## Example: Replace DEBUG with false
 
 ```luau
 -- Replace all occurrences of "DEBUG" with "false"
 return {
     transformSource = function(source, context)
         local edits = {}
-        local pos = 1
-        while true do
-            local start, finish = string.find(source, "DEBUG", pos, true)
-            if not start then break end
+        local line = 1
+        local lineStart = 1 -- byte position where current line begins
 
-            local line, col = 1, start
-            for i = 1, start - 1 do
-                if string.sub(source, i, i) == "\n" then
-                    line = line + 1
-                    col = start - i
-                end
+        for i = 1, #source do
+            if string.sub(source, i, i) == "\n" then
+                line = line + 1
+                lineStart = i + 1
             end
 
-            table.insert(edits, {
-                range = {
-                    start = { line = line, column = col },
-                    ["end"] = { line = line, column = col + 5 }
-                },
-                newText = "false"
-            })
-            pos = finish + 1
+            if string.sub(source, i, i + 4) == "DEBUG" then
+                local col = i - lineStart + 1
+                table.insert(edits, {
+                    range = {
+                        start = { line = line, column = col },
+                        ["end"] = { line = line, column = col + 5 }
+                    },
+                    newText = "false"
+                })
+            end
         end
         return edits
     end
 }
 ```
 
-## Configuration
-
-Plugins are configured via LSP client settings:
-
-```json
-{
-  "luau-lsp.plugins.enabled": true,
-  "luau-lsp.plugins.paths": ["./plugins/my_plugin.luau"],
-  "luau-lsp.plugins.timeoutMs": 5000
-}
-```
-
-## Multiple Plugins
-
-When multiple plugins are configured:
-
-1. All plugins receive the **original** source
-2. Each plugin returns edits against the original
-3. All edits are combined into a single list
-4. If any edits overlap, an error is logged and no transformation is applied
-5. The combined edits produce the final transformed source
-
-This parallel approach is simpler than chaining and ensures plugins don't need to be aware of each other.
-
 ## Filesystem API
 
-Plugins can optionally access files within the workspace through a sandboxed filesystem API.
+Plugins can optionally read files within the workspace through a sandboxed filesystem API. This must be explicitly enabled via `luau-lsp.plugins.fileSystem.enabled`.
 
-### Enabling Filesystem Access
-
-Filesystem access is disabled by default. To enable it:
-
-```json
-{
-  "luau-lsp.plugins.fileSystem.enabled": true
-}
-```
-
-### API Reference
-
-#### `lsp.workspace.getRootUri(): Uri`
+### `lsp.workspace.getRootUri(): Uri`
 
 Returns the workspace root as a Uri object.
 
-#### `lsp.fs.readFile(uri: Uri): string`
+### `lsp.fs.readFile(uri: Uri): string`
 
-Reads a file within the workspace. Throws an error on failure.
-
-**Security**: Only files within the workspace can be read. Attempting to read files outside the workspace will throw an "access denied" error.
+Reads a file within the workspace. Only files within the workspace can be read; attempting to read files outside the workspace throws an "access denied" error.
 
 ```luau
 local ok, content = pcall(function()
@@ -212,61 +151,26 @@ end)
 if ok then
     -- Use content
 else
-    warn("Failed:", content)
+    print("Failed:", content)
 end
 ```
 
-#### `lsp.Uri.parse(uriString: string): Uri`
+### `lsp.Uri.parse(uriString: string): Uri`
 
 Parses a URI string into a Uri object.
 
-```luau
-local uri = lsp.Uri.parse("file:///path/to/file.luau")
-```
+### `lsp.Uri.file(fsPath: string): Uri`
 
-#### `lsp.Uri.file(fsPath: string): Uri`
-
-Creates a file:// Uri from a filesystem path.
-
-```luau
-local uri = lsp.Uri.file("/path/to/file.luau")
-```
+Creates a `file://` Uri from a filesystem path.
 
 ### Uri Object
 
-Uri is a userdata object with the following properties and methods:
-
-**Properties** (read-only):
-
-- `scheme: string` - URI scheme (e.g., "file")
-- `authority: string` - URI authority
-- `path: string` - URI path
-- `query: string` - URI query string
-- `fragment: string` - URI fragment
-- `fsPath: string` - Platform-specific filesystem path
+**Properties** (read-only): `scheme`, `authority`, `path`, `query`, `fragment`, `fsPath`
 
 **Methods**:
 
 - `:joinPath(...segments: string): Uri` - Join path segments, returns new Uri
 - `:toString(): string` - Convert to URI string
-
-### Error Handling
-
-All filesystem operations throw on error. Use `pcall` to handle errors:
-
-```luau
-local ok, result = pcall(lsp.fs.readFile, uri)
-if not ok then
-    -- result contains error message
-end
-```
-
-Possible errors:
-
-- `"filesystem access not available"` - Setting is disabled
-- `"only file:// URIs are supported"` - Non-file URI
-- `"access denied: file is outside workspace"` - Security violation
-- `"file not found or cannot be read"` - I/O error
 
 ### Example: Reading Configuration
 
@@ -294,57 +198,54 @@ return {
 
 ## Client API
 
-Plugins can send log messages to the LSP client for debugging and status reporting.
-
 ### `lsp.client.sendLogMessage(type: string, message: string)`
 
-Sends a log message to the client.
+Sends a log message to the editor. `type` can be `"error"`, `"warning"`, `"info"`, or `"log"`.
 
-**Parameters:**
-
-- `type: string` - Message type: `"error"`, `"warning"`, `"info"`, or `"log"`
-- `message: string` - The message content
+The global `print` function sends a log message at `info` level.
 
 ```luau
 lsp.client.sendLogMessage("info", "Processing file...")
 lsp.client.sendLogMessage("warning", "Deprecated syntax detected")
-lsp.client.sendLogMessage("error", "Failed to parse configuration")
 ```
 
-The global `print` function will send a log message at `info` level.
-
 ## JSON API
-
-Plugins can parse JSON strings into Lua tables.
 
 ### `lsp.json.deserialize(jsonString: string): any`
 
 Parses a JSON string and returns the corresponding Lua value.
 
-**Example:**
-
 ```luau
--- Parse an object
 local data = lsp.json.deserialize('{"name": "test", "count": 42}')
 print(data.name)   -- "test"
 print(data.count)  -- 42
-
--- Parse an array (1-indexed in Lua)
-local arr = lsp.json.deserialize('[1, 2, 3]')
-print(arr[1])  -- 1
-
--- Parse nested structures
-local nested = lsp.json.deserialize('{"items": [{"id": 1}, {"id": 2}]}')
-print(nested.items[1].id)  -- 1
 ```
 
-**Error Handling:**
+## Error Handling
 
-Parse errors throw a Luau error. Use `pcall` to handle them:
+All API functions that can fail (filesystem, JSON) throw on error. Use `pcall`:
 
 ```luau
-local ok, result = pcall(lsp.json.deserialize, "invalid json")
+local ok, result = pcall(lsp.fs.readFile, uri)
 if not ok then
-    -- result contains error message starting with "JSON parse error:"
+    -- result contains error message
 end
 ```
+
+Common errors:
+
+- `"filesystem access not available"` - `fileSystem.enabled` is `false`
+- `"only file:// URIs are supported"` - Non-file URI passed
+- `"access denied: file is outside workspace"` - Security violation
+- `"file not found or cannot be read"` - I/O error
+- `"JSON parse error: ..."` - Invalid JSON string
+
+## Debugging
+
+### View Internal Source
+
+The language server provides a debug command to view the transformed source code that Luau actually type-checks. This is useful for verifying that your plugin produces the expected output.
+
+In VS Code, run the command **"Luau Debug: View Internal Source Representation of File"** (`luau-lsp.debug.viewInternalSource`) while a `.luau` file is open. This opens a side-by-side view showing the transformed source, which updates live as you edit.
+
+For other editors, send a `luau-lsp/debug/viewInternalSource` request with a `TextDocumentIdentifier` parameter. The response is the transformed source as a string.
