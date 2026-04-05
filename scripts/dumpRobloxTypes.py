@@ -420,7 +420,20 @@ EXTRA_MEMBERS = {
     "AvatarCreationService": [
         "function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string",
         "function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string"
-    ]
+    ],
+    # SetDistanceAttenuation and SetAngleAttenuation take { [number]: number } curves, not generic Dictionaries
+    "AudioEmitter": [
+        "function GetAngleAttenuation(self): { [number]: number }",
+        "function GetDistanceAttenuation(self): { [number]: number }",
+        "function SetAngleAttenuation(self, curve: { [number]: number }): nil",
+        "function SetDistanceAttenuation(self, curve: { [number]: number }): nil",
+    ],
+    "AudioListener": [
+        "function GetAngleAttenuation(self): { [number]: number }",
+        "function GetDistanceAttenuation(self): { [number]: number }",
+        "function SetAngleAttenuation(self, curve: { [number]: number }): nil",
+        "function SetDistanceAttenuation(self, curve: { [number]: number }): nil",
+    ],
 }
 
 # Hardcoded types

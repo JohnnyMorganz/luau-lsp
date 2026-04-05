@@ -8918,15 +8918,15 @@ declare class AudioEmitter extends Instance
 	AcousticSimulationEnabled: boolean
 	AudioInteractionGroup: string
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
-	function GetAngleAttenuation(self): { [string]: any }
+	function GetAngleAttenuation(self): { [number]: number }
 	function GetAudibilityFor(self, listener: AudioListener): number
 	function GetConnectedWires(self, pin: string): { Instance }
-	function GetDistanceAttenuation(self): { [string]: any }
+	function GetDistanceAttenuation(self): { [number]: number }
 	function GetInputPins(self): { any }
 	function GetInteractingListeners(self): { Instance }
 	function GetOutputPins(self): { any }
-	function SetAngleAttenuation(self, curve: { [string]: any }): nil
-	function SetDistanceAttenuation(self, curve: { [string]: any }): nil
+	function SetAngleAttenuation(self, curve: { [number]: number }): nil
+	function SetDistanceAttenuation(self, curve: { [number]: number }): nil
 end
 
 declare class AudioEqualizer extends Instance
@@ -9002,15 +9002,15 @@ declare class AudioListener extends Instance
 	AcousticSimulationEnabled: boolean
 	AudioInteractionGroup: string
 	WiringChanged: RBXScriptSignal<boolean, string, Wire, Instance>
-	function GetAngleAttenuation(self): { [string]: any }
+	function GetAngleAttenuation(self): { [number]: number }
 	function GetAudibilityFor(self, emitter: AudioEmitter): number
 	function GetConnectedWires(self, pin: string): { Instance }
-	function GetDistanceAttenuation(self): { [string]: any }
+	function GetDistanceAttenuation(self): { [number]: number }
 	function GetInputPins(self): { any }
 	function GetInteractingEmitters(self): { Instance }
 	function GetOutputPins(self): { any }
-	function SetAngleAttenuation(self, curve: { [string]: any }): nil
-	function SetDistanceAttenuation(self, curve: { [string]: any }): nil
+	function SetAngleAttenuation(self, curve: { [number]: number }): nil
+	function SetDistanceAttenuation(self, curve: { [number]: number }): nil
 end
 
 declare class AudioPitchShifter extends Instance
