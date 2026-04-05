@@ -414,7 +414,7 @@ void RobloxPlatform::updateSourcemapTypes()
 {
     clearSourcemapTypes();
 
-    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    auto config = workspaceFolder->getConfiguration();
     bool expressiveTypes = config.diagnostics.strictDatamodelTypes || FFlag::LuauSolverV2;
 
     // NOTE: expressive types is always enabled for autocomplete, regardless of the setting!
@@ -438,7 +438,7 @@ void RobloxPlatform::updateSourcemapTypes()
 bool RobloxPlatform::updateSourceMap()
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceMap", "LSP");
-    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    auto config = workspaceFolder->getConfiguration();
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 
     // TODO: we assume the sourcemap file is in the workspace root

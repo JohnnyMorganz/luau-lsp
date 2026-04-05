@@ -768,7 +768,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_update_uses_plugin_info_if_sourcemap_file_
     client->globalConfig.sourcemap.enabled = true;
 
     // Verify that no sourcemap file exists - this ensures we're testing the fallback behavior
-    auto config = client->getConfiguration(workspace.rootUri);
+    auto config = client->getEditorConfiguration(workspace.rootUri);
     auto sourcemapPath = workspace.rootUri.resolvePath(config.sourcemap.sourcemapFile);
     REQUIRE_FALSE(Luau::FileUtils::exists(sourcemapPath.fsPath()));
 

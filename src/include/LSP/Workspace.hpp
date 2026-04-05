@@ -10,6 +10,7 @@
 #include "Protocol/SemanticTokens.hpp"
 #include "Protocol/Extensions.hpp"
 #include "LSP/Client.hpp"
+#include "LSP/FileConfiguration.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
 using LSPCancellationToken = std::shared_ptr<Luau::FrontendCancellationToken>;
@@ -44,6 +45,9 @@ public:
     /// Whether the first-time configuration (platform, global types) have been applied for this folder.
     /// First-time configuration is only applied once, and changes require a language server restart
     bool appliedFirstTimeConfiguration = false;
+
+    /// LSP configuration extracted from the root .config.luau file
+    std::optional<FileConfiguration> configLuauLSPConfiguration;
 
     /// Whether this workspace folder has completed an initial set up process.
     /// Workspaces are initialized lazily on demand.
@@ -84,6 +88,13 @@ public:
 
     /// Initializes the workspace on demand
     void lazyInitialize();
+
+    /// Load LSP file configuration from the root .config.luau
+    void loadConfigLuauLSPConfiguration();
+
+    /// Get the effective configuration: editor config merged with file config.
+    /// File config values override editor config values where present.
+    ClientConfiguration getConfiguration() const;
 
     // Sets up the workspace folder after receiving configuration information
     void setupWithConfiguration(const ClientConfiguration& configuration);

@@ -108,7 +108,7 @@ static std::optional<std::vector<lsp::TextEdit>> convertQuotesByHeuristic(const 
 
 lsp::DocumentOnTypeFormattingResult WorkspaceFolder::onTypeFormatting(const lsp::DocumentOnTypeFormattingParams& params)
 {
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
 
     if (!config.format.convertQuotes)
         return std::nullopt;

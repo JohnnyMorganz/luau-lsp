@@ -8,7 +8,7 @@ static const char* kSourcemapWatchingRegistrationId = "sourcemapWatching";
 
 void RobloxPlatform::onDidChangeWatchedFiles(const lsp::FileEvent& change)
 {
-    auto config = workspaceFolder->client->getConfiguration(workspaceFolder->rootUri);
+    auto config = workspaceFolder->getConfiguration();
     std::string sourcemapFileName = config.sourcemap.sourcemapFile;
 
     // Flag sourcemap changes

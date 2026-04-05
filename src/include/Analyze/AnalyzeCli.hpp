@@ -8,6 +8,7 @@
 #include "Analyze/CliClient.hpp"
 
 struct WorkspaceFileResolver;
+struct FileConfiguration;
 
 std::unordered_map<std::string, std::string> processDefinitionsFilePaths(const argparse::ArgumentParser& program);
 
@@ -22,4 +23,5 @@ FilePathInformation getFilePath(const WorkspaceFileResolver* fileResolver, const
 std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths, const std::vector<std::string>& ignoreGlobPatterns);
 void applySettings(const std::string& settingsContents, CliClient& client, std::vector<std::string>& ignoreGlobPatterns,
     std::unordered_map<std::string, std::string>& definitionsPaths);
+void applyFileConfiguration(const FileConfiguration& fileConfig, CliClient& client, std::unordered_map<std::string, std::string>& definitionsPaths);
 int startAnalyze(const argparse::ArgumentParser& program);

@@ -122,8 +122,10 @@ std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
         return std::nullopt;
 
     ClientConfiguration clientConfig;
-    if (fileResolver->client)
-        clientConfig = fileResolver->client->getConfiguration(fileResolver->rootUri);
+    if (workspaceFolder)
+        clientConfig = workspaceFolder->getConfiguration();
+    else if (fileResolver->client)
+        clientConfig = fileResolver->client->getEditorConfiguration(fileResolver->rootUri);
 
     if (isInitLuauFile(*contextPath) && !clientConfig.require.useOriginalRequireByStringSemantics)
     {
@@ -216,7 +218,7 @@ void LSPPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, con
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
-    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    ClientConfiguration config = workspaceFolder->getConfiguration();
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
     Luau::LanguageServer::AutoImports::StringRequireAutoImporterContext importCtx{
@@ -261,7 +263,7 @@ std::vector<lsp::TextEdit> LSPPlatform::computeAddAllMissingImportsEdits(
     Luau::LanguageServer::AutoImports::FindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
 
-    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    ClientConfiguration config = workspaceFolder->getConfiguration();
     auto hotCommentsLineNumber = Luau::LanguageServer::AutoImports::computeHotCommentsLineNumber(*ctx.sourceModule);
 
     std::vector<std::string> unknownSymbols;

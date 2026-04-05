@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - String requires are now sourcemap-aware when in Roblox mode. Relative requires from sourcemap-managed files walk the DataModel tree instead of the filesystem ([#1141](https://github.com/JohnnyMorganz/luau-lsp/issues/1141))
 - Added built-in `@game` alias for string requires in Roblox mode, resolving from the sourcemap root. User-defined `@game` in `.luaurc` takes precedence ([#1347](https://github.com/JohnnyMorganz/luau-lsp/issues/1347)). This alias is now considered during string require autocomplete when in Roblox mode.
+- Added support for project-specific LSP configuration via an `lsp` section in `.config.luau`. File configuration takes precedence over editor settings, and is also read by `luau-lsp analyze`. Supported settings: `platform.type`, `sourcemap.rojoProjectFile`, `sourcemap.sourcemapFile`, `types.definitionFiles`, `types.disabledGlobals`. Example:
+  ```lua
+  return {
+      languageMode = "strict",
+      lsp = {
+          platform = { type = "roblox" },
+          sourcemap = { rojoProjectFile = "default.project.json" },
+          types = {
+              definitionFiles = { testez = "types/testez.d.luau" },
+          },
+      },
+  }
+  ```
 
 ### Changed
 

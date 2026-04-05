@@ -275,7 +275,7 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         !params.context.wants(lsp::CodeActionKind::SourceOrganizeImports))
         return result;
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
 

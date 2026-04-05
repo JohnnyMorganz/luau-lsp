@@ -140,7 +140,7 @@ lsp::CompilerRemarksResult WorkspaceFolder::bytecode(const lsp::BytecodeParams& 
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     return computeBytecodeOutput(moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::Textual);
 }
 
@@ -151,7 +151,7 @@ lsp::CompilerRemarksResult WorkspaceFolder::compilerRemarks(const lsp::CompilerR
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     return computeBytecodeOutput(moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CompilerRemarks);
 }
 
@@ -162,7 +162,7 @@ lsp::CodegenResult WorkspaceFolder::codeGen(const lsp::CodegenParams& params)
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     return computeBytecodeOutput(
         moduleName, textDocument->getText(), config, params.optimizationLevel, BytecodeOutputType::CodeGen, params.codeGenTarget);
 }

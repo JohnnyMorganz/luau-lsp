@@ -733,14 +733,17 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         if (!workspace->isReady)
             return;
 
+        // Use the effective configuration (editor config merged with file config)
+        auto effectiveConfig = workspace->getConfiguration();
+
         // Update the workspace setup with the new configuration
-        workspace->setupWithConfiguration(config);
+        workspace->setupWithConfiguration(effectiveConfig);
 
         // Refresh diagnostics
-        workspace->recomputeDiagnostics(config);
+        workspace->recomputeDiagnostics(effectiveConfig);
 
         // Refresh inlay hint if changed
-        if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
+        if (!oldConfig || oldConfig->inlayHints != effectiveConfig.inlayHints)
             client->refreshInlayHints();
     };
 

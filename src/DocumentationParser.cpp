@@ -545,7 +545,7 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAstNode(
 {
     if (auto ref = node->as<Luau::AstTypeReference>())
     {
-        auto config = client->getConfiguration(rootUri);
+        auto config = getConfiguration();
         return getDocumentationForTypeReference(
             moduleName, scope, ref->prefix, ref->name.value, /* forAutocomplete= */ config.hover.strictDatamodelTypes);
     }

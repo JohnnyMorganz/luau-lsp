@@ -19,7 +19,7 @@ struct BaseClient
 {
     virtual ~BaseClient() = default;
 
-    virtual ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
+    virtual ClientConfiguration getEditorConfiguration(const lsp::DocumentUri& uri) = 0;
 
     virtual void sendLogMessage(const lsp::MessageType& type, const std::string& message) const = 0;
 
@@ -83,7 +83,7 @@ public:
     void registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions);
     void unregisterCapability(const std::string& registrationId, const std::string& method);
 
-    ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override;
+    ClientConfiguration getEditorConfiguration(const lsp::DocumentUri& uri) override;
     void removeConfiguration(const lsp::DocumentUri& uri);
     // TODO: this function only supports getting requests for workspaces
     void requestConfiguration(const std::vector<lsp::DocumentUri>& uris);

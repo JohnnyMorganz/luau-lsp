@@ -102,7 +102,7 @@ struct DocumentationLocation
 
 std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken)
 {
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
 
     if (!config.hover.enabled)
         return std::nullopt;
