@@ -21,6 +21,7 @@ declare lsp: {
     },
     fs: {
         readFile: (uri: Uri) -> string,
+        exists: (uri: Uri) -> boolean,
     },
     client: {
         sendLogMessage: (type: "error" | "warning" | "info" | "log", message: string) -> (),
@@ -34,25 +35,17 @@ declare lsp: {
     },
 }
 
-export type Position = {
-    line: number,    -- 1-indexed
-    column: number,  -- 1-indexed, UTF-8 byte offset
-}
-
-export type Range = {
-    start: Position,
-    ["end"]: Position,
-}
-
 export type TextEdit = {
-    range: Range,
+    startLine: number,      -- 1-indexed
+    startColumn: number,    -- 1-indexed, UTF-8 byte offset
+    endLine: number,        -- 1-indexed
+    endColumn: number,      -- 1-indexed, UTF-8 byte offset
     newText: string,
 }
 
 export type PluginContext = {
     filePath: string,
     moduleName: string,
-    languageId: string,
 }
 
 export type PluginApi = {

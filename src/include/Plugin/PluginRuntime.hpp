@@ -1,5 +1,5 @@
 #pragma once
-#include "Plugin/TextEdit.hpp"
+#include "Plugin/PluginTypes.hpp"
 #include "LSP/Uri.hpp"
 #include "Luau/NotNull.h"
 #include <memory>
@@ -14,6 +14,15 @@ class WorkspaceFolder;
 namespace Luau::LanguageServer::Plugin
 {
 
+// Memory tracking for plugin Lua VM
+struct MemoryAllocator
+{
+    size_t bytesUsed = 0;
+    size_t maxBytes = 64 * 1024 * 1024; // 64MB default
+
+    static void* allocate(void* ud, void* ptr, size_t osize, size_t nsize);
+};
+
 // Executes Luau plugin scripts in a sandboxed environment
 class PluginRuntime
 {
@@ -21,6 +30,7 @@ public:
     static constexpr int LUA_NOREF = -1;
 
 private:
+    MemoryAllocator memoryAllocator;
     std::unique_ptr<lua_State, void (*)(lua_State*)> state;
     Uri pluginUri;
     size_t timeoutMs;

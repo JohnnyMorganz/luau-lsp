@@ -1,5 +1,5 @@
 #pragma once
-#include "Plugin/TextEdit.hpp"
+#include "Plugin/PluginTypes.hpp"
 #include "Luau/Location.h"
 #include <string>
 #include <vector>
@@ -19,13 +19,12 @@ struct AppliedEdit
 // Handles bidirectional position mapping between original and transformed source
 class SourceMapping
 {
-    std::string originalSource;
     std::string transformedSource;
     std::vector<AppliedEdit> edits;  // Sorted by original position
 
 public:
     SourceMapping() = default;
-    SourceMapping(std::string original, std::string transformed, std::vector<AppliedEdit> appliedEdits);
+    SourceMapping(std::string transformed, std::vector<AppliedEdit> appliedEdits);
 
     // Build mapping from a list of text edits applied to original source
     // Edits must not overlap. They will be sorted by position.
@@ -42,16 +41,6 @@ public:
     const std::string& getTransformedSource() const
     {
         return transformedSource;
-    }
-
-    const std::string& getOriginalSource() const
-    {
-        return originalSource;
-    }
-
-    const std::vector<AppliedEdit>& getEdits() const
-    {
-        return edits;
     }
 
     bool hasEdits() const

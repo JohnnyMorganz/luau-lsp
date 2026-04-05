@@ -8,7 +8,7 @@
 #include "Plugin/PluginTextDocument.hpp"
 #include "Plugin/PluginRuntime.hpp"
 #include "Plugin/PluginManager.hpp"
-#include "Plugin/TextEdit.hpp"
+#include "Plugin/PluginTypes.hpp"
 #include "Luau/NotNull.h"
 
 using namespace Luau::LanguageServer::Plugin;
@@ -591,7 +591,7 @@ return {
     CHECK(!runtime.hasTransformSource());
 
     // Calling transformSource should return empty edits
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
     auto& edits = std::get<std::vector<TextEdit>>(result);
@@ -629,7 +629,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -651,7 +651,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -667,10 +667,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 8 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 8,
                 newText = "y"
             }
         }
@@ -681,7 +679,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -703,7 +701,6 @@ return {
         -- Verify we receive the context
         assert(context.filePath == "test/file.luau", "filePath mismatch")
         assert(context.moduleName == "TestModule", "moduleName mismatch")
-        assert(context.languageId == "luau", "languageId mismatch")
         return nil
     end
 }
@@ -712,7 +709,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test/file.luau", "TestModule", "luau"};
+    PluginContext ctx{"test/file.luau", "TestModule"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     // If context was wrong, we'd get an error from the assert
@@ -733,7 +730,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<PluginError>(result));
@@ -757,7 +754,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<PluginError>(result));
@@ -805,7 +802,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath), 10);
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<PluginError>(result));
@@ -833,7 +830,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath), 5000);
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -912,10 +909,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 8 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 8,
                 newText = "y"
             }
         }
@@ -975,10 +970,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 8 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 8,
                 newText = "foo"
             }
         }
@@ -992,10 +985,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 11 },
-                    ["end"] = { line = 1, column = 12 }
-                },
+                startLine = 1, startColumn = 11,
+                endLine = 1, endColumn = 12,
                 newText = "42"
             }
         }
@@ -1022,10 +1013,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 11 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 11,
                 newText = "foo"
             }
         }
@@ -1039,10 +1028,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 9 },
-                    ["end"] = { line = 1, column = 12 }
-                },
+                startLine = 1, startColumn = 9,
+                endLine = 1, endColumn = 12,
                 newText = "bar"
             }
         }
@@ -1068,10 +1055,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 8 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 8,
                 newText = "y"
             }
         }
@@ -1093,10 +1078,8 @@ return {
     transformSource = function(source, context)
         return {
             {
-                range = {
-                    start = { line = 1, column = 7 },
-                    ["end"] = { line = 1, column = 8 }
-                },
+                startLine = 1, startColumn = 7,
+                endLine = 1, endColumn = 8,
                 newText = "z"
             }
         }
@@ -1179,7 +1162,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1203,7 +1186,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1226,7 +1209,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1254,7 +1237,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1278,7 +1261,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1309,7 +1292,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1338,7 +1321,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1364,7 +1347,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1389,7 +1372,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1427,7 +1410,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1463,7 +1446,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1484,7 +1467,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1518,7 +1501,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1572,7 +1555,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1612,7 +1595,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1649,7 +1632,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1685,7 +1668,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
@@ -1715,7 +1698,7 @@ return {
     PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
     REQUIRE(!runtime.load().has_value());
 
-    PluginContext ctx{"test.luau", "test", "luau"};
+    PluginContext ctx{"test.luau", "test"};
     auto result = runtime.transformSource("local x = 1", ctx);
 
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));

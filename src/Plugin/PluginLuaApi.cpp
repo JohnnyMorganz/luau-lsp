@@ -20,6 +20,7 @@ static int uriJoinPath(lua_State* L);
 
 static int lspWorkspaceGetRootUri(lua_State* L);
 static int lspFsReadFile(lua_State* L);
+static int lspFsExists(lua_State* L);
 static int lspUriParse(lua_State* L);
 static int lspUriFile(lua_State* L);
 static int lspClientSendLogMessage(lua_State* L);
@@ -27,7 +28,7 @@ static int lspJsonDeserialize(lua_State* L);
 static int pluginPrint(lua_State* L);
 
 // Helper to push JSON value onto Lua stack
-static void pushJsonValue(lua_State* L, const nlohmann::json& value);
+static void pushJsonValue(lua_State* L, const nlohmann::json& value, int depth = 0);
 
 // Helper to get LuaApiContext from upvalue
 static LuaApiContext* getLuaApiContext(lua_State* L)
@@ -179,40 +180,44 @@ static int lspWorkspaceGetRootUri(lua_State* L)
     return 1;
 }
 
-static int lspFsReadFile(lua_State* L)
+// Validates filesystem access and returns the checked Uri.
+// Throws Lua errors on failure (config disabled, wrong scheme, outside workspace).
+static Uri* validateFileAccess(lua_State* L)
 {
     auto* ctx = getLuaApiContext(L);
 
-    // Check if filesystem access is enabled
     auto config = ctx->workspace->client->getConfiguration(ctx->workspace->rootUri);
     if (!config.plugins.fileSystem.enabled)
-    {
         luaL_errorL(L, "filesystem access not available");
-    }
 
-    // Get Uri argument (must be Uri userdata)
     Uri* targetUri = checkUri(L, 1);
 
-    // Validate scheme
     if (targetUri->scheme != "file")
-    {
         luaL_errorL(L, "only file:// URIs are supported");
-    }
 
-    // Security: check if within workspace
     if (!ctx->workspace->rootUri.isAncestorOf(*targetUri))
-    {
         luaL_errorL(L, "access denied: file is outside workspace");
-    }
 
-    // Read file
+    return targetUri;
+}
+
+static int lspFsReadFile(lua_State* L)
+{
+    Uri* targetUri = validateFileAccess(L);
+
     auto content = Luau::FileUtils::readFile(targetUri->fsPath());
     if (!content)
-    {
         luaL_errorL(L, "file not found or cannot be read");
-    }
 
     lua_pushlstring(L, content->c_str(), content->size());
+    return 1;
+}
+
+static int lspFsExists(lua_State* L)
+{
+    Uri* targetUri = validateFileAccess(L);
+
+    lua_pushboolean(L, Luau::FileUtils::exists(targetUri->fsPath()));
     return 1;
 }
 
@@ -284,8 +289,13 @@ static int lspUriFile(lua_State* L)
 // JSON API Implementation
 // ============================================================================
 
-static void pushJsonValue(lua_State* L, const nlohmann::json& value)
+static constexpr int kMaxJsonDepth = 200;
+
+static void pushJsonValue(lua_State* L, const nlohmann::json& value, int depth)
 {
+    if (depth > kMaxJsonDepth)
+        luaL_errorL(L, "JSON nesting too deep (max %d levels)", kMaxJsonDepth);
+
     lua_rawcheckstack(L, 1);
 
     if (value.is_null())
@@ -315,7 +325,7 @@ static void pushJsonValue(lua_State* L, const nlohmann::json& value)
         int index = 1;
         for (const auto& elem : value)
         {
-            pushJsonValue(L, elem);
+            pushJsonValue(L, elem, depth + 1);
             lua_rawseti(L, -2, index++);
         }
     }
@@ -326,7 +336,7 @@ static void pushJsonValue(lua_State* L, const nlohmann::json& value)
         for (const auto& [key, val] : value.items())
         {
             lua_pushlstring(L, key.c_str(), key.size());
-            pushJsonValue(L, val);
+            pushJsonValue(L, val, depth + 1);
             lua_rawset(L, -3);
         }
     }
@@ -380,6 +390,8 @@ void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string&
     lua_newtable(L);
     pushClosureWithContext(lspFsReadFile, "readFile");
     lua_setfield(L, -2, "readFile");
+    pushClosureWithContext(lspFsExists, "exists");
+    lua_setfield(L, -2, "exists");
     lua_setfield(L, -2, "fs");
 
     // lsp.client table

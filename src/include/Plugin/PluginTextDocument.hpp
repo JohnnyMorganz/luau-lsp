@@ -29,12 +29,6 @@ public:
     // Luau position (in transformed) -> LSP position (in original)
     lsp::Position convertPosition(const Luau::Position& position) const override;
 
-    // Access to mapping for special cases
-    const SourceMapping& getMapping() const
-    {
-        return mapping;
-    }
-
     // Access to original content if needed
     std::string getOriginalText() const;
 };

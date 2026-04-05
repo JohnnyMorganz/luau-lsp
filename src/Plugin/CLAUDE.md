@@ -41,7 +41,7 @@ This file provides implementation guidance for Claude Code when working on the p
 
 ## Components
 
-### TextEdit (`Plugin/TextEdit.hpp`)
+### PluginTypes (`Plugin/PluginTypes.hpp`)
 
 Simple data structure representing a text edit with a range and replacement text. Uses Luau's `Location` type for the range.
 

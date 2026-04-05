@@ -5,9 +5,8 @@
 namespace Luau::LanguageServer::Plugin
 {
 
-SourceMapping::SourceMapping(std::string original, std::string transformed, std::vector<AppliedEdit> appliedEdits)
-    : originalSource(std::move(original))
-    , transformedSource(std::move(transformed))
+SourceMapping::SourceMapping(std::string transformed, std::vector<AppliedEdit> appliedEdits)
+    : transformedSource(std::move(transformed))
     , edits(std::move(appliedEdits))
 {
 }
@@ -91,7 +90,7 @@ TextSize calculateTextSize(const std::string& text)
 SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const std::vector<TextEdit>& edits)
 {
     if (edits.empty())
-        return SourceMapping{originalSource, originalSource, {}};
+        return SourceMapping{std::string(originalSource), std::vector<AppliedEdit>{}};
 
     // Sort edits by start position
     std::vector<TextEdit> sortedEdits = edits;
@@ -180,7 +179,7 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
     // Copy remaining text after last edit
     transformed.append(originalSource, lastOffset, originalSource.size() - lastOffset);
 
-    return SourceMapping{originalSource, transformed, appliedEdits};
+    return SourceMapping{std::move(transformed), std::move(appliedEdits)};
 }
 
 std::optional<Luau::Position> SourceMapping::originalToTransformed(const Luau::Position& pos) const

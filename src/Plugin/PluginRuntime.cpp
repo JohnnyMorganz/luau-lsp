@@ -10,39 +10,41 @@
 namespace Luau::LanguageServer::Plugin
 {
 
+void* MemoryAllocator::allocate(void* ud, void* ptr, size_t osize, size_t nsize)
+{
+    auto* allocator = static_cast<MemoryAllocator*>(ud);
+
+    if (nsize == 0)
+    {
+        allocator->bytesUsed -= osize;
+        free(ptr);
+        return nullptr;
+    }
+
+    if (osize > allocator->bytesUsed || allocator->bytesUsed - osize + nsize > allocator->maxBytes)
+        return nullptr; // Triggers a Lua memory error
+
+    allocator->bytesUsed += nsize - osize;
+    return realloc(ptr, nsize);
+}
+
+
 namespace
 {
 
-// Parse a Lua position table {line: number, column: number} from the stack at the given index.
-// Plugin positions are 1-indexed (matching Luau conventions); this converts to 0-indexed internally.
-// Returns false on error (caller should handle cleanup).
-bool parsePosition(lua_State* L, int tableIdx, unsigned int& outLine, unsigned int& outColumn)
+// Read a number field from a Lua table at the top of the stack.
+// Returns the value, or std::nullopt if the field is missing or not a number.
+std::optional<double> readNumberField(lua_State* L, const char* fieldName)
 {
-    lua_getfield(L, tableIdx, "line");
+    lua_getfield(L, -1, fieldName);
     if (!lua_isnumber(L, -1))
     {
         lua_pop(L, 1);
-        return false;
+        return std::nullopt;
     }
-    double rawLine = lua_tonumber(L, -1);
+    double value = lua_tonumber(L, -1);
     lua_pop(L, 1);
-
-    lua_getfield(L, tableIdx, "column");
-    if (!lua_isnumber(L, -1))
-    {
-        lua_pop(L, 1);
-        return false;
-    }
-    double rawColumn = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    if (rawLine < 1 || rawColumn < 1)
-        return false;
-
-    outLine = static_cast<unsigned int>(rawLine) - 1;
-    outColumn = static_cast<unsigned int>(rawColumn) - 1;
-
-    return true;
+    return value;
 }
 
 } // anonymous namespace
@@ -98,8 +100,9 @@ std::optional<PluginError> PluginRuntime::load()
         return PluginError{"Failed to open plugin file: " + pluginPath, pluginPath};
     }
 
-    // Create Lua state
-    state.reset(luaL_newstate());
+    // Create Lua state with memory-limited allocator
+    // state.reset() closes the old state first, freeing through our allocator
+    state.reset(lua_newstate(MemoryAllocator::allocate, &memoryAllocator));
     lua_State* L = state.get();
 
     // Open safe libraries
@@ -217,13 +220,11 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
     lua_pushstring(L, source.c_str());
 
     // Create context table
-    lua_createtable(L, 0, 3);
+    lua_createtable(L, 0, 2);
     lua_pushstring(L, context.filePath.c_str());
     lua_setfield(L, -2, "filePath");
     lua_pushstring(L, context.moduleName.c_str());
     lua_setfield(L, -2, "moduleName");
-    lua_pushstring(L, context.languageId.c_str());
-    lua_setfield(L, -2, "languageId");
 
     // Call the function (use pcall, not resume - resume is for coroutines)
     int status = lua_pcall(L, 2, 1, 0);
@@ -271,46 +272,28 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
 
         TextEdit edit;
 
-        // Get range
-        lua_getfield(L, -1, "range");
-        if (!lua_istable(L, -1))
+        // Parse flat range fields (all 1-indexed, converted to 0-indexed)
+        auto rawStartLine = readNumberField(L, "startLine");
+        auto rawStartColumn = readNumberField(L, "startColumn");
+        auto rawEndLine = readNumberField(L, "endLine");
+        auto rawEndColumn = readNumberField(L, "endColumn");
+
+        if (!rawStartLine || !rawStartColumn || !rawEndLine || !rawEndColumn)
         {
-            lua_pop(L, 3); // Pop range, edit, and edits table
-            return PluginError{"Edit must have a 'range' table", pluginPath};
+            lua_pop(L, 2);
+            return PluginError{"Edit must have startLine, startColumn, endLine, endColumn numbers", pluginPath};
         }
 
-        // Get start position
-        unsigned int startLine, startColumn;
-        lua_getfield(L, -1, "start");
-        if (!lua_istable(L, -1))
+        if (*rawStartLine < 1 || *rawStartColumn < 1 || *rawEndLine < 1 || *rawEndColumn < 1)
         {
-            lua_pop(L, 4);
-            return PluginError{"Range must have a 'start' position", pluginPath};
+            lua_pop(L, 2);
+            return PluginError{"Edit positions must be >= 1 (1-indexed)", pluginPath};
         }
-        if (!parsePosition(L, -1, startLine, startColumn))
-        {
-            lua_pop(L, 4);
-            return PluginError{"Position must have 'line' and 'column' numbers", pluginPath};
-        }
-        lua_pop(L, 1); // Pop start table
 
-        // Get end position
-        unsigned int endLine, endColumn;
-        lua_getfield(L, -1, "end");
-        if (!lua_istable(L, -1))
-        {
-            lua_pop(L, 4);
-            return PluginError{"Range must have an 'end' position", pluginPath};
-        }
-        if (!parsePosition(L, -1, endLine, endColumn))
-        {
-            lua_pop(L, 4);
-            return PluginError{"Position must have 'line' and 'column' numbers", pluginPath};
-        }
-        lua_pop(L, 1); // Pop end table
-        lua_pop(L, 1); // Pop range table
-
-        edit.range = Luau::Location{{startLine, startColumn}, {endLine, endColumn}};
+        edit.range = Luau::Location{
+            {static_cast<unsigned int>(*rawStartLine) - 1, static_cast<unsigned int>(*rawStartColumn) - 1},
+            {static_cast<unsigned int>(*rawEndLine) - 1, static_cast<unsigned int>(*rawEndColumn) - 1},
+        };
 
         // Get newText
         lua_getfield(L, -1, "newText");

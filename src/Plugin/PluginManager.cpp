@@ -61,7 +61,7 @@ std::vector<TextEdit> PluginManager::transform(const std::string& source, const 
         return {};
 
     std::vector<TextEdit> allEdits;
-    PluginContext context{uri.fsPath(), moduleName, "luau"};
+    PluginContext context{uri.fsPath(), moduleName};
 
     // All plugins receive the original source and return edits against it
     for (auto& plugin : plugins)

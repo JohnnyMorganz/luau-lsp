@@ -1,5 +1,5 @@
 #pragma once
-#include "Plugin/TextEdit.hpp"
+#include "Plugin/PluginTypes.hpp"
 #include "Plugin/PluginRuntime.hpp"
 #include "LSP/Uri.hpp"
 #include "Luau/NotNull.h"

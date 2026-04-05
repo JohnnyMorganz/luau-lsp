@@ -4,9 +4,52 @@ The plugin system allows you to write Luau scripts that transform source code be
 
 ## Getting Started
 
-1. Create a Luau plugin script
-2. Enable plugins in your editor settings
-3. Add the plugin path to the configuration
+Here's a complete walkthrough to get a plugin running:
+
+**1. Create a plugin file** at `plugins/my_plugin.luau` in your workspace:
+
+```luau
+-- Replace all occurrences of "TODO" with "DONE"
+return {
+    transformSource = function(source, context)
+        local edits = {}
+        local line = 1
+        local lineStart = 1
+
+        for i = 1, #source do
+            if string.sub(source, i, i) == "\n" then
+                line += 1
+                lineStart = i + 1
+            end
+
+            if string.sub(source, i, i + 3) == "TODO" then
+                local col = i - lineStart + 1
+                table.insert(edits, {
+                    startLine = line,
+                    startColumn = col,
+                    endLine = line,
+                    endColumn = col + 4,
+                    newText = "DONE",
+                })
+            end
+        end
+        return edits
+    end,
+} :: PluginApi
+```
+
+**2. Add VS Code settings** in `.vscode/settings.json`:
+
+```json
+{
+  "luau-lsp.plugins.enabled": true,
+  "luau-lsp.plugins.paths": ["./plugins/my_plugin.luau"]
+}
+```
+
+**3. Open any `.luau` file** — the plugin will transform all `TODO` identifiers to `DONE` for type checking purposes. You'll see your original source in the editor, but Luau will see the transformed version.
+
+Plugins hot-reload automatically when you save changes to the plugin file — no need to restart the language server.
 
 ### Minimal Plugin
 
@@ -17,7 +60,7 @@ return {
         -- Return a list of TextEdits to transform the source
         return nil
     end
-}
+} :: PluginApi
 ```
 
 ## Configuration
@@ -41,7 +84,7 @@ Plugins are configured via LSP client settings:
 
 ## Plugin API
 
-A plugin is a Luau script that returns a table with a `transformSource` function:
+A plugin is a Luau script that returns a table with a `transformSource` function. Annotate the return value with `:: PluginApi` to get type checking and autocomplete for your plugin:
 
 ```luau
 return {
@@ -49,31 +92,23 @@ return {
         -- Return nil or {} for no changes
         -- Return list of edits to transform the source
     end
-}
+} :: PluginApi
 ```
 
 ### Types
 
 ```luau
-type Position = {
-    line: number,    -- 1-indexed
-    column: number,  -- 1-indexed, UTF-8 byte offset
-}
-
-type Range = {
-    start: Position,
-    ["end"]: Position,
-}
-
 type TextEdit = {
-    range: Range,
+    startLine: number,      -- 1-indexed
+    startColumn: number,    -- 1-indexed, UTF-8 byte offset
+    endLine: number,        -- 1-indexed
+    endColumn: number,      -- 1-indexed, UTF-8 byte offset
     newText: string,
 }
 
 type PluginContext = {
     filePath: string,
     moduleName: string,
-    languageId: string,  -- "luau"
 }
 ```
 
@@ -117,11 +152,11 @@ return {
             if string.sub(source, i, i + 4) == "DEBUG" then
                 local col = i - lineStart + 1
                 table.insert(edits, {
-                    range = {
-                        start = { line = line, column = col },
-                        ["end"] = { line = line, column = col + 5 }
-                    },
-                    newText = "false"
+                    startLine = line,
+                    startColumn = col,
+                    endLine = line,
+                    endColumn = col + 5,
+                    newText = "false",
                 })
             end
         end
@@ -154,6 +189,10 @@ else
     print("Failed:", content)
 end
 ```
+
+### `lsp.fs.exists(uri: Uri): boolean`
+
+Checks whether a file exists within the workspace. Returns `true` if the file exists and is readable, `false` otherwise. Like `readFile`, only files within the workspace can be checked.
 
 ### `lsp.Uri.parse(uriString: string): Uri`
 

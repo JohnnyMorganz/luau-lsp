@@ -19,7 +19,6 @@ struct PluginContext
 {
     std::string filePath;
     std::string moduleName;
-    std::string languageId;
 };
 
 // Error returned from plugin execution
