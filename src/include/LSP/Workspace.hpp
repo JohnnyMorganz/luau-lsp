@@ -46,15 +46,15 @@ public:
     /// First-time configuration is only applied once, and changes require a language server restart
     bool appliedFirstTimeConfiguration = false;
 
-    /// LSP configuration extracted from the root .config.luau file
-    std::optional<FileConfiguration> configLuauLSPConfiguration;
-
     /// Whether this workspace folder has completed an initial set up process.
     /// Workspaces are initialized lazily on demand.
     /// When a new request comes in and the workspace is not ready, we will prepare it then.
     bool isReady = false;
 
 private:
+    /// LSP configuration extracted from the root .config.luau file
+    std::optional<FileConfiguration> configLuauLSPConfiguration;
+
     struct DefinitionsFileState
     {
         TextDocument textDocument;

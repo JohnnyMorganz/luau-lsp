@@ -13,7 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added support for project-specific LSP configuration via an `lsp` section in `.config.luau`. File configuration takes precedence over editor settings, and is also read by `luau-lsp analyze`. Supported settings: `platform.type`, `sourcemap.rojoProjectFile`, `sourcemap.sourcemapFile`, `types.definitionFiles`, `types.disabledGlobals`. Example:
   ```lua
   return {
-      languageMode = "strict",
+      luau = {
+          languagemode = "strict",
+      },
       lsp = {
           platform = { type = "roblox" },
           sourcemap = { rojoProjectFile = "default.project.json" },
