@@ -149,6 +149,7 @@ jobs:
         shell: bash
         if: matrix.crash-reporting == true
         run: |
+          rm -rf build/_deps
           sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
