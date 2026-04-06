@@ -33,6 +33,7 @@ struct FindRequireVisitor : public Luau::AstVisitor
 std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::DocumentLinkParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
+    auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     std::vector<lsp::DocumentLink> result{};
 
     frontend.parse(moduleName);
@@ -53,8 +54,8 @@ std::vector<lsp::DocumentLink> WorkspaceFolder::documentLink(const lsp::Document
             {
                 lsp::DocumentLink link;
                 link.target = *uri;
-                link.range = lsp::Range{
-                    {require.location.begin.line, require.location.begin.column}, {require.location.end.line, require.location.end.column - 1}};
+                Luau::Position endPos{require.location.end.line, require.location.end.column - 1};
+                link.range = {textDocument->convertPosition(require.location.begin), textDocument->convertPosition(endPos)};
                 result.push_back(link);
             }
         }

@@ -1,0 +1,77 @@
+#pragma once
+#include "Plugin/PluginTypes.hpp"
+#include "Plugin/PluginRuntime.hpp"
+#include "LSP/Uri.hpp"
+#include "Luau/NotNull.h"
+#include <memory>
+#include <string>
+#include <vector>
+
+struct Client;
+class WorkspaceFolder;
+
+namespace lsp
+{
+enum struct MessageType;
+}
+
+namespace Luau::LanguageServer::Plugin
+{
+
+// Manages multiple plugins and combines their edits
+class PluginManager
+{
+    std::vector<std::unique_ptr<PluginRuntime>> plugins;
+    Client* client = nullptr;
+    Luau::NotNull<WorkspaceFolder> workspace;
+
+public:
+    explicit PluginManager(Client* client, Luau::NotNull<WorkspaceFolder> workspace)
+        : client(client)
+        , workspace(workspace)
+    {
+    }
+
+    // Configure plugins from paths. Returns number of successfully loaded plugins.
+    size_t configure(const std::vector<std::string>& pluginPaths, size_t timeoutMs = 5000);
+
+    // Reload all currently loaded plugins from disk. Returns number of successfully reloaded plugins.
+    size_t reload();
+
+    // Apply all plugins to transform source code.
+    // Returns edits to apply, or empty vector if no transformation or error.
+    // Callers should pass the edits to SourceMapping::fromEdits() which validates and builds the mapping.
+    std::vector<TextEdit> transform(const std::string& source, const Uri& uri, const std::string& moduleName);
+
+    bool hasPlugins() const
+    {
+        return !plugins.empty();
+    }
+
+    size_t pluginCount() const
+    {
+        return plugins.size();
+    }
+
+    // Check if a URI is a loaded plugin
+    bool isPluginFile(const Uri& uri) const
+    {
+        for (const auto& plugin : plugins)
+        {
+            if (plugin->getUri() == uri)
+                return true;
+        }
+        return false;
+    }
+
+    // Clear all plugins
+    void clear()
+    {
+        plugins.clear();
+    }
+
+private:
+    void sendLogMessage(lsp::MessageType type, const std::string& message) const;
+};
+
+} // namespace Luau::LanguageServer::Plugin

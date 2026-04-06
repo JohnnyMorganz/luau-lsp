@@ -580,4 +580,29 @@ TEST_CASE("Uri::exists handles filesystem errors")
     CHECK_NOTHROW(Uri::file(IF_WINDOWS("c:\\Users\\con", "/home/con")).exists());
 }
 
+TEST_CASE("Uri::isAncestorOf")
+{
+    auto workspace = Uri::file(IF_WINDOWS("c:\\Users\\user\\project", "/home/user/project"));
+
+    // Basic containment
+    CHECK(workspace.isAncestorOf(Uri::file(IF_WINDOWS("c:\\Users\\user\\project\\src\\main.luau", "/home/user/project/src/main.luau"))));
+    CHECK(workspace.isAncestorOf(Uri::file(IF_WINDOWS("c:\\Users\\user\\project\\file.txt", "/home/user/project/file.txt"))));
+
+    // Exact match is an ancestor
+    CHECK(workspace.isAncestorOf(workspace));
+
+    // Outside workspace
+    CHECK_FALSE(workspace.isAncestorOf(Uri::file(IF_WINDOWS("c:\\Users\\user\\other", "/home/user/other"))));
+
+    // Path separator boundary: "project-evil" should NOT match "project"
+    CHECK_FALSE(workspace.isAncestorOf(Uri::file(IF_WINDOWS("c:\\Users\\user\\project-evil\\file.txt", "/home/user/project-evil/file.txt"))));
+
+    // Path traversal: ".." segments should be resolved before comparison
+    CHECK_FALSE(workspace.isAncestorOf(
+        Uri::file(IF_WINDOWS("c:\\Users\\user\\project\\..\\..\\etc\\passwd", "/home/user/project/../../etc/passwd"))));
+
+    // Different scheme
+    CHECK_FALSE(workspace.isAncestorOf(Uri::parse("https://example.com/home/user/project/file.txt")));
+}
+
 TEST_SUITE_END();

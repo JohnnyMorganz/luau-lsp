@@ -645,10 +645,18 @@ bool Uri::isAncestorOf(const Uri& other) const
     if (scheme != other.scheme || authority != other.authority)
         return false;
 
+    // Normalize both paths to resolve ".." segments before comparison
+    auto normalizedParent = Luau::FileUtils::normalizePath(path);
+    auto normalizedChild = Luau::FileUtils::normalizePath(other.path);
+
 #if defined(_WIN32) || defined(__APPLE__)
-    return Luau::startsWith(toLower(other.path), toLower(path));
+    auto parentLower = toLower(normalizedParent);
+    auto childLower = toLower(normalizedChild);
+    // Ensure separator boundary: parent path must be followed by '/' or be an exact match
+    return Luau::startsWith(childLower, parentLower) && (childLower.size() == parentLower.size() || childLower[parentLower.size()] == '/');
 #else
-    return Luau::startsWith(other.path, path);
+    return Luau::startsWith(normalizedChild, normalizedParent) &&
+           (normalizedChild.size() == normalizedParent.size() || normalizedChild[normalizedParent.size()] == '/');
 #endif
 }
 

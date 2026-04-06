@@ -41,8 +41,6 @@ std::optional<Uri> LSPPlatform::resolveToRealPath(const Luau::ModuleName& name) 
 std::optional<std::string> LSPPlatform::readSourceCode(const Luau::ModuleName& name, const Uri& path) const
 {
     LUAU_TIMETRACE_SCOPE("LSPPlatform::readSourceCode", "LSP");
-    if (auto textDocument = fileResolver->getTextDocumentFromModuleName(name))
-        return textDocument->getText();
 
     if (path.extension() == ".lua" || path.extension() == ".luau")
         return Luau::FileUtils::readFile(path.fsPath());

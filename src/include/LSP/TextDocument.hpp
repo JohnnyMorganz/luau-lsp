@@ -24,6 +24,8 @@ public:
     {
     }
 
+    virtual ~TextDocument() = default;
+
     const lsp::DocumentUri& uri() const
     {
         return _uri;
@@ -45,8 +47,8 @@ public:
     lsp::Position positionAt(size_t offset) const;
     size_t offsetAt(const lsp::Position& position) const;
 
-    Luau::Position convertPosition(const lsp::Position& position) const;
-    lsp::Position convertPosition(const Luau::Position& position) const;
+    virtual Luau::Position convertPosition(const lsp::Position& position) const;
+    virtual lsp::Position convertPosition(const Luau::Position& position) const;
 
     Luau::Location convertRange(const lsp::Range& range) const;
     lsp::Range convertLocation(const Luau::Location& location) const;

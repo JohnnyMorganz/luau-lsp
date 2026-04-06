@@ -97,6 +97,12 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/OnTypeFormatting.cpp
         src/transport/PipeTransport.cpp
         src/transport/StdioTransport.cpp
+        src/Plugin/SourceMapping.cpp
+        src/Plugin/PluginTextDocument.cpp
+        src/Plugin/PluginRuntime.cpp
+        src/Plugin/PluginManager.cpp
+        src/Plugin/PluginLuaApi.cpp
+        src/Plugin/PluginDefinitions.cpp
         extern/glob/match.cpp
 )
 
@@ -140,6 +146,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
         tests/CodeAction.test.cpp
+        tests/Plugin.test.cpp
         tests/Refactoring.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
