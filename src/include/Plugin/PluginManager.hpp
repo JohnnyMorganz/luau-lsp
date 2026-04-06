@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-struct BaseClient;
+struct Client;
 class WorkspaceFolder;
 
 namespace lsp
@@ -22,11 +22,11 @@ namespace Luau::LanguageServer::Plugin
 class PluginManager
 {
     std::vector<std::unique_ptr<PluginRuntime>> plugins;
-    BaseClient* client = nullptr;
+    Client* client = nullptr;
     Luau::NotNull<WorkspaceFolder> workspace;
 
 public:
-    explicit PluginManager(BaseClient* client, Luau::NotNull<WorkspaceFolder> workspace)
+    explicit PluginManager(Client* client, Luau::NotNull<WorkspaceFolder> workspace)
         : client(client)
         , workspace(workspace)
     {
