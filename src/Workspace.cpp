@@ -316,12 +316,9 @@ void WorkspaceFolder::reloadPlugins()
     fileResolver.pluginManager->reload();
     fileResolver.clearPluginDocuments();
 
-    // Any open document could have plugin transformations applied, so mark all dirty
-    for (const auto& [uri, _] : fileResolver.managedFiles)
-    {
-        auto moduleName = fileResolver.getModuleName(uri);
-        frontend.markDirty(moduleName);
-    }
+    // Any source node could have plugin transformations applied (including non-managed files), so mark all dirty
+    for (const auto& [name, _] : frontend.sourceNodes)
+        frontend.markDirty(name);
 }
 
 // Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.
