@@ -177,7 +177,7 @@ if (LSP_BUILD_ASAN)
     endforeach ()
 
     if (NOT MSVC)
-        foreach (TARGET_NAME IN LISTS LUAU_ASAN_TARGETS Luau.LanguageServer Luau.LanguageServer.CLI Luau.LanguageServer.Test)
+        foreach (TARGET_NAME IN LISTS LUAU_ASAN_TARGETS ITEMS Luau.LanguageServer Luau.LanguageServer.CLI Luau.LanguageServer.Test)
             target_link_options(${TARGET_NAME} PRIVATE ${ASAN_FLAG})
         endforeach ()
     endif ()
