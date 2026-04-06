@@ -38,6 +38,10 @@ local b = 2
 local extracted = a + b
 local x = extracted
 )");
+
+    // Should trigger rename at the new variable name
+    REQUIRE(resolved.command);
+    CHECK_EQ(resolved.command->command, "editor.action.rename");
 }
 
 TEST_CASE_FIXTURE(Fixture, "extract_variable_function_call")

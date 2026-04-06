@@ -288,7 +288,13 @@ std::string getLineIndentation(const TextDocument& textDocument, size_t line)
     return lineText.substr(0, indent);
 }
 
-std::optional<lsp::WorkspaceEdit> computeExtractVariableEdit(
+struct RefactoringResult
+{
+    lsp::WorkspaceEdit edit;
+    std::optional<lsp::Position> renamePosition;
+};
+
+std::optional<RefactoringResult> computeExtractVariableEdit(
     const lsp::DocumentUri& uri,
     const Luau::SourceModule& sourceModule,
     const TextDocument& textDocument,
@@ -312,8 +318,12 @@ std::optional<lsp::WorkspaceEdit> computeExtractVariableEdit(
 
     std::string declaration = indent + "local extracted = " + exprText + "\n";
 
-    lsp::Range insertRange = {{enclosingStmt->location.begin.line, 0}, {enclosingStmt->location.begin.line, 0}};
+    size_t insertLine = enclosingStmt->location.begin.line;
+    lsp::Range insertRange = {{insertLine, 0}, {insertLine, 0}};
     lsp::Range exprRange = textDocument.convertLocation(expr->location);
+
+    // "extracted" starts after "<indent>local "
+    lsp::Position renamePos = {insertLine, indent.size() + 6 /* strlen("local ") */};
 
     std::vector<lsp::TextEdit> edits;
     edits.push_back({insertRange, declaration});
@@ -321,10 +331,10 @@ std::optional<lsp::WorkspaceEdit> computeExtractVariableEdit(
 
     lsp::WorkspaceEdit workspaceEdit;
     workspaceEdit.changes.emplace(uri, std::move(edits));
-    return workspaceEdit;
+    return RefactoringResult{std::move(workspaceEdit), renamePos};
 }
 
-std::optional<lsp::WorkspaceEdit> computeExtractFunctionEdit(
+std::optional<RefactoringResult> computeExtractFunctionEdit(
     const lsp::DocumentUri& uri,
     const Luau::SourceModule& sourceModule,
     const TextDocument& textDocument,
@@ -448,19 +458,23 @@ std::optional<lsp::WorkspaceEdit> computeExtractFunctionEdit(
         callSite = indent + "extracted(" + params + ")";
 
     // Delete from start of the first statement's line to the end of the last statement
-    lsp::Range deleteRange = {{firstStmt->location.begin.line, 0}, {lastStmt->location.end.line + 1, 0}};
+    size_t insertLine = firstStmt->location.begin.line;
+    lsp::Range deleteRange = {{insertLine, 0}, {lastStmt->location.end.line + 1, 0}};
 
     std::string replacement = functionDef + callSite + "\n";
+
+    // "extracted" starts after "<indent>local function "
+    lsp::Position renamePos = {insertLine, indent.size() + 15 /* strlen("local function ") */};
 
     std::vector<lsp::TextEdit> edits;
     edits.push_back({deleteRange, replacement});
 
     lsp::WorkspaceEdit workspaceEdit;
     workspaceEdit.changes.emplace(uri, std::move(edits));
-    return workspaceEdit;
+    return RefactoringResult{std::move(workspaceEdit), renamePos};
 }
 
-std::optional<lsp::WorkspaceEdit> computeInlineVariableEdit(
+std::optional<RefactoringResult> computeInlineVariableEdit(
     const lsp::DocumentUri& uri,
     const Luau::SourceModule& sourceModule,
     const TextDocument& textDocument,
@@ -538,7 +552,7 @@ std::optional<lsp::WorkspaceEdit> computeInlineVariableEdit(
 
     lsp::WorkspaceEdit workspaceEdit;
     workspaceEdit.changes.emplace(uri, std::move(edits));
-    return workspaceEdit;
+    return RefactoringResult{std::move(workspaceEdit), std::nullopt};
 }
 
 } // anonymous namespace
@@ -654,16 +668,28 @@ lsp::CodeAction resolveRefactoring(
     if (!sourceModule)
         return resolved;
 
-    std::optional<lsp::WorkspaceEdit> edit;
+    std::optional<RefactoringResult> refactorResult;
     if (type == "extractVariable")
-        edit = computeExtractVariableEdit(uri, *sourceModule, *textDocument, range);
+        refactorResult = computeExtractVariableEdit(uri, *sourceModule, *textDocument, range);
     else if (type == "extractFunction")
-        edit = computeExtractFunctionEdit(uri, *sourceModule, *textDocument, range);
+        refactorResult = computeExtractFunctionEdit(uri, *sourceModule, *textDocument, range);
     else if (type == "inlineVariable")
-        edit = computeInlineVariableEdit(uri, *sourceModule, *textDocument, range);
+        refactorResult = computeInlineVariableEdit(uri, *sourceModule, *textDocument, range);
 
-    if (edit)
-        resolved.edit = std::move(*edit);
+    if (refactorResult)
+    {
+        resolved.edit = std::move(refactorResult->edit);
+
+        if (refactorResult->renamePosition)
+        {
+            auto& pos = *refactorResult->renamePosition;
+            resolved.command = lsp::Command{
+                "Rename Symbol",
+                "editor.action.rename",
+                {nlohmann::json(uri.toString()), nlohmann::json(pos)},
+            };
+        }
+    }
 
     return resolved;
 }
