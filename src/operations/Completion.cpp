@@ -579,9 +579,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             return {};
 
         auto newSrc = textDocument->getText();
-        // Construct a ParseResult including comment locations and hot comments so that
-        // tryFragmentAutocomplete can correctly detect when the cursor is inside a comment
-        // and skip autocomplete. Without these fields the comment check is bypassed.
+        // commentLocations and hotcomments are required for tryFragmentAutocomplete to
+        // detect cursor-in-comment and bail out before attempting autocomplete.
         Luau::ParseResult fragmentParseResult;
         fragmentParseResult.root = sourceModule->root;
         fragmentParseResult.commentLocations = sourceModule->commentLocations;
