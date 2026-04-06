@@ -1,5 +1,6 @@
 #include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
+#include "LSP/Refactoring.hpp"
 #include "Protocol/CodeAction.hpp"
 #include "LSP/LuauExt.hpp"
 #include "Luau/PrettyPrinter.h"
@@ -272,7 +273,8 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
     std::vector<lsp::CodeAction> result;
 
     if (!params.context.wants(lsp::CodeActionKind::QuickFix) && !params.context.wants(lsp::CodeActionKind::Source) &&
-        !params.context.wants(lsp::CodeActionKind::SourceOrganizeImports))
+        !params.context.wants(lsp::CodeActionKind::SourceOrganizeImports) && !params.context.wants(lsp::CodeActionKind::RefactorExtract) &&
+        !params.context.wants(lsp::CodeActionKind::RefactorInline))
         return result;
 
     auto config = client->getConfiguration(rootUri);
@@ -465,7 +467,18 @@ lsp::CodeActionResult WorkspaceFolder::codeAction(const lsp::CodeActionParams& p
         }
     }
 
+    // Refactoring actions
+    if (params.context.wants(lsp::CodeActionKind::RefactorExtract) || params.context.wants(lsp::CodeActionKind::RefactorInline))
+    {
+        computeRefactorings(params, *sourceModule, *textDocument, requestRange, result);
+    }
+
     platform->handleCodeAction(params, result);
 
     return result;
+}
+
+lsp::CodeAction WorkspaceFolder::codeActionResolve(const lsp::CodeAction& action, const LSPCancellationToken& cancellationToken)
+{
+    return resolveRefactoring(action, *this, cancellationToken);
 }

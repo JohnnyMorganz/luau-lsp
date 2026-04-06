@@ -14,6 +14,7 @@
 #include "Luau/Type.h"
 
 #include "LSP/Workspace.hpp"
+#include "Protocol/CodeAction.hpp"
 #include "TempDir.h"
 #include "ScopedFlags.h"
 
@@ -96,6 +97,9 @@ struct Fixture
 #define LUAU_LSP_REQUIRE_NO_ERRORS(result) LUAU_LSP_REQUIRE_ERROR_COUNT(0, result)
 
 std::pair<std::string, lsp::Position> sourceWithMarker(std::string source);
+
+/// Find a code action by title in a CodeActionResult
+std::optional<lsp::CodeAction> findCodeAction(const lsp::CodeActionResult& result, const std::string& title);
 
 /// Apply a set of text edits to a source string and return the result
 std::string applyEdit(const std::string& source, const std::vector<lsp::TextEdit>& edits);

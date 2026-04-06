@@ -84,6 +84,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/InlayHints.cpp
         src/operations/SemanticTokens.cpp
         src/operations/CodeAction.cpp
+        src/operations/Refactoring.cpp
         src/operations/WorkspaceSymbol.cpp
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
@@ -135,6 +136,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
         tests/CodeAction.test.cpp
+        tests/Refactoring.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 
