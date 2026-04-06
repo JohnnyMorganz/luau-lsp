@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed crash when parsing YAML files with empty values (e.g. `key:` with no value)
 - Find All References, Rename, and auto imports no longer break after a sourcemap update ([#1115](https://github.com/JohnnyMorganz/luau-lsp/issues/1115))
+- Fixed fragment autocomplete incorrectly triggering inside comments when the cursor is positioned before any statement in the file ([#1416](https://github.com/JohnnyMorganz/luau-lsp/issues/1416))
 
 ## [1.64.1] - 2026-03-30
 

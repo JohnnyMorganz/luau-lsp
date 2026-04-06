@@ -579,10 +579,13 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             return {};
 
         auto newSrc = textDocument->getText();
+        Luau::ParseResult fragmentParseResult;
+        fragmentParseResult.root = sourceModule->root;
+        fragmentParseResult.commentLocations = sourceModule->commentLocations;
+        fragmentParseResult.hotcomments = sourceModule->hotcomments;
         Luau::FragmentContext fragmentContext = {
             newSrc,
-            // TODO: we have to construct a parse result as tryFragmentAutocomplete only accepts this
-            Luau::ParseResult{sourceModule->root},
+            fragmentParseResult,
             frontendOptions,
         };
 
