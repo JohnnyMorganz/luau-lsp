@@ -1873,16 +1873,8 @@ TEST_CASE_FIXTURE(Fixture, "isPluginFile matches loaded plugin paths")
 
 TEST_CASE_FIXTURE(Fixture, "reloadPlugins marks non-managed source nodes dirty")
 {
-    // Source: `--!strict\nlocal x: string = 1`
-    // Plugin v1: rewrites "string" annotation (line 2, cols 10-15) to "number"
-    // so `local x: string = 1` becomes `local x: number = 1` — no type error.
-    // Plugin v2: no-op — type error is visible again.
-    // The test verifies that after reloading the plugin, the non-managed file is
-    // re-analysed with the new plugin and the error is detected.
-    //
-    // Column positions are 1-indexed. In `local x: string = 1`:
-    //   l(1)o(2)c(3)a(4)l(5) (6)x(7):(8) (9)s(10)t(11)r(12)i(13)n(14)g(15)
-    //   so "string" occupies columns 10-15, endColumn=16 (exclusive).
+    // Plugin v1: rewrites "string" -> "number" on line 2, fixing the type error in the source file.
+    // Columns are 1-indexed; "string" in `local x: string = 1` occupies cols 10-15.
     std::string pluginPath = tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
@@ -1897,22 +1889,19 @@ return {
 }
 )");
 
-    // Non-managed file: has a type error that plugin v1 fixes
     std::string filePath = tempDir.write_child("non_managed.luau", "--!strict\nlocal x: string = 1");
-    auto fileUri = Uri::file(filePath);
-    auto moduleName = workspace.fileResolver.getModuleName(fileUri);
+    auto moduleName = workspace.fileResolver.getModuleName(Uri::file(filePath));
 
-    // Configure plugin v1 on the workspace
     workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
         client.get(), getWorkspaceNotNull(*this));
     workspace.fileResolver.pluginManager->configure({pluginPath});
 
-    // Type-check with plugin v1: error is suppressed by the transformation
+    // With plugin v1 active, the type error is suppressed by the transformation
     auto result = workspace.frontend.check(moduleName);
     REQUIRE(result.errors.empty());
     REQUIRE_FALSE(workspace.frontend.isDirty(moduleName));
 
-    // Update plugin to v2: no-op (no transformation applied)
+    // Update plugin on disk to v2: no-op
     tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
@@ -1921,12 +1910,12 @@ return {
 }
 )");
 
-    // Reload plugins — must mark non-managed source nodes dirty so they are re-analysed
+    // reloadPlugins must mark non-managed source nodes dirty so they are re-analysed
     workspace.reloadPlugins();
 
     REQUIRE(workspace.frontend.isDirty(moduleName));
 
-    // Re-check: plugin v2 does nothing, so the original type error is now visible
+    // Plugin v2 does nothing, so the original type error is now visible
     result = workspace.frontend.check(moduleName);
     CHECK_FALSE(result.errors.empty());
 }
