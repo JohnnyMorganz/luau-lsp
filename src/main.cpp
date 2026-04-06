@@ -131,7 +131,7 @@ int startLanguageServer(const argparse::ArgumentParser& program)
         transport = std::make_unique<StdioTransport>();
     }
 
-    Client client{std::move(transport)};
+    LSPClient client{std::move(transport)};
     client.definitionsFiles = definitionsFiles;
     client.documentationFiles = documentationFiles;
     parseDocumentation(documentationFiles, client.documentation, &client);

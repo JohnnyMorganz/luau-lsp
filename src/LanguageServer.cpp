@@ -25,7 +25,7 @@
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
-LanguageServer::LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig)
+LanguageServer::LanguageServer(LSPClient* aClient, std::optional<Luau::Config> aDefaultConfig)
     : client(aClient)
     , defaultConfig(std::move(aDefaultConfig))
     , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))

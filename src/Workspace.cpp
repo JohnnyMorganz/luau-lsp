@@ -39,7 +39,7 @@ void WorkspaceFolder::openTextDocument(const lsp::DocumentUri& uri, const lsp::D
 
 static bool isWorkspaceDiagnosticsEnabled(const Client* client, const ClientConfiguration& config)
 {
-    return client->workspaceDiagnosticsToken && config.diagnostics.workspace;
+    return client->getWorkspaceDiagnosticsToken() && config.diagnostics.workspace;
 }
 
 void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp::DidChangeTextDocumentParams& params)
@@ -135,7 +135,7 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
             }
         }
 
-        client->sendProgress({*client->workspaceDiagnosticsToken, report});
+        client->sendProgress({*client->getWorkspaceDiagnosticsToken(), report});
     }
 }
 
@@ -160,7 +160,7 @@ void WorkspaceFolder::clearDiagnosticsForFiles(const std::vector<lsp::DocumentUr
         for (const auto& uri : uris)
             client->publishDiagnostics(lsp::PublishDiagnosticsParams{uri, std::nullopt, {}});
     }
-    else if (client->workspaceDiagnosticsToken)
+    else if (client->getWorkspaceDiagnosticsToken())
     {
         std::vector<lsp::WorkspaceDocumentDiagnosticReport> reports;
         reports.reserve(uris.size());
@@ -172,7 +172,7 @@ void WorkspaceFolder::clearDiagnosticsForFiles(const std::vector<lsp::DocumentUr
             reports.push_back(report);
         }
         lsp::WorkspaceDiagnosticReportPartialResult report{reports};
-        client->sendProgress({client->workspaceDiagnosticsToken.value(), report});
+        client->sendProgress({client->getWorkspaceDiagnosticsToken().value(), report});
     }
     else
     {

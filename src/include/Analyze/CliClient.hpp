@@ -2,7 +2,7 @@
 
 #include "LSP/Client.hpp"
 
-static std::string getMessageTypeString(const lsp::MessageType& type)
+inline std::string getMessageTypeString(const lsp::MessageType& type)
 {
     switch (type)
     {
@@ -18,19 +18,23 @@ static std::string getMessageTypeString(const lsp::MessageType& type)
     return "LOG";
 }
 
-struct CliClient : public BaseClient
+struct CliClient : public Client
 {
-    ClientConfiguration configuration;
     mutable std::vector<std::pair<Uri, std::string>> diagnostics{};
 
     ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override
     {
-        return configuration;
+        return globalConfig;
     }
 
     void sendLogMessage(const lsp::MessageType& type, const std::string& message) const override
     {
         std::cerr << "[" << getMessageTypeString(type) << "] " << message << "\n";
+    }
+
+    void sendWindowMessage(const lsp::MessageType& type, const std::string& message) const override
+    {
+        sendLogMessage(type, message);
     }
 
     // In the CLI, this is only used for config errors right now
