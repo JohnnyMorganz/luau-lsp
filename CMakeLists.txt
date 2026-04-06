@@ -28,10 +28,18 @@ project(Luau.LanguageServer LANGUAGES CXX)
 
 # Sentry setup
 if (LSP_BUILD_WITH_SENTRY)
-    add_subdirectory(extern/sentry-native)
-    set(BUILD_SHARED_LIBS OFF)
-    set(SENTRY_BUILD_RUNTIMESTATIC ON)
-    set(CRASHPAD_ENABLE_STACKTRACE ON)
+    include(FetchContent)
+    set(SENTRY_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(SENTRY_BACKEND "crashpad" CACHE STRING "" FORCE)
+    set(SENTRY_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(SENTRY_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(SENTRY_BUILD_RUNTIMESTATIC ${LSP_STATIC_CRT} CACHE BOOL "" FORCE)
+    set(SENTRY_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(CRASHPAD_ENABLE_STACKTRACE ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(sentry
+        URL https://github.com/getsentry/sentry-native/releases/download/0.11.0/sentry-native.zip
+    )
+    FetchContent_MakeAvailable(sentry)
 endif ()
 
 add_subdirectory(luau)
