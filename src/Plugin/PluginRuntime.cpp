@@ -97,7 +97,7 @@ std::optional<PluginError> PluginRuntime::load()
     auto source = Luau::FileUtils::readFile(pluginPath);
     if (!source)
     {
-        return PluginError{"Failed to open plugin file: " + pluginPath, pluginPath};
+        return PluginError{"Failed to open plugin file: " + pluginPath};
     }
 
     // Create Lua state with memory-limited allocator
@@ -114,8 +114,9 @@ std::optional<PluginError> PluginRuntime::load()
     // Register lsp API and print override (must be before sandbox)
     registerLspApi(L, workspace, pluginPath);
 
-    // Sandbox the environment (removes dangerous functions)
+    // Sandbox the environment
     luaL_sandbox(L);
+    luaL_sandboxthread(L);
 
     // Store pointer to this runtime for interrupt callback
     lua_setthreaddata(L, this);
@@ -131,7 +132,7 @@ std::optional<PluginError> PluginRuntime::load()
     std::string bytecode = Luau::compile(*source, compileOptions);
     if (bytecode.empty())
     {
-        return PluginError{"Failed to compile plugin", pluginPath};
+        return PluginError{"Failed to compile plugin"};
     }
 
     // Load the bytecode
@@ -140,7 +141,7 @@ std::optional<PluginError> PluginRuntime::load()
     {
         std::string error = lua_tostring(L, -1);
         lua_pop(L, 1);
-        return PluginError{"Failed to load plugin: " + error, pluginPath};
+        return PluginError{"Failed to load plugin: " + error};
     }
 
     // Execute the plugin to get the return value (should be a table)
@@ -153,18 +154,18 @@ std::optional<PluginError> PluginRuntime::load()
     {
         if (timedOut)
         {
-            return PluginError{"Plugin execution timed out", pluginPath};
+            return PluginError{"Plugin execution timed out"};
         }
 
         std::string error = lua_isstring(L, -1) ? lua_tostring(L, -1) : "Unknown error";
         lua_pop(L, 1);
-        return PluginError{"Plugin execution failed: " + error, pluginPath};
+        return PluginError{"Plugin execution failed: " + error};
     }
 
     // Check that the plugin returned a table
     if (lua_gettop(L) != 1 || !lua_istable(L, -1))
     {
-        return PluginError{"Plugin must return a table", pluginPath};
+        return PluginError{"Plugin must return a table"};
     }
 
     // Get the transformSource function (optional)
@@ -178,7 +179,7 @@ std::optional<PluginError> PluginRuntime::load()
     {
         // transformSource exists but is not a function - that's an error
         lua_pop(L, 2); // Pop field and table
-        return PluginError{"Plugin 'transformSource' must be a function", pluginPath};
+        return PluginError{"Plugin 'transformSource' must be a function"};
     }
     else
     {
@@ -194,11 +195,9 @@ std::optional<PluginError> PluginRuntime::load()
 
 std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(const std::string& source, const PluginContext& context)
 {
-    auto pluginPath = pluginUri.fsPath();
-
     if (!loaded || !state)
     {
-        return PluginError{"Plugin not loaded", pluginPath};
+        return PluginError{"Plugin not loaded"};
     }
 
     // If transformSource is not provided, return empty edits
@@ -232,12 +231,12 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
     {
         if (timedOut)
         {
-            return PluginError{"Plugin transformSource timed out", pluginPath};
+            return PluginError{"Plugin transformSource timed out"};
         }
 
         std::string error = lua_isstring(L, -1) ? lua_tostring(L, -1) : "Unknown error";
         lua_pop(L, 1);
-        return PluginError{"transformSource failed: " + error, pluginPath};
+        return PluginError{"transformSource failed: " + error};
     }
 
     // Handle return value
@@ -252,7 +251,7 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
     if (!lua_istable(L, -1))
     {
         lua_pop(L, 1);
-        return PluginError{"transformSource must return a table of edits or nil", pluginPath};
+        return PluginError{"transformSource must return a table of edits or nil"};
     }
 
     // Parse the edits table
@@ -267,7 +266,7 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
         if (!lua_istable(L, -1))
         {
             lua_pop(L, 2); // Pop edit and edits table
-            return PluginError{"Each edit must be a table", pluginPath};
+            return PluginError{"Each edit must be a table"};
         }
 
         TextEdit edit;
@@ -281,13 +280,13 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
         if (!rawStartLine || !rawStartColumn || !rawEndLine || !rawEndColumn)
         {
             lua_pop(L, 2);
-            return PluginError{"Edit must have startLine, startColumn, endLine, endColumn numbers", pluginPath};
+            return PluginError{"Edit must have startLine, startColumn, endLine, endColumn numbers"};
         }
 
         if (*rawStartLine < 1 || *rawStartColumn < 1 || *rawEndLine < 1 || *rawEndColumn < 1)
         {
             lua_pop(L, 2);
-            return PluginError{"Edit positions must be >= 1 (1-indexed)", pluginPath};
+            return PluginError{"Edit positions must be >= 1 (1-indexed)"};
         }
 
         edit.range = Luau::Location{
@@ -300,7 +299,7 @@ std::variant<std::vector<TextEdit>, PluginError> PluginRuntime::transformSource(
         if (!lua_isstring(L, -1))
         {
             lua_pop(L, 3);
-            return PluginError{"Edit must have a 'newText' string", pluginPath};
+            return PluginError{"Edit must have a 'newText' string"};
         }
         edit.newText = lua_tostring(L, -1);
         lua_pop(L, 1);

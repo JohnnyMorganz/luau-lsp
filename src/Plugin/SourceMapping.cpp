@@ -5,59 +5,15 @@
 namespace Luau::LanguageServer::Plugin
 {
 
-SourceMapping::SourceMapping(std::string transformed, std::vector<AppliedEdit> appliedEdits)
-    : transformedSource(std::move(transformed))
-    , edits(std::move(appliedEdits))
+SourceMapping::SourceMapping(std::vector<AppliedEdit> appliedEdits)
+    : edits(std::move(appliedEdits))
 {
 }
 
 namespace
 {
 
-// Convert a Luau::Position to a byte offset in a string
-size_t positionToOffset(const std::string& source, const Luau::Position& pos)
-{
-    size_t offset = 0;
-    unsigned int currentLine = 0;
-
-    while (offset < source.size() && currentLine < pos.line)
-    {
-        if (source[offset] == '\n')
-            currentLine++;
-        offset++;
-    }
-
-    // Add column offset (clamped to line length)
-    size_t lineStart = offset;
-    while (offset < source.size() && source[offset] != '\n' && (offset - lineStart) < pos.column)
-        offset++;
-
-    return offset;
-}
-
-// Calculate end position after inserting text at a given position
-Luau::Position calculateEndPosition(const Luau::Position& start, const std::string& text)
-{
-    unsigned int line = start.line;
-    unsigned int column = start.column;
-
-    for (char c : text)
-    {
-        if (c == '\n')
-        {
-            line++;
-            column = 0;
-        }
-        else
-        {
-            column++;
-        }
-    }
-
-    return {line, column};
-}
-
-// Calculate the length of text in terms of lines and columns
+// Calculate the size of text in terms of line delta and last line length
 struct TextSize
 {
     int lineDelta;
@@ -87,10 +43,10 @@ TextSize calculateTextSize(const std::string& text)
 
 } // anonymous namespace
 
-SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const std::vector<TextEdit>& edits)
+TransformResult SourceMapping::fromEdits(const std::string& originalSource, const std::vector<TextEdit>& edits)
 {
     if (edits.empty())
-        return SourceMapping{std::string(originalSource), std::vector<AppliedEdit>{}};
+        return TransformResult{std::string(originalSource), std::vector<AppliedEdit>{}};
 
     // Sort edits by start position
     std::vector<TextEdit> sortedEdits = edits;
@@ -118,6 +74,7 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
 
     // Build transformed string in a single pass over originalSource, computing
     // position mappings via cumulative line/column deltas.
+    // We carry forward the byte offset to avoid re-scanning from the start for each edit.
     std::string transformed;
     transformed.reserve(originalSource.size());
     std::vector<AppliedEdit> appliedEdits;
@@ -127,11 +84,34 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
     int cumulativeColumnDelta = 0;
     int currentOriginalLine = -1;
 
+    // State for carry-forward positionToOffset
+    size_t scanOffset = 0;
+    unsigned int scanLine = 0;
+
+    // Convert a Luau::Position to a byte offset, carrying forward from previous scan position.
+    // Requires that positions are queried in non-decreasing order.
+    auto positionToOffset = [&](const Luau::Position& pos) -> size_t {
+        while (scanOffset < originalSource.size() && scanLine < pos.line)
+        {
+            if (originalSource[scanOffset] == '\n')
+                scanLine++;
+            scanOffset++;
+        }
+
+        // Add column offset (clamped to line length)
+        size_t lineStart = scanOffset;
+        size_t result = scanOffset;
+        while (result < originalSource.size() && originalSource[result] != '\n' && (result - lineStart) < pos.column)
+            result++;
+
+        return result;
+    };
+
     for (const auto& edit : sortedEdits)
     {
-        // Convert original positions to byte offsets (against immutable originalSource)
-        size_t startOffset = positionToOffset(originalSource, edit.range.begin);
-        size_t endOffset = positionToOffset(originalSource, edit.range.end);
+        // Convert original positions to byte offsets (carried forward)
+        size_t startOffset = positionToOffset(edit.range.begin);
+        size_t endOffset = positionToOffset(edit.range.end);
         if (endOffset > originalSource.size())
             endOffset = originalSource.size();
 
@@ -140,13 +120,17 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
         transformed.append(edit.newText);
         lastOffset = endOffset;
 
-        // Compute transformed range via cumulative deltas
+        // Compute transformed start position via cumulative deltas
         Luau::Position transformedStart = edit.range.begin;
         transformedStart.line += cumulativeLineDelta;
         if (static_cast<int>(edit.range.begin.line) == currentOriginalLine)
             transformedStart.column += cumulativeColumnDelta;
 
-        Luau::Position transformedEnd = calculateEndPosition(transformedStart, edit.newText);
+        // Compute transformed end position from start + text size
+        auto newSize = calculateTextSize(edit.newText);
+        Luau::Position transformedEnd = newSize.lineDelta == 0
+            ? Luau::Position{transformedStart.line, transformedStart.column + newSize.lastLineLength}
+            : Luau::Position{transformedStart.line + static_cast<unsigned int>(newSize.lineDelta), newSize.lastLineLength};
 
         appliedEdits.push_back(AppliedEdit{
             edit.range,
@@ -156,7 +140,6 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
 
         // Update cumulative deltas
         int originalLines = static_cast<int>(edit.range.end.line) - static_cast<int>(edit.range.begin.line);
-        auto newSize = calculateTextSize(edit.newText);
         cumulativeLineDelta += (newSize.lineDelta - originalLines);
 
         size_t originalRangeLength = endOffset - startOffset;
@@ -179,7 +162,7 @@ SourceMapping SourceMapping::fromEdits(const std::string& originalSource, const 
     // Copy remaining text after last edit
     transformed.append(originalSource, lastOffset, originalSource.size() - lastOffset);
 
-    return SourceMapping{std::move(transformed), std::move(appliedEdits)};
+    return TransformResult{std::move(transformed), std::move(appliedEdits)};
 }
 
 std::optional<Luau::Position> SourceMapping::originalToTransformed(const Luau::Position& pos) const

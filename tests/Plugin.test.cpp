@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "Fixture.h"
-#include "TempDir.h"
 #include "LSP/Uri.hpp"
 #include "LSP/Workspace.hpp"
 #include "Protocol/Window.hpp"
@@ -42,10 +41,10 @@ TEST_CASE("SourceMapping.fromEdits no edits")
     std::string original = "local x = 1";
     std::vector<TextEdit> edits{};
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto result = SourceMapping::fromEdits(original, edits);
 
-    CHECK(mapping.getTransformedSource() == original);
-    CHECK(!mapping.hasEdits());
+    CHECK(result.transformedSource == original);
+    CHECK(result.edits.empty());
 }
 
 TEST_CASE("SourceMapping.fromEdits single replacement same length")
@@ -55,10 +54,12 @@ TEST_CASE("SourceMapping.fromEdits single replacement same length")
         {{{0, 6}, {0, 7}}, "y"}  // Replace "x" with "y"
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto result = SourceMapping::fromEdits(original, edits);
 
-    CHECK(mapping.getTransformedSource() == "local y = 1");
-    CHECK(mapping.hasEdits());
+    CHECK(result.transformedSource == "local y = 1");
+    CHECK(!result.edits.empty());
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position before edit unchanged
     auto pos = mapping.originalToTransformed({0, 0});
@@ -80,9 +81,11 @@ TEST_CASE("SourceMapping.fromEdits single replacement longer")
         {{{0, 18}, {0, 22}}, "\"path/to/file\""}  // Replace "file" with "path/to/file"
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto result = SourceMapping::fromEdits(original, edits);
 
-    CHECK(mapping.getTransformedSource() == "local x = require(\"path/to/file\")");
+    CHECK(result.transformedSource == "local x = require(\"path/to/file\")");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position before edit unchanged
     auto pos = mapping.originalToTransformed({0, 10});
@@ -104,9 +107,11 @@ TEST_CASE("SourceMapping.fromEdits single replacement shorter")
         {{{0, 6}, {0, 22}}, "x"}  // Replace "longVariableName" with "x"
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto result = SourceMapping::fromEdits(original, edits);
 
-    CHECK(mapping.getTransformedSource() == "local x = 1");
+    CHECK(result.transformedSource == "local x = 1");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position after edit shifted back
     auto pos = mapping.originalToTransformed({0, 25});
@@ -123,8 +128,8 @@ TEST_CASE("SourceMapping.fromEdits multiple edits")
         {{{0, 4}, {0, 5}}, "CCC"},  // c -> CCC
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "AAA b CCC");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "AAA b CCC");
 }
 
 TEST_CASE("SourceMapping.fromEdits three edits same line")
@@ -137,8 +142,10 @@ TEST_CASE("SourceMapping.fromEdits three edits same line")
         {{{0, 4}, {0, 5}}, "CCC"},  // c -> CCC (+2 chars)
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "AAA BBB CCC d");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "AAA BBB CCC d");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Test position mapping after all three edits
     // Position of 'd' in original is column 6
@@ -166,8 +173,10 @@ TEST_CASE("SourceMapping.fromEdits three edits same line shrinking")
         {{{0, 8}, {0, 11}}, "c"},   // ccc -> c (-2 chars)
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "a b c ddd");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "a b c ddd");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position of 'ddd' in original is column 12
     // After edits: -2 (first) -2 (second) -2 (third) = -6
@@ -188,8 +197,10 @@ TEST_CASE("SourceMapping.fromEdits adjacent edits same line")
         {{{0, 2}, {0, 3}}, "ZZ"},   // c -> ZZ
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "XXYYZZd");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "XXYYZZd");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // 'd' was at column 3, now should be at column 6
     auto pos = mapping.originalToTransformed({0, 3});
@@ -209,8 +220,10 @@ TEST_CASE("SourceMapping.fromEdits mixed size edits same line")
         {{{0, 9}, {0, 11}}, "DDD"},   // dd -> DDD (+1)
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "AAAA B CC DDD");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "AAAA B CC DDD");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position inside third edit range (col 6 = start of 'cc') maps to transformed start of that edit
     // Transformed: "AAAA B CC DDD" — 'CC' starts at col 7
@@ -236,8 +249,10 @@ TEST_CASE("SourceMapping.fromEdits position mapping between same-line edits")
         {{{0, 4}, {0, 5}}, "YYY"},  // b -> YYY at col 4-5, (+2)
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "XX   YYY   c");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "XX   YYY   c");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position in gap between first and second edit (e.g., column 2 = first space)
     // After first edit: +1, so column 2 -> column 3
@@ -267,8 +282,8 @@ TEST_CASE("SourceMapping.fromEdits multiline")
         {{{1, 0}, {1, 5}}, "replaced"}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "line1\nreplaced\nline3");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "line1\nreplaced\nline3");
 }
 
 TEST_CASE("SourceMapping.fromEdits insert (empty range)")
@@ -278,8 +293,10 @@ TEST_CASE("SourceMapping.fromEdits insert (empty range)")
         {{{0, 0}, {0, 0}}, "-- comment\n"}  // Insert at start
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "-- comment\nlocal x = 1");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "-- comment\nlocal x = 1");
+
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position after insert is shifted
     auto pos = mapping.originalToTransformed({0, 0});
@@ -295,8 +312,8 @@ TEST_CASE("SourceMapping.fromEdits delete (empty newText)")
         {{{0, 11}, {0, 22}}, ""}  // Delete " -- comment"
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    CHECK(mapping.getTransformedSource() == "local x = 1");
+    auto result = SourceMapping::fromEdits(original, edits);
+    CHECK(result.transformedSource == "local x = 1");
 }
 
 TEST_CASE("SourceMapping.transformedToOriginal basic")
@@ -306,7 +323,8 @@ TEST_CASE("SourceMapping.transformedToOriginal basic")
         {{{0, 18}, {0, 22}}, "\"path/to/file\""}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
+    auto result = SourceMapping::fromEdits(original, edits);
+    SourceMapping mapping{std::move(result.edits)};
 
     // Position before edit
     auto pos = mapping.transformedToOriginal({0, 10});
@@ -344,8 +362,8 @@ TEST_CASE("PluginTextDocument getText returns transformed")
         {{{0, 6}, {0, 7}}, "y"}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    PluginTextDocument doc(Uri::parse("file://test.luau"), "luau", 1, original, transformed, std::move(mapping));
+    auto result = SourceMapping::fromEdits(original, edits);
+    PluginTextDocument doc(Uri::parse("file://test.luau"), "luau", 1, original, transformed, SourceMapping{std::move(result.edits)});
 
     CHECK(doc.getText() == transformed);
     CHECK(doc.getOriginalText() == original);
@@ -358,15 +376,14 @@ TEST_CASE("PluginTextDocument convertPosition maps correctly")
         {{{0, 18}, {0, 22}}, "\"path/to/file\""}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    auto transformedSource = mapping.getTransformedSource();
+    auto result = SourceMapping::fromEdits(original, edits);
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        std::move(transformedSource),
-        std::move(mapping)
+        std::move(result.transformedSource),
+        SourceMapping{std::move(result.edits)}
     );
 
     // LSP position -> Luau position (original -> transformed)
@@ -394,8 +411,7 @@ TEST_CASE("PluginTextDocument convertPosition with multiline insertion")
         {{{0, 0}, {0, 0}}, "-- long header line\n"}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    auto transformedSource = mapping.getTransformedSource();
+    auto result = SourceMapping::fromEdits(original, edits);
     // transformed = "-- long header line\nab\ncd"
     // original offsets:    [0, 3]         (line 0: "ab\n", line 1: "cd")
     // transformed offsets: [0, 20, 23]    (line 0: "-- long header line\n", line 1: "ab\n", line 2: "cd")
@@ -404,8 +420,8 @@ TEST_CASE("PluginTextDocument convertPosition with multiline insertion")
         "luau",
         1,
         original,
-        std::move(transformedSource),
-        std::move(mapping)
+        std::move(result.transformedSource),
+        SourceMapping{std::move(result.edits)}
     );
 
     // LSP position {1, 1} is column 1 on line 1 of ORIGINAL ("cd")
@@ -426,15 +442,14 @@ TEST_CASE("PluginTextDocument convertPosition reverse with multiline insertion")
         {{{0, 0}, {0, 0}}, "-- long header line\n"}
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    auto transformedSource = mapping.getTransformedSource();
+    auto result = SourceMapping::fromEdits(original, edits);
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        std::move(transformedSource),
-        std::move(mapping)
+        std::move(result.transformedSource),
+        SourceMapping{std::move(result.edits)}
     );
 
     // Luau position {2, 1} in transformed is "d" on line 2 ("cd")
@@ -455,16 +470,15 @@ TEST_CASE("PluginTextDocument convertPosition with line-changing edit preserves 
         {{{0, 14}, {0, 14}}, "\nend"}          // Append "\nend" at end
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    auto transformedSource = mapping.getTransformedSource();
+    auto result = SourceMapping::fromEdits(original, edits);
     // transformed = "do\nprint('hello')\nend"
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        std::move(transformedSource),
-        std::move(mapping)
+        std::move(result.transformedSource),
+        SourceMapping{std::move(result.edits)}
     );
 
     // Original position {0, 6} -> should map to transformed {1, 6} -> back to {0, 6}
@@ -482,15 +496,14 @@ TEST_CASE("PluginTextDocument lineCount uses transformed")
         {{{0, 0}, {0, 0}}, "-- header\n"}  // Insert line at start
     };
 
-    auto mapping = SourceMapping::fromEdits(original, edits);
-    auto transformedSource = mapping.getTransformedSource();
+    auto result = SourceMapping::fromEdits(original, edits);
     PluginTextDocument doc(
         Uri::parse("file://test.luau"),
         "luau",
         1,
         original,
-        std::move(transformedSource),
-        std::move(mapping)
+        std::move(result.transformedSource),
+        SourceMapping{std::move(result.edits)}
     );
 
     CHECK(doc.lineCount() == 2);  // Transformed has 2 lines
@@ -502,8 +515,8 @@ TEST_SUITE_BEGIN("PluginRuntime");
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime loads valid plugin")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("valid_plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("valid_plugin.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
@@ -530,8 +543,8 @@ TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails on non-existent file")
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails on syntax error")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("syntax_error.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("syntax_error.luau", R"(
 return {
     this is not valid lua syntax!!!
 }
@@ -546,8 +559,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin does not return table")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("no_table.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("no_table.luau", R"(
 return "not a table"
 )");
 
@@ -561,8 +574,8 @@ return "not a table"
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when plugin returns nil")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("returns_nil.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("returns_nil.luau", R"(
 return nil
 )");
 
@@ -576,8 +589,8 @@ return nil
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime loads plugin without transformSource (optional)")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("no_transform.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("no_transform.luau", R"(
 return {
     someOtherFunction = function() end
 }
@@ -600,8 +613,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime fails when transformSource is not a function")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("not_function.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("not_function.luau", R"(
 return {
     transformSource = "not a function"
 }
@@ -617,8 +630,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns nil for no changes")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("no_changes.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("no_changes.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
@@ -639,8 +652,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns empty table for no changes")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("empty_table.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("empty_table.luau", R"(
 return {
     transformSource = function(source, context)
         return {}
@@ -661,8 +674,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource returns edits")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("with_edits.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("with_edits.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -694,8 +707,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource receives context")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("check_context.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("check_context.luau", R"(
 return {
     transformSource = function(source, context)
         -- Verify we receive the context
@@ -718,8 +731,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource handles runtime error")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("runtime_error.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("runtime_error.luau", R"(
 return {
     transformSource = function(source, context)
         error("Something went wrong!")
@@ -740,8 +753,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource handles invalid edit structure")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("invalid_edit.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("invalid_edit.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -762,8 +775,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime load times out on infinite loop")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("infinite_loop.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("infinite_loop.luau", R"(
 -- This plugin has an infinite loop during load
 while true do
 end
@@ -786,8 +799,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime transformSource times out on infinite loop")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("infinite_transform.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("infinite_transform.luau", R"(
 return {
     transformSource = function(source, context)
         -- Infinite loop during transform
@@ -812,8 +825,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginRuntime with long timeout completes successfully")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("valid_plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("valid_plugin.luau", R"(
 return {
     transformSource = function(source, context)
         -- Do some work but not an infinite loop
@@ -842,15 +855,15 @@ TEST_SUITE_BEGIN("PluginManager");
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager configure loads plugins")
 {
-    TempDir dir("plugin_test");
-    std::string plugin1 = dir.write_child("plugin1.luau", R"(
+
+    std::string plugin1 = tempDir.write_child("plugin1.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
     end
 }
 )");
-    std::string plugin2 = dir.write_child("plugin2.luau", R"(
+    std::string plugin2 = tempDir.write_child("plugin2.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
@@ -868,15 +881,15 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager configure handles invalid plugins gracefully")
 {
-    TempDir dir("plugin_test");
-    std::string validPlugin = dir.write_child("valid.luau", R"(
+
+    std::string validPlugin = tempDir.write_child("valid.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
     end
 }
 )");
-    std::string invalidPlugin = dir.write_child("invalid.luau", R"(
+    std::string invalidPlugin = tempDir.write_child("invalid.luau", R"(
 return "not a table"
 )");
 
@@ -903,8 +916,8 @@ TEST_CASE_FIXTURE(Fixture, "PluginManager transform with no plugins returns empt
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager transform applies plugin edits")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("transform.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("transform.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -929,8 +942,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager clear removes all plugins")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
@@ -954,18 +967,18 @@ TEST_CASE_FIXTURE(Fixture, "PluginManager SourceMapping builds correct mapping f
         {{{0, 6}, {0, 7}}, "y"}
     };
 
-    auto mapping = SourceMapping::fromEdits(source, edits);
+    auto result = SourceMapping::fromEdits(source, edits);
 
-    CHECK(mapping.getTransformedSource() == "local y = 1");
-    CHECK(mapping.hasEdits());
+    CHECK(result.transformedSource == "local y = 1");
+    CHECK(!result.edits.empty());
 }
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager combines edits from multiple plugins")
 {
-    TempDir dir("plugin_test");
+
 
     // Plugin 1: replace "x" with "foo"
-    std::string plugin1Path = dir.write_child("plugin1.luau", R"(
+    std::string plugin1Path = tempDir.write_child("plugin1.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -980,7 +993,7 @@ return {
 )");
 
     // Plugin 2: replace "1" with "42"
-    std::string plugin2Path = dir.write_child("plugin2.luau", R"(
+    std::string plugin2Path = tempDir.write_child("plugin2.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -1005,10 +1018,10 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager overlapping edits rejected by SourceMapping")
 {
-    TempDir dir("plugin_test");
+
 
     // Plugin 1: replace columns 6-10
-    std::string plugin1Path = dir.write_child("plugin1.luau", R"(
+    std::string plugin1Path = tempDir.write_child("plugin1.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -1023,7 +1036,7 @@ return {
 )");
 
     // Plugin 2: edits overlapping range (columns 8-11)
-    std::string plugin2Path = dir.write_child("plugin2.luau", R"(
+    std::string plugin2Path = tempDir.write_child("plugin2.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -1049,8 +1062,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager reload reloads plugins from disk")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -1073,7 +1086,7 @@ return {
     CHECK(edits[0].newText == "y");
 
     // Update the plugin file on disk to replace with "z" instead
-    dir.write_child("plugin.luau", R"(
+    tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
         return {
@@ -1098,8 +1111,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager reload handles plugin that becomes invalid")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("plugin.luau", R"(
 return {
     transformSource = function(source, context)
         return nil
@@ -1112,7 +1125,7 @@ return {
     CHECK(manager.pluginCount() == 1);
 
     // Overwrite plugin with invalid content
-    dir.write_child("plugin.luau", R"(
+    tempDir.write_child("plugin.luau", R"(
 return "not a table"
 )");
 
@@ -1128,8 +1141,8 @@ return "not a table"
 
 TEST_CASE_FIXTURE(Fixture, "PluginManager isPluginFile matches loaded plugins")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("plugin.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("plugin.luau", R"(
 return {}
 )");
 
@@ -1146,8 +1159,8 @@ TEST_SUITE_BEGIN("PluginFilesystemAPI");
 
 TEST_CASE_FIXTURE(Fixture, "lsp.workspace.getRootUri returns Uri userdata")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_rooturi.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_rooturi.luau", R"(
 return {
     transformSource = function(source, context)
         local rootUri = lsp.workspace.getRootUri()
@@ -1170,8 +1183,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.Uri.parse creates Uri userdata")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_uri_parse.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_uri_parse.luau", R"(
 return {
     transformSource = function(source, context)
         local uri = lsp.Uri.parse("file:///test/path/file.luau")
@@ -1194,8 +1207,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.Uri.file creates file Uri")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_uri_file.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_uri_file.luau", R"(
 return {
     transformSource = function(source, context)
         local uri = lsp.Uri.file("/test/path/file.luau")
@@ -1217,8 +1230,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "Uri:joinPath works correctly")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_joinpath.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_joinpath.luau", R"(
 return {
     transformSource = function(source, context)
         local rootUri = lsp.workspace.getRootUri()
@@ -1245,8 +1258,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "Uri:toString returns string")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_tostring.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_tostring.luau", R"(
 return {
     transformSource = function(source, context)
         local uri = lsp.Uri.parse("file:///test/path/file.luau")
@@ -1269,12 +1282,12 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.fs.readFile throws when disabled")
 {
-    TempDir dir("plugin_test");
+
     // Filesystem access is disabled by default
 
-    std::string testFilePath = dir.write_child("testdata.txt", "Hello, World!");
+    std::string testFilePath = tempDir.write_child("testdata.txt", "Hello, World!");
 
-    std::string pluginPath = dir.write_child("test_readfile_disabled.luau", R"(
+    std::string pluginPath = tempDir.write_child("test_readfile_disabled.luau", R"(
 return {
     transformSource = function(source, context)
         local rootUri = lsp.workspace.getRootUri()
@@ -1300,11 +1313,11 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.fs.readFile throws for non-file URIs")
 {
-    TempDir dir("plugin_test");
+
     // Enable filesystem access for this test
     client->globalConfig.plugins.fileSystem.enabled = true;
 
-    std::string pluginPath = dir.write_child("test_readfile_https.luau", R"(
+    std::string pluginPath = tempDir.write_child("test_readfile_https.luau", R"(
 return {
     transformSource = function(source, context)
         local httpsUri = lsp.Uri.parse("https://example.com/file.txt")
@@ -1329,8 +1342,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "Uri equality works")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_uri_equality.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_uri_equality.luau", R"(
 return {
     transformSource = function(source, context)
         local uri1 = lsp.Uri.parse("file:///test/path/file.luau")
@@ -1353,14 +1366,107 @@ return {
     CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
 }
 
+TEST_CASE_FIXTURE(Fixture, "lsp.fs.listDirectory lists directory entries")
+{
+    // Enable filesystem access
+    client->globalConfig.plugins.fileSystem.enabled = true;
+
+    // Create some files in a subdirectory within the workspace temp dir
+    tempDir.write_child("subdir/file1.luau", "");
+    tempDir.write_child("subdir/file2.luau", "");
+
+    std::string pluginPath = tempDir.write_child("test_listdir.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        local dirUri = rootUri:joinPath("subdir")
+        local entries = lsp.fs.listDirectory(dirUri)
+        assert(type(entries) == "table", "listDirectory should return a table")
+        assert(#entries >= 2, "expected at least 2 entries, got " .. #entries)
+        -- Each entry should be a Uri
+        for _, entry in entries do
+            assert(entry.scheme == "file", "entry should have file scheme")
+            assert(entry.fsPath ~= nil, "entry should have fsPath")
+        end
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.fs.listDirectory throws when disabled")
+{
+    // Filesystem access disabled by default
+
+    std::string pluginPath = tempDir.write_child("test_listdir_disabled.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        local ok, err = pcall(function()
+            return lsp.fs.listDirectory(rootUri)
+        end)
+        assert(not ok, "listDirectory should have thrown")
+        assert(string.find(err, "filesystem access not available") ~= nil, "wrong error: " .. tostring(err))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
+TEST_CASE_FIXTURE(Fixture, "lsp.fs.listDirectory throws for non-directory")
+{
+    client->globalConfig.plugins.fileSystem.enabled = true;
+
+    tempDir.write_child("afile.txt", "content");
+
+    std::string pluginPath = tempDir.write_child("test_listdir_file.luau", R"(
+return {
+    transformSource = function(source, context)
+        local rootUri = lsp.workspace.getRootUri()
+        local fileUri = rootUri:joinPath("afile.txt")
+        local ok, err = pcall(function()
+            return lsp.fs.listDirectory(fileUri)
+        end)
+        assert(not ok, "listDirectory should have thrown for a file")
+        assert(string.find(err, "not a directory") ~= nil, "wrong error: " .. tostring(err))
+        return nil
+    end
+}
+)");
+
+    PluginRuntime runtime(getWorkspaceNotNull(*this), Uri::file(pluginPath));
+    REQUIRE(!runtime.load().has_value());
+
+    PluginContext ctx{"test.luau", "test"};
+    auto result = runtime.transformSource("local x = 1", ctx);
+
+    CHECK(std::holds_alternative<std::vector<TextEdit>>(result));
+}
+
 TEST_SUITE_END();
 
 TEST_SUITE_BEGIN("PluginLoggingAPI");
 
 TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage sends message with prefix")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_log.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_log.luau", R"(
 return {
     transformSource = function(source, context)
         lsp.client.sendLogMessage("info", "Test message")
@@ -1394,8 +1500,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage supports all message types")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_log_types.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_log_types.luau", R"(
 return {
     transformSource = function(source, context)
         lsp.client.sendLogMessage("error", "Error msg")
@@ -1429,8 +1535,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.client.sendLogMessage rejects invalid type")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_log_invalid.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_log_invalid.luau", R"(
 return {
     transformSource = function(source, context)
         local ok, err = pcall(function()
@@ -1454,8 +1560,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "print redirects to log with Info level")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_print.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_print.luau", R"(
 return {
     transformSource = function(source, context)
         print("Hello from plugin")
@@ -1488,8 +1594,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "print handles multiple arguments with tabs")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_print_multi.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_print_multi.luau", R"(
 return {
     transformSource = function(source, context)
         print("a", "b", "c")
@@ -1526,8 +1632,8 @@ TEST_SUITE_BEGIN("PluginJsonAPI");
 
 TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses simple values")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_json_simple.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_json_simple.luau", R"(
 return {
     transformSource = function(source, context)
         -- Test null
@@ -1563,8 +1669,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses arrays")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_json_arrays.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_json_arrays.luau", R"(
 return {
     transformSource = function(source, context)
         -- Test simple array
@@ -1603,8 +1709,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses objects")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_json_objects.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_json_objects.luau", R"(
 return {
     transformSource = function(source, context)
         -- Test simple object
@@ -1640,8 +1746,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize parses nested structures")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_json_nested.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_json_nested.luau", R"(
 return {
     transformSource = function(source, context)
         -- Test nested object
@@ -1676,8 +1782,8 @@ return {
 
 TEST_CASE_FIXTURE(Fixture, "lsp.json.deserialize throws on invalid JSON")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("test_json_error.luau", R"(
+
+    std::string pluginPath = tempDir.write_child("test_json_error.luau", R"(
 return {
     transformSource = function(source, context)
         -- Test that invalid JSON throws
@@ -1710,8 +1816,8 @@ TEST_SUITE_BEGIN("PluginEnvironment");
 
 TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns LSPPlugin for plugin files")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("my_plugin.luau", "return {}");
+
+    std::string pluginPath = tempDir.write_child("my_plugin.luau", "return {}");
 
     // Configure plugin manager with the plugin
     workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
@@ -1726,8 +1832,8 @@ TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns LSPPlugin for plugin
 
 TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns nullopt for non-plugin files")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("my_plugin.luau", "return {}");
+
+    std::string pluginPath = tempDir.write_child("my_plugin.luau", "return {}");
 
     // Configure plugin manager with the plugin
     workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
@@ -1750,8 +1856,8 @@ TEST_CASE_FIXTURE(Fixture, "getEnvironmentForModule returns nullopt when no plug
 
 TEST_CASE_FIXTURE(Fixture, "isPluginFile matches loaded plugin paths")
 {
-    TempDir dir("plugin_test");
-    std::string pluginPath = dir.write_child("plugin.luau", "return {}");
+
+    std::string pluginPath = tempDir.write_child("plugin.luau", "return {}");
 
     // Configure plugin manager
     workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(

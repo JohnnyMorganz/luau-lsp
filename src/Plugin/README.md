@@ -99,16 +99,16 @@ return {
 
 ```luau
 type TextEdit = {
-    startLine: number,      -- 1-indexed
-    startColumn: number,    -- 1-indexed, UTF-8 byte offset
-    endLine: number,        -- 1-indexed
-    endColumn: number,      -- 1-indexed, UTF-8 byte offset
+    startLine: number,      -- 1-indexed, inclusive
+    startColumn: number,    -- 1-indexed, inclusive, UTF-8 byte offset
+    endLine: number,        -- 1-indexed, inclusive
+    endColumn: number,      -- 1-indexed, exclusive, UTF-8 byte offset
     newText: string,
 }
 
 type PluginContext = {
-    filePath: string,
-    moduleName: string,
+    filePath: string,       -- absolute filesystem path of the source file
+    moduleName: string,     -- Luau module name (virtual path for Roblox, filesystem path otherwise)
 }
 ```
 
@@ -116,11 +116,17 @@ type PluginContext = {
 
 Positions use **1-based** line and column numbers (not 0-based like LSP). The first character of a file is at line 1, column 1. Columns are measured in UTF-8 byte offsets.
 
+The end position is **exclusive** — `endColumn` points to the byte *after* the last character to be replaced. For example, to replace the 4-character word `TODO` starting at column 5, use `startColumn = 5, endColumn = 9`.
+
 ### Sandbox Environment
 
 Plugins run in a sandboxed Luau environment. Standard libraries (`string`, `table`, `math`, `bit32`, `buffer`, `coroutine`, `utf8`) are available. Direct filesystem and OS access (`io`, `os`, `debug`) is not available; use the `lsp.fs` API instead.
 
 Plugin files that are listed in `plugins.paths` are automatically recognized by the language server and receive type information for the `lsp.*` API, giving you autocomplete and type checking while editing your plugins.
+
+### State Persistence
+
+Plugin state persists between calls to `transformSource`. Global variables set during one invocation will be visible in subsequent ones. This is useful for caching (e.g., parsed config files), but be aware that stale state can cause subtle bugs. When a plugin is hot-reloaded (e.g., after saving the plugin file), all state is reset.
 
 ### How It Works
 
@@ -193,6 +199,19 @@ end
 ### `lsp.fs.exists(uri: Uri): boolean`
 
 Checks whether a file exists within the workspace. Returns `true` if the file exists and is readable, `false` otherwise. Like `readFile`, only files within the workspace can be checked.
+
+### `lsp.fs.listDirectory(uri: Uri): {Uri}`
+
+Lists the entries in a directory within the workspace. Returns an array of Uri objects for each entry (files and subdirectories). Only directories within the workspace can be listed.
+
+```luau
+local rootUri = lsp.workspace.getRootUri()
+local srcUri = rootUri:joinPath("src")
+local entries = lsp.fs.listDirectory(srcUri)
+for _, entry in entries do
+    print(entry.fsPath)
+end
+```
 
 ### `lsp.Uri.parse(uriString: string): Uri`
 

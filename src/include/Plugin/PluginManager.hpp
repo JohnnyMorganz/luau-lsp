@@ -18,7 +18,7 @@ enum struct MessageType;
 namespace Luau::LanguageServer::Plugin
 {
 
-// Manages multiple plugins and handles plugin chaining
+// Manages multiple plugins and combines their edits
 class PluginManager
 {
     std::vector<std::unique_ptr<PluginRuntime>> plugins;

@@ -21,6 +21,7 @@ static int uriJoinPath(lua_State* L);
 static int lspWorkspaceGetRootUri(lua_State* L);
 static int lspFsReadFile(lua_State* L);
 static int lspFsExists(lua_State* L);
+static int lspFsListDirectory(lua_State* L);
 static int lspUriParse(lua_State* L);
 static int lspUriFile(lua_State* L);
 static int lspClientSendLogMessage(lua_State* L);
@@ -221,6 +222,25 @@ static int lspFsExists(lua_State* L)
     return 1;
 }
 
+static int lspFsListDirectory(lua_State* L)
+{
+    Uri* targetUri = validateFileAccess(L);
+
+    auto targetPath = targetUri->fsPath();
+    if (!Luau::FileUtils::isDirectory(targetPath))
+        luaL_errorL(L, "not a directory or does not exist");
+
+    lua_newtable(L);
+    int index = 1;
+
+    Luau::FileUtils::traverseDirectory(targetPath, [L, &index](const std::string& name) {
+        pushUri(L, Uri::file(name));
+        lua_rawseti(L, -2, index++);
+    });
+
+    return 1;
+}
+
 static int lspClientSendLogMessage(lua_State* L)
 {
     auto* ctx = getLuaApiContext(L);
@@ -392,6 +412,8 @@ void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string&
     lua_setfield(L, -2, "readFile");
     pushClosureWithContext(lspFsExists, "exists");
     lua_setfield(L, -2, "exists");
+    pushClosureWithContext(lspFsListDirectory, "listDirectory");
+    lua_setfield(L, -2, "listDirectory");
     lua_setfield(L, -2, "fs");
 
     // lsp.client table

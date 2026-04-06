@@ -1,7 +1,6 @@
 #pragma once
 #include "Luau/Location.h"
 #include <string>
-#include <vector>
 
 namespace Luau::LanguageServer::Plugin
 {
@@ -25,7 +24,6 @@ struct PluginContext
 struct PluginError
 {
     std::string message;
-    std::string pluginPath;
 };
 
 } // namespace Luau::LanguageServer::Plugin

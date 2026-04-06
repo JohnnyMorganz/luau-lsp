@@ -16,19 +16,25 @@ struct AppliedEdit
     Luau::Location transformedRange;  // Resulting range in transformed source
 };
 
+// Result of applying edits to source code
+struct TransformResult
+{
+    std::string transformedSource;
+    std::vector<AppliedEdit> edits;  // Sorted by original position
+};
+
 // Handles bidirectional position mapping between original and transformed source
 class SourceMapping
 {
-    std::string transformedSource;
     std::vector<AppliedEdit> edits;  // Sorted by original position
 
 public:
     SourceMapping() = default;
-    SourceMapping(std::string transformed, std::vector<AppliedEdit> appliedEdits);
+    explicit SourceMapping(std::vector<AppliedEdit> appliedEdits);
 
-    // Build mapping from a list of text edits applied to original source
+    // Build transformed source and mapping from a list of text edits applied to original source
     // Edits must not overlap. They will be sorted by position.
-    static SourceMapping fromEdits(const std::string& originalSource, const std::vector<TextEdit>& edits);
+    static TransformResult fromEdits(const std::string& originalSource, const std::vector<TextEdit>& edits);
 
     // Convert position from original source to transformed source
     // Returns nullopt if position falls inside a deleted region
@@ -37,11 +43,6 @@ public:
     // Convert position from transformed source to original source
     // Returns nullopt if position falls inside synthesized (inserted) text
     std::optional<Luau::Position> transformedToOriginal(const Luau::Position& pos) const;
-
-    const std::string& getTransformedSource() const
-    {
-        return transformedSource;
-    }
 
     bool hasEdits() const
     {

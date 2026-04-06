@@ -22,6 +22,7 @@ declare lsp: {
     fs: {
         readFile: (uri: Uri) -> string,
         exists: (uri: Uri) -> boolean,
+        listDirectory: (uri: Uri) -> {Uri},
     },
     client: {
         sendLogMessage: (type: "error" | "warning" | "info" | "log", message: string) -> (),
@@ -36,16 +37,16 @@ declare lsp: {
 }
 
 export type TextEdit = {
-    startLine: number,      -- 1-indexed
-    startColumn: number,    -- 1-indexed, UTF-8 byte offset
-    endLine: number,        -- 1-indexed
-    endColumn: number,      -- 1-indexed, UTF-8 byte offset
+    startLine: number,      -- 1-indexed, inclusive
+    startColumn: number,    -- 1-indexed, inclusive, UTF-8 byte offset
+    endLine: number,        -- 1-indexed, inclusive
+    endColumn: number,      -- 1-indexed, exclusive, UTF-8 byte offset
     newText: string,
 }
 
 export type PluginContext = {
-    filePath: string,
-    moduleName: string,
+    filePath: string,       -- absolute filesystem path of the source file
+    moduleName: string,     -- Luau module name (virtual path for Roblox, filesystem path otherwise)
 }
 
 export type PluginApi = {

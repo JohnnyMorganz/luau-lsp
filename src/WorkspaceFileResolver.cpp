@@ -77,14 +77,13 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
     if (!transformed)
         return original;
 
-    auto transformedSource = transformed->getTransformedSource();
     auto pluginDoc = std::make_unique<Luau::LanguageServer::Plugin::PluginTextDocument>(
         original->uri(),
         original->languageId(),
         original->version(),
         original->getText(),
-        std::move(transformedSource),
-        std::move(*transformed));
+        std::move(transformed->transformedSource),
+        Luau::LanguageServer::Plugin::SourceMapping{std::move(transformed->edits)});
 
     pluginDocuments[uri] = std::move(pluginDoc);
     return pluginDocuments[uri].get();
@@ -100,7 +99,7 @@ void WorkspaceFileResolver::clearPluginDocuments()
     pluginDocuments.clear();
 }
 
-std::optional<Luau::LanguageServer::Plugin::SourceMapping> WorkspaceFileResolver::applyPluginTransformation(
+std::optional<Luau::LanguageServer::Plugin::TransformResult> WorkspaceFileResolver::applyPluginTransformation(
     const std::string& source, const Uri& uri, const std::string& moduleName) const
 {
     if (!pluginManager || !pluginManager->hasPlugins())
@@ -157,7 +156,7 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     if (auto source = platform->readSourceCode(name, uri))
     {
         if (auto transformed = applyPluginTransformation(*source, uri, name))
-            return Luau::SourceCode{transformed->getTransformedSource(), sourceType};
+            return Luau::SourceCode{std::move(transformed->transformedSource), sourceType};
         return Luau::SourceCode{*source, sourceType};
     }
 
