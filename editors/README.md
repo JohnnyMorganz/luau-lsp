@@ -112,6 +112,23 @@ the appropriate spot. The following payload is sent in this case:
 It is optional to decide whether to implement this command for your language client, and the server will run fine without
 it being defined. If not available, you may see slight problems when autocompleting `end`.
 
+## Optional: Rename After Refactoring
+
+When resolving refactoring code actions (e.g., Extract to local variable, Extract to function), the server returns a
+`CodeAction` with both an `edit` and a `command`. The command triggers a rename prompt so the user can name the newly
+created symbol.
+
+The command used is `luau-lsp.rename` with arguments `[uri: string, position: { line: number, character: number }]`.
+The VS Code extension handles this by moving the cursor to the specified position and triggering `editor.action.rename`.
+
+For non-VS Code clients, you should register a handler for this command that:
+
+1. Moves the cursor to the given position in the given document
+2. Triggers your editor's rename UI
+
+If the command is not handled, the refactoring will still work but the user will need to manually rename the
+extracted symbol.
+
 ## Optional: Rojo Sourcemap Generation
 
 The Language Server automatically listens for any changes to a `sourcemap.json` file present in the opened workspace root.

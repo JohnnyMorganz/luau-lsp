@@ -253,6 +253,19 @@ std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
     return std::make_pair(source, lsp::Position{line, column});
 }
 
+std::optional<lsp::CodeAction> findCodeAction(const lsp::CodeActionResult& result, const std::string& title)
+{
+    if (!result)
+        return std::nullopt;
+
+    for (const auto& action : *result)
+    {
+        if (action.title == title)
+            return action;
+    }
+    return std::nullopt;
+}
+
 std::string dedent(std::string source)
 {
     auto lines = Luau::split(source, '\n');
