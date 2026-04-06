@@ -685,7 +685,7 @@ lsp::CodeAction resolveRefactoring(
             auto& pos = *refactorResult->renamePosition;
             resolved.command = lsp::Command{
                 "Rename Symbol",
-                "editor.action.rename",
+                "luau-lsp.rename",
                 {nlohmann::json(uri.toString()), nlohmann::json(pos)},
             };
         }

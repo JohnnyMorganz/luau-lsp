@@ -118,9 +118,16 @@ When resolving refactoring code actions (e.g., Extract to local variable, Extrac
 `CodeAction` with both an `edit` and a `command`. The command triggers a rename prompt so the user can name the newly
 created symbol.
 
-The command used is `editor.action.rename`, which is a VS Code built-in command. For non-VS Code clients, you may need
-to map this to your editor's equivalent rename command. If the command is not supported, the refactoring will still work
-but the user will need to manually rename the extracted symbol.
+The command used is `luau-lsp.rename` with arguments `[uri: string, position: { line: number, character: number }]`.
+The VS Code extension handles this by moving the cursor to the specified position and triggering `editor.action.rename`.
+
+For non-VS Code clients, you should register a handler for this command that:
+
+1. Moves the cursor to the given position in the given document
+2. Triggers your editor's rename UI
+
+If the command is not handled, the refactoring will still work but the user will need to manually rename the
+extracted symbol.
 
 ## Optional: Rojo Sourcemap Generation
 
