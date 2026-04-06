@@ -542,7 +542,10 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   clientDisposables.push(
     vscode.commands.registerCommand(
       "luau-lsp.rename",
-      async (uriString: string, position: { line: number; character: number }) => {
+      async (
+        uriString: string,
+        position: { line: number; character: number },
+      ) => {
         const uri = vscode.Uri.parse(uriString);
         const pos = new vscode.Position(position.line, position.character);
         const editor = vscode.window.activeTextEditor;

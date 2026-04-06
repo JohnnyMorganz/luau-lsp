@@ -1,10 +1,16 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include "Protocol/CodeAction.hpp"
 #include "LSP/TextDocument.hpp"
-#include "Luau/Ast.h"
-#include "Luau/Module.h"
+#include "Luau/Location.h"
+
+namespace Luau
+{
+struct SourceModule;
+struct FrontendCancellationToken;
+}
 
 class WorkspaceFolder;
 using LSPCancellationToken = std::shared_ptr<Luau::FrontendCancellationToken>;
