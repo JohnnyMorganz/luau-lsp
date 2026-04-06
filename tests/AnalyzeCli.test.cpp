@@ -31,10 +31,16 @@ ostream& operator<<(ostream& os, const vector<T>& value)
 }
 } // namespace std
 
-static void initCliWorkspace(CliClient& client, WorkspaceFolder& workspace)
+/// Sets up default client config and definitions. Call this before customizing
+/// globalConfig fields, then call setupCliWorkspace() to finalize.
+static void initCliClient(CliClient& client)
 {
     client.globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
     client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+}
+
+static void setupCliWorkspace(CliClient& client, WorkspaceFolder& workspace)
+{
     workspace.setupWithConfiguration(client.globalConfig);
     workspace.isReady = true;
 }
@@ -50,9 +56,10 @@ TEST_CASE("getFilesToAnalyze")
     CHECK_EQ(allResults, std::vector<std::string>{fileA, fileB});
 
     CliClient client;
-    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    initCliClient(client);
     client.globalConfig.ignoreGlobs = {"b.luau"};
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
 
     auto ignoredFile = getFilesToAnalyze({t.path()}, &workspace);
     std::sort(ignoredFile.begin(), ignoredFile.end());
@@ -66,9 +73,10 @@ TEST_CASE("getFilesToAnalyze_handles_ignore_globs_within_directories")
     auto fileB = Uri::file(t.write_child("src/b.luau", "")).fsPath();
 
     CliClient client;
-    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    initCliClient(client);
     client.globalConfig.ignoreGlobs = {"b.luau"};
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
 
     auto ignoredFile = getFilesToAnalyze({t.path()}, &workspace);
     std::sort(ignoredFile.begin(), ignoredFile.end());
@@ -81,9 +89,10 @@ TEST_CASE("getFilesToAnalyze_still_matches_file_if_it_was_explicitly_provided")
     auto fileA = Uri::file(t.write_child("src/a.luau", "")).fsPath();
 
     CliClient client;
-    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    initCliClient(client);
     client.globalConfig.ignoreGlobs = {"a.luau"};
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
 
     CHECK_EQ(getFilesToAnalyze({fileA}, &workspace), std::vector<std::string>{fileA});
 }
@@ -185,8 +194,9 @@ TEST_CASE("analyze_file_reports_type_errors")
     )");
 
     CliClient client;
+    initCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    setupCliWorkspace(client, workspace);
 
     auto cr = workspace.checkSimple(filePath, nullptr);
     CHECK(!cr.errors.empty());
@@ -201,8 +211,9 @@ TEST_CASE("analyze_file_reports_no_errors_for_valid_code")
     )");
 
     CliClient client;
+    initCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    setupCliWorkspace(client, workspace);
 
     auto cr = workspace.checkSimple(filePath, nullptr);
     CHECK(cr.errors.empty());
@@ -217,8 +228,9 @@ TEST_CASE("definitions_loaded_through_workspace_via_client")
     )");
 
     CliClient client;
+    initCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    setupCliWorkspace(client, workspace);
 
     auto cr = workspace.checkSimple(filePath, nullptr);
     CHECK(cr.errors.empty());
@@ -250,15 +262,13 @@ TEST_CASE("sourcemap_loaded_through_workspace_configuration")
     t.write_child("src/Module.luau", "return {}");
 
     CliClient client;
-    client.globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
+    initCliClient(client);
     client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
     client.globalConfig.sourcemap.enabled = true;
     client.globalConfig.sourcemap.sourcemapFile = "sourcemap.json";
-    client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
 
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    workspace.setupWithConfiguration(client.globalConfig);
-    workspace.isReady = true;
+    setupCliWorkspace(client, workspace);
 
     auto* robloxPlatform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
     REQUIRE(robloxPlatform);
@@ -275,8 +285,9 @@ end
     )");
 
     CliClient client;
+    initCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
-    initCliWorkspace(client, workspace);
+    setupCliWorkspace(client, workspace);
 
     Luau::ModuleName name = filePath;
     workspace.checkStrict(name, nullptr, /* forAutocomplete= */ false);

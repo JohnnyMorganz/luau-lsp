@@ -32,10 +32,12 @@ struct Client
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
     ClientConfiguration globalConfig{};
 
-    /// A partial result token for workspace diagnostics streaming
-    std::optional<lsp::ProgressToken> workspaceDiagnosticsToken = std::nullopt;
-
     virtual ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
+
+    virtual std::optional<lsp::ProgressToken> getWorkspaceDiagnosticsToken() const
+    {
+        return std::nullopt;
+    }
 
     virtual void sendLogMessage(const lsp::MessageType& type, const std::string& message) const = 0;
 
@@ -71,15 +73,9 @@ struct Client
 
     virtual void refreshInlayHints() {}
 
-    virtual void applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler = std::nullopt)
-    {
-        throw std::logic_error("applyEdit not implemented");
-    }
+    virtual void applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler = std::nullopt) {}
 
-    virtual void sendNotification(const std::string& method, const std::optional<json>& params) const
-    {
-        throw std::logic_error("sendNotification not implemented");
-    }
+    virtual void sendNotification(const std::string& method, const std::optional<json>& params) const {}
 };
 
 class LSPClient : public Client
@@ -91,7 +87,13 @@ public:
 
     ConfigChangedCallback configChangedCallback;
 
+    std::optional<lsp::ProgressToken> workspaceDiagnosticsToken = std::nullopt;
     std::optional<id_type> workspaceDiagnosticsRequestId = std::nullopt;
+
+    std::optional<lsp::ProgressToken> getWorkspaceDiagnosticsToken() const override
+    {
+        return workspaceDiagnosticsToken;
+    }
 
 private:
     std::unique_ptr<Transport> transport;

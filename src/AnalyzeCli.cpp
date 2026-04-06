@@ -225,8 +225,6 @@ int startAnalyze(const argparse::ArgumentParser& program)
     FFlag::DebugLuauTimeTracing.value = program.is_used("--timetrace");
 
     CliClient client;
-    client.globalConfig.ignoreGlobs = program.get<std::vector<std::string>>("--ignore");
-    client.definitionsFiles = processDefinitionsFilePaths(program);
 
     auto currentWorkingDirectory = Luau::FileUtils::getCurrentWorkingDirectory();
     if (!currentWorkingDirectory)
@@ -247,6 +245,12 @@ int startAnalyze(const argparse::ArgumentParser& program)
             return 1;
         }
     }
+
+    // Apply CLI args after settings so they take precedence
+    auto cliIgnoreGlobs = program.get<std::vector<std::string>>("--ignore");
+    client.globalConfig.ignoreGlobs.insert(client.globalConfig.ignoreGlobs.end(), cliIgnoreGlobs.begin(), cliIgnoreGlobs.end());
+    for (const auto& [key, value] : processDefinitionsFilePaths(program))
+        client.definitionsFiles.insert_or_assign(key, value);
 
     auto filesArg = program.present<std::vector<std::string>>("files");
     if (!filesArg || filesArg->empty())
