@@ -38,6 +38,7 @@ if (LSP_BUILD_WITH_SENTRY)
     set(CRASHPAD_ENABLE_STACKTRACE ON CACHE BOOL "" FORCE)
     FetchContent_Declare(sentry
         URL https://github.com/getsentry/sentry-native/releases/download/0.11.0/sentry-native.zip
+        URL_HASH SHA256=2946d5d13ef2aa791fc4cee3663658da78ad8b3260f6976e1fd8f6e237c14db0
     )
     FetchContent_MakeAvailable(sentry)
 endif ()
