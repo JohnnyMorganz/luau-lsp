@@ -288,7 +288,7 @@ lsp::PartialResponse<lsp::WorkspaceDiagnosticReport> LanguageServer::workspaceDi
     }
 }
 
-void Client::terminateWorkspaceDiagnostics(bool retriggerRequest)
+void LSPClient::terminateWorkspaceDiagnostics(bool retriggerRequest)
 {
     lsp::DiagnosticServerCancellationData cancellationData{retriggerRequest};
 

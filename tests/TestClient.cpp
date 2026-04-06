@@ -3,7 +3,7 @@
 #include "LSP/Transport/StdioTransport.hpp"
 
 TestClient::TestClient()
-    : Client(std::make_unique<StdioTransport>())
+    : LSPClient(std::make_unique<StdioTransport>())
 {
 }
 
