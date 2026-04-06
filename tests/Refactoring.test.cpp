@@ -114,9 +114,14 @@ local y = 2
 
     auto& changes = resolved.edit->changes.at(uri);
     auto newSource = applyEdit(source, changes);
-    // The extracted function should take x as a parameter since it's used but defined outside
-    CHECK(newSource.find("local function extracted(x)") != std::string::npos);
-    CHECK(newSource.find("extracted(x)") != std::string::npos);
+    CHECK_EQ(newSource, R"(
+local x = 1
+local function extracted(x)
+    print(x)
+end
+extracted(x)
+local y = 2
+)");
 }
 
 TEST_CASE_FIXTURE(Fixture, "extract_function_with_return_values")
@@ -143,10 +148,15 @@ print(b)
 
     auto& changes = resolved.edit->changes.at(uri);
     auto newSource = applyEdit(source, changes);
-    // b is defined in selection and used after, so it should be a return value
-    // a is used but not defined in selection, so it should be a parameter
-    CHECK(newSource.find("return b") != std::string::npos);
-    CHECK(newSource.find("local b = extracted(a)") != std::string::npos);
+    CHECK_EQ(newSource, R"(
+local a = 1
+local function extracted(a)
+    local b = a + 1
+    return b
+end
+local b = extracted(a)
+print(b)
+)");
 }
 
 TEST_CASE_FIXTURE(Fixture, "extract_function_rejects_return_statement")
