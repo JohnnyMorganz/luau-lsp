@@ -30,12 +30,14 @@ std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(cons
     if (!requireString.empty() && requireString[0] == '@')
     {
         // Derive the real file URI for alias resolution (needed for @self on init.luau files)
-        Uri nodeUri;
         if (auto filePath = node->getScriptFilePath())
-            nodeUri = *workspaceFolder->fileResolver.rootUri.resolvePath(*filePath).parent();
-
-        if (auto aliasedPath = resolveAlias(requireString, *mainRequirerNodeConfig, nodeUri))
-            return std::make_unique<FileRequireNode>(*aliasedPath, aliasedPath->isDirectory(), workspaceFolder);
+        {
+            if (auto nodeUri = workspaceFolder->fileResolver.rootUri.resolvePath(*filePath).parent())
+            {
+                if (auto aliasedPath = resolveAlias(requireString, *mainRequirerNodeConfig, *nodeUri))
+                    return std::make_unique<FileRequireNode>(*aliasedPath, aliasedPath->isDirectory(), workspaceFolder);
+            }
+        }
 
         size_t slashPos = requireString.find('/');
         std::string aliasName = requireString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
