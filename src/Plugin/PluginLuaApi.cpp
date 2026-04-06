@@ -360,6 +360,10 @@ static void pushJsonValue(lua_State* L, const nlohmann::json& value, int depth)
             lua_rawset(L, -3);
         }
     }
+    else
+    {
+        lua_pushnil(L);
+    }
 }
 
 static int lspJsonDeserialize(lua_State* L)
@@ -377,6 +381,8 @@ static int lspJsonDeserialize(lua_State* L)
     {
         luaL_errorL(L, "JSON parse error: %s", e.what());
     }
+
+    return 0;
 }
 
 void registerLspApi(lua_State* L, WorkspaceFolder* workspace, const std::string& pluginPath)

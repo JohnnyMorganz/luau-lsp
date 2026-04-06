@@ -16,7 +16,7 @@ This file provides implementation guidance for Claude Code when working on the p
 │                                                                  │
 │  1. getTextDocument(uri) called                                  │
 │  2. If plugins configured:                                       │
-│     - All plugins transform original source (parallel)           │
+│     - All plugins transform original source (sequentially)        │
 │     - Edits combined, overlap check performed                    │
 │     - PluginTextDocument created with SourceMapping              │
 │  3. Returns PluginTextDocument (or original if no plugins)       │
