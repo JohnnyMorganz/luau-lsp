@@ -88,6 +88,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/operations/InlayHints.cpp
         src/operations/SemanticTokens.cpp
         src/operations/CodeAction.cpp
+        src/operations/Refactoring.cpp
         src/operations/WorkspaceSymbol.cpp
         src/operations/FoldingRange.cpp
         src/operations/CallHierarchy.cpp
@@ -146,12 +147,13 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/AnalyzeCli.test.cpp
         tests/CodeAction.test.cpp
         tests/Plugin.test.cpp
+        tests/Refactoring.test.cpp
         src/AnalyzeCli.cpp # For testing
 )
 
 # TODO: Set Luau.Analysis at O2 to speed up debugging
 if (MSVC)
-    list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS)
+    list(APPEND LUAU_LSP_OPTIONS /W3 /D_CRT_SECURE_NO_WARNINGS /bigobj)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         list(APPEND LUAU_LSP_OPTIONS "/EHsc") # The CMake clang-cl target doesn't enable exceptions by default
     else ()

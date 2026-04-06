@@ -157,6 +157,7 @@ public:
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
     lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params, const LSPCancellationToken& cancellationToken);
+    lsp::CodeAction codeActionResolve(const lsp::CodeAction& action, const LSPCancellationToken& cancellationToken);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken);
 
