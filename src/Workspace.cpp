@@ -3,10 +3,12 @@
 #include <memory>
 
 #include "LSP/Diagnostics.hpp"
+#include "LSP/FileConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "glob/match.h"
 #include "Luau/BuiltinDefinitions.h"
+#include "Luau/LuauConfig.h"
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
 
@@ -62,7 +64,7 @@ void WorkspaceFolder::updateTextDocument(const lsp::DocumentUri& uri, const lsp:
 
     // In pull based diagnostics module, documentDiagnostics will update the necessary files
     // But if we are still using push-based diagnostics, we need to send updates
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     if (!usingPullDiagnostics(client->capabilities))
     {
         // Convert the diagnostics report into a series of diagnostics published for each relevant file
@@ -92,7 +94,7 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
 {
     LUAU_ASSERT(isReady);
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     if (isWorkspaceDiagnosticsEnabled(client, config))
     {
         Luau::DenseHashSet<Luau::ModuleName> dependents{""};
@@ -144,7 +146,7 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
     fileResolver.managedFiles.erase(uri);
 
     // Mark the module as dirty as we no longer track its changes
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
     auto moduleName = fileResolver.getModuleName(uri);
     frontend.markDirty(moduleName);
 
@@ -194,7 +196,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     client->createWorkDoneProgress(kWatchedFilesProgressToken);
     client->sendWorkDoneProgressBegin(kWatchedFilesProgressToken, "Luau: Processing " + std::to_string(changes.size()) + " file changes");
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
 
     std::vector<Luau::ModuleName> dirtyFiles;
     std::vector<Uri> deletedFiles;
@@ -208,7 +210,13 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
             client->sendLogMessage(lsp::MessageType::Info, "Acknowledge config changed for workspace " + name + ", clearing configuration cache");
             fileResolver.clearConfigCache();
 
-            // Recompute diagnostics
+            // Reload LSP file config if the root .config.luau changed
+            if (change.uri.filename() == ".config.luau")
+                loadConfigLuauLSPConfiguration();
+
+            // Refresh the cached config and reapply
+            config = getConfiguration();
+            setupWithConfiguration(config);
             recomputeDiagnostics(config);
         }
         else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau")
@@ -245,7 +253,7 @@ bool WorkspaceFolder::isIgnoredFile(const Uri& uri, const std::optional<ClientCo
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePathString = uri.lexicallyRelative(rootUri);
-    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    auto config = givenConfig ? *givenConfig : getConfiguration();
     std::vector<std::string> patterns = config.ignoreGlobs; // TODO: extend further?
     for (auto& pattern : patterns)
     {
@@ -261,7 +269,7 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::opt
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePathString = uri.lexicallyRelative(rootUri);
-    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    auto config = givenConfig ? *givenConfig : getConfiguration();
     std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
     for (auto& pattern : patterns)
     {
@@ -275,7 +283,7 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::opt
 
 bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig) const
 {
-    auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
+    auto config = givenConfig ? *givenConfig : getConfiguration();
 
     for (auto& [_, file] : config.types.definitionFiles)
     {
@@ -583,6 +591,64 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
         Luau::freeze(frontend.globalsForAutocomplete.globalTypes);
 }
 
+void WorkspaceFolder::loadConfigLuauLSPConfiguration()
+{
+    configLuauLSPConfiguration = std::nullopt;
+
+    if (isNullWorkspace())
+        return;
+
+    auto luauConfigPath = rootUri.resolvePath(Luau::kLuauConfigName);
+    auto contents = Luau::FileUtils::readFile(luauConfigPath.fsPath());
+    if (!contents)
+        return;
+
+    client->sendTrace("workspace: loading LSP file configuration from " + luauConfigPath.fsPath());
+
+    std::string error;
+    auto configTable = Luau::extractConfig(*contents, {}, &error);
+    if (!configTable)
+    {
+        client->sendLogMessage(lsp::MessageType::Warning, "Failed to parse .config.luau for LSP config: " + error);
+        // Clear any stale LSP config diagnostics — Luau's own config parser will report the syntax error
+        client->publishDiagnostics({luauConfigPath, std::nullopt, {}});
+        return;
+    }
+
+    FileConfiguration fileConfig;
+    auto configDir = rootUri.fsPath();
+    if (auto parseError = extractLspConfigFromTable(*configTable, fileConfig, configDir))
+    {
+        client->sendLogMessage(lsp::MessageType::Warning, "Error in .config.luau lsp section: " + *parseError);
+
+        lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+        diagnostic.message = *parseError;
+        diagnostic.severity = lsp::DiagnosticSeverity::Error;
+        diagnostic.source = "luau-lsp";
+        client->publishDiagnostics({luauConfigPath, std::nullopt, {diagnostic}});
+        return;
+    }
+
+    // Clear any previous LSP config diagnostics on this file
+    client->publishDiagnostics({luauConfigPath, std::nullopt, {}});
+
+    if (fileConfig.hasAnyValue())
+    {
+        client->sendLogMessage(lsp::MessageType::Info, "Loaded LSP configuration from " + luauConfigPath.fsPath());
+        configLuauLSPConfiguration = std::move(fileConfig);
+    }
+}
+
+ClientConfiguration WorkspaceFolder::getConfiguration() const
+{
+    auto editorConfig = isNullWorkspace() ? client->globalConfig : client->getEditorConfiguration(rootUri);
+
+    if (configLuauLSPConfiguration)
+        return mergeConfigurations(editorConfig, *configLuauLSPConfiguration);
+
+    return editorConfig;
+}
+
 void WorkspaceFolder::lazyInitialize()
 {
     if (isReady)
@@ -590,16 +656,18 @@ void WorkspaceFolder::lazyInitialize()
 
     LUAU_TIMETRACE_SCOPE("WorkspaceFolder::lazyInitialize", "LSP");
 
+    // Load file-based LSP config before first setupWithConfiguration
+    loadConfigLuauLSPConfiguration();
+
     if (isNullWorkspace())
     {
         client->sendTrace("initializing null workspace");
-        setupWithConfiguration(client->globalConfig);
+        setupWithConfiguration(getConfiguration());
     }
     else
     {
         client->sendTrace("initializing workspace: " + rootUri.toString());
-        auto config = client->getConfiguration(rootUri);
-        setupWithConfiguration(config);
+        setupWithConfiguration(getConfiguration());
     }
 
     isReady = true;

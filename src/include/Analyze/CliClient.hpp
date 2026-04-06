@@ -23,7 +23,7 @@ struct CliClient : public BaseClient
     ClientConfiguration configuration;
     mutable std::vector<std::pair<Uri, std::string>> diagnostics{};
 
-    ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override
+    ClientConfiguration getEditorConfiguration(const lsp::DocumentUri& uri) override
     {
         return configuration;
     }

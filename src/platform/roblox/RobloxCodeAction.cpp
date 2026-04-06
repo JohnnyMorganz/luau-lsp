@@ -83,7 +83,7 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
     if (unknownSymbol.context != Luau::UnknownSymbol::Binding)
         return;
 
-    ClientConfiguration config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    ClientConfiguration config = workspaceFolder->getConfiguration();
 
     Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);
@@ -173,7 +173,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
     std::vector<lsp::TextEdit> requireEdits;
     std::unordered_set<std::string> addedServices;
 
-    auto config = workspaceFolder->fileResolver.client->getConfiguration(workspaceFolder->rootUri);
+    auto config = workspaceFolder->getConfiguration();
 
     Luau::LanguageServer::AutoImports::RobloxFindImportsVisitor importsVisitor;
     importsVisitor.visit(ctx.sourceModule->root);

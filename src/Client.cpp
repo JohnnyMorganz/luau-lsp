@@ -157,7 +157,7 @@ void Client::unregisterCapability(const std::string& registrationId, const std::
     sendRequest(nextRequestId++, "client/unregisterCapability", lsp::UnregistrationParams{{unregistration}});
 }
 
-ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
+ClientConfiguration Client::getEditorConfiguration(const lsp::DocumentUri& uri)
 {
     if (configStore.find(uri) != configStore.end())
         return configStore[uri];

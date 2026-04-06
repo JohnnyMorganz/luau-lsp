@@ -5,6 +5,7 @@
 #include "Flags.hpp"
 
 #include "LSP/ClientConfiguration.hpp"
+#include "LSP/FileConfiguration.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
@@ -14,6 +15,7 @@
 #include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Luau/LuauConfig.h"
 #include "glob/match.h"
 #include <iostream>
 #include <memory>
@@ -241,6 +243,23 @@ std::unordered_map<std::string, std::string> processDefinitionsFilePaths(const a
     return definitionsFiles;
 }
 
+void applyFileConfiguration(const FileConfiguration& fileConfig, CliClient& client, std::unordered_map<std::string, std::string>& definitionsPaths)
+{
+    client.configuration = mergeConfigurations(client.configuration, fileConfig);
+
+    // Extract definition files into the separate definitionsPaths map used by the CLI
+    if (fileConfig.types.definitionFiles)
+    {
+        for (const auto& [name, path] : *fileConfig.types.definitionFiles)
+        {
+            auto packageName = name;
+            if (!Luau::startsWith(packageName, "@"))
+                packageName = "@" + packageName;
+            definitionsPaths.emplace(packageName, path);
+        }
+    }
+}
+
 int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
@@ -260,6 +279,25 @@ int startAnalyze(const argparse::ArgumentParser& program)
     {
         fprintf(stderr, "Failed to determine current working directory\n");
         return 1;
+    }
+
+    // Load .config.luau lsp section (lowest priority — overridden by --settings and CLI args)
+    {
+        auto configLuauPath = Uri::file(*currentWorkingDirectory).resolvePath(Luau::kLuauConfigName);
+        if (auto contents = Luau::FileUtils::readFile(configLuauPath.fsPath()))
+        {
+            std::string extractError;
+            if (auto configTable = Luau::extractConfig(*contents, {}, &extractError))
+            {
+                FileConfiguration fileConfig;
+                if (auto parseError = extractLspConfigFromTable(*configTable, fileConfig, *currentWorkingDirectory))
+                    fprintf(stderr, "warning: error in .config.luau lsp section: %s\n", parseError->c_str());
+                else if (fileConfig.hasAnyValue())
+                    applyFileConfiguration(fileConfig, client, definitionsPaths);
+            }
+            // Note: extractConfig failure is not reported here since the Luau config
+            // parser will report it separately when the Frontend loads the file
+        }
     }
 
     if (settingsPath)

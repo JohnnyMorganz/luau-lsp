@@ -144,6 +144,68 @@ TEST_CASE_FIXTURE(Fixture, "files_in_alias_directories_are_indexed")
     CHECK(workspace.frontend.getSourceModule(moduleName));
 }
 
+TEST_CASE_FIXTURE(Fixture, "loadConfigLuauLSPConfiguration_loads_lsp_section")
+{
+    tempDir.write_child(".config.luau", R"(
+        return {
+            lsp = {
+                platform = { type = "roblox" },
+            },
+        }
+    )");
+
+    workspace.loadConfigLuauLSPConfiguration();
+
+    auto config = workspace.getConfiguration();
+    CHECK_EQ(config.platform.type, LSPPlatformConfig::Roblox);
+}
+
+TEST_CASE_FIXTURE(Fixture, "loadConfigLuauLSPConfiguration_no_lsp_section")
+{
+    tempDir.write_child(".config.luau", R"(
+        return {
+            luau = {
+                languagemode = "strict",
+            },
+        }
+    )");
+
+    workspace.loadConfigLuauLSPConfiguration();
+
+    // Should use editor config defaults when no lsp section
+    auto config = workspace.getConfiguration();
+    CHECK_EQ(config.platform.type, client->globalConfig.platform.type);
+}
+
+TEST_CASE_FIXTURE(Fixture, "config_luau_reload_on_file_change")
+{
+    tempDir.write_child(".config.luau", R"(
+        return {
+            lsp = {
+                platform = { type = "roblox" },
+            },
+        }
+    )");
+
+    workspace.loadConfigLuauLSPConfiguration();
+    CHECK_EQ(workspace.getConfiguration().platform.type, LSPPlatformConfig::Roblox);
+
+    // Update the config file to standard
+    tempDir.write_child(".config.luau", R"(
+        return {
+            lsp = {
+                platform = { type = "standard" },
+            },
+        }
+    )");
+
+    // Simulate file watcher event
+    lsp::FileEvent event{workspace.rootUri.resolvePath(".config.luau"), lsp::FileChangeType::Changed};
+    workspace.onDidChangeWatchedFiles({event});
+
+    CHECK_EQ(workspace.getConfiguration().platform.type, LSPPlatformConfig::Standard);
+}
+
 TEST_CASE_FIXTURE(Fixture, "ignored_files_are_marked_as_dirty_when_changed_externally")
 {
     client->globalConfig.ignoreGlobs = {"**/ignored/**"};

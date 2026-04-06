@@ -3,6 +3,7 @@
 #include "Fixture.h"
 #include "Analyze/AnalyzeCli.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "LSP/FileConfiguration.hpp"
 #include "Analyze/CliConfigurationParser.hpp"
 
 namespace std
@@ -150,6 +151,76 @@ TEST_CASE("parse_definitions_files_handles_legacy_syntax")
                                    {"@roblox", "example_path.d.luau"},
                                    {"@roblox1", "lune.d.luau"},
                                });
+}
+
+TEST_CASE("applyFileConfiguration_sets_platform")
+{
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::unordered_map<std::string, std::string> definitionPaths;
+
+    FileConfiguration fileConfig;
+    fileConfig.platform.type = LSPPlatformConfig::Roblox;
+
+    applyFileConfiguration(fileConfig, client, definitionPaths);
+
+    CHECK_EQ(client.configuration.platform.type, LSPPlatformConfig::Roblox);
+}
+
+TEST_CASE("applyFileConfiguration_sets_definition_files")
+{
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::unordered_map<std::string, std::string> definitionPaths;
+
+    FileConfiguration fileConfig;
+    fileConfig.types.definitionFiles = std::unordered_map<std::string, std::string>{
+        {"testez", "/project/types/testez.d.luau"},
+        {"@lune", "/project/types/lune.d.luau"},
+    };
+
+    applyFileConfiguration(fileConfig, client, definitionPaths);
+
+    CHECK_EQ(definitionPaths.size(), 2);
+    CHECK_EQ(definitionPaths.at("@testez"), "/project/types/testez.d.luau");
+    CHECK_EQ(definitionPaths.at("@lune"), "/project/types/lune.d.luau");
+}
+
+TEST_CASE("applyFileConfiguration_sets_sourcemap")
+{
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::unordered_map<std::string, std::string> definitionPaths;
+
+    FileConfiguration fileConfig;
+    fileConfig.sourcemap.rojoProjectFile = "/project/default.project.json";
+    fileConfig.sourcemap.sourcemapFile = "/project/sourcemap.json";
+
+    applyFileConfiguration(fileConfig, client, definitionPaths);
+
+    CHECK_EQ(client.configuration.sourcemap.rojoProjectFile, "/project/default.project.json");
+    CHECK_EQ(client.configuration.sourcemap.sourcemapFile, "/project/sourcemap.json");
+}
+
+TEST_CASE("applyFileConfiguration_does_not_override_existing_definition_paths")
+{
+    CliClient client;
+    std::vector<std::string> ignoreGlobs;
+    std::unordered_map<std::string, std::string> definitionPaths;
+    definitionPaths["@roblox"] = "cli/roblox.d.luau";
+
+    FileConfiguration fileConfig;
+    fileConfig.types.definitionFiles = std::unordered_map<std::string, std::string>{
+        {"@roblox", "/project/types/roblox.d.luau"},
+        {"extra", "/project/types/extra.d.luau"},
+    };
+
+    applyFileConfiguration(fileConfig, client, definitionPaths);
+
+    // CLI-provided @roblox should NOT be overwritten (emplace doesn't overwrite)
+    CHECK_EQ(definitionPaths.at("@roblox"), "cli/roblox.d.luau");
+    // New entry should be added
+    CHECK_EQ(definitionPaths.at("@extra"), "/project/types/extra.d.luau");
 }
 
 TEST_SUITE_END();

@@ -57,7 +57,7 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     if (!frontend.getSourceModule(moduleName))
         return report;
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
 
     // If the file is a definitions file, then don't display any diagnostics
     if (isDefinitionFile(params.textDocument.uri, config))
@@ -145,7 +145,7 @@ lsp::WorkspaceDiagnosticReport WorkspaceFolder::workspaceDiagnostics(const lsp::
     if (isNullWorkspace())
         return workspaceReport;
 
-    auto config = client->getConfiguration(rootUri);
+    auto config = getConfiguration();
 
     // Find a list of files to compute diagnostics for
     auto files = findFilesForWorkspaceDiagnostics(rootUri.fsPath(), config);

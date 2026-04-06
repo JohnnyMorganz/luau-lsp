@@ -56,6 +56,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Thread.cpp
         src/JsonTomlSyntaxParser.cpp
         src/CliConfigurationParser.cpp
+        src/FileConfiguration.cpp
         src/platform/AutoImports.cpp
         src/platform/LSPPlatform.cpp
         src/platform/StringRequireAutoImporter.cpp
@@ -121,6 +122,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/ColorProvider.test.cpp
         tests/LuauExt.test.cpp
         tests/CliConfigurationParser.test.cpp
+        tests/FileConfiguration.test.cpp
         tests/Hover.test.cpp
         tests/LanguageServer.test.cpp
         tests/InlayHints.test.cpp
