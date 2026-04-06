@@ -172,6 +172,30 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_prop
     CHECK_EQ(item.documentation->value, "This is a property on the table!");
 }
 
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_no_completions_in_single_line_comment_before_first_statement")
+{
+    // Regression test: when the cursor is inside a comment that appears before the first statement,
+    // the fragment region becomes empty (no statement covers the cursor position). The empty fragment
+    // has no commentLocations, so the comment check is skipped and autocomplete incorrectly returns
+    // suggestions. The fix is to pass commentLocations from the SourceModule into the ParseResult.
+    auto oldSource = "local x = 1\n";
+
+    auto [source, marker] = sourceWithMarker("-- TODO: |\nlocal x = 1\n");
+
+    auto result = fragmentAutocomplete(oldSource, source, marker);
+    CHECK(result.empty());
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_no_completions_in_block_comment_before_first_statement")
+{
+    auto oldSource = "local x = 1\n";
+
+    auto [source, marker] = sourceWithMarker("--[[ TODO: | ]]\nlocal x = 1\n");
+
+    auto result = fragmentAutocomplete(oldSource, source, marker);
+    CHECK(result.empty());
+}
+
 TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_documentation")
 {
     std::string typeSource = R"(
