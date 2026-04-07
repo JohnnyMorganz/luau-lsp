@@ -215,7 +215,8 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     const std::unordered_set<const SourceNode*>& fromAncestors,
     const SourceNode* fromService,
     const Luau::ModuleName& target,
-    ImportRequireStyle style)
+    ImportRequireStyle style,
+    const Luau::LanguageServer::AutoImports::AliasMap& availableAliases)
 {
     auto targetIt = platform->virtualPathsToSourceNodes.find(target);
     if (targetIt == platform->virtualPathsToSourceNodes.end())
@@ -226,9 +227,15 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     if (!targetNode->isScript())
         return std::nullopt;
 
-    // Compute absolute path: @game/<virtual path without "game/" prefix>
+    // Compute absolute path: prefer user-defined aliases, then fall back to @game/<virtual path>
     auto computeAbsolute = [&]() -> std::pair<std::string, const char*>
     {
+        if (auto realPath = platform->getRealPathFromSourceNode(targetNode))
+        {
+            if (auto aliasPath = Luau::LanguageServer::AutoImports::computeBestAliasedPath(*realPath, availableAliases))
+                return {*aliasPath, SortText::AutoImportsAbsolute};
+        }
+
         std::string path = targetNode->virtualPath;
         if (Luau::startsWith(path, "game/"))
             path = path.substr(5);
@@ -318,11 +325,14 @@ std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> RobloxPlat
         fromAncestors.insert(n);
     const SourceNode* fromService = getServiceNode(fromNode);
 
-    return [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style](
+    auto availableAliases = fileResolver->getConfig(from, workspaceFolder->limits).aliases;
+
+    return [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style,
+               availableAliases = std::move(availableAliases)](
                const Luau::ModuleName& /*from*/, const Luau::ModuleName& target)
         -> std::optional<std::pair<std::string, const char*>>
     {
-        return computeSourcemapRequirePath(this, fromNode, fromAncestors, fromService, target, style);
+        return computeSourcemapRequirePath(this, fromNode, fromAncestors, fromService, target, style, availableAliases);
     };
 }
 

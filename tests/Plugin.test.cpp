@@ -1871,6 +1871,36 @@ TEST_CASE_FIXTURE(Fixture, "isPluginFile matches loaded plugin paths")
     CHECK_FALSE(workspace.fileResolver.isPluginFile("/path/to/other.luau"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "plugin does not transform its own source file")
+{
+    // A plugin that would replace "local" with "TRANSFORMED" in any file it processes
+    std::string pluginSource = R"(return {
+    transformSource = function(source, context)
+        return {
+            {
+                startLine = 1, startColumn = 1,
+                endLine = 1, endColumn = 6,
+                newText = "TRANSFORMED"
+            }
+        }
+    end
+})";
+    std::string pluginPath = tempDir.write_child("plugin.luau", pluginSource);
+
+    workspace.fileResolver.pluginManager = std::make_unique<Luau::LanguageServer::Plugin::PluginManager>(
+        client.get(), getWorkspaceNotNull(*this));
+    workspace.fileResolver.pluginManager->configure({pluginPath});
+
+    // Open the plugin file itself as a managed document
+    Uri pluginUri = Uri::file(pluginPath);
+    workspace.openTextDocument(pluginUri, {{pluginUri, "luau", 0, pluginSource}});
+
+    // The plugin should NOT transform its own source file
+    auto* doc = workspace.fileResolver.getTextDocument(pluginUri);
+    REQUIRE(doc);
+    CHECK(doc->getText() == pluginSource);
+}
+
 TEST_CASE_FIXTURE(Fixture, "reloadPlugins marks non-managed source nodes dirty")
 {
     // Plugin v1: rewrites "string" -> "number" on line 2, fixing the type error in the source file.
