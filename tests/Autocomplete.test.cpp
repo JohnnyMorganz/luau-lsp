@@ -2129,4 +2129,42 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
     checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ModuleC",
+                "className": "ModuleScript",
+                "filePaths": ["packages/ModuleC/init.luau"],
+                "children": [{"name": "HelperModule", "className": "ModuleScript", "filePaths": ["packages/ModuleC/HelperModule.luau"]}]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("packages/ModuleC/HelperModule.luau");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@self/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("packages/ModuleC/init.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..", "@self");
+    checkFileCompletionExists(result, "HelperModule.luau", "@self/HelperModule");
+}
+
 TEST_SUITE_END();

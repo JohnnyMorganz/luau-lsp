@@ -643,6 +643,33 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_nonexistent_path")
     CHECK_EQ(result->name, "game/NonExistent/Module");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_from_module")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ModuleC",
+                "className": "ModuleScript",
+                "filePaths": ["packages/ModuleC/init.luau"],
+                "children": [{"name": "HelperModule", "className": "ModuleScript", "filePaths": ["packages/ModuleC/HelperModule.luau"]}]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("packages/ModuleC/HelperModule.luau");
+
+    Luau::ModuleInfo baseContext{"game/ModuleC"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/HelperModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ModuleC/HelperModule");
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
