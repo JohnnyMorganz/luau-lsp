@@ -105,6 +105,10 @@ std::optional<Luau::LanguageServer::Plugin::TransformResult> WorkspaceFileResolv
     if (!pluginManager || !pluginManager->hasPlugins())
         return std::nullopt;
 
+    // Plugins should not apply to their own source files
+    if (pluginManager->isPluginFile(uri))
+        return std::nullopt;
+
     auto edits = pluginManager->transform(source, uri, moduleName);
     if (edits.empty())
         return std::nullopt;
