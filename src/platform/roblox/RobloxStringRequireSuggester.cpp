@@ -29,12 +29,15 @@ std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(cons
 
     if (!requireString.empty() && requireString[0] == '@')
     {
-        // Derive the real file URI for alias resolution (needed for @self on init.luau files)
-        Uri nodeUri;
+        Uri fromUri;
         if (auto filePath = node->getScriptFilePath())
-            nodeUri = workspaceFolder->fileResolver.rootUri.resolvePath(*filePath);
+        {
+            auto fileUri = workspaceFolder->fileResolver.rootUri.resolvePath(*filePath);
+            if (auto parent = fileUri.parent())
+                fromUri = *parent;
+        }
 
-        if (auto aliasedPath = resolveAlias(requireString, *mainRequirerNodeConfig, nodeUri))
+        if (auto aliasedPath = resolveAlias(requireString, *mainRequirerNodeConfig, fromUri))
             return std::make_unique<FileRequireNode>(*aliasedPath, aliasedPath->isDirectory(), workspaceFolder);
 
         size_t slashPos = requireString.find('/');
@@ -89,6 +92,11 @@ std::vector<Luau::RequireAlias> SourceNodeRequireNode::getAvailableAliases() con
     std::string gameLower = "game";
     if (!mainRequirerNodeConfig->aliases.find(gameLower))
         results.emplace_back(Luau::RequireAlias{"game", {"Alias"}});
+
+    // Include @self alias for init.luau files
+    if (auto filePath = node->getScriptFilePath())
+        if (isInitLuauFile(workspaceFolder->fileResolver.rootUri.resolvePath(*filePath)))
+            results.emplace_back(Luau::RequireAlias{"self", {"Alias"}});
 
     return results;
 }
