@@ -652,22 +652,22 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_from_module")
         "className": "DataModel",
         "children": [
             {
-                "name": "ModuleC",
+                "name": "Library",
                 "className": "ModuleScript",
-                "filePaths": ["packages/ModuleC/init.luau"],
-                "children": [{"name": "HelperModule", "className": "ModuleScript", "filePaths": ["packages/ModuleC/HelperModule.luau"]}]
+                "filePaths": ["lib/init.luau"],
+                "children": [{"name": "Helper", "className": "ModuleScript", "filePaths": ["lib/Helper.luau"]}]
             }
         ]
     }
     )");
 
-    tempDir.touch_child("packages/ModuleC/HelperModule.luau");
+    tempDir.touch_child("lib/Helper.luau");
 
-    Luau::ModuleInfo baseContext{"game/ModuleC"};
-    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/HelperModule", workspace.limits);
+    Luau::ModuleInfo baseContext{"game/Library"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/Helper", workspace.limits);
 
     REQUIRE(result.has_value());
-    CHECK_EQ(result->name, "game/ModuleC/HelperModule");
+    CHECK_EQ(result->name, "game/Library/Helper");
 }
 
 TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")

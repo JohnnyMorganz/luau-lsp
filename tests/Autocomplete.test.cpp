@@ -2138,23 +2138,23 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
         "className": "DataModel",
         "children": [
             {
-                "name": "ModuleC",
+                "name": "Library",
                 "className": "ModuleScript",
-                "filePaths": ["packages/ModuleC/init.luau"],
-                "children": [{"name": "HelperModule", "className": "ModuleScript", "filePaths": ["packages/ModuleC/HelperModule.luau"]}]
+                "filePaths": ["lib/init.luau"],
+                "children": [{"name": "Helper", "className": "ModuleScript", "filePaths": ["lib/Helper.luau"]}]
             }
         ]
     }
     )");
 
-    tempDir.touch_child("packages/ModuleC/HelperModule.luau");
+    tempDir.touch_child("lib/Helper.luau");
 
     auto [source, marker] = sourceWithMarker(R"(
         --!strict
         local x = require("@self/|")
     )");
 
-    auto uri = newDocument(tempDir.write_child("packages/ModuleC/init.luau", source), source);
+    auto uri = newDocument(tempDir.write_child("lib/init.luau", source), source);
 
     lsp::CompletionParams params;
     params.textDocument = lsp::TextDocumentIdentifier{uri};
@@ -2164,7 +2164,7 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
 
     REQUIRE_EQ(result.size(), 2);
     checkFolderCompletionExists(result, "..", "@self");
-    checkFileCompletionExists(result, "HelperModule.luau", "@self/HelperModule");
+    checkFileCompletionExists(result, "Helper.luau", "@self/Helper");
 }
 
 TEST_SUITE_END();
