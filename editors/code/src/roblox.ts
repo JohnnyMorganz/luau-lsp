@@ -11,17 +11,21 @@ import * as utils from "./utils";
 
 let pluginServer: Server | undefined = undefined;
 
-// Reads a studio plugin setting from the new "studioPlugin" key, falling back to the
-// old "plugin" key for backwards compatibility with existing user configurations.
 const getStudioPluginValue = <T>(key: string, defaultValue: T): T => {
-  const newConfig = vscode.workspace.getConfiguration("luau-lsp.studioPlugin");
-  const newInspect = newConfig.inspect<T>(key);
+  const newInspect = vscode.workspace
+    .getConfiguration("luau-lsp.studioPlugin")
+    .inspect<T>(key);
   if (
     newInspect?.globalValue !== undefined ||
     newInspect?.workspaceValue !== undefined ||
     newInspect?.workspaceFolderValue !== undefined
   ) {
-    return newConfig.get<T>(key) ?? defaultValue;
+    return (
+      newInspect.workspaceFolderValue ??
+      newInspect.workspaceValue ??
+      newInspect.globalValue ??
+      defaultValue
+    );
   }
   return vscode.workspace.getConfiguration("luau-lsp.plugin").get<T>(key) ?? defaultValue;
 };
