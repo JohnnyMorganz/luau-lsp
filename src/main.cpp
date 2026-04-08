@@ -26,6 +26,48 @@
 #endif
 #define SENTRY_BUILD_STATIC 1
 #include <sentry.h>
+#include <random>
+#include <sstream>
+#include <iomanip>
+#endif
+
+#ifdef LSP_BUILD_WITH_SENTRY
+static std::string generateUuid()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint32_t> dis(0, 0xFFFFFFFF);
+
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
+    ss << std::setw(8) << dis(gen) << '-';
+    ss << std::setw(4) << (dis(gen) & 0xFFFF) << '-';
+    // Version 4: set bits 12-15 to 0100
+    ss << std::setw(4) << ((dis(gen) & 0x0FFF) | 0x4000) << '-';
+    // Variant: set bits 14-15 to 10
+    ss << std::setw(4) << ((dis(gen) & 0x3FFF) | 0x8000) << '-';
+    ss << std::setw(8) << dis(gen);
+    ss << std::setw(4) << (dis(gen) & 0xFFFF);
+    return ss.str();
+}
+
+static std::string getOrCreateUserId(const std::string& dbDirectory)
+{
+    std::string userIdFile = dbDirectory + "/luau-lsp-user-id";
+    if (auto existing = Luau::FileUtils::readFile(userIdFile))
+    {
+        auto id = *existing;
+        // Trim any trailing whitespace/newline
+        while (!id.empty() && (id.back() == '\n' || id.back() == '\r' || id.back() == ' '))
+            id.pop_back();
+        if (!id.empty())
+            return id;
+    }
+
+    auto id = generateUuid();
+    Luau::FileUtils::writeFileIfModified(userIdFile, id);
+    return id;
+}
 #endif
 
 static void displayFlags()
@@ -65,6 +107,14 @@ int startLanguageServer(const argparse::ArgumentParser& program)
 
         sentry_options_set_release(options, "luau-lsp@" LSP_VERSION);
         sentry_init(options);
+
+        // Set an anonymous user ID so Sentry can count unique users.
+        // The ID is persisted in the database directory across sessions.
+        std::string dbDir = crashReportDirectory.value_or(".sentry-native");
+        auto userId = getOrCreateUserId(dbDir);
+        sentry_value_t user = sentry_value_new_object();
+        sentry_value_set_by_key(user, "id", sentry_value_new_string(userId.c_str()));
+        sentry_set_user(user);
 #else
         std::cerr << "Ignoring '--enable-crash-reporting' as this server was not built with crash reporting features\n";
 #endif
