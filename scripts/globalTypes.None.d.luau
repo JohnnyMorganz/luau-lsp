@@ -8574,7 +8574,7 @@ declare class AdService extends Instance
 	function GetAdAvailabilityNowAsync(self, adFormat: EnumAdFormat): { [string]: any }
 	function GetCampaignEligibilityAsync(self, campaignId: string, player: Player?): { [string]: any }
 	function RegisterAdOpportunityAsync(self, instance: Instance, placementId: number?): nil
-	function RegisterDisclosureButton(self, disclosureButton: GuiButton, immersiveBrandedAdId: string): nil
+	function RegisterDisclosureButton(self, disclosureButton: GuiButton, adIntegrationPlacementId: string): nil
 	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward, placementId: number?): EnumShowAdResult
 	function UnregisterAdOpportunity(self, instance: Instance): nil
 end
@@ -12044,9 +12044,14 @@ declare class LogReporterService extends Instance
 end
 
 declare class LogService extends Instance
-	MessageOut: RBXScriptSignal<string, EnumMessageType>
+	MessageOut: RBXScriptSignal<string, EnumMessageType, { [string]: any }>
 	function ClearOutput(self): nil
+	function Error(self, message: string, context: { [string]: any }?): nil
 	function GetLogHistory(self): { any }
+	function Info(self, message: string, context: { [string]: any }?): nil
+	function Log(self, messageType: EnumMessageType, message: string, context: { [string]: any }?): nil
+	function Output(self, message: string, context: { [string]: any }?): nil
+	function Warn(self, message: string, context: { [string]: any }?): nil
 end
 
 declare class LoginService extends Instance
@@ -14427,6 +14432,7 @@ declare class SurfaceAppearance extends Instance
 	EmissiveTint: Color3
 	MetalnessMapContent: Content
 	NormalMapContent: Content
+	ResampleMode: EnumResamplerMode
 	RoughnessMapContent: Content
 end
 

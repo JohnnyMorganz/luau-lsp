@@ -8608,7 +8608,7 @@ declare class AdService extends Instance
 	function HideEudsaDisclosure(self): nil
 	function OnDemandVideoCompleteFromUI(self, result: EnumShowAdResult, encryptedAdTrackingData: string, encryptionMetadata: string, rewardDetails: string): nil
 	function RegisterAdOpportunityAsync(self, instance: Instance, placementId: number?): nil
-	function RegisterDisclosureButton(self, disclosureButton: GuiButton, immersiveBrandedAdId: string): nil
+	function RegisterDisclosureButton(self, disclosureButton: GuiButton, adIntegrationPlacementId: string): nil
 	function ReturnToPublisherExperience(self, adTeleportMethod: EnumAdTeleportMethod): nil
 	function SetAdGuiInteractivityHandlerInitialized(self): nil
 	function ShowRewardedVideoAdAsync(self, player: Player, reward: AdReward, placementId: number?): EnumShowAdResult
@@ -11532,6 +11532,7 @@ end
 declare class GamepadService extends Instance
 	GamepadCursorEnabled: boolean
 	GamepadThumbstick1Changed: RBXScriptSignal<Vector2>
+	function AutoSelectGui(self): nil
 	function DisableGamepadCursor(self): nil
 	function EnableGamepadCursor(self, guiObject: Instance): nil
 	function GetGamepadCursorPosition(self): Vector2
@@ -13218,17 +13219,22 @@ end
 
 declare class LogService extends Instance
 	HttpResultOut: RBXScriptSignal<{ [string]: any }>
-	MessageOut: RBXScriptSignal<string, EnumMessageType>
+	MessageOut: RBXScriptSignal<string, EnumMessageType, { [string]: any }>
 	OnHttpResultApproved: RBXScriptSignal<boolean>
 	ServerHttpResultOut: RBXScriptSignal<{ [string]: any }>
 	ServerMessageOut: RBXScriptSignal<string, EnumMessageType, number>
 	function ClearOutput(self): nil
+	function Error(self, message: string, context: { [string]: any }?): nil
 	function ExecuteScript(self, source: string): nil
 	function GetHttpResultHistory(self): { any }
 	function GetLogHistory(self): { any }
+	function Info(self, message: string, context: { [string]: any }?): nil
+	function Log(self, messageType: EnumMessageType, message: string, context: { [string]: any }?): nil
+	function Output(self, message: string, context: { [string]: any }?): nil
 	function RequestHttpResultApproved(self): nil
 	function RequestServerHttpResult(self): nil
 	function RequestServerOutput(self): nil
+	function Warn(self, message: string, context: { [string]: any }?): nil
 end
 
 declare class LoginService extends Instance
@@ -13324,7 +13330,7 @@ declare class MarketplaceService extends Instance
 	PrepareCollectiblesPurchaseRequested: RBXScriptSignal<Instance, number, string, string, string, number>
 	ProcessReceipt: (receiptInfo: { [string]: any }) -> EnumProductPurchaseDecision
 	PromptBulkPurchaseFinished: RBXScriptSignal<Instance, EnumMarketplaceBulkPurchasePromptStatus, { [string]: any }>
-	PromptBulkPurchaseRequested: RBXScriptSignal<Instance, { any }, { [string]: any }, number, number, { [string]: any }>
+	PromptBulkPurchaseRequested: RBXScriptSignal<Instance, { any }, { [string]: any }, number, number, { [string]: any }, { [string]: any }>
 	PromptBundlePurchaseFinished: RBXScriptSignal<Instance, number, boolean>
 	PromptBundlePurchaseRequested: RBXScriptSignal<Instance, number>
 	PromptCancelSubscriptionRequested: RBXScriptSignal<string>
@@ -13691,6 +13697,7 @@ declare class NotificationService extends Instance
 	function CancelNotification(self, userId: number, alertId: number): nil
 	function GetScheduledNotifications(self, userId: number): { any }
 	function ScheduleNotification(self, userId: number, alertId: number, alertMsg: string, minutesToFire: number): nil
+	function SubscribeToRccEventNamespace(self, eventNamespace: string): nil
 	function SwitchedToAppShellFeature(self, appShellFeature: EnumAppShellFeature): nil
 end
 
@@ -15690,7 +15697,7 @@ declare class DataModel extends ServiceProvider
 	function GetFastString(self, name: string): string
 	function GetJobsInfo(self): { any }
 	function GetObjects(self, url: ContentId): { Instance }
-	function GetObjectsAllOrNone(self, url: ContentId, binaryFormatOnly: boolean?): { Instance }
+	function GetObjectsAllOrNone(self, url: ContentId): { Instance }
 	function GetObjectsAsync(self, url: ContentId): { Instance }
 	function GetObjectsList(self, urls: { any }): { any }
 	function GetPlaySessionId(self): string
@@ -16649,6 +16656,7 @@ declare class SurfaceAppearance extends Instance
 	MetalnessMapContent: Content
 	NormalMap: ContentId
 	NormalMapContent: Content
+	ResampleMode: EnumResamplerMode
 	RoughnessMap: ContentId
 	RoughnessMapContent: Content
 	TexturePack: ContentId
@@ -16994,15 +17002,17 @@ declare class TextChatService extends Instance
 	OnIncomingMessage: (message: TextChatMessage) -> any
 	OnIncomingMessageEvent: RBXScriptSignal<TextChatMessage>
 	SendingMessage: RBXScriptSignal<TextChatMessage>
+	SendingUniverseChatMessage: RBXScriptSignal<TextChatMessage>
+	UniverseChatChannelAllocated: RBXScriptSignal<string>
 	UniverseChatMessageReceived: RBXScriptSignal<TextChatMessage>
 	UserMessageIntentSent: RBXScriptSignal<TextChatMessage>
-	function AllocateUniverseChatChannelAsync(self, context: string): boolean
 	function CanUserChatAsync(self, userId: number): boolean
 	function CanUsersChatAsync(self, userIdFrom: number, userIdTo: number): boolean
 	function CanUsersDirectChatAsync(self, requesterUserId: number, userIds: { any }): { any }
 	function CanUsersWhisperAsync(self, fromUserId: number, toUserId: number): boolean
 	function DisplayBubble(self, partOrCharacter: Instance, message: string): nil
 	function GetChatGroupsAsync(self, players: { Instance }): { any }
+	function HasAllocatedUniverseChatContext(self, context: string): boolean
 	function SendEnableChatButtonClicked(self): nil
 	function SendEnableChatButtonShown(self): nil
 	function SendExpChatLoadSuccess(self, loadingLatency: number): nil
