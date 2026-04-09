@@ -631,17 +631,42 @@
                             "Type": {
                                 "Name": "number"
                             }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
                         },
                         {
                             "Name": "frictionWeight",
-                            "Default": "nil",
                             "Type": {
                                 "Name": "number"
                             }
                         },
                         {
                             "Name": "elasticityWeight",
-                            "Default": "nil",
                             "Type": {
                                 "Name": "number"
                             }
@@ -669,6 +694,24 @@
                         },
                         {
                             "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "frictionWeight",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticityWeight",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "acousticAbsorption",
                             "Type": {
                                 "Name": "number"
                             }
@@ -3082,6 +3125,13 @@
                 {
                     "MemberType": "Property",
                     "Name": "Friction",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "AcousticAbsorption",
                     "ValueType": {
                         "Name": "number"
                     }
