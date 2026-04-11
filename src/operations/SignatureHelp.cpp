@@ -3,7 +3,7 @@
 #include "Luau/AstQuery.h"
 #include "Luau/Normalize.h"
 #include "Luau/Unifier.h"
-#include "Luau/OverloadResolution.h"
+#include "Luau/OverloadResolver.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
