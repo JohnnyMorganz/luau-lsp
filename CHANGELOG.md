@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed Studio Plugin settings from `luau-lsp.plugin.*` to `luau-lsp.studioPlugin.*` to avoid confusion with the source transform plugins (`luau-lsp.plugins.*`). The old `luau-lsp.plugin.*` settings are deprecated but still supported for backwards compatibility.
+
 ### Fixed
 
 - When a plugin is hot-reloaded, all source nodes (not just managed text documents) are now marked dirty so non-managed files are re-analysed with the updated plugin transformations
