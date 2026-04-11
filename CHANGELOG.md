@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.66.0] - 2026-04-11
+
 ### Changed
 
 - Sync to upstream Luau 0.716
@@ -1943,7 +1945,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
