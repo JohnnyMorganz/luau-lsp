@@ -45,6 +45,24 @@ TEST_CASE("getAncestorPath handles when ancestor name is the same as current nam
     CHECK_EQ(getAncestorPath("game/ReplicatedStorage/Module/Child/Module", "Module", nullptr), "game/ReplicatedStorage/Module");
 }
 
+TEST_CASE("getAncestorPath handles when ancestor name is a substring of a child folder name")
+{
+    // "Foo" appears as a suffix substring inside "PrefixFoo" — rfind must not
+    // match the substring and should continue searching backward for a boundary-valid match.
+    CHECK_EQ(
+        getAncestorPath(
+            "game/Packages/_Workspace/Foo/Foo/Components/PrefixFoo/PrefixFoo",
+            "Foo",
+            nullptr),
+        "game/Packages/_Workspace/Foo/Foo");
+
+    // Prefix substring case: "Foo" inside "FooSuffix"
+    CHECK_EQ(getAncestorPath("game/Root/Foo/Components/FooSuffix/Script", "Foo", nullptr), "game/Root/Foo");
+
+    // Suffix substring case: "Bar" inside "PrefixBar"
+    CHECK_EQ(getAncestorPath("game/Root/Bar/Components/PrefixBar/Script", "Bar", nullptr), "game/Root/Bar");
+}
+
 TEST_CASE("convertToScriptPath handles when path is empty")
 {
     CHECK_EQ(convertToScriptPath(""), "");
