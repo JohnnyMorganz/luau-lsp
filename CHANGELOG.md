@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Sync to upstream Luau 0.716
+- The minimum supported VSCode version is now 1.82.0
 - Renamed Studio Plugin settings from `luau-lsp.plugin.*` to `luau-lsp.studioPlugin.*` to avoid confusion with the source transform plugins (`luau-lsp.plugins.*`). The old `luau-lsp.plugin.*` settings are deprecated but still supported for backwards compatibility.
 
 ### Fixed
@@ -16,10 +18,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Plugin transformations are no longer applied to plugin files themselves ([#1433](https://github.com/JohnnyMorganz/luau-lsp/issues/1433))
 - Fixed string-require auto imports in Roblox mode ignoring user-defined aliases from `.luaurc`. Aliases are now preferred over `@game/...` paths when available ([#1436](https://github.com/JohnnyMorganz/luau-lsp/issues/1436))
 - Fixed `@self` alias not resolving and missing path autocomplete for string requires in Roblox mode ([#1432](https://github.com/JohnnyMorganz/luau-lsp/pull/1432))
-
-### Changed
-
-- Sync to upstream Luau 0.716
 
 ## [1.65.0] - 2026-04-06
 
@@ -1945,6 +1943,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
