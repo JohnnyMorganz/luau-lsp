@@ -27,7 +27,10 @@ const getStudioPluginValue = <T>(key: string, defaultValue: T): T => {
       defaultValue
     );
   }
-  return vscode.workspace.getConfiguration("luau-lsp.plugin").get<T>(key) ?? defaultValue;
+  return (
+    vscode.workspace.getConfiguration("luau-lsp.plugin").get<T>(key) ??
+    defaultValue
+  );
 };
 
 const API_DOCS = "https://luau-lsp.pages.dev/api-docs/en-us.json";
