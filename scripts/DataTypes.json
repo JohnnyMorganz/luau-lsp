@@ -4773,6 +4773,20 @@
                 },
                 {
                     "MemberType": "Property",
+                    "Name": "ExcludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
                     "Name": "IgnoreWater",
                     "ValueType": {
                         "Name": "boolean"
@@ -4839,6 +4853,20 @@
                     "ValueType": {
                         "Category": "Enum",
                         "Name": "RaycastFilterType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "ExcludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
                     }
                 },
                 {
