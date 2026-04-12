@@ -7604,8 +7604,10 @@ end
 declare class OverlapParams
 	BruteForceAllSlow: boolean
 	CollisionGroup: string
+	ExcludeInstances: { Instance }
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
+	IncludeInstances: { Instance }
 	MaxParts: number
 	RespectCanCollide: boolean
 	Tolerance: number
@@ -7662,9 +7664,11 @@ end
 declare class RaycastParams
 	BruteForceAllSlow: boolean
 	CollisionGroup: string
+	ExcludeInstances: { Instance }
 	FilterDescendantsInstances: { Instance }
 	FilterType: EnumRaycastFilterType
 	IgnoreWater: boolean
+	IncludeInstances: { Instance }
 	RespectCanCollide: boolean
 	function AddToFilter(self, instances: Instance | { Instance }): nil
 end
