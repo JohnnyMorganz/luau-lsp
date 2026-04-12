@@ -6,10 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Added
-
-- Added `ExcludeInstances` and `IncludeInstances` properties to `OverlapParams` and `RaycastParams` type definitions ([#1451](https://github.com/JohnnyMorganz/luau-lsp/issues/1451))
-
 ## [1.66.0] - 2026-04-11
 
 ### Changed
