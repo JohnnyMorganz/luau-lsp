@@ -47,8 +47,8 @@ TEST_CASE("getAncestorPath handles when ancestor name is the same as current nam
 
 TEST_CASE("getAncestorPath handles when ancestor name is a substring of a child folder name")
 {
-    // "Foo" appears as a suffix substring inside "PrefixFoo" — rfind must not
-    // match the substring and should continue searching backward for a boundary-valid match.
+    // "Foo" appears as a suffix substring inside "PrefixFoo" — searching for
+    // "/Foo/" avoids matching inside "PrefixFoo/".
     CHECK_EQ(
         getAncestorPath(
             "game/Packages/_Workspace/Foo/Foo/Components/PrefixFoo/PrefixFoo",

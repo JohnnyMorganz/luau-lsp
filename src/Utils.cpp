@@ -34,21 +34,18 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     // Append a "/" to the end of the parentPath to make searching easier
     auto parentPathWithSlash = *parentPath + "/";
 
-    auto searchTarget = ancestorName + "/";
-    auto searchFrom = parentPathWithSlash.size();
-    while (searchFrom > 0)
+    auto searchTarget = "/" + ancestorName + "/";
+    auto ancestor = parentPathWithSlash.rfind(searchTarget);
+    if (ancestor != std::string::npos)
     {
-        auto ancestor = parentPathWithSlash.rfind(searchTarget, searchFrom - 1);
-        if (ancestor == std::string::npos)
-            break;
+        // +1 to skip the leading '/' in the search target
+        return parentPathWithSlash.substr(0, ancestor + 1 + ancestorName.size());
+    }
 
-        // Ensure the match is at a path boundary (preceded by '/' or at the very start)
-        if (ancestor == 0 || parentPathWithSlash.at(ancestor - 1) == '/')
-        {
-            return parentPathWithSlash.substr(0, ancestor + ancestorName.size());
-        }
-
-        searchFrom = ancestor;
+    // Handle the edge case where the ancestor is the very first path component
+    if (parentPathWithSlash.starts_with(ancestorName + "/"))
+    {
+        return ancestorName;
     }
 
     // At this point we know there is definitely no ancestor with the same name within the path
