@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed `FindFirstAncestor` failing when ancestor name is a substring of another folder name in the path (e.g., `FindFirstAncestor("Foo")` failed when a folder named `PrefixFoo` existed in the path)
 - When a plugin is hot-reloaded, all source nodes (not just managed text documents) are now marked dirty so non-managed files are re-analysed with the updated plugin transformations
 - Plugin transformations are no longer applied to plugin files themselves ([#1433](https://github.com/JohnnyMorganz/luau-lsp/issues/1433))
 - Fixed string-require auto imports in Roblox mode ignoring user-defined aliases from `.luaurc`. Aliases are now preferred over `@game/...` paths when available ([#1436](https://github.com/JohnnyMorganz/luau-lsp/issues/1436))
