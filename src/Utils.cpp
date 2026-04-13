@@ -43,7 +43,7 @@ std::optional<std::string> getAncestorPath(const std::string& path, const std::s
     }
 
     // Handle the edge case where the ancestor is the very first path component
-    if (parentPathWithSlash.starts_with(ancestorName + "/"))
+    if (parentPathWithSlash.rfind(ancestorName + "/", 0) == 0)
     {
         return ancestorName;
     }
