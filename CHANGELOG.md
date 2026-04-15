@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed autocomplete-end incorrectly inserting `then`/`end` inside a string literal when Enter is pressed with the cursor inside a string used as an `if`/`while` condition ([#1453](https://github.com/JohnnyMorganz/luau-lsp/issues/1453))
+
 ## [1.66.0] - 2026-04-11
 
 ### Changed

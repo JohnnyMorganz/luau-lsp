@@ -46,6 +46,15 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (ancestry.size() < 2)
         return;
 
+    // When Enter is pressed inside a string literal (e.g. `if "|"`), the string becomes
+    // broken: the remaining quote lands on the cursor's line as an error statement in the AST.
+    // Capture this *before* stripping error nodes from the ancestry.
+    // When Enter is pressed inside a string literal (e.g. `if "|"`), the string becomes
+    // broken: the remaining quote lands on the cursor's line as an error statement in the AST.
+    // Capture this *before* stripping error nodes from the ancestry.
+    bool cursorIsInErrorNode = (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()) &&
+        ancestry.back()->location.begin.line == position.line;
+
     // Remove error nodes from end of ancestry chain
     while (ancestry.size() > 0 && (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()))
         ancestry.pop_back();
@@ -69,6 +78,25 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
     if (params.position.line - currentNode->location.begin.line > 1)
         return;
+
+    // If the cursor landed inside an error node, the parent statement is likely missing its
+    // opening keyword (then/do) because the condition contained a broken string literal.
+    // Autocompleting in this situation would insert keywords inside the string.
+    if (cursorIsInErrorNode)
+    {
+        auto* parentNodeForCheck = getParentNode(ancestry);
+        if (parentNodeForCheck)
+        {
+            if (auto* statIf = parentNodeForCheck->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
+                return;
+            if (auto* statWhile = parentNodeForCheck->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
+                return;
+            if (auto* statForIn = parentNodeForCheck->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
+                return;
+            if (auto* statFor = parentNodeForCheck->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+                return;
+        }
+    }
 
     auto unclosedBlock = false;
     for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
