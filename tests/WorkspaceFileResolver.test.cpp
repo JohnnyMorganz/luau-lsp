@@ -223,6 +223,25 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
     CHECK_EQ(resolveAlias("@self/foo", workspace.fileResolver.defaultConfig, basePath), basePath.resolvePath("foo"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_chained_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "std": "lute/std/libs",
+            "lint": "@std/commands/lint/types",
+            "transform": "@std/commands/transform/types"
+        }
+    }
+    )");
+
+    auto stdBase = workspace.fileResolver.rootUri.resolvePath("lute/std/libs");
+
+    CHECK_EQ(resolveAlias("@lint", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types"));
+    CHECK_EQ(resolveAlias("@lint/foo", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types/foo"));
+    CHECK_EQ(resolveAlias("@transform", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/transform/types"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_tilde_alias_end_to_end")
 {
     // This test goes through resolveStringRequire (not resolveAlias directly) to catch

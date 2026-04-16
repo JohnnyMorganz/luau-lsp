@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Support chained aliases in `.luaurc` (e.g., an alias whose value references another `@alias`)
+
 ## [1.66.0] - 2026-04-11
 
 ### Changed
