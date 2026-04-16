@@ -7,6 +7,7 @@
 #include "Platform/StringRequireSuggester.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
+#include "Luau/StringUtils.h"
 #include "Luau/TimeTrace.h"
 #include <memory>
 #include <unordered_set>
@@ -88,10 +89,8 @@ static std::optional<Uri> resolveAliasWithCycleCheck(
     Uri resolvedUri;
     if (auto aliasInfo = config.aliases.find(potentialAlias))
     {
-        // If the alias value itself starts with '@', it's a chained alias - resolve recursively
-        if (!aliasInfo->value.empty() && aliasInfo->value[0] == '@')
+        if (Luau::startsWith(aliasInfo->value, "@"))
         {
-            // Detect cycles: if we've already visited this alias, stop
             if (!visited.insert(potentialAlias).second)
                 return std::nullopt;
 
