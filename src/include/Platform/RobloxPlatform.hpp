@@ -43,8 +43,8 @@ struct SourceNode
     /// Returns nullptr if any segment fails to resolve.
     const SourceNode* walkPath(const std::string& path) const;
 
-    bool containsFilePaths() const;
-    ordered_json toJson() const;
+    bool containsFilePaths(bool includeNonScripts = true) const;
+    ordered_json toJson(bool includeNonScripts = true) const;
 
     static SourceNode* fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator);
 };
