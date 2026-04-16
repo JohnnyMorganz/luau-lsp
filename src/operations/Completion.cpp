@@ -49,9 +49,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     // When Enter is pressed inside a string literal (e.g. `if "|"`), the string becomes
     // broken: the remaining quote lands on the cursor's line as an error statement in the AST.
     // Capture this *before* stripping error nodes from the ancestry.
-    // When Enter is pressed inside a string literal (e.g. `if "|"`), the string becomes
-    // broken: the remaining quote lands on the cursor's line as an error statement in the AST.
-    // Capture this *before* stripping error nodes from the ancestry.
     bool cursorIsInErrorNode = (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()) &&
         ancestry.back()->location.begin.line == position.line;
 
@@ -79,23 +76,21 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (params.position.line - currentNode->location.begin.line > 1)
         return;
 
+    auto parentNode = getParentNode(ancestry);
+
     // If the cursor landed inside an error node, the parent statement is likely missing its
     // opening keyword (then/do) because the condition contained a broken string literal.
     // Autocompleting in this situation would insert keywords inside the string.
-    if (cursorIsInErrorNode)
+    if (cursorIsInErrorNode && parentNode)
     {
-        auto* parentNodeForCheck = getParentNode(ancestry);
-        if (parentNodeForCheck)
-        {
-            if (auto* statIf = parentNodeForCheck->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
-                return;
-            if (auto* statWhile = parentNodeForCheck->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
-                return;
-            if (auto* statForIn = parentNodeForCheck->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
-                return;
-            if (auto* statFor = parentNodeForCheck->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
-                return;
-        }
+        if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
+            return;
+        if (auto* statWhile = parentNode->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
+            return;
+        if (auto* statForIn = parentNode->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
+            return;
+        if (auto* statFor = parentNode->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+            return;
     }
 
     auto unclosedBlock = false;
@@ -134,7 +129,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
 
-    auto parentNode = getParentNode(ancestry);
     if (parentNode)
     {
         if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && statIf->condition && !statIf->thenLocation)

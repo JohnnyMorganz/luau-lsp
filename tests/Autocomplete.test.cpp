@@ -1701,8 +1701,6 @@ TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_double_quoted
 {
     client->globalConfig.completion.autocompleteEnd = true;
 
-    // Simulate pressing Enter while cursor is inside a double-quoted string: if "|"
-    // After Enter the document is split across two lines with cursor at start of line 1
     auto [source, marker] = sourceWithMarker("if \"\n|\"\n");
 
     auto uri = newDocument("foo.luau", source);
@@ -1715,7 +1713,6 @@ TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_double_quoted
 
     auto queueSizeBefore = client->requestQueue.size();
     workspace.completion(params, nullptr);
-    // No workspace/applyEdit should have been added (no 'then' or 'end' should be inserted)
     REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
 }
 
@@ -1723,7 +1720,6 @@ TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_single_quoted
 {
     client->globalConfig.completion.autocompleteEnd = true;
 
-    // Simulate pressing Enter while cursor is inside a single-quoted string: if '|'
     auto [source, marker] = sourceWithMarker("if '\n|'\n");
 
     auto uri = newDocument("foo.luau", source);
@@ -1743,7 +1739,6 @@ TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_string_in_whi
 {
     client->globalConfig.completion.autocompleteEnd = true;
 
-    // Simulate pressing Enter while cursor is inside a string in a while condition: while "|" do
     auto [source, marker] = sourceWithMarker("while \"\n|\"\n");
 
     auto uri = newDocument("foo.luau", source);
