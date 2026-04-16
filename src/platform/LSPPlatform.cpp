@@ -53,12 +53,9 @@ Uri resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo)
     return Uri::file(aliasInfo.configLocation).resolvePath(resolvePath(aliasInfo.value));
 }
 
-static std::optional<Uri> resolveAliasWithDepth(
-    const std::string& path, const Luau::Config& config, const Uri& from, int depth)
+static std::optional<Uri> resolveAliasWithCycleCheck(
+    const std::string& path, const Luau::Config& config, const Uri& from, std::unordered_set<std::string>& visited)
 {
-    if (depth > 16)
-        return std::nullopt;
-
     if (path.size() < 1 || path[0] != '@')
         return std::nullopt;
 
@@ -94,7 +91,11 @@ static std::optional<Uri> resolveAliasWithDepth(
         // If the alias value itself starts with '@', it's a chained alias - resolve recursively
         if (!aliasInfo->value.empty() && aliasInfo->value[0] == '@')
         {
-            auto chainedResolved = resolveAliasWithDepth(aliasInfo->value, config, from, depth + 1);
+            // Detect cycles: if we've already visited this alias, stop
+            if (!visited.insert(potentialAlias).second)
+                return std::nullopt;
+
+            auto chainedResolved = resolveAliasWithCycleCheck(aliasInfo->value, config, from, visited);
             if (!chainedResolved)
                 return std::nullopt;
             resolvedUri = *chainedResolved;
@@ -124,7 +125,8 @@ static std::optional<Uri> resolveAliasWithDepth(
 
 std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from)
 {
-    return resolveAliasWithDepth(path, config, from, 0);
+    std::unordered_set<std::string> visited;
+    return resolveAliasWithCycleCheck(path, config, from, visited);
 }
 
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(

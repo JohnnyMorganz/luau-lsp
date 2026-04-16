@@ -242,6 +242,21 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_chained_aliases")
     CHECK_EQ(resolveAlias("@transform", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/transform/types"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_returns_nullopt_on_cyclic_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "@a"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_tilde_alias_end_to_end")
 {
     // This test goes through resolveStringRequire (not resolveAlias directly) to catch
