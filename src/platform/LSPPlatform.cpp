@@ -53,7 +53,8 @@ Uri resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo)
     return Uri::file(aliasInfo.configLocation).resolvePath(resolvePath(aliasInfo.value));
 }
 
-std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from)
+static std::optional<Uri> resolveAliasImpl(
+    const std::string& path, const Luau::Config& config, const Uri& from, std::unordered_set<std::string>& seen)
 {
     if (path.size() < 1 || path[0] != '@')
         return std::nullopt;
@@ -84,25 +85,53 @@ std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& con
             return ('A' <= c && c <= 'Z') ? (c + ('a' - 'A')) : c;
         });
 
-    Uri resolvedUri;
-    if (auto aliasInfo = config.aliases.find(potentialAlias))
-        resolvedUri = resolveAliasLocation(*aliasInfo);
-    else if (potentialAlias == "self")
-        resolvedUri = from;
-    else
-        // TODO: report error: "@" + potentialAlias + " is not a valid alias"
-        return std::nullopt;
-
     auto remainder = path.substr(potentialAlias.size() + 1);
 
     // If remainder begins with a '/' character, we need to trim it off before it gets mistaken for an
     // absolute path
     remainder.erase(0, remainder.find_first_not_of("/\\"));
 
+    if (potentialAlias == "self")
+    {
+        if (remainder.empty())
+            return from;
+        return from.resolvePath(remainder);
+    }
+
+    auto aliasInfo = config.aliases.find(potentialAlias);
+    if (!aliasInfo)
+    {
+        // TODO: report error: "@" + potentialAlias + " is not a valid alias"
+        return std::nullopt;
+    }
+
+    // If the alias value itself starts with '@', it is a chained alias.
+    if (!aliasInfo->value.empty() && aliasInfo->value[0] == '@')
+    {
+        // TODO: report error: detected alias cycle (@alias1 -> @alias2 -> @alias1)
+        if (seen.count(potentialAlias))
+            return std::nullopt;
+        seen.insert(potentialAlias);
+
+        std::string chainedPath = aliasInfo->value;
+        if (!remainder.empty())
+            chainedPath += "/" + remainder;
+
+        return resolveAliasImpl(chainedPath, config, from, seen);
+    }
+
+    Uri resolvedUri = resolveAliasLocation(*aliasInfo);
+
     if (remainder.empty())
         return resolvedUri;
     else
         return resolvedUri.resolvePath(remainder);
+}
+
+std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from)
+{
+    std::unordered_set<std::string> seen;
+    return resolveAliasImpl(path, config, from, seen);
 }
 
 std::optional<Luau::ModuleInfo> LSPPlatform::resolveStringRequire(
