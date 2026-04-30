@@ -12,6 +12,13 @@ class WorkspaceFolder;
 
 std::unordered_map<std::string, std::string> processDefinitionsFilePaths(const argparse::ArgumentParser& program);
 
+enum class ReportFormat
+{
+    Default,
+    Luacheck,
+    Gnu,
+};
+
 struct FilePathInformation
 {
     Uri uri;
@@ -20,6 +27,7 @@ struct FilePathInformation
 
 FilePathInformation getFilePath(const WorkspaceFileResolver* fileResolver, const std::string& moduleName);
 
+bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate);
 std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths, WorkspaceFolder* workspace = nullptr);
 void applySettings(const std::string& settingsContents, CliClient& client);
 int startAnalyze(const argparse::ArgumentParser& program);
