@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `@game` requires now resolve correctly when using `luau-lsp analyze` ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
+
 ## [1.66.1] - 2026-04-27
 
 ### Changed
