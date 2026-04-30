@@ -82,8 +82,8 @@ LUAU_SNIPPET_PATCHES = {
 }
 
 TYPE_INDEX = {
-    "Tuple": "any",
     "Variant": "any",
+    "Tuple": "...any",
     "Function": "((...any) -> ...any)",
     "function": "((...any) -> ...any)",
     "bool": "boolean",
