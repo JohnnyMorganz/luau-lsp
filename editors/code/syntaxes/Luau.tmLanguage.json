@@ -396,7 +396,7 @@
         },
         {
           "name": "support.constant.luau",
-          "match": "(?<![^.]\\.|:)\\b(bit32|buffer|coroutine|debug|math(\\.(huge|pi))?|os|string|table|task|utf8(\\.charpattern)?|vector(\\.(one|zero))?)\\b"
+          "match": "(?<![^.]\\.|:)\\b(bit32|buffer|coroutine|debug|math(\\.(huge|pi|nan|e|phi|sqrt2|tau))?|os|string|table|task|utf8(\\.charpattern)?|vector(\\.(one|zero))?)\\b"
         },
         {
           "name": "support.function.luau",
