@@ -141,7 +141,8 @@ bool RobloxPlatform::hydrateSourcemapWithPluginInfo()
 
             try
             {
-                Luau::FileUtils::writeFileIfModified(sourcemapPath.fsPath(), rootSourceNode->toJson().dump(2));
+                Luau::FileUtils::writeFileIfModified(sourcemapPath.fsPath(),
+                    rootSourceNode->toJson(config.sourcemap.includeNonScripts).dump(2));
             }
             catch (const std::exception& e)
             {
