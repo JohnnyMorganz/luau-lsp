@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- `@game` requires now resolve correctly when using `luau-lsp analyze` ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
+- String requires (including `@game` aliases and relative requires between DataModel siblings with non-mirrored filesystem layouts) now resolve correctly when using `luau-lsp analyze` with a sourcemap ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
 
 ## [1.66.1] - 2026-04-27
 

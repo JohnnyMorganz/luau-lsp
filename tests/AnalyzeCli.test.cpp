@@ -45,6 +45,14 @@ static void setupCliWorkspace(CliClient& client, WorkspaceFolder& workspace)
     workspace.isReady = true;
 }
 
+static void initRobloxCliClient(CliClient& client)
+{
+    initCliClient(client);
+    client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
+    client.globalConfig.sourcemap.enabled = true;
+    client.globalConfig.sourcemap.sourcemapFile = "sourcemap.json";
+}
+
 TEST_CASE("getFilesToAnalyze")
 {
     TempDir t("analyze_cli_get_files_to_analyze");
@@ -262,11 +270,7 @@ TEST_CASE("sourcemap_loaded_through_workspace_configuration")
     t.write_child("src/Module.luau", "return {}");
 
     CliClient client;
-    initCliClient(client);
-    client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
-    client.globalConfig.sourcemap.enabled = true;
-    client.globalConfig.sourcemap.sourcemapFile = "sourcemap.json";
-
+    initRobloxCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
     setupCliWorkspace(client, workspace);
 
@@ -307,15 +311,10 @@ end
 TEST_CASE("analyze_resolves_game_requires_with_sourcemap")
 {
     // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1473
-    // analyzeFile used to pass the raw filesystem path as the module name, which bypassed
-    // RobloxPlatform's sourcemap-aware require resolution. @game requires and relative
-    // requires between DataModel siblings with non-mirrored filesystem layouts produced
-    // UnknownRequire errors.
     TempDir t("analyze_game_requires");
 
-    // ServerModule is at src/server/ServerModule.luau but mapped to
-    // game/ServerScriptService/ServerModule. Util is at packages/util/Util.luau but
-    // mapped to game/ReplicatedStorage/Util. Completely different filesystem locations.
+    // ServerModule and Util are at completely different filesystem locations but are
+    // DataModel siblings — only the sourcemap knows they are related.
     t.write_child("sourcemap.json", R"({
         "name": "Game",
         "className": "DataModel",
@@ -348,11 +347,7 @@ TEST_CASE("analyze_resolves_game_requires_with_sourcemap")
     t.write_child("src/server/ServerModule.luau", "local _ = require('@game/ReplicatedStorage/Util')");
 
     CliClient client;
-    initCliClient(client);
-    client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
-    client.globalConfig.sourcemap.enabled = true;
-    client.globalConfig.sourcemap.sourcemapFile = t.path() + "/sourcemap.json";
-
+    initRobloxCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
     setupCliWorkspace(client, workspace);
 
@@ -392,11 +387,7 @@ TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
     t.write_child("packages/combat/ModuleB.luau", "return {}");
 
     CliClient client;
-    initCliClient(client);
-    client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
-    client.globalConfig.sourcemap.enabled = true;
-    client.globalConfig.sourcemap.sourcemapFile = t.path() + "/sourcemap.json";
-
+    initRobloxCliClient(client);
     WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
     setupCliWorkspace(client, workspace);
 
