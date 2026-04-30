@@ -2,12 +2,15 @@
 
 #include "LSP/ClientConfiguration.hpp"
 #include "LSP/TextDocument.hpp"
+#include "Platform/StringRequireTypes.hpp"
 #include "Luau/Ast.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/Error.h"
 #include "Luau/FileResolver.h"
 #include "Luau/Frontend.h"
 #include "Luau/GlobalTypes.h"
 #include "Luau/Module.h"
+#include "Luau/NotNull.h"
 #include "Luau/TypeFwd.h"
 #include "Protocol/CodeAction.hpp"
 #include "Protocol/Completion.hpp"
@@ -16,12 +19,20 @@
 #include "Protocol/Workspace.hpp"
 #include "nlohmann/json.hpp"
 
-#include <filesystem>
 #include <memory>
 #include <unordered_set>
 
 class WorkspaceFolder;
 struct WorkspaceFileResolver;
+
+/// Context for generating unknown symbol quick fixes
+struct UnknownSymbolFixContext
+{
+    lsp::DocumentUri uri;
+    Luau::NotNull<const TextDocument> textDocument;
+    Luau::NotNull<const Luau::SourceModule> sourceModule;
+    Luau::NotNull<const WorkspaceFolder> workspaceFolder;
+};
 
 class LSPPlatform
 {
@@ -36,31 +47,38 @@ public:
 
     virtual void setupWithConfiguration(const ClientConfiguration& config) {}
 
+    virtual std::unique_ptr<Luau::RequireSuggester> getRequireSuggester();
+
+    virtual Luau::LanguageServer::AutoImports::ModuleVisitor getAutoImportsModuleVisitor(const Luau::ModuleName& from);
+    virtual std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> getAutoImportsRequirePathComputer(
+        const Luau::ModuleName& from, ImportRequireStyle style)
+    {
+        return std::nullopt;
+    }
+
     /// The name points to a virtual path (i.e. for Roblox, game/ or ProjectRoot/)
     [[nodiscard]] virtual bool isVirtualPath(const Luau::ModuleName& name) const
     {
         return false;
     }
 
-    [[nodiscard]] virtual std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const
+    [[nodiscard]] virtual std::optional<Luau::ModuleName> resolveToVirtualPath(const Uri& name) const
     {
         return std::nullopt;
     }
 
-    [[nodiscard]] virtual std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const
-    {
-        return name;
-    }
+    [[nodiscard]] virtual std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const;
 
-    [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const
+    [[nodiscard]] virtual Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const
     {
         return Luau::SourceCode::Type::Module;
     }
 
-    [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const;
+    [[nodiscard]] virtual std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const;
 
-    std::optional<Luau::ModuleInfo> resolveStringRequire(const Luau::ModuleInfo* context, const std::string& requiredString);
-    virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node);
+    virtual std::optional<Luau::ModuleInfo> resolveStringRequire(
+        const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits);
+    virtual std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits);
 
     virtual void handleCompletion(
         const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, std::vector<lsp::CompletionItem>& items)
@@ -68,7 +86,7 @@ public:
     }
 
     virtual std::optional<Luau::AutocompleteEntryMap> completionCallback(
-        const std::string& tag, std::optional<const Luau::ClassType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName);
+        const std::string& tag, std::optional<const Luau::ExternType*> ctx, std::optional<std::string> contents, const Luau::ModuleName& moduleName);
 
     virtual const char* handleSortText(
         const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry, const std::unordered_set<std::string>& tags)
@@ -82,9 +100,7 @@ public:
     }
 
     virtual void handleSuggestImports(const TextDocument& textDocument, const Luau::SourceModule& module, const ClientConfiguration& config,
-        size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items)
-    {
-    }
+        size_t hotCommentsLineNumber, bool completingTypeReferencePrefix, std::vector<lsp::CompletionItem>& items);
 
     virtual void handleSignatureHelp(
         const TextDocument& textDocument, const Luau::SourceModule& module, Luau::Position position, lsp::SignatureHelp& signatureHelp)
@@ -92,6 +108,14 @@ public:
     }
 
     virtual void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) {}
+
+    /// Generate code actions for an unknown symbol (missing require/service import)
+    virtual void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result);
+
+    /// Compute edits to add all missing imports for all unknown symbols in the given errors
+    virtual std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors);
 
     virtual lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module)
     {
@@ -123,10 +147,7 @@ public:
 
     LSPPlatform(WorkspaceFileResolver* fileResolver = nullptr, WorkspaceFolder* workspaceFolder = nullptr);
     virtual ~LSPPlatform() = default;
-
-private:
-    [[nodiscard]] std::filesystem::path getRequireBasePath(std::optional<Luau::ModuleName> fileModuleName) const;
 };
 
-std::optional<std::filesystem::path> resolveDirectoryAlias(
-    const std::filesystem::path& rootPath, const std::unordered_map<std::string, std::string>& directoryAliases, const std::string& str);
+Uri resolveAliasLocation(const Luau::Config::AliasInfo& aliasInfo);
+std::optional<Uri> resolveAlias(const std::string& path, const Luau::Config& config, const Uri& from);

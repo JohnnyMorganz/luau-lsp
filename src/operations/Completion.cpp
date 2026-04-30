@@ -3,14 +3,30 @@
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
+#include "Luau/FragmentAutocomplete.h"
 #include "Luau/TxnLog.h"
 #include "Luau/TypeUtils.h"
+#include "Luau/TimeTrace.h"
 
 #include "LSP/Completion.hpp"
-#include "LSP/LanguageServer.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
+
+LUAU_FASTFLAG(LuauSolverV2)
+
+static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
+{
+    if (ancestry.size() < 2)
+        return nullptr;
+    for (auto it = ++ancestry.rbegin(); it != ancestry.rend(); ++it)
+    {
+        if ((*it)->is<Luau::AstExprError>() || (*it)->is<Luau::AstStatError>())
+            continue;
+        return *it;
+    }
+    return nullptr;
+}
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
@@ -30,18 +46,22 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (ancestry.size() < 2)
         return;
 
-    // Search backwards for the first node that is not an Error node
-    size_t currentNodeIndex = ancestry.size() - 1;
-    while (ancestry.at(currentNodeIndex)->is<Luau::AstStatError>() || ancestry.at(currentNodeIndex)->is<Luau::AstExprError>())
-    {
-        currentNodeIndex--;
-        if (currentNodeIndex < 1)
-            return;
-    }
+    // Remove error nodes from end of ancestry chain
+    while (ancestry.size() > 0 && (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()))
+        ancestry.pop_back();
 
-    Luau::AstNode* currentNode = ancestry.at(currentNodeIndex);
-    if (!currentNode)
+    if (ancestry.size() == 0)
         return;
+
+    Luau::AstNode* currentNode = ancestry.back();
+
+    // TODO: https://github.com/luau-lang/luau/issues/1328 causes the ast ancestry to be shorter than expected
+    if (auto globalFunc = currentNode->as<Luau::AstStatFunction>())
+    {
+        ancestry.push_back(globalFunc->func);
+        ancestry.push_back(globalFunc->func->body);
+        currentNode = globalFunc->func->body;
+    }
 
     // We should only apply it if the line just above us is the start of the unclosed statement
     // Otherwise, we insert ends in weird places if theirs an unclosed stat a while away
@@ -81,9 +101,35 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             unclosedBlock = false;
     }
 
-    // TODO: we could potentially extend this further that just `hasEnd`
-    // by inserting `then`, `until` `do` etc. It seems Studio does this
-    // NOTE: `until` can be inserted if `hasEnd` in a repeat block is false
+    std::vector<lsp::TextEdit> edits;
+    bool moveCursorUp = false;
+
+    // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
+
+    auto parentNode = getParentNode(ancestry);
+    if (parentNode)
+    {
+        if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && statIf->condition && !statIf->thenLocation)
+        {
+            lsp::Position thenLocation = document->convertPosition(statIf->thenbody->location.begin);
+            edits.emplace_back(lsp::TextEdit{{thenLocation, thenLocation}, " then"});
+        }
+        else if (auto* statWhile = parentNode->as<Luau::AstStatWhile>(); statWhile && statWhile->condition && !statWhile->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statWhile->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+        else if (auto* statForIn = parentNode->as<Luau::AstStatForIn>(); statForIn && statForIn->values.size > 0 && !statForIn->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statForIn->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+        else if (auto* statFor = parentNode->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+        {
+            lsp::Position doLocation = document->convertPosition(statFor->body->location.begin);
+            edits.emplace_back(lsp::TextEdit{{doLocation, doLocation}, " do"});
+        }
+    }
 
     if (unclosedBlock)
     {
@@ -126,9 +172,23 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         {
             // Insert an end at the current position, with a newline before it
             auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
+            edits.emplace_back(lsp::TextEdit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText});
+            moveCursorUp = true;
+        }
+        else
+        {
+            LUAU_ASSERT(currentLineContent.empty());
 
-            lsp::TextEdit edit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText};
-            std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
+            // Insert the end onto the next line
+            lsp::Position position{params.position.line + 1, 0};
+            edits.emplace_back(lsp::TextEdit{{position, position}, indent + "end\n"});
+        }
+    }
+
+    if (!edits.empty())
+    {
+        std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, edits}};
+        if (moveCursorUp)
             client->applyEdit({"insert end", {changes}},
                 [this](auto) -> void
                 {
@@ -139,25 +199,17 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
                                                               {"data", {{"to", "prevBlankLine"}}},
                                                           }));
                 });
-        }
         else
-        {
-            LUAU_ASSERT(currentLineContent.empty());
-
-            // Insert the end onto the next line
-            lsp::Position position{params.position.line + 1, 0};
-            lsp::TextEdit edit{{position, position}, indent + "end\n"};
-            std::unordered_map<std::string, std::vector<lsp::TextEdit>> changes{{params.textDocument.uri.toString(), {edit}}};
             client->applyEdit({"insert end", {changes}});
-        }
     }
 }
 
 void WorkspaceFolder::suggestImports(const Luau::ModuleName& moduleName, const Luau::Position& position, const ClientConfiguration& config,
     const TextDocument& textDocument, std::vector<lsp::CompletionItem>& result, bool completingTypeReferencePrefix)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::suggestImports", "LSP");
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return;
 
@@ -189,6 +241,26 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     if (entry.deprecated)
         return true;
 
+    // TODO: unnecessary once https://github.com/luau-lang/luau/issues/2158 is fixed
+    if (entry.type)
+    {
+        const auto ty = Luau::follow(*entry.type);
+        if (const auto ftv = Luau::get<Luau::FunctionType>(ty); ftv && ftv->isDeprecatedFunction)
+            return true;
+        else if (const auto itv = Luau::get<Luau::IntersectionType>(ty))
+        {
+            const auto allDeprecated = std::all_of(itv->parts.begin(), itv->parts.end(),
+                [](const auto& part)
+                {
+                    const auto partTy = Luau::follow(part);
+                    const auto ftv = Luau::get<Luau::FunctionType>(partTy);
+                    return ftv && ftv->isDeprecatedFunction;
+                });
+            if (allDeprecated)
+                return true;
+        }
+    }
+
     if (documentation)
         if (documentation->value.find("@deprecated") != std::string::npos)
             return true;
@@ -196,12 +268,12 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     return false;
 }
 
-static std::optional<lsp::CompletionItemKind> entryKind(const Luau::AutocompleteEntry& entry, LSPPlatform* platform)
+static std::optional<lsp::CompletionItemKind> entryKind(const std::string& label, const Luau::AutocompleteEntry& entry, LSPPlatform* platform)
 {
     if (auto kind = platform->handleEntryKind(entry))
         return kind;
 
-    if (entry.type.has_value())
+    if (entry.type.has_value() && entry.kind != Luau::AutocompleteEntryKind::Type)
     {
         auto id = Luau::follow(entry.type.value());
         if (Luau::isOverloadedFunction(id))
@@ -212,7 +284,9 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
             return lsp::CompletionItemKind::Function;
     }
 
-    if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
+    if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
+        return lsp::CompletionItemKind::Constant;
+    else if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
         return lsp::CompletionItemKind::File;
     else if (std::find(entry.tags.begin(), entry.tags.end(), "Directory") != entry.tags.end())
         return lsp::CompletionItemKind::Folder;
@@ -233,24 +307,35 @@ static std::optional<lsp::CompletionItemKind> entryKind(const Luau::Autocomplete
         return lsp::CompletionItemKind::Module;
     case Luau::AutocompleteEntryKind::GeneratedFunction:
         return lsp::CompletionItemKind::Function;
+    case Luau::AutocompleteEntryKind::RequirePath:
+    {
+        if (label == ".." || label == ".")
+            return lsp::CompletionItemKind::Folder;
+        return lsp::CompletionItemKind::File;
+    }
+    case Luau::AutocompleteEntryKind::HotComment:
+        return lsp::CompletionItemKind::Snippet;
     }
 
     return std::nullopt;
 }
 
-static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
-    const std::unordered_set<std::string>& tags, LSPPlatform& platform)
+static const char* sortText(const Luau::Frontend& frontend, const std::string& name, const lsp::CompletionItem& item,
+    const Luau::AutocompleteEntry& entry, const std::unordered_set<std::string>& tags, LSPPlatform& platform)
 {
     if (auto text = platform.handleSortText(frontend, name, entry, tags))
         return text;
+
+    if (item.deprecated)
+        return SortText::Deprioritized;
 
     // If it's a file or directory alias, de-prioritise it compared to normal paths
     if (std::find(entry.tags.begin(), entry.tags.end(), "Alias") != entry.tags.end())
         return SortText::AutoImports;
 
     // If the entry is `loadstring`, deprioritise it
-    if (auto it = frontend.globalsForAutocomplete.globalScope->bindings.find(Luau::AstName("loadstring"));
-        it != frontend.globalsForAutocomplete.globalScope->bindings.end())
+    auto& completionGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
+    if (auto it = completionGlobals.globalScope->bindings.find(Luau::AstName("loadstring")); it != completionGlobals.globalScope->bindings.end())
     {
         if (entry.type == it->second.typeId)
             return SortText::Deprioritized;
@@ -258,18 +343,36 @@ static const char* sortText(const Luau::Frontend& frontend, const std::string& n
 
     if (entry.wrongIndexType)
         return SortText::WrongIndexType;
-    if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
-        return SortText::CorrectTypeKind;
-    else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
-        return SortText::CorrectFunctionResult;
     else if (entry.kind == Luau::AutocompleteEntryKind::Property && types::isMetamethod(name))
         return SortText::MetatableIndex;
     else if (entry.kind == Luau::AutocompleteEntryKind::Property)
         return SortText::TableProperties;
     else if (entry.kind == Luau::AutocompleteEntryKind::Keyword)
+    {
+        // These keywords are contextual and only show up when relevant - they should be prioritised over other suggestions
+        if (name == "else" || name == "elseif" || name == "until" || name == "end")
+            return SortText::PrioritisedSuggestion;
         return SortText::Keywords;
+    }
+    else if (entry.typeCorrect == Luau::TypeCorrectKind::Correct)
+        return SortText::CorrectTypeKind;
+    else if (entry.typeCorrect == Luau::TypeCorrectKind::CorrectFunctionResult)
+        return SortText::CorrectFunctionResult;
 
     return SortText::Default;
+}
+
+const std::vector<std::string> keywords = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function", "if", "in", "local", "nil",
+    "not", "or", "repeat", "return", "then", "true", "until", "while"};
+
+static bool isKeyword(std::string_view s)
+{
+    return std::find(keywords.begin(), keywords.end(), s) != keywords.end();
+}
+
+static bool isIdentifier(std::string_view s)
+{
+    return Luau::isIdentifier(s) && !isKeyword(s);
 }
 
 static std::pair<std::string, std::string> computeLabelDetailsForFunction(const Luau::AutocompleteEntry& entry, const Luau::FunctionType* ftv)
@@ -282,6 +385,11 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
     size_t snippetIndex = 1;
 
     auto [minCount, _] = Luau::getParameterExtents(Luau::TxnLog::empty(), ftv->argTypes, true);
+
+    // Include 'unknown' arguments as required types
+    for (auto arg : ftv->argTypes)
+        if (Luau::get<Luau::UnknownType>(follow(arg)))
+            minCount += 1;
 
     auto it = Luau::begin(ftv->argTypes);
     for (; it != Luau::end(ftv->argTypes); ++it, ++argIndex)
@@ -311,13 +419,25 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
         snippetIndex++;
     }
 
-    if (auto tail = it.tail())
+    if (auto tail = it.tail(); tail && !Luau::isEmpty(*tail))
     {
-        if (comma)
+        tail = Luau::follow(tail);
+        if (auto vtp = Luau::get<Luau::VariadicTypePack>(tail); !vtp || !vtp->hidden)
         {
-            detail += ", ";
+            if (comma)
+            {
+                detail += ", ";
+            }
+            detail += Luau::toString(*tail);
         }
-        detail += Luau::toString(*tail);
+    }
+
+    // If Luau recommended we put the cursor inside, but we haven't recorded any arguments yet, then we are going to fail to do this.
+    // This can happen when all the arguments to function are optional or any (e.g., wait or require)
+    // Let's force a tabstop inside if this happens
+    if (entry.parens == Luau::ParenthesesRecommendation::CursorInside && parenthesesSnippet == "(")
+    {
+        parenthesesSnippet += "$1";
     }
 
     detail += ")";
@@ -326,8 +446,8 @@ static std::pair<std::string, std::string> computeLabelDetailsForFunction(const 
     return std::make_pair(detail, parenthesesSnippet);
 }
 
-std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(
-    const Luau::AutocompleteEntry& entry, const std::vector<Luau::AstNode*>& ancestry, const Luau::ModuleName& moduleName)
+std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry(const std::string& name, const Luau::AutocompleteEntry& entry,
+    const std::vector<Luau::AstNode*>& ancestry, const Luau::ModulePtr& localModule, const Luau::Position& position)
 {
     if (entry.documentationSymbol)
         if (auto docs = printDocumentation(client->documentation, *entry.documentationSymbol))
@@ -337,32 +457,56 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
         if (auto documentation = getDocumentationForType(entry.type.value()))
             return documentation;
 
+    if (entry.kind == Luau::AutocompleteEntryKind::Type)
+    {
+        std::optional<Luau::AstName> importedPrefix = std::nullopt;
+        if (auto node = ancestry.back())
+            if (auto typeReference = node->as<Luau::AstTypeReference>())
+                importedPrefix = typeReference->prefix;
+
+        auto scope = Luau::findScopeAtPosition(*localModule, position);
+        if (auto documentation = getDocumentationForTypeReference(localModule->name, scope, importedPrefix, name, /* forAutocomplete= */ true))
+            return documentation;
+    }
+
     if (entry.prop)
     {
         std::optional<Luau::ModuleName> definitionModuleName;
 
-        if (entry.containingClass)
+        if (entry.containingExternType)
         {
-            definitionModuleName = entry.containingClass.value()->definitionModuleName;
+            definitionModuleName = entry.containingExternType.value()->definitionModuleName;
         }
         else
         {
             // TODO: there is not a nice way to get the containing table type from the entry, so we compute it ourselves
-            auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
-
-            if (module)
+            if (localModule)
             {
                 Luau::TypeId* parentTy = nullptr;
                 if (auto node = ancestry.back())
                 {
                     if (auto indexName = node->as<Luau::AstExprIndexName>())
-                        parentTy = module->astTypes.find(indexName->expr);
+                        parentTy = localModule->astTypes.find(indexName->expr);
                     else if (auto indexExpr = node->as<Luau::AstExprIndexExpr>())
-                        parentTy = module->astTypes.find(indexExpr->expr);
+                        parentTy = localModule->astTypes.find(indexExpr->expr);
+                    else if (node->is<Luau::AstExprGlobal>())
+                    {
+                        // potentially autocompleting a property inside of a table literal
+                        if (ancestry.size() > 2)
+                            if (auto table = ancestry[ancestry.size() - 2]->as<Luau::AstExprTable>())
+                                parentTy = localModule->astTypes.find(table);
+                    }
                 }
 
                 if (parentTy)
-                    definitionModuleName = Luau::getDefinitionModuleName(*parentTy);
+                {
+                    // parentTy might be an intersected type, find the actual base ttv
+                    auto followedTy = Luau::follow(*parentTy);
+                    if (auto propInformation = lookupProp(followedTy, name); !propInformation.empty())
+                        definitionModuleName = Luau::getDefinitionModuleName(propInformation[0].baseTableTy);
+                    else
+                        definitionModuleName = Luau::getDefinitionModuleName(followedTy);
+                }
             }
         }
 
@@ -381,8 +525,9 @@ std::optional<std::string> WorkspaceFolder::getDocumentationForAutocompleteEntry
     return std::nullopt;
 }
 
-std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params)
+std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::CompletionParams& params, const LSPCancellationToken& cancellationToken)
 {
+    LUAU_TIMETRACE_SCOPE("WorkspaceFolder::completion", "LSP");
     auto config = client->getConfiguration(rootUri);
 
     if (!config.completion.enabled)
@@ -402,18 +547,72 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     std::unordered_set<std::string> tags;
 
-    // We must perform check before autocompletion
-    checkStrict(moduleName, /* forAutocomplete: */ true);
+    auto stringCompletionCB = [&](const std::string& tag, std::optional<const Luau::ExternType*> ctx,
+                                  std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
+    {
+        tags.insert(tag);
+        return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
+    };
 
     auto position = textDocument->convertPosition(params.position);
-    auto result = Luau::autocomplete(frontend, moduleName, position,
-        [&](const std::string& tag, std::optional<const Luau::ClassType*> ctx,
-            std::optional<std::string> contents) -> std::optional<Luau::AutocompleteEntryMap>
-        {
-            tags.insert(tag);
-            return platform->completionCallback(tag, ctx, std::move(contents), moduleName);
-        });
 
+    Luau::FragmentAutocompleteStatusResult fragmentStatusResult;
+    Luau::AutocompleteResult result;
+    bool forAutocomplete = !FFlag::LuauSolverV2; // New type solver does not have a different engine for autocomplete
+    bool fragmentWasSuccessful = false;
+
+    if (config.completion.enableFragmentAutocomplete && frontend.allModuleDependenciesValid(moduleName, forAutocomplete) &&
+        frontend.isDirty(moduleName, forAutocomplete))
+    {
+        Luau::FrontendOptions frontendOptions;
+        frontendOptions.retainFullTypeGraphs = true;
+        if (FFlag::LuauSolverV2)
+            frontendOptions.runLintChecks = true;
+        else
+            frontendOptions.forAutocomplete = true;
+        frontendOptions.cancellationToken = cancellationToken;
+
+        // Get parse information for this script
+        frontend.parse(moduleName);
+        const auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            return {};
+
+        auto newSrc = textDocument->getText();
+        Luau::ParseResult fragmentParseResult;
+        fragmentParseResult.root = sourceModule->root;
+        fragmentParseResult.commentLocations = sourceModule->commentLocations;
+        fragmentParseResult.hotcomments = sourceModule->hotcomments;
+        Luau::FragmentContext fragmentContext = {
+            newSrc,
+            fragmentParseResult,
+            frontendOptions,
+        };
+
+        // It is important to keep the fragmentResult in scope for the whole completion step
+        // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
+        fragmentStatusResult = Luau::tryFragmentAutocomplete(frontend, moduleName, position, fragmentContext, stringCompletionCB);
+        throwIfCancelled(cancellationToken);
+        if (fragmentStatusResult.status == Luau::FragmentAutocompleteStatus::Success)
+        {
+            // Result is nullopt if there are no suggestions (i.e. comments)
+            if (!fragmentStatusResult.result)
+                return {};
+
+            result = fragmentStatusResult.result->acResults;
+            fragmentWasSuccessful = true;
+        }
+    }
+
+    if (!fragmentWasSuccessful)
+    {
+        // We must perform check before autocompletion
+        checkStrict(moduleName, cancellationToken, forAutocomplete);
+
+        throwIfCancelled(cancellationToken);
+
+        result = Luau::autocomplete(frontend, moduleName, position, stringCompletionCB);
+    }
 
     std::vector<lsp::CompletionItem> items{};
 
@@ -425,26 +624,67 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             !(Luau::get<Luau::FunctionType>(*entry.type) || Luau::isOverloadedFunction(*entry.type)))
             continue;
 
+        if (!config.completion.showKeywords && entry.kind == Luau::AutocompleteEntryKind::Keyword)
+            continue;
+
+        if (!config.completion.showAnonymousAutofilledFunction && entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
+            continue;
+
         lsp::CompletionItem item;
         item.label = name;
 
-        if (auto documentationString = getDocumentationForAutocompleteEntry(entry, result.ancestry, moduleName))
+        // Remove the trailing slash in `../` and `./` as it prevents completion from triggering
+        if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
+        {
+            if (name == "../")
+                item.label = "..";
+            else if (name == "./")
+                item.label = ".";
+        }
+
+        const auto localModule = fragmentWasSuccessful ? fragmentStatusResult.result->incrementalModule : getModule(moduleName, forAutocomplete);
+        if (auto documentationString = getDocumentationForAutocompleteEntry(name, entry, result.ancestry, localModule, position))
             item.documentation = {lsp::MarkupKind::Markdown, documentationString.value()};
 
         item.deprecated = deprecated(entry, item.documentation);
-        item.kind = entryKind(entry, platform.get());
-        item.sortText = sortText(frontend, name, entry, tags, *platform);
+
+        if (!config.completion.showDeprecatedItems && item.deprecated)
+            continue;
+
+        item.kind = entryKind(item.label, entry, platform.get());
+        item.sortText = sortText(frontend, item.label, item, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             item.insertText = entry.insertText;
 
-        // We shouldn't include the extension when inserting a file
-        if (std::find(entry.tags.begin(), entry.tags.end(), "File") != entry.tags.end())
-            if (auto pos = name.find_last_of('.'); pos != std::string::npos)
-                item.insertText = std::string(name).erase(pos);
+        if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
+        {
+            if (entry.insertText)
+            {
+                LUAU_ASSERT(!result.ancestry.empty());
+                auto containingString = result.ancestry.back()->as<Luau::AstExprConstantString>();
+                LUAU_ASSERT(containingString);
+
+                auto insertText = entry.insertText;
+                if (!insertText->empty() && insertText->back() == '/')
+                    insertText->pop_back();
+
+                item.textEdit = lsp::TextEdit{{params.position, textDocument->convertPosition(Luau::Position{
+                                                                    containingString->location.end.line, containingString->location.end.column - 1})},
+                    *insertText};
+
+                // TextEdit cannot replace the old text for some reason, so we need an additional edit
+                item.additionalTextEdits.emplace_back(
+                    lsp::TextEdit{{textDocument->convertPosition(
+                                       Luau::Position{containingString->location.begin.line, containingString->location.begin.column + 1}),
+                                      textDocument->convertPosition(
+                                          Luau::Position{containingString->location.end.line, containingString->location.end.column - 1})},
+                        ""});
+            }
+        }
 
         // Handle if name is not an identifier
-        if (entry.kind == Luau::AutocompleteEntryKind::Property && !Luau::isIdentifier(name))
+        if (entry.kind == Luau::AutocompleteEntryKind::Property && !isIdentifier(name))
         {
             auto lastAst = result.ancestry.back();
             if (auto indexName = lastAst->as<Luau::AstExprIndexName>())
@@ -464,7 +704,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         // If autocompleting in a string and the autocompleting text contains a '/' character, then it won't replace correctly due to word boundaries
         // Apply a complete text edit instead
-        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String)
+        if (name.find('/') != std::string::npos && result.context == Luau::AutocompleteContext::String &&
+            entry.kind != Luau::AutocompleteEntryKind::RequirePath)
         {
             auto lastAst = result.ancestry.back();
             if (auto str = lastAst->as<Luau::AstExprConstantString>())
@@ -523,7 +764,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             item.detail = Luau::toString(id);
 
             // Try to infer more type info about the entry to provide better suggestion info
-            if (auto ftv = Luau::get<Luau::FunctionType>(id); ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction)
+            if (auto ftv = Luau::get<Luau::FunctionType>(id);
+                ftv && entry.kind != Luau::AutocompleteEntryKind::GeneratedFunction && entry.kind != Luau::AutocompleteEntryKind::Type)
             {
                 // Compute label details and more detailed parentheses snippet
                 auto [detail, parenthesesSnippet] = computeLabelDetailsForFunction(entry, ftv);
@@ -559,6 +801,23 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         {
             suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
         }
+        else if (result.context == Luau::AutocompleteContext::Property)
+        {
+            bool isDirectTableLiteral = false;
+            for (auto it = result.ancestry.rbegin(); it != result.ancestry.rend(); ++it)
+            {
+                if ((*it)->is<Luau::AstExprTable>())
+                {
+                    isDirectTableLiteral = true;
+                    break;
+                }
+                if ((*it)->is<Luau::AstExprIndexName>())
+                    break;
+            }
+
+            if (isDirectTableLiteral)
+                suggestImports(moduleName, position, config, *textDocument, items, /* completingTypeReferencePrefix: */ false);
+        }
         else if (result.context == Luau::AutocompleteContext::Type)
         {
             // Make sure we are in the context of completing a prefix in an AstTypeReference
@@ -570,10 +829,4 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     }
 
     return items;
-}
-
-std::vector<lsp::CompletionItem> LanguageServer::completion(const lsp::CompletionParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->completion(params);
 }

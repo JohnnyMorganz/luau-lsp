@@ -289,8 +289,19 @@ lsp::Position TextDocument::convertPosition(const Luau::Position& position) cons
 {
     auto lineOffsets = getLineOffsets();
     auto line = position.line;
-    std::string currentContent = _content.substr(lineOffsets[line], position.column);
+    LUAU_ASSERT(line < lineOffsets.size());
+    std::string currentContent = _content.substr(line < lineOffsets.size() ? lineOffsets[line] : lineOffsets.back(), position.column);
     return lsp::Position{line, lspLength(currentContent)};
+}
+
+Luau::Location TextDocument::convertRange(const lsp::Range& range) const
+{
+    return Luau::Location{convertPosition(range.start), convertPosition(range.end)};
+}
+
+lsp::Range TextDocument::convertLocation(const Luau::Location& location) const
+{
+    return lsp::Range{convertPosition(location.begin), convertPosition(location.end)};
 }
 
 void TextDocument::update(const std::vector<lsp::TextDocumentContentChangeEvent>& changes, size_t version)

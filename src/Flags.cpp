@@ -4,6 +4,20 @@
 
 #include <iostream>
 
+#ifdef LSP_BUILD_WITH_SENTRY
+// sentry.h pulls in <windows.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#endif
+#define SENTRY_BUILD_STATIC 1
+#include <sentry.h>
+#endif
+
+LUAU_FASTFLAG(LuauSolverV2)
+LUAU_FASTINT(LuauTarjanChildLimit)
+LUAU_FASTINT(LuauTableTypeMaximumStringifierLength)
+
 void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, ErrorCallback onError, ErrorCallback onWarning)
 {
     for (Luau::FValue<bool>* flag = Luau::FValue<bool>::list; flag; flag = flag->next)
@@ -50,6 +64,10 @@ void registerFastFlags(std::unordered_map<std::string, std::string>& fastFlags, 
     {
         onWarning(std::string("Unknown FFlag: ") + key);
     }
+
+#ifdef LSP_BUILD_WITH_SENTRY
+    sentry_set_tag("luau.new_solver_enabled", FFlag::LuauSolverV2 ? "true" : "false");
+#endif
 }
 
 void registerFastFlagsCLI(std::unordered_map<std::string, std::string>& fastFlags)
@@ -65,4 +83,16 @@ void registerFastFlagsCLI(std::unordered_map<std::string, std::string>& fastFlag
         {
             std::cerr << message << '\n';
         });
+}
+
+void applyRequiredFlags()
+{
+    // Manually enforce a LuauTarjanChildLimit increase
+    // TODO: re-evaluate the necessity of this change
+    if (FInt::LuauTarjanChildLimit > 0 && FInt::LuauTarjanChildLimit < 15000)
+        FInt::LuauTarjanChildLimit.value = 15000;
+    // This flag value is enforced due to Studio, but modern editors can handle this easily. Let's remove the restriction by setting it to zero.
+    // NOTE: 40 is the current value on Studio. We check against that so that we don't inadvertently change people's overrides
+    if (FInt::LuauTableTypeMaximumStringifierLength == 40)
+        FInt::LuauTableTypeMaximumStringifierLength.value = 0;
 }

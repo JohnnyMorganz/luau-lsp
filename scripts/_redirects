@@ -1,0 +1,7 @@
+# Cloudflare Pages Redirects
+/ https://github.com/JohnnyMorganz/luau-lsp
+
+# In future, we want to move the type definitions in a separate folder
+# For now, let's serve it as a redirect
+
+/type-definitions/* /:splat

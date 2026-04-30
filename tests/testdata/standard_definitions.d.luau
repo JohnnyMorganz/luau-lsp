@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage"]}
+--#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage","ServerScriptService","Workspace"]}
 
 declare class Enum
     function GetEnumItems(self): { any }
@@ -31,13 +31,18 @@ export type RBXScriptSignal<T... = ...any> = {
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-declare class Instance
+declare class Object
+	Changed: RBXScriptSignal<string>
+	ClassName: string
+	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
+	function IsA(self, className: string): boolean
+end
+
+declare class Instance extends Object
     AncestryChanged: RBXScriptSignal<Instance, Instance?>
     AttributeChanged: RBXScriptSignal<string>
-    Changed: RBXScriptSignal<string>
     ChildAdded: RBXScriptSignal<Instance>
     ChildRemoved: RBXScriptSignal<Instance>
-    ClassName: string
     DescendantAdded: RBXScriptSignal<Instance>
     DescendantRemoving: RBXScriptSignal<Instance>
     Destroying: RBXScriptSignal<>
@@ -53,22 +58,27 @@ declare class Instance
     function FindFirstChildOfClass(self, className: string): Instance?
     function FindFirstChildWhichIsA(self, className: string, recursive: boolean?): Instance?
     function FindFirstDescendant(self, name: string): Instance?
-    function GetAttribute(self, attribute: string): any
+    function GetAttribute(self, attribute: string): unknown?
     function GetAttributeChangedSignal(self, attribute: string): RBXScriptSignal<>
-    function GetAttributes(self): { [string]: any }
+    function GetAttributes(self): { [string]: unknown }
     function GetChildren(self): { Instance }
     function GetDescendants(self): { Instance }
     function GetFullName(self): string
-    function GetPropertyChangedSignal(self, property: string): RBXScriptSignal<>
-    function IsA(self, className: string): boolean
     function IsAncestorOf(self, descendant: Instance): boolean
     function IsDescendantOf(self, ancestor: Instance): boolean
+    function IsPropertyModified(self, property: string): boolean
+    function ResetPropertyToDefault(self, property: string): nil
     function SetAttribute(self, attribute: string, value: any): nil
     function WaitForChild(self, name: string): Instance
     function WaitForChild(self, name: string, timeout: number): Instance?
+    function QueryDescendants(self, selector: string): { Instance }
 end
 
-declare class Part extends Instance
+declare class BasePart extends Instance
+    Anchored: boolean
+end
+
+declare class Part extends BasePart
     Anchored: boolean
 end
 
@@ -79,15 +89,43 @@ end
 declare class ReplicatedStorage extends Instance
 end
 
+declare class ServerScriptService extends Instance
+end
+
+declare class Workspace extends Instance
+end
+
 declare class ServiceProvider extends Instance
     function GetService(self, className: string): Instance
 end
 
 declare class DataModel extends ServiceProvider
+    function BindToClose(self, func: ((...any) -> ...any)): nil
 end
 
 declare Instance: {
     new: ((className: string, parent: Instance?) -> Instance),
+    fromExisting: ((existingInstance: Instance) -> Instance),
 }
 
 declare game: DataModel
+
+--- This is a documented table
+export type DocumentedTable = {
+    --- This is documented member1 of the table
+    member1: string,
+}
+
+--- This is a documented class
+declare class DocumentedClass
+    --- This is a documented member1 of the class
+    member1: string
+    --- This is a documented function1 of the class
+    function function1(self): number
+end
+
+--- This is a documented global function
+declare function DocumentedGlobalFunction(): number
+
+--- This is a documented global variable
+declare DocumentedGlobalVariable: number

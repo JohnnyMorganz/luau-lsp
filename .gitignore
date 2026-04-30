@@ -1,6 +1,7 @@
 /build
 .vscode/settings.json
 /.vs
+out/
 .cache
 .idea
 .DS_Store
@@ -11,6 +12,8 @@ cmake-build-debug-visual-studio/
 cmake-build-release-visual-studio/
 cmake-build-relwithdebinfo-visual-studio/
 CMakeFiles
+sourcemap.json
+trace.json
 
 # Prerequisites
 *.d
@@ -44,3 +47,6 @@ CMakeFiles
 *.exe
 *.out
 *.app
+
+# Python venvs
+.venv

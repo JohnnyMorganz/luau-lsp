@@ -1,7 +1,7 @@
 #include "LSP/Workspace.hpp"
-#include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
+#include "Luau/Module.h"
 #include "Luau/ToString.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
@@ -100,7 +100,7 @@ struct DocumentationLocation
     Luau::Location location;
 };
 
-std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
+std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -116,12 +116,15 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
 
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    checkStrict(moduleName, cancellationToken, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
-                                                    : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule)
+        return std::nullopt;
+
+    if (Luau::isWithinComment(*sourceModule, position))
         return std::nullopt;
 
     if (auto hover = platform->handleHover(*textDocument, *sourceModule, position))
@@ -181,8 +184,8 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
                     if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
                         documentationLocation = {definitionModuleName.value(), prop.location};
                     auto resolvedProperty = lookupProp(parentType, prop.name.value);
-                    if (resolvedProperty)
-                        type = resolvedProperty->type();
+                    if (resolvedProperty.size() == 1 && resolvedProperty[0].property.readTy)
+                        type = resolvedProperty[0].property.readTy;
                     break;
                 }
             }
@@ -230,16 +233,17 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
             {
                 auto parentType = Luau::follow(*parentIt);
                 auto indexName = index->index.value;
-                auto prop = lookupProp(parentType, indexName);
-                if (prop)
+                if (auto propInformation = lookupProp(parentType, indexName); !propInformation.empty())
                 {
-                    type = prop->type();
-                    if (auto definitionModuleName = Luau::getDefinitionModuleName(parentType))
+                    auto [baseTy, prop] = propInformation[0];
+                    if (propInformation.size() == 1 && prop.readTy)
+                        type = prop.readTy;
+                    if (auto definitionModuleName = Luau::getDefinitionModuleName(baseTy))
                     {
-                        if (prop->location)
-                            documentationLocation = {definitionModuleName.value(), prop->location.value()};
-                        else if (prop->typeLocation)
-                            documentationLocation = {definitionModuleName.value(), prop->typeLocation.value()};
+                        if (prop.location)
+                            documentationLocation = {definitionModuleName.value(), prop.location.value()};
+                        else if (prop.typeLocation)
+                            documentationLocation = {definitionModuleName.value(), prop.typeLocation.value()};
                     }
                 }
             }
@@ -343,28 +347,27 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params)
     if (std::optional<std::string> docs;
         documentationSymbol && (docs = printDocumentation(client->documentation, *documentationSymbol)) && docs && !docs->empty())
     {
-        typeString += "\n----------\n";
+        typeString += kDocumentationBreaker;
         typeString += *docs;
     }
     else if (auto documentation = getDocumentationForType(*type); documentation && !documentation->empty())
     {
-        typeString += "\n----------\n";
+        typeString += kDocumentationBreaker;
+        typeString += *documentation;
+    }
+    else if (auto documentation = getDocumentationForAstNode(moduleName, node, scope); documentation && !documentation->empty())
+    {
+        typeString += kDocumentationBreaker;
         typeString += *documentation;
     }
     else if (documentationLocation)
     {
         if (auto text = printMoonwaveDocumentation(getComments(documentationLocation->moduleName, documentationLocation->location)); !text.empty())
         {
-            typeString += "\n----------\n";
+            typeString += kDocumentationBreaker;
             typeString += text;
         }
     }
 
     return lsp::Hover{{lsp::MarkupKind::Markdown, typeString}};
-}
-
-std::optional<lsp::Hover> LanguageServer::hover(const lsp::HoverParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->hover(params);
 }

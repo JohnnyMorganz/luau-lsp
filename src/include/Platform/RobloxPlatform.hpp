@@ -2,10 +2,11 @@
 
 #include "LSP/LuauExt.hpp"
 #include "Platform/LSPPlatform.hpp"
+#include "Platform/AutoImports.hpp"
 
 using json = nlohmann::json;
-using SourceNodePtr = std::shared_ptr<struct SourceNode>;
-using PluginNodePtr = std::shared_ptr<struct PluginNode>;
+
+const std::string kSourcemapGeneratedTag = "@sourcemap-generated";
 
 struct RobloxDefinitionsFileMetadata
 {
@@ -14,136 +15,95 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
-struct RobloxFindImportsVisitor : public FindImportsVisitor
-{
-public:
-    std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
-    std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
-    std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
-
-    size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber)
-    {
-        if (firstServiceDefinitionLine)
-            minimumLineNumber = *firstServiceDefinitionLine > minimumLineNumber ? *firstServiceDefinitionLine : minimumLineNumber;
-
-        size_t lineNumber = minimumLineNumber;
-        for (auto& [definedService, stat] : serviceLineMap)
-        {
-            auto location = stat->location.end.line;
-            if (definedService < serviceName && location >= lineNumber)
-                lineNumber = location + 1;
-        }
-        return lineNumber;
-    }
-
-    bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line) override
-    {
-        if (!isGetService(expr))
-            return false;
-
-        firstServiceDefinitionLine =
-            !firstServiceDefinitionLine.has_value() || firstServiceDefinitionLine.value() >= line ? line : firstServiceDefinitionLine.value();
-        lastServiceDefinitionLine =
-            !lastServiceDefinitionLine.has_value() || lastServiceDefinitionLine.value() <= line ? line : lastServiceDefinitionLine.value();
-        serviceLineMap.emplace(std::string(localName->name.value), local);
-
-        return true;
-    }
-
-    [[nodiscard]] size_t getMinimumRequireLine() const override
-    {
-        if (lastServiceDefinitionLine)
-            return *lastServiceDefinitionLine + 1;
-
-        return 0;
-    }
-
-    [[nodiscard]] bool shouldPrependNewline(size_t lineNumber) const override
-    {
-        return lastServiceDefinitionLine && lineNumber - *lastServiceDefinitionLine == 1;
-    }
-};
-
 struct SourceNode
 {
-    std::weak_ptr<struct SourceNode> parent; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
+    const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
     std::string name;
     std::string className;
-    std::vector<std::filesystem::path> filePaths{};
-    std::vector<SourceNodePtr> children{};
+    std::vector<std::string> filePaths{};
+    std::vector<SourceNode*> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
+    bool pluginManaged = false;
+
     // The corresponding TypeId for this sourcemap node
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
-    std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
+    mutable std::unordered_map<Luau::GlobalTypes const*, Luau::TypeId> tys{}; // NB: NOT POPULATED BY SOURCEMAP, created manually. Can be null!
 
-    bool isScript();
-    std::optional<std::filesystem::path> getScriptFilePath();
+    SourceNode(
+        std::string name, std::string className, std::vector<std::string> filePaths, std::vector<SourceNode*> children, bool pluginManaged = false);
+
+    bool isScript() const;
+    std::optional<std::string> getScriptFilePath() const;
     Luau::SourceCode::Type sourceCodeType() const;
-    std::optional<SourceNodePtr> findChild(const std::string& name);
+    std::optional<SourceNode*> findChild(const std::string& name) const;
+    std::optional<const SourceNode*> findDescendant(const std::string& name) const;
     // O(n) search for ancestor of name
-    std::optional<SourceNodePtr> findAncestor(const std::string& name);
+    std::optional<const SourceNode*> findAncestor(const std::string& name) const;
+    /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
+    /// Returns nullptr if any segment fails to resolve.
+    const SourceNode* walkPath(const std::string& path) const;
+
+    bool containsFilePaths() const;
+    ordered_json toJson() const;
+
+    static SourceNode* fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator);
 };
-
-static void from_json(const json& j, SourceNode& p)
-{
-    j.at("name").get_to(p.name);
-    j.at("className").get_to(p.className);
-
-    if (j.contains("filePaths"))
-        j.at("filePaths").get_to(p.filePaths);
-
-    if (j.contains("children"))
-    {
-        for (auto& child : j.at("children"))
-        {
-            p.children.push_back(std::make_shared<SourceNode>(child.get<SourceNode>()));
-        }
-    }
-}
 
 struct PluginNode
 {
     std::string name = "";
     std::string className = "";
-    std::vector<PluginNodePtr> children{};
+    std::vector<std::string> filePaths{};
+    std::vector<PluginNode*> children{};
+
+    static PluginNode* fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator);
 };
 
-static void from_json(const json& j, PluginNode& p)
-{
-    j.at("Name").get_to(p.name);
-    j.at("ClassName").get_to(p.className);
-
-    if (j.contains("Children"))
-    {
-        for (auto& child : j.at("Children"))
-        {
-            p.children.push_back(std::make_shared<PluginNode>(child.get<PluginNode>()));
-        }
-    }
-}
+/// Parses class names from QueryDescendants CSS-like selector strings.
+/// Returns the class name from the last compound selector of each comma-separated group.
+/// E.g., "Model >> BasePart" → {"BasePart"}, "Part, TextLabel" → {"Part", "TextLabel"}
+std::vector<std::string> parseClassNamesFromSelector(const std::string& selector);
 
 class RobloxPlatform : public LSPPlatform
 {
 private:
     // Plugin-provided DataModel information
-    PluginNodePtr pluginInfo;
+    PluginNode* pluginInfo = nullptr;
 
-    mutable std::unordered_map<std::string, SourceNodePtr> realPathsToSourceNodes{};
-    mutable std::unordered_map<Luau::ModuleName, SourceNodePtr> virtualPathsToSourceNodes{};
+    mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
 
-    std::optional<SourceNodePtr> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
-    std::optional<SourceNodePtr> getSourceNodeFromRealPath(const std::string& name) const;
-    std::optional<std::filesystem::path> getRealPathFromSourceNode(const SourceNodePtr& sourceNode) const;
-    static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNodePtr& sourceNode);
+    std::optional<const SourceNode*> getSourceNodeFromVirtualPath(const Luau::ModuleName& name) const;
+    std::optional<const SourceNode*> getSourceNodeFromRealPath(const Uri& name) const;
 
-    bool updateSourceMap();
-    void writePathsToMap(const SourceNodePtr& node, const std::string& base);
+    static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNode* sourceNode);
+
+    void clearSourcemapTypes();
 
 public:
     // The root source node from a parsed Rojo source map
-    SourceNodePtr rootSourceNode;
+    SourceNode* rootSourceNode = nullptr;
+    Luau::TypedAllocator<SourceNode> sourceNodeAllocator;
+    Luau::TypedAllocator<PluginNode> pluginNodeAllocator;
+
+    mutable std::unordered_map<Luau::ModuleName, const SourceNode*> virtualPathsToSourceNodes{};
 
     Luau::TypeArena instanceTypes;
+
+    /// These are "private" but exposed for unit testing only
+    void setPluginInfo(PluginNode* info)
+    {
+        pluginInfo = info;
+    }
+    bool updateSourceMap();
+    bool updateSourceMapFromContents(const std::string& sourceMapContents);
+    void writePathsToMap(SourceNode* node, const std::string& base);
+    void updateSourcemapTypes();
+
+    std::optional<Uri> getRealPathFromSourceNode(const SourceNode* sourceNode) const;
+
+    void clearPluginManagedNodesFromSourcemap(SourceNode* sourceNode);
+
+    bool hydrateSourcemapWithPluginInfo();
 
     void mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std::optional<nlohmann::json> metadata) override;
 
@@ -156,21 +116,28 @@ public:
         return name == "game" || name == "ProjectRoot" || Luau::startsWith(name, "game/") || Luau::startsWith(name, "ProjectRoot/");
     }
 
-    std::optional<Luau::ModuleName> resolveToVirtualPath(const std::string& name) const override;
+    std::optional<Luau::ModuleName> resolveToVirtualPath(const Uri& name) const override;
 
-    std::optional<std::filesystem::path> resolveToRealPath(const Luau::ModuleName& name) const override;
+    std::optional<Uri> resolveToRealPath(const Luau::ModuleName& name) const override;
 
-    Luau::SourceCode::Type sourceCodeTypeFromPath(const std::filesystem::path& path) const override;
+    Luau::SourceCode::Type sourceCodeTypeFromPath(const Uri& path) const override;
 
-    std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const std::filesystem::path& path) const override;
+    std::optional<std::string> readSourceCode(const Luau::ModuleName& name, const Uri& path) const override;
 
-    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node) override;
+    std::optional<Luau::ModuleInfo> resolveStringRequire(
+        const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits) override;
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits& limits) override;
+
+    std::unique_ptr<Luau::RequireSuggester> getRequireSuggester() override;
+    Luau::LanguageServer::AutoImports::ModuleVisitor getAutoImportsModuleVisitor(const Luau::ModuleName& from) override;
+    std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> getAutoImportsRequirePathComputer(
+        const Luau::ModuleName& from, ImportRequireStyle style) override;
 
     void updateSourceNodeMap(const std::string& sourceMapContents);
 
     void handleSourcemapUpdate(Luau::Frontend& frontend, const Luau::GlobalTypes& globals, bool expressiveTypes);
 
-    std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ClassType*> ctx,
+    std::optional<Luau::AutocompleteEntryMap> completionCallback(const std::string& tag, std::optional<const Luau::ExternType*> ctx,
         std::optional<std::string> contents, const Luau::ModuleName& moduleName) override;
 
     const char* handleSortText(const Luau::Frontend& frontend, const std::string& name, const Luau::AutocompleteEntry& entry,
@@ -183,14 +150,19 @@ public:
 
     lsp::WorkspaceEdit computeOrganiseServicesEdit(const lsp::DocumentUri& uri);
     void handleCodeAction(const lsp::CodeActionParams& params, std::vector<lsp::CodeAction>& items) override;
+    void handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, const Luau::UnknownSymbol& unknownSymbol,
+        const std::optional<lsp::Diagnostic>& diagnostic, std::vector<lsp::CodeAction>& result) override;
+    std::vector<lsp::TextEdit> computeAddAllMissingImportsEdits(
+        const UnknownSymbolFixContext& ctx, const std::vector<Luau::TypeError>& errors) override;
 
     lsp::DocumentColorResult documentColor(const TextDocument& textDocument, const Luau::SourceModule& module) override;
 
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params) override;
 
-    void onStudioPluginFullChange(const PluginNode& dataModel);
+    void onStudioPluginFullChange(const json& dataModel);
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
+
 
     using LSPPlatform::LSPPlatform;
 };

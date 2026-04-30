@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "LSP/DocumentationParser.hpp"
 
 TEST_SUITE_BEGIN("Hover");
 
@@ -15,7 +16,7 @@ TEST_CASE_FIXTURE(Fixture, "show_string_length_on_hover")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "string (16 bytes)"));
 }
@@ -32,7 +33,7 @@ TEST_CASE_FIXTURE(Fixture, "show_string_utf8_characters_on_hover")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "string (22 bytes, 19 characters)"));
 }
@@ -49,7 +50,7 @@ TEST_CASE_FIXTURE(Fixture, "basic_type_alias_declaration")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity = string"));
 }
@@ -66,7 +67,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_declaration_with_single_generic")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T> = T"));
 }
@@ -83,7 +84,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_declaration_with_generic_default_value")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T = string> = T"));
 }
@@ -100,7 +101,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_declaration_with_multiple_generics")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T, U = string> = T"));
 }
@@ -117,7 +118,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_declaration_generic_type_pack")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T...> = (any) -> (T...)"));
 }
@@ -134,7 +135,7 @@ TEST_CASE_FIXTURE(Fixture, "type_alias_declaration_generic_type_pack_with_defaul
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T... = ...string> = (any) -> (T...)"));
 }
@@ -151,9 +152,625 @@ TEST_CASE_FIXTURE(Fixture, "complex_type_alias_declaration_with_generics")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 18};
 
-    auto result = workspace.hover(params);
+    auto result = workspace.hover(params, nullptr);
     REQUIRE(result);
     CHECK_EQ(result->contents.value, codeBlock("luau", "type Identity<T, U = number, V... = ...string> = (T, U) -> (V...)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_type_table")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        type Foo = {
+        }
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 14};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Foo = {  }") + kDocumentationBreaker + "This is documentation for Foo\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_type_table_when_hovering_over_variable_with_type")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        type Foo = {
+        }
+        local x: Foo = nil
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 14};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "local x: {  }") + kDocumentationBreaker + "This is documentation for Foo\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_member_of_a_type_table")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        type Foo = {
+            --- This is a member bar
+            bar: string,
+        }
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 13};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "This is a member bar\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_member_of_a_type_table_when_hovering_over_property")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        type Foo = {
+            --- This is a member bar
+            bar: string,
+        }
+        local x: Foo
+        local y = x.bar
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{7, 21};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "This is a member bar\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_member_of_an_intersected_type_table_when_hovering_over_property")
+{
+    auto source = R"(
+        type A = {
+            --- Example sick number
+            Hello: number
+        }
+
+        type B = {
+            --- Example sick string
+            Heya: string
+        } & A
+
+        local item: B = nil
+        print(item.Heya)
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{12, 21};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "Example sick string\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        function foo()
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 18};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "function foo(): ()") + kDocumentationBreaker + "This is documentation for Foo\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_function_call")
+{
+    auto source = R"(
+        --- This is documentation for Foo
+        function foo()
+        end
+        foo()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 9};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "function foo(): ()") + kDocumentationBreaker + "This is documentation for Foo\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations")
+{
+    auto source = R"(
+        --- The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]
+        --- in the [International System of Units] (SI)
+        export type Meters = number
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 21};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Meters = number") + kDocumentationBreaker +
+                                         "The metre (or meter in [US spelling]; symbol: m) is the [base unit] of [length]\n" +
+                                         "in the [International System of Units] (SI)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_alias_declarations_of_intersected_tables")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as
+        --- metasyntactic variables and placeholder names in computer programming or computer-related documentation
+        export type Foobar = Foo & Bar
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{11, 21};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + kDocumentationBreaker +
+                                         "The terms foobar (/ˈfuːbɑːr/), foo, bar, baz, qux, quux, and others are used as\n" +
+                                         "metasyntactic variables and placeholder names in computer programming or computer-related documentation\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_type_references")
+{
+    auto source = R"(
+        type Foo = {
+            foo: "Foo",
+        }
+
+        type Bar = {
+            bar: "Bar",
+        }
+
+        --- This is the intersection of two types
+        export type Foobar = Foo & Bar
+
+        function consumer(value: Foobar)
+        end
+    )";
+
+    auto uri = newDocument("meters.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{12, 36};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Foobar = {\n    bar: \"Bar\"\n} & {\n    foo: \"Foo\"\n}") + kDocumentationBreaker +
+                                         "This is the intersection of two types\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_external_type_references")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "show_type_of_global_variable")
+{
+    auto source = R"(
+        print(DocumentedGlobalVariable)
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 23};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type DocumentedGlobalVariable = number"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_global_type_table_from_definitions_file")
+{
+    auto source = R"(
+        local x: DocumentedTable = nil
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 24};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type DocumentedTable = {\n"
+                                                       "    member1: string\n"
+                                                       "}") +
+                                         kDocumentationBreaker + "This is a documented table\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_global_type_table_from_definitions_file_when_hovering_over_variable_with_type")
+{
+    auto source = R"(
+        local x: DocumentedTable = nil
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "local x: {\n"
+                                                       "    member1: string\n"
+                                                       "}") +
+                                         kDocumentationBreaker + "This is a documented table\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_global_type_table_from_definitions_file_when_hovering_over_property")
+{
+    auto source = R"(
+        local x: DocumentedTable = nil
+        local y = x.member1
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 23};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "This is documented member1 of the table\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_a_global_function_call_from_definitions_file")
+{
+    auto source = R"(
+        DocumentedGlobalFunction()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 20};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value,
+        codeBlock("luau", "function DocumentedGlobalFunction(): number") + kDocumentationBreaker + "This is a documented global function\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_class_type_from_definitions_file")
+{
+    auto source = R"(
+        local x: DocumentedClass
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 23};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(
+        result->contents.value, codeBlock("luau", "type DocumentedClass = DocumentedClass") + kDocumentationBreaker + "This is a documented class\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_variable_with_class_type")
+{
+    auto source = R"(
+        local x: DocumentedClass
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "local x: DocumentedClass") + kDocumentationBreaker + "This is a documented class\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_class_type_property")
+{
+    auto source = R"(
+        local x: DocumentedClass
+        local y = x.member1
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 23};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string") + kDocumentationBreaker + "This is a documented member1 of the class\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_class_type_method_call")
+{
+    auto source = R"(
+        local x: DocumentedClass
+        local y = x:function1()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 23};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value,
+        codeBlock("luau", "function DocumentedClass:function1(): number") + kDocumentationBreaker + "This is a documented function1 of the class\n");
+}
+
+// TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_hovering_over_global_variable_from_definitions_file")
+//{
+//     auto source = R"(
+//          print(DocumentedGlobalVariable)
+//      )";
+//
+//     auto uri = newDocument("foo.luau", source);
+//
+//     lsp::HoverParams params;
+//     params.textDocument = lsp::TextDocumentIdentifier{uri};
+//     params.position = lsp::Position{1, 23};
+//
+//     auto result = workspace.hover(params, nullptr);
+//     REQUIRE(result);
+//     CHECK_EQ(result->contents.value,
+//         codeBlock("luau", "type DocumentedGlobalVariable = number") + kDocumentationBreaker + "This is a documented global variable\n");
+// }
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_when_all_parts_of_union_point_to_same_location")
+{
+    auto uri = newDocument("foo.luau", R"(
+        type BaseNode<HOS> = {
+	        --[[
+		        Indicates if the node has only a single supporter, this is purely internal
+		        and only used by `object_tree.closest_empty_node`,
+		        as an optimization for trees that have a taper type of "Flat" or "Slope".
+	        ]]
+	        has_one_supporter: HOS,
+        }
+
+        export type Node = BaseNode<true> | BaseNode<false>
+
+        local x: Node = {} :: any
+
+        x.has_one_supporter
+    )");
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{14, 17}; // 'x.has_one_supporter'
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", FFlag::LuauSolverV2 ? "boolean" : "false | true") + kDocumentationBreaker +
+                                         "Indicates if the node has only a single supporter, this is purely internal\n"
+                                         "and only used by `object_tree.closest_empty_node`,\n"
+                                         "as an optimization for trees that have a taper type of \"Flat\" or \"Slope\".\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "handles_type_references_without_types_graph")
+{
+    auto source = newDocument("types.luau", R"(
+        --- This is a type
+        export type Value = string
+    )");
+
+    auto uri = newDocument("source.luau", R"(
+        local Types = require("types.luau")
+
+        local x: Types.Value
+    )");
+
+    // This test explicitly expects type graphs to not be retained (i.e., the required module scope was cleared)
+    // We should still be able to find the type references.
+    workspace.checkSimple(workspace.fileResolver.getModuleName(uri), /* cancellationToken= */ nullptr);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 25};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "type Types.Value = string") + kDocumentationBreaker + "This is a type\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "hover_respects_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.hover(lsp::HoverParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_local_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_global_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        function add1(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_anonymous_function_body_does_not_show_function_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local add1 = function(n: number): number
+            -- hovering | over me should not show function type
+            return n + 1
+        end
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_base_table_member_of_setmetatable_type")
+{
+    auto source = R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.prop_a
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{13, 22};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK(result->contents.value.find("Documentation for prop_a.") != std::string::npos);
+}
+
+TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_index_member_of_setmetatable_type")
+{
+    auto source = R"(
+        local meta = {
+            __index = {
+                --- Documentation for prop_b.
+                prop_b = "hello",
+            }
+        }
+
+        local obj = setmetatable({
+            --- Documentation for prop_a.
+            prop_a = "world",
+        }, meta)
+
+        local y = obj.prop_b
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{13, 22};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK(result->contents.value.find("Documentation for prop_b.") != std::string::npos);
 }
 
 TEST_SUITE_END();

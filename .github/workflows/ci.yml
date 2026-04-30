@@ -9,24 +9,27 @@ on:
     branches:
       - main
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: "10.15"
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-20.04, macos-latest]
+        os: [windows-latest, ubuntu-22.04, macos-latest]
     name: Build Server (${{matrix.os}})
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: true
+          submodules: recursive
 
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_STATIC_CRT:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
   run_tests:
@@ -36,7 +39,9 @@ jobs:
         include:
           - os: windows-latest
             test-path: ./build/Debug/Luau.LanguageServer.Test
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
+            test-path: ./build/Luau.LanguageServer.Test
+          - os: macos-latest
             test-path: ./build/Luau.LanguageServer.Test
 
     name: Run Tests (${{ matrix.os }})
@@ -45,30 +50,44 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: true
+          submodules: recursive
 
-      - name: Build Tests
+      - name: Build Tests (ASAN)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
           cmake --build . --target Luau.LanguageServer.Test -j 3
 
-      - name: Run Tests
+      - name: Build Tests
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake --build . --target Luau.LanguageServer.Test -j 3
+
+      - name: Run Tests (Old Solver)
         run: ${{ matrix.test-path }}
+
+      - name: Run Tests (New Solver)
+        run: ${{ matrix.test-path }} --new-solver
+
+      - name: Run Tests (All FFlags enabled)
+        run: ${{ matrix.test-path }} --fflags=true
 
   types_smoketest:
     name: Types Smoketest
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: true
+          submodules: recursive
 
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
       - name: Regenerate Types
@@ -109,7 +128,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, ubuntu-22.04, windows-latest]
     name: Test Extension (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     steps:
@@ -127,6 +146,24 @@ jobs:
       - run: npm test
         working-directory: editors/code
         if: runner.os != 'Linux'
+      - run: npx @vscode/vsce package
+        working-directory: editors/code
+
+  selene:
+    name: Run selene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ok-nick/setup-aftman@v0.4.2
+      - run: selene .
+
+  stylua:
+    name: Run stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ok-nick/setup-aftman@v0.4.2
+      - run: stylua --check .
 
   build_plugin:
     name: Verify and Build Roblox Studio Plugin
@@ -134,17 +171,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - uses: ok-nick/setup-aftman@v0.4.2
-
-      - name: Run selene
-        run: selene src
-        working-directory: plugin
-
-      - name: Run stylua
-        run: stylua --check src
-        working-directory: plugin
 
       - name: Generate sourcemap
         run: rojo sourcemap default.project.json --output sourcemap.json
@@ -153,11 +182,19 @@ jobs:
       - name: Build Tool
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DLSP_BUILD_ASAN:BOOL=ON
           cmake --build . --target Luau.LanguageServer.CLI -j 3
 
-      - name: Run Luau Analyze
+      - name: Run Luau Analyze (Plugin Source)
         run: ../build/luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.luau src
+        working-directory: plugin
+
+      - name: Run Luau Analyze (Cloud Scripts)
+        run: |
+          lune setup
+          echo '{ "aliases": { "lune": "'"$HOME"'/.lune/.typedefs/0.8.9" } }' > .luaurc
+          rojo sourcemap test.project.json --output test-sourcemap.json
+          ../build/luau-lsp analyze --sourcemap=test-sourcemap.json --definitions=../scripts/globalTypes.d.luau --flag:LuauFixIndexerSubtypingOrdering=True cloud
         working-directory: plugin
 
       - name: Build Plugin

@@ -25,23 +25,34 @@ $ luau-lsp --help
 
 ## Configuring Definitions and Documentation
 
-You can add in built-in definitions by passing the `--definitions=PATH` argument.
+You can add in built-in definitions by passing the `--definitions:@name=PATH` argument.
+The `name` should be a unique reference to the definitions file.
 This can be done multiple times:
 
 ```sh
-$ luau-lsp lsp --definitions=/path/to/globalTypes.d.luau
+$ luau-lsp lsp --definitions:@roblox=/path/to/globalTypes.d.luau
 ```
 
 > NOTE: Definitions file syntax is unstable and undocumented. It may change at any time
 
 For Roblox Users, you can download the Roblox Types Definitions from https://github.com/JohnnyMorganz/luau-lsp/blob/master/scripts/globalTypes.d.luau
-(using something like `curl` or `wget` should be sufficient).
+(using something like `curl` or `wget` should be sufficient). Multiple definition files are available depending on the
+API security level.
 
 Optionally, you can define documentation files as well, by passing `--docs=PATH`.
 This provides documentation for any built-in definitions, but is not a requirement.
 
 See https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/roblox/api-docs/en-us.json for an example of a
 documentation file.
+
+GitHub implements very strong rate limiting for unauthenticated requests. This project provides a Cloudflare-based proxy
+to serve static files on a CDN instead. We recommend using the following URLs when downloading:
+
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.None.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.PluginSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.LocalUserSecurity.d.luau`
+- `https://luau-lsp.pages.dev/type-definitions/globalTypes.RobloxScriptSecurity.d.luau`
+- `https://luau-lsp.pages.dev/api-docs/en-us.json`
 
 ## Configuring FFlags
 
@@ -81,28 +92,6 @@ To view all available FFlags, run:
 $ luau-lsp --show-flags
 ```
 
-## Configuration in `initializationOptions`
-
-Similar to [rust-analyzer](https://github.com/rust-lang/rust-analyzer/blob/master/docs/dev/lsp-extensions.md#configuration-in-initializationoptions),
-it is highly recommended to pass the `luau-lsp` configuration as part of initialization options, in the following format:
-
-```json
-{
-  "initializationOptions": {
-    "config": {
-      "default": { ... }
-      [workspaceFolder.uri]: {
-        ...
-      }
-    }
-  }
-}
-```
-
-This is primarily used to configure the `platform` used for the language server. If not provided, the language server
-will default to a standard Luau configuration, then update once configuration is received normally via the server.
-This may mean erroneous diagnostics or other intellisense are sent during this window (which is typically short).
-
 ## Optional: Custom `$/command` definition
 
 The Luau Language Server relies on a custom defined LSP notification: `$/command`.
@@ -123,6 +112,23 @@ the appropriate spot. The following payload is sent in this case:
 It is optional to decide whether to implement this command for your language client, and the server will run fine without
 it being defined. If not available, you may see slight problems when autocompleting `end`.
 
+## Optional: Rename After Refactoring
+
+When resolving refactoring code actions (e.g., Extract to local variable, Extract to function), the server returns a
+`CodeAction` with both an `edit` and a `command`. The command triggers a rename prompt so the user can name the newly
+created symbol.
+
+The command used is `luau-lsp.rename` with arguments `[uri: string, position: { line: number, character: number }]`.
+The VS Code extension handles this by moving the cursor to the specified position and triggering `editor.action.rename`.
+
+For non-VS Code clients, you should register a handler for this command that:
+
+1. Moves the cursor to the given position in the given document
+2. Triggers your editor's rename UI
+
+If the command is not handled, the refactoring will still work but the user will need to manually rename the
+extracted symbol.
+
 ## Optional: Rojo Sourcemap Generation
 
 The Language Server automatically listens for any changes to a `sourcemap.json` file present in the opened workspace root.
@@ -141,10 +147,11 @@ The Language Server will operate without a sourcemap available, but will not res
 ## Optional: Roblox Studio plugin
 
 A [Roblox Studio Companion Plugin](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion) is available
-for users who would like intellisense for non-filesystem based DataModel instances.
+for users who would like intellisense for non-Rojo and non-filesystem based DataModel instances.
 
-The companion plugin sends HTTP post requests to the following endpoints on localhost at the user-defined port:
+The companion plugin sends HTTP requests to the following endpoints on localhost at the user-defined port:
 
+- `GET /get-file-paths`
 - `POST /full`
 - `POST /clear`
 
@@ -180,11 +187,37 @@ Further Reference:
 
 ## Optional: Bytecode generation
 
-The Language server implements support for computing file-level textual bytecode and source code remarks, for lower level debugging features.
+The Language server implements support for computing file-level textual bytecode, source code remarks, and codegen instructions for lower level debugging features.
 
 A custom LSP request message is implemented:
 
 - `luau-lsp/bytecode`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - textual bytecode output
 - `luau-lsp/compilerRemarks`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number }`, returns `string` - source code with inline remarks as comments
+- `luau-lsp/codeGen`: `{ textDocument: TextDocumentIdentifier, optimizationLevel: number, codeGenTarget: string }`,
+  returns `string` - annotated codegen instructions
+
+`codeGenTarget` can be one of: `"host" | "a64" | "a64_nofeatures" | "x64_windows" | "x64_systemv"`
 
 You can implement this request via a custom command to surface this information in your editor
+
+## Optional: Require Graph
+
+The Language server can generate a require graph from a single file, or of the whole workspace. The require graph visualises dependency links between modules. The require graph is generated in DOT format
+
+A custom LSP request message is implemented:
+
+- `luau-lsp/requireGraph`: `{ textDocument: TextDocumentIdentifier, fromTextDocumentOnly: boolean }`, returns `string` - DOT file output
+  - `textDocument`: the text document to generate the require graph for
+  - `fromTextDocumentOnly`: whether the require graph should only include the dependencies from the selected text document. If false, the graph includes all indexed modules from the selected text document's workspace
+
+You can implement this request via a custom command to surface this information in your editor. You may need a `dot` visualizer.
+
+## Optional: View Internal Source (Debug)
+
+The language server supports [source code transformation plugins](../src/Plugin/README.md). Plugin configuration is handled through standard client settings and requires no special editor support.
+
+A custom LSP request is available to view the transformed source that Luau type-checks after plugin transformations:
+
+- `luau-lsp/debug/viewInternalSource`: `{ textDocument: TextDocumentIdentifier }`, returns `string` - the transformed source
+
+You can implement this request via a custom command to surface this information in your editor.

@@ -69,7 +69,7 @@ JsonRpcMessage parse(const std::string& jsonString)
 }
 
 /// Reads a JSON-RPC message from input
-bool readRawMessage(std::istream& input, std::string& output)
+bool readRawMessage(Transport* transport, std::string& output)
 {
     unsigned int contentLength = 0;
     std::string line;
@@ -77,9 +77,8 @@ bool readRawMessage(std::istream& input, std::string& output)
     // Read the headers
     while (true)
     {
-        if (!input)
+        if (!transport->readLine(line))
             return false;
-        std::getline(input, line);
 
         if (Luau::startsWith(line, "Content-Length: "))
         {
@@ -109,18 +108,15 @@ bool readRawMessage(std::istream& input, std::string& output)
 
     // Read the JSON message into output
     output.resize(contentLength);
-    input.read(&output[0], contentLength);
+    transport->read(&output[0], contentLength);
     return true;
 }
 
 /// Sends a raw JSON-RPC message to output stream
-void sendRawMessage(std::ostream& output, const json& message)
+void sendRawMessage(Transport* transport, const json& message)
 {
-    std::string s = message.dump();
-    output << "Content-Length: " << s.length() << "\r\n";
-    output << "\r\n";
-    output << s;
-    output.flush();
+    std::string s = message.dump(-1, ' ', false, json::error_handler_t::ignore);
+    transport->send(std::string("Content-Length: ") + std::to_string(s.length()) + "\r\n\r\n" + s);
 }
 
 } // namespace json_rpc

@@ -1,11 +1,62 @@
-#include "LSP/LanguageServer.hpp"
+#include "LSP/DocumentationParser.hpp"
 #include "LSP/Workspace.hpp"
+
+#include <algorithm>
 
 #include "Luau/Ast.h"
 #include "Luau/AstQuery.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "LSP/LuauExt.hpp"
+
+static std::vector<lsp::InlayHintLabelPart> toInlayHintLabelParts(
+    const Luau::ToStringResult& result, const Client* client, WorkspaceFileResolver* fileResolver)
+{
+    std::vector<lsp::InlayHintLabelPart> parts;
+
+    if (result.typeSpans.empty())
+    {
+        parts.push_back(lsp::InlayHintLabelPart{result.name});
+        return parts;
+    }
+
+    auto spans = result.typeSpans;
+    std::sort(spans.begin(), spans.end(),
+        [](const Luau::ToStringSpan& a, const Luau::ToStringSpan& b)
+        {
+            return a.startPos < b.startPos;
+        });
+
+    size_t nameLen = result.name.length();
+    size_t lastEnd = 0;
+    for (const auto& [start, end, typeId] : spans)
+    {
+        if (start >= nameLen)
+            break;
+
+        size_t clampedEnd = std::min(end, nameLen);
+
+        if (start > lastEnd)
+            parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd, start - lastEnd)});
+
+        lsp::InlayHintLabelPart part;
+        part.value = result.name.substr(start, clampedEnd - start);
+        part.location = types::getTypeLocation(typeId, fileResolver);
+        if (typeId->documentationSymbol)
+        {
+            if (auto documentation = printDocumentation(client->documentation, *typeId->documentationSymbol))
+                part.tooltip = lsp::MarkupContent{lsp::MarkupKind::Markdown, *documentation};
+        }
+        parts.push_back(part);
+
+        lastEnd = clampedEnd;
+    }
+
+    if (lastEnd < nameLen)
+        parts.emplace_back(lsp::InlayHintLabelPart{result.name.substr(lastEnd)});
+
+    return parts;
+}
 
 bool isLiteral(const Luau::AstExpr* expr)
 {
@@ -49,18 +100,41 @@ struct InlayHintVisitor : public Luau::AstVisitor
 {
     const Luau::ModulePtr& module;
     const ClientConfiguration& config;
+    const Client* client;
     const TextDocument* textDocument;
+    WorkspaceFileResolver* fileResolver;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
-    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const TextDocument* textDocument)
+    explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const Client* client,
+        const TextDocument* textDocument, WorkspaceFileResolver* fileResolver)
         : module(module)
         , config(config)
+        , client(client)
         , textDocument(textDocument)
+        , fileResolver(fileResolver)
 
     {
         stringOptions.maxTableLength = 30;
         stringOptions.maxTypeLength = config.inlayHints.typeHintMaxLength;
+    }
+
+    void setLabelFromType(lsp::InlayHint& hint, Luau::TypeId ty, const std::string& prefix = ": ")
+    {
+        auto result = Luau::toStringDetailed(ty, stringOptions);
+        hint.label.push_back(lsp::InlayHintLabelPart{prefix});
+        auto parts = toInlayHintLabelParts(result, client, fileResolver);
+        hint.label.insert(hint.label.end(), parts.begin(), parts.end());
+    }
+
+    void setLabelFromTypePack(lsp::InlayHint& hint, Luau::TypePackId ty, const std::string& prefix = ": ", bool removeEllipsis = false)
+    {
+        auto result = types::toStringReturnTypeDetailed(ty, stringOptions);
+        if (removeEllipsis)
+            result.name = removePrefix(result.name, "...");
+        hint.label.push_back(lsp::InlayHintLabelPart{prefix});
+        auto parts = toInlayHintLabelParts(result, client, fileResolver);
+        hint.label.insert(hint.label.end(), parts.begin(), parts.end());
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -94,6 +168,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (var->name == "_")
                         continue;
 
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
+                        continue;
+
                     auto typeString = Luau::toString(followedTy, stringOptions);
 
                     // If the stringified type is equivalent to the variable name, don't bother
@@ -103,8 +180,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
+                    setLabelFromType(hint, followedTy);
                     makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
@@ -137,6 +214,9 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     if (var->name == "_")
                         continue;
 
+                    if (config.inlayHints.hideHintsForErrorTypes && Luau::get<Luau::ErrorType>(followedTy))
+                        continue;
+
                     auto typeString = Luau::toString(followedTy, stringOptions);
 
                     // If the stringified type is equivalent to the variable name, don't bother
@@ -146,8 +226,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + typeString;
                     hint.position = textDocument->convertPosition(var->location.end);
+                    setLabelFromType(hint, followedTy);
                     makeInsertable(config, hint, followedTy);
                     hints.emplace_back(hint);
                 }
@@ -173,8 +253,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
-                    hint.label = ": " + types::toStringReturnType(ftv->retTypes, stringOptions);
                     hint.position = textDocument->convertPosition(func->argLocation->end);
+                    setLabelFromTypePack(hint, ftv->retTypes);
                     makeInsertable(config, hint, ftv->retTypes);
                     hints.emplace_back(hint);
                 }
@@ -187,7 +267,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 if (it != Luau::end(ftv->argTypes))
                 {
                     // Skip first item if it is self
-                    if (isMethod(ftv))
+                    if (func->self && isMethod(ftv))
                         it++;
 
                     for (auto param : func->args)
@@ -200,8 +280,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                         {
                             lsp::InlayHint hint;
                             hint.kind = lsp::InlayHintKind::Type;
-                            hint.label = ": " + Luau::toString(argType, stringOptions);
                             hint.position = textDocument->convertPosition(param->location.end);
+                            setLabelFromType(hint, argType);
                             makeInsertable(config, hint, argType);
                             hints.emplace_back(hint);
                         }
@@ -217,8 +297,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     {
                         lsp::InlayHint hint;
                         hint.kind = lsp::InlayHintKind::Type;
-                        hint.label = ": " + removePrefix(Luau::toString(varargType, stringOptions), "...");
                         hint.position = textDocument->convertPosition(func->varargLocation.end);
+                        setLabelFromTypePack(hint, varargType, ": ", /* removeEllipsis: */ true);
                         makeInsertable(config, hint, varargType, /* removeLeadingEllipsis: */ true);
                         hints.emplace_back(hint);
                     }
@@ -248,9 +328,8 @@ struct InlayHintVisitor : public Luau::AstVisitor
             auto idx = 0;
             for (auto param : call->args)
             {
-                // Skip first item if it is self
-                // TODO: hasSelf is not always specified, so we manually check for the "self" name (https://github.com/Roblox/luau/issues/551)
-                if (idx == 0 && isMethod(ftv) && call->self)
+                // Skip first item if method call (`:`)
+                if (idx == 0 && call->self)
                     namesIt++;
 
                 if (namesIt == ftv->argNames.end())
@@ -274,7 +353,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     std::string stringifiedParam = Luau::toString(param);
                     if (auto indexName = param->as<Luau::AstExprIndexName>())
                         stringifiedParam = Luau::toString(indexName->index);
-                    if (Luau::equalsLower(stringifiedParam, paramName))
+                    if (config.inlayHints.hideHintsForMatchingParameterNames && Luau::equalsLower(stringifiedParam, paramName))
                         createHint = false;
                 }
 
@@ -287,7 +366,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
                 {
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Parameter;
-                    hint.label = paramName + ":";
+                    hint.label.push_back(lsp::InlayHintLabelPart{paramName + ":"});
                     hint.position = textDocument->convertPosition(param->location.begin);
                     hint.paddingRight = true;
                     hints.emplace_back(hint);
@@ -312,7 +391,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     }
 };
 
-lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params)
+lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -322,22 +401,16 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
 
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    checkStrict(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    checkStrict(moduleName, cancellationToken, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = config.hover.strictDatamodelTypes ? frontend.moduleResolverForAutocomplete.getModule(moduleName)
-                                                    : frontend.moduleResolver.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config, textDocument};
+    InlayHintVisitor visitor{module, config, client, textDocument, &fileResolver};
     visitor.visit(sourceModule->root);
 
     return visitor.hints;
-}
-
-lsp::InlayHintResult LanguageServer::inlayHint(const lsp::InlayHintParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->inlayHint(params);
 }

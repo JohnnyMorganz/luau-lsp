@@ -1,21 +1,24 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
+#include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerScripts"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("PurchaseClient"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterPlayer/StarterPlayerScripts/PurchaseClient");
@@ -23,13 +26,14 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerScripts")
 
 TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/PlayerGui"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GuiScript"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterGui/GuiScript");
@@ -37,13 +41,14 @@ TEST_CASE("resolveModule handles LocalPlayer PlayerGui")
 
 TEST_CASE("resolveModule handles LocalPlayer StarterGear")
 {
+    Luau::TypeCheckLimits limits;
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
     Luau::ModuleInfo baseContext{"game/Players/LocalPlayer/StarterGear"};
     auto expr = Luau::AstExprIndexName(Luau::Location(), nullptr, Luau::AstName("GearScript"), Luau::Location(), Luau::Position(0, 0), '.');
-    auto resolved = fileResolver.resolveModule(&baseContext, &expr);
+    auto resolved = fileResolver.resolveModule(&baseContext, &expr, limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/StarterPack/GearScript");
@@ -67,7 +72,7 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstChild")
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "game/ReplicatedStorage/Testing");
@@ -91,21 +96,20 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule fails on FindFirstChild with recursive
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     CHECK_FALSE(resolved.has_value());
 }
 
 TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
 {
-    SourceNode sourceNode;
-    sourceNode.name = "Foo";
+    SourceNode sourceNode("Foo", "ClassName", {}, {});
 
     WorkspaceFileResolver fileResolver;
     RobloxPlatform platform{&fileResolver};
     fileResolver.platform = &platform;
 
-    platform.rootSourceNode = std::make_shared<SourceNode>(sourceNode);
+    platform.rootSourceNode = &sourceNode;
 
     Luau::ModuleInfo baseContext{"ProjectRoot/Bar"};
 
@@ -119,63 +123,919 @@ TEST_CASE_FIXTURE(Fixture, "resolveModule handles FindFirstAncestor")
     REQUIRE(local != nullptr);
     REQUIRE_EQ(1, local->values.size);
 
-    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0]);
+    auto resolved = fileResolver.resolveModule(&baseContext, local->values.data[0], workspace.limits);
 
     REQUIRE(resolved.has_value());
     CHECK_EQ(resolved->name, "ProjectRoot");
 }
 
-TEST_CASE_FIXTURE(Fixture, "resolveDirectoryAliases")
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_does_nothing_if_string_doesnt_start_with_@_symbol")
 {
-    std::unordered_map<std::string, std::string> directoryAliases{
-        {"@test1/", "C:/Users/test/test1"},
-        {"@test2/", "~/test2"},
-        {"@relative/", "src/client"},
-        {"@test4", "C:/Users/test/test1"},
-    };
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "test.lua"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("test", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_variations_with_directory_separator")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "folder"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder/foo"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_handles_if_alias_was_defined_with_trailing_slash")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "folder/"
+        }
+    }
+    )");
+
+    auto x = resolveAlias("@test", workspace.fileResolver.defaultConfig, {});
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder"));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("folder/foo"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
+{
+#ifdef _WIN32
+    auto basePath = "C:/Users/test/folder";
+#else
+    auto basePath = "/home/folder";
+#endif
+
+    std::string source = R"(
+        {
+            "aliases": {
+                "test": "{basePath}"
+            }
+        }
+    )";
+    replace(source, "{basePath}", basePath);
+    loadLuaurc(source);
+
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(basePath));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(basePath));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(basePath).resolvePath("foo"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "~/definitions"
+        }
+    }
+    )");
 
     auto home = getHomeDirectory();
     REQUIRE(home);
 
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/foo"), "C:/Users/test/test1/foo");
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/foo.luau"), "C:/Users/test/test1/foo.luau");
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test1/"), "C:/Users/test/test1");
-    // NOTE: we do not strip `/` from `@test1`, so we use it as `@test4`
-    // for now we don't "fix" this, because our startsWith check is greedy, so we want to allow differentiation between `@foo/` and `@foobar/`
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test4"), "C:/Users/test/test1");
+    CHECK_EQ(resolveAlias("@test", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions")));
+    CHECK_EQ(resolveAlias("@test/", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions")));
+    CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(Luau::FileUtils::joinPaths(*home, "definitions/foo")));
+}
 
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test2/bar"), home.value() / "test2" / "bar");
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
+{
+    auto basePath = workspace.fileResolver.rootUri;
 
-    CHECK_EQ(resolveDirectoryAlias("", directoryAliases, "@test3/bar"), std::nullopt);
+    CHECK_EQ(resolveAlias("@self", workspace.fileResolver.defaultConfig, basePath), basePath);
+    CHECK_EQ(resolveAlias("@self/foo", workspace.fileResolver.defaultConfig, basePath), basePath.resolvePath("foo"));
+}
 
-    // Relative directory aliases
-    CHECK_EQ(resolveDirectoryAlias("workspace/", directoryAliases, "@relative/foo.luau"), "workspace/src/client/foo.luau");
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_chained_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "std": "lute/std/libs",
+            "lint": "@std/commands/lint/types",
+            "transform": "@std/commands/transform/types"
+        }
+    }
+    )");
+
+    auto stdBase = workspace.fileResolver.rootUri.resolvePath("lute/std/libs");
+
+    CHECK_EQ(resolveAlias("@lint", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types"));
+    CHECK_EQ(resolveAlias("@lint/foo", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types/foo"));
+    CHECK_EQ(resolveAlias("@transform", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/transform/types"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_resolves_chained_alias_with_intermediate_path")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b/sub",
+            "b": "libs"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("libs/sub"));
+    CHECK_EQ(resolveAlias("@a/file", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("libs/sub/file"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_resolves_longer_alias_chain")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "deep"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("deep"));
+    CHECK_EQ(resolveAlias("@a/file", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("deep/file"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_returns_nullopt_on_cyclic_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "@a"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_returns_nullopt_on_longer_alias_cycle")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "@a"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_chained_alias_end_to_end")
+{
+    auto mainPath = tempDir.touch_child("main.luau");
+    tempDir.touch_child("packages/utils/init.luau");
+    tempDir.write_child(".luaurc", R"({
+        "aliases": {
+            "utils": "@libs/utils",
+            "libs": "./packages"
+        }
+    })");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.platform->resolveStringRequire(&baseContext, "@utils", workspace.limits);
+
+    REQUIRE(result.has_value());
+    auto packagesUri = workspace.fileResolver.rootUri.resolvePath("packages");
+    CHECK(packagesUri.isAncestorOf(Uri::file(result->name)));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_tilde_alias_end_to_end")
+{
+    // This test goes through resolveStringRequire (not resolveAlias directly) to catch
+    // regressions where tilde expansion is broken in the require resolution path.
+    // The .luaurc is written to disk because require resolution reads configs from disk.
+    auto mainPath = tempDir.touch_child("main.luau");
+    tempDir.write_child(".luaurc", R"({
+        "aliases": {
+            "test": "~/definitions"
+        }
+    })");
+
+    auto home = getHomeDirectory();
+    REQUIRE(home);
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.platform->resolveStringRequire(&baseContext, "@test/module", workspace.limits);
+
+    REQUIRE(result.has_value());
+    // The ~ should be expanded: the resolved path must be under the home directory
+    auto definitionsUri = Uri::file(Luau::FileUtils::joinPaths(*home, "definitions"));
+    CHECK(definitionsUri.isAncestorOf(Uri::file(result->name)));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't add file extension if already exists")
 {
-    WorkspaceFileResolver fileResolver;
-    LSPPlatform platform{&fileResolver};
-    fileResolver.platform = &platform;
-
-    Luau::ModuleInfo baseContext{};
-    auto resolved = platform.resolveStringRequire(&baseContext, "Module.luau");
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.luau", workspace.limits);
 
     REQUIRE(resolved.has_value());
-    CHECK_EQ(resolved->name, "/Module.luau");
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\Module.luau"));
+#else
+    CHECK(endsWith(resolved->name, "/Module.luau"));
+#endif
 }
 
 TEST_CASE_FIXTURE(Fixture, "string require doesn't replace a non-luau/lua extension")
 {
-    WorkspaceFileResolver fileResolver;
-    LSPPlatform platform{&fileResolver};
-    fileResolver.platform = &platform;
-
-    Luau::ModuleInfo baseContext{};
-    auto resolved = platform.resolveStringRequire(&baseContext, "Module.mod");
+    Luau::ModuleInfo baseContext{workspace.fileResolver.getModuleName(workspace.rootUri)};
+    auto resolved = workspace.platform->resolveStringRequire(&baseContext, "Module.mod", workspace.limits);
 
     REQUIRE(resolved.has_value());
-    CHECK_EQ(resolved->name, "/Module.mod.lua");
+#ifdef _WIN32
+    CHECK(endsWith(resolved->name, "\\Module.mod.lua"));
+#else
+    CHECK(endsWith(resolved->name, "/Module.mod.lua"));
+#endif
+}
+
+TEST_CASE("string_require_resolves_relative_to_file_integration_test")
+{
+    // This integration test needs access to real test data files, so we create a workspace
+    // rooted in the actual project directory rather than using Fixture's temp directory
+    TestClient client;
+    client.globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
+    client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+
+    auto cwd = Luau::FileUtils::getCurrentWorkingDirectory();
+    REQUIRE(cwd);
+
+    WorkspaceFolder workspace(&client, "$TEST_WORKSPACE", Uri::file(*cwd), std::nullopt);
+    workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
+    workspace.setupWithConfiguration(client.globalConfig);
+    workspace.isReady = true;
+
+    auto moduleName = workspace.fileResolver.getModuleName(workspace.rootUri.resolvePath("tests/testdata/requires/relative_to_file/main.luau"));
+    auto result = workspace.frontend.check(moduleName);
+
+    REQUIRE_EQ(result.errors.size(), 0);
+
+    auto module = workspace.frontend.moduleResolver.getModule(moduleName);
+    REQUIRE(module);
+    REQUIRE(module->hasModuleScope());
+
+    auto binding = module->getModuleScope()->linearSearchForBinding("other");
+    REQUIRE(binding);
+    CHECK_EQ(Luau::toString(Luau::follow(binding->typeId)), "number");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_file")
+{
+    auto projectLibMainPath = tempDir.touch_child("project/lib/main.luau");
+    auto projectLibUtilsPath = tempDir.touch_child("project/lib/utils.luau");
+    auto projectOtherPath = tempDir.touch_child("project/other.luau");
+
+    Luau::ModuleInfo baseContext{projectLibMainPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name),
+        Uri::file(projectLibUtilsPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name),
+        Uri::file(projectOtherPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_a_directory_as_the_init_luau_file")
+{
+    auto projectLibMainPath = tempDir.touch_child("project/lib/main.luau");
+    auto projectOtherPath = tempDir.touch_child("project/other/init.luau");
+
+    Luau::ModuleInfo baseContext{projectLibMainPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../other", workspace.limits)->name),
+        Uri::file(projectOtherPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_relative_to_directory_for_init_luau")
+{
+    auto toolsInitPath = tempDir.touch_child("tools/init.luau");
+    auto toolsFilePath = tempDir.touch_child("tools/file.luau");
+    auto projectSiblingPath = tempDir.touch_child("project/sibling.luau");
+    auto projectDirectoryUtilsPath = tempDir.touch_child("project/directory/utils.luau");
+    auto projectDirectoryInitPath = tempDir.touch_child("project/directory/init.luau");
+
+    Luau::ModuleInfo baseContext{projectDirectoryInitPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./sibling", workspace.limits)->name),
+        Uri::file(projectSiblingPath));
+
+    CHECK_EQ(
+        Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools", workspace.limits)->name), Uri::file(toolsInitPath));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../tools/file", workspace.limits)->name),
+        Uri::file(toolsFilePath));
+
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./utils", workspace.limits)->name),
+        Uri::file(tempDir.path() + "/project/utils.lua"));
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./directory/utils", workspace.limits)->name),
+        Uri::file(projectDirectoryUtilsPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolve_file_named_luau")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto luauPath = tempDir.touch_child("project/luau.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./luau", workspace.limits)->name), Uri::file(luauPath));
+}
+
+TEST_CASE("is_init_luau_file")
+{
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.lua")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.luau")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.client.luau")), true);
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/init.server.luau")), true);
+
+    CHECK_EQ(isInitLuauFile(Uri::file("foo/utils.luau")), false);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_self_alias")
+{
+    auto projectInitPath = tempDir.touch_child("project/init.luau");
+    auto projectUtilsPath = tempDir.touch_child("project/utils.luau");
+
+    Luau::ModuleInfo baseContext{projectInitPath};
+    CHECK_EQ(Uri::file(workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/utils", workspace.limits)->name),
+        Uri::file(projectUtilsPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "init_luau_files_should_not_be_aware_of_sibling_luaurc_files")
+{
+    auto initPath = tempDir.touch_child("project/code/init.luau");
+    auto siblingFilePath = tempDir.touch_child("project/code/sibling.luau");
+    tempDir.write_child("project/code/.luaurc", R"({
+        "aliases": {
+            "test": "test"
+        }
+    })");
+
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)), workspace.limits);
+    auto siblingConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(siblingFilePath)), workspace.limits);
+
+    CHECK_EQ(initConfig.aliases.size(), 0);
+    CHECK_EQ(siblingConfig.aliases.size(), 1);
+    CHECK(siblingConfig.aliases.find("test"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_sibling_to_its_parent_directory")
+{
+    auto initPath = tempDir.touch_child("project/code/init.luau");
+    tempDir.write_child("project/.luaurc", R"({
+        "aliases": {
+            "test": "test"
+        }
+    })");
+
+    auto initConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(initPath)), workspace.limits);
+
+    CHECK_EQ(initConfig.aliases.size(), 1);
+    CHECK(initConfig.aliases.find("test"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
+{
+    auto path = tempDir.write_child("settings.json", R"({"value": 1})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_toml_modules")
+{
+    auto path = tempDir.write_child("settings.toml", R"(value = 1)");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_yaml_modules")
+{
+    auto path = tempDir.write_child("settings.yaml", "value: 1");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_yml_modules")
+{
+    auto path = tempDir.write_child("settings.yml", "value: 1");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "support_config_luau")
+{
+    auto fooPath = tempDir.touch_child("project/code/foo.luau");
+    tempDir.write_child("project/.config.luau", R"(
+        return {
+            luau = {
+                aliases = {
+                    test = "test"
+                }
+            }
+        }
+    )");
+
+    auto fooConfig = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(fooPath)), workspace.limits);
+
+    CHECK_EQ(fooConfig.aliases.size(), 1);
+    CHECK(fooConfig.aliases.find("test"));
+}
+
+#ifndef _WIN32
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_file")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    auto targetPath = tempDir.touch_child("project/real_module.luau");
+
+    // Create a symlink: project/linked_module.luau -> project/real_module.luau
+    std::filesystem::create_symlink(targetPath, tempDir.path() + "/project/linked_module.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./linked_module", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+    CHECK(endsWith(resolved->name, "/project/linked_module.luau"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_symlinked_directory")
+{
+    auto mainPath = tempDir.touch_child("project/main.luau");
+    tempDir.touch_child("real_lib/init.luau");
+
+    // Create a symlink: project/lib -> real_lib
+    std::filesystem::create_symlink(tempDir.path() + "/real_lib", tempDir.path() + "/project/lib");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto resolved = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./lib", workspace.limits);
+
+    REQUIRE(resolved.has_value());
+    CHECK(endsWith(resolved->name, "/project/lib/init.luau"));
+}
+#endif
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_sibling")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./ModuleB", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_bare_name")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "ModuleB", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleB");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_parent_traversal")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../Utils", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Utils");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_nested_path")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./Nested/DeepModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/Nested/DeepModule");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_cross_service")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    // From ModuleA (parent=Shared), ../../ goes Shared->ReplicatedStorage->Game(root)
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "../../ServerScriptService/ServerModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ServerScriptService/ServerModule");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_nonexistent_path")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./NonExistent", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/NonExistent");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_returns_nullopt_past_root")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Utils"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../../../..", workspace.limits);
+
+    CHECK_FALSE(result.has_value());
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_falls_back_for_non_sourcemap_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto mainPath = tempDir.touch_child("standalone/main.luau");
+    auto otherPath = tempDir.touch_child("standalone/other.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./other", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(otherPath));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_from_root")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ServerScriptService/ServerModule"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "@game/ReplicatedStorage/Shared/ModuleA", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleA");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_nonexistent_path")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/NonExistent/Module", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/NonExistent/Module");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_from_module")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "Library",
+                "className": "ModuleScript",
+                "filePaths": ["lib/init.luau"],
+                "children": [{"name": "Helper", "className": "ModuleScript", "filePaths": ["lib/Helper.luau"]}]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("lib/Helper.luau");
+
+    Luau::ModuleInfo baseContext{"game/Library"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/Helper", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/Library/Helper");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto gameDirModule = tempDir.touch_child("game_alias/MyModule.luau");
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "game": "game_alias"
+        }
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/MyModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(gameDirModule));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_alias_resolves_via_filesystem")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto sharedModule = tempDir.touch_child("shared_libs/Helper.luau");
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "shared": "shared_libs"
+        }
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Shared/ModuleA"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@shared/Helper", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(sharedModule));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_json_data_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto jsonPath = tempDir.write_child("data/settings.json", R"({"enabled": true})");
+    auto luauPath = tempDir.write_child("src/main.luau", "");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {"name": "Settings", "className": "ModuleScript", "filePaths": ["{jsonPath}"]},
+                    {"name": "Main", "className": "ModuleScript", "filePaths": ["{luauPath}"]}
+                ]
+            }
+        ]
+    }
+    )");
+    replace(sourcemap, "{jsonPath}", jsonPath);
+    replace(sourcemap, "{luauPath}", luauPath);
+    loadSourcemap(sourcemap);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Main"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./Settings", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Settings");
+
+    auto source = workspace.fileResolver.readSource(result->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"enabled\"] = true;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_toml_data_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto tomlPath = tempDir.write_child("data/settings.toml", "enabled = true");
+    auto luauPath = tempDir.write_child("src/main.luau", "");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {"name": "Settings", "className": "ModuleScript", "filePaths": ["{tomlPath}"]},
+                    {"name": "Main", "className": "ModuleScript", "filePaths": ["{luauPath}"]}
+                ]
+            }
+        ]
+    }
+    )");
+    replace(sourcemap, "{tomlPath}", tomlPath);
+    replace(sourcemap, "{luauPath}", luauPath);
+    loadSourcemap(sourcemap);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Main"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./Settings", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Settings");
+
+    auto source = workspace.fileResolver.readSource(result->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"enabled\"] = true;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_resolves_yaml_data_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto yamlPath = tempDir.write_child("data/settings.yaml", "enabled: true");
+    auto luauPath = tempDir.write_child("src/main.luau", "");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {"name": "Settings", "className": "ModuleScript", "filePaths": ["{yamlPath}"]},
+                    {"name": "Main", "className": "ModuleScript", "filePaths": ["{luauPath}"]}
+                ]
+            }
+        ]
+    }
+    )");
+    replace(sourcemap, "{yamlPath}", yamlPath);
+    replace(sourcemap, "{luauPath}", luauPath);
+    loadSourcemap(sourcemap);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Main"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "./Settings", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Settings");
+
+    auto source = workspace.fileResolver.readSource(result->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"enabled\"] = true;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_game_alias_resolves_data_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto jsonPath = tempDir.write_child("data/config.json", R"({"key": "value"})");
+    auto luauPath = tempDir.write_child("src/server.luau", "");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {"name": "Config", "className": "ModuleScript", "filePaths": ["{jsonPath}"]}
+                ]
+            },
+            {
+                "name": "ServerScriptService",
+                "className": "ServerScriptService",
+                "children": [
+                    {"name": "Server", "className": "ModuleScript", "filePaths": ["{luauPath}"]}
+                ]
+            }
+        ]
+    }
+    )");
+    replace(sourcemap, "{jsonPath}", jsonPath);
+    replace(sourcemap, "{luauPath}", luauPath);
+    loadSourcemap(sourcemap);
+
+    Luau::ModuleInfo baseContext{"game/ServerScriptService/Server"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "@game/ReplicatedStorage/Config", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Config");
+
+    auto source = workspace.fileResolver.readSource(result->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"key\"] = \"value\";}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_relative_parent_resolves_data_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+
+    auto jsonPath = tempDir.write_child("data/config.json", R"({"count": 42})");
+    auto luauPath = tempDir.write_child("src/nested/script.luau", "");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {"name": "Config", "className": "ModuleScript", "filePaths": ["{jsonPath}"]},
+                    {
+                        "name": "Nested",
+                        "className": "Folder",
+                        "children": [
+                            {"name": "Script", "className": "ModuleScript", "filePaths": ["{luauPath}"]}
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+    replace(sourcemap, "{jsonPath}", jsonPath);
+    replace(sourcemap, "{luauPath}", luauPath);
+    loadSourcemap(sourcemap);
+
+    Luau::ModuleInfo baseContext{"game/ReplicatedStorage/Nested/Script"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "../Config", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Config");
+
+    auto source = workspace.fileResolver.readSource(result->name);
+    REQUIRE(source);
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"count\"] = 42;}");
 }
 
 TEST_SUITE_END();

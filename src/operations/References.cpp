@@ -1,37 +1,117 @@
 #include "LSP/Workspace.hpp"
-#include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
 #include "LSP/LuauExt.hpp"
 
-static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
+static bool isSameTableDirect(const Luau::TypeId a, const Luau::TypeId b)
 {
-    if (a == b)
+    Luau::TypeId followedA = Luau::follow(a);
+    Luau::TypeId followedB = Luau::follow(b);
+
+    if (followedA == followedB)
         return true;
+
+    if (auto mt = Luau::get<Luau::MetatableType>(followedA))
+        followedA = Luau::follow(mt->table);
+    if (auto mt = Luau::get<Luau::MetatableType>(followedB))
+        followedB = Luau::follow(mt->table);
+
+    if (followedA == followedB)
+        return true;
+
+    auto ttv1 = Luau::get<Luau::TableType>(followedA);
+    auto ttv2 = Luau::get<Luau::TableType>(followedB);
 
     // TODO: in some cases, the table in the first module doesnt point to the same ty as the table in the second
     // for example, in the first module (the one being required), the table may be unsealed
     // we check for location equality in these cases
-    if (auto ttv1 = Luau::get<Luau::TableType>(a))
-        if (auto ttv2 = Luau::get<Luau::TableType>(b))
-            return !ttv1->definitionModuleName.empty() && ttv1->definitionModuleName == ttv2->definitionModuleName &&
-                   ttv1->definitionLocation == ttv2->definitionLocation;
+    if (ttv1 && ttv2)
+        return !ttv1->definitionModuleName.empty() && ttv1->definitionModuleName == ttv2->definitionModuleName &&
+               ttv1->definitionLocation == ttv2->definitionLocation;
 
+    return false;
+}
+
+static bool tableIsRelatedViaMetatable(const Luau::TypeId metatableType, const Luau::TypeId targetTable, Luau::DenseHashSet<Luau::TypeId>& visited)
+{
+    auto mt = Luau::get<Luau::MetatableType>(Luau::follow(metatableType));
+    if (!mt)
+        return false;
+
+    auto metatable = Luau::follow(mt->metatable);
+
+    if (visited.contains(metatable))
+        return false;
+    visited.insert(metatable);
+
+    if (auto mtable = Luau::get<Luau::TableType>(metatable))
+    {
+        if (auto indexIt = mtable->props.find("__index"); indexIt != mtable->props.end() && indexIt->second.readTy)
+        {
+            auto indexTarget = Luau::follow(*indexIt->second.readTy);
+
+            if (isSameTableDirect(indexTarget, targetTable))
+                return true;
+
+            if (Luau::get<Luau::MetatableType>(indexTarget))
+                return tableIsRelatedViaMetatable(indexTarget, targetTable, visited);
+        }
+    }
+    else if (Luau::is<Luau::MetatableType>(metatable))
+    {
+        if (isSameTableDirect(metatable, targetTable))
+            return true;
+
+        return tableIsRelatedViaMetatable(metatable, targetTable, visited);
+    }
+
+    return false;
+}
+
+static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
+{
+    if (isSameTableDirect(a, b))
+        return true;
+
+    Luau::DenseHashSet<Luau::TypeId> visited{nullptr};
+
+    if (Luau::get<Luau::MetatableType>(Luau::follow(a)))
+    {
+        if (tableIsRelatedViaMetatable(a, b, visited))
+            return true;
+    }
+
+    visited.clear();
+    if (Luau::get<Luau::MetatableType>(Luau::follow(b)))
+    {
+        if (tableIsRelatedViaMetatable(b, a, visited))
+            return true;
+    }
+
+    return false;
+}
+
+static bool isSameFunction(const Luau::TypeId a, const Luau::TypeId b)
+{
+    if (a == b)
+        return true;
+
+    // Two FunctionTypes may be different if one is local to the module and the other is part of the exported interface.
+    // We check for location equality to handle this case
+    if (auto ftv1 = Luau::get<Luau::FunctionType>(a); ftv1 && ftv1->definition && ftv1->definition->definitionModuleName)
+        if (auto ftv2 = Luau::get<Luau::FunctionType>(b); ftv2 && ftv2->definition && ftv2->definition->definitionModuleName)
+            return ftv1->definition->definitionModuleName == ftv2->definition->definitionModuleName &&
+                   ftv1->definition->definitionLocation == ftv2->definition->definitionLocation;
     return false;
 }
 
 // Find all reverse dependencies of the top-level module
 // NOTE: this function is quite expensive as it requires a BFS
-// TODO: this comes from `markDirty`
+// TODO: this comes from `Frontend::traverseDependencies`
 std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Luau::ModuleName& moduleName)
 {
     std::vector<Luau::ModuleName> dependents{};
-    std::unordered_map<Luau::ModuleName, std::vector<Luau::ModuleName>> reverseDeps;
-    for (const auto& module : frontend.sourceNodes)
-    {
-        for (const auto& dep : module.second->requireSet)
-            reverseDeps[dep].push_back(module.first);
-    }
+
     std::vector<Luau::ModuleName> queue{moduleName};
     while (!queue.empty())
     {
@@ -42,21 +122,73 @@ std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Lua
         if (contains(dependents, next))
             continue;
 
+        Luau::SourceNode& sourceNode = *frontend.sourceNodes[next];
+
         dependents.push_back(next);
 
-        if (0 == reverseDeps.count(next))
-            continue;
-
-        const std::vector<Luau::ModuleName>& dependents = reverseDeps[next];
-        queue.insert(queue.end(), dependents.begin(), dependents.end());
+        const Luau::Set<Luau::ModuleName>& localDependents = sourceNode.dependents;
+        queue.insert(queue.end(), localDependents.begin(), localDependents.end());
     }
+
     return dependents;
 }
 
-// Find all references across all files for the usage of TableType, or a property on a TableType
-std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::optional<Luau::Name> property)
+std::vector<Reference> WorkspaceFolder::findAllFunctionReferences(Luau::TypeId ty, const LSPCancellationToken& cancellationToken)
 {
     ty = Luau::follow(ty);
+    auto ftv = Luau::get<Luau::FunctionType>(ty);
+    if (!ftv)
+        return {};
+
+    if (!ftv->definition || !ftv->definition->definitionModuleName || ftv->definition->definitionModuleName->empty())
+        return {};
+
+    std::vector<Reference> references;
+    std::vector<Luau::ModuleName> dependents = findReverseDependencies(ftv->definition->definitionModuleName.value());
+
+    for (const auto& moduleName : dependents)
+    {
+        checkStrict(moduleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
+        auto module = getModule(moduleName, /* forAutocomplete: */ true);
+        if (!module)
+            continue;
+
+        for (const auto [expr, referencedTy] : module->astTypes)
+        {
+            // Skip the actual function definition
+            if (expr->is<Luau::AstExprFunction>())
+                continue;
+            if (isSameFunction(ty, Luau::follow(referencedTy)))
+                references.emplace_back(Reference{moduleName, expr->location});
+        }
+    }
+
+    // Include original definition location
+    references.emplace_back(Reference{ftv->definition->definitionModuleName.value(), ftv->definition->originalNameLocation});
+
+    return references;
+}
+
+// Find all references across all files for the usage of TableType, or a property on a TableType
+std::vector<Reference> WorkspaceFolder::findAllTableReferences(
+    Luau::TypeId ty, const LSPCancellationToken& cancellationToken, const std::optional<Luau::Name>& property)
+{
+    ty = Luau::follow(ty);
+
+    // If looking for a property on a MetatableType, use lookupProp to find the actual
+    // table where the property is defined (may be via __index chain)
+    if (property)
+    {
+        if (auto propResult = lookupProp(ty, *property); propResult.size() == 1)
+        {
+            auto [baseTy, prop] = propResult[0];
+            ty = Luau::follow(baseTy);
+        }
+    }
+
+    LUAU_ASSERT(!Luau::get<Luau::MetatableType>(ty));
+
     auto ttv = Luau::get<Luau::TableType>(ty);
 
     if (!ttv)
@@ -72,8 +204,9 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
     for (const auto& moduleName : dependents)
     {
         // Run the typechecker over the dependency modules
-        checkStrict(moduleName);
-        auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+        checkStrict(moduleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
+        auto module = getModule(moduleName, /* forAutocomplete: */ true);
         if (!module)
             continue;
 
@@ -88,6 +221,20 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
                     auto possibleParentTy = module->astTypes.find(indexName->expr);
                     if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
                         references.push_back(Reference{moduleName, indexName->indexLocation});
+                }
+                else if (auto indexExpr = expr->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    if (auto constantString = indexExpr->index->as<Luau::AstExprConstantString>())
+                    {
+                        std::string propName(constantString->value.data, constantString->value.size);
+                        if (propName == property.value())
+                        {
+                            auto possibleParentTy = module->astTypes.find(indexExpr->expr);
+                            if (possibleParentTy && isSameTable(ty, Luau::follow(*possibleParentTy)))
+                                references.push_back(Reference{moduleName, constantString->location});
+                        }
+                    }
                 }
                 else if (auto table = expr->as<Luau::AstExprTable>(); table && isSameTable(ty, Luau::follow(referencedTy)))
                 {
@@ -110,16 +257,44 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
                     references.push_back(Reference{moduleName, expr->location});
             }
         }
+
+        for (const auto [type, referencedTy] : module->astResolvedTypes)
+        {
+            if (isSameTable(ty, Luau::follow(referencedTy)))
+            {
+                if (property)
+                {
+                    if (auto typeTable = type->as<Luau::AstTypeTable>())
+                    {
+                        for (const auto& prop : typeTable->props)
+                        {
+                            if (prop.name.value == *property)
+                            {
+                                references.push_back(Reference{moduleName, prop.location});
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    references.push_back(Reference{moduleName, type->location});
+                }
+            }
+        }
     }
 
     // If its a property, include its original declaration location if not yet found
     if (property)
     {
-        if (auto prop = lookupProp(ty, *property); prop && prop->location)
+        for (const auto& [baseTy, prop] : lookupProp(ty, *property))
         {
-            auto reference = Reference{ttv->definitionModuleName, prop->location.value()};
-            if (!contains(references, reference))
-                references.push_back(reference);
+            if (prop.location)
+            {
+                auto reference = Reference{Luau::getDefinitionModuleName(baseTy).value_or(ttv->definitionModuleName), prop.location.value()};
+                if (!contains(references, reference))
+                    references.push_back(reference);
+            }
         }
     }
 
@@ -127,7 +302,8 @@ std::vector<Reference> WorkspaceFolder::findAllReferences(Luau::TypeId ty, std::
 }
 
 // Find all references of an exported type
-std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::ModuleName& moduleName, const Luau::Name& typeName)
+std::vector<Reference> WorkspaceFolder::findAllTypeReferences(
+    const Luau::ModuleName& moduleName, const Luau::Name& typeName, const LSPCancellationToken& cancellationToken)
 {
     std::vector<Reference> result;
 
@@ -142,8 +318,9 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
         result.emplace_back(Reference{moduleName, location});
 
     // Find the actual declaration location
-    checkStrict(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!module)
         return {};
 
@@ -160,9 +337,10 @@ std::vector<Reference> WorkspaceFolder::findAllTypeReferences(const Luau::Module
             continue;
 
         // Run the typechecker over the dependency module
-        checkStrict(dependencyModuleName);
+        checkStrict(dependencyModuleName, cancellationToken);
+        throwIfCancelled(cancellationToken);
         auto sourceModule = frontend.getSourceModule(dependencyModuleName);
-        auto module = frontend.moduleResolverForAutocomplete.getModule(dependencyModuleName);
+        auto module = getModule(dependencyModuleName, /* forAutocomplete: */ true);
         if (sourceModule)
         {
             // Find the import name used
@@ -195,22 +373,10 @@ static std::vector<lsp::Location> processReferences(WorkspaceFileResolver& fileR
 
     for (const auto& reference : references)
     {
-        if (auto refTextDocument = fileResolver.getTextDocumentFromModuleName(reference.moduleName))
+        if (auto refTextDocument = fileResolver.getOrCreateTextDocumentFromModuleName(reference.moduleName))
         {
             result.emplace_back(lsp::Location{refTextDocument->uri(),
                 {refTextDocument->convertPosition(reference.location.begin), refTextDocument->convertPosition(reference.location.end)}});
-        }
-        else
-        {
-            if (auto filePath = fileResolver.platform->resolveToRealPath(reference.moduleName))
-            {
-                if (auto source = fileResolver.readSource(reference.moduleName))
-                {
-                    auto refTextDocument = TextDocument{Uri::file(*filePath), "luau", 0, source->source};
-                    result.emplace_back(lsp::Location{refTextDocument.uri(),
-                        {refTextDocument.convertPosition(reference.location.begin), refTextDocument.convertPosition(reference.location.end)}});
-                }
-            }
         }
     }
 
@@ -241,20 +407,20 @@ class FindTypeParameterUsages : public Luau::AstVisitor
         // Check to see the type parameter has not been redefined
         for (auto t : node->generics)
         {
-            if (t.name == name)
+            if (t->name == name)
             {
                 if (initialNode)
-                    result.emplace_back(t.location);
+                    result.emplace_back(t->location);
                 else
                     return false;
             }
         }
         for (auto t : node->genericPacks)
         {
-            if (t.name == name)
+            if (t->name == name)
             {
                 if (initialNode)
-                    result.emplace_back(t.location);
+                    result.emplace_back(t->location);
                 else
                     return false;
             }
@@ -280,11 +446,11 @@ class FindTypeParameterUsages : public Luau::AstVisitor
     bool visit(class Luau::AstStatTypeAlias* node) override
     {
         for (auto t : node->generics)
-            if (t.name == name)
-                result.emplace_back(t.location);
+            if (t->name == name)
+                result.emplace_back(t->location);
         for (auto t : node->genericPacks)
-            if (t.name == name)
-                result.emplace_back(t.location);
+            if (t->name == name)
+                result.emplace_back(t->location);
         initialNode = false;
         return true;
     }
@@ -292,17 +458,17 @@ class FindTypeParameterUsages : public Luau::AstVisitor
     bool visit(class Luau::AstExprFunction* node) override
     {
         for (auto t : node->generics)
-            if (t.name == name)
-                result.emplace_back(t.location);
+            if (t->name == name)
+                result.emplace_back(t->location);
         for (auto t : node->genericPacks)
-            if (t.name == name)
-                result.emplace_back(t.location);
+            if (t->name == name)
+                result.emplace_back(t->location);
         initialNode = false;
         return true;
     }
 
 public:
-    FindTypeParameterUsages(Luau::AstName name)
+    explicit FindTypeParameterUsages(Luau::AstName name)
         : name(name)
     {
     }
@@ -312,13 +478,13 @@ public:
 
 // Determines whether the name matches a type reference in one of the provided generics
 // If so, we find the usages inside of that node
-bool handleIfTypeReferenceByName(Luau::AstNode* node, Luau::AstArray<Luau::AstGenericType> generics,
-    Luau::AstArray<Luau::AstGenericTypePack> genericPacks, Luau::AstName name, std::vector<lsp::Location>& result, const TextDocument* textDocument)
+bool handleIfTypeReferenceByName(Luau::AstNode* node, Luau::AstArray<Luau::AstGenericType*> generics,
+    Luau::AstArray<Luau::AstGenericTypePack*> genericPacks, Luau::AstName name, std::vector<lsp::Location>& result, const TextDocument* textDocument)
 {
     bool isTypeReference = false;
     for (const auto t : generics)
     {
-        if (t.name == name)
+        if (t->name == name)
         {
             isTypeReference = true;
             break;
@@ -326,7 +492,7 @@ bool handleIfTypeReferenceByName(Luau::AstNode* node, Luau::AstArray<Luau::AstGe
     }
     for (const auto t : genericPacks)
     {
-        if (t.name == name)
+        if (t->name == name)
         {
             isTypeReference = true;
             break;
@@ -347,26 +513,26 @@ bool handleIfTypeReferenceByName(Luau::AstNode* node, Luau::AstArray<Luau::AstGe
 
 // Determines whether the name matches a type reference in one of the provided generics
 // If so, we find the usages inside of that node
-bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::AstGenericType> generics,
-    Luau::AstArray<Luau::AstGenericTypePack> genericPacks, Luau::Position position, std::vector<lsp::Location>& result,
+bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::AstGenericType*> generics,
+    Luau::AstArray<Luau::AstGenericTypePack*> genericPacks, Luau::Position position, std::vector<lsp::Location>& result,
     const TextDocument* textDocument)
 {
     Luau::AstName name;
     bool isTypeReference = false;
     for (const auto t : generics)
     {
-        if (t.location.containsClosed(position))
+        if (t->location.containsClosed(position))
         {
-            name = t.name;
+            name = t->name;
             isTypeReference = true;
             break;
         }
     }
     for (const auto t : genericPacks)
     {
-        if (t.location.containsClosed(position))
+        if (t->location.containsClosed(position))
         {
-            name = t.name;
+            name = t->name;
             isTypeReference = true;
             break;
         }
@@ -384,7 +550,24 @@ bool handleIfTypeReferenceByPosition(Luau::AstNode* node, Luau::AstArray<Luau::A
     return true;
 }
 
-lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params)
+static bool typeIsReturned(Luau::TypePackId returnType, Luau::TypeId ty)
+{
+    if (!returnType)
+        return false;
+
+    ty = Luau::follow(ty);
+
+    for (const auto& part : returnType)
+    {
+        auto otherTy = Luau::follow(part);
+        if (isSameTable(ty, otherTy) || isSameFunction(ty, otherTy))
+            return true;
+    }
+
+    return false;
+}
+
+lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
@@ -394,7 +577,8 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     // Run the type checker to ensure we are up to date
     // We check for autocomplete here since autocomplete has stricter types
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
@@ -414,10 +598,31 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
 
     std::vector<lsp::Location> result{};
 
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
+
     if (symbol)
     {
+        // Check if symbol was a returned symbol
+        // We currently only handle returned functions and tables
+        // TODO: maybe we can cover more cases if we generalise this to be AST-based rather than type based?
+        // (we could track usages of local vars, cross-module track usages of X in `local X = require()`)
+        auto scope = Luau::findScopeAtPosition(*module, position);
+        if (auto ty = scope->lookup(symbol))
+        {
+            auto followedTy = Luau::follow(*ty);
+            if (typeIsReturned(module->returnType, followedTy))
+            {
+                std::vector<Reference> references;
+                if (Luau::get<Luau::FunctionType>(followedTy))
+                    references = findAllFunctionReferences(followedTy, cancellationToken);
+                else if (Luau::get<Luau::TableType>(followedTy))
+                    references = findAllTableReferences(followedTy, cancellationToken);
+
+                return processReferences(fileResolver, references);
+            }
+        }
+
         // Search for usages of a local or global symbol
-        // TODO: what if this symbol is returned! need to handle that so we can find cross-file references
         auto references = findSymbolReferences(*sourceModule, symbol);
 
         result.reserve(references.size());
@@ -431,33 +636,41 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     }
 
     // Search for a property
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
     if (auto expr = exprOrLocal.getExpr())
     {
         if (auto indexName = expr->as<Luau::AstExprIndexName>())
         {
-            auto possibleParentTy = module->astTypes.find(indexName->expr);
-            if (possibleParentTy)
+            if (auto possibleParentTy = module->astTypes.find(indexName->expr))
             {
                 auto parentTy = Luau::follow(*possibleParentTy);
-                auto references = findAllReferences(parentTy, indexName->index.value);
+                auto references = findAllTableReferences(parentTy, cancellationToken, indexName->index.value);
                 return processReferences(fileResolver, references);
             }
         }
         else if (auto constantString = expr->as<Luau::AstExprConstantString>())
         {
-            // Potentially a property defined inside of a table
+            // Potentially a property defined inside of a table or accessed via bracket notation
             auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position, /* includeTypes= */ false);
             if (ancestry.size() > 1)
             {
                 auto parent = ancestry.at(ancestry.size() - 2);
                 if (auto tbl = parent->as<Luau::AstExprTable>())
                 {
-                    auto possibleTableTy = module->astTypes.find(tbl);
-                    if (possibleTableTy)
+                    if (auto possibleTableTy = module->astTypes.find(tbl))
                     {
+                        auto references = findAllTableReferences(
+                            Luau::follow(*possibleTableTy), cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
+                        return processReferences(fileResolver, references);
+                    }
+                }
+                else if (auto indexExpr = parent->as<Luau::AstExprIndexExpr>())
+                {
+                    // Handle bracket notation: x["propertyName"]
+                    if (auto possibleParentTy = module->astTypes.find(indexExpr->expr))
+                    {
+                        auto parentTy = Luau::follow(*possibleParentTy);
                         auto references =
-                            findAllReferences(Luau::follow(*possibleTableTy), Luau::Name(constantString->value.data, constantString->value.size));
+                            findAllTableReferences(parentTy, cancellationToken, Luau::Name(constantString->value.data, constantString->value.size));
                         return processReferences(fileResolver, references);
                     }
                 }
@@ -481,9 +694,8 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
         if (typeDefinition->exported)
         {
             // Type may potentially be used in other files, so we need to handle this globally
-            auto references = findAllTypeReferences(moduleName, typeDefinition->name.value);
+            auto references = findAllTypeReferences(moduleName, typeDefinition->name.value, cancellationToken);
             return processReferences(fileResolver, references);
-            ;
         }
         else
         {
@@ -509,7 +721,7 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             if (auto importedModuleName = module->getModuleScope()->importedModules.find(prefix.value().value);
                 importedModuleName != module->getModuleScope()->importedModules.end())
             {
-                auto references = findAllTypeReferences(importedModuleName->second, reference->name.value);
+                auto references = findAllTypeReferences(importedModuleName->second, reference->name.value, cancellationToken);
                 return processReferences(fileResolver, references);
             }
 
@@ -583,12 +795,20 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
             return result;
         }
     }
+    else if (auto typeTable = node->as<Luau::AstTypeTable>())
+    {
+        if (auto possibleTableTy = module->astResolvedTypes.find(typeTable))
+        {
+            for (const auto& prop : typeTable->props)
+            {
+                if (prop.location.containsClosed(position))
+                {
+                    auto references = findAllTableReferences(Luau::follow(*possibleTableTy), cancellationToken, prop.name.value);
+                    return processReferences(fileResolver, references);
+                }
+            }
+        }
+    }
 
     return std::nullopt;
-}
-
-lsp::ReferenceResult LanguageServer::references(const lsp::ReferenceParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->references(params);
 }

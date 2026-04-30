@@ -1,7 +1,7 @@
 #include <LSP/Workspace.hpp>
 #include <LSP/LuauExt.hpp>
 #include <Luau/AstQuery.h>
-#include <Luau/Transpiler.h>
+#include "Luau/PrettyPrinter.h"
 
 using FunctionName = std::pair<std::string, std::optional<std::string>>;
 static FunctionName getFunctionName(Luau::AstExpr* expr)
@@ -51,9 +51,8 @@ static Luau::TypeId lookupFunctionCallType(Luau::ModulePtr module, const Luau::A
         if (auto parentIt = module->astTypes.find(index->expr))
         {
             auto parentType = Luau::follow(*parentIt);
-            auto prop = lookupProp(parentType, index->index.value);
-            if (prop)
-                return Luau::follow(prop->type());
+            if (auto prop = lookupProp(parentType, index->index.value); prop.size() == 1 && prop[0].property.readTy)
+                return Luau::follow(*prop[0].property.readTy);
         }
     }
 
@@ -108,7 +107,8 @@ struct FindAllCallsVisitor : public Luau::AstVisitor
 };
 
 
-std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const lsp::CallHierarchyPrepareParams& params)
+std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(
+    const lsp::CallHierarchyPrepareParams& params, const LSPCancellationToken& cancellationToken)
 {
     // TODO: this is largely based off goto definition, maybe DRY?
 
@@ -119,10 +119,11 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     auto position = textDocument->convertPosition(params.position);
 
     // Run the type checker to ensure we are up to date
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
 
@@ -141,30 +142,9 @@ std::vector<lsp::CallHierarchyItem> WorkspaceFolder::prepareCallHierarchy(const 
     {
         ty = scope->lookup(local).value_or(nullptr);
     }
-    else if (auto lvalue = Luau::tryGetLValue(*exprOrLocal.getExpr()))
+    else if (auto type = module->astTypes.find(exprOrLocal.getExpr()))
     {
-        const Luau::LValue* current = &*lvalue;
-        std::vector<std::string> keys{}; // keys in reverse order
-        while (auto field = Luau::get<Luau::Field>(*current))
-        {
-            keys.push_back(field->key);
-            current = Luau::baseof(*current);
-        }
-
-        const auto* symbol = Luau::get<Luau::Symbol>(*current);
-
-        if (auto baseType = scope->lookup(*symbol))
-            ty = Luau::follow(*baseType);
-        else
-            return {};
-
-        for (auto it = keys.rbegin(); it != keys.rend(); ++it)
-        {
-            auto prop = lookupProp(ty, *it);
-            if (!prop)
-                return {};
-            ty = Luau::follow(prop->type());
-        }
+        ty = Luau::follow(*type);
     }
 
     if (!ty)
@@ -215,7 +195,7 @@ std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomi
 
     // Find the definition of the original function, to determine the appropriate TypeId to lookup
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
     auto node = Luau::findExprAtPosition(*sourceModule, position);
@@ -238,7 +218,7 @@ std::vector<lsp::CallHierarchyIncomingCall> WorkspaceFolder::callHierarchyIncomi
     for (const auto& dependentModuleName : dependents)
     {
         auto dependentSourceModule = frontend.getSourceModule(dependentModuleName);
-        auto dependentModule = frontend.moduleResolverForAutocomplete.getModule(dependentModuleName);
+        auto dependentModule = getModule(dependentModuleName, /* forAutocomplete: */ true);
         if (!dependentSourceModule || !dependentModule)
             continue;
 
@@ -330,7 +310,7 @@ std::vector<lsp::CallHierarchyOutgoingCall> WorkspaceFolder::callHierarchyOutgoi
 
     // Find the original function in the file
     auto sourceModule = frontend.getSourceModule(moduleName);
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     if (!sourceModule || !module)
         return {};
     auto node = Luau::findExprAtPosition(*sourceModule, position);

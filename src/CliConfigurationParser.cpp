@@ -3,10 +3,23 @@
 #include "Luau/StringUtils.h"
 #include "Analyze/CliConfigurationParser.hpp"
 
+#include <iostream>
+
 json parseDottedConfiguration(const std::string& contents)
 {
-    json data = json::parse(contents);
+    json data;
+
+    try
+    {
+        data = json::parse(contents);
+    }
+    catch (const json::exception& err)
+    {
+        std::cerr << "Failed to parse settings JSON: " << err.what() << std::endl;
+    }
+
     json output = json::object();
+
 
     for (const auto& el : data.items())
     {

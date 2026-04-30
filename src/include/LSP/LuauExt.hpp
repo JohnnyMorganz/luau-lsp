@@ -19,7 +19,7 @@ bool isMetamethod(const Luau::Name& name);
 std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& definitions);
 
 Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete = false);
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName, const std::string& definitions);
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
 
@@ -40,6 +40,8 @@ Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau:
 // Duplicated from Luau/TypeInfer.h, since its static
 std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call);
 
+std::optional<lsp::Location> getTypeLocation(Luau::TypeId ty, WorkspaceFileResolver* fileResolver);
+
 } // namespace types
 
 // TODO: should upstream this
@@ -52,7 +54,14 @@ std::vector<Luau::Location> findTypeReferences(const Luau::SourceModule& source,
 std::optional<Luau::Location> getLocation(Luau::TypeId type);
 
 std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, const Luau::Name& name);
-std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
+
+struct PropLookup
+{
+    Luau::TypeId baseTableTy;
+    Luau::Property property;
+};
+
+std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name);
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name);
 
 // Converts a UTF-8 position to a UTF-16 position, using the provided text document if available
@@ -68,77 +77,4 @@ bool isGetService(const Luau::AstExpr* expr);
 bool isRequire(const Luau::AstExpr* expr);
 bool isMethod(const Luau::FunctionType* ftv);
 bool isOverloadedMethod(Luau::TypeId ty);
-
-struct FindImportsVisitor : public Luau::AstVisitor
-{
-private:
-    std::optional<size_t> previousRequireLine = std::nullopt;
-
-public:
-    std::optional<size_t> firstRequireLine = std::nullopt;
-    std::vector<std::map<std::string, Luau::AstStatLocal*>> requiresMap{{}};
-
-    virtual bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int line)
-    {
-        return false;
-    }
-
-    [[nodiscard]] virtual size_t getMinimumRequireLine() const
-    {
-        return 0;
-    }
-
-    [[nodiscard]] virtual bool shouldPrependNewline(size_t lineNumber) const
-    {
-        return false;
-    }
-
-    bool containsRequire(const std::string& module)
-    {
-        for (const auto& map : requiresMap)
-            if (contains(map, module))
-                return true;
-        return false;
-    }
-
-    bool visit(Luau::AstStatLocal* local) override
-    {
-        if (local->vars.size != 1 || local->values.size != 1)
-            return false;
-
-        auto localName = local->vars.data[0];
-        auto expr = local->values.data[0];
-
-        if (!localName || !expr)
-            return false;
-
-        auto line = expr->location.end.line;
-
-        if (handleLocal(local, localName, expr, line))
-            return false;
-
-        if (isRequire(expr))
-        {
-            firstRequireLine = !firstRequireLine.has_value() || firstRequireLine.value() >= line ? line : firstRequireLine.value();
-
-            // If the requires are too many lines away, treat it as a new group
-            if (previousRequireLine && line - previousRequireLine.value() > 1)
-                requiresMap.emplace_back(); // Construct a new group
-
-            requiresMap.back().emplace(std::string(localName->name.value), local);
-            previousRequireLine = line;
-        }
-
-        return false;
-    }
-
-    bool visit(Luau::AstStatBlock* block) override
-    {
-        for (Luau::AstStat* stat : block->body)
-        {
-            stat->visit(this);
-        }
-
-        return false;
-    }
-};
+std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type);

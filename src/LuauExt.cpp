@@ -1,9 +1,11 @@
+#include <optional>
 #include <utility>
 
+#include "Luau/Type.h"
 #include "Platform/LSPPlatform.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ToString.h"
-#include "Luau/Transpiler.h"
+#include "Luau/PrettyPrinter.h"
 #include "Luau/TypeInfer.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/Utils.hpp"
@@ -24,7 +26,7 @@ std::optional<std::string> getTypeName(Luau::TypeId typeId)
         if (auto mtvName = Luau::getName(mtv->metatable))
             name = *mtvName;
     }
-    else if (auto parentClass = Luau::get<Luau::ClassType>(ty))
+    else if (auto parentClass = Luau::get<Luau::ExternType>(ty))
     {
         name = parentClass->name;
     }
@@ -52,10 +54,9 @@ std::optional<nlohmann::json> parseDefinitionsFileMetadata(const std::string& de
 }
 
 Luau::LoadDefinitionFileResult registerDefinitions(
-    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& definitions, bool typeCheckForAutocomplete)
+    Luau::Frontend& frontend, Luau::GlobalTypes& globals, const std::string& packageName, const std::string& definitions)
 {
-    // TODO: packageName shouldn't just be "@roblox"
-    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, "@roblox", /* captureComments = */ false, typeCheckForAutocomplete);
+    return frontend.loadDefinitionFile(globals, globals.globalScope, definitions, packageName, /* captureComments = */ true);
 }
 
 using NameOrExpr = std::variant<std::string, Luau::AstExpr*>;
@@ -150,7 +151,7 @@ Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau:
 {
     size_t retSize = Luau::size(retTypes);
     bool hasTail = !Luau::finite(retTypes);
-    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize > 1);
 
     auto result = Luau::toStringDetailed(retTypes, options);
     if (wrap)
@@ -175,6 +176,28 @@ std::optional<Luau::AstExpr*> matchRequire(const Luau::AstExprCall& call)
 
     return call.args.data[0];
 }
+
+std::optional<lsp::Location> getTypeLocation(Luau::TypeId ty, WorkspaceFileResolver* fileResolver)
+{
+    ty = Luau::follow(ty);
+
+    auto moduleName = Luau::getDefinitionModuleName(ty);
+    auto location = getLocation(ty);
+
+    if (!moduleName || !location)
+        return std::nullopt;
+
+    auto document = fileResolver->getOrCreateTextDocumentFromModuleName(*moduleName);
+    if (!document)
+        return std::nullopt;
+
+    return lsp::Location{
+        document->uri(),
+        lsp::Range{
+            document->convertPosition(location->begin),
+            document->convertPosition(location->end)}};
+}
+
 } // namespace types
 
 struct FindNodeType : public Luau::AstVisitor
@@ -219,6 +242,21 @@ struct FindNodeType : public Luau::AstVisitor
     bool visit(class Luau::AstType* node) override
     {
         return visit(static_cast<Luau::AstNode*>(node));
+    }
+
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return visit(static_cast<Luau::AstNode*>(node));
+    }
+
+    bool visit(Luau::AstGenericType* node) override
+    {
+        return false;
+    }
+
+    bool visit(Luau::AstGenericTypePack* node) override
+    {
+        return false;
     }
 
     bool visit(Luau::AstStatBlock* block) override
@@ -283,60 +321,82 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
     }
 }
 
-std::optional<Luau::Property> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+// Returns [base, property] - base is important during intersections
+static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
-    if (auto ctv = Luau::get<Luau::ClassType>(parentType))
+    if (seenSet.contains(parentType))
+        return {};
+    seenSet.insert(parentType);
+
+    if (auto ctv = Luau::get<Luau::ExternType>(parentType))
     {
-        if (auto prop = Luau::lookupClassProp(ctv, name))
-            return *prop;
+        if (auto prop = Luau::lookupExternTypeProp(ctv, name))
+            return {PropLookup{parentType, *prop}};
     }
     else if (auto tbl = Luau::get<Luau::TableType>(parentType))
     {
         if (tbl->props.find(name) != tbl->props.end())
         {
-            return tbl->props.at(name);
+            return {PropLookup{parentType, tbl->props.at(name)}};
         }
     }
     else if (auto mt = Luau::get<Luau::MetatableType>(parentType))
     {
+        // Check the base table first
+        auto baseTableTy = Luau::follow(mt->table);
+        if (auto mtBaseTable = Luau::get<Luau::TableType>(baseTableTy))
+        {
+            if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
+            {
+                return {PropLookup{baseTableTy, mtBaseTable->props.at(name)}};
+            }
+        }
+
+        // If not found in base table, check __index in the metatable
         if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
-            if (indexIt != mtable->props.end())
+            if (indexIt != mtable->props.end() && indexIt->second.readTy)
             {
-                Luau::TypeId followed = Luau::follow(indexIt->second.type());
+                Luau::TypeId followed = Luau::follow(*indexIt->second.readTy);
                 if ((Luau::get<Luau::TableType>(followed) || Luau::get<Luau::MetatableType>(followed)) && followed != parentType) // ensure acyclic
                 {
-                    return lookupProp(followed, name);
+                    return lookupProp(followed, name, seenSet);
                 }
                 else if (Luau::get<Luau::FunctionType>(followed))
                 {
                     // TODO: can we handle an index function...?
-                    return std::nullopt;
+                    return {};
                 }
             }
         }
-
-        if (auto mtBaseTable = Luau::get<Luau::TableType>(Luau::follow(mt->table)))
+    }
+    else if (auto i = Luau::get<Luau::IntersectionType>(parentType))
+    {
+        for (Luau::TypeId ty : i->parts)
         {
-            if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
-            {
-                return mtBaseTable->props.at(name);
-            }
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet); !prop.empty())
+                return prop;
         }
     }
-    // else if (auto i = get<Luau::IntersectionType>(parentType))
-    // {
-    //     for (Luau::TypeId ty : i->parts)
-    //     {
-    //         // TODO: find the corresponding ty
-    //     }
-    // }
-    // else if (auto u = get<Luau::UnionType>(parentType))
-    // {
-    //     // Find the corresponding ty
-    // }
-    return std::nullopt;
+    else if (auto u = Luau::get<Luau::UnionType>(parentType))
+    {
+        std::vector<PropLookup> options;
+        for (Luau::TypeId ty : u->options)
+        {
+            if (auto prop = lookupProp(Luau::follow(ty), name, seenSet); !prop.empty())
+                options.insert(options.end(), prop.begin(), prop.end());
+        }
+
+        return options;
+    }
+    return {};
+}
+
+std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
+{
+    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    return lookupProp(parentType, name, seenSet);
 }
 
 std::optional<Luau::ModuleName> lookupImportedModule(const Luau::Scope& deepScope, const Luau::Name& name)
@@ -384,7 +444,7 @@ lsp::Diagnostic createTypeErrorDiagnostic(const Luau::TypeError& error, Luau::Fi
     diagnostic.message = message;
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {toUTF16(textDocument, error.location.begin), toUTF16(textDocument, error.location.end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/typecheck")};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/types")};
     return diagnostic;
 }
 
@@ -398,7 +458,7 @@ lsp::Diagnostic createLintDiagnostic(const Luau::LintWarning& lint, const TextDo
     diagnostic.message = lintName + ": " + lint.text;
     diagnostic.severity = lsp::DiagnosticSeverity::Warning; // Configuration can convert this to an error
     diagnostic.range = {toUTF16(textDocument, lint.location.begin), toUTF16(textDocument, lint.location.end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/lint#" + toLower(lintName) + "-" + std::to_string(static_cast<int>(lint.code)))};
 
     if (lint.code == Luau::LintWarning::Code::Code_LocalUnused || lint.code == Luau::LintWarning::Code::Code_ImportUnused ||
         lint.code == Luau::LintWarning::Code::Code_FunctionUnused)
@@ -421,7 +481,7 @@ lsp::Diagnostic createParseErrorDiagnostic(const Luau::ParseError& error, const 
     diagnostic.message = "SyntaxError: " + error.getMessage();
     diagnostic.severity = lsp::DiagnosticSeverity::Error;
     diagnostic.range = {toUTF16(textDocument, error.getLocation().begin), toUTF16(textDocument, error.getLocation().end)};
-    diagnostic.codeDescription = {Uri::parse("https://luau-lang.org/syntax")};
+    diagnostic.codeDescription = {Uri::parse("https://luau.org/syntax")};
     return diagnostic;
 }
 
@@ -632,6 +692,11 @@ struct FindSymbolReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(Luau::AstTypePack* type) override
+    {
+        return true;
+    }
+
     bool visit(Luau::AstTypeReference* typeReference) override
     {
         // TODO: this is not *completely* correct in the case of shadowing, as it is just a name comparison
@@ -666,6 +731,11 @@ struct FindTypeReferences : public Luau::AstVisitor
         return true;
     }
 
+    bool visit(class Luau::AstTypePack* node) override
+    {
+        return true;
+    }
+
     bool visit(class Luau::AstTypeReference* node) override
     {
         if (node->name.value == typeName && ((!prefix && !node->prefix) || (prefix && node->prefix && node->prefix->value == prefix.value())))
@@ -690,6 +760,18 @@ std::optional<Luau::Location> getLocation(Luau::TypeId type)
     {
         if (ftv->definition)
             return ftv->definition->originalNameLocation;
+    }
+    else if (auto ttv = Luau::get<Luau::TableType>(type))
+    {
+        return ttv->definitionLocation;
+    }
+    else if (auto mtv = Luau::get<Luau::MetatableType>(type))
+    {
+        return getLocation(mtv->table);
+    }
+    else if (auto ctv = Luau::get<Luau::ExternType>(type))
+    {
+        return ctv->definitionLocation;
     }
 
     return std::nullopt;
@@ -757,4 +839,26 @@ bool isOverloadedMethod(Luau::TypeId ty)
 
     std::vector<Luau::TypeId> parts = Luau::flattenIntersection(ty);
     return std::all_of(parts.begin(), parts.end(), isOverloadedMethod);
+}
+
+std::optional<Luau::TypeId> findCallMetamethod(Luau::TypeId type)
+{
+    type = Luau::follow(type);
+
+    std::optional<Luau::TypeId> metatable;
+    if (const auto mtType = Luau::get<Luau::MetatableType>(type))
+        metatable = mtType->metatable;
+    else if (const auto classType = Luau::get<Luau::ExternType>(type))
+        metatable = classType->metatable;
+
+    if (!metatable)
+        return std::nullopt;
+
+    auto unwrapped = Luau::follow(*metatable);
+    if (auto prop = lookupProp(unwrapped, "__call"); prop.size() == 1 && prop[0].property.readTy)
+    {
+        return prop[0].property.readTy;
+    }
+
+    return std::nullopt;
 }

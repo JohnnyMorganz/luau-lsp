@@ -30,6 +30,47 @@ enum struct TextDocumentSyncKind
     Incremental = 2,
 };
 
+struct SaveOptions
+{
+    /**
+     * The client is supposed to include the content on save.
+     */
+    bool includeText = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(SaveOptions, includeText)
+
+struct TextDocumentSyncOptions
+{
+    /**
+     * Open and close notifications are sent to the server. If omitted open
+     * close notification should not be sent.
+     */
+    bool openClose = false;
+    /**
+     * Change notifications are sent to the server. See
+     * TextDocumentSyncKind.None, TextDocumentSyncKind.Full and
+     * TextDocumentSyncKind.Incremental. If omitted it defaults to
+     * TextDocumentSyncKind.None.
+     */
+    TextDocumentSyncKind change = TextDocumentSyncKind::None;
+    /**
+     * If present will save notifications are sent to the server. If omitted
+     * the notification should not be sent.
+     */
+    bool willSave = false;
+    /**
+     * If present will save wait until requests are sent to the server. If
+     * omitted the request should not be sent.
+     */
+    bool willSaveWaitUntil = false;
+    /**
+     * If present save notifications are sent to the server. If omitted the
+     * notification should not be sent.
+     */
+    SaveOptions save;
+};
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentSyncOptions, openClose, change, willSave, willSaveWaitUntil, save)
+
 struct DiagnosticOptions
 {
     std::optional<std::string> identifier = std::nullopt;
@@ -94,10 +135,17 @@ struct CodeActionOptions
 };
 NLOHMANN_DEFINE_OPTIONAL(CodeActionOptions, codeActionKinds, resolveProvider);
 
+struct DocumentOnTypeFormattingOptions
+{
+    std::string firstTriggerCharacter;
+    std::optional<std::vector<std::string>> moreTriggerCharacter = std::nullopt;
+};
+NLOHMANN_DEFINE_OPTIONAL(DocumentOnTypeFormattingOptions, firstTriggerCharacter, moreTriggerCharacter);
+
 struct ServerCapabilities
 {
     PositionEncodingKind positionEncoding = PositionEncodingKind::UTF16;
-    std::optional<TextDocumentSyncKind> textDocumentSync = std::nullopt;
+    std::optional<TextDocumentSyncOptions> textDocumentSync = std::nullopt;
     std::optional<CompletionOptions> completionProvider = std::nullopt;
     bool hoverProvider = false;
     std::optional<SignatureHelpOptions> signatureHelpProvider = std::nullopt;
@@ -129,16 +177,17 @@ struct ServerCapabilities
      */
     bool workspaceSymbolProvider = false;
     /**
-	 * The server provides call hierarchy support.
-	 *
-	 * @since 3.16.0
-	 */
+     * The server provides call hierarchy support.
+     *
+     * @since 3.16.0
+     */
     bool callHierarchyProvider = false;
     std::optional<SemanticTokensOptions> semanticTokensProvider = std::nullopt;
+    std::optional<DocumentOnTypeFormattingOptions> documentOnTypeFormattingProvider = std::nullopt;
     std::optional<WorkspaceCapabilities> workspace = std::nullopt;
 };
 NLOHMANN_DEFINE_OPTIONAL(ServerCapabilities, positionEncoding, textDocumentSync, completionProvider, hoverProvider, signatureHelpProvider,
     declarationProvider, definitionProvider, typeDefinitionProvider, implementationProvider, referencesProvider, documentSymbolProvider,
-    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider, workspaceSymbolProvider,
-    callHierarchyProvider, semanticTokensProvider, workspace);
+    codeActionProvider, documentLinkProvider, colorProvider, renameProvider, foldingRangeProvider, inlayHintProvider, diagnosticProvider,
+    workspaceSymbolProvider, callHierarchyProvider, semanticTokensProvider, documentOnTypeFormattingProvider, workspace);
 } // namespace lsp

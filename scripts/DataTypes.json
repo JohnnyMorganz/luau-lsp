@@ -23,6 +23,21 @@
                     "ReturnType": {
                         "Name": "Instance"
                     }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromExisting",
+                    "Parameters": [
+                        {
+                            "Name": "existingInstance",
+                            "Type": {
+                                "Name": "Instance"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Instance"
+                    }
                 }
             ],
             "Name": "Instance"
@@ -181,6 +196,14 @@
                 {
                     "MemberType": "Function",
                     "Name": "random",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "BrickColor"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Random",
                     "Parameters": [],
                     "ReturnType": {
                         "Name": "BrickColor"
@@ -608,17 +631,42 @@
                             "Type": {
                                 "Name": "number"
                             }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "PhysicalProperties"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "density",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "friction",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticity",
+                            "Type": {
+                                "Name": "number"
+                            }
                         },
                         {
                             "Name": "frictionWeight",
-                            "Default": "nil",
                             "Type": {
                                 "Name": "number"
                             }
                         },
                         {
                             "Name": "elasticityWeight",
-                            "Default": "nil",
                             "Type": {
                                 "Name": "number"
                             }
@@ -649,6 +697,24 @@
                             "Type": {
                                 "Name": "number"
                             }
+                        },
+                        {
+                            "Name": "frictionWeight",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "elasticityWeight",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "acousticAbsorption",
+                            "Type": {
+                                "Name": "number"
+                            }
                         }
                     ],
                     "ReturnType": {
@@ -666,9 +732,12 @@
                     "Parameters": [
                         {
                             "Name": "axes",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "Axis | EnumNormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {
@@ -891,7 +960,8 @@
                             "Type": {
                                 "Category": "Enum",
                                 "Name": "RotationOrder"
-                            }
+                            },
+                            "Default": "nil"
                         }
                     ],
                     "ReturnType": {
@@ -1081,6 +1151,27 @@
                         {
                             "Name": "up",
                             "Default": "(0, 1, 0)",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "CFrame"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromRotationBetweenVectors",
+                    "Parameters": [
+                        {
+                            "Name": "from",
+                            "Type": {
+                                "Name": "Vector3"
+                            }
+                        },
+                        {
+                            "Name": "to",
                             "Type": {
                                 "Name": "Vector3"
                             }
@@ -1311,9 +1402,12 @@
                     "Parameters": [
                         {
                             "Name": "normalIds",
-                            "Type": {
-                                "Name": "Tuple"
-                            }
+                            "Type":{
+                                "Variadic":{
+                                    "Category": "Enum",
+                                    "Name": "NormalId"
+                                }
+                        }
                         }
                     ],
                     "ReturnType": {
@@ -2026,6 +2120,64 @@
             "Members": [
                 {
                     "MemberType": "Function",
+                    "Name": "fromUri",
+                    "Parameters": [
+                        {
+                            "Name": "uri",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromObject",
+                    "Parameters": [
+                        {
+                            "Name": "object",
+                            "Type": {
+                                "Name": "Object"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromAssetId",
+                    "Parameters": [
+                        {
+                            "Name": "assetId",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Content"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "none",
+                    "ValueType": {
+                        "Name": "Content"
+                    }
+                }
+            ],
+            "Name": "Content"
+        },
+
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
                     "Name": "new",
                     "Parameters": [],
                     "ReturnType": {
@@ -2335,10 +2487,95 @@
             "Name": "SharedTable"
         },
         {
-            "Members":[],
+            "Members": [],
             "Name": "Secret"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "position",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "leftTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        },
+                        {
+                            "Name": "rightTangent",
+                            "Type": {
+                                "Name": "UDim2"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Path2DControlPoint"
+                    }
+                }
+            ],
+            "Name": "Path2DControlPoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Variadic": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromCurrent",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                }
+            ],
+            "Name": "SecurityCapabilities"
         }
-
     ],
     "DataTypes": [
         {
@@ -2625,7 +2862,7 @@
                         }
                     ],
                     "ReturnType": {
-                        "Name": "Vector2"
+                        "Name": "number"
                     }
                 },
                 {
@@ -2888,6 +3125,13 @@
                 {
                     "MemberType": "Property",
                     "Name": "Friction",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "AcousticAbsorption",
                     "ValueType": {
                         "Name": "number"
                     }
@@ -3602,6 +3846,28 @@
                 },
                 {
                     "MemberType": "Function",
+                    "Name": "FuzzyEq",
+                    "Parameters": [
+                        {
+                            "Name": "other",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        },
+                        {
+                            "Name": "epsilon",
+                            "Default": "0.00001",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "bool"
+                    }
+                },
+                {
+                    "MemberType": "Function",
                     "Name": "components",
                     "Deprecated": true,
                     "Parameters": [],
@@ -3932,6 +4198,7 @@
                         },
                         {
                             "Name": "epsilon",
+                            "Default": "0.00001",
                             "Type": {
                                 "Name": "number"
                             }
@@ -4464,6 +4731,33 @@
             "Members": [
                 {
                     "MemberType": "Property",
+                    "Name": "SourceType",
+                    "ValueType": {
+                       "Category": "Enum",
+                        "Name": "ContentSourceType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Uri",
+                    "ValueType": {
+                        "Name": "string?"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Object",
+                    "ValueType": {
+                        "Name": "Object?"
+                    }
+                } 
+            ],
+            "Name": "Content"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
                     "Name": "FilterDescendantsInstances",
                     "ValueType": {
                         "Name": "Objects"
@@ -4475,6 +4769,20 @@
                     "ValueType": {
                         "Category": "Enum",
                         "Name": "RaycastFilterType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "ExcludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
                     }
                 },
                 {
@@ -4549,6 +4857,20 @@
                 },
                 {
                     "MemberType": "Property",
+                    "Name": "ExcludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeInstances",
+                    "ValueType": {
+                        "Name": "Objects"
+                    }
+                },
+                {
+                    "MemberType": "Property",
                     "Name": "CollisionGroup",
                     "ValueType": {
                         "Name": "string"
@@ -4557,6 +4879,13 @@
                 {
                     "MemberType": "Property",
                     "Name": "MaxParts",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Tolerance",
                     "ValueType": {
                         "Name": "number"
                     }
@@ -4785,6 +5114,14 @@
                 },
                 {
                     "MemberType": "Property",
+                    "Name": "SortAggregation",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CatalogSortAggregation"
+                    }
+                },
+                {
+                    "MemberType": "Property",
                     "Name": "CategoryFilter",
                     "ValueType": {
                         "Category": "Enum",
@@ -4793,7 +5130,15 @@
                 },
                 {
                     "MemberType": "Property",
-                    "Name": "BundleType",
+                    "Name": "SalesTypeFilter",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "SalesTypeFilter"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "BundleTypes",
                     "ValueType": {
                         "Name": "Array",
                         "Generic": "Enum.BundleType"
@@ -4804,7 +5149,43 @@
                     "Name": "AssetTypes",
                     "ValueType": {
                         "Name": "Array",
-                        "Generic": "Enum.AssetType"
+                        "Generic": "Enum.AvatarAssetType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "IncludeOffSale",
+                    "ValueType": {
+                        "Name": "boolean"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorName",
+                    "ValueType": {
+                        "Name": "string"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "CreatorTypeFilter"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "CreatorId",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "Limit",
+                    "ValueType": {
+                        "Name": "number"
                     }
                 }
             ],
@@ -5090,7 +5471,7 @@
             "Name": "SharedTable"
         },
         {
-            "Members":[
+            "Members": [
                 {
                     "MemberType": "Function",
                     "Name": "AddPrefix",
@@ -5123,6 +5504,94 @@
                 }
             ],
             "Name": "Secret"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Position",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "LeftTangent",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "RightTangent",
+                    
+                    "ValueType": {
+                        "Name": "UDim2"
+                    }
+                }
+            ],
+            "Name": "Path2DControlPoint"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "Add",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Remove",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "Contains",
+                    "Parameters": [
+                        {
+                            "Name": "capabilities",
+                            "Type": {
+                                "Tuple": {
+                                    "Category": "Enum",
+                                    "Name": "SecurityCapability"
+                                }
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "SecurityCapabilities"
+                    }
+                }
+            ],
+            "Name": "SecurityCapabilities"
         }
     ]
 }

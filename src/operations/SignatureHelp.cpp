@@ -1,32 +1,55 @@
 #include "LSP/Workspace.hpp"
-#include "LSP/LanguageServer.hpp"
 
 #include "Luau/AstQuery.h"
 #include "Luau/Normalize.h"
 #include "Luau/Unifier.h"
+#include "Luau/OverloadResolver.h"
 #include "LSP/LuauExt.hpp"
 #include "LSP/DocumentationParser.hpp"
 
-/// Computes a score about how much a provided overload matches
-/// `superTp` is the overload function type's argTypes
-/// `subTp` is a type pack built from the actual argument types (taken from astTypes) with an attached free type pack tail
-/// A "score" is built on the number of matching arguments
+LUAU_FASTINT(LuauTypeInferRecursionLimit)
+LUAU_FASTINT(LuauTypeInferIterationLimit)
+
+// Taken from Luau/Autocomplete.cpp
 static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp, Luau::NotNull<Luau::Scope> scope, Luau::TypeArena* typeArena,
     Luau::NotNull<Luau::BuiltinTypes> builtinTypes)
 {
     Luau::InternalErrorReporter iceReporter;
     Luau::UnifierSharedState unifierState(&iceReporter);
-    Luau::Normalizer normalizer{typeArena, builtinTypes, Luau::NotNull{&unifierState}};
-    Luau::Unifier unifier(Luau::NotNull<Luau::Normalizer>{&normalizer}, scope, Luau::Location(), Luau::Variance::Covariant);
+    Luau::Normalizer normalizer{
+        typeArena, builtinTypes, Luau::NotNull{&unifierState}, FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old};
 
-    // Cost of normalization can be too high for autocomplete response time requirements
-    unifier.normalize = false;
-    unifier.checkInhabited = false;
+    if (FFlag::LuauSolverV2)
+    {
+        Luau::TypeCheckLimits limits;
+        Luau::TypeFunctionRuntime typeFunctionRuntime{
+            Luau::NotNull{&iceReporter}, Luau::NotNull{&limits}
+        }; // TODO: maybe subtyping checks should not invoke user-defined type function runtime
 
-    return unifier.canUnify(subTp, superTp, /* isFunctionCall = */ true).empty();
+        unifierState.counters.recursionLimit = FInt::LuauTypeInferRecursionLimit;
+        unifierState.counters.iterationLimit = FInt::LuauTypeInferIterationLimit;
+
+        Luau::Subtyping subtyping{builtinTypes, Luau::NotNull{typeArena}, Luau::NotNull{&normalizer}, Luau::NotNull{&typeFunctionRuntime}, Luau::NotNull{&iceReporter}};
+
+        // DEVIATION: the flip for superTp and subTp is expected
+        // subTp is our custom created type pack, with a trailing ...any
+        // so it is actually more general than superTp - we want to check if superTp can match against it.
+        return subtyping.isSubtype(superTp, subTp, scope, {}).isSubtype;
+    }
+    else
+    {
+        Luau::Unifier unifier(Luau::NotNull<Luau::Normalizer>{&normalizer}, scope, Luau::Location(), Luau::Variance::Covariant);
+
+        // Cost of normalization can be too high for autocomplete response time requirements
+        unifier.normalize = false;
+        unifier.checkInhabited = false;
+
+        return unifier.canUnify(subTp, superTp).empty();
+    }
 }
 
-std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::SignatureHelpParams& params)
+std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
+    const lsp::SignatureHelpParams& params, const LSPCancellationToken& cancellationToken)
 {
     auto config = client->getConfiguration(rootUri);
 
@@ -41,13 +64,14 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
 
     // Run the type checker to ensure we are up to date
     // TODO: expressiveTypes - remove "forAutocomplete" once the types have been fixed
-    checkStrict(moduleName);
+    checkStrict(moduleName, cancellationToken);
+    throwIfCancelled(cancellationToken);
 
     auto sourceModule = frontend.getSourceModule(moduleName);
     if (!sourceModule)
         return std::nullopt;
 
-    auto module = frontend.moduleResolverForAutocomplete.getModule(moduleName);
+    auto module = getModule(moduleName, /* forAutocomplete: */ true);
     auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
     auto scope = Luau::findScopeAtPosition(*module, position);
 
@@ -87,7 +111,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
     for (auto&& arg : candidate->args)
         if (auto ty = module->astTypes.find(arg))
             argumentTys.push_back(Luau::follow(*ty));
-    Luau::TypePackId subTp = typeArena.addTypePack(argumentTys, typeArena.freshTypePack(&*scope));
+    Luau::TypePackId subTp = typeArena.addTypePack(argumentTys, frontend.builtinTypes->anyTypePack);
 
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
@@ -127,9 +151,9 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
             // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
-            if (idx == 0 && isMethod(ftv) && candidate->self)
+            if (idx == 0 && candidate->self)
                 continue;
-            
+
             // Show parameter documentation
             // TODO: parse moonwave docs for param documentation?
             lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
@@ -214,14 +238,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(const lsp::Sign
             if (auto candidateFunctionType = Luau::get<Luau::FunctionType>(part))
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
+    // Handle __call metamethod
+    if (const auto metamethod = findCallMetamethod(followedId))
+        if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*metamethod)))
+            addSignature(*metamethod, ftv);
+
     lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
     platform->handleSignatureHelp(*textDocument, *sourceModule, position, help);
 
     return help;
-}
-
-std::optional<lsp::SignatureHelp> LanguageServer::signatureHelp(const lsp::SignatureHelpParams& params)
-{
-    auto workspace = findWorkspace(params.textDocument.uri);
-    return workspace->signatureHelp(params);
 }

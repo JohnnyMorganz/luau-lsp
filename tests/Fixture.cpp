@@ -4,26 +4,62 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Parser.h"
 #include "Luau/BuiltinDefinitions.h"
+#include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
+#include "Flags.hpp"
+
+#include "TestClient.h"
 
 #include "doctest.h"
 #include <string_view>
+#include <atomic>
 
 static const char* mainModuleName = "MainModule";
+static std::atomic<int> fixtureCounter{0};
 
-Fixture::Fixture()
-    : client(std::make_shared<Client>(Client{}))
-    , workspace(client, "$TEST_WORKSPACE", Uri(), std::nullopt)
+namespace Luau::LanguageServer
 {
-    workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
-    client->definitionsFiles.push_back("./tests/testdata/standard_definitions.d.luau");
-
-    workspace.initialize();
-
+ClientConfiguration defaultTestClientConfiguration()
+{
     ClientConfiguration config;
     config.sourcemap.enabled = false;
     config.index.enabled = false;
-    workspace.setupWithConfiguration(config);
+    return config;
+}
+
+Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source)
+{
+    Uri uri = workspace.rootUri.resolvePath(name);
+    workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(uri));
+    return uri;
+}
+
+void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::string& newSource)
+{
+    lsp::DidChangeTextDocumentParams params;
+    params.textDocument = {{uri}, 0};
+    params.contentChanges = {{std::nullopt, newSource}};
+
+    workspace.updateTextDocument(uri, params);
+}
+} // namespace Luau::LanguageServer
+
+static std::string generateFixtureName()
+{
+    return "luau_lsp_test_" + std::to_string(fixtureCounter.fetch_add(1));
+}
+
+Fixture::Fixture()
+    : client(std::make_unique<TestClient>(TestClient{}))
+    , tempDir(generateFixtureName())
+    , workspace(client.get(), "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt)
+{
+    client->globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
+    workspace.fileResolver.defaultConfig.mode = Luau::Mode::Strict;
+    client->definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+    workspace.setupWithConfiguration(client->globalConfig);
+    workspace.isReady = true;
 
     Luau::setPrintLine([](auto s) {});
 }
@@ -40,9 +76,28 @@ Luau::ModuleName fromString(std::string_view name)
 
 Uri Fixture::newDocument(const std::string& name, const std::string& source)
 {
-    Uri uri("file", "", name);
-    workspace.openTextDocument(uri, {{uri, "luau", 0, source}});
-    return uri;
+    return Luau::LanguageServer::newDocument(workspace, name, source);
+}
+
+/// A hacky way to get cross-module resolution working.
+/// We create a dummy sourcemap node for the particular Uri, which then allows
+/// requires to resolve. e.g. registering "game/Testing/A" will allow `require(game.Testing.A`) to work
+void Fixture::registerDocumentForVirtualPath(const Uri& uri, const Luau::ModuleName& virtualPath)
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    LUAU_ASSERT(platform);
+    auto sourceNode = platform->sourceNodeAllocator.allocate(SourceNode(uri.filename(), "ModuleScript", {uri.fsPath()}, {}));
+    platform->writePathsToMap(sourceNode, virtualPath);
+}
+
+void Fixture::updateDocument(const Uri& uri, const std::string& newSource)
+{
+    return Luau::LanguageServer::updateDocument(workspace, uri, newSource);
+}
+
+static Luau::ModuleName getMainModuleName(const WorkspaceFolder& workspace)
+{
+    return workspace.fileResolver.getModuleName(workspace.rootUri.resolvePath(mainModuleName));
 }
 
 Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseOptions& parseOptions)
@@ -51,7 +106,7 @@ Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseO
 
     Luau::ParseResult result = Luau::Parser::parse(source.c_str(), source.length(), *sourceModule->names, *sourceModule->allocator, parseOptions);
 
-    sourceModule->name = fromString(mainModuleName);
+    sourceModule->name = getMainModuleName(workspace);
     sourceModule->root = result.root;
     sourceModule->mode = parseMode(result.hotcomments);
     sourceModule->hotcomments = std::move(result.hotcomments);
@@ -62,7 +117,7 @@ Luau::AstStatBlock* Fixture::parse(const std::string& source, const Luau::ParseO
 Luau::CheckResult Fixture::check(Luau::Mode mode, std::string source)
 {
     newDocument(mainModuleName, source);
-    return workspace.frontend.check(mainModuleName);
+    return workspace.frontend.check(getMainModuleName(workspace));
 }
 
 Luau::CheckResult Fixture::check(const std::string& source)
@@ -70,19 +125,24 @@ Luau::CheckResult Fixture::check(const std::string& source)
     return check(Luau::Mode::Strict, source);
 }
 
+Luau::ModulePtr Fixture::getModule(const Luau::ModuleName& moduleName)
+{
+    return workspace.frontend.moduleResolver.getModule(moduleName);
+}
+
 Luau::ModulePtr Fixture::getMainModule()
 {
-    return workspace.frontend.moduleResolver.getModule(fromString(mainModuleName));
+    return getModule(getMainModuleName(workspace));
 }
 
 Luau::SourceModule* Fixture::getMainSourceModule()
 {
-    return workspace.frontend.getSourceModule(fromString(mainModuleName));
+    return workspace.frontend.getSourceModule(getMainModuleName(workspace));
 }
 
 std::vector<std::string> Fixture::getComments(const Luau::Location& node)
 {
-    return workspace.getComments(fromString(mainModuleName), node);
+    return workspace.getComments(getMainModuleName(workspace), node);
 }
 
 std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& name)
@@ -94,32 +154,32 @@ std::optional<Luau::TypeId> lookupName(Luau::ScopePtr scope, const std::string& 
         return std::nullopt;
 }
 
-std::optional<Luau::TypeId> Fixture::getType(const std::string& name)
+std::optional<Luau::TypeId> Fixture::getType(Luau::ModulePtr module, const std::string& name)
 {
-    Luau::ModulePtr module = getMainModule();
     REQUIRE(module);
     REQUIRE(module->hasModuleScope());
 
     return lookupName(module->getModuleScope(), name);
 }
 
-Luau::TypeId Fixture::requireType(const std::string& name)
+Luau::TypeId Fixture::requireType(Luau::ModulePtr module, const std::string& name)
 {
-    std::optional<Luau::TypeId> ty = getType(name);
+    std::optional<Luau::TypeId> ty = getType(module, name);
     REQUIRE_MESSAGE(bool(ty), "Unable to requireType \"" << name << "\"");
     return Luau::follow(*ty);
 }
 
-Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& source, bool forAutocomplete)
+Luau::LoadDefinitionFileResult Fixture::loadDefinition(const std::string& packageName, const std::string& source)
 {
-    RobloxPlatform platform;
+    Luau::unfreeze(workspace.frontend.globals.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::unfreeze(workspace.frontend.globalsForAutocomplete.globalTypes);
 
-    auto& globals = forAutocomplete ? workspace.frontend.globalsForAutocomplete : workspace.frontend.globals;
+    auto result = workspace.loadDefinitionFile(packageName, source);
 
-    Luau::unfreeze(globals.globalTypes);
-    Luau::LoadDefinitionFileResult result = types::registerDefinitions(workspace.frontend, globals, source, forAutocomplete);
-    platform.mutateRegisteredDefinitions(globals, std::nullopt);
-    Luau::freeze(globals.globalTypes);
+    Luau::freeze(workspace.frontend.globals.globalTypes);
+    if (!FFlag::LuauSolverV2)
+        Luau::freeze(workspace.frontend.globalsForAutocomplete.globalTypes);
 
     REQUIRE_MESSAGE(result.success, "loadDefinition: unable to load definition file");
     return result;
@@ -141,4 +201,171 @@ std::string Fixture::getErrors(const Luau::CheckResult& cr)
     std::stringstream ss;
     dumpErrors(ss, cr.errors);
     return ss.str();
+}
+
+void Fixture::switchToStandardPlatform()
+{
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.platform = LSPPlatform::getPlatform(client->globalConfig, &workspace.fileResolver, &workspace);
+    workspace.fileResolver.platform = workspace.platform.get();
+    workspace.fileResolver.requireSuggester = workspace.fileResolver.platform->getRequireSuggester();
+}
+
+void Fixture::loadSourcemap(const std::string& contents)
+{
+    dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
+}
+
+void Fixture::loadLuaurc(const std::string& source)
+{
+    REQUIRE(!WorkspaceFileResolver::parseConfig(workspace.rootUri.resolvePath(Luau::kConfigName), source, workspace.fileResolver.defaultConfig)
+            .has_value());
+}
+
+SourceNode* Fixture::getRootSourceNode()
+{
+    auto sourceNode = dynamic_cast<RobloxPlatform*>(workspace.platform.get())->rootSourceNode;
+    REQUIRE(sourceNode);
+    return sourceNode;
+}
+
+std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
+{
+    auto marker = source.find('|');
+    REQUIRE(marker != std::string::npos);
+
+    source.replace(marker, 1, "");
+
+    size_t line = 0;
+    size_t column = 0;
+
+    for (size_t i = 0; i < source.size(); i++)
+    {
+        auto ch = source[i];
+        if (ch == '\r' || ch == '\n')
+        {
+            if (ch == '\r' && i + 1 < source.size() && source[i + 1] == '\n')
+            {
+                i++;
+            }
+            line += 1;
+            column = 0;
+        }
+        else
+            column += 1;
+
+        if (i == marker - 1)
+            break;
+    }
+
+    return std::make_pair(source, lsp::Position{line, column});
+}
+
+std::optional<lsp::CodeAction> findCodeAction(const lsp::CodeActionResult& result, const std::string& title)
+{
+    if (!result)
+        return std::nullopt;
+
+    for (const auto& action : *result)
+    {
+        if (action.title == title)
+            return action;
+    }
+    return std::nullopt;
+}
+
+std::string dedent(std::string source)
+{
+    auto lines = Luau::split(source, '\n');
+
+    size_t minIndent = std::string::npos;
+    for (const auto& line : lines)
+    {
+        if (line.empty())
+            continue;
+        size_t indent = 0;
+        while (indent < line.size() && (line[indent] == ' ' || line[indent] == '\t'))
+            indent++;
+        if (indent < line.size()) // Line has non-whitespace content
+            minIndent = std::min(minIndent, indent);
+    }
+
+    if (minIndent == std::string::npos)
+        minIndent = 0;
+
+    std::string result;
+    bool firstLine = true;
+    for (const auto& line : lines)
+    {
+        if (!firstLine)
+            result += '\n';
+        firstLine = false;
+
+        if (line.empty())
+            continue;
+
+        size_t start = std::min(minIndent, line.size());
+        result += line.substr(start);
+    }
+
+    if (!result.empty() && result[0] == '\n')
+        result = result.substr(1);
+
+    return result;
+}
+
+std::string applyEdit(const std::string& source, const std::vector<lsp::TextEdit>& edits)
+{
+    std::string newSource;
+
+    lsp::Position currentPos{0, 0};
+    std::optional<lsp::Position> editEndPos = std::nullopt;
+
+    for (const auto& c : source)
+    {
+        for (const auto& edit : edits)
+        {
+            if (currentPos == edit.range.start)
+            {
+                newSource += edit.newText;
+                if (!(edit.range.start == edit.range.end))
+                    editEndPos = edit.range.end;
+            }
+        }
+
+        // Skip characters that are being replaced
+        if (editEndPos)
+        {
+            if (currentPos == *editEndPos)
+                editEndPos = std::nullopt;
+            else
+            {
+                // Update position and skip this character (it's being replaced)
+                if (c == '\n')
+                {
+                    currentPos.line += 1;
+                    currentPos.character = 0;
+                }
+                else
+                {
+                    currentPos.character += 1;
+                }
+                continue;
+            }
+        }
+
+        newSource += c;
+
+        if (c == '\n')
+        {
+            currentPos.line += 1;
+            currentPos.character = 0;
+        }
+        else
+        {
+            currentPos.character += 1;
+        }
+    }
+
+    return newSource;
 }

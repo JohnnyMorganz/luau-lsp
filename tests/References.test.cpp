@@ -13,7 +13,7 @@ static void sortResults(std::optional<std::vector<lsp::Location>>& result)
     std::sort(result->begin(), result->end(),
         [](const lsp::Location& a, const lsp::Location& b)
         {
-            return a.uri.toString() < b.uri.toString() || a.range.start < b.range.start;
+            return a.uri.toString() <= b.uri.toString() && a.range.start < b.range.start;
         });
 }
 
@@ -26,7 +26,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_1")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 10);
@@ -44,7 +44,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_2")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 2);
     CHECK(references[0].location.begin.column == 12);
@@ -64,7 +64,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_3")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -84,7 +84,7 @@ TEST_CASE_FIXTURE(Fixture, "find_table_property_declaration_4")
     REQUIRE_EQ(0, result.errors.size());
 
     auto ty = requireType("T");
-    auto references = workspace.findAllReferences(ty, "name");
+    auto references = workspace.findAllTableReferences(ty, nullptr, "name");
     REQUIRE_EQ(1, references.size());
     CHECK(references[0].location.begin.line == 3);
     CHECK(references[0].location.begin.column == 19);
@@ -109,7 +109,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{2, 12};
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -117,6 +117,62 @@ TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property")
 
     CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);
     CHECK_EQ(lsp::Range{{5, 20}, {5, 24}}, result->at(1).range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_from_an_inline_table_property_in_a_type")
+{
+    // Finding reference of "name" defined in "Tbl"
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local T: Tbl
+        local x = T.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 14};
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 24}}, result->at(1).range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_includes_the_original_table_type")
+{
+    // Finding reference of "name" in "T.name"
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local T: Tbl
+        local x = T.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22};
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 24}}, result->at(1).range);
 }
 
 TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
@@ -134,7 +190,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{4, 11};
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -157,7 +213,7 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
     params.textDocument = lsp::TextDocumentIdentifier{uri};
     params.position = lsp::Position{1, 19}; // 'game' symbol
 
-    auto result = workspace.references(params);
+    auto result = workspace.references(params, nullptr);
     REQUIRE(result);
     REQUIRE_EQ(2, result->size());
 
@@ -167,5 +223,480 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
     CHECK_EQ(lsp::Range{{2, 18}, {2, 22}}, result->at(1).range);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_of_type_definition_used_as_return_type")
+{
+    auto source = R"(
+        type Foo = {}
+
+        local function foo(): Foo
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14}; // 'Foo' symbol
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{1, 13}, {1, 16}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{3, 30}, {3, 33}}, result->at(1).range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_local_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        local function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 28}; // 'useFunction' definition
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
+    // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
+    if (FFlag::LuauSolverV2)
+        REQUIRE_EQ(3, result->size());
+    else
+        REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 23}, {1, 34}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 15}, {4, 26}});
+    if (FFlag::LuauSolverV2)
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{3, 22}, {3, 33}});
+    }
+    else
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
+        CHECK_EQ(result->at(3).uri, user);
+        CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_global_function")
+{
+    auto uri = newDocument("useFunction.luau", R"(
+        function useFunction()
+        end
+
+        return useFunction
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local useFunction = require("useFunction.luau")
+
+        local value = useFunction()
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 20}; // 'useFunction' definition
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
+    // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
+    if (FFlag::LuauSolverV2)
+        REQUIRE_EQ(3, result->size());
+    else
+        REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 17}, {1, 28}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 15}, {4, 26}});
+    if (FFlag::LuauSolverV2)
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{3, 22}, {3, 33}});
+    }
+    else
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 28}, {1, 55}});
+        CHECK_EQ(result->at(3).uri, user);
+        CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 33}});
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_a_returned_table")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        local tbl = {}
+
+        return tbl
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local value = tbl
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 16}; // 'tbl' definition
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+
+    // The new solver does not store `require("useFunction.luau")` in the astTypes of a module
+    // So we fail to resolve it as a reference. Unsure if this *should* be resolved.
+    // Note that `require("useFunction.luau")()` *would* resolve as a reference.
+    if (FFlag::LuauSolverV2)
+        REQUIRE_EQ(3, result->size());
+    else
+        REQUIRE_EQ(4, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{1, 20}, {1, 22}});
+    CHECK_EQ(result->at(1).uri, uri);
+    CHECK_EQ(result->at(1).range, lsp::Range{{3, 15}, {3, 18}});
+    if (FFlag::LuauSolverV2)
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{3, 22}, {3, 25}});
+    }
+    else
+    {
+        CHECK_EQ(result->at(2).uri, user);
+        CHECK_EQ(result->at(2).range, lsp::Range{{1, 20}, {1, 39}});
+        CHECK_EQ(result->at(3).uri, user);
+        CHECK_EQ(result->at(3).range, lsp::Range{{3, 22}, {3, 25}});
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_an_exported_table_type_property")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        export type Table = {
+            Property: string
+        }
+        return {}
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local t: tbl.Table
+        local v = t.Property
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 13}; // 'Property' definition
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{2, 12}, {2, 20}});
+    CHECK_EQ(result->at(1).uri, user);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 20}, {4, 28}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "cross_module_find_references_of_an_exported_table_type_property_when_selecting_a_property_usage")
+{
+    auto uri = newDocument("tbl.luau", R"(
+        export type Table = {
+            Property: string
+        }
+        return {}
+    )");
+
+    auto user = newDocument("user.luau", R"(
+        local tbl = require("tbl.luau")
+
+        local t: tbl.Table
+        local v = t.Property
+    )");
+
+    // Index reverse deps
+    workspace.frontend.parse(workspace.fileResolver.getModuleName(user));
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{user};
+    params.position = lsp::Position{4, 23}; // 'Property' usage when indexing 't'
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(result->at(0).uri, uri);
+    CHECK_EQ(result->at(0).range, lsp::Range{{2, 12}, {2, 20}});
+    CHECK_EQ(result->at(1).uri, user);
+    CHECK_EQ(result->at(1).range, lsp::Range{{4, 20}, {4, 28}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "references_respect_cancellation")
+{
+    auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
+    cancellationToken->cancel();
+
+    auto document = newDocument("a.luau", "local x = 1");
+    CHECK_THROWS_AS(workspace.references(lsp::ReferenceParams{{{document}}}, cancellationToken), RequestCancelledException);
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_via_bracket_notation")
+{
+    // Finding reference of "name" accessed via bracket notation x["name"]
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' inside brackets
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // type definition
+    CHECK_EQ(lsp::Range{{6, 20}, {6, 26}}, result->at(1).range); // bracket notation usage (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_includes_both_dot_and_bracket_notation")
+{
+    // Finding references should include both x.name and x["name"]
+    auto source = R"(
+        type Tbl = {
+            name: string
+        }
+
+        local x: Tbl
+        local v1 = x.name
+        local v2 = x["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Find from dot notation
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 22}; // cursor on 'name' in x.name
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(3, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // type definition
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 25}}, result->at(1).range); // dot notation
+    CHECK_EQ(lsp::Range{{7, 21}, {7, 27}}, result->at(2).range); // bracket notation (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_from_bracket_to_dot_notation")
+{
+    // Starting from bracket notation should find dot notation usages
+    auto source = R"(
+        local T = {
+            name = "string"
+        }
+
+        local v1 = T.name
+        local v2 = T["name"]
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    // Find from bracket notation
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{6, 23}; // cursor on 'name' inside T["name"]
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(3, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{2, 12}, {2, 16}}, result->at(0).range); // inline table definition
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(1).range); // dot notation
+    CHECK_EQ(lsp::Range{{6, 21}, {6, 27}}, result->at(2).range); // bracket notation (including quotes)
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_method_through_metatable_index")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+
+        function Foo.Test(self: Foo)
+        end
+
+        local Bar = setmetatable({}, Foo)
+        type Bar = typeof(setmetatable({}, Foo))
+        function Bar.DoSomething(self: Bar)
+            self:Test()
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{5, 21}; // "Test" in function Foo.Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + self:Test() via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(0).range);   // function Foo.Test()
+    CHECK_EQ(lsp::Range{{11, 17}, {11, 21}}, result->at(1).range); // self:Test()
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_method_from_metatable_call_site")
+{
+    // Finding references from self:Test() should find the Foo.Test definition
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+
+        function Foo.Test(self: Foo)
+        end
+
+        local Bar = setmetatable({}, Foo)
+        type Bar = typeof(setmetatable({}, Foo))
+        function Bar.DoSomething(self: Bar)
+            self:Test()
+        end
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{11, 17}; // "Test" in self:Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + self:Test() via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{5, 21}, {5, 25}}, result->at(0).range);   // function Foo.Test()
+    CHECK_EQ(lsp::Range{{11, 17}, {11, 21}}, result->at(1).range); // self:Test()
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_property_through_metatable_index")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        Foo.name = "test"
+
+        local Bar = setmetatable({}, Foo)
+        local x = Bar.name
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 12}; // "name" in Foo.name
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + Bar.name via __index
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{3, 12}, {3, 16}}, result->at(0).range); // Foo.name
+    CHECK_EQ(lsp::Range{{6, 22}, {6, 26}}, result->at(1).range); // Bar.name
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_through_nested_metatable_chain")
+{
+    auto source = R"(
+        local Foo = {}
+        Foo.__index = Foo
+        type Foo = typeof(setmetatable({}, Foo))
+        function Foo.Test(self: Foo) end
+
+        local Bar = setmetatable({}, Foo)
+        Bar.__index = Bar
+
+        local Baz = setmetatable({}, Bar)
+        Baz:Test()
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{4, 21}; // "Test" in function Foo.Test()
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size()); // Definition + Baz:Test() via chain
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{4, 21}, {4, 25}}, result->at(0).range); // function Foo.Test()
+    CHECK_EQ(lsp::Range{{10, 12}, {10, 16}}, result->at(1).range); // Baz:Test()
+}
 
 TEST_SUITE_END();
