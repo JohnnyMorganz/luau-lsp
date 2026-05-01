@@ -9,7 +9,7 @@ namespace Luau::LanguageServer::AutoImports
 lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline, bool useConst)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = (useConst ? "const " : "local ") + name + " = game:GetService(\"" + name + "\")\n";
+    auto importText = std::string(declarationKeyword(useConst)) + name + " = game:GetService(\"" + name + "\")\n";
     if (appendNewline)
         importText += "\n";
     return {range, importText};

@@ -48,6 +48,10 @@ public:
 };
 
 std::string makeValidVariableName(std::string name);
+inline const char* declarationKeyword(bool useConst)
+{
+    return useConst ? "const " : "local ";
+}
 lsp::TextEdit createRequireTextEdit(
     const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false, bool useConst = false);
 lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText,
