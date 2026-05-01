@@ -48,7 +48,8 @@ public:
 };
 
 std::string makeValidVariableName(std::string name);
-lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false);
+lsp::TextEdit createRequireTextEdit(
+    const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline = false, bool useConst = false);
 lsp::CompletionItem createSuggestRequire(const std::string& name, const std::vector<lsp::TextEdit>& textEdits, const char* sortText,
     const std::string& path, const std::string& requirePath);
 size_t computeMinimumLineNumberForRequire(const FindImportsVisitor& importsVisitor, size_t hotCommentsLineNumber);

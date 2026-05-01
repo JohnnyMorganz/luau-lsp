@@ -77,10 +77,10 @@ std::string makeValidVariableName(std::string name)
     return name;
 }
 
-lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline)
+lsp::TextEdit createRequireTextEdit(const std::string& name, const std::string& path, size_t lineNumber, bool prependNewline, bool useConst)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = require(" + path + ")\n";
+    auto importText = (useConst ? "const " : "local ") + name + " = require(" + path + ")\n";
     if (prependNewline)
         importText = "\n" + importText;
     return {range, importText};
