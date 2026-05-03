@@ -91,7 +91,7 @@ struct InstanceRequireResult
 };
 
 /// Create a text edit for inserting a Roblox service import (e.g., `local Players = game:GetService("Players")`)
-lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false);
+lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline = false, bool useConst = false);
 /// Optimise an absolute require path by removing the "game/" prefix (e.g., "game/ReplicatedStorage/Foo" -> "ReplicatedStorage/Foo")
 std::string optimiseAbsoluteRequire(const std::string& path);
 
