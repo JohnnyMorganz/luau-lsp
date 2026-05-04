@@ -60,7 +60,7 @@ for docs_key, docs_entry in luau_docs.items():
     else:
         luau_docs[docs_key]["learn_more_link"] = "https://luau.org/library/#global-functions"
 
-# replacing `require()` description with a general one. this new description is based off the original description.
+# replacing `require()` description with a general one. this new description is based off of the original description.
 luau_docs["@luau/global/require/param/0"]["documentation"] = "The directory path to a file or a folder/directory to retrieve the return value it provides. Directory path can use aliases defined in <code>.luaurc</code> or <code>.config.luau</code>. If the path is a file, executes that file. If the path is a folder/directory, finds <code>init.luau</code> or <code>init.lua</code> and execute that instead."
 luau_docs["@luau/global/require/return/0"]["documentation"] = "What the file or folder/directory returned (usually a table or a function)."
 luau_docs["@luau/global/require"]["documentation"] = "Returns the value that was returned by the given directory path, running it if it has not been run yet."
