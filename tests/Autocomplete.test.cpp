@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "LSP/Completion.hpp"
@@ -169,6 +170,26 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_table_prop
     CHECK_EQ(item.documentation->kind, lsp::MarkupKind::Markdown);
     trim(item.documentation->value);
     CHECK_EQ(item.documentation->value, "This is a property on the table!");
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_no_completions_in_single_line_comment_before_first_statement")
+{
+    auto oldSource = "local x = 1\n";
+
+    auto [source, marker] = sourceWithMarker("-- TODO: |\nlocal x = 1\n");
+
+    auto result = fragmentAutocomplete(oldSource, source, marker);
+    CHECK(result.empty());
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_no_completions_in_block_comment_before_first_statement")
+{
+    auto oldSource = "local x = 1\n";
+
+    auto [source, marker] = sourceWithMarker("--[[ TODO: | ]]\nlocal x = 1\n");
+
+    auto result = fragmentAutocomplete(oldSource, source, marker);
+    CHECK(result.empty());
 }
 
 TEST_CASE_FIXTURE(Fixture, "external_module_intersected_type_table_property_has_documentation")
@@ -2062,6 +2083,88 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_documentation_for_index_property_on_set
     CHECK_EQ(item->documentation->kind, lsp::MarkupKind::Markdown);
     trim(item->documentation->value);
     CHECK_EQ(item->documentation->value, "Documentation for prop_b.");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_datamodel_siblings")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFileCompletionExists(result, "ModuleB", "./ModuleB");
+    checkFolderCompletionExists(result, "Nested", "./Nested");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@game/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("packages/core/ModuleA.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFolderCompletionExists(result, "ReplicatedStorage", "@game/ReplicatedStorage");
+    checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "Library",
+                "className": "ModuleScript",
+                "filePaths": ["lib/init.luau"],
+                "children": [{"name": "Helper", "className": "ModuleScript", "filePaths": ["lib/Helper.luau"]}]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("lib/Helper.luau");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@self/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("lib/init.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..", "@self");
+    checkFileCompletionExists(result, "Helper.luau", "@self/Helper");
 }
 
 TEST_SUITE_END();

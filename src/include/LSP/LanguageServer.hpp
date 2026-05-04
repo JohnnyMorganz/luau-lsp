@@ -36,7 +36,7 @@ class LanguageServer
 {
 private:
     // Client is guaranteed to live for the duration of the whole program
-    Client* client;
+    LSPClient* client;
     std::optional<Luau::Config> defaultConfig;
     // A "in memory" workspace folder which doesn't actually have a root.
     // Any files which aren't part of a workspace but are opened will be handled here.
@@ -47,7 +47,7 @@ private:
     std::vector<json_rpc::JsonRpcMessage> configPostponedMessages;
 
 public:
-    explicit LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig);
+    explicit LanguageServer(LSPClient* aClient, std::optional<Luau::Config> aDefaultConfig);
 
     static lsp::ServerCapabilities getServerCapabilities();
 

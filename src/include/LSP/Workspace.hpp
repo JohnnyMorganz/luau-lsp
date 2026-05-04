@@ -101,6 +101,10 @@ public:
     bool isIgnoredFileForAutoImports(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
     /// Whether the file has been specified in the configuration as a definitions file
     bool isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig = std::nullopt) const;
+    /// Whether the file is a currently loaded plugin
+    bool isPluginFile(const Uri& uri) const;
+    /// Reload all plugins from disk and invalidate cached transformations
+    void reloadPlugins();
 
     lsp::DocumentDiagnosticReport documentDiagnostics(
         const lsp::DocumentDiagnosticParams& params, const LSPCancellationToken& cancellationToken, bool allowUnmanagedFiles = false);
@@ -153,6 +157,7 @@ public:
     lsp::DocumentColorResult documentColor(const lsp::DocumentColorParams& params);
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params);
     lsp::CodeActionResult codeAction(const lsp::CodeActionParams& params, const LSPCancellationToken& cancellationToken);
+    lsp::CodeAction codeActionResolve(const lsp::CodeAction& action, const LSPCancellationToken& cancellationToken);
 
     std::optional<lsp::Hover> hover(const lsp::HoverParams& params, const LSPCancellationToken& cancellationToken);
 

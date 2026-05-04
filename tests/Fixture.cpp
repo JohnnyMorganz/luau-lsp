@@ -203,6 +203,14 @@ std::string Fixture::getErrors(const Luau::CheckResult& cr)
     return ss.str();
 }
 
+void Fixture::switchToStandardPlatform()
+{
+    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
+    workspace.platform = LSPPlatform::getPlatform(client->globalConfig, &workspace.fileResolver, &workspace);
+    workspace.fileResolver.platform = workspace.platform.get();
+    workspace.fileResolver.requireSuggester = workspace.fileResolver.platform->getRequireSuggester();
+}
+
 void Fixture::loadSourcemap(const std::string& contents)
 {
     dynamic_cast<RobloxPlatform*>(workspace.platform.get())->updateSourceMapFromContents(contents);
@@ -251,6 +259,19 @@ std::pair<std::string, lsp::Position> sourceWithMarker(std::string source)
     }
 
     return std::make_pair(source, lsp::Position{line, column});
+}
+
+std::optional<lsp::CodeAction> findCodeAction(const lsp::CodeActionResult& result, const std::string& title)
+{
+    if (!result)
+        return std::nullopt;
+
+    for (const auto& action : *result)
+    {
+        if (action.title == title)
+            return action;
+    }
+    return std::nullopt;
 }
 
 std::string dedent(std::string source)

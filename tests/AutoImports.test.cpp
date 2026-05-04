@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "LSP/IostreamHelpers.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
@@ -976,7 +977,7 @@ static StringRequireAutoImporterContext createContext(Fixture* fixture, const Ur
     StringRequireAutoImporterContext ctx{
         moduleName,
         Luau::NotNull(textDocument),
-        Luau::NotNull(&fixture->workspace.frontend),
+        defaultModuleVisitor(fixture->workspace.frontend),
         Luau::NotNull(&fixture->workspace),
         Luau::NotNull(&fixture->client->globalConfig.completion.imports),
         0,
@@ -1133,10 +1134,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_best_alias_from_luaurc")
 
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("src/shared/Modules/Module.luau", "return {}");
 
@@ -1179,9 +1177,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_
     client->globalConfig.index.enabled = true;
 
     client->globalConfig.completion.imports.enabled = true;
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
+    switchToStandardPlatform();
     workspace.setupWithConfiguration(client->globalConfig);
 
     auto [source, marker] = sourceWithMarker(R"(
@@ -1228,10 +1224,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_at_top_of_file")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 
@@ -1258,10 +1251,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 
@@ -1289,10 +1279,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_inserts_after_hot_comments_2")
 {
     client->globalConfig.completion.imports.enabled = true;
 
-    // HACK: Fixture is loaded for RobloxPlatform
-    client->globalConfig.platform.type = LSPPlatformConfig::Standard;
-    workspace.appliedFirstTimeConfiguration = false;
-    workspace.setupWithConfiguration(client->globalConfig);
+    switchToStandardPlatform();
 
     newDocument("library.luau", "");
 
@@ -1565,6 +1552,170 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_do_not_show_when_indexing_variable_insi
 
     auto result = workspace.completion(params, nullptr);
     CHECK_FALSE(getItem(result, "ReplicatedStorage"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_sibling_uses_relative_path")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ModuleB");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"./ModuleB\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_nested_uses_relative_path")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "DeepModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local DeepModule = require(\"./Nested/DeepModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_absolute_style_uses_game_alias")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysAbsolute;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ModuleB");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@game/ReplicatedStorage/Shared/ModuleB\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_cross_service_defaults_to_game_alias")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ServerModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ServerModule = require(\"@game/ServerScriptService/ServerModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_respects_always_relative_across_services")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysRelative;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ServerModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ServerModule = require(\"../../ServerScriptService/ServerModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_prefers_alias_over_game_path_for_cross_service")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "server": "src/server"
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ServerModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ServerModule = require(\"@server/ServerModule\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_prefers_alias_over_game_path_when_always_absolute")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "combat": "packages/combat"
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysAbsolute;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("packages/core/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "ModuleB");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@combat/ModuleB\")\n");
 }
 
 TEST_SUITE_END();

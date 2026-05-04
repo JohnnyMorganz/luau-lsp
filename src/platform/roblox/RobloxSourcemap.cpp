@@ -384,7 +384,8 @@ static void clearTypesFromSourcemapNodes(SourceNode* node)
 void RobloxPlatform::clearSourcemapTypes()
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::clearSourcemapTypes", "LSP");
-    workspaceFolder->frontend.clear(); // TODO: https://github.com/JohnnyMorganz/luau-lsp/issues/1115
+    for (const auto& [name, _] : workspaceFolder->frontend.sourceNodes)
+        workspaceFolder->frontend.markDirty(name);
     instanceTypes.clear();             // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     clearSourcemapGeneratedTypes(workspaceFolder->frontend.globals);
     if (!FFlag::LuauSolverV2)

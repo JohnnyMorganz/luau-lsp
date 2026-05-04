@@ -6,6 +6,78 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- String requires (including `@game` aliases and relative requires between DataModel siblings with non-mirrored filesystem layouts) now resolve correctly when using `luau-lsp analyze` with a sourcemap ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
+
+### Changed
+
+- Sync to upstream Luau 0.719
+
+## [1.66.1] - 2026-04-27
+
+### Changed
+
+- Sync to upstream Luau 0.718
+
+### Fixed
+
+- Support chained aliases in `.luaurc` (e.g., an alias whose value references another `@alias`) ([#1458](https://github.com/JohnnyMorganz/luau-lsp/issues/1458))
+
+## [1.66.0] - 2026-04-11
+
+### Changed
+
+- Sync to upstream Luau 0.716
+- The minimum supported VSCode version is now 1.82.0
+- Renamed Studio Plugin settings from `luau-lsp.plugin.*` to `luau-lsp.studioPlugin.*` to avoid confusion with the source transform plugins (`luau-lsp.plugins.*`). The old `luau-lsp.plugin.*` settings are deprecated but still supported for backwards compatibility.
+
+### Fixed
+
+- Fixed `FindFirstAncestor` failing when ancestor name is a substring of another folder name in the path (e.g., `FindFirstAncestor("Foo")` failed when a folder named `PrefixFoo` existed in the path)
+- When a plugin is hot-reloaded, all source nodes (not just managed text documents) are now marked dirty so non-managed files are re-analysed with the updated plugin transformations
+- Plugin transformations are no longer applied to plugin files themselves ([#1433](https://github.com/JohnnyMorganz/luau-lsp/issues/1433))
+- Fixed string-require auto imports in Roblox mode ignoring user-defined aliases from `.luaurc`. Aliases are now preferred over `@game/...` paths when available ([#1436](https://github.com/JohnnyMorganz/luau-lsp/issues/1436))
+- Fixed `@self` alias not resolving and missing path autocomplete for string requires in Roblox mode ([#1432](https://github.com/JohnnyMorganz/luau-lsp/pull/1432))
+
+## [1.65.0] - 2026-04-06
+
+### Added
+
+- String requires are now sourcemap-aware when in Roblox mode. Relative requires from sourcemap-managed files walk the DataModel tree instead of the filesystem ([#1141](https://github.com/JohnnyMorganz/luau-lsp/issues/1141))
+- Added built-in `@game` alias for string requires in Roblox mode, resolving from the sourcemap root. User-defined `@game` in `.luaurc` takes precedence ([#1347](https://github.com/JohnnyMorganz/luau-lsp/issues/1347)). This alias is now considered during string require autocomplete when in Roblox mode.
+- Added refactoring code actions: Extract to local variable, Extract to function, Inline variable ([#606](https://github.com/JohnnyMorganz/luau-lsp/issues/606))
+- Added experimental Luau-based plugin system to allow you to perform source code transformations before Luau processes your code. This is useful for implementing features such as custom require resolution. This feature is still experimental and the API is subject to change in future releases. See [Plugin README](src/Plugin/README.md) for more information
+
+### Changed
+
+- Sync to upstream Luau 0.715
+
+### Fixed
+
+- Fixed crash when parsing YAML files with empty values (e.g. `key:` with no value)
+- Find All References, Rename, and auto imports no longer break after a sourcemap update ([#1115](https://github.com/JohnnyMorganz/luau-lsp/issues/1115))
+- Fixed fragment autocomplete incorrectly triggering inside comments when the cursor is positioned before any statement in the file ([#1416](https://github.com/JohnnyMorganz/luau-lsp/issues/1416))
+
+## [1.64.1] - 2026-03-30
+
+### Changed
+
+- Sync to upstream Luau 0.714
+
+## [1.64.0] - 2026-03-29
+
+### Changed
+
+- Sync to upstream Luau 0.712
+- Fragment autocomplete is now enabled by default ([#1268](https://github.com/JohnnyMorganz/luau-lsp/issues/1268))
+- Updated syntax file with improvements to TextMate grammar:
+  - Added support for type instantiation syntax (`<<`/`>>`) (e.g. `Map<<string, number>>`)
+  - Fixed nested type declarations inside indented blocks (e.g. inside `if`/`do` blocks) not being highlighted correctly
+  - Fixed multiline type declarations (e.g. `type Foo = \n  | string \n  | number`) losing type highlighting on continuation lines
+  - Fixed fenced ` ```luau ` code blocks in doc comments allowing syntax errors to escape past the closing ` ``` ` boundary
+  - Added syntax highlighting support for the `const` keyword, including `const` variable declarations and `const function` definitions
+
 ## [1.63.0] - 2026-03-01
 
 ### Removed

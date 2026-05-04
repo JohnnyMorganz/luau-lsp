@@ -9,7 +9,7 @@ LUAU_FASTFLAG(DebugLuauTimeTracing)
 
 TEST_CASE("language_server_handles_fflags_in_initialization_options")
 {
-    Client client;
+    TestClient client;
     LanguageServer server(&client, std::nullopt);
 
     InitializationOptions initializationOptions{};
@@ -29,7 +29,7 @@ TEST_CASE("language_server_handles_fflags_in_initialization_options")
 
 TEST_CASE("language_server_lazily_initializes_workspace_folders")
 {
-    Client client;
+    TestClient client;
     LanguageServer server(&client, std::nullopt);
 
     // Indexing throws errors as the workspace doesn't exist

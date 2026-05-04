@@ -5,17 +5,17 @@
 #include <iostream>
 #include <optional>
 
-Client::Client()
+LSPClient::LSPClient()
     : transport(std::make_unique<StdioTransport>())
 {
 }
 
-Client::Client(std::unique_ptr<Transport> transport)
+LSPClient::LSPClient(std::unique_ptr<Transport> transport)
     : transport(std::move(transport))
 {
 }
 
-void Client::sendRequest(
+void LSPClient::sendRequest(
     const id_type& id, const std::string& method, const std::optional<json>& params, const std::optional<ResponseHandler>& handler)
 {
     json msg{
@@ -32,7 +32,7 @@ void Client::sendRequest(
     sendRawMessage(msg);
 }
 
-void Client::sendResponse(const id_type& id, const json& result)
+void LSPClient::sendResponse(const id_type& id, const json& result)
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -43,7 +43,7 @@ void Client::sendResponse(const id_type& id, const json& result)
     sendRawMessage(msg);
 }
 
-void Client::sendError(const std::optional<id_type>& id, const JsonRpcException& e)
+void LSPClient::sendError(const std::optional<id_type>& id, const JsonRpcException& e)
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -54,7 +54,7 @@ void Client::sendError(const std::optional<id_type>& id, const JsonRpcException&
     sendRawMessage(msg);
 }
 
-void Client::sendNotification(const std::string& method, const std::optional<json>& params) const
+void LSPClient::sendNotification(const std::string& method, const std::optional<json>& params) const
 {
     json msg{
         {"jsonrpc", "2.0"},
@@ -70,7 +70,7 @@ static bool supportsWorkDoneProgress(const lsp::ClientCapabilities& capabilities
     return capabilities.window && capabilities.window->workDoneProgress;
 }
 
-void Client::createWorkDoneProgress(const lsp::ProgressToken& token)
+void LSPClient::createWorkDoneProgress(const lsp::ProgressToken& token)
 {
     if (!supportsWorkDoneProgress(capabilities))
         return;
@@ -79,7 +79,7 @@ void Client::createWorkDoneProgress(const lsp::ProgressToken& token)
     sendRequest(nextRequestId++, "window/workDoneProgress/create", lsp::WorkDoneProgressCreateParams{token});
 }
 
-void Client::sendWorkDoneProgressBegin(
+void LSPClient::sendWorkDoneProgressBegin(
     const lsp::ProgressToken& token, const std::string& title, std::optional<std::string> message, std::optional<uint8_t> percentage)
 {
     if (!supportsWorkDoneProgress(capabilities))
@@ -94,7 +94,7 @@ void Client::sendWorkDoneProgressBegin(
     sendProgress(lsp::ProgressParams{token, workDone});
 }
 
-void Client::sendWorkDoneProgressReport(const lsp::ProgressToken& token, std::optional<std::string> message, std::optional<uint8_t> percentage)
+void LSPClient::sendWorkDoneProgressReport(const lsp::ProgressToken& token, std::optional<std::string> message, std::optional<uint8_t> percentage)
 {
     if (!supportsWorkDoneProgress(capabilities))
         return;
@@ -107,7 +107,7 @@ void Client::sendWorkDoneProgressReport(const lsp::ProgressToken& token, std::op
     sendProgress(lsp::ProgressParams{token, workDone});
 }
 
-void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message)
+void LSPClient::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optional<std::string> message)
 {
     if (!supportsWorkDoneProgress(capabilities))
         return;
@@ -118,7 +118,7 @@ void Client::sendWorkDoneProgressEnd(const lsp::ProgressToken& token, std::optio
     sendProgress(lsp::ProgressParams{token, workDone});
 }
 
-void Client::sendLogMessage(const lsp::MessageType& type, const std::string& message) const
+void LSPClient::sendLogMessage(const lsp::MessageType& type, const std::string& message) const
 {
     json params{
         {"type", type},
@@ -127,7 +127,7 @@ void Client::sendLogMessage(const lsp::MessageType& type, const std::string& mes
     sendNotification("window/logMessage", params);
 }
 
-void Client::sendTrace(const std::string& message, const std::optional<std::string>& verbose) const
+void LSPClient::sendTrace(const std::string& message, const std::optional<std::string>& verbose) const
 {
     if (traceMode == lsp::TraceValue::Off)
         return;
@@ -137,39 +137,39 @@ void Client::sendTrace(const std::string& message, const std::optional<std::stri
     sendNotification("$/logTrace", params);
 }
 
-void Client::sendWindowMessage(const lsp::MessageType& type, const std::string& message) const
+void LSPClient::sendWindowMessage(const lsp::MessageType& type, const std::string& message) const
 {
     lsp::ShowMessageParams params{type, message};
     sendNotification("window/showMessage", params);
 }
 
-void Client::registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions)
+void LSPClient::registerCapability(const std::string& registrationId, const std::string& method, const json& registerOptions)
 {
     lsp::Registration registration{registrationId, method, registerOptions};
     // TODO: handle responses?
     sendRequest(nextRequestId++, "client/registerCapability", lsp::RegistrationParams{{registration}});
 }
 
-void Client::unregisterCapability(const std::string& registrationId, const std::string& method)
+void LSPClient::unregisterCapability(const std::string& registrationId, const std::string& method)
 {
     lsp::Unregistration unregistration{registrationId, method};
     // TODO: handle responses?
     sendRequest(nextRequestId++, "client/unregisterCapability", lsp::UnregistrationParams{{unregistration}});
 }
 
-ClientConfiguration Client::getConfiguration(const lsp::DocumentUri& uri)
+ClientConfiguration LSPClient::getConfiguration(const lsp::DocumentUri& uri)
 {
     if (configStore.find(uri) != configStore.end())
         return configStore[uri];
     return globalConfig;
 }
 
-void Client::removeConfiguration(const lsp::DocumentUri& uri)
+void LSPClient::removeConfiguration(const lsp::DocumentUri& uri)
 {
     configStore.erase(uri);
 }
 
-void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
+void LSPClient::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
 {
     std::vector<lsp::ConfigurationItem> items{};
     for (auto& uri : uris)
@@ -223,17 +223,17 @@ void Client::requestConfiguration(const std::vector<lsp::DocumentUri>& uris)
     sendRequest(nextRequestId++, "workspace/configuration", lsp::ConfigurationParams{items}, handler);
 }
 
-void Client::applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler)
+void LSPClient::applyEdit(const lsp::ApplyWorkspaceEditParams& params, const std::optional<ResponseHandler>& handler)
 {
     sendRequest(nextRequestId++, "workspace/applyEdit", params, handler);
 }
 
-void Client::publishDiagnostics(const lsp::PublishDiagnosticsParams& params)
+void LSPClient::publishDiagnostics(const lsp::PublishDiagnosticsParams& params)
 {
     sendNotification("textDocument/publishDiagnostics", params);
 }
 
-void Client::refreshWorkspaceDiagnostics()
+void LSPClient::refreshWorkspaceDiagnostics()
 {
     if (capabilities.workspace && capabilities.workspace->diagnostics && capabilities.workspace->diagnostics->refreshSupport)
     {
@@ -241,23 +241,23 @@ void Client::refreshWorkspaceDiagnostics()
     }
 }
 
-void Client::refreshInlayHints()
+void LSPClient::refreshInlayHints()
 {
     if (capabilities.workspace && capabilities.workspace->inlayHint && capabilities.workspace->inlayHint->refreshSupport)
         sendRequest(nextRequestId++, "workspace/inlayHint/refresh", nullptr);
 }
 
-void Client::setTrace(const lsp::SetTraceParams& params)
+void LSPClient::setTrace(const lsp::SetTraceParams& params)
 {
     traceMode = params.value;
 }
 
-bool Client::readRawMessage(std::string& output) const
+bool LSPClient::readRawMessage(std::string& output) const
 {
     return json_rpc::readRawMessage(transport.get(), output);
 }
 
-void Client::handleResponse(const JsonRpcMessage& message)
+void LSPClient::handleResponse(const JsonRpcMessage& message)
 {
     // We run our own exception catcher here because we don't want an exception escaping
     // and then the main loop handler returning that. Since the client has sent a response
@@ -284,7 +284,7 @@ void Client::handleResponse(const JsonRpcMessage& message)
     }
 }
 
-void Client::sendRawMessage(const json& message) const
+void LSPClient::sendRawMessage(const json& message) const
 {
     json_rpc::sendRawMessage(transport.get(), message);
 }

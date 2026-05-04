@@ -25,7 +25,7 @@
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
-LanguageServer::LanguageServer(Client* aClient, std::optional<Luau::Config> aDefaultConfig)
+LanguageServer::LanguageServer(LSPClient* aClient, std::optional<Luau::Config> aDefaultConfig)
     : client(aClient)
     , defaultConfig(std::move(aDefaultConfig))
     , nullWorkspace(std::make_shared<WorkspaceFolder>(client, "$NULL_WORKSPACE", Uri(), defaultConfig))
@@ -119,7 +119,16 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Document Link Provider
     capabilities.documentLinkProvider = {false};
     // Code Action Provider
-    capabilities.codeActionProvider = {std::vector<lsp::CodeActionKind>{lsp::CodeActionKind::QuickFix, lsp::CodeActionKind::Source, lsp::CodeActionKind::SourceOrganizeImports}, /* resolveProvider: */ false};
+    capabilities.codeActionProvider = {
+        std::vector<lsp::CodeActionKind>{
+            lsp::CodeActionKind::QuickFix,
+            lsp::CodeActionKind::RefactorExtract,
+            lsp::CodeActionKind::RefactorInline,
+            lsp::CodeActionKind::Source,
+            lsp::CodeActionKind::SourceOrganizeImports,
+        },
+        /* resolveProvider: */ true,
+    };
     // Rename Provider
     capabilities.renameProvider = true;
     // Folding Range Provider
@@ -247,10 +256,21 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->codeAction(params, cancellationToken);
     }
-    // else if (method == "codeAction/resolve")
-    // {
-    //     response = codeActionResolve(JSON_REQUIRED_PARAMS(params, "codeAction/resolve"));
-    // }
+    else if (method == "codeAction/resolve")
+    {
+        ASSERT_PARAMS(baseParams, "codeAction/resolve")
+        auto action = baseParams->get<lsp::CodeAction>();
+        if (action.data && action.data->contains("uri"))
+        {
+            auto uri = lsp::DocumentUri::parse(action.data->at("uri").get<std::string>());
+            auto workspace = findWorkspace(uri);
+            response = workspace->codeActionResolve(action, cancellationToken);
+        }
+        else
+        {
+            response = action;
+        }
+    }
     else if (method == "textDocument/semanticTokens/full")
     {
         ASSERT_PARAMS(baseParams, "textDocument/semanticTokens/full")
@@ -370,6 +390,16 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         auto params = baseParams->get<lsp::RequireGraphParams>();
         auto workspace = findWorkspace(params.textDocument.uri);
         response = workspace->requireGraph(params);
+    }
+    else if (method == "luau-lsp/debug/viewInternalSource")
+    {
+        ASSERT_PARAMS(baseParams, "luau-lsp/debug/viewInternalSource")
+        auto params = baseParams->get<lsp::InternalSourceParams>();
+        auto workspace = findWorkspace(params.textDocument.uri);
+        auto textDocument = workspace->fileResolver.getTextDocument(params.textDocument.uri);
+        if (!textDocument)
+            throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+        response = textDocument->getText();
     }
     else
     {

@@ -4,7 +4,7 @@
 
 #include <vector>
 
-class TestClient : public Client
+class TestClient : public LSPClient
 {
 public:
     TestClient();
