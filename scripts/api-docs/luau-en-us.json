@@ -4291,13 +4291,13 @@
     "code_sample": ""
   },
   "@luau/global/require/param/0": {
-    "documentation": "The <code>ModuleScript</code> that will be executed to retrieve the return value it provides, or a reference to one (a string path or asset ID)."
+    "documentation": "The directory path to a file or a folder/directory to retrieve the return value it provides. Directory path can use aliases defined in <code>.luaurc</code> or <code>.config.luau</code>. If the path is a file, executes that file. If the path is a folder/directory, finds <code>init.luau</code> or <code>init.lua</code> and execute that instead."
   },
   "@luau/global/require/return/0": {
-    "documentation": "What the <code>ModuleScript</code> returned (usually a table or a function)."
+    "documentation": "What the file or folder/directory returned (usually a table or a function)."
   },
   "@luau/global/require": {
-    "documentation": "Returns the value that was returned by the given ModuleScript, running it if it has not been run yet.",
+    "documentation": "Returns the value that was returned by the given directory path, running it if it has not been run yet.",
     "params": [
       {
         "name": "module",
