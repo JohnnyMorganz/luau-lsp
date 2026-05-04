@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - String requires (including `@game` aliases and relative requires between DataModel siblings with non-mirrored filesystem layouts) now resolve correctly when using `luau-lsp analyze` with a sourcemap ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
+- Fixed incorrect description for `require()` when platform is set to "standard." ([#1479](<https://github.com/JohnnyMorganz/luau-lsp/issues/1479>))
 
 ### Changed
 
