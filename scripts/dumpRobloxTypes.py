@@ -1034,7 +1034,7 @@ def declareClass(klass: Union[ApiClass, DataType]) -> str:
 
             if member["MemberType"] == "Event":
                 typeList = ", ".join(types)
-                typeList = f"({typeList})" if len(types) > 1 else typeList
+                typeList = f"({typeList})" if len(types) != 1 else typeList
                 return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{typeList}>\n"
             else:
                 types = [param["Type"] for param in member["Parameters"]]
