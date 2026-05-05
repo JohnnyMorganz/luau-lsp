@@ -17,12 +17,6 @@
 LUAU_FASTFLAG(DebugLuauTimeTracing)
 LUAU_FASTFLAG(LuauSolverV2)
 
-enum class ReportFormat
-{
-    Default,
-    Luacheck,
-    Gnu,
-};
 
 static void report(ReportFormat format, const char* name, const Luau::Location& loc, const char* type, const char* message)
 {
@@ -84,9 +78,9 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-static bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate)
+bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate)
 {
-    Luau::ModuleName name = path;
+    Luau::ModuleName name = workspace.fileResolver.getModuleName(Uri::file(path));
 
     // Use checkStrict when annotating to retain type graphs needed by attachTypeData
     Luau::CheckResult cr = annotate ? workspace.checkStrict(name, /* cancellationToken= */ nullptr, /* forAutocomplete= */ false)
