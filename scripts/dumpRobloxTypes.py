@@ -1017,20 +1017,41 @@ def declareClass(klass: Union[ApiClass, DataType]) -> str:
 
     def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
-            return (
-                f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
-            )
-        elif member["MemberType"] == "Function":
-            return f"\t{resolveDeprecation(member, klass)}function {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{resolveParameterList(member['Parameters'])}): {resolveReturnType(member)}\n"
-        elif member["MemberType"] == "Event":
-            parameters = ", ".join(
-                map(lambda x: resolveType(x["Type"]), member["Parameters"])
-            )
-            return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{parameters}>\n"
-        elif member["MemberType"] == "Callback":
-            return f"\t{escapeName(member['Name'])}: ({resolveParameterList(member['Parameters'])}) -> {resolveReturnType(member)}\n"
+            return f"\t{escapeName(member['Name'])}: {resolveType(member['ValueType'])}\n"
         else:
-            assert False, "Unhandled member type: " + member["MemberType"]
+            # only one pack allowed, normalize all but the last to 'any'
+            types = [resolveType(param["Type"]) for param in member["Parameters"]]
+            packIndices = [i for i, t in enumerate(types) if t.startswith("...")]
+
+            for i in packIndices[:-1]:  
+                types[i] = "any"
+
+            # pack must be the last parameter, otherwise normalize it to 'any'.
+            packIndex = next((i for i, t in enumerate(types) if t.startswith("...")), -1)
+
+            if packIndex >= 0 and packIndex != len(types) - 1:
+                types[packIndex] = "any"
+
+            if member["MemberType"] == "Event":
+                typeList = ", ".join(types)
+                return f"\t{escapeName(member['Name'])}: RBXScriptSignal<{typeList}>\n"
+            else:
+                types = [param["Type"] for param in member["Parameters"]]
+                tuples = [ty for i, ty in enumerate(types) if types[i] == "any"]
+                
+                # Normalize 'any' types to their C++ 'Variant' type.
+                for i, tuple in enumerate(tuples):
+                    tuple["Category"] = "Group"
+                    tuple["Name"] = "Variant"
+                
+                params = resolveParameterList(member["Parameters"])
+                
+                if member["MemberType"] == "Function":
+                    return f"\t{resolveDeprecation(member, klass)}function {escapeName(member['Name'])}(self{', ' if len(member['Parameters']) > 0 else ''}{params}): {resolveReturnType(member)}\n"
+                elif member["MemberType"] == "Callback":
+                    return f"\t{escapeName(member['Name'])}: ({params}) -> {resolveReturnType(member)}\n"
+                else:
+                    assert False, "Unhandled member type: " + member["MemberType"]
 
     memberDefinitions = [
         declareMember(m) for m in klass["Members"] if filterMember(klass["Name"], m)
