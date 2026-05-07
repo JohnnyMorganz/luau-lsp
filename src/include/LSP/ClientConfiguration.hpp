@@ -138,6 +138,13 @@ struct ClientCompletionImportsStringRequiresConfiguration
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsStringRequiresConfiguration, enabled);
 
+struct ClientCompletionImportsServerClientFilteringConfiguration
+{
+    // Whether to force client/server boundaries for auto-imports (roblox platform only)
+    bool enabled = false;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsServerClientFilteringConfiguration, enabled);
+
 struct ClientCompletionImportsConfiguration
 {
     /// Whether we should suggest automatic imports in completions
@@ -157,9 +164,11 @@ struct ClientCompletionImportsConfiguration
     bool separateGroupsWithLine = false;
     /// Files that match these globs will not be shown during auto-import
     std::vector<std::string> ignoreGlobs{"**/_Index/**"};
+    /// Whether to enforce client/server boundaries in auto-import
+    ClientCompletionImportsServerClientFilteringConfiguration serverClientFiltering;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
-    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs);
+    suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs, serverClientFiltering);
 
 struct ClientCompletionConfiguration
 {

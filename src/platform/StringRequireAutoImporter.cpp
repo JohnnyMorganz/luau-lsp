@@ -2,6 +2,39 @@
 
 namespace Luau::LanguageServer::AutoImports
 {
+
+namespace
+{
+    enum class ScriptContext
+    {
+        Client,
+        Server,
+        Shared
+    };
+
+    ScriptContext getScriptContext(const std::string& path)
+    {
+        if (path.find(".server.lua") != std::string::npos || path.find(".server.luau") != std::string::npos)
+            return ScriptContext::Server;
+
+        if (path.find(".client.lua") != std::string::npos || path.find(".client.luau") != std::string::npos)
+            return ScriptContext::Client;
+
+        if (path.find("ServerScriptService") != std::string::npos || path.find("ServerStorage") != std::string::npos)
+        {
+            return ScriptContext::Server;
+        }
+
+        if (path.find("StarterPlayer") != std::string::npos || path.find("StarterGui") != std::string::npos || 
+            path.find("StarterPack") != std::string::npos || path.find("ReplicatedFirst") != std::string::npos)
+        {
+            return ScriptContext::Client;
+        }
+
+        return ScriptContext::Shared;
+    }
+}
+
 std::string requireNameFromModuleName(const Luau::ModuleName& name)
 {
     auto fileName = name;
@@ -110,6 +143,8 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
     auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from, ctx.workspaceFolder->limits).aliases;
 
+    ScriptContext callerContext = getScriptContext(ctx.from);
+
     auto processModule = [&](const Luau::ModuleName& moduleName)
     {
         auto name = requireNameFromModuleName(moduleName);
@@ -119,6 +154,15 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
 
         if (ctx.moduleFilter && !(*ctx.moduleFilter)(name))
             return;
+
+        if (ctx.config->serverClientFiltering.enabled)
+        {
+            ScriptContext targetContext = getScriptContext(moduleName);
+            if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
+                return;
+            if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
+                return;
+        }
 
         auto uri = ctx.workspaceFolder->fileResolver.getUri(moduleName);
         if (ctx.workspaceFolder->isIgnoredFileForAutoImports(uri))
