@@ -467,7 +467,7 @@
     "operator": {
       "patterns": [
         {
-          "match": "==|~=|!=|<=?|>=?",
+          "match": "==|~=|<=?|>=?",
           "name": "keyword.operator.comparison.luau"
         },
         {
@@ -803,7 +803,7 @@
           "name": "constant.language.boolean.true.luau"
         },
         {
-          "match": "\\b(nil|string|number|boolean|thread|userdata|symbol|vector|buffer|unknown|never|any)\\b",
+          "match": "\\b(nil|string|number|boolean|thread|vector|buffer|unknown|never|any)\\b",
           "name": "support.type.primitive.luau"
         },
         {
