@@ -120,13 +120,19 @@ ScriptContext SourceNode::getScriptContext() const
     if (className == "LocalScript")
         return ScriptContext::Client;
 
-    if (findAncestor("ServerScriptService") || findAncestor("ServerStorage"))
-        return ScriptContext::Server;
-
-    if (findAncestor("StarterPlayer") || findAncestor("StarterGui") || 
-        findAncestor("StarterPack") || findAncestor("ReplicatedFirst"))
+    auto current = parent;
+    while (current)
     {
-        return ScriptContext::Client;
+        if (current->name == "ServerScriptService" || current->name == "ServerStorage")
+            return ScriptContext::Server;
+        
+        if (current->name == "StarterPlayer" || current->name == "StarterGui" || 
+            current->name == "StarterPack" || current->name == "ReplicatedFirst")
+        {
+            return ScriptContext::Client;
+        }
+
+        current = current->parent;
     }
 
     return ScriptContext::Shared;

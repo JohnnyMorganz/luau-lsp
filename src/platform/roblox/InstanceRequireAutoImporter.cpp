@@ -35,10 +35,9 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
     std::vector<InstanceRequireResult> results;
     size_t minimumLineNumber = computeMinimumLineNumberForRequire(*ctx.importsVisitor, ctx.hotCommentsLineNumber);
     
-    auto callerNodeIt = ctx.platform->virtualPathsToSourceNodes.find(ctx.from);
-    ScriptContext callerContext = (callerNodeIt != ctx.platform->virtualPathsToSourceNodes.end()) 
-        ? callerNodeIt->second->getScriptContext() 
-        : ScriptContext::Shared;
+    ScriptContext callerContext = ScriptContext::Shared;
+    if (auto it = ctx.platform->virtualPathsToSourceNodes.find(ctx.from); it != ctx.platform->virtualPathsToSourceNodes.end())
+        callerContext = it->second->getScriptContext();
 
     for (auto& [path, node] : ctx.platform->virtualPathsToSourceNodes)
     {
@@ -54,10 +53,14 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             continue;
 
         ScriptContext targetContext = node->getScriptContext();
-        if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
-            continue;
-        if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
-            continue;
+        if (callerContext != ScriptContext::Shared)
+        {
+            ScriptContext targetContext = node->getScriptContext();
+            if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
+                continue;
+            if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
+                continue;
+        }
 
         std::string requirePath;
         std::optional<std::pair<std::string, lsp::TextEdit>> serviceEdit;
