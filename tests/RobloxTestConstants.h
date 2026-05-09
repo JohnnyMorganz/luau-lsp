@@ -43,15 +43,28 @@ static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
 }
 )";
 
-static const std::string SOURCEMAP_FOR_AUTO_IMPORTS = R"(
+static const std::string SOURCEMAP_FOR_SERVER_CLIENT_BOUNDARY_AUTO_IMPORTS = R"(
 {
     "name": "game",
     "className": "DataModel",
     "children": [
         {
+            "name": "Workspace",
+            "className": "Workspace",
+            "children": [
+                {"name": "MyLocalScript", "className": "LocalScript", "filePaths": ["workspace/MyLocalScript.client.luau"]},
+                {"name": "MyServerScript", "className": "Script", "filePaths": ["workspace/MyServerScript.server.luau"]}
+            ]
+        },
+        {
             "name": "ServerScriptService",
             "className": "ServerScriptService",
             "children": [{"name": "ServerModule", "className": "ModuleScript", "filePaths": ["server/ServerModule.luau"]}]
+        },
+        {
+            "name": "ServerStorage",
+            "className": "ServerStorage",
+            "children": [{"name": "ServerStorageModule", "className": "ModuleScript", "filePaths": ["server/ServerStorageModule.luau"]}]
         },
         {
             "name": "StarterPlayer",
@@ -63,6 +76,11 @@ static const std::string SOURCEMAP_FOR_AUTO_IMPORTS = R"(
                     "children": [{"name": "ClientModule", "className": "ModuleScript", "filePaths": ["client/ClientModule.luau"]}]
                 }
             ]
+        },
+        {
+            "name": "StarterGui",
+            "className": "StarterGui",
+            "children": [{"name": "GuiModule", "className": "ModuleScript", "filePaths": ["client/GuiModule.luau"]}]
         },
         {
             "name": "ReplicatedStorage",
