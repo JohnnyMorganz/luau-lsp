@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `luau-lsp.completion.imports.useConst` setting to use `const` instead of `local` for auto-imported declarations ([#1423](https://github.com/JohnnyMorganz/luau-lsp/issues/1423))
+
 ### Fixed
 
 - String requires (including `@game` aliases and relative requires between DataModel siblings with non-mirrored filesystem layouts) now resolve correctly when using `luau-lsp analyze` with a sourcemap ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))

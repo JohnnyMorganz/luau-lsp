@@ -103,7 +103,7 @@ void RobloxPlatform::handleUnknownSymbolFix(const UnknownSymbolFixContext& ctx, 
             importsVisitor.firstRequireLine.value() - lineNumber == 0)
             appendNewline = true;
 
-        auto serviceEdit = Luau::LanguageServer::AutoImports::createServiceTextEdit(unknownSymbol.name, lineNumber, appendNewline);
+        auto serviceEdit = Luau::LanguageServer::AutoImports::createServiceTextEdit(unknownSymbol.name, lineNumber, appendNewline, config.completion.imports.useConst);
 
         lsp::CodeAction action;
         action.title = "Import service '" + unknownSymbol.name + "'";
@@ -206,7 +206,7 @@ std::vector<lsp::TextEdit> RobloxPlatform::computeAddAllMissingImportsEdits(
                     importsVisitor.firstRequireLine.value() - lineNumber == 0)
                     appendNewline = true;
 
-                serviceEdits.push_back(Luau::LanguageServer::AutoImports::createServiceTextEdit(symbolName, lineNumber, appendNewline));
+                serviceEdits.push_back(Luau::LanguageServer::AutoImports::createServiceTextEdit(symbolName, lineNumber, appendNewline, config.completion.imports.useConst));
                 addedServices.insert(symbolName);
             }
         }
