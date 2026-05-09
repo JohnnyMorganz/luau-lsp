@@ -43,37 +43,7 @@ static const std::string SOURCEMAP_FOR_STRING_REQUIRES = R"(
 }
 )";
 
-static const std::string SOURCEMAP_FOR_INSTANCE_REQUIRE_SERVER_CLIENT_FILTERING = R"(
-{
-    "name": "game",
-    "className": "DataModel",
-    "children": [
-        {
-            "name": "ServerScriptService",
-            "className": "ServerScriptService",
-            "children": [{"name": "ServerModule", "className": "ModuleScript", "filePaths": ["server/ServerModule.luau"]}]
-        },
-        {
-            "name": "StarterPlayer",
-            "className": "StarterPlayer",
-            "children": [
-                {
-                    "name": "StarterPlayerScripts",
-                    "className": "StarterPlayerScripts",
-                    "children": [{"name": "ClientModule", "className": "ModuleScript", "filePaths": ["client/ClientModule.luau"]}]
-                }
-            ]
-        },
-        {
-            "name": "ReplicatedStorage",
-            "className": "ReplicatedStorage",
-            "children": [{"name": "SharedModule", "className": "ModuleScript", "filePaths": ["shared/SharedModule.luau"]}]
-        }
-    ]
-}
-)";
-
-static const std::string SOURCEMAP_FOR_STRING_REQUIRES_SERVER_CLIENT_FILTERING = R"(
+static const std::string SOURCEMAP_FOR_AUTO_IMPORTS = R"(
 {
     "name": "game",
     "className": "DataModel",

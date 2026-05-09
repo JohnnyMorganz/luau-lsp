@@ -636,11 +636,6 @@
           ],
           "scope": "resource"
         },
-        "luau-lsp.completion.imports.serverClientFiltering.enabled": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "Enforce Roblox client/server boundaries for auto-import suggestions. When enabled, client scripts will not see modules from server-only containers (e.g., ServerScriptService), and server scripts will not see suggestions from client-only containers (e.g., StarterPlayer)."
-        },
         "luau-lsp.completion.enableFragmentAutocomplete": {
           "markdownDescription": "Enables the fragment autocomplete system for performance improvements",
           "type": "boolean",

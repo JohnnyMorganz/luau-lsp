@@ -1,36 +1,27 @@
 #include "Platform/StringRequireAutoImporter.hpp"
 
+#include "Platform/LSPPlatform.hpp"
+#include "Platform/RobloxPlatform.hpp"
+
 namespace Luau::LanguageServer::AutoImports
 {
 
 namespace
 {
-    enum class ScriptContext
+    ScriptContext getScriptContext(const StringRequireAutoImporterContext& ctx, const Luau::ModuleName& name)
     {
-        Client,
-        Server,
-        Shared
-    };
-
-    ScriptContext getScriptContext(const std::string& path)
-    {
-        if (path.find(".server.lua") != std::string::npos || path.find(".server.luau") != std::string::npos)
-            return ScriptContext::Server;
-
-        if (path.find(".client.lua") != std::string::npos || path.find(".client.luau") != std::string::npos)
-            return ScriptContext::Client;
-
-        if (path.find("ServerScriptService") != std::string::npos || path.find("ServerStorage") != std::string::npos)
+        if (ctx.workspaceFolder->platform)
         {
-            return ScriptContext::Server;
+            auto platform = dynamic_cast<RobloxPlatform*>(ctx.workspaceFolder->platform.get());
+            if (platform)
+            {
+                auto it = platform->virtualPathsToSourceNodes.find(name);
+                if (it != platform->virtualPathsToSourceNodes.end())
+                {
+                    return it->second->getScriptContext();
+                }
+            }
         }
-
-        if (path.find("StarterPlayer") != std::string::npos || path.find("StarterGui") != std::string::npos || 
-            path.find("StarterPack") != std::string::npos || path.find("ReplicatedFirst") != std::string::npos)
-        {
-            return ScriptContext::Client;
-        }
-
         return ScriptContext::Shared;
     }
 }
@@ -143,7 +134,7 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
     auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from, ctx.workspaceFolder->limits).aliases;
 
-    ScriptContext callerContext = getScriptContext(ctx.from);
+    ScriptContext callerContext = getScriptContext(ctx, ctx.from);
 
     auto processModule = [&](const Luau::ModuleName& moduleName)
     {
@@ -155,14 +146,11 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
         if (ctx.moduleFilter && !(*ctx.moduleFilter)(name))
             return;
 
-        if (ctx.config->serverClientFiltering.enabled)
-        {
-            ScriptContext targetContext = getScriptContext(moduleName);
-            if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
-                return;
-            if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
-                return;
-        }
+        ScriptContext targetContext = getScriptContext(ctx, moduleName);
+        if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
+            return;
+        if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
+            return;
 
         auto uri = ctx.workspaceFolder->fileResolver.getUri(moduleName);
         if (ctx.workspaceFolder->isIgnoredFileForAutoImports(uri))

@@ -6,41 +6,6 @@
 namespace Luau::LanguageServer::AutoImports
 {
 
-namespace
-{
-    enum class ScriptContext
-    {
-        Client,
-        Server,
-        Shared
-    };
-
-    ScriptContext getScriptContext(const InstanceRequireAutoImporterContext& ctx, const std::string& path)
-    {
-        auto it = ctx.platform->virtualPathsToSourceNodes.find(path);
-        if (it != ctx.platform->virtualPathsToSourceNodes.end())
-        {
-            if (it->second->className == "Script")
-                return ScriptContext::Server;
-            if (it->second->className == "LocalScript")
-                return ScriptContext::Client;
-        }
-
-        if (Luau::startsWith(path, "game/ServerScriptService") || Luau::startsWith(path, "game/ServerStorage"))
-        {
-            return ScriptContext::Server;
-        }
-
-        if (Luau::startsWith(path, "game/StarterPlayer") || Luau::startsWith(path, "game/StarterGui") || 
-            Luau::startsWith(path, "game/StarterPack") || Luau::startsWith(path, "game/ReplicatedFirst"))
-        {
-            return ScriptContext::Client;
-        }
-
-        return ScriptContext::Shared;
-    }
-}
-
 lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
@@ -69,7 +34,11 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
 {
     std::vector<InstanceRequireResult> results;
     size_t minimumLineNumber = computeMinimumLineNumberForRequire(*ctx.importsVisitor, ctx.hotCommentsLineNumber);
-    ScriptContext callerContext = getScriptContext(ctx, ctx.from);
+    
+    auto callerNodeIt = ctx.platform->virtualPathsToSourceNodes.find(ctx.from);
+    ScriptContext callerContext = (callerNodeIt != ctx.platform->virtualPathsToSourceNodes.end()) 
+        ? callerNodeIt->second->getScriptContext() 
+        : ScriptContext::Shared;
 
     for (auto& [path, node] : ctx.platform->virtualPathsToSourceNodes)
     {
@@ -84,14 +53,11 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             scriptFilePath && ctx.workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath))
             continue;
 
-        if (ctx.config->serverClientFiltering.enabled)
-        {
-            ScriptContext targetContext = getScriptContext(ctx, path);
-            if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
-                continue;
-            if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
-                continue;
-        }
+        ScriptContext targetContext = node->getScriptContext();
+        if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
+            continue;
+        if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
+            continue;
 
         std::string requirePath;
         std::optional<std::pair<std::string, lsp::TextEdit>> serviceEdit;

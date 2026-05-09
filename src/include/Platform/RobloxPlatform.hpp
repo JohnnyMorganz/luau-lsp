@@ -15,6 +15,13 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
+enum class ScriptContext
+{
+    Client,
+    Server,
+    Shared
+};
+
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
@@ -39,6 +46,7 @@ struct SourceNode
     std::optional<const SourceNode*> findDescendant(const std::string& name) const;
     // O(n) search for ancestor of name
     std::optional<const SourceNode*> findAncestor(const std::string& name) const;
+    ScriptContext getScriptContext() const;
     /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
     /// Returns nullptr if any segment fails to resolve.
     const SourceNode* walkPath(const std::string& path) const;

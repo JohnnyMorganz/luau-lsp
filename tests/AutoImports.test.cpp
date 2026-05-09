@@ -1718,30 +1718,10 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_prefers_alias_over_game_path_w
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@combat/ModuleB\")\n");
 }
 
-TEST_CASE_FIXTURE(Fixture, "instance_requires_show_all_when_server_client_filtering_disabled")
+TEST_CASE_FIXTURE(Fixture, "instance_requires_client_cannot_see_server")
 {
     client->globalConfig.completion.imports.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = false;
-    loadSourcemap(SOURCEMAP_FOR_INSTANCE_REQUIRE_SERVER_CLIENT_FILTERING);
-
-    auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("client/ClientModule.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params, nullptr);
-
-    CHECK(getItem(result, "ServerModule"));
-    CHECK(getItem(result, "SharedModule"));
-}
-
-TEST_CASE_FIXTURE(Fixture, "instance_requires_client_cannot_see_server_when_server_client_filtering_enabled")
-{
-    client->globalConfig.completion.imports.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_INSTANCE_REQUIRE_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("client/ClientModule.luau", source);
@@ -1756,11 +1736,10 @@ TEST_CASE_FIXTURE(Fixture, "instance_requires_client_cannot_see_server_when_serv
     CHECK(getItem(result, "SharedModule"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "instance_requires_server_cannot_see_client_when_server_client_filtering_enabled")
+TEST_CASE_FIXTURE(Fixture, "instance_requires_server_cannot_see_client")
 {
     client->globalConfig.completion.imports.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_INSTANCE_REQUIRE_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("server/ServerModule.luau", source);
@@ -1775,11 +1754,10 @@ TEST_CASE_FIXTURE(Fixture, "instance_requires_server_cannot_see_client_when_serv
     CHECK(getItem(result, "SharedModule"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "instance_requires_shared_can_see_all_when_server_client_filtering_enabled")
+TEST_CASE_FIXTURE(Fixture, "instance_requires_shared_can_see_all")
 {
     client->globalConfig.completion.imports.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_INSTANCE_REQUIRE_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("shared/SharedModule.luau", source);
@@ -1794,32 +1772,11 @@ TEST_CASE_FIXTURE(Fixture, "instance_requires_shared_can_see_all_when_server_cli
     CHECK(getItem(result, "ServerModule"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "string_requires_show_all_when_server_client_filtering_disabled")
+TEST_CASE_FIXTURE(Fixture, "string_requires_client_cannot_see_server")
 {
     client->globalConfig.completion.imports.enabled = true;
     client->globalConfig.completion.imports.stringRequires.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = false;
-    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES_SERVER_CLIENT_FILTERING);
-
-    auto [source, marker] = sourceWithMarker(R"(|)");
-    auto uri = newDocument("client/ClientModule.luau", source);
-
-    lsp::CompletionParams params;
-    params.textDocument = lsp::TextDocumentIdentifier{uri};
-    params.position = marker;
-
-    auto result = workspace.completion(params, nullptr);
-
-    CHECK(getItem(result, "ServerModule"));
-    CHECK(getItem(result, "SharedModule"));
-}
-
-TEST_CASE_FIXTURE(Fixture, "string_requires_client_cannot_see_server_when_server_client_filtering_enabled")
-{
-    client->globalConfig.completion.imports.enabled = true;
-    client->globalConfig.completion.imports.stringRequires.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("client/ClientModule.luau", source);
@@ -1834,12 +1791,11 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_client_cannot_see_server_when_server
     CHECK(getItem(result, "SharedModule"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "string_requires_server_cannot_see_client_when_server_client_filtering_enabled")
+TEST_CASE_FIXTURE(Fixture, "string_requires_server_cannot_see_client")
 {
     client->globalConfig.completion.imports.enabled = true;
     client->globalConfig.completion.imports.stringRequires.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("server/ServerModule.luau", source);
@@ -1854,12 +1810,11 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_server_cannot_see_client_when_server
     CHECK(getItem(result, "SharedModule"));
 }
 
-TEST_CASE_FIXTURE(Fixture, "string_requires_shared_can_see_all_when_server_client_filtering_enabled")
+TEST_CASE_FIXTURE(Fixture, "string_requires_shared_can_see_all")
 {
     client->globalConfig.completion.imports.enabled = true;
     client->globalConfig.completion.imports.stringRequires.enabled = true;
-    client->globalConfig.completion.imports.serverClientFiltering.enabled = true;
-    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES_SERVER_CLIENT_FILTERING);
+    loadSourcemap(SOURCEMAP_FOR_AUTO_IMPORTS);
 
     auto [source, marker] = sourceWithMarker(R"(|)");
     auto uri = newDocument("shared/SharedModule.luau", source);
