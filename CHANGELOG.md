@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.720
 - Sourcemap-based auto-imports (both instance and string versions) are now server/client boundary aware: we no longer suggest server scripts from client context and vice versa ([#1065](https://github.com/JohnnyMorganz/luau-lsp/issues/1065))
+- Improved performance of `workspace/symbol` request on large workspaces by deduplicating common transitive files when parsing the workspace
 
 ## [1.66.1] - 2026-04-27
 
