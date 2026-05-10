@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added `luau-lsp.completion.imports.useConst` setting to use `const` instead of `local` for auto-imported declarations ([#1423](https://github.com/JohnnyMorganz/luau-lsp/issues/1423))
 
+### Changed
+
+- Sync to upstream Luau 0.720
+- Sourcemap-based auto-imports (both instance and string versions) are now server/client boundary aware: we no longer suggest server scripts from client context and vice versa ([#1065](https://github.com/JohnnyMorganz/luau-lsp/issues/1065))
+- Improved performance of `workspace/symbol` request on large workspaces by deduplicating common transitive files when parsing the workspace
+
 ### Fixed
 
 - String requires (including `@game` aliases and relative requires between DataModel siblings with non-mirrored filesystem layouts) now resolve correctly when using `luau-lsp analyze` with a sourcemap ([#1473](https://github.com/JohnnyMorganz/luau-lsp/issues/1473))
@@ -17,12 +23,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated properties for Data Types (e.g. `Vector3.magnitude`, `Vector2.y`, `CFrame.p`) are now correctly filtered from autocompletion when `showDeprecatedItems` is disabled, and deprecated functions are annotated with `@deprecated` in generated type definitions ([#1477](https://github.com/JohnnyMorganz/luau-lsp/issues/1477))
 - Fixed an iterator-invalidation crash in `workspace/symbol` when a source module's source becomes unreadable or new dependencies are discovered during the request
 - Fixed `workspace/symbol` query filter incorrectly excluding symbols whose name begins with the query string and including symbols that did not match the query
-
-### Changed
-
-- Sync to upstream Luau 0.720
-- Sourcemap-based auto-imports (both instance and string versions) are now server/client boundary aware: we no longer suggest server scripts from client context and vice versa ([#1065](https://github.com/JohnnyMorganz/luau-lsp/issues/1065))
-- Improved performance of `workspace/symbol` request on large workspaces by deduplicating common transitive files when parsing the workspace
 
 ## [1.66.1] - 2026-04-27
 
