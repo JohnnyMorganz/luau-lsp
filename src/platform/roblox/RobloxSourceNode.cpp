@@ -113,31 +113,6 @@ std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& anc
     return std::nullopt;
 }
 
-ScriptContext SourceNode::getScriptContext() const
-{
-    if (className == "Script")
-        return ScriptContext::Server;
-    if (className == "LocalScript")
-        return ScriptContext::Client;
-
-    auto current = parent;
-    while (current)
-    {
-        if (current->name == "ServerScriptService" || current->name == "ServerStorage")
-            return ScriptContext::Server;
-        
-        if (current->name == "StarterPlayer" || current->name == "StarterGui" || 
-            current->name == "StarterPack" || current->name == "ReplicatedFirst")
-        {
-            return ScriptContext::Client;
-        }
-
-        current = current->parent;
-    }
-
-    return ScriptContext::Shared;
-}
-
 const SourceNode* SourceNode::walkPath(const std::string& path) const
 {
     const SourceNode* base = this;

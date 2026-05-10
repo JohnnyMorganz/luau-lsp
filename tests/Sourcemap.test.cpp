@@ -1670,15 +1670,15 @@ TEST_CASE_FIXTURE(Fixture, "source_node_get_script_context_resolution")
     REQUIRE(workspaceNode);
     auto sharedModule = (*workspaceNode)->findChild("SharedModule");
     REQUIRE(sharedModule);
-    CHECK_EQ((*sharedModule)->getScriptContext(), ScriptContext::Shared);
+    CHECK_EQ((*sharedModule)->scriptContext, ScriptContext::Shared);
 
     auto localInWorkspace = (*workspaceNode)->findChild("LocalScriptInWorkspace");
     REQUIRE(localInWorkspace);
-    CHECK_EQ((*localInWorkspace)->getScriptContext(), ScriptContext::Client);
+    CHECK_EQ((*localInWorkspace)->scriptContext, ScriptContext::Client);
 
     auto scriptInWorkspace = (*workspaceNode)->findChild("ScriptInWorkspace");
     REQUIRE(scriptInWorkspace);
-    CHECK_EQ((*scriptInWorkspace)->getScriptContext(), ScriptContext::Server);
+    CHECK_EQ((*scriptInWorkspace)->scriptContext, ScriptContext::Server);
 
     auto sss = root->findChild("ServerScriptService");
     REQUIRE(sss);
@@ -1686,13 +1686,13 @@ TEST_CASE_FIXTURE(Fixture, "source_node_get_script_context_resolution")
     REQUIRE(folder);
     auto nestedServerModule = (*folder)->findChild("NestedServerModule");
     REQUIRE(nestedServerModule);
-    CHECK_EQ((*nestedServerModule)->getScriptContext(), ScriptContext::Server);
+    CHECK_EQ((*nestedServerModule)->scriptContext, ScriptContext::Server);
 
     auto starterPlayer = root->findChild("StarterPlayer");
     REQUIRE(starterPlayer);
     auto clientModule = (*starterPlayer)->findChild("ClientModule");
     REQUIRE(clientModule);
-    CHECK_EQ((*clientModule)->getScriptContext(), ScriptContext::Client);
+    CHECK_EQ((*clientModule)->scriptContext, ScriptContext::Client);
 }
 
 TEST_SUITE_END();
