@@ -244,4 +244,92 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_respects_cancellation")
     CHECK_THROWS_AS(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, cancellationToken), RequestCancelledException);
 }
 
+// Regression test: HasPropConstraint on string type (PrimitiveType with metatable) should not crash
+// Sentry crash LUAU-LSP-EF: get<TableType>(follow(*pt->metatable)) returned null
+TEST_CASE_FIXTURE(Fixture, "new_solver_string_prop_access_does_not_crash")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto document = newDocument("a.luau", R"(
+        --!strict
+        local s: string = "hello"
+        local n = s:len()
+        local m = s:sub(1, 3)
+        local upper = s:upper()
+    )");
+    CHECK_NOTHROW(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr));
+}
+
+// Same but via a definition file that augments string (common in Roblox projects)
+TEST_CASE_FIXTURE(Fixture, "new_solver_string_prop_access_with_definitions_does_not_crash")
+{
+    ENABLE_NEW_SOLVER();
+
+    loadDefinition("@test", R"(
+        declare class MyClass
+            Name: string
+            getValue: (self: MyClass) -> string
+        end
+        declare function getClass(): MyClass
+    )");
+
+    auto document = newDocument("a.luau", R"(
+        --!strict
+        local obj = getClass()
+        local name = obj.Name:len()
+        local val = obj.getValue(obj):upper()
+    )");
+    CHECK_NOTHROW(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr));
+}
+
+// Test property access on union containing string
+TEST_CASE_FIXTURE(Fixture, "new_solver_union_with_string_prop_access_does_not_crash")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto document = newDocument("a.luau", R"(
+        --!strict
+        local function f(x: string | number)
+            if type(x) == "string" then
+                local n = x:len()
+            end
+        end
+    )");
+    CHECK_NOTHROW(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr));
+}
+
+// Test string property access through intersection types and generic constraints
+TEST_CASE_FIXTURE(Fixture, "new_solver_string_prop_through_intersection_does_not_crash")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto document = newDocument("a.luau", R"(
+        --!strict
+        type StringLike = string & { custom: boolean }
+        local function f(x: StringLike)
+            local n = x:len()
+            return n
+        end
+    )");
+    CHECK_NOTHROW(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr));
+}
+
+// Test with metatable type returned from a function
+TEST_CASE_FIXTURE(Fixture, "new_solver_prop_access_on_metatable_type_does_not_crash")
+{
+    ENABLE_NEW_SOLVER();
+
+    auto document = newDocument("a.luau", R"(
+        --!strict
+        type MyMeta = {
+            __index: { len: (self: any) -> number }
+        }
+        type MyObj = typeof(setmetatable({} :: {}, {} :: MyMeta))
+        local function f(obj: MyObj)
+            return obj:len()
+        end
+    )");
+    CHECK_NOTHROW(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr));
+}
+
 TEST_SUITE_END();

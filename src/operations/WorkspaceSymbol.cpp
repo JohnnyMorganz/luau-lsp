@@ -106,15 +106,27 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
 {
     std::vector<lsp::WorkspaceSymbol> result;
 
-    for (const auto& [moduleName, sourceModule] : frontend.sourceModules)
+    // Collect module names first: frontend.parse() can insert into or erase from
+    // frontend.sourceModules (via getSourceNode), which invalidates unordered_map
+    // iterators and makes range-for references dangle.
+    std::vector<Luau::ModuleName> moduleNames;
+    moduleNames.reserve(frontend.sourceModules.size());
+    for (const auto& [moduleName, _] : frontend.sourceModules)
+        moduleNames.push_back(moduleName);
+
+    for (const auto& moduleName : moduleNames)
     {
         frontend.parse(moduleName);
+
+        auto it = frontend.sourceModules.find(moduleName);
+        if (it == frontend.sourceModules.end())
+            continue;
 
         // Find relevant text document
         if (auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName))
         {
             WorkspaceSymbolsVisitor visitor{*textDocument, params.query};
-            visitor.visit(sourceModule->root);
+            visitor.visit(it->second->root);
             result.insert(result.end(), std::make_move_iterator(visitor.symbols.begin()), std::make_move_iterator(visitor.symbols.end()));
         }
     }
