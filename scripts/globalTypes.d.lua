@@ -7513,6 +7513,28 @@ declare class BrickColor
 end
 
 declare class CFrame
+	@deprecated
+		function components(self): (number, number, number, number, number, number, number, number, number, number, number, number)
+	@deprecated
+		function inverse(self): CFrame
+	@deprecated
+		function lerp(self, goal: CFrame, alpha: number): CFrame
+	@deprecated
+		function pointToObjectSpace(self, v3: Vector3): Vector3
+	@deprecated
+		function pointToWorldSpace(self, v3: Vector3): Vector3
+	@deprecated
+		function toAxisAngle(self): (Vector3, number)
+	@deprecated
+		function toEulerAnglesXYZ(self): (number, number, number)
+	@deprecated
+		function toObjectSpace(self, cf: CFrame): CFrame
+	@deprecated
+		function toWorldSpace(self, cf: CFrame): CFrame
+	@deprecated
+		function vectorToObjectSpace(self, v3: Vector3): Vector3
+	@deprecated
+		function vectorToWorldSpace(self, v3: Vector3): Vector3
 	LookVector: Vector3
 	Position: Vector3
 	RightVector: Vector3
@@ -7544,24 +7566,6 @@ declare class CFrame
 	function __mul(self, other: CFrame): CFrame
 	function __mul(self, other: Vector3): Vector3
 	function __sub(self, other: Vector3): CFrame
-	function components(self): (number, number, number, number, number, number, number, number, number, number, number, number)
-	function inverse(self): CFrame
-	function lerp(self, goal: CFrame, alpha: number): CFrame
-	function pointToObjectSpace(self, v3: Vector3): Vector3
-	function pointToWorldSpace(self, v3: Vector3): Vector3
-	function toAxisAngle(self): (Vector3, number)
-	function toEulerAnglesXYZ(self): (number, number, number)
-	function toObjectSpace(self, cf: CFrame): CFrame
-	function toWorldSpace(self, cf: CFrame): CFrame
-	function vectorToObjectSpace(self, v3: Vector3): Vector3
-	function vectorToWorldSpace(self, v3: Vector3): Vector3
-	lookVector: Vector3
-	p: Vector3
-	rightVector: Vector3
-	upVector: Vector3
-	x: number
-	y: number
-	z: number
 end
 
 declare class CatalogSearchParams
@@ -7582,16 +7586,14 @@ declare class CatalogSearchParams
 end
 
 declare class Color3
+	@deprecated
+		function lerp(self, color: Color3, alpha: number): Color3
 	B: number
 	G: number
 	R: number
-	b: number
 	function Lerp(self, color: Color3, alpha: number): Color3
 	function ToHSV(self): (number, number, number)
 	function ToHex(self): string
-	function lerp(self, color: Color3, alpha: number): Color3
-	g: number
-	r: number
 end
 
 declare class ColorSequence
@@ -7710,10 +7712,10 @@ declare class PhysicalProperties
 end
 
 declare class RBXScriptConnection
+	@deprecated
+		function disconnect(self): nil
 	Connected: boolean
-	connected: boolean
 	function Disconnect(self): nil
-	function disconnect(self): nil
 end
 
 
@@ -7817,6 +7819,8 @@ declare class UDim2
 end
 
 declare class Vector2
+	@deprecated
+		function lerp(self, v: Vector2, alpha: number): Vector2
 	Magnitude: number
 	Unit: Vector2
 	X: number
@@ -7838,11 +7842,6 @@ declare class Vector2
 	function __mul(self, other: Vector2 | number): Vector2
 	function __sub(self, other: Vector2): Vector2
 	function __unm(self): Vector2
-	function lerp(self, v: Vector2, alpha: number): Vector2
-	magnitude: number
-	unit: Vector2
-	x: number
-	y: number
 end
 
 declare class Vector2int16
@@ -7856,6 +7855,8 @@ declare class Vector2int16
 end
 
 declare class Vector3
+	@deprecated
+		function lerp(self, goal: Vector3, alpha: number): Vector3
 	Magnitude: number
 	Unit: Vector3
 	X: number
@@ -7878,12 +7879,6 @@ declare class Vector3
 	function __mul(self, other: Vector3 | number): Vector3
 	function __sub(self, other: Vector3): Vector3
 	function __unm(self): Vector3
-	function lerp(self, goal: Vector3, alpha: number): Vector3
-	magnitude: number
-	unit: Vector3
-	x: number
-	y: number
-	z: number
 end
 
 declare class Vector3int16
