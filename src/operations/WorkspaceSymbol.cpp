@@ -106,9 +106,22 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
 {
     std::vector<lsp::WorkspaceSymbol> result;
 
-    for (const auto& [moduleName, sourceModule] : frontend.sourceModules)
+    // Snapshot the module names before parsing: frontend.parse mutates
+    // frontend.sourceModules via getSourceNode (insert a new dependency, or
+    // erase when source is unreadable), which would invalidate iterators if
+    // we iterated frontend.sourceModules directly while parsing.
+    std::vector<Luau::ModuleName> moduleNames;
+    moduleNames.reserve(frontend.sourceModules.size());
+    for (const auto& [moduleName, _] : frontend.sourceModules)
+        moduleNames.push_back(moduleName);
+
+    frontend.parseModules(moduleNames);
+
+    for (const auto& moduleName : moduleNames)
     {
-        frontend.parse(moduleName);
+        auto sourceModule = frontend.getSourceModule(moduleName);
+        if (!sourceModule)
+            continue;
 
         // Find relevant text document
         if (auto textDocument = fileResolver.getOrCreateTextDocumentFromModuleName(moduleName))
