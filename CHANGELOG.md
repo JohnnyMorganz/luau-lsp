@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed incorrect description for `require()` when platform is set to "standard." ([#1479](<https://github.com/JohnnyMorganz/luau-lsp/issues/1479>))
+
 ## [1.67.0] - 2026-05-10
 
 ### Added
