@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-imported string requires from `init.luau` files now correctly use `@self/` paths for child modules when sourcemap-based requires are in use
 - Deprecated properties for Data Types (e.g. `Vector3.magnitude`, `Vector2.y`, `CFrame.p`) are now correctly filtered from autocompletion when `showDeprecatedItems` is disabled, and deprecated functions are annotated with `@deprecated` in generated type definitions ([#1477](https://github.com/JohnnyMorganz/luau-lsp/issues/1477))
 - Fixed an iterator-invalidation crash in `workspace/symbol` when a source module's source becomes unreadable or new dependencies are discovered during the request
+- Fixed `workspace/symbol` query filter incorrectly excluding symbols whose name begins with the query string and including symbols that did not match the query
 
 ### Changed
 

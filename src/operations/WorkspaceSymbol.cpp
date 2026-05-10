@@ -19,7 +19,7 @@ struct WorkspaceSymbolsVisitor : public Luau::AstVisitor
 
     bool matchesQuery(std::string symbolName)
     {
-        return query.empty() || toLower(symbolName).find(query);
+        return query.empty() || toLower(symbolName).find(query) != std::string::npos;
     }
 
     void createLocalSymbol(Luau::AstLocal* local, std::optional<std::string> containerName)
