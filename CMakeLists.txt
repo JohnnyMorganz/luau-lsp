@@ -7,7 +7,7 @@ option(LSP_STATIC_CRT "Link with the static CRT (/MT)" OFF)
 option(LSP_BUILD_WITH_SENTRY "Build with Sentry (crash reporting)" OFF)
 option(LSP_WERROR "Warnings as errors" ON)
 
-set(LSP_VERSION "1.66.1")
+set(LSP_VERSION "1.67.0")
 set(LSP_NAME "Luau")
 
 if (LSP_STATIC_CRT)
@@ -142,6 +142,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/GoToDefinition.test.cpp
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
+        tests/WorkspaceSymbol.test.cpp
         tests/RequireGraph.test.cpp
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp

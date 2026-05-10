@@ -1619,4 +1619,80 @@ TEST_CASE_FIXTURE(Fixture, "plugin_update_clears_cached_sourcemap_types_on_nodes
     CHECK_EQ(hover2->contents.value, codeBlock("luau", "Part"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "source_node_get_script_context_resolution")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform);
+
+    auto instanceData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Workspace",
+                    "ClassName": "Workspace",
+                    "Children": [
+                        { "Name": "SharedModule", "ClassName": "ModuleScript" },
+                        { "Name": "LocalScriptInWorkspace", "ClassName": "LocalScript" },
+                        { "Name": "ScriptInWorkspace", "ClassName": "Script" }
+                    ]
+                },
+                {
+                    "Name": "ServerScriptService",
+                    "ClassName": "ServerScriptService",
+                    "Children": [
+                        {
+                            "Name": "Folder",
+                            "ClassName": "Folder",
+                            "Children": [
+                                { "Name": "NestedServerModule", "ClassName": "ModuleScript" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "StarterPlayer",
+                    "ClassName": "StarterPlayer",
+                    "Children": [
+                        { "Name": "ClientModule", "ClassName": "ModuleScript" }
+                    ]
+                }
+            ]
+        }
+    )");
+
+    platform->onStudioPluginFullChange(instanceData);
+    REQUIRE(platform->rootSourceNode);
+    auto root = platform->rootSourceNode;
+
+    auto workspaceNode = root->findChild("Workspace");
+    REQUIRE(workspaceNode);
+    auto sharedModule = (*workspaceNode)->findChild("SharedModule");
+    REQUIRE(sharedModule);
+    CHECK_EQ((*sharedModule)->scriptContext, ScriptContext::Shared);
+
+    auto localInWorkspace = (*workspaceNode)->findChild("LocalScriptInWorkspace");
+    REQUIRE(localInWorkspace);
+    CHECK_EQ((*localInWorkspace)->scriptContext, ScriptContext::Client);
+
+    auto scriptInWorkspace = (*workspaceNode)->findChild("ScriptInWorkspace");
+    REQUIRE(scriptInWorkspace);
+    CHECK_EQ((*scriptInWorkspace)->scriptContext, ScriptContext::Server);
+
+    auto sss = root->findChild("ServerScriptService");
+    REQUIRE(sss);
+    auto folder = (*sss)->findChild("Folder");
+    REQUIRE(folder);
+    auto nestedServerModule = (*folder)->findChild("NestedServerModule");
+    REQUIRE(nestedServerModule);
+    CHECK_EQ((*nestedServerModule)->scriptContext, ScriptContext::Server);
+
+    auto starterPlayer = root->findChild("StarterPlayer");
+    REQUIRE(starterPlayer);
+    auto clientModule = (*starterPlayer)->findChild("ClientModule");
+    REQUIRE(clientModule);
+    CHECK_EQ((*clientModule)->scriptContext, ScriptContext::Client);
+}
+
 TEST_SUITE_END();
