@@ -212,6 +212,7 @@ static const SourceNode* getServiceNode(const SourceNode* n)
 static std::optional<std::pair<std::string, const char*>> computeSourcemapRequirePath(
     const RobloxPlatform* platform,
     const SourceNode* fromNode,
+    ScriptContext fromContext,
     const std::unordered_set<const SourceNode*>& fromAncestors,
     const SourceNode* fromService,
     const Luau::ModuleName& target,
@@ -226,6 +227,15 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
 
     if (!targetNode->isScript())
         return std::nullopt;
+
+    if (fromContext != ScriptContext::Shared)
+    {
+        ScriptContext targetContext = targetNode->getScriptContext();
+        if (fromContext == ScriptContext::Client && targetContext == ScriptContext::Server)
+            return std::nullopt;
+        if (fromContext == ScriptContext::Server && targetContext == ScriptContext::Client)
+            return std::nullopt;
+    }
 
     // Compute absolute path: prefer user-defined aliases, then fall back to @game/<virtual path>
     auto computeAbsolute = [&]() -> std::pair<std::string, const char*>
@@ -318,6 +328,7 @@ std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> RobloxPlat
         return std::nullopt;
 
     const SourceNode* fromNode = fromIt->second;
+    ScriptContext fromContext = fromNode->getScriptContext();
 
     // Precompute ancestors of fromNode once, reused across all candidate modules
     std::unordered_set<const SourceNode*> fromAncestors;
@@ -327,12 +338,12 @@ std::optional<Luau::LanguageServer::AutoImports::RequirePathComputer> RobloxPlat
 
     auto availableAliases = fileResolver->getConfig(from, workspaceFolder->limits).aliases;
 
-    return [this, fromNode, fromAncestors = std::move(fromAncestors), fromService, style,
+    return [this, fromNode, fromContext, fromAncestors = std::move(fromAncestors), fromService, style,
                availableAliases = std::move(availableAliases)](
                const Luau::ModuleName& /*from*/, const Luau::ModuleName& target)
         -> std::optional<std::pair<std::string, const char*>>
     {
-        return computeSourcemapRequirePath(this, fromNode, fromAncestors, fromService, target, style, availableAliases);
+        return computeSourcemapRequirePath(this, fromNode, fromContext, fromAncestors, fromService, target, style, availableAliases);
     };
 }
 

@@ -1,11 +1,7 @@
 #include "Platform/StringRequireAutoImporter.hpp"
 
-#include "Platform/LSPPlatform.hpp"
-#include "Platform/RobloxPlatform.hpp"
-
 namespace Luau::LanguageServer::AutoImports
 {
-
 std::string requireNameFromModuleName(const Luau::ModuleName& name)
 {
     auto fileName = name;
@@ -114,14 +110,6 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
     auto fromUri = ctx.workspaceFolder->fileResolver.getUri(ctx.from);
     auto availableAliases = ctx.workspaceFolder->fileResolver.getConfig(ctx.from, ctx.workspaceFolder->limits).aliases;
 
-    ScriptContext callerContext = ScriptContext::Shared;
-    auto platform = dynamic_cast<RobloxPlatform*>(ctx.workspaceFolder->platform.get());
-    if (platform)
-    {
-        if (auto it = platform->virtualPathsToSourceNodes.find(ctx.from); it != platform->virtualPathsToSourceNodes.end())
-            callerContext = it->second->getScriptContext();
-    }
-
     auto processModule = [&](const Luau::ModuleName& moduleName)
     {
         auto name = requireNameFromModuleName(moduleName);
@@ -131,19 +119,6 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
 
         if (ctx.moduleFilter && !(*ctx.moduleFilter)(name))
             return;
-
-        if (platform && callerContext != ScriptContext::Shared)
-        {
-            auto targetIt = platform->virtualPathsToSourceNodes.find(moduleName);
-            if (targetIt != platform->virtualPathsToSourceNodes.end())
-            {
-                ScriptContext targetContext = targetIt->second->getScriptContext();
-                if (callerContext == ScriptContext::Client && targetContext == ScriptContext::Server)
-                    return;
-                if (callerContext == ScriptContext::Server && targetContext == ScriptContext::Client)
-                    return;
-            }
-        }
 
         auto uri = ctx.workspaceFolder->fileResolver.getUri(moduleName);
         if (ctx.workspaceFolder->isIgnoredFileForAutoImports(uri))
