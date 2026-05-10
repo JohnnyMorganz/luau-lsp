@@ -52,7 +52,6 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             scriptFilePath && ctx.workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath))
             continue;
 
-        ScriptContext targetContext = node->getScriptContext();
         if (callerContext != ScriptContext::Shared)
         {
             ScriptContext targetContext = node->getScriptContext();
