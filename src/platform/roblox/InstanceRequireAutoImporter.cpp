@@ -6,10 +6,10 @@
 namespace Luau::LanguageServer::AutoImports
 {
 
-lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline)
+lsp::TextEdit createServiceTextEdit(const std::string& name, size_t lineNumber, bool appendNewline, bool useConst)
 {
     auto range = lsp::Range{{lineNumber, 0}, {lineNumber, 0}};
-    auto importText = "local " + name + " = game:GetService(\"" + name + "\")\n";
+    auto importText = std::string(declarationKeyword(useConst)) + name + " = game:GetService(\"" + name + "\")\n";
     if (appendNewline)
         importText += "\n";
     return {range, importText};
@@ -97,7 +97,7 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
                 // so we use `.value_or(serviceLineNumber)` to ensure it equals 0 and a newline is added
                 if (ctx.config->separateGroupsWithLine && ctx.importsVisitor->firstRequireLine.value_or(serviceLineNumber) - serviceLineNumber == 0)
                     appendNewline = true;
-                serviceEdit = {service, createServiceTextEdit(service, serviceLineNumber, appendNewline)};
+                serviceEdit = {service, createServiceTextEdit(service, serviceLineNumber, appendNewline, ctx.config->useConst)};
             }
         }
 
@@ -109,7 +109,7 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             path,
             require,
             serviceEdit,
-            createRequireTextEdit(name, require, lineNumber, prependNewline),
+            createRequireTextEdit(name, require, lineNumber, prependNewline, ctx.config->useConst),
             isRelative ? SortText::AutoImports : SortText::AutoImportsAbsolute,
         });
     }

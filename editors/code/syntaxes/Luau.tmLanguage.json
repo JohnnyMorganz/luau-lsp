@@ -392,7 +392,7 @@
         },
         {
           "name": "support.function.luau",
-          "match": "(?<![^.]\\.|:)\\b(bit32\\.(?:arshift|band|bnot|bor|btest|bxor|extract|lrotate|lshift|replace|rrotate|rshift|countlz|countrz|byteswap)|coroutine\\.(?:create|isyieldable|resume|running|status|wrap|yield|close)|debug\\.(?:info|loadmodule|profilebegin|profileend|traceback)|math\\.(?:abs|acos|asin|atan|atan2|ceil|clamp|cos|cosh|deg|exp|floor|fmod|frexp|ldexp|log|log10|max|min|modf|noise|pow|rad|random|randomseed|round|sign|sin|sinh|sqrt|tan|tanh)|os\\.(?:clock|date|difftime|time)|string\\.(?:byte|char|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|split|sub|unpack|upper)|table\\.(?:concat|create|find|foreach|foreachi|getn|insert|maxn|move|pack|remove|sort|unpack|clear|freeze|isfrozen|clone)|task\\.(?:spawn|synchronize|desynchronize|wait|defer|delay)|utf8\\.(?:char|codepoint|codes|graphemes|len|nfcnormalize|nfdnormalize|offset)|buffer\\.(?:create|fromstring|tostring|len|readi8|readu8|readi16|readu16|readi32|readu32|readf32|readf64|writei8|writeu8|writei16|writeu16|writei32|writeu32|writef32|writef64|readstring|writestring|copy|fill)|vector\\.(?:abs|angle|ceil|clamp|create|cross|dot|floor|lerp|magnitude|max|min|normalize|sign))\\b"
+          "match": "(?<![^.]\\.|:)\\b(bit32\\.(?:arshift|band|bnot|bor|btest|bxor|extract|lrotate|lshift|replace|rrotate|rshift|countlz|countrz|byteswap)|coroutine\\.(?:create|isyieldable|resume|running|status|wrap|yield|close)|debug\\.(?:info|loadmodule|profilebegin|profileend|traceback)|math\\.(?:abs|acos|asin|atan|atan2|ceil|clamp|cos|cosh|deg|exp|floor|fmod|frexp|isfinite|isinf|isnan|ldexp|lerp|log|log10|map|max|min|modf|noise|pow|rad|random|randomseed|round|sign|sin|sinh|sqrt|tan|tanh)|os\\.(?:clock|date|difftime|time)|string\\.(?:byte|char|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|split|sub|unpack|upper)|table\\.(?:concat|create|find|foreach|foreachi|getn|insert|maxn|move|pack|remove|sort|unpack|clear|freeze|isfrozen|clone)|task\\.(?:spawn|synchronize|desynchronize|wait|defer|delay)|utf8\\.(?:char|codepoint|codes|graphemes|len|nfcnormalize|nfdnormalize|offset)|buffer\\.(?:create|fromstring|tostring|len|readbits|readi8|readu8|readi16|readu16|readi32|readu32|readf32|readf64|writebits|writei8|writeu8|writei16|writeu16|writei32|writeu32|writef32|writef64|readstring|writestring|copy|fill)|vector\\.(?:abs|angle|ceil|clamp|create|cross|dot|floor|lerp|magnitude|max|min|normalize|sign))\\b"
         },
         {
           "name": "support.constant.luau",
@@ -467,7 +467,7 @@
     "operator": {
       "patterns": [
         {
-          "match": "==|~=|!=|<=?|>=?",
+          "match": "==|~=|<=?|>=?",
           "name": "keyword.operator.comparison.luau"
         },
         {
@@ -803,7 +803,7 @@
           "name": "constant.language.boolean.true.luau"
         },
         {
-          "match": "\\b(nil|string|number|boolean|thread|userdata|symbol|vector|buffer|unknown|never|any)\\b",
+          "match": "\\b(nil|string|number|boolean|thread|vector|buffer|unknown|never|any)\\b",
           "name": "support.type.primitive.luau"
         },
         {

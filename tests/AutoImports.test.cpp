@@ -5,6 +5,8 @@
 #include "LSP/IostreamHelpers.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
+LUAU_FASTFLAG(LuauConst2)
+
 static std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     for (const auto& item : items)
@@ -1718,6 +1720,108 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_prefers_alias_over_game_path_w
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@combat/ModuleB\")\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "service_auto_imports_use_const_when_configured")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.useConst = true;
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto serviceImport = getItem(result, "ReplicatedStorage");
+    REQUIRE(serviceImport);
+    REQUIRE_EQ(serviceImport->additionalTextEdits.size(), 1);
+    CHECK_EQ(serviceImport->additionalTextEdits[0].newText, "const ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_require_uses_const_when_configured")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.useConst = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["module.luau"]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        |
+    )");
+
+    auto uri = newDocument("source.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Module");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 2);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "const ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n");
+    CHECK_EQ(imports[0].additionalTextEdits[1].newText, "const Module = require(ReplicatedStorage.Module)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_uses_const_when_configured")
+{
+    newDocument("foo.luau", "");
+
+    client->globalConfig.completion.imports.useConst = true;
+
+    FindImportsVisitor visitor;
+    auto user = newDocument("user.luau", "");
+    auto ctx = createContext(this, user, &visitor);
+
+    std::vector<lsp::CompletionItem> items;
+    suggestStringRequires(ctx, items);
+
+    REQUIRE_EQ(items.size(), 1);
+    auto fooItem = getItem(items, "foo");
+    REQUIRE(fooItem);
+    CHECK_EQ(fooItem->additionalTextEdits[0].newText, "const foo = require(\"./foo\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "const_require_is_not_duplicated_when_already_imported")
+{
+    ScopedFastFlag sff{FFlag::LuauConst2, true};
+
+    newDocument("library.luau", "");
+
+    FindImportsVisitor visitor;
+    auto user = newDocument("user.luau", R"(
+        const library = require("./library")
+    )");
+    auto ctx = createContext(this, user, &visitor);
+
+    std::vector<lsp::CompletionItem> items;
+    suggestStringRequires(ctx, items);
+
+    CHECK_EQ(items.size(), 0);
+}
+
 TEST_CASE_FIXTURE(Fixture, "instance_requires_client_cannot_see_server")
 {
     client->globalConfig.completion.imports.enabled = true;
@@ -1836,7 +1940,7 @@ TEST_CASE_FIXTURE(Fixture, "instance_requires_client_can_see_client")
 
     auto result = workspace.completion(params, nullptr);
 
-    CHECK(getItem(result, "GuiModule")); 
+    CHECK(getItem(result, "GuiModule"));
     CHECK(getItem(result, "SharedModule"));
 }
 
@@ -1977,7 +2081,7 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_client_can_see_client")
 
     auto result = workspace.completion(params, nullptr);
 
-    CHECK(getItem(result, "GuiModule")); 
+    CHECK(getItem(result, "GuiModule"));
     CHECK(getItem(result, "SharedModule"));
 }
 
