@@ -914,9 +914,6 @@ def resolveDeprecation(member: ApiMember, klass: ApiClass | DataType) -> str:
 
     result = ""
 
-    if member.get("Deprecated") is True and not tags:
-        return "@deprecated\n\t\t"
-
     if tags is not None:
         for tag in tags:
             if tag == "Deprecated":
@@ -976,11 +973,12 @@ def classIgnoredMembers(klassName: str):
 
 
 def filterMember(klassName: str, member: ApiMember):
-    is_deprecated = (
-        member.get("Deprecated") is True
-        or ("Tags" in member and member["Tags"] is not None and "Deprecated" in member["Tags"])
-    )
-    if not INCLUDE_DEPRECATED_MEMBERS and is_deprecated and member["MemberType"] != "Function":
+    if not INCLUDE_DEPRECATED_MEMBERS and (
+        "Tags" in member and
+        member["Tags"] is not None
+        and "Deprecated" in member["Tags"]
+        and member["MemberType"] != "Function"
+    ):
         return False
 
     if ("Tags" in member and

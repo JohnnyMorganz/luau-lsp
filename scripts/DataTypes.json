@@ -369,37 +369,37 @@
                     }
                 },
                 {
-                    "MemberType":"Function",
-                    "Name":"min",
+                    "MemberType": "Function",
+                    "Name": "min",
                     "Parameters": [
                         {
-                        "Name": "other",
-                        "Type":{
-                            "Variadic":{
-                                "Name":"Vector2"
+                            "Name": "other",
+                            "Type": {
+                                "Variadic": {
+                                    "Name": "Vector2"
+                                }
                             }
                         }
-                        }
                     ],
-                    "ReturnType":{
-                        "Name":"Vector2"
+                    "ReturnType": {
+                        "Name": "Vector2"
                     }
                 },
                 {
-                    "MemberType":"Function",
-                    "Name":"max",
+                    "MemberType": "Function",
+                    "Name": "max",
                     "Parameters": [
                         {
-                        "Name": "other",
-                        "Type":{
-                            "Variadic":{
-                                "Name":"Vector2"
+                            "Name": "other",
+                            "Type": {
+                                "Variadic": {
+                                    "Name": "Vector2"
+                                }
                             }
                         }
-                        }
                     ],
-                    "ReturnType":{
-                        "Name":"Vector2"
+                    "ReturnType": {
+                        "Name": "Vector2"
                     }
                 }
             ],
@@ -732,12 +732,12 @@
                     "Parameters": [
                         {
                             "Name": "axes",
-                            "Type":{
-                                "Variadic":{
+                            "Type": {
+                                "Variadic": {
                                     "Category": "Enum",
                                     "Name": "Axis | EnumNormalId"
                                 }
-                        }
+                            }
                         }
                     ],
                     "ReturnType": {
@@ -1402,12 +1402,12 @@
                     "Parameters": [
                         {
                             "Name": "normalIds",
-                            "Type":{
-                                "Variadic":{
+                            "Type": {
+                                "Variadic": {
                                     "Category": "Enum",
                                     "Name": "NormalId"
                                 }
-                        }
+                            }
                         }
                     ],
                     "ReturnType": {
@@ -1422,8 +1422,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "new",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Rect"
                     }
@@ -1619,37 +1618,37 @@
                     }
                 },
                 {
-                    "MemberType":"Function",
-                    "Name":"min",
+                    "MemberType": "Function",
+                    "Name": "min",
                     "Parameters": [
                         {
-                        "Name": "other",
-                        "Type":{
-                            "Variadic":{
-                                "Name":"Vector3"
+                            "Name": "other",
+                            "Type": {
+                                "Variadic": {
+                                    "Name": "Vector3"
+                                }
                             }
                         }
-                        }
                     ],
-                    "ReturnType":{
-                        "Name":"Vector3"
+                    "ReturnType": {
+                        "Name": "Vector3"
                     }
                 },
                 {
-                    "MemberType":"Function",
-                    "Name":"max",
+                    "MemberType": "Function",
+                    "Name": "max",
                     "Parameters": [
                         {
-                        "Name": "other",
-                        "Type":{
-                            "Variadic":{
-                                "Name":"Vector3"
+                            "Name": "other",
+                            "Type": {
+                                "Variadic": {
+                                    "Name": "Vector3"
+                                }
                             }
                         }
-                        }
                     ],
-                    "ReturnType":{
-                        "Name":"Vector3"
+                    "ReturnType": {
+                        "Name": "Vector3"
                     }
                 }
             ],
@@ -2072,7 +2071,7 @@
                         {
                             "Name": "value",
                             "Type": {
-                                "Name":  "number"
+                                "Name": "number"
                             }
                         },
                         {
@@ -2173,7 +2172,6 @@
             ],
             "Name": "Content"
         },
-
         {
             "Members": [
                 {
@@ -2394,67 +2392,67 @@
         },
         {
             "Members": [
-                    {
-                        "MemberType": "Function",
-                        "Name": "new",
-                        "Parameters": [
-                            {
-                                "Name": "time",
-                                "Type": {
-                                    "Name": "number"
-                                }
-                            },
-                            {
-                                "Name": "value",
-                                "Type": {
-                                    "Name": "number"
-                                }
-                            },
-                            {
-                                "Name": "Interpolation",
-                                "Type": {
-                                    "Category": "Enum",
-                                    "Name": "KeyInterpolationMode"
-                                }
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "time",
+                            "Type": {
+                                "Name": "number"
                             }
-                        ],
-                        "ReturnType": {
-                            "Name": "FloatCurveKey"
+                        },
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "Interpolation",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "KeyInterpolationMode"
+                            }
                         }
+                    ],
+                    "ReturnType": {
+                        "Name": "FloatCurveKey"
                     }
+                }
             ],
             "Name": "FloatCurveKey"
         },
         {
             "Members": [
-                    {
-                        "MemberType": "Function",
-                        "Name": "new",
-                        "Parameters": [
-                            {
-                                "Name": "time",
-                                "Type": {
-                                    "Name": "number"
-                                }
-                            },
-                            {
-                                "Name": "value",
-                                "Type": {
-                                    "Name": "CFrame"
-                                }
-                            },
-                            {
-                                "Name": "Interpolation",
-                                "Type": {
-                                    "Category": "Enum",
-                                    "Name": "KeyInterpolationMode"
-                                }
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "time",
+                            "Type": {
+                                "Name": "number"
                             }
-                        ],
-                        "ReturnType": {
-                            "Name": "RotationCurveKey"
+                        },
+                        {
+                            "Name": "value",
+                            "Type": {
+                                "Name": "CFrame"
+                            }
+                        },
+                        {
+                            "Name": "Interpolation",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "KeyInterpolationMode"
+                            }
                         }
+                    ],
+                    "ReturnType": {
+                        "Name": "RotationCurveKey"
                     }
+                }
             ],
             "Name": "RotationCurveKey"
         },
@@ -2671,10 +2669,10 @@
                     }
                 },
                 {
-                    "MemberType":"Property",
-                    "Name":"Label",
-                    "ValueType":{
-                        "Name":"string"
+                    "MemberType": "Property",
+                    "Name": "Label",
+                    "ValueType": {
+                        "Name": "string"
                     }
                 }
             ],
@@ -2811,8 +2809,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Abs",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector2"
                     }
@@ -2820,8 +2817,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Ceil",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector2"
                     }
@@ -2829,8 +2825,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Floor",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector2"
                     }
@@ -2838,8 +2833,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Sign",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector2"
                     }
@@ -2849,15 +2843,15 @@
                     "Name": "Angle",
                     "Parameters": [
                         {
-                            "Name":"other",
-                            "Type":{
-                                "Name":"Vector2"
+                            "Name": "other",
+                            "Type": {
+                                "Name": "Vector2"
                             }
                         },
                         {
-                            "Name":"isSigned",
-                            "Type":{
-                                "Name":"bool"
+                            "Name": "isSigned",
+                            "Type": {
+                                "Name": "bool"
                             }
                         }
                     ],
@@ -2902,39 +2896,46 @@
                 {
                     "MemberType": "Property",
                     "Name": "y",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "x",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "unit",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "Vector2"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "magnitude",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "lerp",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "v",
@@ -2951,7 +2952,10 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector2"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 }
             ],
             "Name": "Vector2"
@@ -3027,31 +3031,36 @@
                 {
                     "MemberType": "Property",
                     "Name": "r",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "g",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "b",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "lerp",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "color",
@@ -3068,7 +3077,10 @@
                     ],
                     "ReturnType": {
                         "Name": "Color3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 }
             ],
             "Name": "Color3"
@@ -3441,7 +3453,7 @@
                     "Parameters": [
                         {
                             "Name": "order",
-                            "Default":"XYZ",
+                            "Default": "XYZ",
                             "Type": {
                                 "Category": "Enum",
                                 "Name": "RotationOrder"
@@ -3633,31 +3645,36 @@
                 {
                     "MemberType": "Property",
                     "Name": "z",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "y",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "x",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "pointToObjectSpace",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "v3",
@@ -3668,27 +3685,33 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "p",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "rightVector",
                     "ValueType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
-                    "Deprecated": true,
                     "Name": "vectorToWorldSpace",
                     "Parameters": [
                         {
@@ -3700,12 +3723,14 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "toAxisAngle",
-                    "Deprecated": true,
                     "Parameters": [],
                     "TupleReturns": [
                         {
@@ -3714,29 +3739,35 @@
                         {
                             "Name": "number"
                         }
+                    ],
+                    "Tags": [
+                        "Deprecated"
                     ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "inverse",
-                    "Deprecated": true,
                     "Parameters": [],
                     "ReturnType": {
                         "Name": "CFrame"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "upVector",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "lerp",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "goal",
@@ -3753,12 +3784,14 @@
                     ],
                     "ReturnType": {
                         "Name": "CFrame"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "vectorToObjectSpace",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "v3",
@@ -3769,20 +3802,24 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "lookVector",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "pointToWorldSpace",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "v3",
@@ -3793,12 +3830,14 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "toWorldSpace",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "cf",
@@ -3809,12 +3848,14 @@
                     ],
                     "ReturnType": {
                         "Name": "CFrame"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "toObjectSpace",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "cf",
@@ -3825,12 +3866,14 @@
                     ],
                     "ReturnType": {
                         "Name": "CFrame"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "toEulerAnglesXYZ",
-                    "Deprecated": true,
                     "Parameters": [],
                     "TupleReturns": [
                         {
@@ -3842,6 +3885,9 @@
                         {
                             "Name": "number"
                         }
+                    ],
+                    "Tags": [
+                        "Deprecated"
                     ]
                 },
                 {
@@ -3869,7 +3915,6 @@
                 {
                     "MemberType": "Function",
                     "Name": "components",
-                    "Deprecated": true,
                     "Parameters": [],
                     "TupleReturns": [
                         {
@@ -3908,6 +3953,9 @@
                         {
                             "Name": "number"
                         }
+                    ],
+                    "Tags": [
+                        "Deprecated"
                     ]
                 }
             ],
@@ -4153,8 +4201,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Abs",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector3"
                     }
@@ -4162,8 +4209,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Ceil",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector3"
                     }
@@ -4171,8 +4217,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Floor",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector3"
                     }
@@ -4180,8 +4225,7 @@
                 {
                     "MemberType": "Function",
                     "Name": "Sign",
-                    "Parameters": [
-                    ],
+                    "Parameters": [],
                     "ReturnType": {
                         "Name": "Vector3"
                     }
@@ -4266,7 +4310,6 @@
                 {
                     "MemberType": "Function",
                     "Name": "lerp",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "goal",
@@ -4283,47 +4326,60 @@
                     ],
                     "ReturnType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "z",
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "y",
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "x",
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "unit",
                     "ValueType": {
                         "Name": "Vector3"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
-                    "Deprecated": true,
                     "Name": "magnitude",
                     "ValueType": {
                         "Name": "number"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 }
             ],
             "Name": "Vector3"
@@ -4468,19 +4524,23 @@
                 {
                     "MemberType": "Function",
                     "Name": "disconnect",
-                    "Deprecated": true,
                     "Parameters": [],
                     "ReturnType": {
                         "Name": "void"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Property",
                     "Name": "connected",
-                    "Deprecated": true,
                     "ValueType": {
                         "Name": "bool"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 }
             ],
             "Name": "RBXScriptConnection"
@@ -4546,16 +4606,17 @@
                 {
                     "MemberType": "Function",
                     "Name": "wait",
-                    "Deprecated": true,
                     "Parameters": [],
                     "ReturnType": {
                         "Name": "Variant"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 },
                 {
                     "MemberType": "Function",
                     "Name": "connect",
-                    "Deprecated": true,
                     "Parameters": [
                         {
                             "Name": "callback",
@@ -4566,7 +4627,10 @@
                     ],
                     "ReturnType": {
                         "Name": "RBXScriptConnection"
-                    }
+                    },
+                    "Tags": [
+                        "Deprecated"
+                    ]
                 }
             ],
             "Name": "RBXScriptSignal"
@@ -4733,7 +4797,7 @@
                     "MemberType": "Property",
                     "Name": "SourceType",
                     "ValueType": {
-                       "Category": "Enum",
+                        "Category": "Enum",
                         "Name": "ContentSourceType"
                     }
                 },
@@ -4750,7 +4814,7 @@
                     "ValueType": {
                         "Name": "Object?"
                     }
-                } 
+                }
             ],
             "Name": "Content"
         },
@@ -5510,7 +5574,6 @@
                 {
                     "MemberType": "Property",
                     "Name": "Position",
-                    
                     "ValueType": {
                         "Name": "UDim2"
                     }
@@ -5518,7 +5581,6 @@
                 {
                     "MemberType": "Property",
                     "Name": "LeftTangent",
-                    
                     "ValueType": {
                         "Name": "UDim2"
                     }
@@ -5526,7 +5588,6 @@
                 {
                     "MemberType": "Property",
                     "Name": "RightTangent",
-                    
                     "ValueType": {
                         "Name": "UDim2"
                     }
