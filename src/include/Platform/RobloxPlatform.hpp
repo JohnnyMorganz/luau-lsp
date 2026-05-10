@@ -39,6 +39,7 @@ struct SourceNode
     std::optional<const SourceNode*> findDescendant(const std::string& name) const;
     // O(n) search for ancestor of name
     std::optional<const SourceNode*> findAncestor(const std::string& name) const;
+    bool isAncestorOf(const SourceNode* other) const;
     /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
     /// Returns nullptr if any segment fails to resolve.
     const SourceNode* walkPath(const std::string& path) const;
