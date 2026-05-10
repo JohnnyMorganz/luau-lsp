@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.67.0] - 2026-05-10
+
 ### Added
 
 - Added `luau-lsp.completion.imports.useConst` setting to use `const` instead of `local` for auto-imported declarations ([#1423](https://github.com/JohnnyMorganz/luau-lsp/issues/1423))
@@ -1974,7 +1976,6 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
-
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help
