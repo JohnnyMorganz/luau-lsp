@@ -245,6 +245,22 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     if (style == ImportRequireStyle::AlwaysAbsolute)
         return computeAbsolute();
 
+    // If fromNode is a DataModel ancestor of targetNode, use @self/ — the child module
+    // is always in the same service subtree, so a relative path is always appropriate.
+    if (fromNode->isAncestorOf(targetNode))
+    {
+        std::vector<std::string> pathComponents;
+        for (auto m = targetNode; m != fromNode; m = m->parent)
+            pathComponents.push_back(m->name);
+        std::reverse(pathComponents.begin(), pathComponents.end());
+
+        std::string selfPath = "@self";
+        for (const auto& component : pathComponents)
+            selfPath += "/" + component;
+
+        return std::pair{selfPath, SortText::AutoImports};
+    }
+
     // Find lowest common ancestor
     const SourceNode* commonAncestor = nullptr;
     for (auto n = targetNode; n; n = n->parent)
