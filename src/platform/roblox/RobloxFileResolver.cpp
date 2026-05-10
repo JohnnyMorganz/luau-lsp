@@ -227,6 +227,9 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     if (!targetNode->isScript())
         return std::nullopt;
 
+    if (!isScriptContextCompatible(fromNode->scriptContext, targetNode->scriptContext))
+        return std::nullopt;
+
     // Compute absolute path: prefer user-defined aliases, then fall back to @game/<virtual path>
     auto computeAbsolute = [&]() -> std::pair<std::string, const char*>
     {

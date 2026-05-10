@@ -34,6 +34,10 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
 {
     std::vector<InstanceRequireResult> results;
     size_t minimumLineNumber = computeMinimumLineNumberForRequire(*ctx.importsVisitor, ctx.hotCommentsLineNumber);
+    
+    ScriptContext callerContext = ScriptContext::Shared;
+    if (auto it = ctx.platform->virtualPathsToSourceNodes.find(ctx.from); it != ctx.platform->virtualPathsToSourceNodes.end())
+        callerContext = it->second->scriptContext;
 
     for (auto& [path, node] : ctx.platform->virtualPathsToSourceNodes)
     {
@@ -46,6 +50,9 @@ std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequ
             continue;
         if (auto scriptFilePath = ctx.platform->getRealPathFromSourceNode(node);
             scriptFilePath && ctx.workspaceFolder->isIgnoredFileForAutoImports(*scriptFilePath))
+            continue;
+
+        if (!isScriptContextCompatible(callerContext, node->scriptContext))
             continue;
 
         std::string requirePath;

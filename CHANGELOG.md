@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.720
+- Sourcemap-based auto-imports (both instance and string versions) are now server/client boundary aware: we no longer suggest server scripts from client context and vice versa ([#1065](https://github.com/JohnnyMorganz/luau-lsp/issues/1065))
 
 ## [1.66.1] - 2026-04-27
 
@@ -1970,6 +1971,7 @@ local y = tbl.data -- Should give "This is some special information"
 ### Added
 
 - Added configuration options to enable certain Language Server features. By default, they are all enabled:
+
   - `luau-lsp.completion.enabled`: Autocomplete
   - `luau-lsp.hover.enabled`: Hover
   - `luau-lsp.signatureHelp.enabled`: Signature Help

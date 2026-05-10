@@ -15,6 +15,20 @@ struct RobloxDefinitionsFileMetadata
 };
 NLOHMANN_DEFINE_OPTIONAL(RobloxDefinitionsFileMetadata, CREATABLE_INSTANCES, SERVICES)
 
+enum class ScriptContext
+{
+    Client,
+    Server,
+    Shared
+};
+
+inline bool isScriptContextCompatible(ScriptContext from, ScriptContext target)
+{
+    if (from == ScriptContext::Shared || target == ScriptContext::Shared)
+        return true;
+    return from == target;
+}
+
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually
@@ -24,6 +38,7 @@ struct SourceNode
     std::vector<SourceNode*> children{};
     std::string virtualPath; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
     bool pluginManaged = false;
+    ScriptContext scriptContext = ScriptContext::Shared; // NB: NOT POPULATED BY SOURCEMAP, must be written to manually
 
     // The corresponding TypeId for this sourcemap node
     // A different TypeId is created for each type checker (frontend.typeChecker and frontend.typeCheckerForAutocomplete)
@@ -97,7 +112,7 @@ public:
     }
     bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
-    void writePathsToMap(SourceNode* node, const std::string& base);
+    void writePathsToMap(SourceNode* node, const std::string& base, ScriptContext parentNameContext = ScriptContext::Shared);
     void updateSourcemapTypes();
 
     std::optional<Uri> getRealPathFromSourceNode(const SourceNode* sourceNode) const;
