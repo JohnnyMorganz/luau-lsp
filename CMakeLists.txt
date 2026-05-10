@@ -142,6 +142,7 @@ target_sources(Luau.LanguageServer.Test PRIVATE
         tests/GoToDefinition.test.cpp
         tests/Glob.test.cpp
         tests/Workspace.test.cpp
+        tests/WorkspaceSymbol.test.cpp
         tests/RequireGraph.test.cpp
         tests/OnTypeFormatting.test.cpp
         tests/AnalyzeCli.test.cpp
