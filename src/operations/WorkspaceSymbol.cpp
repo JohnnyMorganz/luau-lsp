@@ -106,10 +106,8 @@ std::optional<std::vector<lsp::WorkspaceSymbol>> WorkspaceFolder::workspaceSymbo
 {
     std::vector<lsp::WorkspaceSymbol> result;
 
-    // Snapshot the module names before parsing: frontend.parse mutates
-    // frontend.sourceModules via getSourceNode (insert a new dependency, or
-    // erase when source is unreadable), which would invalidate iterators if
-    // we iterated frontend.sourceModules directly while parsing.
+    // parseModules mutates frontend.sourceModules (insert/erase via
+    // getSourceNode), so we cannot iterate the map directly while parsing.
     std::vector<Luau::ModuleName> moduleNames;
     moduleNames.reserve(frontend.sourceModules.size());
     for (const auto& [moduleName, _] : frontend.sourceModules)
