@@ -197,6 +197,27 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
     CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(basePath).resolvePath("foo"));
 }
 
+#ifdef _WIN32
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_normalizes_drive_letter_case_on_windows")
+{
+    // Alias values with uppercase drive letters must resolve to the same module name as
+    // files opened directly (which always have lowercase drive letters via Uri::file()).
+    // Mismatch causes the type checker to treat the same file as two distinct modules.
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "C:/Users/test/folder"
+        }
+    }
+    )");
+
+    auto resolved = resolveAlias("@test/module", workspace.fileResolver.defaultConfig, {});
+    REQUIRE(resolved.has_value());
+    // fsPath() must match Uri::file() which lowercases the drive letter
+    CHECK_EQ(resolved->fsPath(), Uri::file("C:/Users/test/folder/module").fsPath());
+}
+#endif
+
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
 {
     loadLuaurc(R"(
