@@ -2347,4 +2347,29 @@ TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_no_snippet_support_use
     CHECK_EQ(item.insertText->find("${"), std::string::npos);
 }
 
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_no_param_tabstops")
+{
+    enableSnippetSupport(client->capabilities);
+    client->globalConfig.completion.anonymousAutofilledFunction.addTabstopForParameters = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: (x: number, y: string) -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::Snippet);
+    CHECK_EQ(*item.insertText, "function(x: number, y: string)\n\t$0\nend");
+}
+
 TEST_SUITE_END();

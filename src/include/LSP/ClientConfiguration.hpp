@@ -169,8 +169,10 @@ struct ClientCompletionAnonymousAutofillConfiguration
     bool enabled = true;
     /// Whether to include type annotations in the generated function snippet
     bool addTypeAnnotations = true;
+    /// Whether to add snippet tabstops on each parameter name for quick editing
+    bool addTabstopForParameters = true;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionAnonymousAutofillConfiguration, enabled, addTypeAnnotations);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionAnonymousAutofillConfiguration, enabled, addTypeAnnotations, addTabstopForParameters);
 
 struct ClientCompletionConfiguration
 {

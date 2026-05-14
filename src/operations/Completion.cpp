@@ -433,7 +433,7 @@ static std::optional<std::string> tryGetTypePackAnnotation(const Luau::ScopePtr&
 }
 
 static std::string buildGeneratedFunctionSnippet(
-    const Luau::FunctionType* ftv, const Luau::ScopePtr& scope, bool addTypeAnnotations)
+    const Luau::FunctionType* ftv, const Luau::ScopePtr& scope, bool addTypeAnnotations, bool addTabstopForParameters)
 {
     std::string snippet = "function(";
 
@@ -455,7 +455,10 @@ static std::string buildGeneratedFunctionSnippet(
         else
             name = "a" + std::to_string(argIdx);
 
-        snippet += "${" + std::to_string(snippetIndex++) + ":" + name + "}";
+        if (addTabstopForParameters)
+            snippet += "${" + std::to_string(snippetIndex++) + ":" + name + "}";
+        else
+            snippet += name;
 
         if (addTypeAnnotations)
             if (auto typeStr = tryGetTypeAnnotation(scope, args[argIdx]))
@@ -788,8 +791,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
                     Luau::ScopePtr scope;
                     if (localModule)
                         scope = Luau::findScopeAtPosition(*localModule, position);
-                    item.insertText =
-                        buildGeneratedFunctionSnippet(ftv, scope, config.completion.anonymousAutofilledFunction.addTypeAnnotations);
+                    item.insertText = buildGeneratedFunctionSnippet(ftv, scope,
+                        config.completion.anonymousAutofilledFunction.addTypeAnnotations,
+                        config.completion.anonymousAutofilledFunction.addTabstopForParameters);
                     item.insertTextFormat = lsp::InsertTextFormat::Snippet;
                 }
                 else

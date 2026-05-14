@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Type annotations are included in the snippet by default, matching the types inferred from context
   - New `luau-lsp.completion.anonymousAutofilledFunction.enabled` setting replaces the deprecated `luau-lsp.completion.showAnonymousAutofilledFunction`
   - New `luau-lsp.completion.anonymousAutofilledFunction.addTypeAnnotations` setting controls whether type annotations are included in the snippet (default: `true`)
+  - New `luau-lsp.completion.anonymousAutofilledFunction.addTabstopForParameters` setting controls whether snippet tabstops are placed on parameter names (default: `true`)
 
 ### Fixed
 

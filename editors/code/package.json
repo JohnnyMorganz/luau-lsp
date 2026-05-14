@@ -561,6 +561,12 @@
           "default": true,
           "scope": "resource"
         },
+        "luau-lsp.completion.anonymousAutofilledFunction.addTabstopForParameters": {
+          "markdownDescription": "Whether to add snippet tabstops on each parameter name in the generated anonymous function snippet, allowing quick navigation and editing",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
         "luau-lsp.completion.showDeprecatedItems": {
           "markdownDescription": "Whether to show deprecated items in autocomplete suggestions",
           "type": "boolean",
