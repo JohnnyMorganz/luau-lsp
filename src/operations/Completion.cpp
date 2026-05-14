@@ -375,6 +375,140 @@ static bool isIdentifier(std::string_view s)
     return Luau::isIdentifier(s) && !isKeyword(s);
 }
 
+static bool canSuggestType(Luau::TypeId ty)
+{
+    ty = Luau::follow(ty);
+    if (Luau::get<Luau::AnyType>(ty) || Luau::get<Luau::ErrorType>(ty) || Luau::get<Luau::GenericType>(ty) || Luau::get<Luau::FreeType>(ty))
+        return false;
+    if (Luau::get<Luau::MetatableType>(ty))
+        return false;
+    if (const Luau::TableType* ttv = Luau::get<Luau::TableType>(ty))
+    {
+        if (ttv->name)
+            return true;
+        if (ttv->syntheticName)
+            return false;
+    }
+    return true;
+}
+
+static bool canSuggestTypePack(Luau::TypePackId tp)
+{
+    tp = Luau::follow(tp);
+    if (Luau::get<Luau::ErrorTypePack>(tp) || Luau::get<Luau::GenericTypePack>(tp) || Luau::get<Luau::FreeTypePack>(tp))
+        return false;
+    auto [head, tail] = Luau::flatten(tp);
+    for (Luau::TypeId headTy : head)
+        if (!canSuggestType(headTy))
+            return false;
+    return true;
+}
+
+static std::optional<std::string> tryGetTypeAnnotation(const Luau::ScopePtr& scope, Luau::TypeId ty)
+{
+    if (!canSuggestType(ty))
+        return std::nullopt;
+    Luau::ToStringOptions opts;
+    opts.useLineBreaks = false;
+    opts.hideTableKind = true;
+    opts.functionTypeArguments = true;
+    opts.scope = scope;
+    auto result = Luau::toStringDetailed(ty, opts);
+    if (result.error || result.invalid || result.cycle || result.truncated)
+        return std::nullopt;
+    return result.name;
+}
+
+static std::optional<std::string> tryGetTypePackAnnotation(const Luau::ScopePtr& scope, Luau::TypePackId tp)
+{
+    if (!canSuggestTypePack(tp))
+        return std::nullopt;
+    Luau::ToStringOptions opts;
+    opts.useLineBreaks = false;
+    opts.hideTableKind = true;
+    opts.functionTypeArguments = true;
+    opts.scope = scope;
+    auto result = Luau::toStringDetailed(tp, opts);
+    if (result.error || result.invalid || result.cycle || result.truncated)
+        return std::nullopt;
+    return result.name;
+}
+
+static std::string buildGeneratedFunctionSnippet(
+    const Luau::FunctionType* ftv, const Luau::ScopePtr& scope, bool addTypeAnnotations)
+{
+    std::string snippet = "function(";
+
+    auto [args, tail] = Luau::flatten(ftv->argTypes);
+
+    bool first = true;
+    size_t snippetIndex = 1;
+
+    for (size_t argIdx = 0; argIdx < args.size(); ++argIdx)
+    {
+        if (!first)
+            snippet += ", ";
+        else
+            first = false;
+
+        std::string name;
+        if (argIdx < ftv->argNames.size() && ftv->argNames[argIdx])
+            name = ftv->argNames[argIdx]->name;
+        else
+            name = "a" + std::to_string(argIdx);
+
+        snippet += "${" + std::to_string(snippetIndex++) + ":" + name + "}";
+
+        if (addTypeAnnotations)
+            if (auto typeStr = tryGetTypeAnnotation(scope, args[argIdx]))
+                snippet += ": " + *typeStr;
+    }
+
+    if (tail && (Luau::isVariadic(*tail) || Luau::get<Luau::FreeTypePack>(Luau::follow(*tail))))
+    {
+        if (!first)
+            snippet += ", ";
+
+        if (addTypeAnnotations)
+        {
+            if (const Luau::VariadicTypePack* pack = Luau::get<Luau::VariadicTypePack>(Luau::follow(*tail)))
+            {
+                if (auto typeStr = tryGetTypeAnnotation(scope, pack->ty))
+                    snippet += "...: " + *typeStr;
+                else
+                    snippet += "...";
+            }
+            else
+                snippet += "...";
+        }
+        else
+            snippet += "...";
+    }
+
+    snippet += ")";
+
+    if (addTypeAnnotations)
+    {
+        auto [rets, retTail] = Luau::flatten(ftv->retTypes);
+        if (const size_t totalRetSize = rets.size() + (retTail ? 1 : 0); totalRetSize > 0)
+        {
+            if (auto returnTypes = tryGetTypePackAnnotation(scope, ftv->retTypes))
+            {
+                snippet += ": ";
+                bool wrap = totalRetSize != 1;
+                if (wrap)
+                    snippet += "(";
+                snippet += *returnTypes;
+                if (wrap)
+                    snippet += ")";
+            }
+        }
+    }
+
+    snippet += "\n\t$0\nend";
+    return snippet;
+}
+
 static std::pair<std::string, std::string> computeLabelDetailsForFunction(const Luau::AutocompleteEntry& entry, const Luau::FunctionType* ftv)
 {
     std::string detail = "(";
@@ -627,7 +761,8 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         if (!config.completion.showKeywords && entry.kind == Luau::AutocompleteEntryKind::Keyword)
             continue;
 
-        if (!config.completion.showAnonymousAutofilledFunction && entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
+        if ((!config.completion.anonymousAutofilledFunction.enabled || !config.completion.showAnonymousAutofilledFunction) &&
+            entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
             continue;
 
         lsp::CompletionItem item;
@@ -655,7 +790,24 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
         item.sortText = sortText(frontend, item.label, item, entry, tags, *platform);
 
         if (entry.kind == Luau::AutocompleteEntryKind::GeneratedFunction)
-            item.insertText = entry.insertText;
+        {
+            if (canUseSnippets(client->capabilities) && entry.type)
+            {
+                if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*entry.type)))
+                {
+                    Luau::ScopePtr scope;
+                    if (localModule)
+                        scope = Luau::findScopeAtPosition(*localModule, position);
+                    item.insertText =
+                        buildGeneratedFunctionSnippet(ftv, scope, config.completion.anonymousAutofilledFunction.addTypeAnnotations);
+                    item.insertTextFormat = lsp::InsertTextFormat::Snippet;
+                }
+                else
+                    item.insertText = entry.insertText;
+            }
+            else
+                item.insertText = entry.insertText;
+        }
 
         if (entry.kind == Luau::AutocompleteEntryKind::RequirePath)
         {

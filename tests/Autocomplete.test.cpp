@@ -2167,4 +2167,185 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
     checkFileCompletionExists(result, "Helper.luau", "@self/Helper");
 }
 
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_new_enabled_config_hides_entry")
+{
+    client->globalConfig.completion.anonymousAutofilledFunction.enabled = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "function (anonymous autofilled)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "deprecated_show_anonymous_autofilled_function_false_hides_entry")
+{
+    client->globalConfig.completion.showAnonymousAutofilledFunction = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    CHECK_FALSE(getItem(result, "function (anonymous autofilled)"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_has_body_tabstop")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::Snippet);
+    CHECK_EQ(*item.insertText, "function()\n\t$0\nend");
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_has_param_tabstops")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: (x: number, y: string) -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::Snippet);
+    CHECK_EQ(*item.insertText, "function(${1:x}: number, ${2:y}: string)\n\t$0\nend");
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_includes_return_type")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: () -> number)
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(*item.insertText, "function(): number\n\t$0\nend");
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_uses_unnamed_param_fallback")
+{
+    enableSnippetSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: (number, string) -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(*item.insertText, "function(${1:a0}: number, ${2:a1}: string)\n\t$0\nend");
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_no_type_annotations")
+{
+    enableSnippetSupport(client->capabilities);
+    client->globalConfig.completion.anonymousAutofilledFunction.addTypeAnnotations = false;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: (x: number, y: string) -> number)
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(*item.insertText, "function(${1:x}, ${2:y})\n\t$0\nend");
+}
+
+TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_no_snippet_support_uses_plain_text")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function foo(cb: (x: number) -> ())
+        end
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto item = requireItem(result, "function (anonymous autofilled)");
+
+    REQUIRE(item.insertText);
+    CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::PlainText);
+    // Falls back to Luau's plain text (no snippet syntax)
+    CHECK_FALSE(item.insertText->find("${") != std::string::npos);
+}
+
 TEST_SUITE_END();

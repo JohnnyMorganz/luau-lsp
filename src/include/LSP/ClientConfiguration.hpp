@@ -163,6 +163,13 @@ struct ClientCompletionImportsConfiguration
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
     suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs, useConst);
 
+struct ClientCompletionAnonymousAutofillConfiguration
+{
+    bool enabled = true;
+    bool addTypeAnnotations = true;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionAnonymousAutofillConfiguration, enabled, addTypeAnnotations);
+
 struct ClientCompletionConfiguration
 {
     bool enabled = true;
@@ -184,15 +191,36 @@ struct ClientCompletionConfiguration
     /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
     bool showKeywords = true;
     /// Whether to show the "function (anonymous autofilled)" generated function entry
+    /// DEPRECATED: USE `completion.anonymousAutofilledFunction.enabled` INSTEAD
     bool showAnonymousAutofilledFunction = true;
+    /// Configuration for the anonymous autofilled function completion entry
+    ClientCompletionAnonymousAutofillConfiguration anonymousAutofilledFunction{};
     /// Whether to show deprecated items in autocomplete suggestions
     bool showDeprecatedItems = true;
     /// Enables the fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = true;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete);
+inline void to_json(nlohmann::json& nlohmann_json_j, const ClientCompletionConfiguration& nlohmann_json_t)
+{
+    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
+        addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction,
+        anonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete))
+}
+
+inline void from_json(const nlohmann::json& nlohmann_json_j, ClientCompletionConfiguration& nlohmann_json_t)
+{
+    ClientCompletionConfiguration nlohmann_json_default_obj;
+    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_FROM_WITH_DEFAULT, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
+        addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, anonymousAutofilledFunction, showDeprecatedItems,
+        enableFragmentAutocomplete))
+    // Backward compatibility: deprecated showAnonymousAutofilledFunction propagates to the new sub-config
+    // only if the new sub-config key was not explicitly set
+    if (nlohmann_json_j.contains("showAnonymousAutofilledFunction") && !nlohmann_json_j.contains("anonymousAutofilledFunction"))
+        nlohmann_json_t.anonymousAutofilledFunction.enabled = nlohmann_json_j["showAnonymousAutofilledFunction"].get<bool>();
+    // Keep the deprecated field in sync so existing code reading it still works
+    nlohmann_json_t.showAnonymousAutofilledFunction = nlohmann_json_t.anonymousAutofilledFunction.enabled;
+}
 
 struct ClientSignatureHelpConfiguration
 {
