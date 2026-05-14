@@ -545,6 +545,26 @@
           "markdownDescription": "Whether to show the auto-generated anonymous function completion item when autocompleting callback arguments",
           "type": "boolean",
           "default": true,
+          "scope": "resource",
+          "markdownDeprecationMessage": "**Deprecated**: Please use `#luau-lsp.completion.anonymousAutofilledFunction.enabled#` instead.",
+          "deprecationMessage": "Deprecated: Please use luau-lsp.completion.anonymousAutofilledFunction.enabled instead."
+        },
+        "luau-lsp.completion.anonymousAutofilledFunction.enabled": {
+          "markdownDescription": "Whether to show the auto-generated anonymous function completion item when autocompleting callback arguments",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.anonymousAutofilledFunction.addTypeAnnotations": {
+          "markdownDescription": "Whether to include type annotations in the generated anonymous function snippet",
+          "type": "boolean",
+          "default": true,
+          "scope": "resource"
+        },
+        "luau-lsp.completion.anonymousAutofilledFunction.addTabstopForParameters": {
+          "markdownDescription": "Whether to add snippet tabstops on each parameter name in the generated anonymous function snippet, allowing quick navigation and editing",
+          "type": "boolean",
+          "default": true,
           "scope": "resource"
         },
         "luau-lsp.completion.showDeprecatedItems": {

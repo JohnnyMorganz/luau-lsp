@@ -163,6 +163,17 @@ struct ClientCompletionImportsConfiguration
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionImportsConfiguration, enabled, suggestServices, includedServices, excludedServices,
     suggestRequires, requireStyle, stringRequires, separateGroupsWithLine, ignoreGlobs, useConst);
 
+struct ClientCompletionAnonymousAutofillConfiguration
+{
+    /// Whether to show the "function (anonymous autofilled)" generated function completion entry
+    bool enabled = true;
+    /// Whether to include type annotations in the generated function snippet
+    bool addTypeAnnotations = true;
+    /// Whether to add snippet tabstops on each parameter name for quick editing
+    bool addTabstopForParameters = true;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionAnonymousAutofillConfiguration, enabled, addTypeAnnotations, addTabstopForParameters);
+
 struct ClientCompletionConfiguration
 {
     bool enabled = true;
@@ -184,15 +195,18 @@ struct ClientCompletionConfiguration
     /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
     bool showKeywords = true;
     /// Whether to show the "function (anonymous autofilled)" generated function entry
+    /// DEPRECATED: USE `completion.anonymousAutofilledFunction.enabled` INSTEAD
     bool showAnonymousAutofilledFunction = true;
+    /// Configuration for the anonymous autofilled function completion entry
+    ClientCompletionAnonymousAutofillConfiguration anonymousAutofilledFunction{};
     /// Whether to show deprecated items in autocomplete suggestions
     bool showDeprecatedItems = true;
     /// Enables the fragment autocomplete system for performance improvements
     bool enableFragmentAutocomplete = true;
 };
-
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, anonymousAutofilledFunction,
+    showDeprecatedItems, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {
