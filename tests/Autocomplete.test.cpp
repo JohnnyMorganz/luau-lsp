@@ -1697,6 +1697,164 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_do_in_numeric_for_loop_missing_step")
     CHECK_EQ(edits[1].newText, "        end\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_double_quoted_string_in_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("if \"\n|\"\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_single_quoted_string_in_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("if '\n|'\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_string_in_while_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("while \"\n|\"\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_backtick_string_in_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("if `\n|`\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_string_in_for_in_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("for i in \"\n|\"\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_inside_string_in_complex_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("if x == \"\n|\"\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "no_autocomplete_end_when_cursor_after_unclosed_string_in_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker("if \"\n|\n");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto queueSizeBefore = client->requestQueue.size();
+    workspace.completion(params, nullptr);
+    REQUIRE_EQ(client->requestQueue.size(), queueSizeBefore);
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_then_when_cursor_after_string_in_if_condition")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        if ""
+        |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params, nullptr);
+    auto edits = requireEndAutocompletionEdits(client.get(), uri);
+    REQUIRE_EQ(edits.size(), 2);
+    CHECK_EQ(edits[0].newText, " then");
+    CHECK_EQ(edits[1].range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(edits[1].newText, "        end\n");
+}
+
 TEST_CASE_FIXTURE(Fixture, "dont_mark_type_as_function_kind_when_autocompleting_in_type_context")
 {
     auto [source, marker] = sourceWithMarker(R"(

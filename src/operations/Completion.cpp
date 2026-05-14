@@ -15,6 +15,43 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+// Distinguishes a real broken expression (e.g. an unterminated `BrokenString` lexeme spans
+// the offending content) from a synthesized "missing expression" error (zero-width location
+// at a token boundary, produced when the parser expected an expression but found nothing).
+static bool isBrokenExpr(Luau::AstExpr* expr)
+{
+    if (!expr)
+        return false;
+    auto* err = expr->as<Luau::AstExprError>();
+    return err && err->location.begin != err->location.end;
+}
+
+// Auto-inserting then/do when the control expression is broken would land the keyword inside
+// what the user intended to be a string literal.
+static bool shouldSuppressKeywordInsertion(Luau::AstNode* parent, bool cursorInError)
+{
+    if (auto* statIf = parent->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
+        return cursorInError || isBrokenExpr(statIf->condition);
+    if (auto* statWhile = parent->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
+        return cursorInError || isBrokenExpr(statWhile->condition);
+    if (auto* statForIn = parent->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
+    {
+        if (cursorInError)
+            return true;
+        for (auto* v : statForIn->values)
+            if (isBrokenExpr(v))
+                return true;
+        return false;
+    }
+    if (auto* statFor = parent->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+    {
+        if (cursorInError)
+            return true;
+        return isBrokenExpr(statFor->from) || isBrokenExpr(statFor->to) || (statFor->step && isBrokenExpr(statFor->step));
+    }
+    return false;
+}
+
 static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
 {
     if (ancestry.size() < 2)
@@ -46,6 +83,12 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (ancestry.size() < 2)
         return;
 
+    // When Enter is pressed inside a string literal (e.g. `if "|"`), the string becomes
+    // broken: the remaining quote lands on the cursor's line as an error statement in the AST.
+    // Capture this *before* stripping error nodes from the ancestry.
+    bool cursorIsInErrorNode = (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()) &&
+        ancestry.back()->location.begin.line == position.line;
+
     // Remove error nodes from end of ancestry chain
     while (ancestry.size() > 0 && (ancestry.back()->is<Luau::AstStatError>() || ancestry.back()->is<Luau::AstExprError>()))
         ancestry.pop_back();
@@ -68,6 +111,11 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (!currentNode->is<Luau::AstStatBlock>())
         return;
     if (params.position.line - currentNode->location.begin.line > 1)
+        return;
+
+    auto parentNode = getParentNode(ancestry);
+
+    if (parentNode && shouldSuppressKeywordInsertion(parentNode, cursorIsInErrorNode))
         return;
 
     auto unclosedBlock = false;
@@ -106,7 +154,6 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
 
-    auto parentNode = getParentNode(ancestry);
     if (parentNode)
     {
         if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && statIf->condition && !statIf->thenLocation)
