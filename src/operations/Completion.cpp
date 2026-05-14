@@ -26,9 +26,7 @@ static bool isBrokenExpr(Luau::AstExpr* expr)
     return err && err->location.begin != err->location.end;
 }
 
-// True when `parent` is an if/while/for/for-in missing its opening keyword (then/do) AND
-// the cursor is in an error node OR the control expression itself is a real broken expression.
-// In those cases we mustn't auto-insert then/do, because the insertion point would land inside
+// Auto-inserting then/do when the control expression is broken would land the keyword inside
 // what the user intended to be a string literal.
 static bool shouldSuppressKeywordInsertion(Luau::AstNode* parent, bool cursorInError)
 {
