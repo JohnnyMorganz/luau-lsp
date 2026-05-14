@@ -2344,8 +2344,7 @@ TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_no_snippet_support_use
 
     REQUIRE(item.insertText);
     CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::PlainText);
-    // Falls back to Luau's plain text (no snippet syntax)
-    CHECK_FALSE(item.insertText->find("${") != std::string::npos);
+    CHECK_EQ(item.insertText->find("${"), std::string::npos);
 }
 
 TEST_SUITE_END();

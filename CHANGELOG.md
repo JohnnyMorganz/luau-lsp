@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Improved anonymous autofilled function completions ([#688](https://github.com/JohnnyMorganz/luau-lsp/issues/688)):
+  - The generated snippet now places the cursor (`$0`) inside the function body and adds snippet tabstops on each parameter name for quick editing
+  - Type annotations are included in the snippet by default, matching the types inferred from context
+  - New `luau-lsp.completion.anonymousAutofilledFunction.enabled` setting replaces the deprecated `luau-lsp.completion.showAnonymousAutofilledFunction`
+  - New `luau-lsp.completion.anonymousAutofilledFunction.addTypeAnnotations` setting controls whether type annotations are included in the snippet (default: `true`)
+
 ### Fixed
 
 - Fixed incorrect description for `require()` when platform is set to "standard." ([#1479](<https://github.com/JohnnyMorganz/luau-lsp/issues/1479>))

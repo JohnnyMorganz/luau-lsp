@@ -404,10 +404,9 @@ static bool canSuggestTypePack(Luau::TypePackId tp)
     return true;
 }
 
-static std::optional<std::string> tryGetTypeAnnotation(const Luau::ScopePtr& scope, Luau::TypeId ty)
+template <typename T>
+static std::optional<std::string> tryGetAnnotation(const Luau::ScopePtr& scope, T ty)
 {
-    if (!canSuggestType(ty))
-        return std::nullopt;
     Luau::ToStringOptions opts;
     opts.useLineBreaks = false;
     opts.hideTableKind = true;
@@ -419,19 +418,18 @@ static std::optional<std::string> tryGetTypeAnnotation(const Luau::ScopePtr& sco
     return result.name;
 }
 
+static std::optional<std::string> tryGetTypeAnnotation(const Luau::ScopePtr& scope, Luau::TypeId ty)
+{
+    if (!canSuggestType(ty))
+        return std::nullopt;
+    return tryGetAnnotation(scope, ty);
+}
+
 static std::optional<std::string> tryGetTypePackAnnotation(const Luau::ScopePtr& scope, Luau::TypePackId tp)
 {
     if (!canSuggestTypePack(tp))
         return std::nullopt;
-    Luau::ToStringOptions opts;
-    opts.useLineBreaks = false;
-    opts.hideTableKind = true;
-    opts.functionTypeArguments = true;
-    opts.scope = scope;
-    auto result = Luau::toStringDetailed(tp, opts);
-    if (result.error || result.invalid || result.cycle || result.truncated)
-        return std::nullopt;
-    return result.name;
+    return tryGetAnnotation(scope, tp);
 }
 
 static std::string buildGeneratedFunctionSnippet(
@@ -469,20 +467,12 @@ static std::string buildGeneratedFunctionSnippet(
         if (!first)
             snippet += ", ";
 
+        std::optional<std::string> varArgType;
         if (addTypeAnnotations)
-        {
-            if (const Luau::VariadicTypePack* pack = Luau::get<Luau::VariadicTypePack>(Luau::follow(*tail)))
-            {
-                if (auto typeStr = tryGetTypeAnnotation(scope, pack->ty))
-                    snippet += "...: " + *typeStr;
-                else
-                    snippet += "...";
-            }
-            else
-                snippet += "...";
-        }
-        else
-            snippet += "...";
+            if (const auto* pack = Luau::get<Luau::VariadicTypePack>(Luau::follow(*tail)))
+                varArgType = tryGetTypeAnnotation(scope, pack->ty);
+
+        snippet += varArgType ? "...: " + *varArgType : "...";
     }
 
     snippet += ")";
