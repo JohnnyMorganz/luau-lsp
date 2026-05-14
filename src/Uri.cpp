@@ -634,6 +634,11 @@ Uri Uri::resolvePath(std::string_view otherPath) const
 
     resolvedPath = Luau::FileUtils::normalizePath(resolvedPath);
 
+#ifdef _WIN32
+    if (resolvedPath.length() >= 2 && resolvedPath[1] == ':' && isupper(resolvedPath[0]))
+        resolvedPath = std::string(1, tolower(resolvedPath[0])) + resolvedPath.substr(1);
+#endif
+
     if (slashAdded)
         resolvedPath = resolvedPath.substr(1);
 

@@ -472,7 +472,7 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
-void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
+void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, ScriptContext parentNameContext)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
     node->virtualPath = base;
@@ -483,10 +483,25 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base)
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
     }
 
+    if (node->className == "Script")
+        node->scriptContext = ScriptContext::Server;
+    else if (node->className == "LocalScript")
+        node->scriptContext = ScriptContext::Client;
+    else
+        node->scriptContext = parentNameContext;
+
+    ScriptContext childNameContext;
+    if (node->name == "ServerScriptService" || node->name == "ServerStorage")
+        childNameContext = ScriptContext::Server;
+    else if (node->name == "StarterPlayer" || node->name == "StarterGui" || node->name == "StarterPack" || node->name == "ReplicatedFirst")
+        childNameContext = ScriptContext::Client;
+    else
+        childNameContext = parentNameContext;
+
     for (auto& child : node->children)
     {
         child->parent = node;
-        writePathsToMap(child, base + "/" + child->name);
+        writePathsToMap(child, base + "/" + child->name, childNameContext);
     }
 }
 

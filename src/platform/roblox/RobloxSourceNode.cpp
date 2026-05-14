@@ -113,6 +113,14 @@ std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& anc
     return std::nullopt;
 }
 
+bool SourceNode::isAncestorOf(const SourceNode* other) const
+{
+    for (auto n = other->parent; n; n = n->parent)
+        if (n == this)
+            return true;
+    return false;
+}
+
 const SourceNode* SourceNode::walkPath(const std::string& path) const
 {
     const SourceNode* base = this;

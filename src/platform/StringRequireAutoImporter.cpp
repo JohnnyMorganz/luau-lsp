@@ -146,7 +146,7 @@ std::vector<StringRequireResult> computeAllStringRequires(const StringRequireAut
             name,
             moduleName,
             require,
-            createRequireTextEdit(name, '"' + require + '"', lineNumber, prependNewline),
+            createRequireTextEdit(name, '"' + require + '"', lineNumber, prependNewline, ctx.config->useConst),
             sortText,
         });
     };

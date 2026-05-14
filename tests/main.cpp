@@ -10,6 +10,12 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+static int luauAssertHandler(const char* expr, const char* file, int line, const char*)
+{
+    ADD_FAIL_AT(file, line, "Assertion failed: ", std::string(expr));
+    return 1; // preserve LUAU_DEBUGBREAK so debuggers/ASAN can still catch the trap
+}
+
 static bool skipFastFlag(const char* flagName)
 {
     if (strncmp(flagName, "Test", 4) == 0)
@@ -103,6 +109,8 @@ static void setFastFlags(const std::vector<doctest::String>& flags)
 
 int main(int argc, const char** argv)
 {
+    Luau::assertHandler() = luauAssertHandler;
+
     doctest::Context context;
     context.applyCommandLine(argc, argv);
 

@@ -2,8 +2,6 @@
 #include "Fixture.h"
 #include "Platform/RobloxPlatform.hpp"
 
-LUAU_FASTFLAG(LuauTypeCheckerUdtfRenameClassToExtern)
-
 TEST_SUITE_BEGIN("SelectorParser");
 
 TEST_CASE("parse_selector_simple_class")
@@ -328,10 +326,7 @@ TEST_CASE_FIXTURE(Fixture, "get_property_changed_signal_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
-    else
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "enum_is_a")
@@ -387,10 +382,7 @@ TEST_CASE_FIXTURE(Fixture, "is_property_modified_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
-    else
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "reset_property_to_default")
@@ -411,10 +403,7 @@ TEST_CASE_FIXTURE(Fixture, "reset_property_to_default_unknown_property")
     )");
 
     LUAU_LSP_REQUIRE_ERROR_COUNT(1, result);
-    if (FFlag::LuauTypeCheckerUdtfRenameClassToExtern)
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
-    else
-        CHECK(toString(result.errors[0]) == "Key 'unknown' not found in class 'Part'");
+    CHECK(toString(result.errors[0]) == "Key 'unknown' not found in external type 'Part'");
 }
 
 TEST_CASE_FIXTURE(Fixture, "query_descendants_no_class")

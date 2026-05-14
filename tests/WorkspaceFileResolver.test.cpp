@@ -197,6 +197,27 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_absolute_paths")
     CHECK_EQ(resolveAlias("@test/foo", workspace.fileResolver.defaultConfig, {}), Uri::file(basePath).resolvePath("foo"));
 }
 
+#ifdef _WIN32
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_normalizes_drive_letter_case_on_windows")
+{
+    // Alias values with uppercase drive letters must resolve to the same module name as
+    // files opened directly (which always have lowercase drive letters via Uri::file()).
+    // Mismatch causes the type checker to treat the same file as two distinct modules.
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "test": "C:/Users/test/folder"
+        }
+    }
+    )");
+
+    auto resolved = resolveAlias("@test/module", workspace.fileResolver.defaultConfig, {});
+    REQUIRE(resolved.has_value());
+    // fsPath() must match Uri::file() which lowercases the drive letter
+    CHECK_EQ(resolved->fsPath(), Uri::file("C:/Users/test/folder/module").fsPath());
+}
+#endif
+
 TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_tilde_expansion")
 {
     loadLuaurc(R"(
@@ -221,6 +242,105 @@ TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_self_alias")
 
     CHECK_EQ(resolveAlias("@self", workspace.fileResolver.defaultConfig, basePath), basePath);
     CHECK_EQ(resolveAlias("@self/foo", workspace.fileResolver.defaultConfig, basePath), basePath.resolvePath("foo"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_supports_chained_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "std": "lute/std/libs",
+            "lint": "@std/commands/lint/types",
+            "transform": "@std/commands/transform/types"
+        }
+    }
+    )");
+
+    auto stdBase = workspace.fileResolver.rootUri.resolvePath("lute/std/libs");
+
+    CHECK_EQ(resolveAlias("@lint", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types"));
+    CHECK_EQ(resolveAlias("@lint/foo", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/lint/types/foo"));
+    CHECK_EQ(resolveAlias("@transform", workspace.fileResolver.defaultConfig, {}), stdBase.resolvePath("commands/transform/types"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_resolves_chained_alias_with_intermediate_path")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b/sub",
+            "b": "libs"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("libs/sub"));
+    CHECK_EQ(resolveAlias("@a/file", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("libs/sub/file"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_resolves_longer_alias_chain")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "deep"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("deep"));
+    CHECK_EQ(resolveAlias("@a/file", workspace.fileResolver.defaultConfig, {}), workspace.fileResolver.rootUri.resolvePath("deep/file"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_returns_nullopt_on_cyclic_aliases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "@a"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "resolve_alias_returns_nullopt_on_longer_alias_cycle")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "a": "@b",
+            "b": "@c",
+            "c": "@a"
+        }
+    }
+    )");
+
+    CHECK_EQ(resolveAlias("@a", workspace.fileResolver.defaultConfig, {}), std::nullopt);
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_resolves_chained_alias_end_to_end")
+{
+    auto mainPath = tempDir.touch_child("main.luau");
+    tempDir.touch_child("packages/utils/init.luau");
+    tempDir.write_child(".luaurc", R"({
+        "aliases": {
+            "utils": "@libs/utils",
+            "libs": "./packages"
+        }
+    })");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.platform->resolveStringRequire(&baseContext, "@utils", workspace.limits);
+
+    REQUIRE(result.has_value());
+    auto packagesUri = workspace.fileResolver.rootUri.resolvePath("packages");
+    CHECK(packagesUri.isAncestorOf(Uri::file(result->name)));
 }
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_tilde_alias_end_to_end")
