@@ -15,6 +15,45 @@
 
 LUAU_FASTFLAG(LuauSolverV2)
 
+// Distinguishes a real broken expression (e.g. an unterminated `BrokenString` lexeme spans
+// the offending content) from a synthesized "missing expression" error (zero-width location
+// at a token boundary, produced when the parser expected an expression but found nothing).
+static bool isBrokenExpr(Luau::AstExpr* expr)
+{
+    if (!expr)
+        return false;
+    auto* err = expr->as<Luau::AstExprError>();
+    return err && err->location.begin != err->location.end;
+}
+
+// True when `parent` is an if/while/for/for-in missing its opening keyword (then/do) AND
+// the cursor is in an error node OR the control expression itself is a real broken expression.
+// In those cases we mustn't auto-insert then/do, because the insertion point would land inside
+// what the user intended to be a string literal.
+static bool shouldSuppressKeywordInsertion(Luau::AstNode* parent, bool cursorInError)
+{
+    if (auto* statIf = parent->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
+        return cursorInError || isBrokenExpr(statIf->condition);
+    if (auto* statWhile = parent->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
+        return cursorInError || isBrokenExpr(statWhile->condition);
+    if (auto* statForIn = parent->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
+    {
+        if (cursorInError)
+            return true;
+        for (auto* v : statForIn->values)
+            if (isBrokenExpr(v))
+                return true;
+        return false;
+    }
+    if (auto* statFor = parent->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
+    {
+        if (cursorInError)
+            return true;
+        return isBrokenExpr(statFor->from) || isBrokenExpr(statFor->to) || (statFor->step && isBrokenExpr(statFor->step));
+    }
+    return false;
+}
+
 static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
 {
     if (ancestry.size() < 2)
@@ -78,20 +117,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 
     auto parentNode = getParentNode(ancestry);
 
-    // If the cursor landed inside an error node, the parent statement is likely missing its
-    // opening keyword (then/do) because the condition contained a broken string literal.
-    // Autocompleting in this situation would insert keywords inside the string.
-    if (cursorIsInErrorNode && parentNode)
-    {
-        if (auto* statIf = parentNode->as<Luau::AstStatIf>(); statIf && !statIf->thenLocation)
-            return;
-        if (auto* statWhile = parentNode->as<Luau::AstStatWhile>(); statWhile && !statWhile->hasDo)
-            return;
-        if (auto* statForIn = parentNode->as<Luau::AstStatForIn>(); statForIn && !statForIn->hasDo)
-            return;
-        if (auto* statFor = parentNode->as<Luau::AstStatFor>(); statFor && !statFor->hasDo)
-            return;
-    }
+    if (parentNode && shouldSuppressKeywordInsertion(parentNode, cursorIsInErrorNode))
+        return;
 
     auto unclosedBlock = false;
     for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
