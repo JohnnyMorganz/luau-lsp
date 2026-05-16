@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The generated snippet now places the cursor (`$0`) inside the function body and adds snippet tabstops on each parameter name for quick editing. If you do not want tabstops on parameter names, disable `luau-lsp.completion.anonymousAutofilledFunction.addTabstopForParameters` (default: `true`)
   - Type annotations in the generated snippet can be disabled via setting `luau-lsp.completion.anonymousAutofilledFunction.addTypeAnnotations` (default: `true`)
   - Deprecated setting `luau-lsp.completion.showAnonymousAutofilledFunction` in favour of `luau-lsp.completion.anonymousAutofilledFunction.enabled`
+- Sync to upstream Luau 0.721
 
 ### Fixed
 
