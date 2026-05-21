@@ -127,7 +127,15 @@ std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
         std::string aliasName = requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
         std::string aliasNameLower = toLower(aliasName);
 
-        if (luauConfig.aliases.find(aliasNameLower) || aliasNameLower == "self")
+        if (aliasNameLower == "self")
+        {
+            std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
+            if (remainder.empty())
+                return Luau::ModuleInfo{context->name};
+            return Luau::ModuleInfo{context->name + "/" + remainder};
+        }
+
+        if (luauConfig.aliases.find(aliasNameLower))
             return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
         if (aliasNameLower == "game" && rootSourceNode)
