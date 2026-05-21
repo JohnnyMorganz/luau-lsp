@@ -814,6 +814,96 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_from_module")
     CHECK_EQ(result->name, "game/Library/Helper");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_sibling_directory_of_src")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "test",
+        "className": "Script",
+        "filePaths": ["src/init.server.luau"],
+        "children": [
+            {
+                "name": "packages",
+                "className": "Folder",
+                "children": [
+                    { "name": "test", "className": "ModuleScript", "filePaths": ["packages/test.luau"] }
+                ]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("packages/test.luau");
+
+    Luau::ModuleInfo baseContext{"ProjectRoot"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/packages/test", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "ProjectRoot/packages/test");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_to_node_itself_with_no_remainder")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "test",
+        "className": "Script",
+        "filePaths": ["src/init.server.luau"],
+        "children": [
+            {
+                "name": "packages",
+                "className": "Folder",
+                "children": [
+                    { "name": "test", "className": "ModuleScript", "filePaths": ["packages/test.luau"] }
+                ]
+            }
+        ]
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{"ProjectRoot"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "ProjectRoot");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_relative_to_calling_node_not_root")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+    {
+        "name": "test",
+        "className": "Script",
+        "filePaths": ["src/init.server.luau"],
+        "children": [
+            {
+                "name": "packages",
+                "className": "Folder",
+                "children": [
+                    { "name": "test", "className": "ModuleScript", "filePaths": ["packages/test.luau"] }
+                ]
+            },
+            {
+                "name": "someChild",
+                "className": "ModuleScript",
+                "filePaths": ["src/someChild.luau"]
+            }
+        ]
+    }
+    )");
+
+    tempDir.touch_child("packages/test.luau");
+
+    Luau::ModuleInfo baseContext{"ProjectRoot/someChild"};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/packages/test", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "ProjectRoot/someChild/packages/test");
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_user_defined_game_alias_takes_precedence")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
