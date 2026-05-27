@@ -67,6 +67,7 @@ type ReplicationPV = any
 type SharedString = any
 type SystemAddress = any
 type UniqueId = any
+type User = any
 type VideoSampleArray = any
 type WebViewParams = any
 
@@ -2161,7 +2162,6 @@ end
 declare class EnumDomainType extends EnumItem end
 declare class EnumDomainType_INTERNAL extends Enum
 	EXPERIENCE: EnumDomainType
-	GROUP: EnumDomainType
 	OAUTH: EnumDomainType
 	function GetEnumItems(self): { EnumDomainType }
 	function FromName(self, Name: string): EnumDomainType?
@@ -2493,6 +2493,14 @@ declare class EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum
 	function GetEnumItems(self): { EnumFeatureRestrictionAbuseVector }
 	function FromName(self, Name: string): EnumFeatureRestrictionAbuseVector?
 	function FromValue(self, Value: number): EnumFeatureRestrictionAbuseVector?
+end
+declare class EnumFeedbackType extends EnumItem end
+declare class EnumFeedbackType_INTERNAL extends Enum
+	Feedback: EnumFeedbackType
+	PlayerSupport: EnumFeedbackType
+	function GetEnumItems(self): { EnumFeedbackType }
+	function FromName(self, Name: string): EnumFeedbackType?
+	function FromValue(self, Value: number): EnumFeedbackType?
 end
 declare class EnumFieldOfViewMode extends EnumItem end
 declare class EnumFieldOfViewMode_INTERNAL extends Enum
@@ -4088,6 +4096,7 @@ declare class EnumOutfitType_INTERNAL extends Enum
 	All: EnumOutfitType
 	Avatar: EnumOutfitType
 	DynamicHead: EnumOutfitType
+	Makeup: EnumOutfitType
 	Shoes: EnumOutfitType
 	function GetEnumItems(self): { EnumOutfitType }
 	function FromName(self, Name: string): EnumOutfitType?
@@ -7211,6 +7220,7 @@ type ENUM_LIST = {
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
 	FacsActionUnit: EnumFacsActionUnit_INTERNAL,
 	FeatureRestrictionAbuseVector: EnumFeatureRestrictionAbuseVector_INTERNAL,
+	FeedbackType: EnumFeedbackType_INTERNAL,
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
 	FilterErrorType: EnumFilterErrorType_INTERNAL,
@@ -8232,7 +8242,7 @@ type ReflectedEvent = {
 
 type ReflectedClass = {
   Name: string,
-  Serialized: boolean?,
+  Serialized: boolean,
   Superclass: string?,
   Subclasses: {string},
   Display: {
@@ -8341,6 +8351,10 @@ type LinkSharingOptions = {
   PreviewDescription: string?,
   PreviewAssetId: number?,
   LaunchData: string?
+}
+
+type PromptFeedbackOptions = {
+  FeedbackType: EnumFeedbackType?,
 }
 
 type ExperienceEvent = {
@@ -8605,40 +8619,6 @@ type VirtualInputPointerAction = {
     Wheel: number?,
     Pan: Vector2?,
     Pinch: number?,
-}
-
-type CreateAvatar2DPreviewParams = {
-    TextPrompt: string,
-    JobId: string?,
-    FileId: string?,
-}
-
-type CreateAvatar2DPreviewResults = {
-    JobId: string,
-    Image: EditableImage,
-}
-
-type CreateAvatarProgress = {
-    JobId: string,
-    Progress: number,
-    Status: string,
-}
-
-type CreateAvatarModelParams = {
-    JobIds: {string},
-    TextPrompt: string?,
-}
-
-type AccessoryResult = {
-    AccessoryType: EnumAccessoryType,
-    IsLayered: boolean,
-    Instance: Model,
-}
-
-type CreateAvatarModelResults = {
-    JobId: string,
-    Body: Model?,
-    Accessories: {AccessoryResult},
 }
 
 
@@ -9205,6 +9185,8 @@ end
 declare class AppUpdateService extends Instance
 	function CanPerformBinaryUpdate(self): boolean
 	function CheckForUpdate(self, handler: ((...any) -> ...any)?): nil
+	function GetProtocolLaunchUpdateName(self): string
+	function GetProtocolLaunchUpdateType(self): string
 	function PerformManagedUpdate(self): boolean
 end
 
@@ -9750,11 +9732,16 @@ end
 declare class AvatarAbilityRules extends Instance
 	CharacterControllerMode: EnumAvatarSettingsCharacterControllerMode
 	EnableClimbing: boolean
+	EnableCrouching: boolean
 	EnableFallingDown: boolean
 	EnableGettingUp: boolean
+	EnableHolding: boolean
 	EnableJumping: boolean
+	EnableReaching: boolean
 	EnableRunning: boolean
 	EnableSitting: boolean
+	EnableSprinting: boolean
+	EnableStrafing: boolean
 	EnableSwimming: boolean
 end
 
@@ -9906,8 +9893,6 @@ declare class AvatarCreationService extends Instance
 	UgcValidationSuccess: RBXScriptSignal<(string, string, number)>
 	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string
 	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string
-	function CreateAvatar2DPreviewAsync(self, createAvatar2DPreviewParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): { [string]: any }
-	function CreateAvatarModelAsync(self, createAvatar2DPreviewParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): { [string]: any }
 	function CreateCageMeshPartsWithScaleForExportAsync(self, model: Model): Folder
 	function DeserializeAvatarModel(self, serializedModel: string): Instance
 	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [string]: any }): string
@@ -10788,7 +10773,11 @@ declare class AngularVelocity extends Constraint
 end
 
 declare class AnimationConstraint extends Constraint
+	AngularDamping: number
+	AngularStrength: number
 	IsKinematic: boolean
+	LinearDamping: number
+	LinearStrength: number
 	MaxForce: number
 	MaxTorque: number
 	Transform: CFrame
@@ -11979,6 +11968,7 @@ declare class GroupService extends Instance
 	function GetEnemiesAsync(self, groupId: number): StandardPages
 	function GetGroupInfoAsync(self, groupId: number): any
 	function GetGroupsAsync(self, userId: number): { any }
+	function GetRolesInGroupAsync(self, userId: number, groupId: number): any
 	function PromptJoinAsync(self, groupId: number): EnumGroupMembershipStatus
 	function PromptJoinCompleted(self, groupId: number, success: boolean, groupMembershipStatus: EnumGroupMembershipStatus, errorMessage: string): nil
 end
@@ -13954,7 +13944,11 @@ end
 
 declare class MicroProfilerService extends Instance
 	ContextLabel: string
+	DataChanged: RBXScriptSignal<(number, number)>
 	function DumpToFileAsync(self, secondsToDelay: number, framesToDump: number): string
+	function GetDataInRange(self, slotId: number, offset: number, size: number, destBuffer: buffer, destBufferOffset: number): number
+	function GetDataSize(self, slotId: number): number
+	function ProcessCommand(self, cmdBuf: buffer, cmdOffset: number, cmdSize: number, respBuf: buffer, respOffset: number, respSize: number): number
 end
 
 declare class ModerationService extends Instance
@@ -14592,6 +14586,7 @@ declare class Workspace extends WorldRoot
 	Retargeting: EnumAnimatorRetargetingMode
 	StreamingEnabled: boolean
 	Terrain: Terrain
+	function ApplyRecommendedStreamingSettings(self): boolean
 	function CalculateJumpDistance(self, gravity: number, jumpPower: number, walkSpeed: number): number
 	function CalculateJumpHeight(self, gravity: number, jumpPower: number): number
 	function CalculateJumpPower(self, gravity: number, jumpHeight: number): number
@@ -14927,6 +14922,10 @@ declare class PlatformLibraries extends Instance
 end
 
 declare class Player extends Instance
+	@[deprecated {use = "GroupService:GetRolesInGroupAsync"}]
+		function GetRankInGroupAsync(self, groupId: number): number
+	@[deprecated {use = "GroupService:GetRolesInGroupAsync"}]
+		function GetRoleInGroupAsync(self, groupId: number): string
 	@[deprecated {use = "Player:GetFriendsOnlineAsync"}]
 		function GetFriendsOnline(self, maxFriends: number?): { any }
 	@[deprecated {use = "Player:GetRankInGroupAsync"}]
@@ -15060,8 +15059,6 @@ declare class Player extends Instance
 	function GetJoinData(self): { LaunchData: string?, Members: {number}?, SourceGameId: number?, SourcePlaceId: number?, TeleportData: TeleportData? }
 	function GetMouse(self): Mouse
 	function GetNetworkPing(self): number
-	function GetRankInGroupAsync(self, groupId: number): number
-	function GetRoleInGroupAsync(self, groupId: number): string
 	function GetUnder13(self): boolean
 	function HasAppearanceLoaded(self): boolean
 	function IsFriendsWithAsync(self, userId: number): boolean
@@ -16277,8 +16274,8 @@ declare class SocialService extends Instance
 	SelfViewHidden: RBXScriptSignal<()>
 	SelfViewVisible: RBXScriptSignal<EnumSelfViewPosition>
 	ShareSheetClosed: RBXScriptSignal<Player>
-	ShowPromptFeedbackSubmission: RBXScriptSignal<()>
-	ShowPromptFeedbackUnavailable: RBXScriptSignal<string>
+	ShowPromptFeedbackSubmission: RBXScriptSignal<EnumFeedbackType>
+	ShowPromptFeedbackUnavailable: RBXScriptSignal<(string, EnumFeedbackType)>
 	ShowPromptRsvpToEvent: RBXScriptSignal<string>
 	function CanSendCallInviteAsync(self, player: Instance): boolean
 	function CanSendGameInviteAsync(self, player: Player, recipientId: number?): boolean
@@ -16292,14 +16289,14 @@ declare class SocialService extends Instance
 	function InvokeIrisInvite(self, player: Instance, tag: string, irisParticipants: { any }): nil
 	function InvokeIrisInvitePromptClosed(self, player: Instance): nil
 	function InvokeShareSheetClosed(self): nil
-	function PromptFeedbackSubmissionAsync(self): nil
+	function PromptFeedbackSubmissionAsync(self, options: { [string]: any }?): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
 	function PromptLinkSharingAsync(self, player: Player, options: { [string]: any }?): ...any
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
 	function PromptRsvpToEventAsync(self, eventId: string): EnumRsvpStatus
 	function PromptRsvpToEventCompleted(self, eventId: string, success: boolean, rsvpStatus: EnumRsvpStatus, previousRsvpStatus: EnumRsvpStatus?): nil
 	function ShowSelfView(self, selfViewPosition: EnumSelfViewPosition?): nil
-	function SignalFeedbackSubmissionCompleted(self, feedback: string): nil
+	function SignalFeedbackSubmissionCompleted(self, feedback: string, options: { [string]: any }?): nil
 	function SignalFeedbackSubmissionPermissionDenied(self): nil
 	function UpdatePlayerPartyData(self, partyId: string): nil
 end
@@ -17499,6 +17496,7 @@ declare class TextChatService extends Instance
 	function SendExpChatWindowScroll(self): nil
 	function SendExpChatWindowStatusChange(self, timeClosed: number, timeOpen: number, timeBackgroundIdle: number, timeTextIdle: number): nil
 	function SendUniverseChatMessageAsync(self, text: string, metadata: string): TextChatMessage
+	function SendUniverseChatPresetAsync(self, presetId: string): TextChatMessage
 	function setModerationModeEnabled(self, userId: number, enabled: boolean): boolean
 end
 
@@ -18106,6 +18104,7 @@ declare class UserInputService extends Instance
 end
 
 declare class UserService extends Instance
+	function GetUserFromGlobalUserIdAsync(self, userId: number): User
 	function GetUserInfosByUserIdsAsync(self, userIds: { number }): { { Id: number, Username: string, DisplayName: string } }
 end
 
@@ -18377,8 +18376,6 @@ declare class VoiceChatInternal extends Instance
 	@deprecated
 		function GetParticipants(self): { any }
 	@deprecated
-		function GetSpeakerDevices(self): ...any
-	@deprecated
 		function GetVoiceChatApiVersion(self): number
 	@deprecated
 		function GetVoiceChatAvailable(self): number
@@ -18396,8 +18393,6 @@ declare class VoiceChatInternal extends Instance
 		function PublishPause(self, paused: boolean): boolean
 	@deprecated
 		function SetMicDevice(self, micDeviceName: string, micDeviceGuid: string): nil
-	@deprecated
-		function SetSpeakerDevice(self, speakerDeviceName: string, speakerDeviceGuid: string): nil
 	@deprecated
 		function SubscribePause(self, userId: number, paused: boolean): boolean
 	@deprecated
