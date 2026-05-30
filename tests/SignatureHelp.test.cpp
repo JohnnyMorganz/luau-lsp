@@ -133,4 +133,80 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_does_not_show_first_argument_on_metho
     CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{22, 28});
 }
 
+TEST_CASE_FIXTURE(Fixture, "signature_help_highlights_param_with_union_type_containing_exported_module_table_type")
+{
+    // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1507
+    // When a parameter type references an exported table type from another module in a union,
+    // the parameter label offset computation must still find the param inside the full signature label.
+    // Note: sourceWithMarker uses '|' as marker so we write the source manually to avoid conflict
+    // with the '|' union operator in the type annotation.
+    tempDir.write_child("second.luau", "export type foo = {}\nreturn nil");
+    newDocument("second.luau", "export type foo = {}\nreturn nil");
+
+    // sourceWithMarker uses '|' as its marker character, which conflicts with the '|' union operator,
+    // so position the cursor manually. After dedent the source becomes:
+    //   Line 0: "local second = require("./second")"
+    //   Line 1: ""
+    //   Line 2: "local function foo(bar: second.foo | string): ()"
+    //   Line 3: "end"
+    //   Line 4: ""
+    //   Line 5: "foo()"   ← column 4 is `)`, i.e. just inside the call
+    std::string source = dedent(R"(
+        local second = require("./second")
+
+        local function foo(bar: second.foo | string): ()
+        end
+
+        foo()
+    )");
+    lsp::Position marker{5, 4};
+
+    auto uri = newDocument("first.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+
+    // The parameter label must be resolved to offsets within the full signature string,
+    // not fall back to a plain string (which means the find failed).
+    CHECK(std::holds_alternative<std::vector<size_t>>(result->signatures[0].parameters->at(0).label));
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_highlights_param_with_intersection_type_containing_exported_module_table_type")
+{
+    // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1507
+    // Same as above but with an intersection type (&).
+    tempDir.write_child("second.luau", "export type foo = {}\nreturn nil");
+    newDocument("second.luau", "export type foo = {}\nreturn nil");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local second = require("./second")
+
+        local function foo(bar: second.foo & {baz: string}): ()
+        end
+
+        foo(|)
+    )");
+
+    auto uri = newDocument("first.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+
+    CHECK(std::holds_alternative<std::vector<size_t>>(result->signatures[0].parameters->at(0).label));
+}
+
 TEST_SUITE_END();
