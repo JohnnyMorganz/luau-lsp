@@ -147,6 +147,15 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
         size_t idx = 0;
         size_t previousParamPos = label.find('('); // start search at start of parameter list, not earlier
 
+        // Use the same ToStringOptions as toStringNamedFunction so that type names (including
+        // module-qualified ones like "second.foo") are resolved identically in both the full label
+        // and each parameter search string.
+        Luau::ToStringOptions typeStringOpts;
+        typeStringOpts.functionTypeArguments = true;
+        typeStringOpts.hideNamedFunctionTypeParameters = false;
+        typeStringOpts.hideTableKind = opts.hideTableKind;
+        typeStringOpts.scope = scope;
+
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
             // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
@@ -167,11 +176,6 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
             std::string labelString;
             if (idx < ftv->argNames.size() && ftv->argNames[idx] && ftv->argNames[idx]->name != "_")
                 labelString = ftv->argNames[idx]->name + ": ";
-            // Use the same ToStringOptions as toStringNamedFunction so that module-qualified type names
-            // (e.g. "second.foo") are resolved identically in both the full label and the search string.
-            Luau::ToStringOptions typeStringOpts;
-            typeStringOpts.hideTableKind = opts.hideTableKind;
-            typeStringOpts.scope = scope;
             labelString += Luau::toString(*it, typeStringOpts);
 
             auto position = label.find(labelString, previousParamPos);
@@ -205,14 +209,10 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 std::variant<std::string, std::vector<size_t>> paramLabel;
                 std::string labelString = "...: ";
 
-                Luau::ToStringOptions varargStringOpts;
-                varargStringOpts.hideTableKind = opts.hideTableKind;
-                varargStringOpts.scope = scope;
-
                 if (vtp)
-                    labelString += Luau::toString(vtp->ty, varargStringOpts);
+                    labelString += Luau::toString(vtp->ty, typeStringOpts);
                 else
-                    labelString += Luau::toString(*tp, varargStringOpts);
+                    labelString += Luau::toString(*tp, typeStringOpts);
 
                 auto position = label.find(labelString, previousParamPos);
                 if (position != std::string::npos)
