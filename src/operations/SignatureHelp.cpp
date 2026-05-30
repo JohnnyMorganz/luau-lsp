@@ -97,7 +97,6 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
             break;
         activeParameter++;
     }
-
     auto it = module->astTypes.find(candidate->func);
     if (!it)
         return std::nullopt;
@@ -168,7 +167,12 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
             std::string labelString;
             if (idx < ftv->argNames.size() && ftv->argNames[idx] && ftv->argNames[idx]->name != "_")
                 labelString = ftv->argNames[idx]->name + ": ";
-            labelString += Luau::toString(*it);
+            // Use the same ToStringOptions as toStringNamedFunction so that module-qualified type names
+            // (e.g. "second.foo") are resolved identically in both the full label and the search string.
+            Luau::ToStringOptions typeStringOpts;
+            typeStringOpts.hideTableKind = opts.hideTableKind;
+            typeStringOpts.scope = scope;
+            labelString += Luau::toString(*it, typeStringOpts);
 
             auto position = label.find(labelString, previousParamPos);
             if (position != std::string::npos)
@@ -201,10 +205,14 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 std::variant<std::string, std::vector<size_t>> paramLabel;
                 std::string labelString = "...: ";
 
+                Luau::ToStringOptions varargStringOpts;
+                varargStringOpts.hideTableKind = opts.hideTableKind;
+                varargStringOpts.scope = scope;
+
                 if (vtp)
-                    labelString += Luau::toString(vtp->ty);
+                    labelString += Luau::toString(vtp->ty, varargStringOpts);
                 else
-                    labelString += Luau::toString(*tp);
+                    labelString += Luau::toString(*tp, varargStringOpts);
 
                 auto position = label.find(labelString, previousParamPos);
                 if (position != std::string::npos)
