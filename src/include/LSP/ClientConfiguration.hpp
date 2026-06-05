@@ -192,6 +192,8 @@ struct ClientCompletionConfiguration
     bool fillCallArguments = true;
     /// Whether to show non-function properties when performing a method call with a colon
     bool showPropertiesOnMethodCall = false;
+    /// Whether to show methods (functions which expect `self`) when performing a field access with a dot
+    bool showMethodsOnIndex = true;
     /// Whether to show keywords (`if` / `then` / `and` / etc.) during autocomplete
     bool showKeywords = true;
     /// Whether to show the "function (anonymous autofilled)" generated function entry
@@ -205,8 +207,8 @@ struct ClientCompletionConfiguration
     bool enableFragmentAutocomplete = true;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ClientCompletionConfiguration, enabled, autocompleteEnd, suggestImports, imports, addParentheses,
-    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showKeywords, showAnonymousAutofilledFunction, anonymousAutofilledFunction,
-    showDeprecatedItems, enableFragmentAutocomplete);
+    addTabstopAfterParentheses, fillCallArguments, showPropertiesOnMethodCall, showMethodsOnIndex, showKeywords, showAnonymousAutofilledFunction,
+    anonymousAutofilledFunction, showDeprecatedItems, enableFragmentAutocomplete);
 
 struct ClientSignatureHelpConfiguration
 {
