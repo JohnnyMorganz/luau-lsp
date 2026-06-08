@@ -51,6 +51,7 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Workspace.cpp
         src/TextDocument.cpp
         src/Client.cpp
+        src/ConfigLuau.cpp
         src/DocumentationParser.cpp
         src/LuauExt.cpp
         src/LuauFileUtils.cpp

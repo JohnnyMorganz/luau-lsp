@@ -4,6 +4,129 @@
 
 TEST_SUITE_BEGIN("Diagnostics");
 
+static bool hasDiagnosticContaining(const std::vector<lsp::Diagnostic>& diagnostics, const std::string& text)
+{
+    for (const auto& diagnostic : diagnostics)
+        if (diagnostic.message.find(text) != std::string::npos)
+            return true;
+
+    return false;
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_return_type_is_checked")
+{
+    auto document = newDocument(".config.luau", R"(
+        return {
+            luau = {
+                languagemode = "invalid",
+                lint = {
+                    NotAWarning = true,
+                    LocalUnused = "no",
+                },
+                linterrors = "yes",
+                globals = {123},
+            },
+        }
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+
+    CHECK(hasDiagnosticContaining(diagnostics.items, "\"invalid\""));
+    CHECK(hasDiagnosticContaining(diagnostics.items, "NotAWarning"));
+    CHECK(hasDiagnosticContaining(diagnostics.items, "LocalUnused"));
+    CHECK(hasDiagnosticContaining(diagnostics.items, "linterrors"));
+    CHECK(hasDiagnosticContaining(diagnostics.items, "globals"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_valid_return_has_no_diagnostics")
+{
+    auto document = newDocument(".config.luau", R"(
+        return {
+            luau = {
+                languagemode = "nonstrict",
+                lint = {
+                    ["*"] = true,
+                    LocalUnused = false,
+                },
+                linterrors = true,
+                typeerrors = true,
+                globals = {"expect"},
+                aliases = {
+                    src = "./src",
+                },
+            },
+        }
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+
+    CHECK(diagnostics.items.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_checks_returns_in_top_level_control_flow")
+{
+    auto document = newDocument(".config.luau", R"(
+        local useStrict = true
+
+        if useStrict then
+            return {
+                luau = {
+                    languagemode = "invalid",
+                },
+            }
+        else
+            return {
+                luau = {
+                    languagemode = "nonstrict",
+                },
+            }
+        end
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+
+    CHECK(hasDiagnosticContaining(diagnostics.items, "\"invalid\""));
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_does_not_check_nested_function_returns_as_file_returns")
+{
+    auto document = newDocument(".config.luau", R"(
+        local function makeConfig()
+            return {
+                luau = {
+                    languagemode = "invalid",
+                },
+            }
+        end
+
+        makeConfig()
+
+        return {
+            luau = {
+                languagemode = "strict",
+            },
+        }
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+
+    CHECK(diagnostics.items.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_non_config_luau_valid_environment")
+{
+    auto document = newDocument(".config.luau", R"(
+    type Foo =
+        | LanguageMode
+        | LintWarning
+        | LuauConfig
+        | Config
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+    CHECK(!diagnostics.items.empty());
+}
+
 TEST_CASE_FIXTURE(Fixture, "document_diagnostics_sends_information_for_required_modules")
 {
     client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};

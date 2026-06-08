@@ -86,6 +86,11 @@ private:
     // Cache for plugin-transformed documents
     mutable std::unordered_map<Uri, std::unique_ptr<Luau::LanguageServer::Plugin::PluginTextDocument>, UriHash> pluginDocuments{};
 
+    // Cache for internally transformed .config.luau documents
+    mutable std::unordered_map<Uri, std::unique_ptr<Luau::LanguageServer::Plugin::PluginTextDocument>, UriHash> configLuauDocuments{};
+
+    const TextDocument* getConfigLuauTextDocument(const TextDocument& original) const;
+
 public:
     Luau::Config defaultConfig;
     Client* client;
