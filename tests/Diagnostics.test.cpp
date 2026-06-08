@@ -113,7 +113,7 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_does_not_check_nest
     CHECK(diagnostics.items.empty());
 }
 
-TEST_CASE_FIXTURE(Fixture, "document_diagnostics_non_config_luau_valid_environment")
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_non_config_valid_environment")
 {
     auto document = newDocument("not-a-config.luau", R"(
     type Foo =

@@ -39,7 +39,7 @@ const std::string& getDefinitions()
         ss << "\tlint: {\n";
         ss << "\t\t[\"*\"]: boolean?,\n";
         appendLintWarningNames(ss, "\t\t", ": boolean?,\n");
-        ss << "\t},\n";
+        ss << "\t}?,\n";
         ss << "\tlinterrors: boolean?,\n";
         ss << "\ttypeerrors: boolean?,\n";
         ss << "\tglobals: { string }?,\n";
