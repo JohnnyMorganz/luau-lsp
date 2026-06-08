@@ -115,7 +115,7 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_config_luau_does_not_check_nest
 
 TEST_CASE_FIXTURE(Fixture, "document_diagnostics_non_config_luau_valid_environment")
 {
-    auto document = newDocument(".config.luau", R"(
+    auto document = newDocument("not-a-config.luau", R"(
     type Foo =
         | LanguageMode
         | LintWarning
