@@ -798,6 +798,12 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
             !(Luau::get<Luau::FunctionType>(*entry.type) || Luau::isOverloadedFunction(*entry.type)))
             continue;
 
+        // If this entry is a method which expects `self`, and we are autocompleting after a `.`
+        // (so it would have to be called as `foo.bar(foo, ...)`), then hide it if configured to do so.
+        // In a non-self index, `wrongIndexType` is only set for entries that expect `:`.
+        if (!config.completion.showMethodsOnIndex && !entry.indexedWithSelf && entry.wrongIndexType)
+            continue;
+
         if (!config.completion.showKeywords && entry.kind == Luau::AutocompleteEntryKind::Keyword)
             continue;
 

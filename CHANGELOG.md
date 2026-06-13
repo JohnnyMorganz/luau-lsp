@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `luau-lsp.completion.showMethodsOnIndex` (default: `true`) to control whether methods (functions which expect `self`) are shown when performing a field access with a dot (e.g. `foo.bar`). Set to `false` to hide them, mirroring `luau-lsp.completion.showPropertiesOnMethodCall` for the `:` case
+
 ### Changed
 
 - Sync to upstream Luau 0.725
