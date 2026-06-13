@@ -32,15 +32,21 @@ end
 --- @param tree -- The encoded instance tree to send.
 --- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
 function ServerEndpoints.full(address: string, tree: types.EncodedInstance): types.Result<types.HttpResponse, string>
+	local encodeSuccess, body = pcall(HttpService.JSONEncode, HttpService, {
+		tree = tree,
+	})
+
+	if not encodeSuccess then
+		return { ok = false, error = "Failed to encode DataModel tree to JSON: " .. tostring(body) }
+	end
+
 	local success, result = pcall(HttpService.RequestAsync, HttpService, {
 		Method = "POST" :: "POST",
 		Url = `{address}/full`,
 		Headers = {
 			["Content-Type"] = "application/json",
 		},
-		Body = HttpService:JSONEncode({
-			tree = tree,
-		}),
+		Body = body,
 		Compress = Enum.HttpCompression.Gzip,
 	})
 
