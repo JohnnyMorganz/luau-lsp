@@ -15,7 +15,7 @@ static Luau::AstExprConstantString* findStringNodeAtPosition(const Luau::SourceM
 static std::optional<std::vector<lsp::TextEdit>> convertQuotesForString(
     const Luau::AstExprConstantString* stringNode, const TextDocument* textDocument, const Luau::Position& position)
 {
-    if (stringNode->quoteStyle != Luau::AstExprConstantString::QuotedSimple && stringNode->quoteStyle != Luau::AstExprConstantString::QuotedSingle)
+    if (stringNode->quoteStyle != Luau::AstExprConstantString::QuoteStyle::QuotedSimple && stringNode->quoteStyle != Luau::AstExprConstantString::QuoteStyle::QuotedSingle)
         return std::nullopt;
 
     auto& location = stringNode->location;
