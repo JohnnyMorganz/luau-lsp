@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Luau/Ast.h"
 #include "Luau/LuauConfig.h"
+#include "LSP/ConfigLuau.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
 
 #include "Luau/TimeTrace.h"
@@ -54,12 +55,40 @@ const TextDocument* WorkspaceFileResolver::getManagedTextDocument(const lsp::Doc
     return nullptr;
 }
 
+const TextDocument* WorkspaceFileResolver::getConfigLuauTextDocument(const TextDocument& original) const
+{
+    const Uri& uri = original.uri();
+
+    auto it = configLuauDocuments.find(uri);
+    if (it != configLuauDocuments.end() && it->second && it->second->version() == original.version())
+        return it->second.get();
+
+    auto transformed = Luau::LanguageServer::ConfigLuau::transformSourceForAnalysis(original.getText());
+    if (!transformed)
+        return &original;
+
+    auto configDoc = std::make_unique<Luau::LanguageServer::Plugin::PluginTextDocument>(
+        original.uri(),
+        original.languageId(),
+        original.version(),
+        original.getText(),
+        std::move(transformed->transformedSource),
+        Luau::LanguageServer::Plugin::SourceMapping{std::move(transformed->edits)});
+
+    configLuauDocuments[uri] = std::move(configDoc);
+    return configLuauDocuments[uri].get();
+}
+
 const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUri& uri) const
 {
     // Get the original managed document
     auto* original = getManagedTextDocument(uri);
     if (!original)
         return nullptr;
+
+    // .config.luau uses an internal wrapper so its chunk returns are checked against the config contract.
+    if (Luau::LanguageServer::ConfigLuau::isConfigLuauFile(uri))
+        return getConfigLuauTextDocument(*original);
 
     // If no plugins active, return original
     if (!pluginManager || !pluginManager->hasPlugins())
@@ -92,6 +121,7 @@ const TextDocument* WorkspaceFileResolver::getTextDocument(const lsp::DocumentUr
 void WorkspaceFileResolver::invalidatePluginDocument(const lsp::DocumentUri& uri)
 {
     pluginDocuments.erase(uri);
+    configLuauDocuments.erase(uri);
 }
 
 void WorkspaceFileResolver::clearPluginDocuments()
@@ -159,6 +189,13 @@ std::optional<Luau::SourceCode> WorkspaceFileResolver::readSource(const Luau::Mo
     // Fallback to reading from platform
     if (auto source = platform->readSourceCode(name, uri))
     {
+        // Keep disk reads consistent with managed .config.luau documents.
+        if (Luau::LanguageServer::ConfigLuau::isConfigLuauFile(uri))
+        {
+            if (auto transformed = Luau::LanguageServer::ConfigLuau::transformSourceForAnalysis(*source))
+                return Luau::SourceCode{std::move(transformed->transformedSource), sourceType};
+        }
+
         if (auto transformed = applyPluginTransformation(*source, uri, name))
             return Luau::SourceCode{std::move(transformed->transformedSource), sourceType};
         return Luau::SourceCode{*source, sourceType};
@@ -368,6 +405,9 @@ bool WorkspaceFileResolver::isPluginFile(const Luau::ModuleName& name) const
 
 std::optional<std::string> WorkspaceFileResolver::getEnvironmentForModule(const Luau::ModuleName& name) const
 {
+    if (Luau::LanguageServer::ConfigLuau::isConfigLuauFile(getUri(name)))
+        return Luau::LanguageServer::ConfigLuau::kEnvironmentName;
+
     if (isPluginFile(name))
         return "LSPPlugin";
     return std::nullopt;
