@@ -70,7 +70,6 @@ type ReplicationPV = any
 type SharedString = any
 type SystemAddress = any
 type UniqueId = any
-type User = any
 type VideoSampleArray = any
 type WebViewParams = any
 
@@ -7972,6 +7971,13 @@ declare class UDim2
 	function __unm(self): UDim2
 end
 
+declare class User
+	DomainId: number
+	DomainType: EnumDomainType
+	Id: number
+	function ToString(self): string
+end
+
 declare class Vector2
 	@deprecated
 		function lerp(self, v: Vector2, alpha: number): Vector2
@@ -9039,11 +9045,11 @@ declare class AnimationClipProvider extends Instance
 	@[deprecated {use = "AnimationClipProvider:GetAnimationClipAsync"}]
 		function GetAnimationClipById(self, assetId: number, useCache: boolean): AnimationClip
 	@[deprecated {use = "AnimationClipProvider:GetAnimationsAsync"}]
-		function GetAnimations(self, userId: User): Instance
+		function GetAnimations(self, userId: (User | number)): Instance
 	function GetAnimationClipAsync(self, assetId: ContentId): AnimationClip
 	function GetAnimationNodeDefinition(self, type: EnumAnimationNodeType): { [string]: any }
 	function GetAnimationNodeTypes(self): { any }
-	function GetAnimationsAsync(self, userId: User): Instance
+	function GetAnimationsAsync(self, userId: (User | number)): Instance
 	function GetClipEvaluatorAsync(self, assetId: ContentId): ClipEvaluator
 	function GetMemStats(self): { [string]: any }
 	function RegisterActiveAnimationClip(self, animationClip: AnimationClip): ContentId
@@ -10086,19 +10092,19 @@ end
 
 declare class BadgeService extends Instance
 	@[deprecated {use = "BadgeService:AwardBadgeAsync"}]
-		function AwardBadge(self, userId: User, badgeId: number): boolean
+		function AwardBadge(self, userId: (User | number), badgeId: number): boolean
 	@deprecated
 		function IsDisabled(self, badgeId: number): boolean
 	@deprecated
 		function IsLegal(self, badgeId: number): boolean
 	@deprecated
-		function UserHasBadge(self, userId: User, badgeId: number): boolean
+		function UserHasBadge(self, userId: (User | number), badgeId: number): boolean
 	BadgeAwarded: RBXScriptSignal<(string, number, number)>
 	OnBadgeAwarded: RBXScriptSignal<(number, number, number)>
-	function AwardBadgeAsync(self, userId: User, badgeId: number): boolean
-	function CheckUserBadgesAsync(self, userId: User, badgeIds: { any }): { any }
+	function AwardBadgeAsync(self, userId: (User | number), badgeId: number): boolean
+	function CheckUserBadgesAsync(self, userId: (User | number), badgeIds: { any }): { any }
 	function GetBadgeInfoAsync(self, badgeId: number): { [string]: any }
-	function UserHasBadgeAsync(self, userId: User, badgeId: number): boolean
+	function UserHasBadgeAsync(self, userId: (User | number), badgeId: number): boolean
 end
 
 declare class BaseCoreGuiConfiguration extends Instance
@@ -12032,8 +12038,8 @@ declare class GroupService extends Instance
 	function GetAlliesAsync(self, groupId: number): StandardPages
 	function GetEnemiesAsync(self, groupId: number): StandardPages
 	function GetGroupInfoAsync(self, groupId: number): any
-	function GetGroupsAsync(self, userId: User): { any }
-	function GetRolesInGroupAsync(self, userId: User, groupId: number): any
+	function GetGroupsAsync(self, userId: (User | number)): { any }
+	function GetRolesInGroupAsync(self, userId: (User | number), groupId: number): any
 	function PromptJoinAsync(self, groupId: number): EnumGroupMembershipStatus
 	function PromptJoinCompleted(self, groupId: number, success: boolean, groupMembershipStatus: EnumGroupMembershipStatus, errorMessage: string): nil
 end
@@ -12738,8 +12744,8 @@ declare class GuiService extends Instance
 	function GetScreenResolution(self): Vector2
 	function GetUiMessage(self): string
 	function InspectPlayerFromHumanoidDescription(self, humanoidDescription: HumanoidDescription, name: string): nil
-	function InspectPlayerFromUserId(self, userId: User): nil
-	function InspectPlayerFromUserIdWithCtx(self, userId: User, ctx: string): nil
+	function InspectPlayerFromUserId(self, userId: (User | number)): nil
+	function InspectPlayerFromUserIdWithCtx(self, userId: (User | number), ctx: string): nil
 	function IsMemoryTrackerEnabled(self): boolean
 	function IsTenFootInterface(self): boolean
 	function OnNotificationDisplayed(self, notificationId: string): nil
@@ -13319,7 +13325,7 @@ declare class InsertService extends Instance
 	@[deprecated {use = "InsertService:GetFreeModelsAsync"}]
 		function GetFreeModels(self, searchText: string, pageNum: number): { any }
 	@[deprecated {use = "InsertService:GetUserSets"}]
-		function GetUserCategories(self, userId: User): { any }
+		function GetUserCategories(self, userId: (User | number)): { any }
 	@[deprecated {use = "InsertService:LoadAsset"}]
 		function loadAsset(self, assetId: number): Instance
 	@deprecated
@@ -13331,7 +13337,7 @@ declare class InsertService extends Instance
 	@deprecated
 		function GetCollection(self, categoryId: number): { any }
 	@deprecated
-		function GetUserSets(self, userId: User): { any }
+		function GetUserSets(self, userId: (User | number)): { any }
 	@deprecated
 		function Insert(self, instance: Instance): nil
 	InternalDelete: RBXScriptSignal<Instance>
@@ -13466,12 +13472,12 @@ end
 
 declare class KeyframeSequenceProvider extends Instance
 	@[deprecated {use = "KeyframeSequenceProvider:GetAnimationsAsync"}]
-		function GetAnimations(self, userId: User): Instance
+		function GetAnimations(self, userId: (User | number)): Instance
 	@[deprecated {use = "KeyframeSequenceProvider:GetKeyframeSequenceAsync"}]
 		function GetKeyframeSequence(self, assetId: ContentId): Instance
 	@[deprecated {use = "KeyframeSequenceProvider:GetKeyframeSequenceAsync"}]
 		function GetKeyframeSequenceById(self, assetId: number, useCache: boolean): Instance
-	function GetAnimationsAsync(self, userId: User): Instance
+	function GetAnimationsAsync(self, userId: (User | number)): Instance
 	function GetKeyframeSequenceAsync(self, assetId: ContentId): Instance
 	function GetMemStats(self): { [string]: any }
 	function RegisterActiveKeyframeSequence(self, keyframeSequence: Instance): ContentId
@@ -13859,7 +13865,7 @@ declare class MarketplaceService extends Instance
 	function SignalRobuxTransferCompleted(self, userId: number): nil
 	function SignalServerLuaDialogClosed(self, value: boolean): nil
 	function SignalUserSubscriptionStatusChanged(self, subscriptionId: string): nil
-	function UserOwnsGamePassAsync(self, userId: User, gamePassId: number): boolean
+	function UserOwnsGamePassAsync(self, userId: (User | number), gamePassId: number): boolean
 end
 
 declare class MatchmakingService extends Instance
@@ -15007,9 +15013,9 @@ declare class Player extends Instance
 	@[deprecated {use = "Player:GetRoleInGroupAsync"}]
 		function GetRoleInGroup(self, groupId: number): string
 	@[deprecated {use = "Player:IsFriendsWith"}]
-		function isFriendsWith(self, userId: User): boolean
+		function isFriendsWith(self, userId: (User | number)): boolean
 	@[deprecated {use = "Player:IsFriendsWithAsync"}]
-		function IsFriendsWith(self, userId: User): boolean
+		function IsFriendsWith(self, userId: (User | number)): boolean
 	@[deprecated {use = "Player:IsInGroupAsync"}]
 		function IsInGroup(self, groupId: number): boolean
 	@[deprecated {use = "Player:LoadBoolean"}]
@@ -15035,7 +15041,7 @@ declare class Player extends Instance
 	@[deprecated {use = "Player:WaitForDataReady"}]
 		function waitForDataReady(self): boolean
 	@deprecated
-		function IsBestFriendsWith(self, userId: User): boolean
+		function IsBestFriendsWith(self, userId: (User | number)): boolean
 	@deprecated
 		function LoadBoolean(self, key: string): boolean
 	@deprecated
@@ -15136,7 +15142,7 @@ declare class Player extends Instance
 	function GetNetworkPing(self): number
 	function GetUnder13(self): boolean
 	function HasAppearanceLoaded(self): boolean
-	function IsFriendsWithAsync(self, userId: User): boolean
+	function IsFriendsWithAsync(self, userId: (User | number)): boolean
 	function IsInGroupAsync(self, groupId: number): boolean
 	function IsVerified(self): boolean
 	function Kick(self, message: string?): nil
@@ -15250,11 +15256,11 @@ declare class Players extends Instance
 	@[deprecated {use = "Players:CreateHumanoidModelFromDescriptionAsync"}]
 		function CreateHumanoidModelFromDescription(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	@[deprecated {use = "Players:CreateHumanoidModelFromUserIdAsync"}]
-		function CreateHumanoidModelFromUserId(self, userId: User): Model
+		function CreateHumanoidModelFromUserId(self, userId: (User | number)): Model
 	@[deprecated {use = "Players:GetHumanoidDescriptionFromOutfitIdAsync"}]
 		function GetHumanoidDescriptionFromOutfitId(self, outfitId: number): HumanoidDescription
 	@[deprecated {use = "Players:GetHumanoidDescriptionFromUserIdAsync"}]
-		function GetHumanoidDescriptionFromUserId(self, userId: User): HumanoidDescription
+		function GetHumanoidDescriptionFromUserId(self, userId: (User | number)): HumanoidDescription
 	@[deprecated {use = "Players:GetPlayerFromCharacter"}]
 		function playerFromCharacter(self, character: Model): Player
 	@[deprecated {use = "Players:GetPlayers"}]
@@ -15262,7 +15268,7 @@ declare class Players extends Instance
 	@[deprecated {use = "Players:GetPlayers"}]
 		function players(self): { Instance }
 	@deprecated
-		function GetCharacterAppearanceAsync(self, userId: User): Model
+		function GetCharacterAppearanceAsync(self, userId: (User | number)): Model
 	BubbleChat: boolean
 	CharacterAutoLoads: boolean
 	ClassicChat: boolean
@@ -15284,20 +15290,20 @@ declare class Players extends Instance
 	function BanAsync(self, config: { [string]: any }): nil
 	function Chat(self, message: string): nil
 	function CreateHumanoidModelFromDescriptionAsync(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
-	function CreateHumanoidModelFromUserIdAsync(self, userId: User): Model
+	function CreateHumanoidModelFromUserIdAsync(self, userId: (User | number)): Model
 	function CreateLocalPlayer(self): Player
 	function CreateThumbnailPlayer(self): Player
-	function GetBanHistoryAsync(self, userId: User): BanHistoryPages
-	function GetCharacterAppearanceInfoAsync(self, userId: User): { [string]: any }
-	function GetFriendsAsync(self, userId: User): FriendPages
+	function GetBanHistoryAsync(self, userId: (User | number)): BanHistoryPages
+	function GetCharacterAppearanceInfoAsync(self, userId: (User | number)): { [string]: any }
+	function GetFriendsAsync(self, userId: (User | number)): FriendPages
 	function GetHumanoidDescriptionFromOutfitIdAsync(self, outfitId: number): HumanoidDescription
-	function GetHumanoidDescriptionFromUserIdAsync(self, userId: User): HumanoidDescription
-	function GetNameFromUserIdAsync(self, userId: User): string
+	function GetHumanoidDescriptionFromUserIdAsync(self, userId: (User | number)): HumanoidDescription
+	function GetNameFromUserIdAsync(self, userId: (User | number)): string
 	function GetPlayerByUserId(self, userId: number): Player?
 	function GetPlayerFromCharacter(self, character: Model): Player?
 	function GetPlayers(self): { Player }
 	function GetUserIdFromNameAsync(self, userName: string): number
-	function GetUserThumbnailAsync(self, userId: User, thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
+	function GetUserThumbnailAsync(self, userId: (User | number), thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
 	function ReportAbuseV3(self, player: Player, jsonTags: string): nil
 	function ReportAvatarAbuse(self, targetUserId: number, tags: { [string]: any }): nil
@@ -16361,7 +16367,7 @@ declare class SocialService extends Instance
 	ShowPromptFeedbackUnavailable: RBXScriptSignal<(string, EnumFeedbackType)>
 	ShowPromptRsvpToEvent: RBXScriptSignal<string>
 	function CanSendCallInviteAsync(self, player: Instance): boolean
-	function CanSendGameInviteAsync(self, player: Player, recipientId: User?): boolean
+	function CanSendGameInviteAsync(self, player: Player, recipientId: (User | number)?): boolean
 	function GetEventRsvpStatusAsync(self, eventId: string): EnumRsvpStatus
 	function GetExperienceEventAsync(self, eventId: string): { [string]: any }?
 	function GetPartyAsync(self, partyId: string): { any }
@@ -17396,7 +17402,7 @@ declare class TextChannel extends Instance
 	MessageReceived: RBXScriptSignal<TextChatMessage>
 	OnIncomingMessage: (message: TextChatMessage) -> ...any
 	ShouldDeliverCallback: (message: TextChatMessage, textSource: TextSource) -> ...any
-	function AddUserAsync(self, userId: User): ...any
+	function AddUserAsync(self, userId: (User | number)): ...any
 	function DisplaySystemMessage(self, systemMessage: string, metadata: string?): TextChatMessage
 	function SendAsync(self, message: string, metadata: string?): TextChatMessage
 	function SendInternalAsync(self, message: string, metadata: string?): TextChatMessage
@@ -17569,10 +17575,10 @@ declare class TextChatService extends Instance
 	UniverseChatChannelAllocated: RBXScriptSignal<string>
 	UniverseChatMessageReceived: RBXScriptSignal<TextChatMessage>
 	UserMessageIntentSent: RBXScriptSignal<TextChatMessage>
-	function CanUserChatAsync(self, userId: User): boolean
-	function CanUsersChatAsync(self, userIdFrom: User, userIdTo: User): boolean
-	function CanUsersDirectChatAsync(self, requesterUserId: User, userIds: { any }): { any }
-	function CanUsersWhisperAsync(self, fromUserId: User, toUserId: User): boolean
+	function CanUserChatAsync(self, userId: (User | number)): boolean
+	function CanUsersChatAsync(self, userIdFrom: (User | number), userIdTo: (User | number)): boolean
+	function CanUsersDirectChatAsync(self, requesterUserId: (User | number), userIds: { any }): { any }
+	function CanUsersWhisperAsync(self, fromUserId: (User | number), toUserId: (User | number)): boolean
 	function DisplayBubble(self, partOrCharacter: Instance, message: string): nil
 	function GetChatGroupsAsync(self, players: { Instance }): { any }
 	function GetPresetsAsync(self): { [string]: any }
@@ -18513,7 +18519,7 @@ declare class VoiceChatService extends Instance
 	VoiceChatEnabledForUniverseOnRcc: boolean
 	VoiceChatStatsCollected: RBXScriptSignal<()>
 	function GetChatGroupsAsync(self, players: { Instance }): { any }
-	function IsVoiceEnabledForUserIdAsync(self, userId: User): boolean
+	function IsVoiceEnabledForUserIdAsync(self, userId: (User | number)): boolean
 	function getInternalChannelId(self): string
 	function getInternalGroupId(self): string
 	function getInternalPublishPause(self): boolean
@@ -18859,6 +18865,11 @@ declare Path2DControlPoint: {
 declare SecurityCapabilities: {
 	new: ((...EnumSecurityCapability) -> SecurityCapabilities),
 	fromCurrent: (() -> SecurityCapabilities),
+}
+
+declare User: {
+	fromId: ((id: number) -> User) & ((id: number, domainType: EnumDomainType, domainId: number) -> User),
+	fromString: ((userStr: string) -> User),
 }
 
 
