@@ -555,9 +555,14 @@ void RobloxPlatform::handleSourcemapUpdate(Luau::Frontend& frontend, const Luau:
             addChildrenToCTV(globals, instanceTypes, dataModelType->type, rootSourceNode);
 
         // Mutate globally-registered Services to include children information (so it's available through :GetService)
+        // Only process actual services: in Roblox, services are always named after their class (e.g. name="ReplicatedStorage",
+        // className="ReplicatedStorage"). Non-service instances included via --include-non-scripts (e.g. Folder, Part) must be
+        // skipped here to avoid corrupting the corresponding global type definitions.
         for (const auto& service : rootSourceNode->children)
         {
-            auto serviceName = service->className; // We know it must be a service of the same class name
+            if (service->name != service->className)
+                continue;
+            auto serviceName = service->className;
             if (auto serviceType = globals.globalScope->lookupType(serviceName))
                 addChildrenToCTV(globals, instanceTypes, serviceType->type, service);
         }

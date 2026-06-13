@@ -59,6 +59,11 @@ FilePathInformation getFilePath(const WorkspaceFileResolver* fileResolver, const
 
 static bool reportError(WorkspaceFolder& workspace, ReportFormat format, const Luau::TypeError& error)
 {
+    // resolveToRealPath can return nullopt for virtual paths with no backing file (e.g. non-script
+    // Roblox instances included via --include-non-scripts). Skip errors from such modules.
+    if (!workspace.fileResolver.platform->resolveToRealPath(error.moduleName))
+        return false;
+
     auto [uri, relativePath] = getFilePath(&workspace.fileResolver, error.moduleName);
 
     if (workspace.isIgnoredFile(uri))

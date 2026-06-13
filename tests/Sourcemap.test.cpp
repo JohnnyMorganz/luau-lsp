@@ -728,6 +728,84 @@ TEST_CASE_FIXTURE(Fixture, "child_properties_of_services_are_cleared_when_the_se
     CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Part");
 }
 
+// Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1521
+// When --include-non-scripts is used, non-service nodes (e.g. a Folder named "Assets") can appear
+// as direct DataModel children. The service loop must not call addChildrenToCTV on the global
+// "Folder" class just because its className exists in the global scope — that would corrupt every
+// Folder's type with children from this one specific instance.
+TEST_CASE_FIXTURE(Fixture, "non_service_datamodel_children_do_not_corrupt_global_class_types")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    // "Assets" is a Folder sitting directly under DataModel (not a service).
+    // With --include-non-scripts this structure appears in real sourcemaps.
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "ReplicatedStorage",
+                    "className": "ReplicatedStorage",
+                    "children": [{ "name": "Part", "className": "Part" }]
+                },
+                {
+                    "name": "Assets",
+                    "className": "Folder",
+                    "children": [{ "name": "MyPart", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    // The service (ReplicatedStorage) should still have its child available.
+    auto result = check(R"(
+        --!strict
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        print(ReplicatedStorage.Part)
+    )");
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    // An unrelated Folder should NOT gain "MyPart" as a known property just because
+    // a Folder named "Assets" happens to be a sibling of the services.
+    auto result2 = check(R"(
+        --!strict
+        local f: Folder = game.Assets
+        print(f.MyPart)
+    )");
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "MyPart");
+}
+
+// Non-service children under DataModel should still appear as properties on the game object itself.
+TEST_CASE_FIXTURE(Fixture, "non_service_datamodel_children_are_accessible_via_game")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                {
+                    "name": "Assets",
+                    "className": "Folder",
+                    "children": [{ "name": "MyPart", "className": "Part" }]
+                }
+            ]
+        }
+    )");
+
+    auto result = check(R"(
+        --!strict
+        local assets = game.Assets
+        local part = assets.MyPart
+    )");
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+    CHECK(Luau::toString(requireType("assets")) == "Folder");
+    CHECK(Luau::toString(requireType("part")) == "Part");
+}
+
 TEST_CASE_FIXTURE(Fixture, "child_properties_of_game_are_cleared_when_an_invalid_sourcemap_is_given")
 {
     client->globalConfig.diagnostics.strictDatamodelTypes = true;

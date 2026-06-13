@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Fixed segmentation fault in `luau-lsp analyze` when using a sourcemap generated with `--include-non-scripts` ([#1521](https://github.com/JohnnyMorganz/luau-lsp/issues/1521))
 - Fixed signature help parameter highlighting when a parameter type references an exported table type from another module inside a union or intersection type ([#1507](https://github.com/JohnnyMorganz/luau-lsp/issues/1507))
 
 ## [1.68.0] - 2026-05-16
