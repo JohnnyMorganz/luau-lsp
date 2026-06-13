@@ -11,7 +11,7 @@ This plugin acts as a bridge between Roblox Studio and an external Luau Language
 1. Install the plugin in Roblox Studio [(Get it from the Creator Store)](https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion)
 2. Ensure the Luau Language Server extension is installed in your editor (e.g., VS Code)
 3. Enable the plugin feature in your editor settings:
-   - VS Code: Set `luau-lsp.plugin.enabled` to `true`
+   - VS Code: Set `luau-lsp.studioPlugin.enabled` to `true`
 
 ## Usage
 
@@ -28,7 +28,7 @@ Click the **Settings** button to open the configuration module (`LuauLSP_Setting
 | Setting              | Type         | Default              | Description                                                             |
 | -------------------- | ------------ | -------------------- | ----------------------------------------------------------------------- |
 | `host`               | `string`     | `"http://localhost"` | Language server hostname                                                |
-| `port`               | `number`     | `3667`               | Language server port (configured via `luau-lsp.plugin.port` in VS Code) |
+| `port`               | `number`     | `3667`               | Language server port (configured via `luau-lsp.studioPlugin.port` in VS Code) |
 | `startAutomatically` | `boolean`    | `false`              | Auto-connect when Studio starts                                         |
 | `include`            | `{Instance}` | Core services        | Instances to track for changes                                          |
 | `logLevel`           | `string`     | `"INFO"`             | Logging verbosity (`DEBUG`, `INFO`, `WARN`, `ERROR`)                    |
