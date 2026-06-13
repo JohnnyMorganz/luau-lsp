@@ -136,7 +136,7 @@ function LSPManager._logHttpError(self: LSPManager, operation: string, result: a
 			return
 		end
 		Log.warn(
-			`{operation} on {self._address} failed. Is the server enabled? Check the settings 'luau-lsp.plugin.enabled' and 'luau-lsp.plugin.port' in your editor`
+			`{operation} on {self._address} failed. Is the server enabled? Check the settings 'luau-lsp.studioPlugin.enabled' and 'luau-lsp.studioPlugin.port' in your editor`
 		)
 	else
 		Log.warn(`{operation} on {self._address} failed: {result}`)

@@ -1,13 +1,13 @@
 --- Configuration for the Luau Language Server
 --- https://devforum.roblox.com/t/luau-language-server-for-external-editors/2185389
---- Make sure that `luau-lsp.plugin.enabled` is set to `true` in VSCode for the plugin to connect
+--- Make sure that `luau-lsp.studioPlugin.enabled` is set to `true` in VSCode for the plugin to connect
 
 return {
 	--- The host to connect to the language server.
 	host = "http://localhost",
 
 	--- The port to connect to the language server.
-	--- In VSCode, this is configured using `luau-lsp.plugin.port`
+	--- In VSCode, this is configured using `luau-lsp.studioPlugin.port`
 	--- Note, this port is *different* to your Rojo port
 	port = 3667,
 
