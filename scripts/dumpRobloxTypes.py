@@ -885,6 +885,13 @@ def resolveType(type: Union[ApiValueType, CorrectionsValueType]) -> str:
 
 def resolveParameter(param: ApiParameter):
     paramType = resolveType(param["Type"])
+
+    if paramType == "User":
+        # HACK: The User type is a special case where we only want to
+        # union it with number when its a parameter, so we
+        # don't use TYPE_INDEX to handle this case.
+        paramType = "(User | number)"
+
     isOptional = paramType[-1] == "?"
     isVariadic = paramType.startswith("...")
     if isVariadic:

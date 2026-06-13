@@ -2575,6 +2575,69 @@
                 }
             ],
             "Name": "SecurityCapabilities"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "fromId",
+                    "Parameters": [
+                        {
+                            "Name": "id",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "User"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromId",
+                    "Parameters": [
+                        {
+                            "Name": "id",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        },
+                        {
+                            "Name": "domainType",
+                            "Type": {
+                                "Category": "Enum",
+                                "Name": "DomainType"
+                            }
+                        },
+                        {
+                            "Name": "domainId",
+                            "Type": {
+                                "Name": "number"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "User"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "fromString",
+                    "Parameters": [
+                        {
+                            "Name": "userStr",
+                            "Type": {
+                                "Name": "string"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "User"
+                    }
+                }
+            ],
+            "Name": "User"
         }
     ],
     "DataTypes": [
@@ -5592,6 +5655,41 @@
                 }
             ],
             "Name": "SecurityCapabilities"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Property",
+                    "Name": "Id",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "DomainType",
+                    "ValueType": {
+                        "Category": "Enum",
+                        "Name": "DomainType"
+                    }
+                },
+                {
+                    "MemberType": "Property",
+                    "Name": "DomainId",
+                    "ValueType": {
+                        "Name": "number"
+                    }
+                },
+                {
+                    "MemberType": "Function",
+                    "Name": "ToString",
+                    "Parameters": [],
+                    "ReturnType": {
+                        "Name": "string"
+                    }
+                }
+            ],
+            "Name": "User"
         }
     ]
 }
