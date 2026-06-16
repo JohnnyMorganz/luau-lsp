@@ -16596,7 +16596,7 @@ declare class StartPageService extends Instance
 	function isTutorialPopupClosed(self): boolean
 	function openLink(self, link: string): nil
 	function openLocalFile(self, filePath: string): nil
-	function openPlace(self, placeId: number, universeId: number, launchTutorial: boolean, shouldSkipSafetyChecks: boolean?): nil
+	function openPlace(self, placeId: number, universeId: number, launchTutorial: boolean, shouldSkipSafetyChecks: boolean?, openAsLocalCopy: boolean?): nil
 	function removeAPIGameFromRegistry(self, gameId: number): nil
 	function removeLocalFileFromRegistry(self, fileName: string): nil
 	function setTutorialBannerClosed(self, closed: boolean): nil
