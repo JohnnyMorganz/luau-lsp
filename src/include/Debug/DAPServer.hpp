@@ -52,8 +52,7 @@ private:
     void sendErrorResponse(int requestSeq, const std::string& command, const std::string& message);
     void sendEvent(const std::string& eventName, const json& body);
 
-    bool readRawMessage(std::string& output) const;
-    void sendRaw(const json& msg);
+    void sendRaw(json msg);
 
     std::optional<dap::Message> popMessage();
 };

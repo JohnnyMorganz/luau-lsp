@@ -23,10 +23,14 @@ local function getVirtualPath(instance: Instance): string
 	local parts: { string } = {}
 	local current: Instance? = instance
 	while current ~= nil and current ~= game do
-		table.insert(parts, 1, current.Name)
+		parts[#parts + 1] = current.Name
 		current = current.Parent
 	end
-	table.insert(parts, 1, "game")
+	parts[#parts + 1] = "game"
+	local n = #parts
+	for i = 1, n // 2 do
+		parts[i], parts[n - i + 1] = parts[n - i + 1], parts[i]
+	end
 	return table.concat(parts, "/")
 end
 
@@ -75,14 +79,10 @@ end
 local DebugBridge = {}
 
 function DebugBridge.start()
-	local ws
-	do
-		local ok, result = pcall(HttpService.ConnectAsync, HttpService, "ws://localhost:" .. DAP_WS_PORT)
-		if not ok or not result then
-			-- DAP server not running; skip silently
-			return
-		end
-		ws = result
+	local ok, ws = pcall(HttpService.ConnectAsync, HttpService, "ws://localhost:" .. DAP_WS_PORT)
+	if not ok or not ws then
+		-- DAP server not running; skip silently
+		return
 	end
 
 	local connections: { RBXScriptConnection } = {}
@@ -103,18 +103,15 @@ function DebugBridge.start()
 		local scriptPath: string = data.scriptPath or ""
 		local bpList: { any } = data.breakpoints or {}
 
+		local script = findScript(scriptPath)
+
 		-- Clear previous breakpoints for this script
-		if activeBreakpoints[scriptPath] then
-			local script = findScript(scriptPath)
-			if script then
-				for _, line in activeBreakpoints[scriptPath] do
-					pcall(ScriptDebuggerService.RemoveBreakpoint, ScriptDebuggerService, script, line)
-				end
+		if activeBreakpoints[scriptPath] and script then
+			for _, line in activeBreakpoints[scriptPath] do
+				pcall(ScriptDebuggerService.RemoveBreakpoint, ScriptDebuggerService, script, line)
 			end
 		end
 		activeBreakpoints[scriptPath] = {}
-
-		local script = findScript(scriptPath)
 		local results: { { [string]: any } } = {}
 
 		if script then
@@ -247,9 +244,7 @@ function DebugBridge.start()
 		connections,
 		LogService.MessageOut:Connect(function(message: string, messageType: Enum.MessageType)
 			local category = "stdout"
-			if messageType == Enum.MessageType.MessageWarning then
-				category = "stderr"
-			elseif messageType == Enum.MessageType.MessageError then
+			if messageType == Enum.MessageType.MessageWarning or messageType == Enum.MessageType.MessageError then
 				category = "stderr"
 			end
 			send({ event = "output", output = message .. "\n", category = category })

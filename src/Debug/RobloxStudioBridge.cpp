@@ -264,12 +264,14 @@ void RobloxStudioBridge::handleIncoming(const json& msg)
         e.reason = msg.value("reason", "breakpoint");
         if (msg.contains("exceptionText"))
             e.text = msg["exceptionText"].get<std::string>();
-        {
-            std::lock_guard<std::mutex> lock(snapshotMutex);
-            e.threadId = snapshot.threadId ? std::make_optional(snapshot.threadId) : std::nullopt;
-        }
         if (msg.contains("threadIds") && msg["threadIds"].is_array() && !msg["threadIds"].empty())
             e.threadId = msg["threadIds"][0].get<int>();
+        else
+        {
+            std::lock_guard<std::mutex> lock(snapshotMutex);
+            if (snapshot.threadId)
+                e.threadId = snapshot.threadId;
+        }
         e.allThreadsStopped = true;
         onStopped(e);
     }

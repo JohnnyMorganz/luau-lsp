@@ -3,8 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "Luau/StringUtils.h"
-#include "LSP/Utils.hpp"
+#include "LSP/JsonRpc.hpp"
 
 namespace debug
 {
@@ -49,7 +48,7 @@ void DAPServer::processInputLoop()
     std::string jsonString;
     while (!shutdownRequested.load())
     {
-        if (readRawMessage(jsonString))
+        if (json_rpc::readRawMessage(transport, jsonString))
         {
             try
             {
@@ -142,32 +141,32 @@ void DAPServer::processRequest(const dap::Message& msg)
         }
         else if (command == "continue")
         {
-            auto cArgs = args ? args->get<dap::ContinueArgs>() : dap::ContinueArgs{};
-            runtime->continue_(cArgs.threadId);
+            int tid = args ? args->get<dap::ThreadArgs>().threadId : 0;
+            runtime->continue_(tid);
             sendResponse(requestSeq, command, json{{"allThreadsContinued", true}});
         }
         else if (command == "next")
         {
-            auto nArgs = args ? args->get<dap::NextArgs>() : dap::NextArgs{};
-            runtime->next(nArgs.threadId);
+            int tid = args ? args->get<dap::ThreadArgs>().threadId : 0;
+            runtime->next(tid);
             sendResponse(requestSeq, command, json::object());
         }
         else if (command == "stepIn")
         {
-            auto sArgs = args ? args->get<dap::StepInArgs>() : dap::StepInArgs{};
-            runtime->stepIn(sArgs.threadId);
+            int tid = args ? args->get<dap::ThreadArgs>().threadId : 0;
+            runtime->stepIn(tid);
             sendResponse(requestSeq, command, json::object());
         }
         else if (command == "stepOut")
         {
-            auto sArgs = args ? args->get<dap::StepOutArgs>() : dap::StepOutArgs{};
-            runtime->stepOut(sArgs.threadId);
+            int tid = args ? args->get<dap::ThreadArgs>().threadId : 0;
+            runtime->stepOut(tid);
             sendResponse(requestSeq, command, json::object());
         }
         else if (command == "pause")
         {
-            auto pArgs = args ? args->get<dap::PauseArgs>() : dap::PauseArgs{};
-            runtime->pause(pArgs.threadId);
+            int tid = args ? args->get<dap::ThreadArgs>().threadId : 0;
+            runtime->pause(tid);
             sendResponse(requestSeq, command, json::object());
         }
         else if (command == "stackTrace")
@@ -260,76 +259,40 @@ void DAPServer::sendOutputEvent(const dap::OutputEvent& e)
 
 void DAPServer::sendResponse(int requestSeq, const std::string& command, const json& body)
 {
-    json msg = {
+    sendRaw(json{
         {"type", "response"},
         {"request_seq", requestSeq},
         {"success", true},
         {"command", command},
         {"body", body},
-    };
-    sendRaw(msg);
+    });
 }
 
 void DAPServer::sendErrorResponse(int requestSeq, const std::string& command, const std::string& message)
 {
-    json msg = {
+    sendRaw(json{
         {"type", "response"},
         {"request_seq", requestSeq},
         {"success", false},
         {"command", command},
         {"message", message},
-    };
-    sendRaw(msg);
+    });
 }
 
 void DAPServer::sendEvent(const std::string& eventName, const json& body)
 {
-    json msg = {
+    sendRaw(json{
         {"type", "event"},
         {"event", eventName},
         {"body", body},
-    };
-    sendRaw(msg);
+    });
 }
 
-void DAPServer::sendRaw(const json& msg)
+void DAPServer::sendRaw(json msg)
 {
     std::lock_guard<std::mutex> lock(seqMutex);
-    json out = msg;
-    out["seq"] = nextSeq++;
-    std::string s = out.dump(-1, ' ', false, json::error_handler_t::ignore);
-    transport->send(std::string("Content-Length: ") + std::to_string(s.length()) + "\r\n\r\n" + s);
-}
-
-bool DAPServer::readRawMessage(std::string& output) const
-{
-    unsigned int contentLength = 0;
-    std::string line;
-
-    while (true)
-    {
-        if (!transport->readLine(line))
-            return false;
-
-        if (Luau::startsWith(line, "Content-Length: "))
-        {
-            std::string len = line.substr(16);
-            trim_end(len);
-            contentLength = std::stoi(len);
-            continue;
-        }
-
-        trim_end(line);
-        if (line.empty())
-            break;
-    }
-
-    if (contentLength == 0)
-        return false;
-
-    output.resize(contentLength);
-    transport->read(&output[0], contentLength);
-    return true;
+    msg["seq"] = nextSeq++;
+    json_rpc::sendRawMessage(transport, msg);
 }
 
 } // namespace debug

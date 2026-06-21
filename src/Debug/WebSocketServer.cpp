@@ -158,7 +158,7 @@ bool WebSocketServer::listen()
 
 bool WebSocketServer::performHandshake()
 {
-    // Read the HTTP upgrade request
+    // Read the HTTP upgrade request byte-by-byte, stopping at \r\n\r\n
     std::string request;
     char buf[1];
     while (true)
@@ -167,7 +167,10 @@ bool WebSocketServer::performHandshake()
         if (n <= 0)
             return false;
         request += buf[0];
-        if (request.size() >= 4 && request.substr(request.size() - 4) == "\r\n\r\n")
+        auto sz = request.size();
+        if (sz >= 4 &&
+            request[sz - 4] == '\r' && request[sz - 3] == '\n' &&
+            request[sz - 2] == '\r' && request[sz - 1] == '\n')
             break;
     }
 
@@ -290,6 +293,7 @@ void WebSocketServer::sendFrame(const std::string& payload, uint8_t opcode)
         return;
 
     std::vector<uint8_t> frame;
+    frame.reserve(10 + payload.size()); // max header is 10 bytes
     frame.push_back(0x80 | (opcode & 0x0F)); // FIN + opcode
 
     size_t len = payload.size();

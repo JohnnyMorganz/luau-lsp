@@ -3,9 +3,7 @@
 #include <string>
 #include <vector>
 #include <optional>
-#include "nlohmann/json.hpp"
-
-using json = nlohmann::json;
+#include "Protocol/Base.hpp"
 
 // Debug Adapter Protocol types.
 // Wire format: Content-Length: N\r\n\r\n{json}  (same framing as LSP)
@@ -119,23 +117,6 @@ inline void to_json(json& j, const Variable& v)
 
 // ── Request argument structs ───────────────────────────────────────────────────
 
-struct InitializeArgs
-{
-    std::optional<std::string> clientID;
-    std::optional<std::string> clientName;
-    std::optional<std::string> adapterID;
-};
-
-inline void from_json(const json& j, InitializeArgs& a)
-{
-    if (j.contains("clientID"))
-        a.clientID = j["clientID"].get<std::string>();
-    if (j.contains("clientName"))
-        a.clientName = j["clientName"].get<std::string>();
-    if (j.contains("adapterID"))
-        a.adapterID = j["adapterID"].get<std::string>();
-}
-
 struct AttachArgs
 {
     int debugWsPort = 7868;
@@ -174,52 +155,13 @@ inline void from_json(const json& j, SetExceptionBreakpointsArgs& a)
         a.filters = j["filters"].get<std::vector<std::string>>();
 }
 
-struct ContinueArgs
+// Shared argument struct for continue/next/stepIn/stepOut/pause — all carry only threadId.
+struct ThreadArgs
 {
     int threadId = 0;
 };
 
-inline void from_json(const json& j, ContinueArgs& a)
-{
-    a.threadId = j.at("threadId").get<int>();
-}
-
-struct NextArgs
-{
-    int threadId = 0;
-};
-
-inline void from_json(const json& j, NextArgs& a)
-{
-    a.threadId = j.at("threadId").get<int>();
-}
-
-struct StepInArgs
-{
-    int threadId = 0;
-};
-
-inline void from_json(const json& j, StepInArgs& a)
-{
-    a.threadId = j.at("threadId").get<int>();
-}
-
-struct StepOutArgs
-{
-    int threadId = 0;
-};
-
-inline void from_json(const json& j, StepOutArgs& a)
-{
-    a.threadId = j.at("threadId").get<int>();
-}
-
-struct PauseArgs
-{
-    int threadId = 0;
-};
-
-inline void from_json(const json& j, PauseArgs& a)
+inline void from_json(const json& j, ThreadArgs& a)
 {
     a.threadId = j.at("threadId").get<int>();
 }
