@@ -103,12 +103,16 @@ target_sources(Luau.LanguageServer PRIVATE
         src/Plugin/PluginManager.cpp
         src/Plugin/PluginLuaApi.cpp
         src/Plugin/PluginDefinitions.cpp
+        src/Debug/DAPServer.cpp
+        src/Debug/WebSocketServer.cpp
+        src/Debug/RobloxStudioBridge.cpp
         extern/glob/match.cpp
 )
 
 target_sources(Luau.LanguageServer.CLI PRIVATE
         src/main.cpp
         src/AnalyzeCli.cpp
+        src/DebugAdapterCli.cpp
 )
 
 target_sources(Luau.LanguageServer.Test PRIVATE

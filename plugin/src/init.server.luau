@@ -12,6 +12,12 @@
 
 assert(plugin, "This code must run inside of a plugin")
 if game:GetService("RunService"):IsRunning() then
+	-- Play mode: attempt to connect to a running luau-lsp DAP server.
+	-- Fails silently if no DAP server is listening.
+	local ok, DebugBridge = pcall(require, script.DebugBridge)
+	if ok then
+		DebugBridge.start()
+	end
 	return
 end
 

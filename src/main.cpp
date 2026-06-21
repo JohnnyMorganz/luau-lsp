@@ -7,6 +7,7 @@
 #include "argparse/argparse.hpp"
 #include "LuauFileUtils.hpp"
 #include "LSP/RequireGraph.hpp"
+#include "DebugAdapterCli.hpp"
 
 #include "LSP/Transport/StdioTransport.hpp"
 #ifndef _WIN32
@@ -283,6 +284,19 @@ int main(int argc, char** argv)
         .implicit_value(true);
     lsp_command.add_argument("--crash-report-directory").help("location to store database for crash reports").metavar("PATH");
 
+    // DAP (Debug Adapter Protocol) arguments
+    argparse::ArgumentParser dap_command("dap");
+    dap_command.set_assign_chars(":=");
+    dap_command.add_description("Start a Debug Adapter Protocol server");
+    dap_command.add_epilog("Listens for DAP messages on stdin (or --pipe) and bridges to the selected Luau runtime");
+    dap_command.add_parents(parent_parser);
+    dap_command.add_argument("--platform")
+        .help("debug runtime to bridge to")
+        .default_value(std::string("roblox"))
+        .choices("roblox");
+    dap_command.add_argument("--stdio").help("use stdio for DAP communication (default)").implicit_value(true);
+    dap_command.add_argument("--pipe").help("path to pipe / socket file for DAP communication").metavar("PATH");
+
     // Require graph arguments
     argparse::ArgumentParser require_graph_command("require-graph");
     require_graph_command.set_assign_chars(":=");
@@ -299,6 +313,7 @@ int main(int argc, char** argv)
 
     program.add_subparser(analyze_command);
     program.add_subparser(lsp_command);
+    program.add_subparser(dap_command);
     program.add_subparser(require_graph_command);
 
     try
@@ -337,6 +352,11 @@ int main(int argc, char** argv)
         processFFlags(analyze_command);
         return startAnalyze(analyze_command);
     }
+    else if (program.is_subcommand_used("dap"))
+    {
+        processFFlags(dap_command);
+        return startDebugAdapter(dap_command);
+    }
     else if (program.is_subcommand_used("require-graph"))
     {
         processFFlags(require_graph_command);
@@ -344,7 +364,7 @@ int main(int argc, char** argv)
     }
 
     // No sub-command specified
-    std::cerr << "Specify a particular mode to run the program (analyze/lsp/require-graph)" << '\n';
+    std::cerr << "Specify a particular mode to run the program (analyze/lsp/dap/require-graph)" << '\n';
     std::cerr << program;
     return 1;
 }
