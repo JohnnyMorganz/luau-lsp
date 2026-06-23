@@ -148,6 +148,24 @@ function InstanceTracker.shouldInclude(self: InstanceTracker, instance: Instance
 	return false
 end
 
+local function sanitizeUtf8(str: string): string
+	local clean = {}
+	local current = str
+	while true do
+		local len, invalidIndex = utf8.len(current)
+		if len then
+			table.insert(clean, current)
+			break
+		end
+
+		local index = assert(invalidIndex, "invalidIndex must be provided when utf8.len fails")
+		table.insert(clean, string.sub(current, 1, index - 1))
+		table.insert(clean, "?")
+		current = string.sub(current, index + 1)
+	end
+	return table.concat(clean)
+end
+
 --- Recursively encodes an Instance and its children into a serializable table.
 --- Only includes children that pass the `shouldInclude` filter.
 --- @param self -- The InstanceTracker instance.
@@ -163,10 +181,18 @@ function InstanceTracker.encode(
 ): types.EncodedInstance
 	Log.debug(`Encoding {instance:GetFullName()}`)
 
+	local cleanFilePaths = {}
+	local filePaths = instanceFilePaths[instance]
+	if filePaths then
+		for _, path in filePaths do
+			table.insert(cleanFilePaths, sanitizeUtf8(path))
+		end
+	end
+
 	local encoded: types.EncodedInstance = {
-		Name = instance.Name,
-		ClassName = instance.ClassName,
-		FilePaths = instanceFilePaths[instance] or {},
+		Name = sanitizeUtf8(instance.Name),
+		ClassName = sanitizeUtf8(instance.ClassName),
+		FilePaths = cleanFilePaths,
 		Children = {},
 	}
 
