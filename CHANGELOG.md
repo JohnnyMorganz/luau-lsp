@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `luau-lsp.types.dataFilesForceStringletons` to infer string singletons for matching imported data file string values.
+
 ### Changed
 
 - Sync to upstream Luau 0.726

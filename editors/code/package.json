@@ -384,6 +384,18 @@
           },
           "scope": "window"
         },
+        "luau-lsp.types.dataFilesForceStringletons": {
+          "markdownDescription": "A mapping from data file globs (.json/.toml/.yaml) to string value globs. Matched strings will be inferred as string singletons",
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope": "window"
+        },
         "luau-lsp.types.roblox": {
           "markdownDescription": "Load in and automatically update Roblox type definitions for the type checker",
           "type": "boolean",

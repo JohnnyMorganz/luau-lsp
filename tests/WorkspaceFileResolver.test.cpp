@@ -611,6 +611,101 @@ TEST_CASE_FIXTURE(Fixture, "resolve_yml_modules")
     CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
 }
 
+TEST_CASE_FIXTURE(Fixture, "data_file_force_stringletons_use_string_singletons")
+{
+    client->globalConfig.types.dataFilesForceStringletons = {{"data/**", {"*"}}};
+
+    auto path = tempDir.write_child("data/settings.json", R"({"value":"enabled","nested":{"value":"disabled"}})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source,
+        "--!strict\nreturn {[\"nested\"] = {[\"value\"] = (\"disabled\" :: \"disabled\");};[\"value\"] = (\"enabled\" :: \"enabled\");}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "data_file_force_stringletons_do_not_affect_non_matching_files")
+{
+    client->globalConfig.types.dataFilesForceStringletons = {{"data/**", {"*"}}};
+
+    auto path = tempDir.write_child("settings.json", R"({"value":"enabled"})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = \"enabled\";}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "data_file_force_stringletons_only_affect_matching_strings")
+{
+    client->globalConfig.types.dataFilesForceStringletons = {{"*.json", {"enabled*"}}};
+
+    auto path = tempDir.write_child("data/settings.json", R"({"value":"enabled","nested":{"value":"disabled"}})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"nested\"] = {[\"value\"] = \"disabled\";};[\"value\"] = (\"enabled\" :: \"enabled\");}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "data_file_force_stringletons_preserve_singletons_during_analysis")
+{
+    client->globalConfig.types.dataFilesForceStringletons = {{"data/**", {"enabled"}}};
+
+    auto path = tempDir.write_child("data/settings.json", R"({"value":"enabled"})");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            { "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] },
+            { "name": "Main", "className": "ModuleScript", "filePaths": ["{mainpath}"] }
+        ]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    replace(sourcemap, "{mainpath}", tempDir.touch_child("main.luau"));
+    loadSourcemap(sourcemap);
+
+    auto result = check(R"(
+        local settings = require(game.Settings)
+        local value: "enabled" = settings.value
+    )");
+
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+}
+
 TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 {
     auto fooPath = tempDir.touch_child("project/code/foo.luau");
