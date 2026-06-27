@@ -55,6 +55,9 @@ type InfoTypeArray = any
 type OpenCloudModel = any
 type ProductIdentifierArray = any
 type RankedItemArray = any
+type ReflectedClassOrNil = ReflectedClass?
+type ReflectedClasses = { ReflectedClass }
+type ReflectedProperties = { ReflectedProperty }
 type UniqueId = any
 type VideoSampleArray = any
 type WebViewParams = any
@@ -13984,11 +13987,11 @@ declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
 declare class ReflectionService extends Instance
-	function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClass?
-	function GetClasses(self, filter: ReflectionClassFilter?): { ReflectedClass }
+	function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClassOrNil
+	function GetClasses(self, filter: ReflectionClassFilter?): ReflectedClasses
 	function GetEventsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedEvent }
 	function GetMethodsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedMethod }
-	function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedProperty }
+	function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): ReflectedProperties
 end
 
 declare class RemoteCommandService extends Instance

@@ -80,9 +80,9 @@ LUAU_SNIPPET_PATCHES = {
     "declare Workspace: any": "",
     "declare Game: any": "",
 
-    "type ReflectedClassOrNil = any": "",
-    "type ReflectedClasses = any": "",
-    "type ReflectedProperties = any": "",
+    "type ReflectedClassOrNil = any": "type ReflectedClassOrNil = ReflectedClass?",
+    "type ReflectedClasses = any": "type ReflectedClasses = { ReflectedClass }",
+    "type ReflectedProperties = any": "type ReflectedProperties = { ReflectedProperty }",
 
     "type ReflectionClassFilter = {": "export type ReflectionClassFilter = {",
     "type ReflectionMemberFilter = {": "export type ReflectionMemberFilter = {",
@@ -114,9 +114,6 @@ TYPE_INDEX = {
     "table": "{ any }",
     "CoordinateFrame": "CFrame",
     "OptionalCoordinateFrame": "CFrame?",
-    "ReflectedClassOrNil": "ReflectedClass?",
-    "ReflectedClasses": "{ ReflectedClass }",
-    "ReflectedProperties": "{ ReflectedProperty }",
 }
 
 IGNORED_INSTANCES: List[str] = [
