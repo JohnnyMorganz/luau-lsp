@@ -165,7 +165,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             {
                 auto type = inferTokenType(*ty, lsp::SemanticTokenTypes::Variable);
                 if (type == lsp::SemanticTokenTypes::Variable)
-                    continue; // No special semantic token needed, fall back to syntax highlighting
+                    return true; // No special semantic token needed, fall back to syntax highlighting
                 tokens.emplace_back(SemanticToken{var->location.begin, var->location.end, type, lsp::SemanticTokenModifiers::None});
             }
         }
@@ -228,9 +228,7 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
             }
             else if (localInfo == AstLocalInfo::Parameter)
             {
-                tokens.emplace_back(
-                    SemanticToken{local->location.begin, local->location.end, lsp::SemanticTokenTypes::Parameter, lsp::SemanticTokenModifiers::None});
-                return true;
+                defaultType = lsp::SemanticTokenTypes::Parameter;
             }
         }
 

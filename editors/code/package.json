@@ -80,9 +80,6 @@
       {
         "language": "luau",
         "scopes": {
-          "parameter": [
-            "variable.parameter.function.luau"
-          ],
           "variable.defaultLibrary.readonly": [
             "constant.language.global.luau"
           ],

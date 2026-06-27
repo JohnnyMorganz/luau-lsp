@@ -132,54 +132,6 @@ TEST_CASE_FIXTURE(Fixture,
     CHECK_EQ(usage->tokenModifiers, lsp::SemanticTokenModifiers::None);
 }
 
-TEST_CASE_FIXTURE(Fixture, "references_of_parameters_in_function_body_have_parameter_semantic_token")
-{
-    check(R"(
-        local function foo(value: number)
-            local x = value
-        end
-    )");
-
-    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
-    REQUIRE(!tokens.empty());
-
-    // `        local function foo(value: number)` — `value` at col 27
-    auto paramDecl = getSemanticToken(tokens, Luau::Position{1, 27});
-    REQUIRE(paramDecl);
-    CHECK_EQ(paramDecl->tokenType, lsp::SemanticTokenTypes::Parameter);
-    CHECK_EQ(paramDecl->tokenModifiers, lsp::SemanticTokenModifiers::None);
-
-    // `            local x = value` — `value` at col 22
-    auto paramUsage = getSemanticToken(tokens, Luau::Position{2, 22});
-    REQUIRE(paramUsage);
-    CHECK_EQ(paramUsage->tokenType, lsp::SemanticTokenTypes::Parameter);
-    CHECK_EQ(paramUsage->tokenModifiers, lsp::SemanticTokenModifiers::None);
-}
-
-TEST_CASE_FIXTURE(Fixture, "function_typed_parameter_references_in_body_are_not_reclassified_as_function_tokens")
-{
-    check(R"(
-        local function foo(callback: () -> ())
-            callback()
-        end
-    )");
-
-    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
-    REQUIRE(!tokens.empty());
-
-    // `        local function foo(callback: () -> ())` — `callback` at col 27
-    auto paramDecl = getSemanticToken(tokens, Luau::Position{1, 27});
-    REQUIRE(paramDecl);
-    CHECK_EQ(paramDecl->tokenType, lsp::SemanticTokenTypes::Parameter);
-    CHECK_EQ(paramDecl->tokenModifiers, lsp::SemanticTokenModifiers::None);
-
-    // `            callback()` — `callback` at col 12
-    auto paramUsage = getSemanticToken(tokens, Luau::Position{2, 12});
-    REQUIRE(paramUsage);
-    CHECK_EQ(paramUsage->tokenType, lsp::SemanticTokenTypes::Parameter);
-    CHECK_EQ(paramUsage->tokenModifiers, lsp::SemanticTokenModifiers::None);
-}
-
 TEST_CASE_FIXTURE(Fixture, "semantic_tokens_respects_cancellation")
 {
     auto cancellationToken = std::make_shared<Luau::FrontendCancellationToken>();
