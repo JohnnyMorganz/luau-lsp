@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `ReflectionService` method signatures to use proper typed return types (`ReflectedClass`, `ReflectedMethod`, `ReflectedEvent`, `ReflectedProperty`) instead of `{ any }`, and corrected `filter` parameter types to `ReflectionClassFilter`/`ReflectionMemberFilter` instead of `{ [string]: any }`. Also fixed `applyCorrections` in the type dump generator to correctly propagate `Declared` type overrides from `Corrections.json`.
+
 ### Changed
 
 - Sync to upstream Luau 0.726

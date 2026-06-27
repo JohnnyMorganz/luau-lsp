@@ -79,6 +79,10 @@ LUAU_SNIPPET_PATCHES = {
 
     "declare Workspace: any": "",
     "declare Game: any": "",
+
+    "type ReflectedClassOrNil = any": "type ReflectedClassOrNil = ReflectedClass?",
+    "type ReflectedClasses = any": "type ReflectedClasses = { ReflectedClass }",
+    "type ReflectedProperties = any": "type ReflectedProperties = { ReflectedProperty }",
 }
 
 TYPE_INDEX = {
@@ -1262,6 +1266,10 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                     otherMember["ReturnType"]["Generic"] = member[
                                         "ReturnType"
                                     ]["Generic"]
+                                if "Declared" in member["ReturnType"]:
+                                    otherMember["ReturnType"]["Declared"] = member[
+                                        "ReturnType"
+                                    ]["Declared"]
                             elif "ValueType" in member:
                                 otherMember["ValueType"]["Name"] = (
                                     member["ValueType"]["Name"]
@@ -1289,6 +1297,10 @@ def applyCorrections(dump: ApiDump, corrections: CorrectionsDump):
                                                 if "Generic" in param["Type"]:
                                                     otherParam["Type"]["Generic"] = (
                                                         param["Type"]["Generic"]
+                                                    )
+                                                if "Declared" in param["Type"]:
+                                                    otherParam["Type"]["Declared"] = (
+                                                        param["Type"]["Declared"]
                                                     )
                                             if "Default" in param:
                                                 otherParam["Default"] = param["Default"]

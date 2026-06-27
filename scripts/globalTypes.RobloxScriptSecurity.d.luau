@@ -55,9 +55,9 @@ type InfoTypeArray = any
 type OpenCloudModel = any
 type ProductIdentifierArray = any
 type RankedItemArray = any
-type ReflectedClassOrNil = any
-type ReflectedClasses = any
-type ReflectedProperties = any
+type ReflectedClassOrNil = ReflectedClass?
+type ReflectedClasses = { ReflectedClass }
+type ReflectedProperties = { ReflectedProperty }
 type UniqueId = any
 type VideoSampleArray = any
 type WebViewParams = any
@@ -15751,12 +15751,12 @@ declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
 declare class ReflectionService extends Instance
-	function GetClass(self, className: string, filter: { [string]: any }?): { [string]: any }?
-	function GetClasses(self, filter: { [string]: any }?): { any }
-	function GetEventsOfClass(self, className: string, filter: { [string]: any }?): { any }
-	function GetMethodsOfClass(self, className: string, filter: { [string]: any }?): { any }
-	function GetPropertiesOfClass(self, className: string, filter: { [string]: any }?): { any }
-	function GetPropertyNames(self, name: string): { string }
+	function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClassOrNil
+	function GetClasses(self, filter: ReflectionClassFilter?): ReflectedClasses
+	function GetEventsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedEvent }
+	function GetMethodsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedMethod }
+	function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): ReflectedProperties
+	function GetPropertyNames(self, className: string): { string }
 	function GetStyledPropertyNames(self, name: string): { any }
 end
 
