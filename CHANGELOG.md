@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.726
 
+### Fixed
+
+- Fixed inconsistent syntax highlighting for function parameter references inside function bodies. Parameter usages were not colored as parameters when the parameter had a function/method type, and the `parameter` semantic token type was not mapped to the correct TextMate scope (`variable.parameter.function.luau`)
+- Fixed `local x, y = ...` declarations where if `x` was a plain variable, subsequent variables like `y` (e.g., function-typed) would not receive a semantic token
+
 ## [1.68.1] - 2026-06-14
 
 ### Changed
