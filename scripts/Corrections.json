@@ -2392,6 +2392,34 @@
                     }
                 },
                 {
+                    "Name": "GetEventsOfClass",
+                    "Parameters": [
+                        {
+                            "Name": "filter",
+                            "Type": {
+                                "Declared": "ReflectionMemberFilter?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Declared": "{ ReflectedEvent }"
+                    }
+                },
+                {
+                    "Name": "GetMethodsOfClass",
+                    "Parameters": [
+                        {
+                            "Name": "filter",
+                            "Type": {
+                                "Declared": "ReflectionMemberFilter?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Declared": "{ ReflectedMethod }"
+                    }
+                },
+                {
                     "Name": "GetPropertiesOfClass",
                     "Parameters": [
                         {

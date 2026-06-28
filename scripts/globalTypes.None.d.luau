@@ -55,9 +55,9 @@ type InfoTypeArray = any
 type OpenCloudModel = any
 type ProductIdentifierArray = any
 type RankedItemArray = any
-type ReflectedClassOrNil = any
-type ReflectedClasses = any
-type ReflectedProperties = any
+type ReflectedClassOrNil = ReflectedClass?
+type ReflectedClasses = { ReflectedClass }
+type ReflectedProperties = { ReflectedProperty }
 type UniqueId = any
 type VideoSampleArray = any
 type WebViewParams = any
@@ -8287,19 +8287,19 @@ type Creator = {
     CreatorType: EnumCreatorType
 }
 
-type ReflectionClassFilter = {
+export type ReflectionClassFilter = {
   Security: SecurityCapabilities?, -- default: SecurityCapabilities.fromCurrent()
   IsA: string?, -- default: nil
   ExcludeDisplay: boolean?, -- default: false
 }
 
-type ReflectionMemberFilter = {
+export type ReflectionMemberFilter = {
   Security: SecurityCapabilities?, -- default: SecurityCapabilities.fromCurrent()
   ExcludeInherited: boolean?, -- default: false
   ExcludeDisplay: boolean?, -- default: false
 }
 
-type ReflectionType = {
+export type ReflectionType = {
   EngineType: string,
   ScriptType: string?,
   EnumType: string?,
@@ -8307,13 +8307,13 @@ type ReflectionType = {
   -- ContentType: EnumAssetType?,
 }
 
-type ReflectionParameter = {
+export type ReflectionParameter = {
   Name: string,
   Type: ReflectionType,
   DefaultValue: any?
 }
 
-type ReflectedProperty = {
+export type ReflectedProperty = {
   Name: string,
   Serialized: boolean,
   Owner: string?,
@@ -8338,7 +8338,7 @@ type ReflectedProperty = {
   },
 }
 
-type ReflectedMethod = {
+export type ReflectedMethod = {
   Name: string,
   Owner: string,
   Parameters: { ReflectionParameter },
@@ -8356,7 +8356,7 @@ type ReflectedMethod = {
   },
 }
 
-type ReflectedEvent = {
+export type ReflectedEvent = {
   Name: string,
   Owner: string,
   Parameters: { ReflectionParameter },
@@ -8371,7 +8371,7 @@ type ReflectedEvent = {
   },
 }
 
-type ReflectedClass = {
+export type ReflectedClass = {
   Name: string,
   Serialized: boolean,
   Superclass: string?,
@@ -13987,11 +13987,11 @@ declare class ReflectionMetadataYieldFunctions extends Instance
 end
 
 declare class ReflectionService extends Instance
-	function GetClass(self, className: string, filter: { [string]: any }?): { [string]: any }?
-	function GetClasses(self, filter: { [string]: any }?): { any }
-	function GetEventsOfClass(self, className: string, filter: { [string]: any }?): { any }
-	function GetMethodsOfClass(self, className: string, filter: { [string]: any }?): { any }
-	function GetPropertiesOfClass(self, className: string, filter: { [string]: any }?): { any }
+	function GetClass(self, className: string, filter: ReflectionClassFilter?): ReflectedClassOrNil
+	function GetClasses(self, filter: ReflectionClassFilter?): ReflectedClasses
+	function GetEventsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedEvent }
+	function GetMethodsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedMethod }
+	function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): ReflectedProperties
 end
 
 declare class RemoteCommandService extends Instance
