@@ -55,9 +55,6 @@ type InfoTypeArray = any
 type OpenCloudModel = any
 type ProductIdentifierArray = any
 type RankedItemArray = any
-type ReflectedClassOrNil = ReflectedClass?
-type ReflectedClasses = { ReflectedClass }
-type ReflectedProperties = { ReflectedProperty }
 type UniqueId = any
 type VideoSampleArray = any
 type WebViewParams = any
@@ -8759,6 +8756,9 @@ type VirtualInputPointerAction = {
 }
 
 
+type ReflectedClassOrNil = ReflectedClass?
+type ReflectedClasses = { ReflectedClass }
+type ReflectedProperties = { ReflectedProperty }
 
 declare class Object
 	@deprecated
@@ -8803,7 +8803,7 @@ declare class EditableImage extends Object
 	function Destroy(self): nil
 	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number, combineType: EnumImageCombineType, antiAliasing: EnumAntiAliasing?): nil
 	function DrawImage(self, position: Vector2, image: EditableImage, combineType: EnumImageCombineType): nil
-	function DrawImageProjected(self, mesh: EditableMesh, projection: { [string]: any }, brushConfig: { [string]: any }): nil
+	function DrawImageProjected(self, mesh: EditableMesh, projection: ProjectionParams, brushConfig: BrushConfig): nil
 	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: EditableImage, options: { [string]: any }?): nil
 	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType, antiAliasing: EnumAntiAliasing?): nil
 	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
@@ -13873,8 +13873,8 @@ declare class MarketplaceService extends Instance
 	function PromptRobuxTransferAsync(self, sender: Player, receiverUserId: number, amount: number): string
 	function PromptSubscriptionPurchase(self, user: Player, subscriptionId: string): nil
 	function PromptThirdPartyPurchase(self, player: Instance, productId: string): nil
-	function RankProductsAsync(self, productIdentifiers: { any }): { any }
-	function RecommendTopProductsAsync(self, infoTypes: { any }): { any }
+	function RankProductsAsync(self, productIdentifiers: ProductIdentifierArray): RankedItemArray
+	function RecommendTopProductsAsync(self, infoTypes: InfoTypeArray): RankedItemArray
 	function ReportAssetSale(self, assetId: string, robuxAmount: number): nil
 	function ReportRobuxUpsellStarted(self): nil
 	function SignalAssetTypePurchased(self, player: Instance, assetType: EnumAssetType): nil
@@ -14061,9 +14061,9 @@ end
 
 declare class ModerationService extends Instance
 	function BindReviewableContentEventProcessor(self, priority: number, callback: (event: ReviewableContentEvent) -> ()): RBXScriptConnection
-	function CreateReviewableContentAsync(self, config: { [string]: any }): string
+	function CreateReviewableContentAsync(self, config: CreateReviewableContentParams): string
 	function CreateReviewableContentKey(self, content: Content): string
-	function InternalRequestReviewableContentReviewAsync(self, config: { [string]: any }): nil
+	function InternalRequestReviewableContentReviewAsync(self, config: RequestReviewableContentReviewParams): nil
 end
 
 declare class Mouse extends Instance
@@ -15309,7 +15309,7 @@ declare class Players extends Instance
 	PromptAgeCheckRequested: RBXScriptSignal<Player>
 	RespawnTime: number
 	UserSubscriptionStatusChanged: RBXScriptSignal<(Player, string)>
-	function BanAsync(self, config: { [string]: any }): nil
+	function BanAsync(self, config: BanConfigType): nil
 	function Chat(self, message: string): nil
 	function CreateHumanoidModelFromDescriptionAsync(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
 	function CreateHumanoidModelFromUserIdAsync(self, userId: (User | number)): Model
@@ -15334,7 +15334,7 @@ declare class Players extends Instance
 	function SetChatStyle(self, style: EnumChatStyle?): nil
 	function SetLocalPlayerInfo(self, userId: number, userName: string, displayName: string, membershipType: EnumMembershipType, isUnder13: boolean, hasRobloxSubscription: boolean?, ageCheckedStatus: EnumAgeCheckStatus?): nil
 	function TeamChat(self, message: string): nil
-	function UnbanAsync(self, config: { [string]: any }): nil
+	function UnbanAsync(self, config: UnbanConfigType): nil
 	function WhisperChat(self, message: string, player: Instance): nil
 end
 
@@ -15681,14 +15681,14 @@ declare class RealtimeMedia extends Instance
 end
 
 declare class RecommendationService extends Instance
-	function GenerateItemListAsync(self, generateRecommendationItemListRequest: { [string]: any }): RecommendationPages
-	function GetRecommendationItemAsync(self, itemId: string): { [string]: any }
-	function LogActionEvent(self, actionType: EnumRecommendationActionType, itemId: string, tracingId: string, actionEventDetails: { [string]: any }?): nil
-	function LogImpressionEvent(self, impressionType: EnumRecommendationImpressionType, itemId: string, tracingId: string, impressionEventDetails: { [string]: any }?): nil
+	function GenerateItemListAsync(self, generateRecommendationItemListRequest: GenerateRecommendationItemListRequest): RecommendationPages
+	function GetRecommendationItemAsync(self, itemId: string): RecommendationItem
+	function LogActionEvent(self, actionType: EnumRecommendationActionType, itemId: string, tracingId: string, actionEventDetails: RecommendationActionEventDetails?): nil
+	function LogImpressionEvent(self, impressionType: EnumRecommendationImpressionType, itemId: string, tracingId: string, impressionEventDetails: RecommendationImpressionEventDetails?): nil
 	function LogPreferenceEvent(self, preferenceType: EnumRecommendationPreferenceType, targetType: EnumRecommendationPreferenceTargetType, targetId: string, tracingId: string?, itemId: string?): nil
-	function RegisterItemAsync(self, player: Player, registerRecommendationItemsRequest: { [string]: any }): { [string]: any }
+	function RegisterItemAsync(self, player: Player, registerRecommendationItemsRequest: RegisterRecommendationItemRequest): RegisterRecommendationItemResponse
 	function RemoveItemAsync(self, itemId: string): nil
-	function UpdateItemAsync(self, updateRecommendationItemRequest: { [string]: any }): nil
+	function UpdateItemAsync(self, updateRecommendationItemRequest: UpdateRecommendationItemRequest): nil
 end
 
 declare class ReflectionMetadata extends Instance
@@ -15756,7 +15756,7 @@ declare class ReflectionService extends Instance
 	function GetEventsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedEvent }
 	function GetMethodsOfClass(self, className: string, filter: ReflectionMemberFilter?): { ReflectedMethod }
 	function GetPropertiesOfClass(self, className: string, filter: ReflectionMemberFilter?): ReflectedProperties
-	function GetPropertyNames(self, className: string): { string }
+	function GetPropertyNames(self, name: string): { string }
 	function GetStyledPropertyNames(self, name: string): { any }
 end
 
@@ -16374,7 +16374,7 @@ end
 
 declare class SocialService extends Instance
 	@deprecated
-		function PromptLinkSharing(self, player: Player, options: { [string]: any }?): ...any
+		function PromptLinkSharing(self, player: Player, options: LinkSharingOptions?): ...any
 	CallInviteStateChanged: RBXScriptSignal<(Instance, EnumInviteState)>
 	GameInvitePromptClosed: RBXScriptSignal<(Instance, { any })>
 	OnCallInviteInvoked: (tag: string, callParticipantIds: { any }) -> Instance
@@ -16403,7 +16403,7 @@ declare class SocialService extends Instance
 	function InvokeShareSheetClosed(self): nil
 	function PromptFeedbackSubmissionAsync(self, options: { [string]: any }?): nil
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
-	function PromptLinkSharingAsync(self, player: Player, options: { [string]: any }?): ...any
+	function PromptLinkSharingAsync(self, player: Player, options: LinkSharingOptions?): ...any
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
 	function PromptRsvpToEventAsync(self, eventId: string): EnumRsvpStatus
 	function PromptRsvpToEventCompleted(self, eventId: string, success: boolean, rsvpStatus: EnumRsvpStatus, previousRsvpStatus: EnumRsvpStatus?): nil
