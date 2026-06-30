@@ -162,7 +162,16 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
             returns.emplace_back(comment);
         else if (Luau::startsWith(comment, "@error "))
             throws.emplace_back(comment);
-        else if (comment == "@yields" || comment == "@unreleased")
+        else if (
+            comment == "@yields"
+            || comment == "@unreleased"
+            || comment == "@server"
+            || comment == "@client"
+            || comment == "@plugin"
+            || comment == "@private"
+            || comment == "@ignore"
+            || comment == "@readonly"
+        )
             // Boldify
             result += "**" + comment + "**\n";
         else if (Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within "))
