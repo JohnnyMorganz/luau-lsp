@@ -1173,6 +1173,43 @@ TEST_CASE_FIXTURE(Fixture, "source_node_to_json_includes_plugin_managed_flag")
     CHECK_EQ(children[0]["pluginManaged"], true);
 }
 
+TEST_CASE_FIXTURE(Fixture, "source_node_to_json_includes_plugin_managed_nodes_when_include_non_scripts")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto nonScriptChild = allocator.allocate(SourceNode("Database", "Folder", {}, {}));
+    nonScriptChild->pluginManaged = true;
+
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {nonScriptChild}));
+
+    auto jsonOutput = root->toJson(true);
+
+    REQUIRE(jsonOutput.contains("children"));
+    auto& children = jsonOutput["children"];
+    REQUIRE_EQ(children.size(), 1);
+
+    CHECK_EQ(children[0]["name"], "Database");
+    CHECK_EQ(children[0]["className"], "Folder");
+    CHECK(children[0].contains("pluginManaged"));
+    CHECK_EQ(children[0]["pluginManaged"], true);
+    CHECK_FALSE(children[0].contains("filePaths"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "source_node_to_json_excludes_plugin_managed_nodes_when_exclude_non_scripts")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto nonScriptChild = allocator.allocate(SourceNode("Database", "Folder", {}, {}));
+    nonScriptChild->pluginManaged = true;
+
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {nonScriptChild}));
+
+    auto jsonOutput = root->toJson(false);
+
+    // Plugin-managed non-script nodes should not appear when includeNonScripts is false
+    CHECK_FALSE(jsonOutput.contains("children"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "on_studio_plugin_full_change_updates_sourcemap")
 {
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
@@ -1404,6 +1441,34 @@ TEST_CASE("source_node_contains_file_paths_returns_false_when_no_file_paths_in_t
     CHECK_FALSE(root->containsFilePaths());
     CHECK_FALSE(parent->containsFilePaths());
     CHECK_FALSE(child->containsFilePaths());
+}
+
+TEST_CASE("source_node_contains_file_paths_returns_true_for_plugin_managed_nodes_when_include_non_scripts")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child = allocator.allocate(SourceNode("Part", "Part", {}, {}));
+    child->pluginManaged = true;
+    auto parent = allocator.allocate(SourceNode("Folder", "Folder", {}, {child}));
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {parent}));
+
+    CHECK(root->containsFilePaths(true));
+    CHECK(parent->containsFilePaths(true));
+    CHECK(child->containsFilePaths(true));
+}
+
+TEST_CASE("source_node_contains_file_paths_returns_false_for_plugin_managed_nodes_when_exclude_non_scripts")
+{
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    auto child = allocator.allocate(SourceNode("Part", "Part", {}, {}));
+    child->pluginManaged = true;
+    auto parent = allocator.allocate(SourceNode("Folder", "Folder", {}, {child}));
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {parent}));
+
+    CHECK_FALSE(root->containsFilePaths(false));
+    CHECK_FALSE(parent->containsFilePaths(false));
+    CHECK_FALSE(child->containsFilePaths(false));
 }
 
 TEST_CASE_FIXTURE(Fixture, "plugin_node_from_json_parses_file_paths")

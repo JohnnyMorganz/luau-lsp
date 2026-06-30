@@ -92,12 +92,15 @@ std::optional<const SourceNode*> SourceNode::findDescendant(const std::string& c
     return std::nullopt;
 }
 
-bool SourceNode::containsFilePaths() const
+bool SourceNode::containsFilePaths(bool includeNonScripts) const
 {
-    return !filePaths.empty() || std::any_of(children.begin(), children.end(),
-                                     [](const auto* child)
+    // When includeNonScripts is true: plugin-managed nodes need to persist even when they don't map
+    // to a script file. Otherwise, non-script Studio instances disappear after sourcemap reloads.
+    // When includeNonScripts is false: only nodes with file paths (scripts) are retained.
+    return (includeNonScripts && pluginManaged) || !filePaths.empty() || std::any_of(children.begin(), children.end(),
+                                     [includeNonScripts](const auto* child)
                                      {
-                                         return child->containsFilePaths();
+                                         return child->containsFilePaths(includeNonScripts);
                                      });
 }
 
@@ -180,7 +183,9 @@ SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>
 }
 
 // Only includes nodes with filepaths to avoid writing every Instance in the DataModel to `sourcemap.json`
-ordered_json SourceNode::toJson() const
+// except plugin-managed nodes (when includeNonScripts), which are persisted to retain Studio-only
+// non-script DataModel structure across sourcemap reloads.
+ordered_json SourceNode::toJson(bool includeNonScripts) const
 {
     ordered_json node;
     node["name"] = name;
@@ -204,11 +209,11 @@ ordered_json SourceNode::toJson() const
         ordered_json children_array = ordered_json::array();
         for (const auto* child : children)
         {
-            if (!child->containsFilePaths())
+            if (!child->containsFilePaths(includeNonScripts))
             {
                 continue;
             }
-            children_array.emplace_back(child->toJson());
+            children_array.emplace_back(child->toJson(includeNonScripts));
         }
         if (!children_array.empty())
         {
