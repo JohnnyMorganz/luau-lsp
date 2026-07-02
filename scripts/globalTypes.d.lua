@@ -9214,6 +9214,7 @@ declare class AnimationTrack extends Instance
 	function GetTargetNames(self): { any }
 	function GetTimeOfKeyframe(self, keyframeName: string): number
 	function Play(self, fadeTime: number?, weight: number?, speed: number?): nil
+	function ResetGraph(self): nil
 	function SetParameter(self, key: string, value: any): nil
 	function SetTargetInstance(self, name: string, target: Instance): nil
 	function Stop(self, fadeTime: number?): nil
@@ -9878,6 +9879,7 @@ declare class AvatarAccessoryRules extends Instance
 	CustomShoulderAccessoryId: number
 	CustomWaistAccessoryEnabled: boolean
 	CustomWaistAccessoryId: number
+	EnableEmissives: boolean
 	EnableSound: boolean
 	EnableVFX: boolean
 	LimitBounds: Vector3
@@ -10009,8 +10011,8 @@ declare class AvatarCreationService extends Instance
 	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string
 	function CreateCageMeshPartsWithScaleForExportAsync(self, model: Model): Folder
 	function DeserializeAvatarModel(self, serializedModel: string): Instance
-	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [string]: any }): string
-	function GenerateAvatarAsync(self, avatarGenerationParams: { [string]: any }): string
+	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): string
+	function GenerateAvatarAsync(self, avatarGenerationParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): string
 	function GetBatchTokenDetailsAsync(self, tokenIds: { any }): { any }
 	function GetValidationRules(self): { [string]: any }
 	function HandleSelfieConsentResult(self, consentAccepted: boolean): nil
@@ -10060,6 +10062,7 @@ declare class AvatarEditorService extends Instance
 	OpenPromptSetFavorite: RBXScriptSignal<(number, EnumAvatarItemType, boolean)>
 	OpenPromptUpdateOutfit: RBXScriptSignal<(number, HumanoidDescription, EnumHumanoidRigType)>
 	PromptAllowInventoryReadAccessCompleted: RBXScriptSignal<EnumAvatarPromptResult>
+	PromptApplyProfileConfigurationCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptCreateOutfitCompleted: RBXScriptSignal<(EnumAvatarPromptResult, any)>
 	PromptDeleteOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
 	PromptRenameOutfitCompleted: RBXScriptSignal<EnumAvatarPromptResult>
@@ -10082,19 +10085,20 @@ declare class AvatarEditorService extends Instance
 	function GetOutfitsAsync(self, outfitSource: EnumOutfitSource?, outfitType: EnumOutfitType?): OutfitPages
 	function GetRecommendedAssetsAsync(self, assetType: EnumAvatarAssetType, contextAssetId: number?): { any }
 	function GetRecommendedBundlesAsync(self, bundleId: number): { any }
+	function NoPromptApplyProfileConfiguration(self, profileConfiguration: { [string]: any }): boolean
 	function NoPromptCreateOutfit(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, name: string, gearAssetId: number?, outfitOptions: { [string]: any }?, outfitType: any): boolean
 	function NoPromptDeleteOutfit(self, outfitId: number): boolean
 	function NoPromptRenameOutfit(self, outfitId: number, name: string): boolean
 	function NoPromptSaveAvatar(self, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, saveDict: { [string]: any }, gearAssetId: number?, profileConfiguration: { [string]: any }?): boolean
 	function NoPromptSaveAvatarThumbnailCustomization(self, thumbnailType: EnumAvatarThumbnailCustomizationType, emoteAssetId: number, cameraDistanceScale: number, yRotDeg: number, fieldOfViewDeg: number?): boolean
 	function NoPromptSetFavorite(self, itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean): boolean
-	function NoPromptUpdateOutfit(self, outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, gearAssetId: number?): boolean
-	function PerformCreateOutfitWithDescription(self, humanoidDescription: HumanoidDescription, name: string): nil
+	function NoPromptUpdateOutfit(self, outfitId: number, humanoidDescription: HumanoidDescription, rigType: EnumHumanoidRigType, gearAssetId: number?, outfitOptions: { [string]: any }?): boolean
+	function PerformCreateOutfitWithDescription(self, humanoidDescription: HumanoidDescription, name: string, profileConfiguration: { [string]: any }?): nil
 	function PerformDeleteOutfit(self): nil
 	function PerformRenameOutfit(self, name: string): nil
 	function PerformSaveAvatarWithDescription(self, humanoidDescription: HumanoidDescription, addedAssets: { any }, removedAssets: { any }): nil
 	function PerformSetFavorite(self): nil
-	function PerformUpdateOutfit(self, humanoidDescription: HumanoidDescription): nil
+	function PerformUpdateOutfit(self, humanoidDescription: HumanoidDescription, profileConfiguration: { [string]: any }?): nil
 	function PromptAllowInventoryReadAccess(self): nil
 	function PromptCreateOutfit(self, outfit: HumanoidDescription, rigType: EnumHumanoidRigType, outfitOptions: { [string]: any }?, outfitType: any): nil
 	function PromptDeleteOutfit(self, outfitId: number): nil
@@ -10892,6 +10896,7 @@ end
 declare class AnimationConstraint extends Constraint
 	AngularDamping: number
 	AngularStrength: number
+	EnableSkinning: boolean
 	IsKinematic: boolean
 	LinearDamping: number
 	LinearStrength: number
@@ -10901,6 +10906,7 @@ declare class AnimationConstraint extends Constraint
 end
 
 declare class BallSocketConstraint extends Constraint
+	EnableSkinning: boolean
 	LimitsEnabled: boolean
 	MaxFrictionTorque: number
 	Radius: number
@@ -11833,6 +11839,7 @@ declare class FaceInstance extends Instance
 end
 
 declare class Decal extends FaceInstance
+	AutoLocalize: boolean
 	Color3: Color3
 	ColorMap: ContentId
 	ColorMapContent: Content
@@ -12386,6 +12393,7 @@ declare class TextBox extends GuiObject
 end
 
 declare class TextChannelWindow extends GuiObject
+	IsRendering: boolean
 	Target: TextChannel
 end
 
@@ -13477,6 +13485,7 @@ declare class Motor extends JointInstance
 end
 
 declare class Motor6D extends Motor
+	EnableSkinning: boolean
 	Transform: CFrame
 end
 
@@ -15169,6 +15178,7 @@ declare class Player extends Instance
 	function LoadCharacterWithAvatarRules(self, avatarRules: AvatarRules): nil
 	function LoadCharacterWithHumanoidDescriptionAsync(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
 	function Move(self, walkDirection: Vector3, relativeToCamera: boolean?): nil
+	function NotifyAgeCheckPassed(self): nil
 	function PinStreamingForInstance(self, instance: Instance, depth: number): nil
 	function PinStreamingForInstanceByUniqueId(self, uniqueIdString: string, depth: number): nil
 	function PromptAgeCheck(self): nil
@@ -15324,6 +15334,7 @@ declare class Players extends Instance
 	function GetPlayerByUserId(self, userId: number): Player?
 	function GetPlayerFromCharacter(self, character: Model): Player?
 	function GetPlayers(self): { Player }
+	function GetProfileConfigurationFromUserIdAsync(self, userId: (User | number)): { [string]: any }
 	function GetUserIdFromNameAsync(self, userName: string): number
 	function GetUserThumbnailAsync(self, userId: (User | number), thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
@@ -16770,6 +16781,7 @@ declare class Studio extends Instance
 	CameraShiftFactor: number
 	CameraTweenFocus: boolean
 	CameraZoomSpeed: number
+	CameraZoomToMousePosition: boolean
 	CommandBarEnterExec: boolean
 	CommandBarFont: QFont
 	CommandBarHistoryLen: number
@@ -17417,14 +17429,20 @@ declare class TestService extends Instance
 	function Error(self, description: string, source: Instance?, line: number?): nil
 	function Fail(self, description: string, source: Instance?, line: number?): nil
 	function FetchExtraAssets(self, extraAssetsFileName: string): string
+	function GetTestControlSchema(self, providerName: string): { [string]: any }
+	function GetTestControls(self, providerName: string): { [string]: any }
 	function Message(self, text: string, source: Instance?, line: number?): nil
 	function RegisterTest(self, testOptions: { [string]: any }): TestCase
 	function RequestValidationAsync(self, artifactType: string, artifactName: string): ...any
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
+	function ResetTestControl(self, providerName: string, controlName: string): nil
 	function RunAsync(self): nil
 	function ScopeTime(self): { [string]: any }
+	function SetTestControl(self, providerName: string, controlName: string, value: any): nil
 	function StartTestSession(self): nil
+	function StartVideoCaptureAsync(self, artifactName: string?, options: { [string]: any }?): ...any
 	function StopTestSession(self): nil
+	function StopVideoCaptureAsync(self): ...any
 	function TakeSnapshot(self, snapshotname: string, source: Instance?): nil
 	function TranscodePropertySet(self, extraAssetsFileName: string, psetFileName: string): string
 	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
@@ -18150,6 +18168,7 @@ declare class UserGameSettings extends Instance
 	VRThirdPersonFollowCamEnabledCustomOption: boolean
 	VignetteEnabled: boolean
 	VignetteEnabledCustomOption: boolean
+	VoiceChatVolume: number
 	function GetCameraYInvertValue(self): number
 	function GetDefaultFramerateCap(self): number
 	function GetOnboardingCompleted(self, onboardingId: string): boolean

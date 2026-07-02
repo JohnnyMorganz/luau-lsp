@@ -9637,8 +9637,8 @@ declare class AvatarCreationService extends Instance
 	AvatarModerationCompleted: RBXScriptSignal<(number, EnumModerationStatus)>
 	function AutoSetupAvatarAsync(self, player: Player, model: Model, progressCallback: (progressInfo: { Progress: number }) -> ()?): string
 	function AutoSetupAvatarNewAsync(self, player: Player, autoSetupParams: AutoSetupParams, progressCallback: (progressInfo: { Progress: number }) -> ()?): string
-	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [string]: any }): string
-	function GenerateAvatarAsync(self, avatarGenerationParams: { [string]: any }): string
+	function GenerateAvatar2DPreviewAsync(self, avatarGeneration2dPreviewParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): string
+	function GenerateAvatarAsync(self, avatarGenerationParams: { [string]: any }, progressCallback: ((...any) -> ...any)?): string
 	function GetBatchTokenDetailsAsync(self, tokenIds: { any }): { any }
 	function GetValidationRules(self): { [string]: any }
 	function LoadAvatar2DPreviewAsync(self, previewId: string): EditableImage
@@ -11080,6 +11080,7 @@ declare class FaceInstance extends Instance
 end
 
 declare class Decal extends FaceInstance
+	AutoLocalize: boolean
 	Color3: Color3
 	ColorMap: ContentId
 	ColorMapContent: Content
@@ -13927,6 +13928,7 @@ declare class Players extends Instance
 	function GetPlayerByUserId(self, userId: number): Player?
 	function GetPlayerFromCharacter(self, character: Model): Player?
 	function GetPlayers(self): { Player }
+	function GetProfileConfigurationFromUserIdAsync(self, userId: (User | number)): { [string]: any }
 	function GetUserIdFromNameAsync(self, userName: string): number
 	function GetUserThumbnailAsync(self, userId: (User | number), thumbnailType: EnumThumbnailType, thumbnailSize: EnumThumbnailSize): (string, boolean)
 	function ReportAbuse(self, player: Player, reason: string, optionalMessage: string): nil
@@ -15483,14 +15485,20 @@ declare class TestService extends Instance
 	function Done(self): nil
 	function Error(self, description: string, source: Instance?, line: number?): nil
 	function Fail(self, description: string, source: Instance?, line: number?): nil
+	function GetTestControlSchema(self, providerName: string): { [string]: any }
+	function GetTestControls(self, providerName: string): { [string]: any }
 	function Message(self, text: string, source: Instance?, line: number?): nil
 	function RegisterTest(self, testOptions: { [string]: any }): TestCase
 	function RequestValidationAsync(self, artifactType: string, artifactName: string): ...any
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
+	function ResetTestControl(self, providerName: string, controlName: string): nil
 	function RunAsync(self): nil
 	function ScopeTime(self): { [string]: any }
+	function SetTestControl(self, providerName: string, controlName: string, value: any): nil
 	function StartTestSession(self): nil
+	function StartVideoCaptureAsync(self, artifactName: string?, options: { [string]: any }?): ...any
 	function StopTestSession(self): nil
+	function StopVideoCaptureAsync(self): ...any
 	function TakeSnapshot(self, snapshotname: string, source: Instance?): nil
 	function Warn(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function getTestSessionProviderStats(self, providerName: string): { [string]: any }
