@@ -231,6 +231,12 @@
           ],
           "scope": "resource"
         },
+        "luau-lsp.analyzeLuaFiles": {
+          "markdownDescription": "Whether to analyze standard `.lua` files. If disabled, only `.luau` files will be analyzed. Note: You may also need to configure `\"files.associations\": {\"*.lua\": \"lua\"}` in your settings to restore standard Lua syntax highlighting and behavior for `.lua` files.",
+          "type": "boolean",
+          "default": true,
+          "scope": "window"
+        },
         "luau-lsp.platform.type": {
           "markdownDescription": "Platform-specific support features",
           "type": "string",

@@ -33,6 +33,13 @@ const getStudioPluginValue = <T>(key: string, defaultValue: T): T => {
   );
 };
 
+const getFilePattern = (): string => {
+  const analyzeLua = vscode.workspace
+    .getConfiguration("luau-lsp")
+    .get<boolean>("analyzeLuaFiles", true);
+  return analyzeLua ? "**/*.{lua,luau}" : "**/*.luau";
+};
+
 const API_DOCS = "https://luau-lsp.pages.dev/api-docs/en-us.json";
 const LUAU_API_DOCS = "https://luau-lsp.pages.dev/api-docs/luau-en-us.json";
 const STUDIO_PLUGIN_URL =
@@ -326,7 +333,7 @@ const startSourcemapGeneration = async (
     spawnChildProcess();
 
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(workspaceFolder, "**/*.{lua,luau}"),
+      new vscode.RelativePattern(workspaceFolder, getFilePattern()),
       /* ignoreCreateEvents = */ false,
       /* ignoreChangeEvents = */ true,
       /* ignoreDeleteEvents = */ false,
@@ -417,7 +424,7 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
 
   app.get("/get-file-paths", async (_req, res) => {
     try {
-      const uris = await vscode.workspace.findFiles("**/*.{lua,luau}");
+      const uris = await vscode.workspace.findFiles(getFilePattern());
       res.json({
         files: uris.map((uri: vscode.Uri) => uri.fsPath),
       });
@@ -518,7 +525,10 @@ export const onActivate = async (
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("luau-lsp.sourcemap")) {
+      if (
+        e.affectsConfiguration("luau-lsp.sourcemap") ||
+        e.affectsConfiguration("luau-lsp.analyzeLuaFiles")
+      ) {
         if (vscode.workspace.workspaceFolders) {
           for (const folder of vscode.workspace.workspaceFolders) {
             const config = vscode.workspace.getConfiguration(
@@ -538,7 +548,8 @@ export const onActivate = async (
         }
       } else if (
         e.affectsConfiguration("luau-lsp.studioPlugin") ||
-        e.affectsConfiguration("luau-lsp.plugin")
+        e.affectsConfiguration("luau-lsp.plugin") ||
+        e.affectsConfiguration("luau-lsp.analyzeLuaFiles")
       ) {
         if (getStudioPluginValue("enabled", false)) {
           stopPluginServer(true);
