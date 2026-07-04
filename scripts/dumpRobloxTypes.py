@@ -464,13 +464,13 @@ type QDir = string
 type QFont = string
 type TeleportData = boolean | buffer | number | string | {[number]: TeleportData} | {[string]: TeleportData}
 
-declare class Enum
+declare extern type Enum with
     function GetEnumItems(self): { any }
     function FromValue(self,Number: number): any
     function FromName(self,Name: string): any
 end
 
-declare class EnumItem
+declare extern type EnumItem with
     Name: string
     Value: number
     EnumType: Enum
@@ -506,7 +506,7 @@ declare function spawn(callback: (dt: number, gt: number) -> ())
 """
 
 POST_DATATYPES_BASE = """
-declare class SharedTable
+declare extern type SharedTable with
   [string | number]: any
   function __iter(self): (any, number) -> (number, any)
 end
@@ -542,7 +542,7 @@ type HumanoidDescriptionAccessory = {
     Puffiness: number?,
 }
 
-declare class ValueCurveKey
+declare extern type ValueCurveKey with
     Interpolation: EnumKeyInterpolationMode
     Time: number
     Value: any
@@ -566,7 +566,7 @@ export type RaycastResult<T = BasePart> = {
     Distance: number,
 }
 
-declare class GlobalSettings extends GenericSettings
+declare extern type GlobalSettings extends GenericSettings with
     Lua: LuaSettings
     Game: GameSettings
     Studio: Studio
@@ -1036,10 +1036,10 @@ def declareClass(klass: Union[ApiClass, DataType]) -> str:
     if klass["Name"] in IGNORED_INSTANCES:
         return ""
 
-    out = "declare class " + klass["Name"]
+    out = "declare extern type " + klass["Name"]
     if "Superclass" in klass and klass["Superclass"] != "<<<ROOT>>>":
         out += " extends " + klass["Superclass"]
-    out += "\n"
+    out += " with\n"
 
     def declareMember(member: ApiMember):
         if member["MemberType"] == "Property":
@@ -1106,8 +1106,8 @@ def printEnums(dump: ApiDump):
     out = ""
     for enum, items in enums.items():
         # Declare an atom for the enum
-        out += f"declare class Enum{enum} extends EnumItem end\n"
-        out += f"declare class Enum{enum}_INTERNAL extends Enum\n"
+        out += f"declare extern type Enum{enum} extends EnumItem with end\n"
+        out += f"declare extern type Enum{enum}_INTERNAL extends Enum with\n"
         items.sort()
         for item in items:
             out += f"\t{escapeName(item)}: Enum{enum}\n"
