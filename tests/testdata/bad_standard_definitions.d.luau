@@ -1,16 +1,16 @@
 --#METADATA#{}
 
-declare class Object
+declare extern type Object with
 end
 
-declare class Instance
+declare extern type Instance with
 end
 
-declare class ServiceProvider
+declare extern type ServiceProvider with
 end
 
-declare class Enum
+declare extern type Enum with
 end
 
-declare class EnumItem
+declare extern type EnumItem with
 end
