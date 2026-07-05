@@ -5,8 +5,6 @@
 #include "LSP/IostreamHelpers.hpp"
 #include "Platform/StringRequireAutoImporter.hpp"
 
-LUAU_FASTFLAG(LuauConst2)
-
 static std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     for (const auto& item : items)
@@ -1936,8 +1934,6 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_const_when_configured")
 
 TEST_CASE_FIXTURE(Fixture, "const_require_is_not_duplicated_when_already_imported")
 {
-    ScopedFastFlag sff{FFlag::LuauConst2, true};
-
     newDocument("library.luau", "");
 
     FindImportsVisitor visitor;

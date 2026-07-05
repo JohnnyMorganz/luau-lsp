@@ -1,4 +1,4 @@
-declare class RemodelInstance
+declare extern type RemodelInstance with
 	Name: string
 	ClassName: string
 	Parent: RemodelInstance
@@ -9,7 +9,7 @@ declare class RemodelInstance
 	function FindFirstChild(self, name: string): RemodelInstance?
 end
 
-declare class RemodelDataModel extends RemodelInstance
+declare extern type RemodelDataModel extends RemodelInstance with
 	function GetService(self, name: string): RemodelInstance
 end
 
