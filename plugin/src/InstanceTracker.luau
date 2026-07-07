@@ -148,27 +148,11 @@ function InstanceTracker.shouldInclude(self: InstanceTracker, instance: Instance
 	return false
 end
 
---- Checks if the string ends with a corrupted, malformed, or truncated UTF-8
---- replacement character sequence (bytes 239, 191, 189)
---- @param self -- The InstanceTracker instance.
---- @param name -- The name of the instance.
---- @return boolean -- True if the instance name contains trailing corruption bytes.
-function InstanceTracker.hasTrailingCorruptedBytes(self: InstanceTracker, name: string): boolean
-	local replacementChar = string.char(239, 191, 189)
-
-	if string.find(name, replacementChar .. "$") then
-		return true
-	end
-
-	if string.find(name, string.char(239) .. "$") then
-		return true
-	end
-
-	if string.find(name, string.char(239, 191) .. "$") then
-		return true
-	end
-
-	return false
+--- Verifies strings are valid UTF8
+--- @param str -- The input string.
+--- @return boolean -- Returns if its valid UTF8 or not.
+local function isValidUTF8(str: string): boolean
+	return utf8.len(str) ~= nil
 end
 
 --- Recursively encodes an Instance and its children into a serializable table.
@@ -186,8 +170,8 @@ function InstanceTracker.encode(
 ): types.EncodedInstance
 	Log.debug(`Encoding {instance:GetFullName()}`)
 
-	if self:hasTrailingCorruptedBytes(instance.Name) then
-		Log.error(`Instance name ends with a truncated or incomplete UTF-8 byte sequence: "{instance.Name}"`)
+	if not isValidUTF8(instance.Name) then
+		Log.warn(`Cannot encode instance "{instance:GetFullName()}" because its name contains invalid UTF-8.`)
 	end
 
 	local encoded: types.EncodedInstance = {
