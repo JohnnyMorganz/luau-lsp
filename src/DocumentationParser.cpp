@@ -167,7 +167,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
             // Boldify
             result += "**" + comment + "**\n";
         else if (Luau::startsWith(comment, "@deprecated "))
-            result = "**Deprecated** " + comment.substr(12) + "\n" + result;
+            result = "**Deprecated** " + comment.substr(12) + "\n\n" + result;
         else if (Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within "))
             // Ignore
             continue;
