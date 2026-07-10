@@ -162,18 +162,12 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
             returns.emplace_back(comment);
         else if (Luau::startsWith(comment, "@error "))
             throws.emplace_back(comment);
-        else if (
-            comment == "@yields"
-            || comment == "@unreleased"
-            || comment == "@server"
-            || comment == "@client"
-            || comment == "@plugin"
-            || comment == "@private"
-            || comment == "@ignore"
-            || comment == "@readonly"
-        )
+        else if (comment == "@yields" || comment == "@unreleased" || comment == "@server" || comment == "@client" || comment == "@plugin" ||
+                 comment == "@private" || comment == "@ignore" || comment == "@readonly")
             // Boldify
             result += "**" + comment + "**\n";
+        else if (Luau::startsWith(comment, "@deprecated "))
+            result = "**Deprecated** " + comment.substr(12) + "\n" + result;
         else if (Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within "))
             // Ignore
             continue;
@@ -279,7 +273,8 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 
         // Sort by end position descending (closest to target first)
         std::sort(candidates.begin(), candidates.end(),
-            [](const Luau::Comment& a, const Luau::Comment& b) {
+            [](const Luau::Comment& a, const Luau::Comment& b)
+            {
                 return a.location.end > b.location.end;
             });
 
