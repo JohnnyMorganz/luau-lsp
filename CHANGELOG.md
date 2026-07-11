@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for more Moonwave tags in hover documentation: `@deprecated` and `@since` are now rendered with their version and description, `@field` entries are shown in a "Fields" list, and `@readonly` is boldified
+
 ### Changed
 
 - Sync to upstream Luau 0.726
+- Moonwave flag tags (e.g. `@yields`, `@server`, `@private`) are now rendered as readable labels (e.g. **Yields**) instead of the raw tag name
+- Moonwave declaration and metadata tags (`@class`, `@function`, `@method`, `@prop`, `@interface`, `@type`, `@__index`, `@external`, `@ignore`) are no longer shown as raw text in hover documentation
 
 ## [1.68.1] - 2026-06-14
 
