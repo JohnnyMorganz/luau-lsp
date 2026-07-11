@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.726
+- Sync to upstream Luau 0.728
 - Moonwave flag tags (e.g. `@yields`, `@server`, `@private`) are now rendered as readable labels (e.g. **Yields**) instead of the raw tag name
 - Moonwave declaration and metadata tags (`@class`, `@function`, `@method`, `@prop`, `@interface`, `@type`, `@__index`, `@external`, `@ignore`) are no longer shown as raw text in hover documentation
 
