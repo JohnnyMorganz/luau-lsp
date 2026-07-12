@@ -158,6 +158,13 @@ const SourceNode* SourceNode::walkPath(const std::string& path) const
     return base;
 }
 
+void SourceNode::clearCachedTypes() const
+{
+    tys.clear();
+    for (const auto& child : children)
+        child->clearCachedTypes();
+}
+
 SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator)
 {
     auto name = j.at("name").get<std::string>();

@@ -51,6 +51,10 @@ static bool mutateSourceNodeWithPluginInfo(SourceNode* sourceNode, const PluginN
 
         if (child->pluginManaged && pluginChildNames.find(child->name) == pluginChildNames.end())
         {
+            // The pruned subtree stays allocated but becomes unreachable from the root, so
+            // clearSourcemapTypes can no longer clear its cached types. Clear them now so a
+            // retained reference to the node cannot resurrect types from a destroyed arena
+            child->clearCachedTypes();
             it = sourceNode->children.erase(it);
             didUpdateSourcemap = true;
         }
@@ -96,6 +100,7 @@ void RobloxPlatform::clearPluginManagedNodesFromSourcemap(SourceNode* sourceNode
 
         if (child->pluginManaged)
         {
+            child->clearCachedTypes();
             it = sourceNode->children.erase(it);
         }
         else
@@ -161,7 +166,11 @@ void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
     setPluginInfo(PluginNode::fromJson(dataModel, pluginNodeAllocator));
 
     hydrateSourcemapWithPluginInfo();
-    writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+
+    // Rebuild the path maps from scratch: hydration may have pruned nodes, and writePathsToMap
+    // only overwrites entries for nodes still in the tree. A stale entry pointing at a pruned
+    // node would let later type checks reach its (freed) cached sourcemap types
+    rebuildPathMaps();
     updateSourcemapTypes();
 }
 
@@ -176,7 +185,7 @@ void RobloxPlatform::onStudioPluginClear()
     if (rootSourceNode)
     {
         clearPluginManagedNodesFromSourcemap(rootSourceNode);
-        writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+        rebuildPathMaps();
         updateSourcemapTypes();
     }
 }
