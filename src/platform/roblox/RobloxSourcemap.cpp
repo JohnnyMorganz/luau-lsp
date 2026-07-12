@@ -508,6 +508,14 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, 
     }
 }
 
+void RobloxPlatform::rebuildPathMaps()
+{
+    realPathsToSourceNodes.clear();
+    virtualPathsToSourceNodes.clear();
+    if (rootSourceNode)
+        writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+}
+
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceNodeMap", "LSP");
@@ -534,8 +542,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     hydrateSourcemapWithPluginInfo();
 
     // Write paths
-    std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
-    writePathsToMap(rootSourceNode, base);
+    rebuildPathMaps();
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)

@@ -170,9 +170,7 @@ void RobloxPlatform::onStudioPluginFullChange(const json& dataModel)
     // Rebuild the path maps from scratch: hydration may have pruned nodes, and writePathsToMap
     // only overwrites entries for nodes still in the tree. A stale entry pointing at a pruned
     // node would let later type checks reach its (freed) cached sourcemap types
-    realPathsToSourceNodes.clear();
-    virtualPathsToSourceNodes.clear();
-    writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+    rebuildPathMaps();
     updateSourcemapTypes();
 }
 
@@ -187,9 +185,7 @@ void RobloxPlatform::onStudioPluginClear()
     if (rootSourceNode)
     {
         clearPluginManagedNodesFromSourcemap(rootSourceNode);
-        realPathsToSourceNodes.clear();
-        virtualPathsToSourceNodes.clear();
-        writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+        rebuildPathMaps();
         updateSourcemapTypes();
     }
 }

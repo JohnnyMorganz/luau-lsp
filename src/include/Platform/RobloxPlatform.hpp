@@ -99,6 +99,12 @@ private:
 
     void clearSourcemapTypes();
 
+    /// Clears `realPathsToSourceNodes`/`virtualPathsToSourceNodes` and repopulates them by walking
+    /// `rootSourceNode`. Must be used (rather than calling `writePathsToMap` directly) whenever the
+    /// tree may have been pruned, since `writePathsToMap` only overwrites entries for nodes still in
+    /// the tree and would otherwise leave stale entries pointing at pruned/freed nodes.
+    void rebuildPathMaps();
+
 public:
     // The root source node from a parsed Rojo source map
     SourceNode* rootSourceNode = nullptr;
