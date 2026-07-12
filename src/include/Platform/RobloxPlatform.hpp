@@ -58,6 +58,10 @@ struct SourceNode
     /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
     /// Returns nullptr if any segment fails to resolve.
     const SourceNode* walkPath(const std::string& path) const;
+    /// Recursively clear the cached sourcemap-generated types (`tys`) for this node and its descendants.
+    /// Must be called whenever the types the cache points into are about to be destroyed, including on
+    /// nodes detached from the tree (which `RobloxPlatform::clearSourcemapTypes` cannot reach)
+    void clearCachedTypes() const;
 
     bool containsFilePaths() const;
     ordered_json toJson() const;
@@ -94,6 +98,12 @@ private:
     static Luau::ModuleName getVirtualPathFromSourceNode(const SourceNode* sourceNode);
 
     void clearSourcemapTypes();
+
+    /// Clears `realPathsToSourceNodes`/`virtualPathsToSourceNodes` and repopulates them by walking
+    /// `rootSourceNode`. Must be used (rather than calling `writePathsToMap` directly) whenever the
+    /// tree may have been pruned, since `writePathsToMap` only overwrites entries for nodes still in
+    /// the tree and would otherwise leave stale entries pointing at pruned/freed nodes.
+    void rebuildPathMaps();
 
 public:
     // The root source node from a parsed Rojo source map

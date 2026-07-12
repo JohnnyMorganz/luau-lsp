@@ -374,24 +374,27 @@ static void clearSourcemapGeneratedTypes(Luau::GlobalTypes& globals)
     }
 }
 
-static void clearTypesFromSourcemapNodes(SourceNode* node)
-{
-    node->tys.clear();
-    for (const auto& child : node->children)
-        clearTypesFromSourcemapNodes(child);
-}
-
 void RobloxPlatform::clearSourcemapTypes()
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::clearSourcemapTypes", "LSP");
-    for (const auto& [name, _] : workspaceFolder->frontend.sourceNodes)
+    for (const auto& [name, sourceNode] : workspaceFolder->frontend.sourceNodes)
+    {
         workspaceFolder->frontend.markDirty(name);
+
+        // Marking the module dirty is not enough: the retained type graph of an already-checked
+        // module may reference the sourcemap-generated types (in instanceTypes) that we are about
+        // to free, and fragment autocomplete deliberately reads the stale type graph of a dirty
+        // module. Flag the module as having invalid dependencies so its stale type graph is not
+        // used until it has been rechecked (Frontend::recordItemResult resets the flag)
+        sourceNode->setInvalidModuleDependency(true, /* forAutocomplete= */ false);
+        sourceNode->setInvalidModuleDependency(true, /* forAutocomplete= */ true);
+    }
     instanceTypes.clear();             // NOTE: used across BOTH instances of handleSourcemapUpdate, don't clear in between!
     clearSourcemapGeneratedTypes(workspaceFolder->frontend.globals);
     if (!FFlag::LuauSolverV2)
         clearSourcemapGeneratedTypes(workspaceFolder->frontend.globalsForAutocomplete);
     if (rootSourceNode)
-        clearTypesFromSourcemapNodes(rootSourceNode);
+        rootSourceNode->clearCachedTypes();
 }
 
 bool RobloxPlatform::updateSourceMapFromContents(const std::string& sourceMapContents)
@@ -505,6 +508,14 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, 
     }
 }
 
+void RobloxPlatform::rebuildPathMaps()
+{
+    realPathsToSourceNodes.clear();
+    virtualPathsToSourceNodes.clear();
+    if (rootSourceNode)
+        writePathsToMap(rootSourceNode, rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot");
+}
+
 void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::updateSourceNodeMap", "LSP");
@@ -531,8 +542,7 @@ void RobloxPlatform::updateSourceNodeMap(const std::string& sourceMapContents)
     hydrateSourcemapWithPluginInfo();
 
     // Write paths
-    std::string base = rootSourceNode->className == "DataModel" ? "game" : "ProjectRoot";
-    writePathsToMap(rootSourceNode, base);
+    rebuildPathMaps();
 }
 
 // TODO: expressiveTypes is used because of a Luau issue where we can't cast a most specific Instance type (which we create here)

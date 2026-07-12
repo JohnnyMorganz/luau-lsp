@@ -12,9 +12,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.728
+- Sync to upstream Luau 0.729
 - Moonwave flag tags (e.g. `@yields`, `@server`, `@private`) are now rendered as readable labels (e.g. **Yields**) instead of the raw tag name
 - Moonwave declaration and metadata tags (`@class`, `@function`, `@method`, `@prop`, `@interface`, `@type`, `@__index`, `@external`, `@ignore`) are no longer shown as raw text in hover documentation
+
+### Fixed
+
+- Fixed use-after-free crashes after a sourcemap update. Studio Plugin updates left stale entries in the virtual/real path maps and stale cached DataModel types on pruned source nodes, allowing later type checks to reference destroyed sourcemap types. Additionally, incremental (fragment) autocomplete could read the stale type graph of a not-yet-rechecked module which referenced destroyed sourcemap types ([#1331](https://github.com/JohnnyMorganz/luau-lsp/issues/1331))
 
 ## [1.68.1] - 2026-06-14
 
