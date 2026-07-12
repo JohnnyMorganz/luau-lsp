@@ -1432,6 +1432,58 @@ TEST_CASE_FIXTURE(Fixture, "plugin_clear_clears_cached_types_on_pruned_nodes")
     CHECK_FALSE(platform->resolveToVirtualPath(childBUri));
 }
 
+// Use-after-free regression test: without proper cleanup on prune, the pruned node remains
+// reachable through stale path map entries and its cached types point into the destroyed
+// instanceTypes arena, so a later check binds `script` to a freed type (crashes under ASAN)
+TEST_CASE_FIXTURE(Fixture, "plugin_prune_does_not_leave_dangling_types_reachable_by_later_checks")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData1 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                {
+                    "Name": "Folder",
+                    "ClassName": "Folder",
+                    "Children": [
+                        { "Name": "Script", "ClassName": "ModuleScript", "FilePaths": ["script.luau"] }
+                    ]
+                }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData1);
+
+    // Check a document backed by the plugin-provided node: `script` is bound to a
+    // sourcemap-generated type, which gets cached on the source node
+    auto uri = newDocument("script.luau", R"(
+        local p = script.Parent
+        return {}
+    )");
+    workspace.frontend.check(workspace.fileResolver.getModuleName(uri));
+
+    // Prune the subtree. This destroys and rebuilds the instanceTypes arena, and internally
+    // triggers a recheck of the (dirty) managed document via recomputeDiagnostics
+    auto pluginData2 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": []
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData2);
+
+    // A later fresh check must also not be able to reach the pruned node
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    workspace.frontend.markDirty(moduleName);
+    workspace.frontend.check(moduleName);
+    CHECK(workspace.frontend.getSourceModule(moduleName));
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_update_invalidates_stale_module_type_graphs")
 {
     // Use an unmanaged on-disk file: recomputeDiagnostics (triggered by the sourcemap update
