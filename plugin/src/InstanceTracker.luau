@@ -170,10 +170,6 @@ function InstanceTracker.encode(
 ): types.EncodedInstance
 	Log.debug(`Encoding {instance:GetFullName()}`)
 
-	if not isValidUTF8(instance.Name) then
-		Log.warn(`Cannot encode instance "{instance:GetFullName()}" because its name contains invalid UTF-8.`)
-	end
-
 	local encoded: types.EncodedInstance = {
 		Name = instance.Name,
 		ClassName = instance.ClassName,
@@ -183,6 +179,11 @@ function InstanceTracker.encode(
 
 	for _, child in instance:GetChildren() do
 		if not self:shouldInclude(child, includeList) then
+			continue
+		end
+
+		if not isValidUTF8(instance.Name) then
+			Log.warn(`Cannot encode instance "{instance:GetFullName()}" because its name contains invalid UTF-8.`)
 			continue
 		end
 
